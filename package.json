@@ -17,6 +17,7 @@
 		"flowbite": "^2.3.0",
 		"flowbite-svelte": "^0.44.24",
 		"flowbite-svelte-icons": "^1.5.0",
+		"knex": "^3.1.0",
 		"mariadb": "^3.3.0",
 		"postcss": "^8.4.38",
 		"sass": "^1.72.0",
@@ -27,5 +28,8 @@
 		"typescript": "^5.0.0",
 		"vite": "^5.0.3"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"mysql": "^2.18.1"
+	}
 }

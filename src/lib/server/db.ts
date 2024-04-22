@@ -1,35 +1,33 @@
-import mariadb from 'mariadb';
-import { HOSTNAME, USER, PASSWORD, PORT } from '$env/static/private';
-declare type ConnectionWorker = (connection: mariadb.PoolConnection) => void;
+import knex from 'knex';
+import { HOSTNAME, USER, PASSWORD, PORT, DATABASE } from '$env/static/private';
+export class DbProvider {
+    private knex: knex.Knex<any, unknown[]>;
 
-export default class {
-    pool: mariadb.Pool;
-    connection: mariadb.PoolConnection | null;
+    public get db() {
+        return this.knex;
+    }
+
+    public table<T extends {}>(name: string) {
+        return this.knex<T>(name);
+    }
+
     
     constructor() {
-        this.pool = mariadb.createPool({
-            host: HOSTNAME,
-            user: USER,
-            password: PASSWORD,
-            port: Number(PORT),
-            ssl: false,
-            connectTimeout: 5000,
-            trace: true
+        this.knex = knex({
+            client: 'mysql',
+            connection: {
+                host: HOSTNAME,
+                port: Number(PORT),
+                user: USER,
+                password: PASSWORD,
+                database: DATABASE,
+            },
+            pool: { min: 0, max: 7 },
         });
-        this.connection = null;
+        
     }
 
-    async getConnection(): Promise<mariadb.PoolConnection> {
-        return await new Promise(async (resolve, reject) => {
-            try {
-                this.connection = await this.pool.getConnection();
-                resolve(this.connection);
-                this.connection.release();
-            } catch(error) {
-                console.error(error);
-                reject(error);
-            }
-        });
-    }
+
+
 
 }
