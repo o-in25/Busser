@@ -1,14 +1,14 @@
 <div class="flex justify-center p-10">
   <Card>
-    <form class="flex flex-col space-y-6" action="/">
+    <form class="flex flex-col space-y-6" on:submit={login}>
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign in</h3>
       <Label class="space-y-2">
         <span>Email</span>
-        <Input type="email" name="email" placeholder="name@company.com" required />
+        <Input name="username" bind:value={username} required />
       </Label>
       <Label class="space-y-2">
         <span>Password</span>
-        <Input type="password" name="password" placeholder="•••••" required />
+        <Input type="password" name="password" bind:value={password} required />
       </Label>
       <div class="flex items-start">
         <Checkbox>Remember me</Checkbox>
@@ -25,6 +25,19 @@
 <script lang="ts">
     import type { PageData } from './$types';
     import { Card, Button, Label, Input, Checkbox } from 'flowbite-svelte';
+    let username: String, password: String;
+    async function login() {
+      try {
+          const response = await fetch('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        console.log(data)
+      } catch(e) {
+        console.error(e)
+      }
+    }
+    
 
-    export let data: PageData;
 </script>
