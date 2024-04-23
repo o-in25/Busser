@@ -8,7 +8,7 @@
 
 <div class="flex justify-center p-10">
   <Card>
-    <form class="flex flex-col space-y-6" method="POST" use:enhance>
+    <form class="flex flex-col space-y-6" method="POST" action="?/login" use:enhance>
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign in</h3>
       <Label class="space-y-2">
         <span>Username</span>
@@ -26,12 +26,7 @@
       <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
         Not registered? <a href="/" class="text-primary-700 hover:underline dark:text-primary-500"> Create account </a>
       </div>
-      {#if form?.user}
-      <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-        <span class="font-medium">Logged In! Redirecting.....</span>
-      </div>
-    {/if}
-      {#if form?.error}
+      {#if form?.error ?? false}
         <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
           <span class="font-medium">Danger alert!</span> Change a few things up and try submitting again.
         </div>

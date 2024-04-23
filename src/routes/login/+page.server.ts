@@ -1,21 +1,15 @@
 import type { Actions } from './$types';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { AuthService } from '$lib/server/auth';
+import { StatusCodes } from 'http-status-codes'
 const authService = new AuthService();
 export const actions = {
-	default: async ({ request }) => {
+	login: async ({ request, url }) => {
 		const formData: any = await request.formData();
 		const username = formData.get('username');
 		const password = formData.get('password');
-
-		try {
-			const user = await authService.login(username, password);
-			if(user) return { user: { username } };
-			return fail(500, { error: true, username })
-
-		} catch(e) {
-			console.error(e)
-			return fail(500, { error: true, username })
-		}
+		const user = await authService.login(username, password);
+		if(!user) return fail(StatusCodes.UNAUTHORIZED, { error: true, username });
+		redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
 	},
 } satisfies Actions;
