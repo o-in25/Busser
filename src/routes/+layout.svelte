@@ -10,13 +10,16 @@ import {
     NavBrand,
     NavHamburger,
     NavUl,
-    NavLi
+    NavLi,
+    Dropdown,
+    DropdownItem
 } from 'flowbite-svelte';
 import {
-    HomeSolid,
-    WalletSolid,
-    AdjustmentsVerticalOutline,
-    UserCircleSolid
+    UserSettingsSolid,
+    QuestionCircleSolid,
+    UsersGroupOutline,
+    UserCircleSolid,
+    ArrowRightToBracketOutline
 } from 'flowbite-svelte-icons';
 import logo from '$lib/assets/logo.png';
 
@@ -35,12 +38,20 @@ export let data: LayoutData;
         </NavBrand>
         <NavHamburger  />
         <NavUl >
-            <NavLi href="/">Home</NavLi>
-            <NavLi href="/about">About</NavLi>
-            <NavLi href="/docs/components/navbar">Navbar</NavLi>
-            <NavLi href="/pricing">Pricing</NavLi>
-            <NavLi href="/contact">Contact</NavLi>
+            <NavLi href="/contact" class="inline-flex"><QuestionCircleSolid></QuestionCircleSolid></NavLi>
+            <NavLi type="button" class="inline-flex" id="setting-link">
+                <UserSettingsSolid></UserSettingsSolid>
+                <Dropdown triggeredBy="#setting-link">
+                    <DropdownItem class="inline-flex" href="/settings/user-management">
+                        <UsersGroupOutline></UsersGroupOutline>&nbsp;User Management
+                    </DropdownItem>
+                    <DropdownItem class="inline-flex" href="/login">
+                        <ArrowRightToBracketOutline></ArrowRightToBracketOutline>&nbsp;Sign out
+                    </DropdownItem>
+                </Dropdown>
+            </NavLi>
+
         </NavUl>
     </Navbar>
     <slot/>
-</div>
+        </div>

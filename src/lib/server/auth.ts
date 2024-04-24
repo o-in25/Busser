@@ -19,4 +19,15 @@ export class AuthService {
             return null;
         }
     }
+
+    async getAllUsers(): Promise<Array<User>> {
+        try {
+            const user = await this.dbProvider.table<User>('Users');
+            if(!user?.length) throw new Error('Users not found.');
+            return user;
+        } catch({ message }: any) {
+            console.error(message);
+            return [];
+        }
+    }
 }
