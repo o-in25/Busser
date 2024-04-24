@@ -12,7 +12,7 @@
 		Button,
 	} from 'flowbite-svelte';
 	import type { PageData } from './$types';
-	import type { User } from '$lib/server/types/user';
+	import type { User } from '$lib/types/user';
 	import {
 		DotsVerticalOutline,
 		UserRemoveOutline,

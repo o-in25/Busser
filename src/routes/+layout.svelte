@@ -24,8 +24,15 @@
 	} from 'flowbite-svelte-icons';
 	import logo from '$lib/assets/logo.png';
 	import Placeholder from '$lib/components/Placeholder.svelte';
+	import { goto } from '$app/navigation';
 
 	export let data: LayoutData;
+
+	async function logout() {
+		const response = await fetch('/logout', { method: 'POST'});
+		console.log(response)
+		if(response.ok) await goto(`/login`);
+	}
 </script>
 
 <div class="container mx-auto px-4">
@@ -58,7 +65,7 @@
 				>User Management</DropdownItem
 			>
 			<DropdownDivider />
-			<DropdownItem href="/login">Sign out</DropdownItem>
+			<DropdownItem on:click={logout}>Log out</DropdownItem>
 		</Dropdown>
 		<NavUl>
 			<NavLi

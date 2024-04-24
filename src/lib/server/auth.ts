@@ -1,30 +1,53 @@
 import { DbProvider } from "./db";
-import type { User } from './types/user';
+import type { User } from '../types/user';
 import sha256 from 'crypto-js/sha256';
+import type { Session } from "$lib/types/session";
+import { dev } from '$app/environment';
 
 export class AuthService {
-    dbProvider: DbProvider;
+    static dbProvider: DbProvider = new DbProvider();
 
     constructor() {
-       this.dbProvider = new DbProvider();
     }
 
-    async login(username: string, password: string): Promise<User|null> {
+
+    async login(username: string, password: string): Promise<Session | null> {
         try {
-            const user = await this.dbProvider.table<User>('Users').where({ username }).first();
-            if(!user?.userId) throw new Error('User not found.');
-            return user;
-        } catch({ message }: any) {
-            console.error(message);
+            const session: Session = {
+                opts: {
+                    path: '/',
+                    httpOnly: true,
+                    sameSite: 'strict',
+                    secure: !dev,
+                    maxAge: 60 * 60 * 24 * 7 
+                }
+            };
+            const { userId, password: hashedPassword } = await AuthService.dbProvider.table<User>('Users')
+                .where({ username })
+                    .first() || {};
+                    
+            if(!userId || !hashedPassword) return session;
+            if(sha256(password).toString() !== hashedPassword) return session;
+            return { ...session, userId };
+        } catch(error: any) {
+            console.error(error.message || error);
             return null;
         }
     }
 
+    // async getUser(username: string): Promise<User | null> {
+    //     try {
+    //         const users = await AuthService.dbProvider.table<User>('Users').where({ username }).first();
+    //     } catch({ message }: any) {
+    //         console.error(message);
+    //         return null;
+    //     }
+    // }
+
     async getAllUsers(): Promise<Array<User>> {
         try {
-            const user = await this.dbProvider.table<User>('Users');
-            if(!user?.length) throw new Error('Users not found.');
-            return user;
+            const users = await AuthService.dbProvider.table<User>('Users') || [];
+            return users.map(user => JSON.parse(JSON.stringify(user)))
         } catch({ message }: any) {
             console.error(message);
             return [];
