@@ -1,57 +1,78 @@
 <script lang="ts">
-import "../app.css";
-import type {
-    LayoutData
-} from './$types';
-import {
-    BottomNav,
-    BottomNavItem,
-    Navbar,
-    NavBrand,
-    NavHamburger,
-    NavUl,
-    NavLi,
-    Dropdown,
-    DropdownItem
-} from 'flowbite-svelte';
-import {
-    UserSettingsSolid,
-    QuestionCircleSolid,
-    UsersGroupOutline,
-    UserCircleSolid,
-    ArrowRightToBracketOutline
-} from 'flowbite-svelte-icons';
-import logo from '$lib/assets/logo.png';
+	import '../app.css';
+	import type { LayoutData } from './$types';
+	import {
+		BottomNav,
+		BottomNavItem,
+		Navbar,
+		NavBrand,
+		NavHamburger,
+		NavUl,
+		NavLi,
+		Dropdown,
+		DropdownItem,
+		DropdownHeader,
+		DropdownDivider,
+		Avatar,
+	} from 'flowbite-svelte';
+	import {
+		UserSettingsSolid,
+		QuestionCircleSolid,
+		UsersGroupOutline,
+		UserCircleSolid,
+		ArrowRightToBracketOutline,
+	} from 'flowbite-svelte-icons';
+	import logo from '$lib/assets/logo.png';
+	import Placeholder from '$lib/components/Placeholder.svelte';
 
-export let data: LayoutData;
+	export let data: LayoutData;
 </script>
 
-<style lang="postcss">
-
-</style>
-
 <div class="container mx-auto px-4">
-    <Navbar>
-        <NavBrand href="/">
-            <img src={logo} class="me-3 h-6 sm:h-9" alt="Logo" />
-            <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"></span>
-        </NavBrand>
-        <NavHamburger  />
-        <NavUl >
-            <NavLi href="/contact" class="inline-flex"><QuestionCircleSolid></QuestionCircleSolid></NavLi>
-            <NavLi type="button" class="inline-flex" id="setting-link">
-                <UserSettingsSolid></UserSettingsSolid>
-                <Dropdown triggeredBy="#setting-link">
-                    <DropdownItem class="inline-flex" href="/settings/user-management">
-                        <UsersGroupOutline></UsersGroupOutline>&nbsp;User Management
-                    </DropdownItem>
-                    <DropdownItem class="inline-flex" href="/login">
-                        <ArrowRightToBracketOutline></ArrowRightToBracketOutline>&nbsp;Sign out
-                    </DropdownItem>
-                </Dropdown>
-            </NavLi>
+	<Navbar>
+		<NavBrand href="/">
+			<img
+				src={logo}
+				class="me-3 h-6 sm:h-9"
+				alt="Flowbite Logo"
+			/>
+			<span
+				class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
+			></span>
+		</NavBrand>
+		<div class="flex items-center md:order-2">
+			<Placeholder id="avatar-menu" />
+			<NavHamburger class1="w-full md:flex md:w-auto md:order-1" />
+		</div>
+		<Dropdown
+			placement="bottom"
+			triggeredBy="#avatar-menu"
+		>
+			<DropdownHeader>
+				<span class="block text-sm">Bonnie Green</span>
+				<span class="block truncate text-sm font-medium">name@flowbite.com</span
+				>
+			</DropdownHeader>
+			<DropdownItem href="/settings/user-management">Profile</DropdownItem>
+			<DropdownItem href="/settings/user-management"
+				>User Management</DropdownItem
+			>
+			<DropdownDivider />
+			<DropdownItem href="/login">Sign out</DropdownItem>
+		</Dropdown>
+		<NavUl>
+			<NavLi
+				href="/"
+				active={true}>Home</NavLi
+			>
+			<NavLi href="/about">About</NavLi>
+			<NavLi href="/docs/components/navbar">Navbar</NavLi>
+			<NavLi href="/pricing">Pricing</NavLi>
+			<NavLi href="/contact">Contact</NavLi>
+		</NavUl>
+	</Navbar>
+	<slot />
+</div>
 
-        </NavUl>
-    </Navbar>
-    <slot/>
-        </div>
+<style lang="postcss">
+</style>
