@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import {
 		Heading,
 		Breadcrumb,
@@ -11,8 +12,6 @@
 		TableHeadCell,
 		Button,
 	} from 'flowbite-svelte';
-	import type { PageData } from './$types';
-	import type { User } from '$lib/types/user';
 	import {
 		DotsVerticalOutline,
 		UserRemoveOutline,
@@ -20,16 +19,10 @@
 		PlusOutline,
 	} from 'flowbite-svelte-icons';
 	import {
-		BottomNav,
-		BottomNavItem,
-		Navbar,
-		NavBrand,
-		NavHamburger,
-		NavUl,
-		NavLi,
 		Dropdown,
 		DropdownItem,
 	} from 'flowbite-svelte';
+
 	export let data: PageData;
 </script>
 

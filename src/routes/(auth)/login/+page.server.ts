@@ -1,47 +1,31 @@
 import type { Actions } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
-import { AuthService } from '$lib/server/auth';
+import { login } from '$lib/server/auth';
 import { StatusCodes, ReasonPhrases } from 'http-status-codes'
-import type { CookieParseOptions } from 'cookie';
-import type { Result } from '$lib/types/result';
-import type { Session } from '$lib/types/session';
+import { dev } from '$app/environment';
 
-const authService = new AuthService();
 export const actions = {
 	login: async ({ request, cookies }) => {
 		const formData: any = await request.formData();
 		const username = formData.get('username');
 		const password = formData.get('password');
-		const response: Result<any> = {
-			data: { username }
-		};
 
 		if(!username || !password) {
-			response.error = { 
-				type: StatusCodes.UNAUTHORIZED,
-				message: ReasonPhrases.UNAUTHORIZED
-			}
-			return fail(response.error.type as number, response);
+			return fail(StatusCodes.BAD_REQUEST, { err: true } as any);
 		}
 
-		const session = await authService.login(username, password);
-		if(!session) {
-			response.error = { 
-				type: StatusCodes.INTERNAL_SERVER_ERROR,
-				message: ReasonPhrases.INTERNAL_SERVER_ERROR
-			}	
-			return fail(response.error.type as number, response);	
+		const { userId } = await login(username, password) || {};
+		if(!userId) {
+			return fail(StatusCodes.BAD_REQUEST, { err: true, username } as any);
 		}
 
-		if(!session.userId) {
-			response.error = { 
-				type: StatusCodes.UNAUTHORIZED,
-				message: ReasonPhrases.UNAUTHORIZED
-			}	
-			return fail(response.error.type as number, response);	
-		}
-
-		cookies.set('session', session.userId, { ...session.opts });
+		cookies.set('session_token', userId, {
+			path: '/',
+			httpOnly: true,
+			sameSite: 'strict',
+			secure: !dev,
+			maxAge: 60 * 60 * 24 * 7 
+		});
 		redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
 	},
 } satisfies Actions;

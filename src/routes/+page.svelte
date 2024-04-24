@@ -7,9 +7,6 @@
 	class="mb-4"
 	customSize="text-3xl font-extrabold  md:text-5xl lg:text-6xl"
 >
-	<Span gradient>Better Data</Span> Scalable AI.
+	Your own<Span gradient>&nbsp;Débarrasseu.&nbsp;</Span>At your side.
 </Heading>
-<P
-	>Here at Flowbite we focus on markets where technology, innovation, and
-	capital can unlock long-term value and drive economic growth.</P
->
+<P>Busser makes it easy to manage your inventory and keep tabs on your stock. Sign up today.</P>

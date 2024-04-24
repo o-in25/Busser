@@ -14,7 +14,7 @@
       <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign in</h3>
       <Label class="space-y-2">
         <span>Username</span>
-        <Input name="username" value={form?.data?.username ?? ''} required />
+        <Input name="username" value={form?.username ?? ''} required />
       </Label>
       <Label class="space-y-2">
         <span>Password</span>
@@ -28,9 +28,10 @@
       <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
         Not registered? <a href="/" class="text-primary-700 hover:underline dark:text-primary-500"> Create account </a>
       </div>
-      {#if form?.error}
+      {#if form?.err}
         <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-          {#if form.error.type === 401}Username or password is incorrect.{:else}An internal error occurred. Please try again later.{/if}
+          <span class="font-medium">Username or password is incorrect.</span>
+
         </div>
       {/if}
     </form>
