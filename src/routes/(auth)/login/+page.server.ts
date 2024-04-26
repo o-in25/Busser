@@ -26,6 +26,7 @@ export const actions = {
 			secure: !dev,
 			maxAge: 60 * 60 * 24 * 7 
 		});
+		
 		redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
 	},
 } satisfies Actions;

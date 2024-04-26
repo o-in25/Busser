@@ -3,14 +3,13 @@ import { HOSTNAME, USER, PASSWORD, PORT, DATABASE } from '$env/static/private';
 export class DbProvider {
     private knex: knex.Knex<any, unknown[]>;
 
-    public get db() {
+    public get query() {
         return this.knex;
     }
 
-    public table<T extends {}>(name: string) {
-        return this.knex<T>(name);
+    public table<T extends {}>(table: string) {
+        return this.knex<T>(table);
     }
-
     
     constructor() {
         this.knex = knex({

@@ -1,6 +1,6 @@
 import type { PageServerLoad } from "./$types";
-import { DbProvider } from "$lib/server/db";
 import type { User } from "$lib/types";
+import { DbProvider } from "$lib/server/db";
 const db = new DbProvider();
 
 export const load: PageServerLoad = async () => {
