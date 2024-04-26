@@ -22,14 +22,6 @@
 
   export let users: User[];
 </script>
-
-<Heading tag="h4" class="mb-4 flex flex-row justify-between">
-  User Management
-  <Button size="xs" class="items-center flex gap-4">
-    <PlusOutline />Add User
-  </Button>
-</Heading>
-
 <Table>
   <TableHead>
     <TableHeadCell>User ID</TableHeadCell>
