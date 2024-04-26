@@ -5,9 +5,14 @@ import type { User } from "$lib/types";
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
+		interface Error {
+			message: string | null,
+			type: string | null;
+			code: string | number | null;
+
+		}
 		interface Locals {
-			user: User | null
+			user: User | null;
 		}
 		// interface PageData {}
 		// interface PageState {}
@@ -15,4 +20,4 @@ declare global {
 	}
 }
 
-export {};
+export { };

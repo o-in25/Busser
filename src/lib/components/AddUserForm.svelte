@@ -1,28 +1,45 @@
-<script>
-  import { Button, Checkbox, Input, Label, Modal } from 'flowbite-svelte';
-  let opened = false;
+<script lang="ts">
+  import { enhance, applyAction } from '$app/forms';
+  import { Button, Input, Label, Modal } from 'flowbite-svelte';
+	import { goto } from '$app/navigation';
 
+  let opened = false;
   export const toggle = () => opened = true;
-  
+
 </script>
-<Modal title="Terms of Service" bind:open={opened} autoclose>
-  <form class="flex flex-col space-y-6" action="#">
-    <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Sign in to our platform</h3>
+<Modal title="Create New User" bind:open={opened}>
+  <form class="flex flex-col space-y-6" 
+    method="POST" 
+    action="?/addUser" 
+    use:enhance={({ formElement, formData, action, cancel }) => {
+      return async ({ result }) => {
+          console.log(result)
+          await applyAction(result);
+      };
+	  }}>
+    <Label class="space-y-2">
+      <span>Username</span>
+      <Input type="email" name="username" placeholder="username" required/>
+    </Label>
     <Label class="space-y-2">
       <span>Email</span>
       <Input type="email" name="email" placeholder="name@company.com" required />
     </Label>
     <Label class="space-y-2">
-      <span>Your password</span>
+      <span>Password</span>
       <Input type="password" name="password" placeholder="•••••" required />
     </Label>
-    <div class="flex items-start">
+      <Label class="space-y-2">
+      <span>Password Confirm</span>
+      <Input type="password" name="passwordConfirmation" placeholder="•••••" required />
+    </Label>
+    <!-- <div class="flex items-start">
       <Checkbox>Remember me</Checkbox>
       <a href="/" class="ms-auto text-sm text-primary-700 hover:underline dark:text-primary-500"> Lost password? </a>
-    </div>
-    <Button type="submit" class="w-full1">Login to your account</Button>
-    <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+    </div> -->
+    <Button type="submit" class="w-full1">Add User</Button>
+    <!-- <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
       Not registered? <a href="/" class="text-primary-700 hover:underline dark:text-primary-500"> Create account </a>
-    </div>
+    </div> -->
   </form>
 </Modal>
