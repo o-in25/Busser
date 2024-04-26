@@ -10,7 +10,7 @@ export class DbProvider {
     public table<T extends {}>(table: string) {
         return this.knex<T>(table);
     }
-    
+
     constructor() {
         this.knex = knex({
             client: 'mysql',
@@ -23,9 +23,8 @@ export class DbProvider {
             },
             pool: { min: 0, max: 7 },
         });
-        
-    }
 
+    }
 
 
 

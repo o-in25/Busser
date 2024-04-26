@@ -22,6 +22,7 @@
 
   export let users: User[];
 </script>
+
 <Table>
   <TableHead>
     <TableHeadCell>User ID</TableHeadCell>
