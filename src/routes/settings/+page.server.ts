@@ -19,7 +19,6 @@ export const actions = {
         const username = formData.get('username');
         const email = formData.get('email');
         const password = formData.get('password');
-        const passwordConfirm = formData.get('passwordConfirm');
         // check 2 passwords
         const result = await addUser({ username, email, password } as User, password);
         console.log(result);

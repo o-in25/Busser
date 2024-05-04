@@ -1,25 +1,25 @@
 <script lang="ts">
   import type { User } from "$lib/types";
   import {
-    Heading,
-    Breadcrumb,
-    BreadcrumbItem,
     Table,
     TableBody,
     TableBodyCell,
     TableBodyRow,
     TableHead,
     TableHeadCell,
-    Button,
   } from "flowbite-svelte";
   import {
     DotsVerticalOutline,
     UserRemoveOutline,
     UserEditOutline,
-    PlusOutline,
   } from "flowbite-svelte-icons";
   import { Dropdown, DropdownItem } from "flowbite-svelte";
+  import { createEventDispatcher } from 'svelte'
 
+  const dispatch = createEventDispatcher();
+  const editUser = (user: User) => {
+    dispatch('toggle', { user })
+  }
   export let users: User[];
 </script>
 
@@ -44,7 +44,7 @@
             <DotsVerticalOutline></DotsVerticalOutline>
           </button>
           <Dropdown placement="right-end" triggeredBy="#drop">
-            <DropdownItem class="items-center flex gap-4">
+            <DropdownItem class="items-center flex gap-4" on:click={() => editUser(user)}>
               <UserEditOutline />Edit User
             </DropdownItem>
             <DropdownItem

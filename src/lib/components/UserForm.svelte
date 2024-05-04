@@ -2,10 +2,11 @@
   import { enhance, applyAction } from '$app/forms';
   import { Button, Input, Label, Modal } from 'flowbite-svelte';
 	import { goto } from '$app/navigation';
+	import type { User } from '$lib/types';
 
   let opened = false;
   export const toggle = () => opened = true;
-
+  export let user: User;
 </script>
 <Modal title="Create New User" bind:open={opened}>
   <form class="flex flex-col space-y-6" 
@@ -13,14 +14,13 @@
     action="?/addUser" 
     use:enhance={({ formElement, formData, action, cancel }) => {
       return async ({ result }) => {
-          console.log(result)
           await applyAction(result);
       };
 	  }}>
     <Label class="space-y-2">
       <span>Username</span>
-      <Input type="email" name="username" placeholder="username" required/>
-    </Label>
+      <Input type="email" name="username" placeholder="username" required value={user?.email || ''}/>
+    </Label>  
     <Label class="space-y-2">
       <span>Email</span>
       <Input type="email" name="email" placeholder="name@company.com" required />
@@ -28,10 +28,6 @@
     <Label class="space-y-2">
       <span>Password</span>
       <Input type="password" name="password" placeholder="•••••" required />
-    </Label>
-      <Label class="space-y-2">
-      <span>Password Confirm</span>
-      <Input type="password" name="passwordConfirmation" placeholder="•••••" required />
     </Label>
     <!-- <div class="flex items-start">
       <Checkbox>Remember me</Checkbox>

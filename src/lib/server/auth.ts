@@ -26,7 +26,7 @@ export async function login(
         if(!user?.userId) throw Error("User not found.");
         return user;
     } catch(error: any) {
-        console.error(error.message || error);
+        console.error(error);
         return null;
     }
 }
@@ -46,7 +46,7 @@ export async function authenticate(cookies: Cookies): Promise<User | null> {
         if(!user?.userId) throw Error("User not found.");
         return user;
     } catch(error: any) {
-        console.error(error.message || error);
+        console.error(error);
         return null;
     }
 }

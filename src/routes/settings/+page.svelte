@@ -8,11 +8,17 @@
   } from "flowbite-svelte-icons";
   import { DarkMode } from "flowbite-svelte";
   import UserTable from "$lib/components/UserTable.svelte";
-  import AddUserForm from "$lib/components/AddUserForm.svelte";
+  import UserForm from "$lib/components/UserForm.svelte";
+	import type { User } from "$lib/types";
 
   export let data: PageData;
-	let modal: AddUserForm; 
+	let modal: UserForm; 
+  let user: User;
 
+  const update = (user2: User) => {
+    user = user2;
+    modal.toggle();
+  }
 </script>
 
 <Tabs tabStyle="underline">
@@ -42,9 +48,8 @@
           <PlusOutline />Add User
         </Button>
       </Heading>
-      <AddUserForm bind:this={modal}></AddUserForm>
     </div>
-
-    <UserTable users={data?.users || []}></UserTable>
+    <UserForm bind:this={modal} bind:user={user}></UserForm>
+    <UserTable users={data?.users || []} on:toggle={({ detail }) => update(detail.user)}></UserTable>
   </TabItem>
 </Tabs>
