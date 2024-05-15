@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { User } from "$lib/types";
+  import { EditOutline, TrashBinOutline, UserEditOutline, UserRemoveOutline } from "flowbite-svelte-icons";
+  import { createEventDispatcher } from 'svelte'
   import {
     Button,
     ButtonGroup,
@@ -10,19 +12,8 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-  import {
-    DotsVerticalOutline,
-    UserRemoveOutline,
-    UserEditOutline,
-    AdjustmentsVerticalOutline,
-    DownloadSolid,
-    UserCircleSolid,
-  } from "flowbite-svelte-icons";
-  import { Dropdown, DropdownItem } from "flowbite-svelte";
-  import { createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher();
-
   export let users: User[];
 </script>
 
@@ -30,6 +21,7 @@
   <TableHead>
     <TableHeadCell>User ID</TableHeadCell>
     <TableHeadCell>Username</TableHeadCell>
+    <TableHeadCell>Email</TableHeadCell>
     <TableHeadCell>
       <span class="sr-only">Actions</span>
     </TableHeadCell>
@@ -39,13 +31,14 @@
       <TableBodyRow>
         <TableBodyCell>{user.userId}</TableBodyCell>
         <TableBodyCell>{user.username}</TableBodyCell>
+        <TableBodyCell>{user.email}</TableBodyCell>
         <TableBodyCell>
           <ButtonGroup size="sm" divClass="inline-flex rounded-lg shadow-sm float-right">
-            <Button outline color="dark" on:click={() => dispatch('modalControl', { state: 'show', action: 'edit', payload: { user } })}>
-              <UserCircleSolid class="w-4 h-4" />
+            <Button outline color="dark" on:click={() => dispatch('modalControl', { state: 'open', action: 'edit', payload: { user } })}>
+              <UserEditOutline class="w-4 h-4" />
             </Button>
             <Button outline color="dark">
-              <AdjustmentsVerticalOutline class="w-4 h-4" />
+              <UserRemoveOutline class="w-4 h-4" />
             </Button>
           </ButtonGroup>
         </TableBodyCell>
