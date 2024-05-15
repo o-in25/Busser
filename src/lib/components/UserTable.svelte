@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { User } from "$lib/types";
   import {
+    Button,
+    ButtonGroup,
     Table,
     TableBody,
     TableBodyCell,
@@ -12,14 +14,15 @@
     DotsVerticalOutline,
     UserRemoveOutline,
     UserEditOutline,
+    AdjustmentsVerticalOutline,
+    DownloadSolid,
+    UserCircleSolid,
   } from "flowbite-svelte-icons";
   import { Dropdown, DropdownItem } from "flowbite-svelte";
   import { createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher();
-  const editUser = (user: User) => {
-    dispatch('toggle', { user })
-  }
+
   export let users: User[];
 </script>
 
@@ -28,7 +31,7 @@
     <TableHeadCell>User ID</TableHeadCell>
     <TableHeadCell>Username</TableHeadCell>
     <TableHeadCell>
-      <span class="sr-only">Edit</span>
+      <span class="sr-only">Actions</span>
     </TableHeadCell>
   </TableHead>
   <TableBody tableBodyClass="divide-y">
@@ -37,21 +40,14 @@
         <TableBodyCell>{user.userId}</TableBodyCell>
         <TableBodyCell>{user.username}</TableBodyCell>
         <TableBodyCell>
-          <button
-            type="button"
-            class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-            id="drop">
-            <DotsVerticalOutline></DotsVerticalOutline>
-          </button>
-          <Dropdown placement="right-end" triggeredBy="#drop">
-            <DropdownItem class="items-center flex gap-4" on:click={() => editUser(user)}>
-              <UserEditOutline />Edit User
-            </DropdownItem>
-            <DropdownItem
-              class="text-red-700 dark:text-red-500 items-center flex gap-4">
-              <UserRemoveOutline></UserRemoveOutline>Delete User
-            </DropdownItem>
-          </Dropdown>
+          <ButtonGroup size="sm" divClass="inline-flex rounded-lg shadow-sm float-right">
+            <Button outline color="dark" on:click={() => dispatch('toggle', { user })}>
+              <UserCircleSolid class="w-4 h-4" />
+            </Button>
+            <Button outline color="dark">
+              <AdjustmentsVerticalOutline class="w-4 h-4" />
+            </Button>
+          </ButtonGroup>
         </TableBodyCell>
       </TableBodyRow>
     {/each}
