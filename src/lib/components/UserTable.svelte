@@ -41,7 +41,7 @@
         <TableBodyCell>{user.username}</TableBodyCell>
         <TableBodyCell>
           <ButtonGroup size="sm" divClass="inline-flex rounded-lg shadow-sm float-right">
-            <Button outline color="dark" on:click={() => dispatch('toggle', { user })}>
+            <Button outline color="dark" on:click={() => dispatch('modalControl', { state: 'show', action: 'edit', payload: { user } })}>
               <UserCircleSolid class="w-4 h-4" />
             </Button>
             <Button outline color="dark">

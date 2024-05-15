@@ -5,25 +5,20 @@
 	import type { User } from '$lib/types';
 
   let opened = false;
-  export const toggle = () => opened = true;
+  export const show = () => opened = true;
   export let user: User;
 </script>
 <Modal title="Create New User" bind:open={opened}>
   <form class="flex flex-col space-y-6" 
     method="POST" 
-    action="?/addUser" 
-    use:enhance={({ formElement, formData, action, cancel }) => {
-      return async ({ result }) => {
-          await applyAction(result);
-      };
-	  }}>
+    action="?/addUser">
     <Label class="space-y-2">
       <span>Username</span>
-      <Input type="email" name="username" placeholder="username" required value={user?.email || ''}/>
+      <Input type="email" name="username" placeholder="username" required value={user?.username || ''}/>
     </Label>  
     <Label class="space-y-2">
       <span>Email</span>
-      <Input type="email" name="email" placeholder="name@company.com" required />
+      <Input type="email" name="email" placeholder="name@company.com" required value={user?.email || ''}/>
     </Label>
     <Label class="space-y-2">
       <span>Password</span>

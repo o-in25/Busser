@@ -1,24 +1,25 @@
 <script lang="ts">
   import type { PageData } from "./$types";
+  import type { User } from "$lib/types";
   import { Tabs, TabItem, Label, Heading, Button } from "flowbite-svelte";
-  import {
-    UsersOutline,
-    AdjustmentsVerticalSolid,
-    PlusOutline,
-  } from "flowbite-svelte-icons";
+  import { UsersOutline, AdjustmentsVerticalSolid, PlusOutline } from "flowbite-svelte-icons";
   import { DarkMode } from "flowbite-svelte";
   import UserTable from "$lib/components/UserTable.svelte";
   import UserForm from "$lib/components/UserForm.svelte";
-	import type { User } from "$lib/types";
 
   export let data: PageData;
 	let modal: UserForm; 
   let user: User;
 
-  const update = (user2: User) => {
-    user = user2;
-    modal.toggle();
+  function modalControl({ state, payload }) {
+    user = payload?.user || null;
+    modal.show();
   }
+
+  // const update = (user: User) => {
+  //   user = user;
+  //   modal.toggle();
+  // }
 </script>
 
 <Tabs tabStyle="underline">
@@ -44,12 +45,12 @@
     <div class="text-sm text-gray-500 dark:text-gray-400">
       <Heading tag="h4" class="mb-4 flex flex-row justify-between">
         User Management
-        <Button size="xs" class="items-center flex gap-4" on:click={modal.toggle}>
+        <Button size="xs" class="items-center flex gap-4" on:click={() => modalControl({ state: 'open', payload: null })}>
           <PlusOutline />Add User
         </Button>
       </Heading>
     </div>
     <UserForm bind:this={modal} bind:user={user}></UserForm>
-    <UserTable users={data?.users || []} on:toggle={({ detail }) => update(detail.user)}></UserTable>
+    <UserTable users={data?.users || []} on:modalControl={({ detail }) => modalControl(detail)}></UserTable>
   </TabItem>
 </Tabs>
