@@ -3,6 +3,7 @@
   import { EditOutline, TrashBinOutline, UserEditOutline, UserRemoveOutline } from "flowbite-svelte-icons";
   import { createEventDispatcher } from 'svelte'
   import {
+    A,
     Button,
     ButtonGroup,
     Table,
@@ -34,7 +35,7 @@
         <TableBodyCell>{user.email}</TableBodyCell>
         <TableBodyCell>
           <ButtonGroup size="sm" divClass="inline-flex rounded-lg shadow-sm float-right">
-            <Button outline color="dark" on:click={() => dispatch('modalControl', { state: 'open', action: 'edit', payload: { user } })}>
+            <Button outline color="dark" href="/settings/users/{user.userId}/edit">
               <UserEditOutline class="w-4 h-4" />
             </Button>
             <Button outline color="dark">

@@ -63,3 +63,13 @@ export async function addUser(user: User, password: string) {
         return null;
     }
 }
+
+export async function editUser(user: User) {
+    try {
+        const result = await db.table('Users').update(user)
+        return result;
+    } catch(error) {
+        console.error(error);
+        return null;
+    }
+}

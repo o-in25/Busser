@@ -9,26 +9,29 @@
 </script>
 <form class="flex flex-col space-y-6" 
   method="POST" 
-  action="?/addUser">
+  action="?/{action}User">
+  
   {#if action === 'edit'}
-    <Label class="space-y-2">
-      <span>User ID</span>
-      <Input type="email" name="username" disabled value={user?.userId || ''}/>
-    </Label>  
+      <Input type=hidden name="userId" value={user?.userId || ''}/>
   {/if}
   <Label class="space-y-2">
     <span>Username</span>
-    <Input type="email" name="username" placeholder="username" required value={user?.username || ''}/>
+    <Input type="text" name="username" placeholder="username" required value={user?.username || ''}/>
   </Label>  
   <Label class="space-y-2">
     <span>Email</span>
     <Input type="email" name="email" placeholder="name@company.com" required value={user?.email || ''}/>
   </Label>
-  <Label class="space-y-2">
-    <span>Password</span>
-    <Input type="password" name="password" placeholder="•••••" required />
-  </Label>
+  {#if action === 'edit'}
+    <div class="flex items-start">
+      <a href="/" class="text-sm text-primary-700 hover:underline dark:text-primary-500">Reset Password...</a>
+    </div>
+  {/if}
   {#if action === 'add'}
+    <Label class="space-y-2">
+      <span>Password</span>
+      <Input type="password" name="password" placeholder="•••••" required />
+    </Label>
     <Label class="space-y-2">
       <span>Confirm Password</span>
       <Input type="password" name="passwordConfirm" placeholder="•••••" required />
