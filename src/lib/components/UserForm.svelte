@@ -4,16 +4,17 @@
 	import { goto } from '$app/navigation';
 	import type { User } from '$lib/types';
 
-  export let user: User;
+  export let user: User | null;
   export let action: String
 </script>
 <form class="flex flex-col space-y-6" 
   method="POST" 
-  action="?/{action}User">
+  action="{action === 'edit'? 
+    `/settings/users/${user?.userId}/edit` : 
+    '/settings/users/add'
+  }"
+>
   
-  {#if action === 'edit'}
-      <Input type=hidden name="userId" value={user?.userId || ''}/>
-  {/if}
   <Label class="space-y-2">
     <span>Username</span>
     <Input type="text" name="username" placeholder="username" required value={user?.username || ''}/>

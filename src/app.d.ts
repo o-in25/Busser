@@ -6,15 +6,18 @@ import type { User } from "$lib/types";
 declare global {
 	namespace App {
 		interface Error {
-			message: string | null,
-			type: string | null;
-			code: string | number | null;
-
+			reason: string,
+			code: number,
+      message?: string
 		}
 		interface Locals {
 			user: User | null;
 		}
-		// interface PageData {}
+
+		interface PageData {
+      args: any,
+      error?: Error | null
+    }
 		// interface PageState {}
 		// interface Platform {}
 	}

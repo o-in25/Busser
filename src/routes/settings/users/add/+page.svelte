@@ -1,13 +1,14 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
-    import { Tabs, TabItem, Heading, DarkMode, Label } from 'flowbite-svelte';
-    import { AdjustmentsVerticalSolid, UsersOutline } from 'flowbite-svelte-icons';
-    import type { PageData } from './$types';
-    import type { User } from '$lib/types';
     import UserTable from '$lib/components/UserTable.svelte';
-    
+    import { A, Alert, Breadcrumb, BreadcrumbItem, Heading } from 'flowbite-svelte';
+    import { AdjustmentsVerticalSolid, AngleLeftOutline, ChevronDoubleRightOutline, ChevronRightOutline, HomeOutline, InfoCircleSolid, UsersOutline } from 'flowbite-svelte-icons';
+    import type { ActionData, PageData } from './$types';
+    import UserForm from '$lib/components/UserForm.svelte';
+    import { user } from '../../../../stores';
+    import { error } from '@sveltejs/kit';
+
+    export let form: ActionData;
     export let data: PageData;
-  
 </script>
 
 <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
@@ -30,8 +31,21 @@
 <div class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4">
   <div class="text-sm text-gray-500 dark:text-gray-400">
     <Heading tag="h4" class="mb-4 flex flex-row justify-between">
-        User Management
+        <A href="/settings/users">User Management</A>
+    </Heading>
+    <Heading tag="h6" class="mb-4 flex flex-row justify-between">
+      Add User
     </Heading>
   </div>
-  <UserTable users={data?.args}></UserTable>
+  <div class="flex justify-left items-center">
+    <div class="grow">
+      {#if form?.error || form?.success}
+      <Alert border color="{form.error? 'red' : 'green'}" class="mb-4">
+        <InfoCircleSolid slot="icon" class="w-5 h-5" />
+        {form.error? form.error.message : 'User has been updated.'}
+      </Alert>
+      {/if}
+      <UserForm user={null} action='add'></UserForm>
+    </div>
+  </div>
 </div>

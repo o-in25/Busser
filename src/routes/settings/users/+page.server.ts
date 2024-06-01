@@ -7,5 +7,5 @@ export const load: PageServerLoad = async () => {
   let users = await db.table<User>('Users');
   users = users.map(user => Object.assign({}, user));
   console.log(users)
-  return { users };
+  return { args: users };
 };

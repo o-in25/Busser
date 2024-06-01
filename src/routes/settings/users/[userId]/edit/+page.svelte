@@ -1,9 +1,13 @@
 <script lang="ts">
     import UserTable from '$lib/components/UserTable.svelte';
-    import { A, Breadcrumb, BreadcrumbItem, Heading } from 'flowbite-svelte';
-    import { AdjustmentsVerticalSolid, AngleLeftOutline, ChevronDoubleRightOutline, HomeOutline, UsersOutline } from 'flowbite-svelte-icons';
-    import type { PageData } from './$types';
-    
+    import { A, Alert, Breadcrumb, BreadcrumbItem, Heading } from 'flowbite-svelte';
+    import { AdjustmentsVerticalSolid, AngleLeftOutline, ChevronDoubleRightOutline, ChevronRightOutline, HomeOutline, InfoCircleSolid, UsersOutline } from 'flowbite-svelte-icons';
+    import type { ActionData, PageData } from './$types';
+    import UserForm from '$lib/components/UserForm.svelte';
+    import { user } from '../../../../../stores';
+    import { error } from '@sveltejs/kit';
+
+    export let form: ActionData;
     export let data: PageData;
 </script>
 
@@ -26,11 +30,22 @@
 <div class="h-0.5 bg-gray-200 dark:bg-gray-700"></div>
 <div class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4">
   <div class="text-sm text-gray-500 dark:text-gray-400">
-
+    <Heading tag="h4" class="mb-4 flex flex-row justify-between">
+        <A href="/settings/users">User Management</A>
+    </Heading>
+    <Heading tag="h6" class="mb-4 flex flex-row justify-between">
+      Edit User
+    </Heading>
   </div>
   <div class="flex justify-left items-center">
     <div class="grow">
-      blah
+      {#if form?.error || form?.success}
+      <Alert border color="{form.error? 'red' : 'green'}" class="mb-4">
+        <InfoCircleSolid slot="icon" class="w-5 h-5" />
+        {form.error? form.error.message : form.success.message}
+      </Alert>
+      {/if}
+      <UserForm user={data?.args} action='edit'></UserForm>
     </div>
   </div>
 </div>

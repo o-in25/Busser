@@ -64,9 +64,9 @@ export async function addUser(user: User, password: string) {
     }
 }
 
-export async function editUser(user: User) {
+export async function editUser(userId: string, user: User) {
     try {
-        const result = await db.table('Users').update(user)
+        const result = await db.table('Users').where({ userId }).update(user)
         return result;
     } catch(error) {
         console.error(error);
