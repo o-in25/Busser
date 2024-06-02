@@ -11,8 +11,7 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-    import { error } from "@sveltejs/kit";
-  
+      
   // props
   export let users: User[];
 
@@ -74,8 +73,6 @@
   <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
     Delete user <Span>{users.find(({ userId }) => target === userId)?.username}</Span>?
     <P color="text-red-700 dark:text-red-500" weight="bold">Once deleted, this user can't be recovered.</P>
-
-
   </p>
   <svelte:fragment slot="footer">
     <Button color="red" on:click={async () => {
@@ -85,7 +82,7 @@
         users = refresh;
       }
       target = undefined;
-    }}>Delete</Button>
+    }}>Delete User</Button>
     <Button color="alternative" on:click={() => target = undefined}>Cancel</Button>
   </svelte:fragment>
 </Modal>

@@ -1,13 +1,11 @@
 <script lang="ts">
-  import { enhance, applyAction } from '$app/forms';
-  import { Button, Input, Label, Modal } from 'flowbite-svelte';
-	import { goto } from '$app/navigation';
+  import { Button, Input, Label } from 'flowbite-svelte';
 	import type { User } from '$lib/types';
 
   export let user: User | null = null;
   export let action: String
 </script>
-<form class="flex flex-col space-y-6" 
+<form class="space-y-6" 
   method="POST" 
   action="{action === 'edit'? 
     `/settings/users/${user?.userId}/edit` : 
@@ -25,7 +23,7 @@
   </Label>
   {#if action === 'edit'}
     <div class="flex items-start">
-      <a href="/" class="text-sm text-primary-700 hover:underline dark:text-primary-500">Reset Password...</a>
+      <a href="/settings/users/{user?.userId}/reset-password" class="text-sm text-primary-700 hover:underline dark:text-primary-500">Reset Password...</a>
     </div>
   {/if}
   {#if action === 'add'}
@@ -38,5 +36,5 @@
       <Input type="password" name="passwordConfirm" placeholder="•••••" required />
     </Label>
   {/if}
-  <Button type="submit" class="w-full1">{action === 'edit'? 'Save Changes' : 'Submit'}</Button>
+  <Button type="submit">{action === 'edit'? 'Save Changes' : 'Add User'}</Button>
 </form>

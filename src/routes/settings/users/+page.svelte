@@ -1,9 +1,7 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
-    import { Tabs, TabItem, Heading, DarkMode, Label } from 'flowbite-svelte';
+    import { Heading } from 'flowbite-svelte';
     import { AdjustmentsVerticalSolid, UsersOutline } from 'flowbite-svelte-icons';
     import type { PageData } from './$types';
-    import type { User } from '$lib/types';
     import UserTable from '$lib/components/UserTable.svelte';
     
     export let data: PageData;
