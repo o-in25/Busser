@@ -1,12 +1,7 @@
 <script lang="ts">
   import type { User } from "$lib/types";
-  import { EditOutline, TrashBinOutline, UserAddOutline, UserEditOutline, UserRemoveOutline } from "flowbite-svelte-icons";
-  import { createEventDispatcher } from 'svelte'
-  import {
-    A,
-    Button,
-    ButtonGroup,
-    Modal,
+  import { InfoCircleSolid, UserAddOutline, UserEditOutline, UserRemoveOutline } from "flowbite-svelte-icons";
+  import { Alert, Button, ButtonGroup,Modal,
     P,
     Span,
     Table,
@@ -16,19 +11,31 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-
+    import { error } from "@sveltejs/kit";
+  
+  // props
   export let users: User[];
-  let target: string | undefined = undefined;
-  let defaultModal = false;
 
-  const deleteUser = async (userId: string) => {
-    const result = await fetch('/api/ci', {
-      method: 'POST',
+  let target: string | undefined = undefined;
+  let isOpened = false;
+  let result: any = {}
+
+  const deleteUser = async (userId: string): Promise<any> => {
+    let response = await fetch(`/api/user/${userId}/delete`, {
+      method: 'DELETE',
     });
+    response = await response.json();
+    console.log(response)
+    return response;
   }
 
 </script>
-
+{#if result.error || result.success}
+  <Alert border color="{result.error? 'red' : 'green'}" class="mb-4">
+    <InfoCircleSolid slot="icon" class="w-5 h-5" />
+    {result.error || result.success}
+  </Alert>
+{/if}
 <Table>
   <TableHead>
     <TableHeadCell>Username</TableHeadCell>
@@ -52,7 +59,7 @@
               <UserEditOutline class="w-4 h-4" />
             </Button>
             <Button outline color="dark" on:click={() => {
-              defaultModal = true;
+              isOpened = true;
               target = user.userId;
             }}>
               <UserRemoveOutline class="w-4 h-4" />
@@ -63,7 +70,7 @@
     {/each}
   </TableBody>
 </Table>
-<Modal title="Delete User" bind:open={defaultModal} autoclose>
+<Modal title="Delete User" bind:open={isOpened} autoclose>
   <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
     Delete user <Span>{users.find(({ userId }) => target === userId)?.username}</Span>?
     <P color="text-red-700 dark:text-red-500" weight="bold">Once deleted, this user can't be recovered.</P>
@@ -71,7 +78,14 @@
 
   </p>
   <svelte:fragment slot="footer">
-    <Button color="red" on:click={() => alert('Handle "success"')}>Delete</Button>
+    <Button color="red" on:click={async () => {
+      if(target) {
+        let { success, error, refresh } = await deleteUser(target);
+        result = { success, error }
+        users = refresh;
+      }
+      target = undefined;
+    }}>Delete</Button>
     <Button color="alternative" on:click={() => target = undefined}>Cancel</Button>
   </svelte:fragment>
 </Modal>

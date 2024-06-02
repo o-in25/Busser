@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import type { User } from '$lib/types';
 
-  export let user: User | null;
+  export let user: User | null = null;
   export let action: String
 </script>
 <form class="flex flex-col space-y-6" 

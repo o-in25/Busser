@@ -21,16 +21,13 @@ export const actions = {
         const password = formData.get('password');
         // check 2 passwords
         const result = await addUser({ username, email, password } as User, password);
-        console.log(result);
         return {};
     },
     editUser: async ({ request, params }) => {
-        console.log(params)
         const formData: any = await request.formData();
         const username = formData.get('username');
         const email = formData.get('email');
         const userId = formData.get('userId')
-        console.log({ username, email, userId })
         // check 2 passwords
         // const result = await editUser({ username, email, userId } as User);
         // console.log(result);

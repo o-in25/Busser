@@ -8,7 +8,5 @@ export const GET: RequestHandler = async () => {
 
 export const POST: RequestHandler = async ({ request }) => {
     const body = await request.json();
-
-    console.log(body);
     return new Response();
 };

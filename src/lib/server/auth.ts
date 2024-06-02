@@ -5,6 +5,8 @@ import { DbProvider } from "./db";
 import sha256 from "crypto-js/sha256";
 const db = new DbProvider();
 
+
+
 export function hashPassword(password: string) {
     return sha256(password).toString();
 }
@@ -51,6 +53,17 @@ export async function authenticate(cookies: Cookies): Promise<User | null> {
     }
 }
 
+export async function getUsers() {
+  try {
+    let users = await db.table<User>('Users');
+    users = users.map(user => Object.assign({}, user));
+    return users;
+  } catch(error: any) {
+    console.error(error);
+    return [];
+  }
+}
+
 export async function addUser(user: User, password: string) {
     try {
         const result = await db.table('Users').insert({
@@ -72,4 +85,23 @@ export async function editUser(userId: string, user: User) {
         console.error(error);
         return null;
     }
+}
+
+export async function deleteUser(userId: string) {
+  let response = {};
+  try {
+    const result = await db.table('Users').where({ userId }).del();
+    if(result !== 1) {
+      response = { error: 'Returned unexpected number of rows.'}
+    }
+  } catch(error: any) {
+    console.error(error);
+    response = { error: error.message || 'An error occurred.' }
+
+  } finally {
+    const refresh = await getUsers() || [];
+    response = { ...response, refresh }
+  }
+  console.log(response)
+  return response;
 }
