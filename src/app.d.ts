@@ -14,10 +14,10 @@ declare global {
 			user: User | null;
 		}
 
-		interface PageData {
-      args: any,
-      error?: Error | null
-    }
+		// interface PageData {
+    //   args: any,
+    //   error?: Error | null
+    // }
 		// interface PageState {}
 		// interface Platform {}
 	}

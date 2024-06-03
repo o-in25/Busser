@@ -5,7 +5,7 @@
     import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
     
     export let form: ActionData;
-    export let data: PageData;
+    let data: PageData;
 </script>
 
 <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
