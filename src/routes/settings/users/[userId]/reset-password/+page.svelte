@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { A, Heading } from 'flowbite-svelte';
-    import { AdjustmentsVerticalSolid, UsersOutline } from 'flowbite-svelte-icons';
+    import { A, Alert, Heading } from 'flowbite-svelte';
+    import { AdjustmentsVerticalSolid, InfoCircleSolid, UsersOutline } from 'flowbite-svelte-icons';
     import type { ActionData, PageData } from './$types';
     import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
     
@@ -36,13 +36,12 @@
   </div>
   <div class="flex justify-left items-center">
     <div class="grow">
-      <!-- {#if form?.error || form?.success}
+    {#if form?.error || form?.success}
       <Alert border color="{form.error? 'red' : 'green'}" class="mb-4">
         <InfoCircleSolid slot="icon" class="w-5 h-5" />
         {form.error? form.error.message : form.success.message}
       </Alert>
       {/if}
-      <UserForm user={data?.args} action='edit'></UserForm> -->
       <ResetPasswordForm></ResetPasswordForm>
     </div>
   </div>

@@ -53,6 +53,21 @@ export async function authenticate(cookies: Cookies): Promise<User | null> {
     }
 }
 
+export async function resetPassword(userId: string, oldPassword: string, newPassword: string): Promise<boolean> {
+  try {
+    const result: any = await db
+      .table('Users')
+      .where({ userId, password: hashPassword(oldPassword) })
+          .update({
+            password: hashPassword(newPassword)
+          }, ['userId', 'username', 'email']);
+    return result === 1;
+  } catch(error: any) {
+    console.error(error);
+    return false;
+  }
+}
+
 export async function getUsers() {
   try {
     let users = await db.table<User>('Users');
@@ -65,32 +80,40 @@ export async function getUsers() {
 }
 
 export async function addUser(user: User, password: string) {
-    try {
-        const result = await db.table('Users').insert({
-            ...user,
+  try {
+      const result = await db
+        .table('Users')
+          .insert({
+           ...user,
             password: hashPassword(password)
         });
-        return { rows: result?.length || 0 };
-    } catch(error) {
-        console.error(error);
-        return null;
-    }
+      return { rows: result?.length || 0 };
+  } catch(error) {
+      console.error(error);
+      return null;
+  }
 }
 
 export async function editUser(userId: string, user: User) {
-    try {
-        const result = await db.table('Users').where({ userId }).update(user)
-        return result;
-    } catch(error) {
-        console.error(error);
-        return null;
-    }
+  try {
+      const result = await db
+      .table('Users')
+        .where({ userId })
+          .update(user)
+      return result;
+  } catch(error) {
+      console.error(error);
+      return null;
+  }
 }
 
 export async function deleteUser(userId: string) {
   let response = {};
   try {
-    const result = await db.table('Users').where({ userId }).del();
+    const result = await db
+    .table('Users')
+      .where({ userId })
+        .del();
     if(result !== 1) {
       response = { error: 'Returned unexpected number of rows.'}
     }
