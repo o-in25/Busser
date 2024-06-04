@@ -68,8 +68,9 @@
   {#if data.user}
   <NavUl {activeUrl}>
       <NavLi href="/" active>Home</NavLi>
-      <NavLi href="/about">Inventory</NavLi>
-      <NavLi href="/docs/components/navbar">Tools</NavLi>
+      <NavLi href="/inventory">Inventory</NavLi>
+      <NavLi href="/spirits">Spirits</NavLi>
+      <NavLi href="/tools">Tools</NavLi>
   </NavUl>
   {/if}
 </Navbar>
