@@ -11,7 +11,9 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-      
+  import moment from 'moment';
+
+
   // props
   export let users: User[];
 
@@ -24,7 +26,6 @@
       method: 'DELETE',
     });
     response = await response.json();
-    console.log(response)
     return response;
   }
 
@@ -39,6 +40,7 @@
   <TableHead>
     <TableHeadCell>Username</TableHeadCell>
     <TableHeadCell>Email</TableHeadCell>
+    <TableHeadCell>Last Activity</TableHeadCell>
     <TableHeadCell>
       <ButtonGroup size="sm" divClass="inline-flex rounded-lg shadow-sm float-right">
         <Button outline color="dark" href="/settings/users/add">
@@ -52,6 +54,7 @@
       <TableBodyRow>
         <TableBodyCell>{user.username}</TableBodyCell>
         <TableBodyCell>{user.email}</TableBodyCell>
+        <TableBodyCell>{(moment(user.lastActivityDate)).format('DD-MMM-YYYY HH:mm:ss')}</TableBodyCell>
         <TableBodyCell>
           <ButtonGroup size="sm" divClass="inline-flex rounded-lg shadow-sm float-right">
             <Button outline color="dark" href="/settings/users/{user.userId}/edit">

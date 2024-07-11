@@ -3,8 +3,7 @@ import type { Cookies } from "@sveltejs/kit";
 import type { RequestEvent } from "../../routes/(auth)/login/$types";
 import { DbProvider } from "./db";
 import sha256 from "crypto-js/sha256";
-const db = new DbProvider();
-
+const db = new DbProvider('user_t');
 
 
 export function hashPassword(password: string) {
@@ -16,10 +15,11 @@ export async function login(
     password: string,
 ): Promise<User | null> {
     try {
+
         const user = Object.assign(
             {},
             await db
-                .table<User>("Users")
+                .table<User>("user")
                 .where("username", username)
                 .andWhere("password", hashPassword(password))
                 .select("userId", "username", "email")
@@ -40,7 +40,7 @@ export async function authenticate(cookies: Cookies): Promise<User | null> {
         const user = Object.assign(
             {},
             await db
-                .table<User>("Users")
+                .table<User>("user")
                 .where({ userId })
                 .select("userId", "username", "email")
                 .first(),
@@ -56,7 +56,7 @@ export async function authenticate(cookies: Cookies): Promise<User | null> {
 export async function resetPassword(userId: string, oldPassword: string, newPassword: string): Promise<boolean> {
   try {
     const result: any = await db
-      .table('Users')
+      .table('user')
       .where({ userId, password: hashPassword(oldPassword) })
           .update({
             password: hashPassword(newPassword)
@@ -70,7 +70,7 @@ export async function resetPassword(userId: string, oldPassword: string, newPass
 
 export async function getUsers() {
   try {
-    let users = await db.table<User>('Users');
+    let users = await db.table<User>('user');
     users = users.map(user => Object.assign({}, user));
     return users;
   } catch(error: any) {
@@ -82,7 +82,7 @@ export async function getUsers() {
 export async function addUser(user: User, password: string) {
   try {
       const result = await db
-        .table('Users')
+        .table('user')
           .insert({
            ...user,
             password: hashPassword(password)
@@ -97,7 +97,7 @@ export async function addUser(user: User, password: string) {
 export async function editUser(userId: string, user: User) {
   try {
       const result = await db
-      .table('Users')
+        .table('user')
         .where({ userId })
           .update(user)
       return result;
@@ -111,7 +111,7 @@ export async function deleteUser(userId: string) {
   let response = {};
   try {
     const result = await db
-    .table('Users')
+      .table('user')
       .where({ userId })
         .del();
     if(result !== 1) {
@@ -125,6 +125,5 @@ export async function deleteUser(userId: string) {
     const refresh = await getUsers() || [];
     response = { ...response, refresh }
   }
-  console.log(response)
   return response;
 }

@@ -5,7 +5,7 @@ import { DbProvider } from "$lib/server/db";
 import type { User } from "$lib/types";
 import { editUser } from "$lib/server/auth";
 const { NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
-const db = new DbProvider();
+const db = new DbProvider('user_t');
 
 const load: PageServerLoad = async ({ params }) => {
   const { userId } = params;
@@ -17,7 +17,7 @@ const load: PageServerLoad = async ({ params }) => {
     });
   }
 
-  let user = await db.table<User>('Users').where({ userId }).first();
+  let user = await db.table<User>('user').where({ userId }).first();
   user = Object.assign({}, user);
   return { args: user, error: null };
 }
