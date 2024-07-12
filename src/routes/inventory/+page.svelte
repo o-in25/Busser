@@ -6,26 +6,7 @@
     export let data: PageData;
   let searchTerm = '';
 
-  const items = [
-    {
-      name: 'Apple MacBook Pro 17"',
-      color: "Sliver",
-      type: "Laptop",
-      price: "$2999",
-    },
-    {
-      name: "Microsoft Surface Pro",
-      color: "White",
-      type: "Laptop PC",
-      price: "$1999",
-    },
-    {
-      name: "Magic Mouse 2",
-      color: "Black",
-      type: "Accessories",
-      price: "$99",
-    },
-  ];
+  const items = data.args;
 
   let openRow
   let details
@@ -33,7 +14,7 @@
   const toggleRow = (i) => {
     openRow = openRow === i ? null : i
   }
-  $: filteredItems = items.filter((item) => item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
+  $: filteredItems = items;//items.filter((item) => item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
 </script>
 
 <div class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4">
@@ -55,8 +36,8 @@
               <TableBody tableBodyClass="divide-y">
                 {#each filteredItems as item, i}
                   <TableBodyRow on:click={() => toggleRow(i)}>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.color}</TableBodyCell>
+                    <TableBodyCell>{item.ProductName}</TableBodyCell>
+                    <TableBodyCell>{item.ProductInStockQuantity}</TableBodyCell>
                     <TableBodyCell>{item.type}</TableBodyCell>
                     <TableBodyCell>{item.price}</TableBodyCell>
                   </TableBodyRow>
