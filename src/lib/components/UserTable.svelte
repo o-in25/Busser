@@ -50,7 +50,7 @@
     </TableHeadCell>
   </TableHead>
   <TableBody tableBodyClass="divide-y">
-    {#each users as user}
+    {#each users as user (user.userId)}
       <TableBodyRow>
         <TableBodyCell>{user.username}</TableBodyCell>
         <TableBodyCell>{user.email}</TableBodyCell>
