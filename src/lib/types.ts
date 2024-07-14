@@ -17,21 +17,22 @@ export type User = {
 };
 
 export type Product = {
-  productId: 1,
-  categoryId: 2,
-  supplierId: 3,
-  productName: "Example Product",
-  productInStockQuantity: 100,
-  productPricePerUnit: 10.5,
-  productUnitSizeInMilliliters: 500,
-  productProof: 40,
-  productDetailId: 4,
-  productImageUrl: "http://example.com/image.jpg",
-  categoryName: "Beverages",
-  categoryDescription: "A variety of beverages.";
+  productId: number,
+  categoryId: number,
+  supplierId: number,
+  productName: string,
+  productInStockQuantity: number,
+  productPricePerUnit: number,
+  productUnitSizeInMilliliters: number,
+  productProof: number,
+  productDetailId: number,
+  productImageUrl: string,
+  categoryName: string,
+  categoryDescription: string;
 };
 
 export type GallerySeeding = {
   src: string,
   alt?: string
 }
+
