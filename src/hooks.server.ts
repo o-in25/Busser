@@ -1,19 +1,19 @@
 import { authenticate } from '$lib/server/auth';
 import { redirect, type Handle } from "@sveltejs/kit"
 import { StatusCodes } from 'http-status-codes';
-const publicRoutes = ['/login', '/logout'];
+
+const publicRoutes = ['/login', '/logout', '/'];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     const { cookies, url } = event;
     const slug = url.pathname;
     event.locals.user = await authenticate(cookies);
 
-
     if(!event.locals.user && !publicRoutes.includes(slug)) {
-        return redirect(StatusCodes.TEMPORARY_REDIRECT, '/login');
+        return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
     }
 
-	const response = await resolve(event);
+    const response = await resolve(event);
     return response;
 
 }

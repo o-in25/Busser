@@ -2,6 +2,7 @@
 import type { GallerySeeding, Product } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
+import { attachPaginate, type IWithPagination } from "knex-paginate";
 const db = new DbProvider('app_t');
 
 const marshal = (obj: any) => {
@@ -15,18 +16,35 @@ const marshal = (obj: any) => {
   }, {});
 };
 
-export async function getInventory(): Promise<Product[]> {
+export async function getInventory(): Promise<IWithPagination<Product>> {
   try {
     
-    let inventory = await db.table<Product>('product')
-      .join('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
-      .join('category', 'category.CategoryId', '=', 'product.ProductId')
-    inventory = inventory.map(item => Object.assign({}, item));
-    inventory = marshal(inventory);
-    return inventory;
+    let { data, pagination } = await db.table('product')
+      .select([
+        'product.productId',
+        'product.supplierId',
+        'product.productName',
+        'product.productPricePerUnit',
+        'product.productInStockQuantity',
+        'product.productUnitSizeInMilliliters',
+        'product.productProof',
+        'category.categoryId',
+        'category.categoryName',
+        'category.categoryDescription',
+        'productdetail.productImageUrl',
+        'productdetail.productDetailId',
+      ])
+      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
+      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
+      .paginate({ perPage: 30, currentPage: 1})
+    data = data.map(item => Object.assign({}, item));
+    data = marshal(data);
+    const result: IWithPagination<Product> = { data, pagination };
+
+    return result;
   } catch(error: any) {
     console.error(error);
-    return [];
+    return { data: null, pagination: null } as unknown as IWithPagination<any>;
   }
 
 }

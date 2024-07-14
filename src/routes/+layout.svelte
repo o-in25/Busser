@@ -12,10 +12,7 @@
     NavLi,
     NavUl,
     Footer,
-    FooterBrand,
     FooterCopyright,
-    FooterLink,
-    FooterLinkGroup,
   } from "flowbite-svelte";
   import logo from "$lib/assets/logo-nav.png";
   import Placeholder from "$lib/components/Placeholder.svelte";
@@ -66,12 +63,12 @@
     {/if}
   </Dropdown>
   {#if data.user}
-  <NavUl {activeUrl}>
-      <NavLi href="/" active>Home</NavLi>
-      <NavLi href="/inventory">Inventory</NavLi>
-      <NavLi href="/spirits">Spirits</NavLi>
-      <NavLi href="/tools">Tools</NavLi>
-  </NavUl>
+    <NavUl {activeUrl}>
+        <NavLi href="/" active>Home</NavLi>
+        <NavLi href="/inventory">Inventory</NavLi>
+        <!-- <NavLi href="/spirits">Spirits</NavLi>
+        <NavLi href="/tools">Tools</NavLi> -->
+    </NavUl>
   {/if}
 </Navbar>
 
@@ -80,12 +77,9 @@
     <slot/>
   </div>
   <Footer footerType="logo" class="">
-  <!-- <div class="sm:flex sm:items-center sm:justify-between">
-    <FooterBrand href="https://flowbite.com" src={logo} alt="Flowbite Logo" name="Busser" />
-  </div> -->
-  <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-  <FooterCopyright href="/" by="Busser" />
-</Footer>
+    <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+    <FooterCopyright href="/" by="Busser" />
+  </Footer>
 </div>
 
 
