@@ -1,25 +1,27 @@
 
-import type { GallerySeeding, Product } from "$lib/types";
+import type { GallerySeeding, PaginationResult, Product } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
-import { attachPaginate, type IWithPagination } from "knex-paginate";
-const db = new DbProvider('app_t');
+import { type ILengthAwarePagination, type IWithPagination } from "knex-paginate";
+import type { Pagination } from "flowbite-svelte";
 
-const marshal = (obj: any) => {
-  if(!_.isObject(obj)) return obj;
-  if(_.isArray(obj)) return obj.map((v) => marshal(v));
+const db = new DbProvider('app_t');
+//attachPaginate();
+
+const marshal = <T>(obj: any) => {
+  if(!_.isObject(obj)) return obj as T ;
+  if(_.isArray(obj)) return obj.map((v) => marshal<T>(v));
   return _.reduce(obj, (arr, curr, acc) => {
     return {
       ...arr,
-      [_.camelCase(acc)]: marshal(curr)
+      [_.camelCase(acc)]: marshal<T>(curr)
     };
   }, {});
 };
 
-export async function getInventory(): Promise<IWithPagination<Product>> {
+export async function getInventory(currentPage: number, perPage: number = 25): Promise<PaginationResult<Product[]>> {
   try {
-    
-    let { data, pagination } = await db.table('product')
+    let { data, pagination }: { data: Product[], pagination: any} = await db.table('product')
       .select([
         'product.productId',
         'product.supplierId',
@@ -36,15 +38,24 @@ export async function getInventory(): Promise<IWithPagination<Product>> {
       ])
       .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
       .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
-      .paginate({ perPage: 30, currentPage: 1})
+      .paginate({ perPage, currentPage })
     data = data.map(item => Object.assign({}, item));
     data = marshal(data);
-    const result: IWithPagination<Product> = { data, pagination };
+    pagination = pagination as Pagination
+    const result: PaginationResult<Product[]> = { data, pagination };
 
     return result;
   } catch(error: any) {
     console.error(error);
-    return { data: null, pagination: null } as unknown as IWithPagination<any>;
+    return { 
+      data: [], 
+      pagination: {
+        total: 0,
+        currentPage: 0,
+        perPage: 0,
+        from: 0,
+        to: 0
+    }};
   }
 
 }

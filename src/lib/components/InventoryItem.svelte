@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Product } from "$lib/types";
-    import { ImagePlaceholder, P, Heading, ButtonGroup, GradientButton, ScoreRating } from "flowbite-svelte";
-    import { EditOutline, TrashBinOutline } from "flowbite-svelte-icons";
+    import { Card, Button, Toggle, ImagePlaceholder, P, Heading, ButtonGroup, GradientButton, ScoreRating } from "flowbite-svelte";
+    import { ArrowRightOutline, EditOutline, PenOutline, TrashBinOutline } from "flowbite-svelte-icons";
     export let product: Product;
 
   let headerLabel = {
@@ -14,8 +14,6 @@
     }
   };
 
-
-  
   const fakeRatings = () => {
     let vec: number[] = [];
     for(let i = 0; i < 4; i++) {

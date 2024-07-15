@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Product } from '$lib/types';
+  import type { PaginationData, Product } from '$lib/types';
   import {
     Table,
     TableBody,
@@ -9,7 +9,10 @@
     TableHeadCell,
     ImagePlaceholder,
     Modal,
-    Indicator
+    Indicator,
+
+    Pagination
+
   } from 'flowbite-svelte';
   import { slide } from 'svelte/transition';
   import InventoryItem from './InventoryItem.svelte';
@@ -36,6 +39,8 @@
   // ];
 
   export let products: Product[];
+  export let paginationData: PaginationData;
+  // export let pagination: Pagination;
   let openRow
   let details
   let doubleClickModal = false
@@ -51,6 +56,37 @@
       style: 'currency',
       currency: 'USD',
   });
+
+  import { page } from '$app/stores';
+  import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
+  import { invalidateAll } from '$app/navigation';
+    import { createEventDispatcher } from 'svelte';
+
+  $: activeUrl = $page.url.searchParams.get('page');
+  let pages = paginationData.pages
+
+  $: {
+    pages?.forEach((page) => {
+      let splitUrl = page.href.split('?');
+      let queryString = splitUrl.slice(1).join('?');
+      const hrefParams = new URLSearchParams(queryString);
+      let hrefValue = hrefParams.get('page');
+      if (hrefValue === activeUrl) {
+        page.active = true;
+      } else {
+        page.active = false;
+      }
+    });
+    pages = pages;
+  }
+
+  const previous = () => {
+   console.log('prev')  
+  };
+  const next = () => {
+   console.log('next')  
+  };
+
 
 </script>
 
@@ -97,6 +133,17 @@
       {/if}
     {/each}
   </TableBody>
+
+  <Pagination {pages} large>
+    <svelte:fragment slot="prev">
+      <span class="sr-only">Previous</span>
+      <ChevronLeftOutline class="w-6 h-6" />
+    </svelte:fragment>
+    <svelte:fragment slot="next">
+      <span class="sr-only">Next</span>
+      <ChevronRightOutline class="w-6 h-6" />
+    </svelte:fragment>
+  </Pagination>
 </Table>
 <Modal title={details?.name} bind:open={doubleClickModal} autoclose outsideclose>
   <ImagePlaceholder />

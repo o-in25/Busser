@@ -1,8 +1,9 @@
 import { HOSTNAME, PASSWORD, PORT, USER } from '$env/static/private';
+import { attachPaginate } from 'knex-paginate';
 import knex from 'knex';
-// import { HOSTNAME, USER, PASSWORD, PORT, DATABASE } from '$env/static/private';
+
 export class DbProvider {
-    private knex: knex.Knex<any, unknown[]>;
+    private knex: knex.Knex<any, any []>;
 
     public get query() {
         return this.knex;
@@ -25,5 +26,8 @@ export class DbProvider {
             pool: { min: 0, max: 7 },
         });
 
+        if(!Object.prototype.hasOwnProperty.call(this.knex, 'paginate')) {
+          attachPaginate();
+        }
     }
 }

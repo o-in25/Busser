@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { AdvancedRating, Card, Heading, ImagePlaceholder, Modal, P, Pagination, Rating, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, TableSearch, type LinkType } from 'flowbite-svelte';
+    import { AdvancedRating, Card, Heading, ImagePlaceholder, Modal, P, Rating, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, TableSearch, type LinkType } from 'flowbite-svelte';
     import type { PageData } from './$types';
     import { slide } from 'svelte/transition';
-    import type { Product } from '$lib/types';
+    import type { PaginationData, PaginationResult, Product } from '$lib/types';
     import { ArrowLeftOutline, ArrowRightOutline, ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
     import InventoryTable from '$lib/components/InventoryTable.svelte';
     
@@ -10,6 +10,8 @@
     let searchTerm = '';
 
     const products: Product[] = data.args.data;
+    const paginationData: PaginationData = data.args.pagination
+
 </script>
 
 <div class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4">
@@ -19,7 +21,7 @@
       </Heading>
       <div>
         <div id="inventory-table">
-          <InventoryTable {products}></InventoryTable>
+          <InventoryTable {products} {paginationData}></InventoryTable>
         </div>
       </div>
     </div>
