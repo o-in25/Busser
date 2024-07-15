@@ -43,6 +43,9 @@ export type PaginationResult<T> = {
 
 export type PaginationData = {
   total: number,
+  lastPage: number, 
+  prevPage: number,
+  nextPage: number,
   currentPage: number,
   perPage: number,
   from: number,

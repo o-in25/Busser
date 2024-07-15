@@ -1,9 +1,9 @@
 
-import type { GallerySeeding, PaginationResult, Product } from "$lib/types";
+import type { GallerySeeding, PaginationData, PaginationResult, Product } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import { type ILengthAwarePagination, type IWithPagination } from "knex-paginate";
-import type { Pagination } from "flowbite-svelte";
+import { Pagination } from "flowbite-svelte";
 
 const db = new DbProvider('app_t');
 //attachPaginate();
@@ -19,9 +19,20 @@ const marshal = <T>(obj: any) => {
   }, {});
 };
 
+const paginationData = {
+  total: 0,
+  currentPage: 0,
+  perPage: 0,
+  from: 0,
+  to: 0,
+  lastPage: 0,
+  prevPage: 0,
+  nextPage: 0
+}
+
 export async function getInventory(currentPage: number, perPage: number = 25): Promise<PaginationResult<Product[]>> {
   try {
-    let { data, pagination }: { data: Product[], pagination: any} = await db.table('product')
+    let { data, pagination } = await db.table('product')
       .select([
         'product.productId',
         'product.supplierId',
@@ -38,10 +49,9 @@ export async function getInventory(currentPage: number, perPage: number = 25): P
       ])
       .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
       .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
-      .paginate({ perPage, currentPage })
+      .paginate({ perPage, currentPage, isLengthAware: true })
     data = data.map(item => Object.assign({}, item));
     data = marshal(data);
-    pagination = pagination as Pagination
     const result: PaginationResult<Product[]> = { data, pagination };
 
     return result;
@@ -49,13 +59,7 @@ export async function getInventory(currentPage: number, perPage: number = 25): P
     console.error(error);
     return { 
       data: [], 
-      pagination: {
-        total: 0,
-        currentPage: 0,
-        perPage: 0,
-        from: 0,
-        to: 0
-    }};
+      pagination: paginationData };
   }
 
 }
