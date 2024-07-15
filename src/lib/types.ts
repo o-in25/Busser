@@ -36,3 +36,25 @@ export type GallerySeeding = {
   alt?: string
 }
 
+export type PaginationResult<T> = {
+  data: T,
+  pagination: PaginationData;
+};
+
+export type PaginationData = {
+  total: number,
+  lastPage: number, 
+  prevPage: number,
+  nextPage: number,
+  currentPage: number,
+  perPage: number,
+  from: number,
+  to: number,
+  pages?: Page[]
+}
+
+export type Page = {
+  name: string,
+  href: string,
+  active: boolean
+}
