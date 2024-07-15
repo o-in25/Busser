@@ -10,33 +10,11 @@
     ImagePlaceholder,
     Modal,
     Indicator,
-
     Pagination
-
   } from 'flowbite-svelte';
   import { slide } from 'svelte/transition';
   import InventoryItem from './InventoryItem.svelte';
 
-  // const items = [
-  //   {
-  //     name: 'Apple MacBook Pro 17"',
-  //     color: "Sliver",
-  //     type: "Laptop",
-  //     price: "$2999",
-  //   },
-  //   {
-  //     name: "Microsoft Surface Pro",
-  //     color: "White",
-  //     type: "Laptop PC",
-  //     price: "$1999",
-  //   },
-  //   {
-  //     name: "Magic Mouse 2",
-  //     color: "Black",
-  //     type: "Accessories",
-  //     price: "$99",
-  //   },
-  // ];
 
   export let products: Product[];
   export let paginationData: PaginationData;
@@ -59,12 +37,17 @@
 
   import { page } from '$app/stores';
   import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
-  import { invalidateAll } from '$app/navigation';
-    import { createEventDispatcher } from 'svelte';
+  import { goto, invalidateAll } from '$app/navigation';
+  import { createEventDispatcher } from 'svelte';
 
   $: activeUrl = $page.url.searchParams.get('page');
-  let pages = paginationData.pages
 
+    let pages = [
+    { name: '1', href: '/inventory?page=1', active: false },
+    { name: '2', href: '/inventory?page=2', active: false  },
+    { name: '3', href: '/inventory?page=3', active: false  },
+    { name: '4', href: '/inventory?page=4', active: false  },
+  ];
   $: {
     pages?.forEach((page) => {
       let splitUrl = page.href.split('?');
@@ -81,10 +64,11 @@
   }
 
   const previous = () => {
-   console.log('prev')  
+    console.log('sfd')
+   goto('/inventory?page=1') 
   };
   const next = () => {
-   console.log('next')  
+   goto('/inventory?page=4') 
   };
 
 
@@ -134,7 +118,7 @@
     {/each}
   </TableBody>
 
-  <Pagination {pages} large>
+  <Pagination {pages} on:previous={previous} on:next={next} large>
     <svelte:fragment slot="prev">
       <span class="sr-only">Previous</span>
       <ChevronLeftOutline class="w-6 h-6" />

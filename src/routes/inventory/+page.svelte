@@ -7,12 +7,8 @@
     import InventoryTable from '$lib/components/InventoryTable.svelte';
     
     export let data: PageData;
-    let searchTerm = '';
-
-    const products: Product[] = data.args.data;
-    const paginationData: PaginationData = data.args.pagination
-
-</script>
+    export let result: PaginationResult<Product[]> = data.args;
+    $: (result.data = data.args.data)</script>
 
 <div class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4">
   <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -21,7 +17,7 @@
       </Heading>
       <div>
         <div id="inventory-table">
-          <InventoryTable {products} {paginationData}></InventoryTable>
+          <InventoryTable products={result.data} paginationData={result.pagination}></InventoryTable>
         </div>
       </div>
     </div>
