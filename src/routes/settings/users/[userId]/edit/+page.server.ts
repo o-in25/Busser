@@ -4,7 +4,7 @@ import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import { DbProvider } from "$lib/server/db";
 import type { User } from "$lib/types";
 import { editUser } from "$lib/server/auth";
-const { NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
+const { NOT_FOUND } = StatusCodes;
 const db = new DbProvider('user_t');
 
 const load: PageServerLoad = async ({ params }) => {

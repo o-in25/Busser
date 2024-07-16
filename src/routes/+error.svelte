@@ -1,8 +1,7 @@
 <script lang="ts">
     import { page } from '$app/stores';
-    import { Heading, P, A } from 'flowbite-svelte';
-    import { ChevronRightOutline } from 'flowbite-svelte-icons';
-</script>
+    import { Heading, P } from 'flowbite-svelte';
+    </script>
 
 <Heading tag="h2" customSize="text-4xl font-extrabold ">{$page.error?.reason}</Heading>
 {#if $page.error?.message}

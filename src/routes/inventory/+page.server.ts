@@ -1,7 +1,5 @@
 import { getInventory } from '$lib/server/core';
-import { DbProvider } from '$lib/server/db';
-import type { IWithPagination } from 'knex-paginate';
-import type { Actions, PageServerLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url }) => {
   let queryString = url.href.split('?').slice(1).join('?');

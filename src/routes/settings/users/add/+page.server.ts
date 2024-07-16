@@ -1,7 +1,4 @@
-import type { Actions } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
 import type { User } from '$lib/types';
-import { P } from 'flowbite-svelte';
 import { addUser } from '$lib/server/auth';
 
 // const load = (async () => {
