@@ -31,6 +31,11 @@ export type Product = {
   categoryDescription: string;
 };
 
+export type Category = {
+  categoryId: number,
+  categoryName: string,
+  categoryDescription: string
+}
 export type GallerySeeding = {
   src: string,
   alt?: string
@@ -57,4 +62,9 @@ export type Page = {
   name: string,
   href: string,
   active: boolean
+}
+
+export type SelectOption = {
+  name: string,
+  value: string | number
 }

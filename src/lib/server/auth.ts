@@ -1,6 +1,6 @@
-import type { Result, User } from "$lib/types";
+import type { User } from "$lib/types";
 import type { Cookies } from "@sveltejs/kit";
-import type { RequestEvent } from "../../routes/(auth)/login/$types";
+// import type { RequestEvent } from "../../routes/(auth)/login/$types";
 import { DbProvider } from "./db";
 import sha256 from "crypto-js/sha256";
 const db = new DbProvider('user_t');
@@ -15,7 +15,6 @@ export async function login(
     password: string,
 ): Promise<User | null> {
     try {
-
         const user = Object.assign(
             {},
             await db
