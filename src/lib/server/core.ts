@@ -1,9 +1,7 @@
 
-import type { GallerySeeding, PaginationData, PaginationResult, Product } from "$lib/types";
+import type { Category, GallerySeeding, PaginationResult, Product, SelectOption } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
-import { type ILengthAwarePagination, type IWithPagination } from "knex-paginate";
-import { Pagination } from "flowbite-svelte";
 
 const db = new DbProvider('app_t');
 //attachPaginate();
@@ -83,10 +81,26 @@ export async function getBaseSpirits(): Promise<string[]> {
   try {
     let spirits = await db.table<any>('recipecategory')
       .select('RecipeCategoryDescription')
-    spirits = spirits.map(item => item.RecipeCategoryDescription);
     spirits = marshal(spirits);
+    spirits = spirits.map(item => item.RecipeCategoryDescription);
 
     return spirits;
+  } catch(error: any) {
+    console.error(error);
+    return [];
+  }
+}
+
+export async function categorySelect(): Promise<SelectOption[]> {
+  try {
+    let result = await db.table('category')
+                          .select('CategoryId', 'CategoryName');
+    let categories: Category[] = marshal<Category>(result);
+    let selectOptions: SelectOption[] = categories.map(({ categoryId, categoryName}) => ({
+      name: categoryName,
+      value: categoryId
+    }));
+    return selectOptions;
   } catch(error: any) {
     console.error(error);
     return [];

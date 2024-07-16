@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Label, Checkbox, A, Button, Input, Listgroup, ListgroupItem } from "flowbite-svelte";
-    import Autocomplete from "./Autocomplete.svelte";
+  import Autocomplete from "./Autocomplete.svelte";
+    import { onMount } from "svelte";
   let buttons = [
     { name: 'Profile', mycustomfield: 'data1', current: true },
     { name: 'Settings', mycustomfield: 'data2' },
@@ -19,6 +20,7 @@
   const getValues = () => {
     console.log(cat)
   }
+
 </script>
 
 <form class="relative">
@@ -30,7 +32,7 @@
     <div class="w-full">
       <!-- <Label for="last_name" class="mb-2">Category</Label>
       <Input type="text" id="last_name" placeholder="Doe" required bind:value={searchTerm}/> -->
-      <Autocomplete label="Category" placeholder="Whiskey" bind:value={cat}/>
+      <Autocomplete label="Category" placeholder="Whiskey" fetchUrl="/api/select" bind:value={cat}/>
       <!-- <div class="relative">
         <Listgroup active class="absolute w-full" >
           {#each search as button, name}
