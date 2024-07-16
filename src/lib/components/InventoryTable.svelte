@@ -7,15 +7,10 @@
     TableBodyRow,
     TableHead,
     TableHeadCell,
-    ImagePlaceholder,
-    Modal,
     Indicator,
     Pagination,
     TableSearch,
-    Alert,
-
-    Button
-
+    Alert
   } from 'flowbite-svelte';
   import { ChevronLeftOutline, ChevronRightOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
   import { slide } from 'svelte/transition';
@@ -79,7 +74,7 @@
 
 </script>
 
-<Table divClass="overflow-hidden">
+<Table>
   <TableSearch placeholder="Search" hoverable={true} bind:inputValue={searchTerm}>
     <TableHead>
       <TableHeadCell>Product Name</TableHeadCell>

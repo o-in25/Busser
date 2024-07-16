@@ -1,7 +1,6 @@
 <script>
-  import { Popover, Label, Input, Checkbox, Button } from 'flowbite-svelte';
-  import { CheckOutline, CloseOutline } from 'flowbite-svelte-icons';
-</script>
+  import { Label, Input, Button } from 'flowbite-svelte';
+  </script>
 <form class="space-y-6"
   method="POST"
 >

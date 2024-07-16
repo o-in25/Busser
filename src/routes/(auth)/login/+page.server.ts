@@ -1,7 +1,7 @@
 import type { Actions } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { login } from '$lib/server/auth';
-import { StatusCodes, ReasonPhrases } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import { dev } from '$app/environment';
 
 export const actions = {

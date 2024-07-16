@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { Card, Input, Label } from 'flowbite-svelte';
-    import { GiftBoxSolid, ArrowUpRightFromSquareOutline } from 'flowbite-svelte-icons';
+    import { Input, Label } from 'flowbite-svelte';
     import type { PageData } from './$types';
     
     export let data: PageData;
