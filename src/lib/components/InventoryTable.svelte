@@ -98,7 +98,7 @@
 </div>
 <!-- search -->
 <Label class="space-y-2 mb-6">
-  <Input type="email" size="md" on:keydown={handleInput}>
+  <Input type="email" size="md" placeholder="Search inventory..." on:keydown={handleInput}>
     <SearchOutline slot="left" class="w-5 h-5" />
   </Input>
 </Label>
@@ -134,7 +134,7 @@
         <TableBodyCell tdClass="hidden sm:table-cell sm:px-6 sm:py-4 sm:whitespace-nowrap">
           {#if product.productProof < 1}
           <!-- <Progressbar progress="{product.productProof / 2}" /> -->
-           <Badge rounded color="dark" class="w-full h-auto">Dark</Badge>
+           <Badge rounded color="dark" class="w-full h-auto">N/A</Badge>
            {:else}
               <Progressbar progress="{product.productProof / 2}" />
           {/if}

@@ -150,8 +150,8 @@
 
 </script>
 
-      <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
-
+<!-- "grid gap-6 mb-6 md:grid-cols-2 -->
+{#if product}
   <div class="space-y-2 text-wrap w-full">
     <div class="mb-6 grid gap-6 grid-cols-1 md:grid-cols-2">
         <!-- col 1 -->
@@ -165,7 +165,7 @@
             </div>
 
             <!-- desktop only -->
-            <div class="hidden md:flex md:flex-grow">
+            <div class="flex flex-grow">
                 <ButtonGroup divClass="inline-flex rounded-lg shadow-sm mt-auto">
                   <GradientButton color="blue" href="/inventory/{product.productId}/edit"><EditOutline/></GradientButton>
                   <GradientButton color="red"><TrashBinOutline/></GradientButton>
@@ -174,16 +174,12 @@
           </div>
         </div>
         <!-- mobile only -->
-        <!-- <div class="sm:hidden">
-          <div class="flex">
-            <Progressbar progress="50" size="h-1.5" />
+        <!-- <div class="flex sm:hidden">
+          <div class="flex-grow my-auto mt-4">
+            <Badge color="dark">{product.categoryName}</Badge>
+            <Badge color="dark">${product.productPricePerUnit}</Badge>
+            <Badge color="dark">{parseSize(product.productUnitSizeInMilliliters)}</Badge> 
           </div>
-
-            <div class="flex">
-              <Badge color="dark" class="mx-auto">{product.categoryName}</Badge>
-              <Badge color="dark" class="mx-auto">${product.productPricePerUnit}</Badge>
-              <Badge color="dark" class="mx-auto">{parseSize(product.productUnitSizeInMilliliters)}</Badge>
-            </div>
         </div> -->
         <!-- col 2 -->
         <div class="px-2 pt-4 md:pb-4">
@@ -195,49 +191,6 @@
             ratings2={ratings2}
           />
         </div>
-    </div>
-  </div>
-{#if product.categoryId === -12}
-  <div class="space-y-4 text-wrap w-full p-4">
-
-    <div class="flex">
-      <img class="rounded object-fit h-48 w-44" src="{product.productImageUrl}" alt="Image of {product.productName}">
-      <div class="flex-auto w-64 px-4 pt-4 relative">
-
-        <div class="grid gap-6 mb-6 md:grid-cols-2 xs:grid-cols-1">
-          <div>
-            <Heading tag="h6">
-              {#if product.productName !== product.categoryName}
-                {product.productName} - {product.categoryName}
-              {:else}
-                {product.productName}
-              {/if}
-            </Heading>
-            <P weight="extralight">{product.categoryDescription}</P>
-            <!-- <ButtonGroup class="*:!ring-primary-700 absolute bottom-0">
-              <GradientButton color="purpleToBlue" href="/inventory/{product.productId}/edit"><EditOutline/></GradientButton>
-              <GradientButton color="pinkToOrange"><TrashBinOutline/></GradientButton>
-            </ButtonGroup> -->
-          </div>
-          <!-- <div class="flex-grow w-64">
-            <ScoreRating
-              desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
-              linkClass="hidden"
-              headerLabel={{...headerLabel, desc1, desc2}}
-              ratings={ratings}
-              ratings2={ratings2}
-            />
-          </div> -->
-        </div>
-    </div>
-
-      <!-- <div class="p-4">
-        <p>{product.categoryDescription}</p>
-        <P class="mb-3 md:text-xl" weight="light" size="lg" color="text-gray-500 dark:text-gray-400">
-          {product.productName} - {product.categoryName}
-        </P>
-        <P weight="light" color="text-gray-500 dark:text-gray-400">{product.categoryDescription}</P> 
-      </div> -->
     </div>
   </div>
 {:else}

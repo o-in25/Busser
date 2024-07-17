@@ -13,6 +13,9 @@
     NavUl,
     Footer,
     FooterCopyright,
+    FooterLink,
+    FooterLinkGroup,
+    FooterBrand,
   } from "flowbite-svelte";
   import logo from "$lib/assets/logo-nav.png";
   import Placeholder from "$lib/components/Placeholder.svelte";
@@ -74,12 +77,10 @@
   <div class="flex-1">
     <slot/>
   </div>
-  <Footer footerType="logo" class="">
-    <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-    <FooterCopyright href="/" by="Busser" />
-  </Footer>
 </div>
-
-
+<Footer footerType="logo">
+  <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+  <FooterCopyright by="Busser" />
+</Footer>
 
 <style lang="postcss"></style>
