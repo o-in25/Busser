@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
   const hrefParams = new URLSearchParams(queryString);
   let hrefValue = hrefParams.get('page');
   let page = Number(hrefValue);
-  let { data, pagination } = await getInventory(page, 5);
+  let { data, pagination } = await getInventory(page, 20);
 
   // let { total, perPage } = pagination;
   // let pages: any = Math.ceil(total / perPage);

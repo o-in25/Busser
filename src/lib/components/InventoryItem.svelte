@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Product } from "$lib/types";
-  import { ImagePlaceholder, P, Heading, ButtonGroup, GradientButton, ScoreRating } from "flowbite-svelte";
+  import { ImagePlaceholder, P, Heading, ButtonGroup, GradientButton, ScoreRating, Badge, Progressbar } from "flowbite-svelte";
   import { EditOutline, TrashBinOutline } from "flowbite-svelte-icons";
   export let product: Product;
 
@@ -139,17 +139,75 @@
     
   }
 
+  
+  const parseSize = (ml: number) => {
+    if(ml === 0) return 'N/A'
+    if(ml < 1000) return `${ml} ML`
+    return  `${ml / 1000} L`
+  }
+
   const { ratings, ratings2, desc1, desc2, style } = fakeRatings();
 
 </script>
 
       <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
 
-{#if product}
+  <div class="space-y-2 text-wrap w-full">
+    <div class="mb-6 grid gap-6 grid-cols-1 md:grid-cols-2">
+        <!-- col 1 -->
+        <div class="flex px-2 pt-4 md:pb-4">
+          <img class="rounded object-fit h-48 w-44 mr-2" src="{product.productImageUrl}" alt="Image of {product.productName}">
+          <div class="flex flex-col">
+            <div class="pb-2">
+              {#if product.productInStockQuantity < 1}<Badge color="red" class="sm:hidden">Out of Stock</Badge>{/if}
+              <Heading tag="h6">{product.productName}</Heading>
+              <P weight="extralight">{product.categoryDescription}</P>
+            </div>
+
+            <!-- desktop only -->
+            <div class="hidden md:block md:flex-grow">
+              <div class="flex">
+                <Badge color="dark" class="mr-2">${product.productPricePerUnit}</Badge>
+                <Badge color="dark" class="mr-2">{parseSize(product.productUnitSizeInMilliliters)}</Badge>
+                <!-- <ButtonGroup divClass="inline-flex rounded-lg shadow-sm mt-auto">
+                  <GradientButton color="purpleToBlue" href="/inventory/{product.productId}/edit"><EditOutline/></GradientButton>
+                  <GradientButton color="pinkToOrange"><TrashBinOutline/></GradientButton>
+                </ButtonGroup> -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- mobile only -->
+        <!-- <div class="sm:hidden">
+          <div class="flex">
+            <Progressbar progress="50" size="h-1.5" />
+          </div>
+
+            <div class="flex">
+              <Badge color="dark" class="mx-auto">{product.categoryName}</Badge>
+              <Badge color="dark" class="mx-auto">${product.productPricePerUnit}</Badge>
+              <Badge color="dark" class="mx-auto">{parseSize(product.productUnitSizeInMilliliters)}</Badge>
+            </div>
+        </div> -->
+        <!-- col 2 -->
+        <div>
+          <ScoreRating
+            desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
+            linkClass="hidden"
+            headerLabel={{...headerLabel, desc1, desc2}}
+            ratings={ratings}
+            ratings2={ratings2}
+          />
+        </div>
+    </div>
+  </div>
+{#if product.categoryId === -12}
   <div class="space-y-4 text-wrap w-full p-4">
+
     <div class="flex">
       <img class="rounded object-fit h-48 w-44" src="{product.productImageUrl}" alt="Image of {product.productName}">
       <div class="flex-auto w-64 px-4 pt-4 relative">
+
         <div class="grid gap-6 mb-6 md:grid-cols-2 xs:grid-cols-1">
           <div>
             <Heading tag="h6">
@@ -160,12 +218,12 @@
               {/if}
             </Heading>
             <P weight="extralight">{product.categoryDescription}</P>
-            <ButtonGroup class="*:!ring-primary-700 absolute bottom-0">
+            <!-- <ButtonGroup class="*:!ring-primary-700 absolute bottom-0">
               <GradientButton color="purpleToBlue" href="/inventory/{product.productId}/edit"><EditOutline/></GradientButton>
               <GradientButton color="pinkToOrange"><TrashBinOutline/></GradientButton>
-            </ButtonGroup>
+            </ButtonGroup> -->
           </div>
-          <div class="flex-grow w-64">
+          <!-- <div class="flex-grow w-64">
             <ScoreRating
               desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
               linkClass="hidden"
@@ -173,7 +231,7 @@
               ratings={ratings}
               ratings2={ratings2}
             />
-          </div>
+          </div> -->
         </div>
     </div>
 
@@ -187,7 +245,7 @@
     </div>
   </div>
 {:else}
-  <ImagePlaceholder />
+  <!-- <ImagePlaceholder /> -->
 {/if}
 
 

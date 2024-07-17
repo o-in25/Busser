@@ -10,14 +10,21 @@
     Indicator,
     Pagination,
     TableSearch,
-    Alert
+    Alert,
+    Input,
+    Label,
+    Progressbar,
+    Badge,
+
+
   } from 'flowbite-svelte';
-  import { ChevronLeftOutline, ChevronRightOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
+  import { ChevronLeftOutline, ChevronRightOutline, InfoCircleSolid, SearchOutline } from 'flowbite-svelte-icons';
   import { slide } from 'svelte/transition';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import InventoryItem from './InventoryItem.svelte';
 
+  import debounce from 'lodash';
   export let products: Product[];
   export let paginationData: PaginationData;
 
@@ -72,49 +79,84 @@
       currency: 'USD',
   });
 
-</script>
+  //  const handleInput = debounce((e: Event) => {
+  //   const detail = (<CustomEvent>e).detail;
+  //   search = products.filter(({ productName }) => productName.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1)
+  // })
 
-<Table divClass="relative overflow-x-auto">
-  <TableSearch placeholder="Search" hoverable={true} bind:inputValue={searchTerm}>
-    <TableHead>
-      <TableHeadCell class="">Product Name</TableHeadCell>
-      <TableHeadCell>Category</TableHeadCell>
-      <TableHeadCell>Inventory</TableHeadCell>
-      <TableHeadCell>Size</TableHeadCell>
-    </TableHead>
-    <TableBody tableBodyClass="divide-y">
-      <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
-      {#each search as product, row}
-        <TableBodyRow on:click={() => rowControl(row)}>
-          <TableBodyCell>{product.productName}</TableBodyCell>
-          <TableBodyCell>{product.categoryName}</TableBodyCell>
-          <TableBodyCell>
+  const handleInput = ({ target }) => {
+    setTimeout(() => {
+      searchTerm = target.value;
+      search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
+    }, 300);
+  }
+</script> 
+<!-- <input on:keydown={(event) => handleInput(event)}> -->
+<div>
+  <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
+
+</div>
+<!-- search -->
+<Label class="space-y-2 mb-6">
+  <Input type="email" size="md" on:keydown={handleInput}>
+    <SearchOutline slot="left" class="w-5 h-5" />
+  </Input>
+</Label>
+
+<!-- table -->
+<Table divClass="relative overflow-x-auto" hoverable={true}>
+
+  <!-- head -->
+  <TableHead>
+    <TableHeadCell>Product Name</TableHeadCell>
+    <TableHeadCell class="hidden sm:table-cell">Category</TableHeadCell>
+    <TableHeadCell class="hidden sm:table-cell">Inventory</TableHeadCell>
+    <TableHeadCell class="hidden sm:table-cell">Strength</TableHeadCell>
+  </TableHead>
+
+  <!-- body -->
+  <TableBody tableBodyClass="divide-y">
+
+    <!-- rows -->
+    {#each search as product, row}
+      <TableBodyRow on:click={() => rowControl(row)}>
+        <TableBodyCell>{product.productName}</TableBodyCell>
+        <TableBodyCell tdClass="hidden sm:table-cell sm:px-6 sm:py-4 sm:whitespace-nowrap">{product.categoryName}</TableBodyCell>
+          <TableBodyCell tdClass="hidden sm:table-cell sm:px-6 sm:py-4 sm:whitespace-nowrap">
             <span class="flex items-center">
-              {#if product.productInStockQuantity > 0}
-                <Indicator size="sm" color="green" class="me-1.5" />In stock
-              {:else}
+              {#if product.productInStockQuantity < 1}
                 <Indicator size="sm" color="red" class="me-1.5" />Out of stock
+              {:else}
+                <Indicator size="sm" color="green" class="me-1.5" />In stock
               {/if}
             </span>
           </TableBodyCell>
-          <TableBodyCell>{parseSize(product.productUnitSizeInMilliliters)}</TableBodyCell>
+        <TableBodyCell tdClass="hidden sm:table-cell sm:px-6 sm:py-4 sm:whitespace-nowrap">
+          {#if product.productProof < 1}
+          <!-- <Progressbar progress="{product.productProof / 2}" /> -->
+           <Badge rounded color="dark" class="w-full h-auto">Dark</Badge>
+           {:else}
+              <Progressbar progress="{product.productProof / 2}" />
+          {/if}
+        </TableBodyCell>
+      </TableBodyRow>
 
+      <!-- opened  -->
+      {#if openRow === row}
+        <TableBodyRow class=""  on:dblclick={() => {
+          // doubleClickModal = true;
+          // details = product;
+        }}>
+          <TableBodyCell colspan="6" class="p-0" tdClass="border-b last:border-b-0 bg-white dark:bg-gray-800 dark:border-gray-700">
+            <div class="px-3 py-3" transition:slide={{ duration: 300, axis: 'y' }}>
+              <InventoryItem {product}></InventoryItem>
+            </div>
+          </TableBodyCell>
         </TableBodyRow>
-        {#if openRow === row}
-          <TableBodyRow on:dblclick={() => {
-            // doubleClickModal = true;
-            // details = product;
-          }}>
-            <TableBodyCell colspan="6" class="p-0">
-              <div class="px-2 py-3" transition:slide={{ duration: 300, axis: 'y' }}>
-                <InventoryItem {product}></InventoryItem>
-              </div>
-            </TableBodyCell>
-          </TableBodyRow>
-        {/if}
-      {/each}
-    </TableBody>
-  </TableSearch>
+      {/if}
+
+    {/each}
+  </TableBody>
 </Table>
 {#if !search.length}
   <div class="flex flex-col items-center">
@@ -125,7 +167,7 @@
     </Alert>
   </div>
 {/if}
-{#if searchTerm === '' }
+{#if searchTerm === ''}
   <div class="flex flex-col items-center justify-center gap-2 p-7">
     <div class="text-sm text-gray-700 dark:text-gray-400">
       Showing <span class="font-semibold text-gray-900 dark:text-white">{paginationData.from + 1}</span>
