@@ -165,15 +165,11 @@
             </div>
 
             <!-- desktop only -->
-            <div class="hidden md:block md:flex-grow">
-              <div class="flex">
-                <Badge color="dark" class="mr-2">${product.productPricePerUnit}</Badge>
-                <Badge color="dark" class="mr-2">{parseSize(product.productUnitSizeInMilliliters)}</Badge>
-                <!-- <ButtonGroup divClass="inline-flex rounded-lg shadow-sm mt-auto">
-                  <GradientButton color="purpleToBlue" href="/inventory/{product.productId}/edit"><EditOutline/></GradientButton>
-                  <GradientButton color="pinkToOrange"><TrashBinOutline/></GradientButton>
-                </ButtonGroup> -->
-              </div>
+            <div class="hidden md:flex md:flex-grow">
+                <ButtonGroup divClass="inline-flex rounded-lg shadow-sm mt-auto">
+                  <GradientButton color="blue" href="/inventory/{product.productId}/edit"><EditOutline/></GradientButton>
+                  <GradientButton color="red"><TrashBinOutline/></GradientButton>
+                </ButtonGroup>
             </div>
           </div>
         </div>
@@ -190,7 +186,7 @@
             </div>
         </div> -->
         <!-- col 2 -->
-        <div>
+        <div class="px-2 pt-4 md:pb-4">
           <ScoreRating
             desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
             linkClass="hidden"
