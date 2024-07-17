@@ -74,17 +74,16 @@
 
 </script>
 
-<Table>
+<Table divClass="relative overflow-x-auto">
   <TableSearch placeholder="Search" hoverable={true} bind:inputValue={searchTerm}>
     <TableHead>
-      <TableHeadCell>Product Name</TableHeadCell>
+      <TableHeadCell class="">Product Name</TableHeadCell>
       <TableHeadCell>Category</TableHeadCell>
       <TableHeadCell>Inventory</TableHeadCell>
-      <TableHeadCell>Price</TableHeadCell>
       <TableHeadCell>Size</TableHeadCell>
-      <TableHeadCell>ABV</TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
+      <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
       {#each search as product, row}
         <TableBodyRow on:click={() => rowControl(row)}>
           <TableBodyCell>{product.productName}</TableBodyCell>
@@ -98,9 +97,7 @@
               {/if}
             </span>
           </TableBodyCell>
-          <TableBodyCell>{money.format(product.productPricePerUnit)}</TableBodyCell>
           <TableBodyCell>{parseSize(product.productUnitSizeInMilliliters)}</TableBodyCell>
-          <TableBodyCell>{product.productProof === 0? 'N/A' : `${product.productProof / 2}%`}</TableBodyCell>
 
         </TableBodyRow>
         {#if openRow === row}

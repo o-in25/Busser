@@ -18,7 +18,6 @@
   import Placeholder from "$lib/components/Placeholder.svelte";
   import { goto, invalidateAll } from "$app/navigation";
   import { page } from '$app/stores';
-
   $: activeUrl = $page.url.pathname;
 
   export let data: LayoutData;
@@ -33,7 +32,6 @@
     }
   }
 </script>
-
 <Navbar color="form" class="mb-3">
   <NavBrand href="/">
     <img src={logo} class="me-3 h-12" alt="Flowbite Logo" />

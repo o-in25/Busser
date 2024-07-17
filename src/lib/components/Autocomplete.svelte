@@ -53,7 +53,7 @@
   </Input>
   {#if show}
   <div class="relative">
-    <Listgroup active class="absolute w-full max-h-44 overflow-y-auto">
+    <Listgroup active class="absolute w-full max-h-44 overflow-y-auto z-20">
       {#each search as button, name}
         <ListgroupItem on:click={handleClick}>{button.name}</ListgroupItem>
       {/each}

@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { Label, Checkbox, A, Button, Input, Listgroup, ListgroupItem } from "flowbite-svelte";
+  import { Label, Checkbox, A, Button, Input, Listgroup, ListgroupItem, InputAddon, NumberInput, GradientButton } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
-    import { onMount } from "svelte";
+  import { onMount } from "svelte";
+    import { DollarOutline, EditOutline, SearchOutline } from "flowbite-svelte-icons";
+  
   let buttons = [
     { name: 'Profile', mycustomfield: 'data1', current: true },
     { name: 'Settings', mycustomfield: 'data2' },
@@ -20,33 +22,43 @@
   const getValues = () => {
     console.log(cat)
   }
+  let price;
+  let size;
 
 </script>
 
-<form class="relative">
+<form class="relative" method="POST">
   <div class="grid gap-6 mb-6 md:grid-cols-2">
     <div>
       <Label for="first_name" class="mb-2">Name</Label>
       <Input type="text" id="first_name" placeholder="Plantation 3 Star" required />
     </div>
     <div class="w-full">
-      <!-- <Label for="last_name" class="mb-2">Category</Label>
-      <Input type="text" id="last_name" placeholder="Doe" required bind:value={searchTerm}/> -->
       <Autocomplete label="Category" placeholder="Whiskey" fetchUrl="/api/select" bind:value={cat}/>
-      <!-- <div class="relative">
-        <Listgroup active class="absolute w-full" >
-          {#each search as button, name}
-            <ListgroupItem>{button.name}</ListgroupItem>
-          {/each}
-          {#if !search.length}
-            <ListgroupItem disabled>No Results</ListgroupItem>
-          {/if}
-        </Listgroup>
-      </div> -->
     </div>
   </div>
-  <Checkbox class="mb-6 space-x-1 rtl:space-x-reverse" required>
-    I agree with the <A href="/" class="text-primary-700 dark:text-primary-600 hover:underline">terms and conditions</A>.
-  </Checkbox>
-  <Button on:click={getValues}>Submit</Button>
+  <div class="grid gap-6 mb-6 md:grid-cols-3">
+    <div>
+      <Label for="first_name" class="mb-2">Price</Label>
+      <Input let:props required>
+        <div slot="left" class="font-bold">$</div>
+        <input type="number" {...props} bind:value={price} />
+      </Input>
+    </div>
+    <div>
+      <Label for="first_name" class="mb-2">Size</Label>
+      <Input let:props required>
+        <input type="number" {...props} bind:value={size} />
+        <div slot="right" class="font-bold">mL</div>
+      </Input>
+    </div>
+        <div>
+      <Label for="first_name" class="mb-2">ABV</Label>
+      <Input let:props required>
+        <input type="number" {...props} bind:value={size} />
+        <div slot="right" class="font-bold">%</div>
+      </Input>
+    </div>
+  </div>
+    <GradientButton color="purpleToBlue" type="submit">Save</GradientButton>
 </form>
