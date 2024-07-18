@@ -79,12 +79,12 @@ export async function seedGallery(): Promise<GallerySeeding[]> {
 
 export async function getBaseSpirits(): Promise<string[]> {
   try {
-    let spirits = await db.table<any>('recipecategory')
+    let result = await db
+      .table<any>('recipecategory')
       .select('RecipeCategoryDescription')
-    spirits = marshal(spirits);
-    spirits = spirits.map(item => item.RecipeCategoryDescription);
-
-    return spirits;
+    result = marshal(result);
+    result = result.map(({ recipeCategoryDescription }) => recipeCategoryDescription);
+    return result;
   } catch(error: any) {
     console.error(error);
     return [];

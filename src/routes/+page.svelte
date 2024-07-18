@@ -6,6 +6,8 @@
   export let data: PageData;	
 
   const { gallery, spirits } = data.args;
+  console.log(spirits)
+
 </script>
 
 <Heading
@@ -24,5 +26,4 @@
     {/each}
   {/if}
 </div>
-
 <Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3" />
