@@ -90,27 +90,32 @@
 
 <div class="sm:hidden mt-20 group">
 <BottomNav position="fixed" navType="application" classInner="grid-cols-5" {activeUrl} outerClass="w-full z-50 border-gray-200 dark:bg-transparent backdrop-blur-xl">
-  <BottomNavItem btnName="Home" appBtnPosition="left" href="/" activeClass="dark:hover:bg-red-300">
-    <HomeSolid class="w-6 h-6 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-500" />
+  <BottomNavItem btnName="Home" appBtnPosition="left" href="/" activeClass="hover:bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 backdrop-blur-xl" exact={false}>
+    <HomeSolid class="w-6 h-6 mb-1 group-hover:text-gray-500 group-hover:dark:text-gray-400 text-primary-600 dark:text-primary-500" />
   </BottomNavItem>
-  <BottomNavItem btnName="Wallet" appBtnPosition="middle" href="/inventory" >
-    <WalletSolid class="w-6 h-6 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-500" />
+  <BottomNavItem btnName="Wallet" appBtnPosition="middle" href="/inventory" activeClass="hover:bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 backdrop-blur-xl">
+    <HomeSolid class="w-6 h-6 mb-1 group-hover:text-gray-500 group-hover:dark:text-gray-400 text-primary-600 dark:text-primary-500" />
   </BottomNavItem>
   <div class="flex items-center justify-center">
-    <BottomNavItem btnName="Create new item" appBtnPosition="middle" btnClass="inline-flex items-center justify-center w-10 h-10 font-medium bg-primary-600 rounded-full hover:bg-primary-700 group focus:ring-4 focus:ring-primary-300 focus:outline-none dark:focus:ring-primary-800">
+    <BottomNavItem btnName="Create new item" appBtnPosition="middle" btnClass="inline-flex items-center justify-center w-10 h-10 font-medium bg-gradient-to-r from-green-400 to-blue-500 rounded-full hover:bg-gradient-to-r from-green-400 to-blue-500 group focus:ring-4 focus:ring-primary-300 focus:outline-none dark:focus:ring-primary-800">
+    <HomeSolid class="w-6 h-6 mb-1 group-hover:text-gray-500 group-hover:dark:text-gray-400 text-primary-600 dark:text-primary-500" />
     </BottomNavItem>
   </div>
   <BottomNavItem btnName="Settings" appBtnPosition="middle">
-    <AdjustmentsVerticalOutline class="w-6 h-6 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-500" />
+    <HomeSolid class="w-6 h-6 mb-1 group-hover:text-gray-500 group-hover:dark:text-gray-400 text-primary-600 dark:text-primary-500" />
   </BottomNavItem>
   <BottomNavItem btnName="Profile" appBtnPosition="right">
-    <UserCircleSolid class="w-6 h-6 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-500" />
+    <HomeSolid class="w-6 h-6 mb-1 group-hover:text-gray-500 group-hover:dark:text-gray-400 text-primary-600 dark:text-primary-500" />
+
   </BottomNavItem>
 </BottomNav>
 </div>
 
 
-<style lang="sass">
+<style lang="scss">
 
+  .blurred {
+    @apply bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 backdrop-blur-xl
+  }
 
 </style>
