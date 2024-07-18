@@ -26,6 +26,8 @@
     import { HomeSolid, WalletSolid, AdjustmentsVerticalOutline, UserCircleSolid } from "flowbite-svelte-icons";
     import MobileNav from "$lib/components/MobileNav.svelte";
   $: activeUrl = $page.url.pathname;
+      import { ProgressBar } from "@prgm/sveltekit-progress-bar";
+
   let svgClass = `
     mb-1 
     text-gray-500 
@@ -110,35 +112,21 @@
 </div>
 
 <div class="container mx-auto p-4">
-<slot/>
+  <!-- <ProgressBar class="text-green-500" /> -->
+  <slot/>
 </div>
 
-<!-- <Footer footerType="logo">
-  <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-  <FooterCopyright by="Busser" />
-</Footer> -->
+<!-- desktop only -->
+<div class="hidden sm:block">
+  <Footer footerType="logo">
+    <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+    <FooterCopyright by="Busser" />
+  </Footer>
+</div>
 
+<!-- mobile only -->
 <div class="sm:hidden mt-20">
-    <MobileNav></MobileNav>
-<!-- <BottomNav {activeUrl} position="fixed" innerClass="grid grid-cols-3 h-full bot-nav" outerClass="w-full bg-transparent dark:bg-transparent backdrop-blur-xl border-none">
-  <BottomNavItem btnName="Home" href="/" class="bg-transparent dark:bg-transparent backdrop-blur-xl">
-    <HomeSolid class={activeUrl === '/' ? svgActiveClass : svgClass} />
-  </BottomNavItem>
-  <BottomNavItem btnName="Inventory" href="/inventory">
-    <WalletSolid class={activeUrl === '/inventory' ? svgActiveClass : svgClass} />
-  </BottomNavItem>
-  <BottomNavItem btnName="Settings" href="/settings">
-    <AdjustmentsVerticalOutline class={activeUrl === '/settings' ? svgActiveClass : svgClass} />
-  </BottomNavItem>
-
-</BottomNav> -->
+  <MobileNav/>
 </div>
 
 
-<style lang="scss">
-  .bot-nav {
-    a:hover {
-
-    }
-  }
-</style>

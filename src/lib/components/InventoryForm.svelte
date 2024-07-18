@@ -17,48 +17,50 @@
 
   const toggle = () => showGroup = showGroup;
 
-  let cat;
+  let categoryId;
 
   const getValues = () => {
-    console.log(cat)
+    // console.log(cat)
   }
   let price;
   let size;
 
 </script>
 
-<form class="relative" method="POST">
+<form class="relative" method="POST" action="?/add">
   <div class="grid gap-6 mb-6 md:grid-cols-2">
     <div>
-      <Label for="first_name" class="mb-2">Name</Label>
-      <Input type="text" id="first_name" placeholder="Plantation 3 Star" required />
+      <Label for="productName" class="mb-2">Name</Label>
+      <Input type="text" id="productName" placeholder="Plantation 3 Star" required />
     </div>
     <div class="w-full">
-      <Autocomplete label="Category" placeholder="Whiskey" fetchUrl="/api/select" bind:value={cat}/>
+      <Autocomplete label="Category" placeholder="Whiskey" fetchUrl="/api/select" bind:value={categoryId}/>
     </div>
   </div>
   <div class="grid gap-6 mb-6 md:grid-cols-3">
     <div>
-      <Label for="first_name" class="mb-2">Price</Label>
+      <Label for="productPricePerUnit" class="mb-2">Price</Label>
       <Input let:props required>
         <div slot="left" class="font-bold">$</div>
-        <input type="number" {...props} bind:value={price} />
+        <input name="productPricePerUnit" type="number" {...props} bind:value={price} />
       </Input>
     </div>
     <div>
-      <Label for="first_name" class="mb-2">Size</Label>
-      <Input let:props required>
-        <input type="number" {...props} bind:value={size} />
+      <Label for="size" class="mb-2">Size</Label>
+      <Input for="productUnitSizeInMilliliters" let:props required>
+        <input id="productUnitSizeInMilliliters" name="productUnitSizeInMilliliters" type="number" {...props} bind:value={size} />
         <div slot="right" class="font-bold">mL</div>
       </Input>
     </div>
-        <div>
-      <Label for="first_name" class="mb-2">ABV</Label>
-      <Input let:props required>
-        <input type="number" {...props} bind:value={size} />
+    <div>
+      <Label for="abv" class="mb-2">Proof</Label>
+      <Input for="productProof" let:props required>
+        <input id="productProof" name="productProof" type="number" {...props} bind:value={size} />
         <div slot="right" class="font-bold">%</div>
       </Input>
     </div>
   </div>
-    <GradientButton color="purpleToBlue" type="submit">Save</GradientButton>
+  <div class="w-full flex sm:block">
+    <GradientButton color="purple" type="submit" class="flex-grow mt-6" size="lg">Save</GradientButton>
+  </div>
 </form>

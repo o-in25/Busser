@@ -5,7 +5,6 @@
     import InventoryForm from '$lib/components/InventoryForm.svelte';
     import Breadcrumb from '$lib/components/Breadcrumb.svelte';
     import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
-    import RTable from '$lib/components/RTable.svelte';
     
     export let data: PageData;
 </script>
