@@ -24,10 +24,8 @@
   import { goto, invalidateAll } from "$app/navigation";
   import { page } from '$app/stores';
     import { HomeSolid, WalletSolid, AdjustmentsVerticalOutline, UserCircleSolid } from "flowbite-svelte-icons";
+    import MobileNav from "$lib/components/MobileNav.svelte";
   $: activeUrl = $page.url.pathname;
-  $: {
-    activeUrl = '/'
-  }
   let svgClass = `
     mb-1 
     text-gray-500 
@@ -53,6 +51,10 @@
     text-primary-900 
     dark:text-primary-900"
   `;
+
+
+  
+  let currentTab = `group inline-flex flex-col items-center justify-center px-5 hover:bg-red-50 dark:hover:bg-red-800 group text-primary-700 dark:text-primary-700 hover:text-primary-900 dark:hover:text-primary-900`
   
   
   export let data: LayoutData;
@@ -108,8 +110,7 @@
 </div>
 
 <div class="container mx-auto p-4">
-  <h1 class="text-white">HELLLLOOOO {activeUrl}</h1>
-  <slot/>
+<slot/>
 </div>
 
 <!-- <Footer footerType="logo">
@@ -118,8 +119,8 @@
 </Footer> -->
 
 <div class="sm:hidden mt-20">
-  {activeUrl}
-<BottomNav {activeUrl} position="fixed" classInner="grid-cols-3" outerClass="w-full bg-transparent dark:bg-transparent backdrop-blur-xl border-none">
+    <MobileNav></MobileNav>
+<!-- <BottomNav {activeUrl} position="fixed" innerClass="grid grid-cols-3 h-full bot-nav" outerClass="w-full bg-transparent dark:bg-transparent backdrop-blur-xl border-none">
   <BottomNavItem btnName="Home" href="/" class="bg-transparent dark:bg-transparent backdrop-blur-xl">
     <HomeSolid class={activeUrl === '/' ? svgActiveClass : svgClass} />
   </BottomNavItem>
@@ -130,14 +131,14 @@
     <AdjustmentsVerticalOutline class={activeUrl === '/settings' ? svgActiveClass : svgClass} />
   </BottomNavItem>
 
-</BottomNav>
+</BottomNav> -->
 </div>
 
 
 <style lang="scss">
+  .bot-nav {
+    a:hover {
 
-  .blurred {
-    @apply bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 backdrop-blur-xl
+    }
   }
-
 </style>
