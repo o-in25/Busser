@@ -68,3 +68,18 @@ export type SelectOption = {
   name: string,
   value: string | number
 }
+
+export enum LogLevel {
+  DEBUG = 1,
+  INFO = 2,
+  WARNING = 3,
+  ERROR = 4,
+  CRITICAL = 5
+}
+
+export type Log = {
+  logLevelId: LogLevel
+  logMessage: string,
+  logDate: Date | string,
+  logStackTrace: string | null
+}
