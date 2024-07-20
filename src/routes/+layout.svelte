@@ -67,7 +67,7 @@
     });
     if (response.ok) {
       await invalidateAll();
-      await goto(`/login`);
+      await goto(`/`);
     }
   }
 </script>
@@ -125,8 +125,10 @@
 </div>
 
 <!-- mobile only -->
-<div class="sm:hidden mt-20">
-  <MobileNav/>
-</div>
+{#if data.user}
+  <div class="sm:hidden mt-20">
+    <MobileNav/>
+  </div>
+{/if}
 
 

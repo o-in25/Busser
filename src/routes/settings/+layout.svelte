@@ -1,12 +1,9 @@
 <script lang="ts">
-  import { Label, Heading } from "flowbite-svelte";
   import { UsersOutline, AdjustmentsVerticalSolid, UserSettingsOutline } from "flowbite-svelte-icons";
-  import { DarkMode } from "flowbite-svelte";
   import { page } from "$app/stores";
-    $: activeUrl$ = $page.url.pathname;
-
-    let activeClass = 'inline-block text-sm font-medium text-center disabled:cursor-not-allowed p-4 text-primary-600 bg-gray-100 rounded-t-lg dark:bg-gray-800 dark:text-primary-500';
-    let defaultClass = 'inline-block text-sm font-medium text-center disabled:cursor-not-allowed p-4 text-gray-500 rounded-t-lg hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300'
+  $: activeUrl$ = $page.url.pathname;
+  let activeClass = 'inline-block text-sm font-medium text-center disabled:cursor-not-allowed p-4 text-primary-600 bg-gray-100 rounded-t-lg dark:bg-gray-800 dark:text-primary-500';
+  let defaultClass = 'inline-block text-sm font-medium text-center disabled:cursor-not-allowed p-4 text-gray-500 rounded-t-lg hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300'
 </script>
 
 <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
@@ -25,7 +22,7 @@
       </a>
    </li>
   <li class="group" role="presentation">
-      <a href="/settings/users" type="button" role="tab" class="{activeUrl$.includes('account')? activeClass : defaultClass}" >
+      <a href="/settings/account" type="button" role="tab" class="{activeUrl$.includes('account')? activeClass : defaultClass}" >
          <div class="flex items-center gap-2">
           <UserSettingsOutline size="md" />Account
          </div>

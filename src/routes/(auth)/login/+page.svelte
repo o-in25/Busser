@@ -1,7 +1,8 @@
 <script lang="ts">
 	  import { enhance } from '$app/forms';
-    import { Card, Button, Label, Input, Checkbox } from 'flowbite-svelte';
+    import { Card, Button, Label, Input, Checkbox, GradientButton, Span, Alert } from 'flowbite-svelte';
     import type { PageData, ActionData } from './$types';
+    import { ArrowLeftToBracketOutline, ExclamationCircleSolid, InfoCircleSolid } from 'flowbite-svelte-icons';
     export let data: PageData;
 	  export let form: ActionData; 
 
@@ -10,7 +11,7 @@
 <div class="flex justify-center p-10">
   <Card>
     <form class="flex flex-col space-y-6" method="POST" action="?/login" use:enhance>
-      <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign in</h3>
+      <h3 class="text-xl font-medium text-gray-900 dark:text-white">Log in</h3>
       <Label class="space-y-2">
         <span>Username</span>
         <Input name="username" value={form?.username ?? ''} required />
@@ -23,14 +24,20 @@
         <Checkbox>Remember me</Checkbox>
         <a href="/" class="ms-auto text-sm text-primary-700 hover:underline dark:text-primary-500"> Lost password? </a>
       </div> -->
-      <Button type="submit" class="w-full">Sign in</Button>
+      <div class="!mt-8">
+        <GradientButton color="purple" type="submit" size="lg" class="w-full">
+          <ArrowLeftToBracketOutline/>
+          <Span class="pl-1">Log In</Span>
+        </GradientButton>
+      </div>
       <!-- <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
         Not registered? <a href="/" class="text-primary-700 hover:underline dark:text-primary-500"> Create account </a>
       </div> -->
       {#if form?.err}
-        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-          <span class="font-medium">Username or password is incorrect.</span>
-        </div>
+        <Alert border color="red">
+          <ExclamationCircleSolid slot="icon" class="w-5 h-5" />
+          Username or password is incorrect.
+        </Alert>
       {/if}
     </form>
   </Card>

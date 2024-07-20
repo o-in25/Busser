@@ -13,7 +13,7 @@ export type User = {
     userId?: string,
     username?: string,
     email?: string;
-    lastActivityDate?: Date
+    lastActivityDate?: Date | string
 };
 
 export type Product = {

@@ -1,6 +1,5 @@
 <script lang="ts">
     import { Heading } from 'flowbite-svelte';
-    import { AdjustmentsVerticalSolid, UsersOutline } from 'flowbite-svelte-icons';
     import type { PageData } from './$types';
     import UserTable from '$lib/components/UserTable.svelte';
     

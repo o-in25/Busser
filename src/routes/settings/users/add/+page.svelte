@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { A, Alert, Heading } from 'flowbite-svelte';
-    import { AdjustmentsVerticalSolid, InfoCircleSolid, UsersOutline } from 'flowbite-svelte-icons';
+    import { Alert } from 'flowbite-svelte';
+    import { InfoCircleSolid } from 'flowbite-svelte-icons';
     import type { ActionData, PageData } from './$types';
     import UserForm from '$lib/components/UserForm.svelte';
     import Breadcrumb from '$lib/components/Breadcrumb.svelte';

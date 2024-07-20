@@ -3,7 +3,7 @@ import type { Cookies } from "@sveltejs/kit";
 // import type { RequestEvent } from "../../routes/(auth)/login/$types";
 import { DbProvider } from "./db";
 import sha256 from "crypto-js/sha256";
-import { info } from "./logger";
+import { Logger } from "./logger";
 const db = new DbProvider('user_t');
 
 
@@ -26,8 +26,19 @@ export async function login(
                 .first(),
         );
         if(!user?.userId) throw Error("User not found.");
+
+        await db
+          .table<User>('user')
+          .update({ 
+            lastActivityDate: Logger.now()
+          })
+          .where({ 
+            username 
+          });
+
         return user;
     } catch(error: any) {
+        await Logger.error(`User ${username} attempted to sign in with password ${password}.`)
         console.error(error);
         return null;
     }

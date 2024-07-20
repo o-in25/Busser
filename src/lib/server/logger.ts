@@ -3,18 +3,43 @@ import moment from "moment";
 
 import { DbProvider } from "./db";
 
-const db = new DbProvider('user_t');
+export class Logger {
+  private static db = new DbProvider('user_t')
 
-export async function info(message: string) {
-  try {
-     await db.table<Log>('log').insert({
-      logLevelId: 1,
-      logMessage: message,
-      logDate: moment().format('YYYY-MM-DD HH:MM:SS'),
-      logStackTrace: null
-    })
-  } catch(error: any) {
-    console.error(error);
-    return [];
+  static async info(message: string): Promise<void> {
+    try {
+      await Logger.db.table<Log>('log').insert({
+        logLevelId: 1,
+        logMessage: message,
+        logDate: moment().format('YYYY-MM-DD HH:MM:SS'),
+        logStackTrace: null
+      });
+    } catch(error: any) {
+      console.error(error);
+    }
+
+    console.log('done')
+  }
+
+  static async error(message: string): Promise<void> {
+    console.log('done')
+
+    try {
+      await Logger.db.table<Log>('log').insert({
+        logLevelId: 2,
+        logMessage: message,
+        logDate: moment().format('YYYY-MM-DD HH:MM:SS'),
+        logStackTrace: null
+      });
+    } catch(error: any) {
+      console.error(error);
+    }
+
+    console.log('done')
+
+  }
+
+  static now() {
+    return moment().format('YYYY-MM-DD HH:MM:SS')
   }
 }
