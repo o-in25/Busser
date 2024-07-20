@@ -6,6 +6,7 @@
   export let value;
   export let fetchUrl;
   export let placeholder = '';
+  export let name;
 
   let items = [
     // { name: 'Profile', mycustomfield: 'data1', current: true },
@@ -25,7 +26,9 @@
   let show = false;
   $: selectValue = '';
   $: search = items.filter(({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1);
-  $: value = selectValue;
+  $: value = items.find(({ name }) => name.toLowerCase() === selectValue.toLocaleLowerCase())?.value || 0;
+
+
   const showAutocomplete = () => show = true;
   // theres a race condition b/w onblur and onclick, so we timeout 
   const hideAutocomplete = () => setTimeout(() => {
@@ -44,8 +47,9 @@
 </script>
 <div class="w-full">
   <slot> </slot>
-  <Label for="last_name" class="mb-2">{label}</Label>
-  <Input type="text" id="last_name" placeholder="{placeholder}"
+  <Label for="{name}" class="mb-2">{label} {value}</Label>
+  <input  id="{name}" {name} class="hidden" bind:value={value}>
+  <Input type="text" placeholder="{placeholder}"
     on:blur={hideAutocomplete}
     on:focus={showAutocomplete} 
     bind:value={selectValue}

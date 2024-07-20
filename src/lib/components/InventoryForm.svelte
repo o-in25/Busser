@@ -17,13 +17,14 @@
 
   const toggle = () => showGroup = showGroup;
 
-  let categoryId;
 
   const getValues = () => {
     // console.log(cat)
   }
-  let price;
-  let size;
+  let productPricePerUnit;
+  let productUnitSizeInMilliliters;
+  let productProof;
+  let categoryId;
 
 </script>
 
@@ -31,10 +32,10 @@
   <div class="grid gap-6 mb-6 md:grid-cols-2">
     <div>
       <Label for="productName" class="mb-2">Name</Label>
-      <Input type="text" id="productName" placeholder="Plantation 3 Star" required />
+      <Input type="text" id="productName" name="productName" placeholder="Plantation 3 Star" required />
     </div>
     <div class="w-full">
-      <Autocomplete label="Category" placeholder="Whiskey" fetchUrl="/api/select" bind:value={categoryId}/>
+      <Autocomplete label="Category" placeholder="Whiskey" fetchUrl="/api/select" name="categoryId" bind:value={categoryId}/>
     </div>
   </div>
   <div class="grid gap-6 mb-6 md:grid-cols-3">
@@ -42,20 +43,20 @@
       <Label for="productPricePerUnit" class="mb-2">Price</Label>
       <Input let:props required>
         <div slot="left" class="font-bold">$</div>
-        <input name="productPricePerUnit" type="number" {...props} bind:value={price} />
+        <input name="productPricePerUnit" type="number" {...props} bind:value={productPricePerUnit} />
       </Input>
     </div>
     <div>
       <Label for="size" class="mb-2">Size</Label>
       <Input for="productUnitSizeInMilliliters" let:props required>
-        <input id="productUnitSizeInMilliliters" name="productUnitSizeInMilliliters" type="number" {...props} bind:value={size} />
+        <input id="productUnitSizeInMilliliters" name="productUnitSizeInMilliliters" type="number" {...props} bind:value={productUnitSizeInMilliliters} />
         <div slot="right" class="font-bold">mL</div>
       </Input>
     </div>
     <div>
       <Label for="abv" class="mb-2">Proof</Label>
       <Input for="productProof" let:props required>
-        <input id="productProof" name="productProof" type="number" {...props} bind:value={size} />
+        <input id="productProof" name="productProof" type="number"  max="200" {...props} bind:value={productProof}/>
         <div slot="right" class="font-bold">%</div>
       </Input>
     </div>

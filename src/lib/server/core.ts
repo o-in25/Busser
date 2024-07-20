@@ -2,20 +2,24 @@
 import type { Category, GallerySeeding, PaginationResult, Product, SelectOption } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
+import * as changeCase from "change-case";
 
 const db = new DbProvider('app_t');
 //attachPaginate();
 
-const marshal = <T>(obj: any) => {
+const marshal = <T>(obj: any, fn: Function = camelCase) => {
   if(!_.isObject(obj)) return obj as T ;
   if(_.isArray(obj)) return obj.map((v) => marshal<T>(v));
   return _.reduce(obj, (arr, curr, acc) => {
     return {
       ...arr,
-      [_.camelCase(acc)]: marshal<T>(curr)
+      [fn(acc)]: marshal<T>(curr)
     };
   }, {});
 };
+
+const pascalCase = (str: string) => changeCase.pascalCase(str)
+const camelCase = (str: string) => changeCase.camelCase(str)
 
 const paginationData = {
   total: 0,
@@ -106,3 +110,35 @@ export async function categorySelect(): Promise<SelectOption[]> {
     return [];
   }
 }
+
+export async function addToInventory(product: Product) {
+  try {
+    let insert = marshal(product, pascalCase);
+    const result = await db.table('product').insert({ 
+      ...insert,
+      SupplierId: 1,
+      ProductInStockQuantity: 1
+    });
+    console.log(result)
+  } catch(error: any) {
+    console.error(error);
+
+  }
+}
+
+// export async function categorySelect(categoryName: string): Promise<Number> {
+//   try {
+//     let result = await db.table('category')
+//       .select('CategoryId')
+//       .where({ Categ});
+//     let categories: Category[] = marshal<Category>(result);
+//     let selectOptions: SelectOption[] = categories.map(({ categoryId, categoryName }) => ({
+//       name: categoryName,
+//       value: categoryId
+//     }));
+//     return selectOptions;
+//   } catch(error: any) {
+//     console.error(error);
+//     return [];
+//   }
+// }

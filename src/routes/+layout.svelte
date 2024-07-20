@@ -13,52 +13,14 @@
     NavUl,
     Footer,
     FooterCopyright,
-    FooterLink,
-    FooterLinkGroup,
-    FooterBrand,
-    BottomNav,
-    BottomNavItem,
   } from "flowbite-svelte";
   import logo from "$lib/assets/logo-nav.png";
   import Placeholder from "$lib/components/Placeholder.svelte";
   import { goto, invalidateAll } from "$app/navigation";
-  import { page } from '$app/stores';
-    import { HomeSolid, WalletSolid, AdjustmentsVerticalOutline, UserCircleSolid } from "flowbite-svelte-icons";
-    import MobileNav from "$lib/components/MobileNav.svelte";
+  import { page } from "$app/stores";
+  import MobileNav from "$lib/components/MobileNav.svelte";
   $: activeUrl = $page.url.pathname;
-      import { ProgressBar } from "@prgm/sveltekit-progress-bar";
 
-  let svgClass = `
-    mb-1 
-    text-gray-500 
-    dark:text-gray-400 
-    group-hover:text-gray-600 
-    dark:group-hover:text-gray-500
-  `;
-  let svgActiveClass = `
-    mb-1 
-    text-primary-500 
-    dark:text-primary-500 
-    group-hover:text-primary-700 
-    dark:group-hover:text-primary-700
-  `;
-
-  //dark:hover:bg-gray-800 group 
-  let oneTime = `
-    hover:bg-gray-50 
-    dark:bg-gray-800 
-    text-primary-700 
-
-    dark:text-primary-700 
-    text-primary-900 
-    dark:text-primary-900"
-  `;
-
-
-  
-  let currentTab = `group inline-flex flex-col items-center justify-center px-5 hover:bg-red-50 dark:hover:bg-red-800 group text-primary-700 dark:text-primary-700 hover:text-primary-900 dark:hover:text-primary-900`
-  
-  
   export let data: LayoutData;
 
   async function logout() {
@@ -71,6 +33,7 @@
     }
   }
 </script>
+
 <div class="hidden sm:block">
   <Navbar color="form" class="mb-3">
     <NavBrand href="/">
@@ -102,9 +65,9 @@
     </Dropdown>
     {#if data.user}
       <NavUl {activeUrl}>
-          <NavLi href="/" active>Home</NavLi>
-          <NavLi href="/inventory">Inventory</NavLi>
-          <!-- <NavLi href="/spirits">Spirits</NavLi>
+        <NavLi href="/" active>Home</NavLi>
+        <NavLi href="/inventory">Inventory</NavLi>
+        <!-- <NavLi href="/spirits">Spirits</NavLi>
           <NavLi href="/tools">Tools</NavLi> -->
       </NavUl>
     {/if}
@@ -113,7 +76,7 @@
 
 <div class="container mx-auto p-4">
   <!-- <ProgressBar class="text-green-500" /> -->
-  <slot/>
+  <slot />
 </div>
 
 <!-- desktop only -->
@@ -125,10 +88,8 @@
 </div>
 
 <!-- mobile only -->
- {#if data.user}
+{#if data.user}
   <div class="sm:hidden mt-20">
-    <MobileNav {activeUrl}/>
+    <MobileNav {activeUrl} />
   </div>
 {/if}
-
-

@@ -17,18 +17,18 @@ export type User = {
 };
 
 export type Product = {
-  productId: number,
+  productId?: number,
   categoryId: number,
-  supplierId: number,
+  supplierId?: number,
   productName: string,
   productInStockQuantity: number,
   productPricePerUnit: number,
   productUnitSizeInMilliliters: number,
   productProof: number,
-  productDetailId: number,
-  productImageUrl: string,
-  categoryName: string,
-  categoryDescription: string;
+  productDetailId?: number,
+  productImageUrl?: string,
+  categoryName?: string,
+  categoryDescription?: string;
 };
 
 export type Category = {
