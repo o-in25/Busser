@@ -13,22 +13,22 @@ export type User = {
     userId?: string,
     username?: string,
     email?: string;
-    lastActivityDate?: Date
+    lastActivityDate?: Date | string
 };
 
 export type Product = {
-  productId: number,
+  productId?: number,
   categoryId: number,
-  supplierId: number,
+  supplierId?: number,
   productName: string,
   productInStockQuantity: number,
   productPricePerUnit: number,
   productUnitSizeInMilliliters: number,
   productProof: number,
-  productDetailId: number,
-  productImageUrl: string,
-  categoryName: string,
-  categoryDescription: string;
+  productDetailId?: number,
+  productImageUrl?: string,
+  categoryName?: string,
+  categoryDescription?: string;
 };
 
 export type Category = {
@@ -67,4 +67,19 @@ export type Page = {
 export type SelectOption = {
   name: string,
   value: string | number
+}
+
+export enum LogLevel {
+  DEBUG = 1,
+  INFO = 2,
+  WARNING = 3,
+  ERROR = 4,
+  CRITICAL = 5
+}
+
+export type Log = {
+  logLevelId: LogLevel
+  logMessage: string,
+  logDate: Date | string,
+  logStackTrace: string | null
 }

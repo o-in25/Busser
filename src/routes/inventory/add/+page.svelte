@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Heading } from 'flowbite-svelte';
+    import { Heading, P } from 'flowbite-svelte';
     import type { PageData } from './$types';
     import { AngleRightOutline } from 'flowbite-svelte-icons';
     import InventoryForm from '$lib/components/InventoryForm.svelte';
@@ -18,6 +18,7 @@
         <Heading tag="h4" class="mb-4 flex flex-row justify-between">
           Add To Inventory
         </Heading>
+
       </div>
       <InventoryForm/>
     </div>

@@ -19,7 +19,7 @@
           Inventory
         </Heading>
         <ButtonGroup>
-          <GradientButton color="purpleToBlue" href="/inventory/add" size="xs" class="h-8"><PlusOutline/></GradientButton>
+          <GradientButton color="purple" href="/inventory/add" size="lg" class="h-8"><PlusOutline/></GradientButton>
         </ButtonGroup>
       </div>
       <InventoryTable products={result.data} paginationData={result.pagination}></InventoryTable>

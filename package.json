@@ -10,6 +10,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"devDependencies": {
+		"@prgm/sveltekit-progress-bar": "^2.0.0",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-node": "^5.0.1",
 		"@sveltejs/adapter-vercel": "^5.4.1",
@@ -35,8 +36,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@automapper/core": "^8.8.1",
-		"@automapper/pojos": "^8.8.1",
+		"change-case": "^5.4.4",
 		"crypto-js": "^4.2.0",
 		"fast-json-stringify": "^5.15.0",
 		"http-status-codes": "^2.3.0",

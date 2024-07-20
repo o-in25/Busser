@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { Label, Checkbox, A, Button, Input, Listgroup, ListgroupItem } from "flowbite-svelte";
+  import { Label, Checkbox, A, Button, Input, Listgroup, ListgroupItem, InputAddon, NumberInput, GradientButton } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
-    import { onMount } from "svelte";
+  import { onMount } from "svelte";
+    import { DollarOutline, EditOutline, SearchOutline } from "flowbite-svelte-icons";
+  
   let buttons = [
     { name: 'Profile', mycustomfield: 'data1', current: true },
     { name: 'Settings', mycustomfield: 'data2' },
@@ -15,38 +17,51 @@
 
   const toggle = () => showGroup = showGroup;
 
-  let cat;
 
   const getValues = () => {
-    console.log(cat)
+    // console.log(cat)
   }
+  let productPricePerUnit;
+  let productUnitSizeInMilliliters;
+  let productProof;
+  let categoryId;
 
 </script>
 
-<form class="relative">
+<form class="relative" method="POST" action="?/add">
   <div class="grid gap-6 mb-6 md:grid-cols-2">
     <div>
-      <Label for="first_name" class="mb-2">Name</Label>
-      <Input type="text" id="first_name" placeholder="Plantation 3 Star" required />
+      <Label for="productName" class="mb-2">Name</Label>
+      <Input type="text" id="productName" name="productName" placeholder="Plantation 3 Star" required />
     </div>
     <div class="w-full">
-      <!-- <Label for="last_name" class="mb-2">Category</Label>
-      <Input type="text" id="last_name" placeholder="Doe" required bind:value={searchTerm}/> -->
-      <Autocomplete label="Category" placeholder="Whiskey" fetchUrl="/api/select" bind:value={cat}/>
-      <!-- <div class="relative">
-        <Listgroup active class="absolute w-full" >
-          {#each search as button, name}
-            <ListgroupItem>{button.name}</ListgroupItem>
-          {/each}
-          {#if !search.length}
-            <ListgroupItem disabled>No Results</ListgroupItem>
-          {/if}
-        </Listgroup>
-      </div> -->
+      <Autocomplete label="Category" placeholder="Whiskey" fetchUrl="/api/select" name="categoryId" bind:value={categoryId}/>
     </div>
   </div>
-  <Checkbox class="mb-6 space-x-1 rtl:space-x-reverse" required>
-    I agree with the <A href="/" class="text-primary-700 dark:text-primary-600 hover:underline">terms and conditions</A>.
-  </Checkbox>
-  <Button on:click={getValues}>Submit</Button>
+  <div class="grid gap-6 mb-6 md:grid-cols-3">
+    <div>
+      <Label for="productPricePerUnit" class="mb-2">Price</Label>
+      <Input let:props required>
+        <div slot="left" class="font-bold">$</div>
+        <input name="productPricePerUnit" type="number" {...props} bind:value={productPricePerUnit} />
+      </Input>
+    </div>
+    <div>
+      <Label for="size" class="mb-2">Size</Label>
+      <Input for="productUnitSizeInMilliliters" let:props required>
+        <input id="productUnitSizeInMilliliters" name="productUnitSizeInMilliliters" type="number" {...props} bind:value={productUnitSizeInMilliliters} />
+        <div slot="right" class="font-bold">mL</div>
+      </Input>
+    </div>
+    <div>
+      <Label for="abv" class="mb-2">Proof</Label>
+      <Input for="productProof" let:props required>
+        <input id="productProof" name="productProof" type="number"  max="200" {...props} bind:value={productProof}/>
+        <div slot="right" class="font-bold">%</div>
+      </Input>
+    </div>
+  </div>
+  <div class="w-full flex sm:block">
+    <GradientButton color="purple" type="submit" class="flex-grow mt-6" size="lg">Save</GradientButton>
+  </div>
 </form>
