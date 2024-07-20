@@ -125,9 +125,9 @@
 </div>
 
 <!-- mobile only -->
-{#if data.user}
+ {#if data.user}
   <div class="sm:hidden mt-20">
-    <MobileNav/>
+    <MobileNav {activeUrl}/>
   </div>
 {/if}
 
