@@ -9,8 +9,8 @@
 
   let styles = {
     a: {
-      active: "bg-white dark:bg-gray-800",
-      inactive: "bg-gray-50 dark:bg-gray-800",
+      active: "bg-white dark:bg-gray-900",
+      inactive: "bg-gray-50 dark:bg-gray-900",
     },
     span: {
       active: "text-primary-600 dark:text-primary-500",
@@ -25,8 +25,8 @@
 
 <div
   class="fixed w-full
-  bg-gray-800
-  dark:bg-gray-800
+  bg-gray-900
+  dark:bg-gray-900
   border-none bottom-0 start-0 h-16 border-t">
   <div class="grid h-full max-w-lg mx-auto grid-cols-3 bot-nav">
     <a

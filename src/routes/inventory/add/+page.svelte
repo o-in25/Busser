@@ -12,18 +12,10 @@
 <Breadcrumb name="Inventory" href="/inventory">
   <BreadcrumbItem name="Add To Inventory"></BreadcrumbItem>
 </Breadcrumb>
-<div class="px-4 pb-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
-  <div class="text-sm text-gray-500 dark:text-gray-400">
-      <div class="flex justify-end">
-        <Heading tag="h4" class="mb-4 flex flex-row justify-between">
-          Add To Inventory
-        </Heading>
+<Heading tag="h4" class="mb-4 flex flex-row justify-between">
+  Inventory
+</Heading>
 
-      </div>
-      <InventoryForm action={'edit'}/>
-    </div>
+<div class="px-4 py-2 md:py-4">
+  <InventoryForm action={'add'}/>
 </div>
-
-<style lang="scss">
-
-</style>

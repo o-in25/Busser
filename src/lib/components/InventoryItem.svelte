@@ -16,8 +16,10 @@
   import {
     ArrowRightOutline,
     EditOutline,
+    EditSolid,
     TrashBinOutline,
   } from "flowbite-svelte-icons";
+  import FancyButton from "./FancyButton.svelte";
   export let product: Product;
 
   let headerLabel = {
@@ -162,8 +164,6 @@
     return `${ml / 1000} L`;
   };
 
-  
-
   const { ratings, ratings2, desc1, desc2, style } = fakeRatings();
 </script>
 
@@ -171,7 +171,7 @@
 {#if product}
   <div class="space-y-2 text-wrap w-full">
     <!-- desktop only -->
-    <div class="hidden sm:flex sm:flex-auto sm:justify-center grow">
+    <div class="hidden sm:py-4 md:py-6 sm:flex sm:flex-auto sm:justify-center grow">
       <Card
         img={product.productImageUrl}
         horizontal
@@ -196,9 +196,9 @@
           </div>
 
           <div class="w-40">
-            <GradientButton outline color="purpleToBlue" size="md" href="/inventory/{product.productId}/edit">
-              <EditOutline class="mr-1"/>Edit
-            </GradientButton>
+            <FancyButton href="/inventory/{product.productId}/edit">
+              <EditSolid class="mr-1" />Edit
+            </FancyButton>
           </div>
         </div>
       </Card>
@@ -225,15 +225,11 @@
               {ratings2} />
           </div>
           <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
-          <GradientButton
-            outline
-            color="purpleToBlue"
-            size="lg"
-            class="w-full my-4"
-            href="/inventory/{product.productId}/edit"
-            >
-            <EditOutline class="mr-1" />Edit
-          </GradientButton>
+          <div class="gost">
+            <FancyButton href="/inventory/{product.productId}/edit">
+              <EditSolid class="mr-1" />Edit
+            </FancyButton>
+          </div>
         </div>
       </Card>
     </div>
@@ -254,4 +250,5 @@
       width: 685px;
     }
   }
+
 </style>

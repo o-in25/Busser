@@ -75,7 +75,7 @@
     {/if}
   </Navbar>
 </div>
-   <ProgressBar class="text-green-500" />
+   <ProgressBar class="text-purple-600" />
 
 <div class="container mx-auto p-4">
   <!-- <ProgressBar class="text-green-500" /> -->
