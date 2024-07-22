@@ -1,10 +1,9 @@
 <script lang="ts">
-    import { Heading, P } from 'flowbite-svelte';
-    import type { PageData } from './$types';
-    import { AngleRightOutline } from 'flowbite-svelte-icons';
-    import InventoryForm from '$lib/components/InventoryForm.svelte';
     import Breadcrumb from '$lib/components/Breadcrumb.svelte';
+    import { Heading } from 'flowbite-svelte';
+    import type { PageData } from './$types';
     import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
+    import InventoryForm from '$lib/components/InventoryForm.svelte';
     
     export let data: PageData;
 </script>
@@ -16,11 +15,11 @@
   <div class="text-sm text-gray-500 dark:text-gray-400">
       <div class="flex justify-end">
         <Heading tag="h4" class="mb-4 flex flex-row justify-between">
-          Add To Inventory
+          Add To Inventory {data.args.product?.productId}
         </Heading>
 
       </div>
-      <InventoryForm action={'edit'}/>
+      <InventoryForm action="edit" product={data.args.product}/>
     </div>
 </div>
 

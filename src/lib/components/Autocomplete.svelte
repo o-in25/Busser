@@ -7,7 +7,7 @@
   export let fetchUrl;
   export let placeholder = '';
   export let name;
-
+  export let key;
   let items = [
     // { name: 'Profile', mycustomfield: 'data1', current: true },
     // { name: 'Settings', mycustomfield: 'data2' },
@@ -21,10 +21,11 @@
     });
     const selectOptions = await response.json();
     items = selectOptions;
+
   })
 
   let show = false;
-  $: selectValue = '';
+  $: selectValue = key || '';
   $: search = items.filter(({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1);
   $: value = items.find(({ name }) => name.toLowerCase() === selectValue.toLocaleLowerCase())?.value || 0;
 
@@ -47,7 +48,7 @@
 </script>
 <div class="w-full">
   <slot> </slot>
-  <Label for="{name}" class="mb-2">{label} {value}</Label>
+  <Label for="{name}" class="mb-2">{label}</Label>
   <input  id="{name}" {name} class="hidden" bind:value={value}>
   <Input type="text" placeholder="{placeholder}"
     on:blur={hideAutocomplete}

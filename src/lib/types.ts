@@ -83,3 +83,5 @@ export type Log = {
   logDate: Date | string,
   logStackTrace: string | null
 }
+
+export type ComponentAction = 'add' | 'edit';

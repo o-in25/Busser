@@ -162,6 +162,8 @@
     return `${ml / 1000} L`;
   };
 
+  
+
   const { ratings, ratings2, desc1, desc2, style } = fakeRatings();
 </script>
 
@@ -194,8 +196,8 @@
           </div>
 
           <div class="w-40">
-            <GradientButton outline color="purpleToBlue" size="md">
-              <EditOutline class="mr-1" />Edit
+            <GradientButton outline color="purpleToBlue" size="md" href="/inventory/{product.productId}/edit">
+              <EditOutline class="mr-1"/>Edit
             </GradientButton>
           </div>
         </div>
@@ -227,7 +229,9 @@
             outline
             color="purpleToBlue"
             size="lg"
-            class="w-full my-4">
+            class="w-full my-4"
+            href="/inventory/{product.productId}/edit"
+            >
             <EditOutline class="mr-1" />Edit
           </GradientButton>
         </div>
