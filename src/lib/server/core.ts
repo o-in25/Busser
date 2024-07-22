@@ -126,6 +126,39 @@ export async function addToInventory(product: Product) {
   }
 }
 
+export async function searchInventory(search: string) {
+  try {
+    let data = await db.table('product')
+      .select([
+        'product.productId',
+        'product.supplierId',
+        'product.productName',
+        'product.productPricePerUnit',
+        'product.productInStockQuantity',
+        'product.productUnitSizeInMilliliters',
+        'product.productProof',
+        'category.categoryId',
+        'category.categoryName',
+        'category.categoryDescription',
+        'productdetail.productImageUrl',
+        'productdetail.productDetailId',
+      ])
+      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
+      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
+      .where('product.productName', 'like', `%${search}%`)
+    let result: Product[] = marshal<Product[]>(data);
+    // const result: PaginationResult<Product[]> = { data, pagination };
+
+    return result;
+  } catch(error: any) {
+    console.error(error);
+    return {
+      data: [],
+      pagination: paginationData
+    };
+  }
+}
+
 // export async function categorySelect(categoryName: string): Promise<Number> {
 //   try {
 //     let result = await db.table('category')

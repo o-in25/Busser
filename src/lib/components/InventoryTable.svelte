@@ -47,7 +47,8 @@
       }))
   }
 
-  $: search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
+  $: search = products;
+  // $: search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
   $: activeUrl = $page.url.searchParams.get('page');
   $: pages = paginate(paginationData);
   $: {
@@ -84,10 +85,18 @@
   //   search = products.filter(({ productName }) => productName.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1)
   // })
 
+  const handleSearch = async (value: string) => {
+    let data = await fetch(`/api/inventory?name=${value}`);
+    let result = await data.json();
+    console.log('asdsd')
+    return result
+  }
+
   const handleInput = ({ target }) => {
-    setTimeout(() => {
+    setTimeout(async () => {
       searchTerm = target.value;
-      search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
+      const { result } = await handleSearch(searchTerm)
+      search = result;
     }, 300);
   }
 </script> 
