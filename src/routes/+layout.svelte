@@ -19,6 +19,8 @@
   import { goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/stores";
   import MobileNav from "$lib/components/MobileNav.svelte";
+      import { ProgressBar } from "@prgm/sveltekit-progress-bar";
+
   $: activeUrl = $page.url.pathname;
 
   export let data: LayoutData;
@@ -73,6 +75,7 @@
     {/if}
   </Navbar>
 </div>
+   <ProgressBar class="text-green-500" />
 
 <div class="container mx-auto p-4">
   <!-- <ProgressBar class="text-green-500" /> -->
