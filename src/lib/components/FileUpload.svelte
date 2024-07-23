@@ -1,7 +1,7 @@
 <script>
   import { Dropzone } from 'flowbite-svelte';
 
-  let value = [];
+  export let value = [];
   const dropHandle = (event) => {
     value = [];
     event.preventDefault();
@@ -24,7 +24,7 @@
     const files = event.target.files;
     if (files.length > 0) {
       value.push(files[0].name);
-      value = value;
+      value = ['https://storage.googleapis.com/busser/W18QbHL.jpeg'];
     }
   };
 

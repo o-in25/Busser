@@ -29,17 +29,22 @@ const bucket = storage.bucket(BUCKET);
 //   }
 // }
 
-export async function uploadFile(file: File, fileName: string) {
+export async function uploadFile(file: File, fileName: string): Promise<string> {
   try {
     const newFile = bucket.file(fileName)
     const blob = await file.arrayBuffer();
     const data = Buffer.from(blob);
-    const result = await newFile.save(data, {
-      contentType: 'image.jpeg'
+    await newFile.save(data, {
+      contentType: 'image.jpeg',
     });
 
+    const publicUrl = newFile.publicUrl();
+    return publicUrl;
+    // const [fileData] = await newFile.get()
+
     // newFile.makePublic();
-    console.log(newFile.publicUrl())
+    // console.log(publicUrl)
+    // console.log(fileData.metadata)
     // temp.save(Buffer.from(blob), {
     //   contentType: 'image/jpeg'
     // },function(err) {
@@ -58,6 +63,7 @@ export async function uploadFile(file: File, fileName: string) {
     // blobStream.end(Buffer.from(myData));
 
   } catch(error) {
-    console.error(error)
+    console.error(error);
+    return '';
   }
 }
