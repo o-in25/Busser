@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { Label, Input, GradientButton, Card } from "flowbite-svelte";
+  import { Label, Input, GradientButton, Card, Range, Button } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
     import type { ComponentAction, Product } from "$lib/types";
     import FancyButton from "./FancyButton.svelte";
+    import FileUpload from "./FileUpload.svelte";
+    import { enhance } from "$app/forms";
     
   export let action: ComponentAction;
   export let product: Product | null = null;
@@ -32,7 +34,7 @@
 </script>
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
   
-  <form class="relative" method="POST" action="?/add">
+  <form class="relative" method="POST" action="?/add" use:enhance enctype="multipart/form-data">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div>
         <Label for="productName" class="mb-2">Name</Label>
@@ -66,19 +68,22 @@
       </div>
     </div>
     <div>
-      <div class="space-y-4">
-        <Card img="{product?.productImageUrl}" horizontal size="md">
-          <Label for="abv" class="mb-2">Proof</Label>
-          <Input for="productProof" let:props required>
-            <input id="productProof" name="productProof" type="number"  max="200" {...props} bind:value={productProof}/>
-          </Input>
-        </Card>
-      </div>
+      <FileUpload></FileUpload>
+    <div>
+      <Label for="abv" class="mb-2">Image</Label>
+      <Card img="{product?.productImageUrl}" horizontal size="md">
+        <Input type="text" id="productName" name="productName" placeholder="Plantation 3 Star" required value={product?.productImageUrl}/>
+      </Card>
     </div>
+    <div class="mt-4">
+        <Label for="abv" class="mb-2">Proof</Label>
+        <Range id="large-range" size="lg"  value={50}/>
+
+    </div>
+            <Label for="abv" class="mb-2">Proof</Label>
+        <Range id="large-range" size="lg"  value={50}/>
     <div class="w-full py-4">
-      <FancyButton>
-        Save
-      </FancyButton>
+      <Button type="submit">Save</Button>
     </div>
   </form>
 </div>

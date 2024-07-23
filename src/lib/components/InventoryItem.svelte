@@ -171,12 +171,12 @@
 {#if product}
   <div class="space-y-2 text-wrap w-full">
     <!-- desktop only -->
-    <div class="hidden sm:py-4 md:py-6 sm:flex sm:flex-auto sm:justify-center grow">
+    <div class="hidden sm:py-4 md:py-6 sm:flex sm:flex-auto sm:justify-center grow ">
       <Card
         img={product.productImageUrl}
         horizontal
         size="xl"
-        class="!w-full"
+        class="!w-full shadow-2xl"
         padding="xl">
         <div class="card-content">
           <Heading tag="h5">
@@ -204,8 +204,8 @@
       </Card>
     </div>
     <!-- mobile only -->
-    <div class="sm:hidden flex justify-center px-2 pt-4 md:pb-4 w-full">
-      <Card img={product.productImageUrl} size="md" href={null} padding="sm">
+    <div class="sm:hidden flex justify-center px-2 py-4 md:pb-4 w-full">
+      <Card img={product.productImageUrl} size="md" href={null} padding="sm" class="shadow-2xl">
         <div class="card-content">
           <Heading tag="h5">
             <span class="block">{product.productName}</span>
@@ -250,5 +250,12 @@
       width: 685px;
     }
   }
+
+    @media (min-width: 1280px) {
+    .card-content {
+      width: 900px;
+    }
+  }
+
 
 </style>

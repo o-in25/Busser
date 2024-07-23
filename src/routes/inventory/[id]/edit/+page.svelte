@@ -3,7 +3,7 @@
     import { Heading } from 'flowbite-svelte';
     import type { PageData } from './$types';
     import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
-    import InventoryForm from '$lib/components/InventoryForm.svelte';
+    import { InventoryForm } from '$lib/components/InventoryForm.svelte';
     
     export let data: PageData;
 </script>
