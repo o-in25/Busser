@@ -1,5 +1,6 @@
 import { Storage } from '@google-cloud/storage';
 import { GOOGLE_SERVICE_KEY, BUCKET} from '$env/static/private';
+import moment from 'moment';
 
 const base64Encode = (str: string) => Buffer.from(str).toString('base64');
 const base64Decode = (str: string) => Buffer.from(GOOGLE_SERVICE_KEY, 'base64').toString(); 
@@ -29,9 +30,10 @@ const bucket = storage.bucket(BUCKET);
 //   }
 // }
 
-export async function uploadFile(file: File, fileName: string): Promise<string> {
+export async function getSignedUrl(file: File): Promise<string> {
   try {
-    const newFile = bucket.file(fileName)
+    const name = `${file.name}-${moment().format('MMDDYYYYSS')}`
+    const newFile = bucket.file(name)
     const blob = await file.arrayBuffer();
     const data = Buffer.from(blob);
     await newFile.save(data, {
@@ -39,29 +41,8 @@ export async function uploadFile(file: File, fileName: string): Promise<string> 
     });
 
     const publicUrl = newFile.publicUrl();
+    // const metadata = await newFile.getMetadata();
     return publicUrl;
-    // const [fileData] = await newFile.get()
-
-    // newFile.makePublic();
-    // console.log(publicUrl)
-    // console.log(fileData.metadata)
-    // temp.save(Buffer.from(blob), {
-    //   contentType: 'image/jpeg'
-    // },function(err) {
-    //   console.log(err)
-    // })
-
-    // const myData = await file.arrayBuffer();
-    // const storage = new Storage();
-    // const bucket = storage.bucket("busser");
-
-    // const blob = bucket.file("myFile");
-    // const blobStream = blob.createWriteStream({
-    //   resumable: false,
-    // });
-
-    // blobStream.end(Buffer.from(myData));
-
   } catch(error) {
     console.error(error);
     return '';

@@ -85,3 +85,10 @@ export type Log = {
 }
 
 export type ComponentAction = 'add' | 'edit';
+
+export type ProductDetail = {
+  productDetailId?: number,
+  productId: number,
+  productImageUrl: string,
+  productImageUrlUploadId?: string
+}

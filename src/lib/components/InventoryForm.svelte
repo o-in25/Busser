@@ -116,21 +116,21 @@
     </div>
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div class="mt-4">
-        <FileUpload></FileUpload>
+        <FileUpload name="productImageUrl"></FileUpload>
       </div>
       <div>
         <div class="mt-4">
-          <Label for="abv" class="mb-2">Sweetness</Label>
-          <Range id="large-range" size="lg" value={50} />
+          <Label for="productSweetnessRating" class="mb-2">Sweetness</Label>
+          <Range id="productSweetnessRating" name="productSweetnessRating" size="lg" value={50} />
         </div>
         <div class="mt-4">
-          <Label for="abv" class="mb-2">Dryness</Label>
-          <Range id="large-range" size="lg" value={50} />
+          <Label for="productDrynessRating" class="mb-2">Dryness</Label>
+          <Range id="productDrynessRating" name="productDrynessRating" size="lg" value={50} />
         </div>
       </div>
     </div>
     <div class="w-1/2 m-auto">
-      <FancyButton>Save</FancyButton>
+      <Button outline type="submit">Save</Button>
     </div>
   </form>
 </div>
