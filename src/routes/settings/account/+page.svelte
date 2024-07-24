@@ -1,7 +1,5 @@
 <script lang="ts">
-    import Breadcrumb from 'flowbite-svelte/Breadcrumb.svelte';
     import type { PageData } from './$types';
-    import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
     import { GradientButton, Heading, Span } from 'flowbite-svelte';
     import { goto, invalidateAll } from '$app/navigation';
     import { ArrowRightToBracketOutline } from 'flowbite-svelte-icons';

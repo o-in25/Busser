@@ -3,11 +3,10 @@
   import { Gallery, Button } from 'flowbite-svelte';
   import type { PageData } from './$types';
   import { page } from '$app/stores';
-    import { ArrowLeftToBracketOutline } from 'flowbite-svelte-icons';
+  import { ArrowLeftToBracketOutline } from 'flowbite-svelte-icons';
   export let data: PageData;	
 
   const { gallery, spirits } = data.args;
-  console.log(spirits)
 
 </script>
 
@@ -17,6 +16,7 @@
 </Heading>
 <P class="px-2">Busser makes it easy to manage your inventory and keep tabs on your stock.</P>
 </div>
+
 
 {#if !$page.data.user}
   <ButtonGroup>

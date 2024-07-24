@@ -83,3 +83,12 @@ export type Log = {
   logDate: Date | string,
   logStackTrace: string | null
 }
+
+export type ComponentAction = 'add' | 'edit';
+
+export type ProductDetail = {
+  productDetailId?: number,
+  productId: number,
+  productImageUrl: string,
+  productImageUrlUploadId?: string
+}

@@ -3,9 +3,9 @@ import type { Category, GallerySeeding, PaginationResult, Product, SelectOption 
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
+import { getSignedUrl } from "./storage";
 
 const db = new DbProvider('app_t');
-//attachPaginate();
 
 const marshal = <T>(obj: any, fn: Function = camelCase) => {
   if(!_.isObject(obj)) return obj as T ;
@@ -111,7 +111,7 @@ export async function categorySelect(): Promise<SelectOption[]> {
   }
 }
 
-export async function addToInventory(product: Product) {
+export async function addToInventory(product: Product): Promise<Record<"productId", number>> {
   try {
     let insert = marshal(product, pascalCase);
     const result = await db.table('product').insert({ 
@@ -119,26 +119,90 @@ export async function addToInventory(product: Product) {
       SupplierId: 1,
       ProductInStockQuantity: 1
     });
-    console.log(result)
+    const [productId] =  result || [-1];
+    return { productId }
   } catch(error: any) {
     console.error(error);
-
+    return { productId: -1 }
   }
 }
 
-// export async function categorySelect(categoryName: string): Promise<Number> {
-//   try {
-//     let result = await db.table('category')
-//       .select('CategoryId')
-//       .where({ Categ});
-//     let categories: Category[] = marshal<Category>(result);
-//     let selectOptions: SelectOption[] = categories.map(({ categoryId, categoryName }) => ({
-//       name: categoryName,
-//       value: categoryId
-//     }));
-//     return selectOptions;
-//   } catch(error: any) {
-//     console.error(error);
-//     return [];
-//   }
-// }
+export async function searchInventory(search: string): Promise<Product[]> {
+  try {
+    let data = await db.table('product')
+      .select([
+        'product.productId',
+        'product.supplierId',
+        'product.productName',
+        'product.productPricePerUnit',
+        'product.productInStockQuantity',
+        'product.productUnitSizeInMilliliters',
+        'product.productProof',
+        'category.categoryId',
+        'category.categoryName',
+        'category.categoryDescription',
+        'productdetail.productImageUrl',
+        'productdetail.productDetailId',
+      ])
+      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
+      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
+      .where('product.productName', 'like', `%${search}%`)
+    let result: Product[] = marshal<Product[]>(data);
+    // const result: PaginationResult<Product[]> = { data, pagination };
+    return result;
+  } catch(error: any) {
+    console.error(error);
+    return []
+  }
+}
+
+export async function findInventoryItem(inventoryId: number): Promise<Product | null> {
+  try {
+    let data = await db.table('product')
+      .select([
+        'product.productId',
+        'product.supplierId',
+        'product.productName',
+        'product.productPricePerUnit',
+        'product.productInStockQuantity',
+        'product.productUnitSizeInMilliliters',
+        'product.productProof',
+        'category.categoryId',
+        'category.categoryName',
+        'category.categoryDescription',
+        'productdetail.productImageUrl',
+        'productdetail.productDetailId',
+      ])
+      .where('product.productId', inventoryId)
+      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
+      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId');
+    let result: Product[] = marshal<Product[]>(data);
+    if(result.length === 0) {
+      throw Error('Product not found')
+    }
+    const [search] = result;
+    return search;
+  
+  } catch(error: any) {
+    console.error(error);
+    return null;
+  }
+}
+
+
+export async function addProductImage(productId: number, file: File): Promise<Record<"productDetailId", number>> {
+  try {
+
+    const signedUrl = await getSignedUrl(file);
+    if(!signedUrl) throw Error('File could not be uploaded.')
+    const result = await db.table('productdetail').insert({
+      ProductId: productId,
+      ProductImageUrl: signedUrl
+    });
+    const [productDetailId] = result || [-1];
+    return { productDetailId }
+  } catch(error: any) {
+    console.error(error);
+    return { productDetailId: -1 };
+  }
+}

@@ -15,16 +15,19 @@
     Label,
     Progressbar,
     Badge,
+    Button,
+    GradientButton,
 
 
   } from 'flowbite-svelte';
-  import { ChevronLeftOutline, ChevronRightOutline, InfoCircleSolid, SearchOutline } from 'flowbite-svelte-icons';
+  import { ChevronLeftOutline, ChevronRightOutline, InfoCircleSolid, PlusOutline, SearchOutline } from 'flowbite-svelte-icons';
   import { slide } from 'svelte/transition';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import InventoryItem from './InventoryItem.svelte';
 
   import debounce from 'lodash';
+    import FancyButton from './FancyButton.svelte';
   export let products: Product[];
   export let paginationData: PaginationData;
 
@@ -47,7 +50,8 @@
       }))
   }
 
-  $: search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
+  $: search = products;
+  // $: search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
   $: activeUrl = $page.url.searchParams.get('page');
   $: pages = paginate(paginationData);
   $: {
@@ -84,10 +88,18 @@
   //   search = products.filter(({ productName }) => productName.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1)
   // })
 
+  const handleSearch = async (value: string) => {
+    let data = await fetch(`/api/inventory?name=${value}`);
+    let result = await data.json();
+    console.log('asdsd')
+    return result
+  }
+
   const handleInput = ({ target }) => {
-    setTimeout(() => {
+    setTimeout(async () => {
       searchTerm = target.value;
-      search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
+      const { result } = await handleSearch(searchTerm)
+      search = result;
     }, 300);
   }
 </script> 
@@ -97,14 +109,19 @@
 
 </div>
 <!-- search -->
-<Label class="space-y-2 mb-6">
-  <Input type="email" size="md" placeholder="Search inventory..." on:keydown={handleInput}>
-    <SearchOutline slot="left" class="w-5 h-5" />
-  </Input>
-</Label>
+<div class="flex justify-between">
+  <Label class="space-y-2 mb-6">
+    <Input type="email" size="md" placeholder="Search inventory..." on:keydown={handleInput}>
+      <SearchOutline slot="left" class="w-5 h-5" />
+    </Input>
+  </Label>
+  <div class="test">
+    <GradientButton outline size="md" color="purpleToBlue" class="btn-gradient-outline" href="/inventory/add"><PlusOutline/></GradientButton>
+  </div>
+</div>
 
 <!-- table -->
-<Table divClass="relative overflow-x-auto" hoverable={true}>
+<Table divClass="relative overflow-x-auto rounded-lg" hoverable={true}>
 
   <!-- head -->
   <TableHead>
@@ -159,11 +176,10 @@
   </TableBody>
 </Table>
 {#if !search.length}
-  <div class="flex flex-col items-center">
+  <div class="flex flex-col items-center py-4">
     <Alert color="dark">
       <InfoCircleSolid slot="icon" class="w-5 h-5" />
-      <span class="font-medium">We couldn't find that!</span>
-      So that means you should add it...
+      No Results
     </Alert>
   </div>
 {/if}
@@ -186,6 +202,16 @@
     </Pagination>
   </div>
 {/if}
+
+<style lang="scss">
+  .test {
+    div {
+      background-color: red !important;
+    }
+  }
+</style>
 <!-- <Modal title={details?.name} bind:open={doubleClickModal} autoclose outsideclose>
   <ImagePlaceholder />
 </Modal> -->
+
+<!-- text-center font-medium focus-within:ring-4 focus-within:outline-none px-5 py-2.5 text-sm rounded-lg inline-flex items-center justify-center w-full !border-0 !rounded-md bg-white !text-gray-900 dark:bg-gray-900 dark:!text-white hover:bg-transparent hover:!text-inherit transition-all duration-75 ease-in group-hover:!bg-opacity-0 group-hover:!text-inherit -->

@@ -1,10 +1,9 @@
 <script lang="ts">
-    import { Heading, P } from 'flowbite-svelte';
-    import type { PageData } from './$types';
-    import { AngleRightOutline } from 'flowbite-svelte-icons';
-    import InventoryForm from '$lib/components/InventoryForm.svelte';
     import Breadcrumb from '$lib/components/Breadcrumb.svelte';
+    import { Heading } from 'flowbite-svelte';
+    import type { PageData } from './$types';
     import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
+    import InventoryForm from '$lib/components/InventoryForm.svelte';
     
     export let data: PageData;
 </script>
@@ -17,5 +16,5 @@
 </Heading>
 
 <div class="px-4 py-2 md:py-4">
-  <InventoryForm action={'add'}/>
+  <InventoryForm action="edit" product={data.args.product} />
 </div>

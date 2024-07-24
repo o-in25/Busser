@@ -12,18 +12,13 @@
     result.pagination = data.args.pagination
   }
 </script>
-<div class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4">
-  <div class="text-sm text-gray-500 dark:text-gray-400">
-    <div class="flex justify-end">
-        <Heading tag="h4" class="mb-4 flex flex-row justify-between">
-          Inventory
-        </Heading>
-        <ButtonGroup>
-          <GradientButton color="purple" href="/inventory/add" size="lg" class="h-8"><PlusOutline/></GradientButton>
-        </ButtonGroup>
-      </div>
-      <InventoryTable products={result.data} paginationData={result.pagination}></InventoryTable>
-    </div>
+<div class="mt-5">
+  <Heading tag="h4" class="mb-4 flex flex-row justify-between">
+    Inventory
+  </Heading>
+</div>
+<div class="px-4 py-2 md:py-4">
+  <InventoryTable products={result.data} paginationData={result.pagination}></InventoryTable>
 </div>
 
 <style lang="scss">
