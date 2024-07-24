@@ -6,7 +6,6 @@ import * as changeCase from "change-case";
 import { getSignedUrl } from "./storage";
 
 const db = new DbProvider('app_t');
-//attachPaginate();
 
 const marshal = <T>(obj: any, fn: Function = camelCase) => {
   if(!_.isObject(obj)) return obj as T ;

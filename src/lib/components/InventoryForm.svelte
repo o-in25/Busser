@@ -16,42 +16,19 @@
 
   export let action: ComponentAction;
   export let product: Product | null = null;
-  let buttons = [
-    { name: "Profile", mycustomfield: "data1", current: true },
-    { name: "Settings", mycustomfield: "data2" },
-    { name: "Messages", mycustomfield: "data3" },
-    {
-      name: "Download",
-      mycustomfield: "data4",
-      disabled: true,
-      attrs: { type: "submit" },
-    },
-  ];
-
-  let showGroup = true;
-  let searchTerm = "";
-  $: search = buttons.filter(
-    ({ name }) => name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
-  );
-
-  const toggle = () => (showGroup = showGroup);
-
-  const getValues = () => {
-    // console.log(cat)
-  };
 
   let productPricePerUnit = product?.productPricePerUnit;
   let productUnitSizeInMilliliters = product?.productUnitSizeInMilliliters;
   let productProof = product?.productProof;
   let categoryId = product?.categoryId;
-  let uploadVal;
+  let productImageUrl = product?.productImageUrl;
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
   <form
     class="relative"
     method="POST"
-    action="?/add"
+    action="{action === 'add'? '?/add' : '?/edit'}"
     use:enhance
     enctype="multipart/form-data">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
@@ -116,7 +93,7 @@
     </div>
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div class="mt-4">
-        <FileUpload name="productImageUrl"></FileUpload>
+        <FileUpload name="productImageUrl" signedUrl={productImageUrl}></FileUpload>
       </div>
       <div>
         <div class="mt-4">
@@ -129,8 +106,8 @@
         </div>
       </div>
     </div>
-    <div class="w-1/2 m-auto">
-      <Button outline type="submit">Save</Button>
+    <div class="flex">
+      <FancyButton>Save</FancyButton>
     </div>
   </form>
 </div>

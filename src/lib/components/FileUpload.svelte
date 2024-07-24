@@ -3,24 +3,22 @@
     import placeholder from "$lib/assets/placeholder@2x.jpg";
 
     export let name = 'image';
-
-    let signedUrl;
+    export let signedUrl;
     let files;
-
+  
 
     $: {
       if(files?.length) {
         const [file] = files;
         const reader = new FileReader();
         reader.onload = ({ target }) => {
-          signedUrl = target?.result || '';
+          signedUrl = target?.result?.toString() || '';
         }
         reader.readAsDataURL(file)
 
-      } else {
-        signedUrl = '';
       }
     }
+
 </script>
 
 <div>

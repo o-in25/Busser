@@ -6,3 +6,9 @@ export const load = (async ({ request, params }) => {
   const product = await findInventoryItem(Number(id));
   return { args: { product } };
 }) satisfies PageServerLoad;
+
+export const actions = {
+  edit: () => {
+    
+  }
+}

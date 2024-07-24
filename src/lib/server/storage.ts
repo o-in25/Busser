@@ -17,19 +17,6 @@ const storage = new Storage({
 const bucket = storage.bucket(BUCKET);
 
 
-// export const getBucket = async (name: string) => {
-//   try {
-//     const [files] = await storage.bucket('').getFiles();
-
-//     console.log('Files:');
-//     files.forEach(file => {
-//       console.log(file.name);
-//     });
-//   } catch(e) {
-//     console.log(e)
-//   }
-// }
-
 export async function getSignedUrl(file: File): Promise<string> {
   try {
     const name = `${file.name}-${moment().format('MMDDYYYYSS')}`
