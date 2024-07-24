@@ -39,12 +39,12 @@
       vec.push(randomRating);
     }
     let ratings = [
-      { label: "Taste", rating: vec[0] },
-      { label: "Smoothness", rating: vec[1] },
+      { label: "Dryness", rating: vec[0] },
+      { label: "Sweetness", rating: vec[1] },
     ];
 
     let ratings2 = [
-      { label: "Cost", rating: vec[2] },
+      { label: "Strength", rating: vec[2] },
       { label: "Versatility", rating: vec[3] },
     ];
 

@@ -19,7 +19,7 @@
   import { goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/stores";
   import MobileNav from "$lib/components/MobileNav.svelte";
-      import { ProgressBar } from "@prgm/sveltekit-progress-bar";
+  import { ProgressBar } from "@prgm/sveltekit-progress-bar";
 
   $: activeUrl = $page.url.pathname;
 
@@ -37,7 +37,7 @@
 </script>
 
 <div class="hidden sm:block">
-  <Navbar color="form" class="mb-3">
+  <Navbar color="default" class="mb-3">
     <NavBrand href="/">
       <img src={logo} class="me-3 h-12" alt="Flowbite Logo" />
       <span
@@ -48,7 +48,7 @@
       <Placeholder id="avatar-menu" />
       <NavHamburger class1="w-full md:flex md:w-auto md:order-1" />
     </div>
-    <Dropdown placement="bottom" triggeredBy="#avatar-menu" class="py-4">
+    <Dropdown placement="right" triggeredBy="#avatar-menu" class="py-4">
       {#if data.user}
         <DropdownHeader>
           <span class="block text-sm">{data.user.username}</span>
@@ -75,10 +75,9 @@
     {/if}
   </Navbar>
 </div>
-   <ProgressBar class="text-purple-600" />
+<ProgressBar class="text-purple-600" />
 
 <div class="container mx-auto p-4">
-  <!-- <ProgressBar class="text-green-500" /> -->
   <slot />
 </div>
 

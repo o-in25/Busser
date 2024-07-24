@@ -1,66 +1,36 @@
 <script>
-  import { Button, ButtonGroup, Dropzone, Fileupload, Input, InputAddon, Label } from 'flowbite-svelte';
-    import { EyeSlashOutline } from 'flowbite-svelte-icons';
+    import { Label, Fileupload, ButtonGroup, InputAddon, Input} from "flowbite-svelte";
+    import { EyeSlashOutline } from "flowbite-svelte-icons";
+    import placeholder from "$lib/assets/placeholder@2x.jpg";
 
-  export let value = [];
-  const dropHandle = (event) => {
-    value = [];
-    event.preventDefault();
-    if (event.dataTransfer.items) {
-      [...event.dataTransfer.items].forEach((item, i) => {
-        if (item.kind === 'file') {
-          const file = item.getAsFile();
-          value.push(file.name);
-          value = value;
-        }
-      });
-    } else {
-      [...event.dataTransfer.files].forEach((file, i) => {
-        value = file.name;
-      });
+    let signedUrl;
+    let files;
+
+    $: {
+      if(files?.length) {
+        signedUrl = getSignedUrl();
+
+      } else {
+        signedUrl = '';
+      }
     }
-  };
 
-  const handleChange = (event) => {
-    const files = event.target.files;
-    if (files.length > 0) {
-      value.push(files[0].name);
-      value = ['https://storage.googleapis.com/busser/W18QbHL.jpeg'];
+    const getSignedUrl = () => 'https://images.immediate.co.uk/production/volatile/sites/30/2023/04/Strawberry-Marg-c985252.jpg'
+
+    const handleInput = () => {
+      signedUrl = getSignedUrl();
     }
-  };
-
-  const showFiles = (files) => {
-    if (files.length === 1) return files[0];
-    let concat = '';
-    files.map((file) => {
-      concat += file;
-      concat += ',';
-      concat += ' ';
-    });
-
-    if (concat.length > 40) concat = concat.slice(0, 40);
-    concat += '...';
-    return concat;
-  };
 </script>
 
 <div>
-  <Label for="abv" class="mb-2">Image</Label>
+  <Label for="image" class="mb-2">Image</Label>
   <div class="mb-4">
-    <Fileupload id="larg_size" class="mb-2" placeholder="123" />
-  </div>
-  <div class="mb-4">
-      <ButtonGroup class="w-full">
-    <InputAddon>
-      <button>
-          <EyeSlashOutline class="w-6 h-6" />
-      </button>
-    </InputAddon>
-    <Input id="show-password1" placeholder="Your password here" />
-  </ButtonGroup>
+    <Fileupload id="image" class="mb-2" placeholder="123" bind:files={files}/> 
   </div>
 
+
   <div class="bg-gray-700 rounded p-4">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg" class="object-scale-down h-48 w-96 m-auto"/>
+    <!-- svelte-ignore a11y-img-redundant-alt -->
+    <img src="{signedUrl || placeholder}" class="object-scale-down h-48 w-96 m-auto" alt="Image"/>
   </div>
 </div>

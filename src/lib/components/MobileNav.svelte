@@ -9,24 +9,26 @@
 
   let styles = {
     a: {
-      active: "bg-white dark:bg-gray-900",
-      inactive: "bg-gray-50 dark:bg-gray-900",
+      active: "bg-white dark:bg-gray-800",
+      inactive: "bg-gray-50 dark:bg-gray-800",
     },
     span: {
-      active: "text-primary-600 dark:text-primary-500",
-      inactive: "text-gray-900 dark:text-white",
+      active: "text-primary-800 dark:text-primary-500",
+      inactive: "text-gray-800 dark:text-white",
     },
     svg: {
-      active: "text-gray-600 dark:text-gray-500",
-      inactive: "text-gray-900 dark:text-white",
+      active: "text-gray-800 dark:text-gray-500",
+      inactive: "text-gray-800 dark:text-white",
     },
   };
 </script>
 
 <div
   class="fixed w-full
-  bg-gray-900
-  dark:bg-gray-900
+  bg-white
+  dark:bg-gray-800
+  dark:divide-gray-700 
+  border-gray-200 dark:border-gray-700 divide-gray-200 
   border-none bottom-0 start-0 h-16 border-t">
   <div class="grid h-full max-w-lg mx-auto grid-cols-3 bot-nav">
     <a

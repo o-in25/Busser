@@ -94,6 +94,7 @@
             id="productUnitSizeInMilliliters"
             name="productUnitSizeInMilliliters"
             type="number"
+            placeholder=""
             {...props}
             bind:value={productUnitSizeInMilliliters} />
           <div slot="right" class="font-bold">mL</div>
@@ -114,16 +115,22 @@
       </div>
     </div>
     <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <FileUpload></FileUpload>
+      <div class="mt-4">
+        <FileUpload></FileUpload>
+      </div>
+      <div>
+        <div class="mt-4">
+          <Label for="abv" class="mb-2">Sweetness</Label>
+          <Range id="large-range" size="lg" value={50} />
+        </div>
+        <div class="mt-4">
+          <Label for="abv" class="mb-2">Dryness</Label>
+          <Range id="large-range" size="lg" value={50} />
+        </div>
+      </div>
     </div>
-    <div class="mt-4">
-      <Label for="abv" class="mb-2">Proof</Label>
-      <Range id="large-range" size="lg" value={50} />
-    </div>
-    <Label for="abv" class="mb-2">Proof</Label>
-    <Range id="large-range" size="lg" value={50} />
-    <div class="w-full py-4">
-      <Button type="submit">Save</Button>
+    <div class="w-1/2 m-auto">
+      <FancyButton>Save</FancyButton>
     </div>
   </form>
 </div>
