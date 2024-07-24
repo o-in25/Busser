@@ -1,5 +1,6 @@
 <script>
-  import { Dropzone } from 'flowbite-svelte';
+  import { Button, ButtonGroup, Dropzone, Fileupload, Input, InputAddon, Label } from 'flowbite-svelte';
+    import { EyeSlashOutline } from 'flowbite-svelte-icons';
 
   export let value = [];
   const dropHandle = (event) => {
@@ -43,20 +44,23 @@
   };
 </script>
 
-<Dropzone
-  id="dropzone"
-    name="fileToUpload"
+<div>
+  <Label for="abv" class="mb-2">Image</Label>
+  <div class="mb-4">
+    <Fileupload id="larg_size" class="mb-2" placeholder="123" />
+  </div>
+  <div class="mb-4">
+      <ButtonGroup class="w-full">
+    <InputAddon>
+      <button>
+          <EyeSlashOutline class="w-6 h-6" />
+      </button>
+    </InputAddon>
+    <Input id="show-password1" placeholder="Your password here" />
+  </ButtonGroup>
+  </div>
 
-  on:drop={dropHandle}
-  on:dragover={(event) => {
-    event.preventDefault();
-  }}
-  on:change={handleChange}>
-  <svg aria-hidden="true" class="mb-3 w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-  {#if value.length === 0}
-    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-    <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
-  {:else}
-    <p>{showFiles(value)}</p>
-  {/if}
-</Dropzone>
+  <div class="bg-gray-700 rounded p-4">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg" class="object-scale-down h-48 w-96 m-auto"/>
+  </div>
+</div>

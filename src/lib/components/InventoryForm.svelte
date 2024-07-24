@@ -6,6 +6,7 @@
     Card,
     Range,
     Button,
+    Fileupload,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, Product } from "$lib/types";
@@ -112,27 +113,17 @@
         </Input>
       </div>
     </div>
-    <div>
-      <Label for="abv" class="mb-2">Image</Label>
-      <FileUpload bind:value={uploadVal}></FileUpload>
-      <Card img="{uploadVal}" horizontal size="md">
-        <!-- <Input
-          type="text"
-          id="productName"
-          name="productName"
-          placeholder="Plantation 3 Star"
-          required
-          value={uploadVal} /> -->
-      </Card>
-      <div class="mt-4">
-        <Label for="abv" class="mb-2">Proof</Label>
-        <Range id="large-range" size="lg" value={50} />
-      </div>
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <FileUpload></FileUpload>
+    </div>
+    <div class="mt-4">
       <Label for="abv" class="mb-2">Proof</Label>
       <Range id="large-range" size="lg" value={50} />
-      <div class="w-full py-4">
-        <Button type="submit">Save</Button>
-      </div>
+    </div>
+    <Label for="abv" class="mb-2">Proof</Label>
+    <Range id="large-range" size="lg" value={50} />
+    <div class="w-full py-4">
+      <Button type="submit">Save</Button>
     </div>
   </form>
 </div>
