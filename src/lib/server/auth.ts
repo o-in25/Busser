@@ -1,6 +1,5 @@
 import type { User } from "$lib/types";
 import type { Cookies } from "@sveltejs/kit";
-// import type { RequestEvent } from "../../routes/(auth)/login/$types";
 import { DbProvider } from "./db";
 import sha256 from "crypto-js/sha256";
 import { Logger } from "./logger";
