@@ -9,6 +9,7 @@
     export let data: PageData;
     export let form: ActionData;
 
+
 </script>
 
 <Breadcrumb name="Inventory" href="/inventory">

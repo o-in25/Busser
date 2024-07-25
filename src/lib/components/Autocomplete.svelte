@@ -29,7 +29,6 @@
   $: search = items.filter(({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1);
   $: value = items.find(({ name }) => name.toLowerCase() === selectValue.toLocaleLowerCase())?.value || 0;
 
-
   const showAutocomplete = () => show = true;
   // theres a race condition b/w onblur and onclick, so we timeout 
   const hideAutocomplete = () => setTimeout(() => {

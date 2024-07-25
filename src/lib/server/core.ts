@@ -4,6 +4,7 @@ import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
 import { getSignedUrl } from "./storage";
+import { P } from "flowbite-svelte";
 
 const db = new DbProvider('app_t');
 
@@ -193,16 +194,48 @@ export async function findInventoryItem(inventoryId: number): Promise<Product | 
 export async function addProductImage(productId: number, file: File): Promise<Record<"productDetailId", number>> {
   try {
 
-    const signedUrl = await getSignedUrl(file);
-    if(!signedUrl) throw Error('File could not be uploaded.')
-    const result = await db.table('productdetail').insert({
-      ProductId: productId,
-      ProductImageUrl: signedUrl
-    });
-    const [productDetailId] = result || [-1];
-    return { productDetailId }
+    // const signedUrl = await getSignedUrl(file);
+    // if(!signedUrl) throw Error('File could not be uploaded.')
+    // const result = await db.table('productdetail').insert({
+    //   ProductId: productId,
+    //   ProductImageUrl: signedUrl
+    // });
+    // const [productDetailId] = result || [-1];
+    return { productDetailId: -1 }
   } catch(error: any) {
     console.error(error);
     return { productDetailId: -1 };
+  }
+}
+
+export async function updateInventory(product: Product): Promise<Product | null> {
+  try {
+    const { productId, ...update } = product;
+    let insert = marshal(update, pascalCase);
+    const result = await db
+    .table<Product>('product')
+      .where("ProductId", productId)
+        .update({
+          ...insert,
+          SupplierId: 1,
+          ProductInStockQuantity: 1
+        });
+  
+
+    if(result === 0) throw Error('Could not update inventory.')
+    const [newRow] = await db
+      .table<Product>('product')
+        .select(Object.keys(insert))
+          .where("ProductId", productId);
+
+    if(!newRow) {
+      throw Error('Inventory item updated but could not be retrieved.');
+    }
+
+    return marshal<Product>(newRow, camelCase)
+
+  } catch(error: any) {
+    console.error(error);
+    return null;
   }
 }
