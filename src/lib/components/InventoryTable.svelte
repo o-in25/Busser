@@ -78,10 +78,7 @@
     if(ml < 1000) return `${ml} ML`
     return  `${ml / 1000} L`
   }
-  let money = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-  });
+
 
   //  const handleInput = debounce((e: Event) => {
   //   const detail = (<CustomEvent>e).detail;

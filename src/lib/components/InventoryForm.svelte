@@ -8,6 +8,9 @@
     Button,
     Fileupload,
     Alert,
+    Modal,
+    P,
+    Span,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
@@ -15,16 +18,33 @@
   import FileUpload from "./FileUpload.svelte";
   import { enhance } from "$app/forms";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
+  import { page } from "$app/stores";
 
   export let action: ComponentAction;
   export let product: Product | null = null;
   export let result: FormSubmitResult = {};
-  
+
+  let slug = $page.params.id;
   let productPricePerUnit = product?.productPricePerUnit;
   let productUnitSizeInMilliliters = product?.productUnitSizeInMilliliters;
   let productProof = product?.productProof;
   let categoryId = product?.categoryId;
   let productImageUrl = product?.productImageUrl;
+  let modalOpen = false;
+
+  const deleteItem = async () => {
+    const response = await fetch(`/api/inventory/${slug}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+    console.log(data)
+
+  }
+
+  const openModal = () => {
+    modalOpen = true;
+  }
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -110,9 +130,14 @@
       </div>
     </div>
     <div class="md:flex md:flex-row">
-      <div>
+      <div class="my-4">
         <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
       </div>
+      {#if action === 'edit'}
+        <div class="my-4">
+          <FancyButton style="grow md:flex-none" type="button" color="orangeToRed" on:clicked={openModal}>Delete</FancyButton>
+        </div>
+      {/if}
         {#if result.success || result.error}
           <div class="my-4 md:my-0 md:ml-4">
             <Alert border color="{result.success? 'green' : 'red'}">
@@ -124,4 +149,16 @@
         {/if}
     </div>
   </form>
+  <Modal title="Confirm Delete" bind:open={modalOpen} autoclose>
+    <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+      Delete&nbsp;<Span>{product?.productName}</Span>&nbsp;from inventory?
+      <P color="text-red-700 dark:text-red-500" weight="bold">Once deleted, it can't be recovered.</P>
+    </p>
+    <svelte:fragment slot="footer">
+      <Button color="red" on:click={async () => {
+        await deleteItem();
+      }}>Delete</Button>
+      <Button color="alternative">Cancel</Button>
+    </svelte:fragment>
+  </Modal>
 </div>

@@ -7,3 +7,4 @@ export const GET: RequestHandler = async ({ request, url}) => {
   const result = await searchInventory(name);
   return json({ result });
 };
+
