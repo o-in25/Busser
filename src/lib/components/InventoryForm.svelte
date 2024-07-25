@@ -7,16 +7,19 @@
     Range,
     Button,
     Fileupload,
+    Alert,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
-  import type { ComponentAction, Product } from "$lib/types";
+  import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
   import FancyButton from "./FancyButton.svelte";
   import FileUpload from "./FileUpload.svelte";
   import { enhance } from "$app/forms";
+  import { InfoCircleSolid } from "flowbite-svelte-icons";
 
   export let action: ComponentAction;
   export let product: Product | null = null;
-
+  export let result: FormSubmitResult = {};
+  
   let productPricePerUnit = product?.productPricePerUnit;
   let productUnitSizeInMilliliters = product?.productUnitSizeInMilliliters;
   let productProof = product?.productProof;
@@ -106,8 +109,19 @@
         </div>
       </div>
     </div>
-    <div class="flex">
-      <FancyButton>Save</FancyButton>
+    <div class="md:flex md:flex-row">
+      <div>
+        <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
+      </div>
+        {#if result.success || result.error}
+          <div class="my-4 md:my-0 md:ml-4">
+            <Alert border color="{result.success? 'green' : 'red'}">
+              <InfoCircleSolid slot="icon" class="w-5 h-5" />
+              {#if result.error}<span class="font-medium">Could not save changes.</span>{/if}
+              {result.success?.message || result.error?.message}
+            </Alert>
+          </div>
+        {/if}
     </div>
   </form>
 </div>

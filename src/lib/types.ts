@@ -92,3 +92,9 @@ export type ProductDetail = {
   productImageUrl: string,
   productImageUrlUploadId?: string
 }
+
+export type FormSubmitResult = {
+  success?: Record<'message', string>;
+  error?: Record<'message', string>;
+  args?: any
+}
