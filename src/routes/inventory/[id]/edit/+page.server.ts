@@ -1,4 +1,4 @@
-import { findInventoryItem, updateInventory } from '$lib/server/core';
+import { addProductImage, editProductImage, findInventoryItem, updateInventory } from '$lib/server/core';
 import type { FormSubmitResult } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -10,49 +10,50 @@ export const load = (async ({ request, params }) => {
 
 export const actions = {
   edit: async ({ request, params }) => {
-    let { id } = params;
-    if(!id) {
+    const productId = Number(params?.id || '');
+    if(isNaN(productId)) {
       // ERROR
       return {
-        error: { message: 'Inventory item not found.' }
+        error: { message: 'Inventory item not foun!d.' }
       } as FormSubmitResult;
     }
 
-    let existing = await findInventoryItem(Number(id));
+    // let existingItem = await findInventoryItem(Number(id));
     let formData = Object.fromEntries(await request.formData());
-    let {
-      productName,
-      categoryId,
-      productInStockQuantity,
-      productPricePerUnit,
-      productUnitSizeInMilliliters,
-      productProof,
-      productImageUrl
-    } = formData;
+    const productData = {
+      productId,
+      productName: formData.productName?.toString(),
+      categoryId: Number(formData.categoryId),
+      productInStockQuantity: Number(formData.productInStockQuantity),
+      productPricePerUnit: Number(formData.productPricePerUnit),
+      productUnitSizeInMilliliters: Number(formData.productUnitSizeInMilliliters),
+      productProof: Number(formData.productProof)
+    };
 
-    const product = await updateInventory({
-      productId: Number(id),
-      productName: productName.toString(),
-      categoryId: Number(categoryId),
-      productInStockQuantity: Number(productInStockQuantity),
-      productPricePerUnit: Number(productPricePerUnit),
-      productUnitSizeInMilliliters: Number(productUnitSizeInMilliliters),
-      productProof: Number(productProof),
-    });
-
-
-    if(!product) {
+    const newItem = await updateInventory(productData);
+    if(!newItem) {
       // ERROR
       return {
         error: { message: 'Inventory item not be updated.' }
       } as FormSubmitResult;
     }
 
+    const { productImageUrl: file } = formData as { productImageUrl: File; };
+    if(file?.size > 0) {
+      const { productDetailId } = await editProductImage(productId, file);
+      console.log(productDetailId)
+      if(productDetailId === -1) {
+        // ERROR
+        return {
+          error: { message: 'Failed add image to inventory item.' }
+        } as FormSubmitResult;
+      }
+    }
     // product.productName = 'The guy from bane capital'
 
     // OK
     return {
-      args: { product },
+      args: { newItem },
       success: { message: 'Inventory has been updated.' }
     } as FormSubmitResult;
   }

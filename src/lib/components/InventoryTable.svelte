@@ -91,7 +91,6 @@
   const handleSearch = async (value: string) => {
     let data = await fetch(`/api/inventory?name=${value}`);
     let result = await data.json();
-    console.log('asdsd')
     return result
   }
 

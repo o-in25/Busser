@@ -194,14 +194,35 @@ export async function findInventoryItem(inventoryId: number): Promise<Product | 
 export async function addProductImage(productId: number, file: File): Promise<Record<"productDetailId", number>> {
   try {
 
-    // const signedUrl = await getSignedUrl(file);
-    // if(!signedUrl) throw Error('File could not be uploaded.')
-    // const result = await db.table('productdetail').insert({
-    //   ProductId: productId,
-    //   ProductImageUrl: signedUrl
-    // });
-    // const [productDetailId] = result || [-1];
-    return { productDetailId: -1 }
+    const signedUrl = await getSignedUrl(file);
+    if(!signedUrl) throw Error('File could not be uploaded.');
+
+    const result = await db.table('productdetail').insert({
+      ProductId: productId,
+      ProductImageUrl: signedUrl
+    });
+    const [productDetailId] = result || [-1];
+    return { productDetailId: productDetailId }
+  } catch(error: any) {
+    console.error(error);
+    return { productDetailId: -1 };
+  }
+}
+
+export async function editProductImage(productId: number, file: File): Promise<Record<"productDetailId", number>> {
+  try {
+
+    const signedUrl = await getSignedUrl(file);
+    if(!signedUrl) throw Error('File could not be uploaded.');
+
+    const result = await db.table('productdetail')
+    .where("ProductId", productId)
+    .update({
+      ProductId: productId,
+      ProductImageUrl: signedUrl
+    });
+    if(result !== productId) throw Error('Product image could not be updated.')
+    return { productDetailId: result };
   } catch(error: any) {
     console.error(error);
     return { productDetailId: -1 };

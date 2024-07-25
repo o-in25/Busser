@@ -18,11 +18,9 @@ export class Logger {
       console.error(error);
     }
 
-    console.log('done')
   }
 
   static async error(message: string): Promise<void> {
-    console.log('done')
 
     try {
       await Logger.db.table<Log>('log').insert({
@@ -35,7 +33,6 @@ export class Logger {
       console.error(error);
     }
 
-    console.log('done')
 
   }
 
