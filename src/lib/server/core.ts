@@ -177,7 +177,6 @@ export async function findInventoryItem(inventoryId: number): Promise<Product | 
         'productdetail.productDrynessRating',
         'productdetail.productVersatilityRating',
         'productdetail.productStrengthRating',
-
       ])
       .where('product.productId', inventoryId)
       .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
