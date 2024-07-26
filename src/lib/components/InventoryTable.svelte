@@ -112,7 +112,7 @@
     </Input>
   </Label>
   <div class="test">
-    <GradientButton outline size="md" color="purpleToBlue" class="btn-gradient-outline" href="/inventory/add"><PlusOutline/></GradientButton>
+    <FancyButton href="/inventory/add"><PlusOutline/></FancyButton>
   </div>
 </div>
 

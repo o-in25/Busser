@@ -3,6 +3,7 @@
     import { Card, Button, Label, Input, Checkbox, GradientButton, Span, Alert } from 'flowbite-svelte';
     import type { PageData, ActionData } from './$types';
     import { ArrowLeftToBracketOutline, ExclamationCircleSolid, InfoCircleSolid } from 'flowbite-svelte-icons';
+    import FancyButton from '$lib/components/FancyButton.svelte';
     export let data: PageData;
 	  export let form: ActionData; 
 
@@ -25,10 +26,9 @@
         <a href="/" class="ms-auto text-sm text-primary-700 hover:underline dark:text-primary-500"> Lost password? </a>
       </div> -->
       <div class="!mt-8">
-        <GradientButton color="purple" type="submit" size="lg" class="w-full">
-          <ArrowLeftToBracketOutline/>
-          <Span class="pl-1">Log In</Span>
-        </GradientButton>
+        <FancyButton type="submit">
+          <span class="pl-1">Log In</span>
+        </FancyButton>
       </div>
       <!-- <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
         Not registered? <a href="/" class="text-primary-700 hover:underline dark:text-primary-500"> Create account </a>

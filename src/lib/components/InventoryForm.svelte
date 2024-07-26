@@ -11,6 +11,8 @@
     Modal,
     P,
     Span,
+    Textarea,
+    Toggle,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
@@ -19,6 +21,8 @@
   import { enhance } from "$app/forms";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
   import { page } from "$app/stores";
+  import { notificationStore } from "../../stores";
+    import { goto } from "$app/navigation";
 
   export let action: ComponentAction;
   export let product: Product | null = null;
@@ -37,9 +41,15 @@
       method: 'DELETE'
     });
 
-    const data = await response.json();
-    console.log(data)
-
+    const { success, error } = await response.json();
+    console.log(success, error)
+    if(error) {
+      $notificationStore.success = error.message
+    } else {
+      $notificationStore.success = success.message
+    }
+    
+    goto(`/inventory`);
   }
 
   const openModal = () => {
@@ -127,10 +137,20 @@
           <Label for="productDrynessRating" class="mb-2">Dryness</Label>
           <Range id="productDrynessRating" name="productDrynessRating" size="lg" value={50} />
         </div>
+        <div class="mt-4">
+          <Label for="textarea-id" class="mb-2">Description</Label>
+          <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
+          <Textarea id="textarea-id" rows="4" name="message"/>
+        </div>
+        <div class="mt-4">
+          <Toggle checked={true}>In Stock</Toggle>
+        </div>
       </div>
     </div>
+
+    <!-- submit -->
     <div class="md:flex md:flex-row">
-      <div class="my-4">
+      <div class="my-4 md:mr-4">
         <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
       </div>
       {#if action === 'edit'}

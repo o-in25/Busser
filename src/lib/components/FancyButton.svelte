@@ -22,7 +22,7 @@
   {#if href}
     <a
       {href}
-      class="text-center font-medium focus-within:ring-4 focus-within:outline-none text-base inline-flex items-center justify-center w-full !border-0 !rounded-md bg-white !text-gray-800 dark:bg-gray-800 dark:!text-white hover:bg-transparent hover:!text-inherit transition-all duration-75 ease-in group-hover:!bg-opacity-0 group-hover:!text-inherit {spacing || 'px-4 py-2'}"
+      class="text-center font-medium focus-within:ring-4 focus-within:outline-none text-base inline-flex items-center justify-center w-full !border-0 !rounded-md bg-white !text-gray-800 dark:bg-gray-800 dark:!text-white hover:!bg-transparent hover:!text-inherit transition-all duration-75 ease-in group-hover:!bg-opacity-0 group-hover:!text-inherit {spacing || 'px-4 py-2'}"
       role="button"
     >
       <slot />
@@ -30,7 +30,7 @@
   {:else}
     <button
       {type}
-      class="text-center font-medium focus-within:ring-4 focus-within:outline-none text-base inline-flex items-center justify-center w-full !border-0 !rounded-md bg-white !text-gray-800 dark:bg-gray-800 dark:!text-white hover:bg-transparent hover:!text-inherit transition-all duration-75 ease-in group-hover:!bg-opacity-0 group-hover:!text-inherit {spacing || 'px-4 py-2'}"
+      class="text-center font-medium focus-within:ring-4 focus-within:outline-none text-base inline-flex items-center justify-center w-full !border-0 !rounded-md bg-white !text-gray-800 dark:bg-gray-800 dark:!text-white hover:!bg-transparent hover:!text-inherit transition-all duration-75 ease-in group-hover:!bg-opacity-0 group-hover:!text-inherit {spacing || 'px-4 py-2'}"
       on:click={onClick}
     >
       <slot />

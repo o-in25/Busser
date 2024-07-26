@@ -1,5 +1,5 @@
 
-import type { Category, GallerySeeding, PaginationResult, Product, SelectOption } from "$lib/types";
+import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, SelectOption } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
@@ -172,7 +172,11 @@ export async function findInventoryItem(inventoryId: number): Promise<Product | 
         'category.categoryName',
         'category.categoryDescription',
         'productdetail.productImageUrl',
-        'productdetail.productDetailId',
+        'productdetail.productDescription',
+        'productdetail.productSweetnessRating',
+        'productdetail.productDrynessRating',
+        'productdetail.productVersatilityRating',
+        'productdetail.productStrengthRating',
       ])
       .where('product.productId', inventoryId)
       .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
@@ -258,5 +262,27 @@ export async function updateInventory(product: Product): Promise<Product | null>
   } catch(error: any) {
     console.error(error);
     return null;
+  }
+}
+
+export async function deleteInventoryItem(productId: number): Promise<number> {
+  // need to delete https://storage.googleapis.com/busser/IMG_5139.JPEG-0724202448
+  try {
+    // const productDetail = await db
+    //   .table<ProductDetail>('productdetail')
+    //     .where('ProductId', productId)
+    //       .del();
+
+    //       console.log(productDetail)
+    // console.log(productDetail)
+    const rowsDeleted = await db
+      .table<Product>('product')
+        .where('ProductId', productId)
+          .del();
+
+    return rowsDeleted;
+  } catch(error) {
+    console.error(error);
+    return 0;
   }
 }
