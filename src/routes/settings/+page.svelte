@@ -1,4 +1,5 @@
 <script lang="ts">
+    import ThemeMixer from "$lib/components/ThemeMixer.svelte";
   import { Label, Heading } from "flowbite-svelte";
   import { DarkMode } from "flowbite-svelte";
 </script>
@@ -9,7 +10,5 @@
   </Heading>
 </div>
 <div class="flex justify-left items-center">
-  <DarkMode
-    class="text-primary-500 dark:text-primary-600 border dark:border-gray-800" />
-  <Label class="ms-2 text-center">Dark Mode</Label>
+  <ThemeMixer></ThemeMixer>
 </div>

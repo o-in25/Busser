@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { Product } from "$lib/types";
+      import placeholder from "$lib/assets/placeholder@2x.jpg";
+
   import {
     ImagePlaceholder,
     P,
@@ -31,6 +33,10 @@
       url: "/",
     },
   };
+
+  // fallback if image cant load 
+  let productImage = product?.productImageUrl || placeholder;
+  const imageLoadError = () => productImage = placeholder
 
   const fakeRatings = () => {
     let vec: number[] = [];
@@ -172,12 +178,16 @@
   <div class="space-y-2 text-wrap w-full">
     <!-- desktop only -->
     <div class="hidden sm:py-4 md:py-6 sm:flex sm:flex-auto sm:justify-center grow ">
+      <!-- svelte-ignore a11y-missing-attribute -->
+      <img class="hidden" src={product.productImageUrl} on:error={imageLoadError}>
       <Card
-        img={product.productImageUrl}
+        img={productImage}
         horizontal
         size="xl"
         class="!w-full shadow-2xl"
-        padding="xl">
+        padding="xl"
+        on:error={imageLoadError}
+        >
         <div class="card-content">
           <Heading tag="h5">
             <span class="block w-96">{product.productName}</span>
@@ -205,7 +215,7 @@
     </div>
     <!-- mobile only -->
     <div class="sm:hidden flex justify-center px-2 py-4 md:pb-4 w-full">
-      <Card img={product.productImageUrl} size="md" href={null} padding="sm" class="shadow-2xl">
+      <Card img={product.productImageUrl || placeholder} size="md" href={null} padding="sm" class="shadow-2xl">
         <div class="card-content">
           <Heading tag="h5">
             <span class="block">{product.productName}</span>

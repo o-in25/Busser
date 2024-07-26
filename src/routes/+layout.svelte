@@ -75,15 +75,15 @@
 </div>
 <ProgressBar class="text-purple-600" />
 
-<div class="container mx-auto p-4">
+<div class="container mx-auto p-4 flex-1">
   <slot />
 </div>
 
-<!-- desktop only -->
-<div class="hidden sm:block">
-  <Footer footerType="logo">
+
+<div class="hidden sm:block md:mt-auto md:text-center">
+  <Footer footerType="logo" class="rounded-none">
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-    <FooterCopyright by="Busser" />
+    <FooterCopyright by="Busser"/>
   </Footer>
 </div>
 
@@ -93,13 +93,3 @@
     <MobileNav {activeUrl} />
   </div>
 {/if}
-
-<style lang="scss">
-html,body{
-  width:100%;
-  height:100%;
-  margin:0;
-  padding:0;
-}
-
-</style>
