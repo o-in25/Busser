@@ -23,11 +23,11 @@
     <ButtonGroup class="space-x-px">
       <GradientButton color="purpleToBlue" size="lg" href="/login">
         <ArrowLeftToBracketOutline/>
-        <Span class="pl-1">Log In</Span>
+        <Span class="pl-1 text-white">Log In</Span>
       </GradientButton>
       <GradientButton id="btn-sign-up" color="cyanToBlue" size="lg" disabled>
         <MailBoxOutline/>
-        <Span class="pl-1">Sign Up</Span>
+        <Span class="pl-1 text-white">Sign Up</Span>
       </GradientButton>
     </ButtonGroup>
   </div>

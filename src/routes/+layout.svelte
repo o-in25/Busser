@@ -44,12 +44,12 @@
         class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
       </span>
     </NavBrand>
-    <div class="flex items-center md:order-2">
-      <Placeholder id="avatar-menu" />
-      <NavHamburger class1="w-full md:flex md:w-auto md:order-1" />
-    </div>
-    <Dropdown placement="right" triggeredBy="#avatar-menu" class="py-4">
-      {#if data.user}
+    {#if data.user}
+      <div class="flex items-center md:order-2">
+        <Placeholder id="avatar-menu" />
+        <NavHamburger class1="w-full md:flex md:w-auto md:order-1" />
+      </div>
+      <Dropdown placement="right" triggeredBy="#avatar-menu" class="py-4">
         <DropdownHeader>
           <span class="block text-sm">{data.user.username}</span>
           <span class="block truncate text-sm font-medium">
@@ -61,10 +61,8 @@
         <DropdownItem on:click={logout}>
           {#if data.user}Log out{:else}Log In{/if}
         </DropdownItem>
-      {:else}
-        <DropdownItem href="/login">Log In</DropdownItem>
-      {/if}
-    </Dropdown>
+      </Dropdown>
+    {/if}
     {#if data.user}
       <NavUl {activeUrl}>
         <NavLi href="/" active>Home</NavLi>
@@ -95,3 +93,13 @@
     <MobileNav {activeUrl} />
   </div>
 {/if}
+
+<style lang="scss">
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+}
+
+</style>

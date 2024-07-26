@@ -27,7 +27,7 @@
       </div> -->
       <div class="!mt-8">
         <FancyButton type="submit">
-          <Span class="pl-1">Log In</Span>
+          <span class="pl-1">Log In</span>
         </FancyButton>
       </div>
       <!-- <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
