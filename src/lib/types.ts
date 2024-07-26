@@ -28,7 +28,12 @@ export type Product = {
   productDetailId?: number,
   productImageUrl?: string,
   categoryName?: string,
-  categoryDescription?: string;
+  categoryDescription?: string,
+  productDescription?: string
+  productSweetnessRating?: number
+  productDrynessRating?: number
+  productVersatilityRating?: number
+  productStrengthRating?: number
 };
 
 export type Category = {
@@ -95,6 +100,11 @@ export type ProductDetail = {
 
 export type FormSubmitResult = {
   success?: Record<'message', string>;
-  error?: Record<'message', string>;
+  error?: Record<'message', string>
   args?: any
 }
+
+export type Notification = {
+  success?: Record<'message', string> | null;
+  error?: Record<'message', string> | null;
+};

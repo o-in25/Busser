@@ -21,6 +21,8 @@
   import { enhance } from "$app/forms";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
   import { page } from "$app/stores";
+  import { notificationStore } from "../../stores";
+    import { goto } from "$app/navigation";
 
   export let action: ComponentAction;
   export let product: Product | null = null;
@@ -39,9 +41,15 @@
       method: 'DELETE'
     });
 
-    const data = await response.json();
-    console.log(data)
-
+    const { success, error } = await response.json();
+    console.log(success, error)
+    if(error) {
+      $notificationStore.success = error.message
+    } else {
+      $notificationStore.success = success.message
+    }
+    
+    goto(`/inventory`);
   }
 
   const openModal = () => {
