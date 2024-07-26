@@ -26,7 +26,7 @@
   <div class="mb-4">
     <Fileupload id={name} {name} class="mb-2" accept="image/*" bind:files={files}/> 
   </div>
-  <div class="bg-gray-700 rounded p-4">
+  <div class="bg-gray-700 rounded-lg p-4">
     <img src="{signedUrl || placeholder}" class="object-scale-down h-48 w-96 m-auto" alt="Product Thumbnail"/>
   </div>
 </div>

@@ -3,6 +3,7 @@
     import { GradientButton, Heading, Span } from 'flowbite-svelte';
     import { goto, invalidateAll } from '$app/navigation';
     import { ArrowRightToBracketOutline } from 'flowbite-svelte-icons';
+    import FancyButton from '$lib/components/FancyButton.svelte';
     
     export let data: PageData;
 
@@ -23,8 +24,5 @@
   </Heading>
 </div>
 <div class="flex justify-left items-center">
-  <GradientButton color="green" href="/inventory/add" size="lg" on:click={logout}>
-      <ArrowRightToBracketOutline/>
-      <Span class="pl-1">Log Out</Span>
-  </GradientButton>
+  <FancyButton on:clicked={logout}>Log Out</FancyButton>
 </div>

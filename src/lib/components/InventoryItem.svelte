@@ -197,7 +197,7 @@
 
           <div class="w-40">
             <FancyButton href="/inventory/{product.productId}/edit">
-              <EditSolid class="mr-1" />Edit
+              Edit
             </FancyButton>
           </div>
         </div>
@@ -226,9 +226,7 @@
           </div>
           <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
           <div class="gost">
-            <FancyButton href="/inventory/{product.productId}/edit">
-              <EditSolid class="mr-1" />Edit
-            </FancyButton>
+            <FancyButton href="/inventory/{product.productId}/edit">Edit</FancyButton>
           </div>
         </div>
       </Card>
