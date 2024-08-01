@@ -29,11 +29,17 @@
   export let result: FormSubmitResult = {};
 
   let slug = $page.params.id;
-  let productPricePerUnit = product?.productPricePerUnit;
+  let productPricePerUnit = product?.productPricePerUnit || 0.0;
   let productUnitSizeInMilliliters = product?.productUnitSizeInMilliliters;
   let productProof = product?.productProof;
   let categoryId = product?.categoryId;
   let productImageUrl = product?.productImageUrl;
+  let productInStockQuantity = product?.productInStockQuantity || 0;
+  let productSweetnessRating = 0.0;
+  let productDrynessRating = 0.0;
+  $: {
+    console.log(productInStockQuantity)
+  }
   let modalOpen = false;
 
   const deleteItem = async () => {
@@ -88,7 +94,7 @@
     <div class="grid gap-6 mb-6 md:grid-cols-3">
       <div>
         <Label for="productPricePerUnit" class="mb-2">Price</Label>
-        <Input let:props required>
+        <Input let:props required step="any">
           <div slot="left" class="font-bold">$</div>
           <input
             name="productPricePerUnit"
@@ -131,19 +137,26 @@
       <div>
         <div class="mt-4">
           <Label for="productSweetnessRating" class="mb-2">Sweetness</Label>
-          <Range id="productSweetnessRating" name="productSweetnessRating" size="lg" value={50} />
+          <Range id="productSweetnessRating" name="productSweetnessRating" size="lg" bind:value={productSweetnessRating} min="0" max="10" step="0.1"/>
         </div>
         <div class="mt-4">
           <Label for="productDrynessRating" class="mb-2">Dryness</Label>
-          <Range id="productDrynessRating" name="productDrynessRating" size="lg" value={50} />
+          <Range id="productDrynessRating" name="productDrynessRating" size="lg" bind:value={productDrynessRating} min="0" max="10" step="0.1" />
         </div>
         <div class="mt-4">
           <Label for="textarea-id" class="mb-2">Description</Label>
           <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-          <Textarea id="textarea-id" rows="4" name="message"/>
+          <Textarea name="productDescription" id="productDescription" rows="4"/>
         </div>
         <div class="mt-4">
-          <Toggle checked={true}>In Stock</Toggle>
+          <input name="productInStockQuantity" type="hidden" bind:value={productInStockQuantity}>
+          <Toggle checked={productInStockQuantity > 0} bind:value={productInStockQuantity} on:change={() => {
+            if(productInStockQuantity > 0) {
+              productInStockQuantity = 0
+            } else {
+              productInStockQuantity = 1;
+            }
+          }}>In Stock</Toggle>
         </div>
       </div>
     </div>
@@ -159,12 +172,14 @@
         </div>
       {/if}
         {#if result.success || result.error}
-          <div class="my-4 md:my-0 md:ml-4">
-            <Alert border color="{result.success? 'green' : 'red'}">
-              <InfoCircleSolid slot="icon" class="w-5 h-5" />
-              {#if result.error}<span class="font-medium">Could not save changes.</span>{/if}
-              {result.success?.message || result.error?.message}
-            </Alert>
+          <div class="my-4 md:my-0 md:ml-4 md:mt-4 md:w-full">
+            <div class="md:w-96 md:m-auto">
+              <Alert border color="{result.success? 'green' : 'red'}">
+                <InfoCircleSolid slot="icon" class="w-5 h-5" />
+                {#if result.error}<span class="font-medium">Could not save changes.</span>{/if}
+                {result.success?.message || result.error?.message}
+              </Alert>
+            </div>
           </div>
         {/if}
     </div>

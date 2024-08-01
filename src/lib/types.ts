@@ -32,8 +32,8 @@ export type Product = {
   productDescription?: string
   productSweetnessRating?: number
   productDrynessRating?: number
-  productVersatilityRating?: number
-  productStrengthRating?: number
+  // productVersatilityRating?: number
+  // productStrengthRating?: number
 };
 
 export type Category = {

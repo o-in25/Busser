@@ -24,10 +24,14 @@ export const actions = {
       productId,
       productName: formData.productName?.toString(),
       categoryId: Number(formData.categoryId),
+      productProof: Number(formData.productProof),
       productInStockQuantity: Number(formData.productInStockQuantity),
       productPricePerUnit: Number(formData.productPricePerUnit),
       productUnitSizeInMilliliters: Number(formData.productUnitSizeInMilliliters),
-      productProof: Number(formData.productProof)
+      productSweetnessRating: Number(formData.productSweetnessRating),
+      productDrynessRating: Number(formData.productDrynessRating),
+      productDescription: formData.productDescription?.toString(),
+
     };
 
     const newItem = await updateInventory(productData);
@@ -49,11 +53,10 @@ export const actions = {
         } as FormSubmitResult;
       }
     }
-    // product.productName = 'The guy from bane capital'
 
     // OK
     return {
-      args: { newItem },
+      args: {  },
       success: { message: 'Inventory has been updated.' }
     } as FormSubmitResult;
   }

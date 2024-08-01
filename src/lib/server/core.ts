@@ -235,7 +235,14 @@ export async function editProductImage(productId: number, file: File): Promise<R
 
 export async function updateInventory(product: Product): Promise<Product | null> {
   try {
-    const { productId, ...update } = product;
+    const { 
+      productId, 
+      productDescription,
+      productSweetnessRating,
+      productDrynessRating,
+      productImageUrl,
+      ...update 
+    } = product;
     let insert = marshal(update, pascalCase);
     const result = await db
     .table<Product>('product')
@@ -243,7 +250,6 @@ export async function updateInventory(product: Product): Promise<Product | null>
         .update({
           ...insert,
           SupplierId: 1,
-          ProductInStockQuantity: 1
         });
   
 
