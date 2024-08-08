@@ -13,6 +13,12 @@ export class DbProvider {
         return this.knex<T>(table);
     }
 
+    // public async transaction() {
+    //   const trxProvider = this.knex.transactionProvider();
+    //   const trx = await trxProvider();
+    //   return trx;
+    // }
+
     constructor(database: string) {
         this.knex = knex({
             client: 'mysql',
@@ -23,7 +29,7 @@ export class DbProvider {
               password: PASSWORD,
               database
             },
-            pool: { min: 0, max: 7 },
+          pool: { min: 0, max: 10 },
         });
 
         if(!Object.prototype.hasOwnProperty.call(this.knex, 'paginate')) {

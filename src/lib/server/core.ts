@@ -233,38 +233,86 @@ export async function editProductImage(productId: number, file: File): Promise<R
   }
 }
 
-export async function updateInventory(product: Product): Promise<Product | null> {
+export async function updateInventory(product: Product) {
+  console.log('starting uhhkay')
   try {
-    const { 
-      productId, 
-      productDescription,
-      productSweetnessRating,
-      productDrynessRating,
-      productImageUrl,
-      ...update 
-    } = product;
-    let insert = marshal(update, pascalCase);
-    const result = await db
-    .table<Product>('product')
-      .where("ProductId", productId)
-        .update({
-          ...insert,
-          SupplierId: 1,
-        });
+
+    await db.query.transaction(async (trx) => {
+      let values = marshal(product, pascalCase);
+      const query1 = await trx('product')
+      .where("ProductId", values.ProductId)
+      .update({
+        // ProductId: values.ProductId, 
+        CategoryId: values.CategoryId,
+        SupplierId: 1,
+        ProductName: values.ProductName,
+        ProductInStockQuantity: values.ProductInStockQuantity,
+        ProductUnitSizeInMilliliters: values.ProductUnitSizeInMilliliters,
+        ProductPricePerUnit: values.ProductPricePerUnit,
+        ProductProof: values.ProductProof
+      });
+
+
+      console.log(query1);
+      const query2 = await trx('productdetail')
+      .where("ProductId", values.ProductId)
+      .update({
+        ProductImageUrl: values.ProductImageUrl,
+        ProductDescription: values.ProductDescription,
+        ProductSweetnessRating: values.ProductSweetnessRating,
+        ProductDrynessRating: values.ProductDrynessRating,
+        ProductVersatilityRating: values.ProductVersatilityRating,
+        ProductStrengthRating: values.ProductStrengthRating
+      });
+
+      console.log(query2);
+      await trx.commit();
+
+    })
+
+    //   console.log(query1);
+    //   const query2 = await trx('productdetail').update({
+    //     ProductImageUrl: values.ProductImageUrl,
+    //     ProductDescription: values.ProductDescription,
+    //     ProductSweetnessRating: values.ProductSweetnessRating,
+    //     ProductDrynessRating: values.ProductDrynessRating,
+    //     ProductVersatilityRating: values.ProductVersatilityRating,
+    //     ProductStrengthRating: values.ProductStrengthRating
+    //   });
+
+    // .table<Product>('product')
+    //   .where("ProductId", productId)
+    //     .update({
+    //       ...insert,
+    //       SupplierId: 1,
+    //     });
   
 
-    if(result === 0) throw Error('Could not update inventory.')
-    const [newRow] = await db
-      .table<Product>('product')
-        .select(Object.keys(insert))
-          .where("ProductId", productId);
+    // if(result === 0) throw Error('Could not update inventory.');
+    
+    // const [newRow] = await db
+    //   .table<Product>('product')
+    //     .select(Object.keys(insert))
+    //       .where("ProductId", productId);
 
-    if(!newRow) {
-      throw Error('Inventory item updated but could not be retrieved.');
-    }
+    // if(!newRow) {
+    //   throw Error('Inventory item updated but could not be retrieved.');
+    // }
 
-    return marshal<Product>(newRow, camelCase)
+    // return marshal<Product>(newRow, camelCase)
 
+    // let values = marshal(product, pascalCase);
+    // const query2 = await db.table('productdetail').where("ProductId", values.ProductId).update({
+    //     ProductImageUrl: values.ProductImageUrl,
+    //     ProductDescription: values.ProductDescription,
+    //     ProductSweetnessRating: values.ProductSweetnessRating,
+    //     ProductDrynessRating: values.ProductDrynessRating,
+    //     ProductVersatilityRating: values.ProductVersatilityRating,
+    //     ProductStrengthRating: values.ProductStrengthRating
+    //   });
+
+
+    //   console.log(query2)
   } catch(error: any) {
     console.error(error);
     return null;
