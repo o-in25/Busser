@@ -214,19 +214,29 @@ export async function editProductImage(productId: number, file: File): Promise<R
   }
 }
 
-export async function updateInventory(product: Product) {
+export async function updateInventory(product: Product, image: File | null = null): Promise<Product | null> {
   try {
+    if(!product?.productId) throw Error('No inventory ID provided.');
+    const productImageUrl = await (async () => {
+      if(!image) return product?.productImageUrl || undefined;
+      const signedUrl = await getSignedUrl(image);
+      if(signedUrl) return signedUrl;
+      return product?.productImageUrl || undefined;
+    })();
+
+    product = { ...product, productImageUrl, supplierId: 1 }
+    const values = marshal(product, pascalCase);
+
     await db.query.transaction(async (trx) => {
-      let values = marshal(product, pascalCase);
 
       // const query0 = await trx.table<Product>('product').select('ProductId').where("ProductId", values.ProductId);
       
-      const productInsert = await trx('product')
+      await trx('product')
       // .where("ProductId", values.ProductId)
         .insert({
           ProductId: values.ProductId, 
           CategoryId: values.CategoryId,
-          SupplierId: 1,
+          SupplierId: values.SupplierId,
           ProductName: values.ProductName,
           ProductInStockQuantity: values.ProductInStockQuantity,
           ProductUnitSizeInMilliliters: values.ProductUnitSizeInMilliliters,
@@ -234,13 +244,9 @@ export async function updateInventory(product: Product) {
           ProductProof: values.ProductProof
         }).onConflict('ProductId').merge();
 
-      // const productDetailSelect = await trx('productdetail').select('')
 
-      // if(query1 !== 1) throw Error('Query 1 failed.');
-
-      const query2 = await trx('productdetail')
-      .where("ProductId", values.ProductId)
-      .update({
+      await trx('productdetail')
+      .insert({
         ProductId: values.ProductId,
         ProductImageUrl: values.ProductImageUrl,
         ProductDescription: values.ProductDescription,
@@ -248,26 +254,14 @@ export async function updateInventory(product: Product) {
         ProductDrynessRating: values.ProductDrynessRating,
         ProductVersatilityRating: values.ProductVersatilityRating,
         ProductStrengthRating: values.ProductStrengthRating
-      }).onConflict('').merge();
-
-      if(query2 === 0) {
-        const query3 = await trx('productdetail')
-          .where("ProductId", values.ProductId)
-          .insert({
-            ProductId: values.ProductId,
-            ProductImageUrl: values.ProductImageUrl,
-            ProductDescription: values.ProductDescription,
-            ProductSweetnessRating: values.ProductSweetnessRating,
-            ProductDrynessRating: values.ProductDrynessRating,
-            ProductVersatilityRating: values.ProductVersatilityRating,
-            ProductStrengthRating: values.ProductStrengthRating
-          })
-      }
-      // if(query2 !== 1) throw Error('Query 2 failed.')
+      }).onConflict('ProductId').merge();     
 
       await trx.commit();
 
-    })
+    });
+
+    return await findInventoryItem(values.ProductId)
+
 
   } catch(error: any) {
     console.error(error);

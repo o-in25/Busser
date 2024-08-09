@@ -181,8 +181,7 @@
             <div class="md:w-96 md:m-auto">
               <Alert border color="{result.success? 'green' : 'red'}">
                 <InfoCircleSolid slot="icon" class="w-5 h-5" />
-                {#if result.error}<span class="font-medium">Could not save changes.</span>{/if}
-                {result.success?.message || result.error?.message}
+                {#if result.error}<span class="font-medium">Could not save changes.</span>{:else}{result.success?.message}{/if}
               </Alert>
             </div>
           </div>

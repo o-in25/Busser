@@ -34,16 +34,15 @@ export const actions = {
       productDescription: formData.productDescription?.toString(),
 
     };
+    const { productImageUrl: file } = formData as { productImageUrl: File; };
+    const newItem = await updateInventory(productData, file);
+    if(!newItem) {
+      // ERROR
+      return {
+        error: { message: 'Inventory item not be updated.' }
+      } as FormSubmitResult;
+    }
 
-    const newItem = await updateInventory(productData);
-    // if(!newItem) {
-    //   // ERROR
-    //   return {
-    //     error: { message: 'Inventory item not be updated.' }
-    //   } as FormSubmitResult;
-    // }
-
-    // const { productImageUrl: file } = formData as { productImageUrl: File; };
     // if(file?.size > 0) {
     //   const { productDetailId } = await editProductImage(productId, file);
     //   console.log(productDetailId)
