@@ -14,7 +14,7 @@ export const actions = {
     if(isNaN(productId)) {
       // ERROR
       return {
-        error: { message: 'Inventory item not foun!d.' }
+        error: { message: 'Inventory item not found.' }
       } as FormSubmitResult;
     }
 
@@ -22,6 +22,7 @@ export const actions = {
     let formData = Object.fromEntries(await request.formData());
     const productData = {
       productId,
+      productDetailId: Number(formData.productDetailId || -1),
       productName: formData.productName?.toString(),
       categoryId: Number(formData.categoryId),
       productProof: Number(formData.productProof),

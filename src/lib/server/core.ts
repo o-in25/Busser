@@ -159,32 +159,13 @@ export async function searchInventory(search: string): Promise<Product[]> {
 
 export async function findInventoryItem(inventoryId: number): Promise<Product | null> {
   try {
-    let data = await db.table('product')
-      .select([
-        'product.productId',
-        'product.supplierId',
-        'product.productName',
-        'product.productPricePerUnit',
-        'product.productInStockQuantity',
-        'product.productUnitSizeInMilliliters',
-        'product.productProof',
-        'category.categoryId',
-        'category.categoryName',
-        'category.categoryDescription',
-        'productdetail.productImageUrl',
-        'productdetail.productDescription',
-        'productdetail.productSweetnessRating',
-        'productdetail.productDrynessRating',
-        'productdetail.productVersatilityRating',
-        'productdetail.productStrengthRating',
-      ])
-      .where('product.productId', inventoryId)
-      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
-      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId');
+    let data = await db.table<Product>('inventory').where("ProductId", inventoryId).select();
     let result: Product[] = marshal<Product[]>(data);
     if(result.length === 0) {
       throw Error('Product not found')
     }
+
+    console.log(result)
     const [search] = result;
     return search;
   
@@ -234,85 +215,60 @@ export async function editProductImage(productId: number, file: File): Promise<R
 }
 
 export async function updateInventory(product: Product) {
-  console.log('starting uhhkay')
   try {
-
     await db.query.transaction(async (trx) => {
       let values = marshal(product, pascalCase);
-      const query1 = await trx('product')
-      .where("ProductId", values.ProductId)
-      .update({
-        // ProductId: values.ProductId, 
-        CategoryId: values.CategoryId,
-        SupplierId: 1,
-        ProductName: values.ProductName,
-        ProductInStockQuantity: values.ProductInStockQuantity,
-        ProductUnitSizeInMilliliters: values.ProductUnitSizeInMilliliters,
-        ProductPricePerUnit: values.ProductPricePerUnit,
-        ProductProof: values.ProductProof
-      });
 
+      // const query0 = await trx.table<Product>('product').select('ProductId').where("ProductId", values.ProductId);
+      
+      const productInsert = await trx('product')
+      // .where("ProductId", values.ProductId)
+        .insert({
+          ProductId: values.ProductId, 
+          CategoryId: values.CategoryId,
+          SupplierId: 1,
+          ProductName: values.ProductName,
+          ProductInStockQuantity: values.ProductInStockQuantity,
+          ProductUnitSizeInMilliliters: values.ProductUnitSizeInMilliliters,
+          ProductPricePerUnit: values.ProductPricePerUnit,
+          ProductProof: values.ProductProof
+        }).onConflict('ProductId').merge();
 
-      console.log(query1);
+      // const productDetailSelect = await trx('productdetail').select('')
+
+      // if(query1 !== 1) throw Error('Query 1 failed.');
+
       const query2 = await trx('productdetail')
       .where("ProductId", values.ProductId)
       .update({
+        ProductId: values.ProductId,
         ProductImageUrl: values.ProductImageUrl,
         ProductDescription: values.ProductDescription,
         ProductSweetnessRating: values.ProductSweetnessRating,
         ProductDrynessRating: values.ProductDrynessRating,
         ProductVersatilityRating: values.ProductVersatilityRating,
         ProductStrengthRating: values.ProductStrengthRating
-      });
+      }).onConflict('').merge();
 
-      console.log(query2);
+      if(query2 === 0) {
+        const query3 = await trx('productdetail')
+          .where("ProductId", values.ProductId)
+          .insert({
+            ProductId: values.ProductId,
+            ProductImageUrl: values.ProductImageUrl,
+            ProductDescription: values.ProductDescription,
+            ProductSweetnessRating: values.ProductSweetnessRating,
+            ProductDrynessRating: values.ProductDrynessRating,
+            ProductVersatilityRating: values.ProductVersatilityRating,
+            ProductStrengthRating: values.ProductStrengthRating
+          })
+      }
+      // if(query2 !== 1) throw Error('Query 2 failed.')
+
       await trx.commit();
 
     })
 
-    //   console.log(query1);
-    //   const query2 = await trx('productdetail').update({
-    //     ProductImageUrl: values.ProductImageUrl,
-    //     ProductDescription: values.ProductDescription,
-    //     ProductSweetnessRating: values.ProductSweetnessRating,
-    //     ProductDrynessRating: values.ProductDrynessRating,
-    //     ProductVersatilityRating: values.ProductVersatilityRating,
-    //     ProductStrengthRating: values.ProductStrengthRating
-    //   });
-
-    // .table<Product>('product')
-    //   .where("ProductId", productId)
-    //     .update({
-    //       ...insert,
-    //       SupplierId: 1,
-    //     });
-  
-
-    // if(result === 0) throw Error('Could not update inventory.');
-    
-    // const [newRow] = await db
-    //   .table<Product>('product')
-    //     .select(Object.keys(insert))
-    //       .where("ProductId", productId);
-
-    // if(!newRow) {
-    //   throw Error('Inventory item updated but could not be retrieved.');
-    // }
-
-    // return marshal<Product>(newRow, camelCase)
-
-    // let values = marshal(product, pascalCase);
-    // const query2 = await db.table('productdetail').where("ProductId", values.ProductId).update({
-    //     ProductImageUrl: values.ProductImageUrl,
-    //     ProductDescription: values.ProductDescription,
-    //     ProductSweetnessRating: values.ProductSweetnessRating,
-    //     ProductDrynessRating: values.ProductDrynessRating,
-    //     ProductVersatilityRating: values.ProductVersatilityRating,
-    //     ProductStrengthRating: values.ProductStrengthRating
-    //   });
-
-
-    //   console.log(query2)
   } catch(error: any) {
     console.error(error);
     return null;

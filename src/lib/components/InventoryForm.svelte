@@ -35,10 +35,13 @@
   let categoryId = product?.categoryId;
   let productImageUrl = product?.productImageUrl;
   let productInStockQuantity = product?.productInStockQuantity || 0;
-  let productSweetnessRating = 0.0;
-  let productDrynessRating = 0.0;
+  let productSweetnessRating = product?.productSweetnessRating || 0.0;
+  let productDrynessRating = product?.productDrynessRating || 0.0;
+  let productDescription = product?.productDescription;
+
+  // TODO: add a column constraint to productId col and do it that way
+  let productDetailId = product?.productDetailId
   $: {
-    console.log(productInStockQuantity)
   }
   let modalOpen = false;
 
@@ -146,7 +149,7 @@
         <div class="mt-4">
           <Label for="textarea-id" class="mb-2">Description</Label>
           <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-          <Textarea name="productDescription" id="productDescription" rows="4"/>
+          <Textarea name="productDescription" id="productDescription" rows="4" bind:value={productDescription}/>
         </div>
         <div class="mt-4">
           <input name="productInStockQuantity" type="hidden" bind:value={productInStockQuantity}>
@@ -160,6 +163,8 @@
         </div>
       </div>
     </div>
+
+    <input type="hidden" value={productDetailId}>
 
     <!-- submit -->
     <div class="md:flex md:flex-row">
