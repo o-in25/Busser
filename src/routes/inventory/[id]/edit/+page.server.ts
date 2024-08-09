@@ -31,6 +31,8 @@ export const actions = {
       productUnitSizeInMilliliters: Number(formData.productUnitSizeInMilliliters),
       productSweetnessRating: Number(formData.productSweetnessRating),
       productDrynessRating: Number(formData.productDrynessRating),
+      productVersatilityRating: Number(formData.productVersatilityRating),
+      productStrengthRating: Number(formData.productStrengthRating),
       productDescription: formData.productDescription?.toString(),
       // productImageUrl: formData.productImageUrl?.toString(),
 

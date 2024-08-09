@@ -35,27 +35,15 @@ const paginationData = {
 
 export async function getInventory(currentPage: number, perPage: number = 25): Promise<PaginationResult<Product[]>> {
   try {
-    let { data, pagination } = await db.table('product')
-      .select([
-        'product.productId',
-        'product.supplierId',
-        'product.productName',
-        'product.productPricePerUnit',
-        'product.productInStockQuantity',
-        'product.productUnitSizeInMilliliters',
-        'product.productProof',
-        'category.categoryId',
-        'category.categoryName',
-        'category.categoryDescription',
-        'productdetail.productImageUrl',
-        'productdetail.productDetailId',
-      ])
-      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
-      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
+    let { data, pagination } = await db.table('inventory')
+      .select()
       .paginate({ perPage, currentPage, isLengthAware: true })
+
+    // let { data, pagination } = await db.table('inventory').paginate({ perPage, currentPage, isLengthAware: true })
     data = data.map(item => Object.assign({}, item));
     data = marshal(data);
-    const result: PaginationResult<Product[]> = { data, pagination };
+    const inventory = data as Product[];
+    const result: PaginationResult<Product[]> = { data: inventory, pagination };
 
     return result;
   } catch(error: any) {
@@ -130,24 +118,25 @@ export async function addToInventory(product: Product): Promise<Record<"productI
 
 export async function searchInventory(search: string): Promise<Product[]> {
   try {
-    let data = await db.table('product')
-      .select([
-        'product.productId',
-        'product.supplierId',
-        'product.productName',
-        'product.productPricePerUnit',
-        'product.productInStockQuantity',
-        'product.productUnitSizeInMilliliters',
-        'product.productProof',
-        'category.categoryId',
-        'category.categoryName',
-        'category.categoryDescription',
-        'productdetail.productImageUrl',
-        'productdetail.productDetailId',
-      ])
-      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
-      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
-      .where('product.productName', 'like', `%${search}%`)
+    let data = await db.table('inventory').where('productName', 'like', `%${search}%`)
+    // let data = await db.table('product')
+    //   .select([
+    //     'product.productId',
+    //     'product.supplierId',
+    //     'product.productName',
+    //     'product.productPricePerUnit',
+    //     'product.productInStockQuantity',
+    //     'product.productUnitSizeInMilliliters',
+    //     'product.productProof',
+    //     'category.categoryId',
+    //     'category.categoryName',
+    //     'category.categoryDescription',
+    //     'productdetail.productImageUrl',
+    //     'productdetail.productDetailId',
+    //   ])
+    //   .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
+    //   .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
+    //   .where('product.productName', 'like', `%${search}%`)
     let result: Product[] = marshal<Product[]>(data);
     // const result: PaginationResult<Product[]> = { data, pagination };
     return result;
@@ -165,7 +154,6 @@ export async function findInventoryItem(inventoryId: number): Promise<Product | 
       throw Error('Product not found')
     }
 
-    console.log(result)
     const [search] = result;
     return search;
   
@@ -218,16 +206,6 @@ export async function updateInventory(product: Product, image: File | null = nul
   try {
     if(!product?.productId) throw Error('No inventory ID provided.');
 
-    // console.log(image)
-    // const productImageUrl = await (async () => {
-    //   if(!image) return product?.productImageUrl || undefined;
-    //   let fileName = image.name === 'undefined'? _.uniqueId() : image.name;
-    //   const signedUrl = await getSignedUrl(image, fileName);
-    //   if(signedUrl) return signedUrl;
-    //   return product?.productImageUrl || undefined;
-    // })();
-
-    console.log(product.productImageUrl, '======EXISTIG')
     const productImageUrl = (async (image) => {
 
       let oldImage: any = await db.table('productdetail').select('ProductImageUrl').where({
@@ -246,7 +224,6 @@ export async function updateInventory(product: Product, image: File | null = nul
     })
 
     const signedUrl = await productImageUrl(image);
-    console.log(signedUrl)
     product = { ...product, productImageUrl: signedUrl, supplierId: 1 }
     const values = marshal(product, pascalCase);
 

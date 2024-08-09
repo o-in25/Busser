@@ -37,6 +37,8 @@
   let productInStockQuantity = product?.productInStockQuantity || 0;
   let productSweetnessRating = product?.productSweetnessRating || 0.0;
   let productDrynessRating = product?.productDrynessRating || 0.0;
+  let productStrengthRating = product?.productStrengthRating || 0.0;
+  let productVersatilityRating = product?.productVersatilityRating || 0.0;
   let productDescription = product?.productDescription;
 
   // TODO: add a column constraint to productId col and do it that way
@@ -51,7 +53,6 @@
     });
 
     const { success, error } = await response.json();
-    console.log(success, error)
     if(error) {
       $notificationStore.success = error.message
     } else {
@@ -147,11 +148,14 @@
           <Range id="productDrynessRating" name="productDrynessRating" size="lg" bind:value={productDrynessRating} min="0" max="10" step="0.1" />
         </div>
         <div class="mt-4">
-          <Label for="textarea-id" class="mb-2">Description</Label>
-          <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-          <Textarea name="productDescription" id="productDescription" rows="4" bind:value={productDescription}/>
+          <Label for="productVersatilityRating" class="mb-2">Versatility</Label>
+          <Range id="productVersatilityRating" name="productVersatilityRating" size="lg" bind:value={productVersatilityRating} min="0" max="10" step="0.1"/>
         </div>
         <div class="mt-4">
+          <Label for="productStrengthRating" class="mb-2">Strength</Label>
+          <Range id="productStrengthRating" name="productStrengthRating" size="lg" bind:value={productStrengthRating} min="0" max="10" step="0.1" />
+        </div>
+        <div class="mt-4 float-right">
           <input name="productInStockQuantity" type="hidden" bind:value={productInStockQuantity}>
           <Toggle checked={productInStockQuantity > 0} bind:value={productInStockQuantity} on:change={() => {
             if(productInStockQuantity > 0) {
@@ -162,6 +166,13 @@
           }}>In Stock</Toggle>
         </div>
       </div>
+    </div>
+    <div class="mb-6">
+      <div class="mt-4">
+          <Label for="textarea-id" class="mb-2">Description</Label>
+          <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
+          <Textarea name="productDescription" id="productDescription" rows="4" bind:value={productDescription}/>
+        </div>
     </div>
 
     <input type="hidden" value={productDetailId}>
