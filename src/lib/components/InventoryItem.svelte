@@ -60,13 +60,12 @@
       { label: "Strength", rating: product.productStrengthRating || 0.0 },
       { label: "Versatility", rating: product.productVersatilityRating || 0.0 },
     ];
-    let vec: number[] = ratings.concat(ratings).map(({ rating }) => rating);
+    let vec: number[] = ratings.concat(ratings2).map(({ rating }) => rating);
 
     // let avg =
     //   Math.round((vec.reduce((acc, curr) => acc + curr, 0) / vec.length) * 10) /
     //   10;
-
-    let avg = weightedMean(vec, [1, 2.5, 1.5, 7.5])
+    let avg = weightedMean(vec, [6.5, 3.5, 0.95, 11.5])
     if(avg === 0) {
       return {
         ratings,
