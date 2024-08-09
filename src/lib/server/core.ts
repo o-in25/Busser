@@ -217,14 +217,37 @@ export async function editProductImage(productId: number, file: File): Promise<R
 export async function updateInventory(product: Product, image: File | null = null): Promise<Product | null> {
   try {
     if(!product?.productId) throw Error('No inventory ID provided.');
-    const productImageUrl = await (async () => {
-      if(!image) return product?.productImageUrl || undefined;
-      const signedUrl = await getSignedUrl(image);
-      if(signedUrl) return signedUrl;
-      return product?.productImageUrl || undefined;
-    })();
 
-    product = { ...product, productImageUrl, supplierId: 1 }
+    // console.log(image)
+    // const productImageUrl = await (async () => {
+    //   if(!image) return product?.productImageUrl || undefined;
+    //   let fileName = image.name === 'undefined'? _.uniqueId() : image.name;
+    //   const signedUrl = await getSignedUrl(image, fileName);
+    //   if(signedUrl) return signedUrl;
+    //   return product?.productImageUrl || undefined;
+    // })();
+
+    console.log(product.productImageUrl, '======EXISTIG')
+    const productImageUrl = (async (image) => {
+
+      let oldImage: any = await db.table('productdetail').select('ProductImageUrl').where({
+        ProductId: product.productId
+      }).limit(1);
+
+      [oldImage] = marshal(oldImage, camelCase);
+      oldImage.productImageUrl = oldImage.productImageUrl || null;
+
+
+      if(!image || image.size === 0 || image.name === 'undefined') {
+        return oldImage.productImageUrl
+      }
+      const signedUrl = await getSignedUrl(image);
+      return signedUrl || oldImage.productImageUrl
+    })
+
+    const signedUrl = await productImageUrl(image);
+    console.log(signedUrl)
+    product = { ...product, productImageUrl: signedUrl, supplierId: 1 }
     const values = marshal(product, pascalCase);
 
     await db.query.transaction(async (trx) => {

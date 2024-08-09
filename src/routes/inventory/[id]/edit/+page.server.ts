@@ -32,6 +32,7 @@ export const actions = {
       productSweetnessRating: Number(formData.productSweetnessRating),
       productDrynessRating: Number(formData.productDrynessRating),
       productDescription: formData.productDescription?.toString(),
+      // productImageUrl: formData.productImageUrl?.toString(),
 
     };
     const { productImageUrl: file } = formData as { productImageUrl: File; };
