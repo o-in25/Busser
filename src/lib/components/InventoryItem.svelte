@@ -38,26 +38,44 @@
   let productImage = product?.productImageUrl || placeholder;
   const imageLoadError = () => productImage = placeholder
 
-  const fakeRatings = () => {
-    let vec: number[] = [];
-    for (let i = 0; i < 4; i++) {
-      const randomRating = Math.floor(Math.random() * (1000 - 100) + 100) / 100;
-      vec.push(randomRating);
-    }
+  const weightedMean = (arrValues: number[], arrWeights: number[]) => {
+    const result = arrValues
+      .map((value, i) => {
+        const weight = arrWeights[i]
+        const sum = value * weight
+        return [sum, weight]
+      })
+      .reduce((p, c) => [p[0] + c[0], p[1] + c[1]], [0, 0])
+
+    return result[0] / result[1]
+  }
+
+  const generateRatings = () => {
     let ratings = [
-      { label: "Dryness", rating: vec[0] },
-      { label: "Sweetness", rating: vec[1] },
+      { label: "Dryness", rating: product.productDrynessRating || 0.0 },
+      { label: "Sweetness", rating: product.productSweetnessRating || 0.0 },
     ];
 
     let ratings2 = [
-      { label: "Strength", rating: vec[2] },
-      { label: "Versatility", rating: vec[3] },
+      { label: "Strength", rating: product.productStrengthRating || 0.0 },
+      { label: "Versatility", rating: product.productVersatilityRating || 0.0 },
     ];
+    let vec: number[] = ratings.concat(ratings2).map(({ rating }) => rating);
 
-    let avg =
-      Math.round((vec.reduce((acc, curr) => acc + curr, 0) / vec.length) * 10) /
-      10;
-    if (avg <= 1) {
+    // let avg =
+    //   Math.round((vec.reduce((acc, curr) => acc + curr, 0) / vec.length) * 10) /
+    //   10;
+    let avg = weightedMean(vec, [6.5, 3.5, 0.95, 11.5])
+    if(avg === 0) {
+      return {
+        ratings,
+        ratings2,
+        desc1: Number(0).toFixed(1),
+        desc2: "No Rating",
+        style: "text-white dark:bg-gray-500 bg-gray-500",
+      };
+    }
+    if(avg <= 1) {
       //'dark:bg-red-500 bg-red-500'
       return {
         ratings,
@@ -67,7 +85,7 @@
         style: "text-white dark:bg-red-500 bg-red-500",
       };
     }
-    if (avg <= 2) {
+    if(avg <= 2) {
       //'dark:bg-red-500 bg-red-500'
       return {
         ratings,
@@ -170,7 +188,7 @@
     return `${ml / 1000} L`;
   };
 
-  const { ratings, ratings2, desc1, desc2, style } = fakeRatings();
+  const { ratings, ratings2, desc1, desc2, style } = generateRatings();
 </script>
 
 <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
@@ -194,7 +212,7 @@
           </Heading>
           <p
             class="my-1 font-normal text-gray-700 dark:text-gray-400 leading-tight">
-            {product.categoryDescription}
+            {product.productDescription || product.categoryDescription}
           </p>
           <div class="py-4">
             <ScoreRating
@@ -223,7 +241,7 @@
           </Heading>
           <p
             class="my-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
-            {product.categoryDescription}
+            {product.productDescription || product.categoryDescription}
           </p>
           <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
           <div class="px-2 md:pb-4">

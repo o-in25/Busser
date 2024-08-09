@@ -35,27 +35,15 @@ const paginationData = {
 
 export async function getInventory(currentPage: number, perPage: number = 25): Promise<PaginationResult<Product[]>> {
   try {
-    let { data, pagination } = await db.table('product')
-      .select([
-        'product.productId',
-        'product.supplierId',
-        'product.productName',
-        'product.productPricePerUnit',
-        'product.productInStockQuantity',
-        'product.productUnitSizeInMilliliters',
-        'product.productProof',
-        'category.categoryId',
-        'category.categoryName',
-        'category.categoryDescription',
-        'productdetail.productImageUrl',
-        'productdetail.productDetailId',
-      ])
-      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
-      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
+    let { data, pagination } = await db.table('inventory')
+      .select()
       .paginate({ perPage, currentPage, isLengthAware: true })
+
+    // let { data, pagination } = await db.table('inventory').paginate({ perPage, currentPage, isLengthAware: true })
     data = data.map(item => Object.assign({}, item));
     data = marshal(data);
-    const result: PaginationResult<Product[]> = { data, pagination };
+    const inventory = data as Product[];
+    const result: PaginationResult<Product[]> = { data: inventory, pagination };
 
     return result;
   } catch(error: any) {
@@ -130,24 +118,25 @@ export async function addToInventory(product: Product): Promise<Record<"productI
 
 export async function searchInventory(search: string): Promise<Product[]> {
   try {
-    let data = await db.table('product')
-      .select([
-        'product.productId',
-        'product.supplierId',
-        'product.productName',
-        'product.productPricePerUnit',
-        'product.productInStockQuantity',
-        'product.productUnitSizeInMilliliters',
-        'product.productProof',
-        'category.categoryId',
-        'category.categoryName',
-        'category.categoryDescription',
-        'productdetail.productImageUrl',
-        'productdetail.productDetailId',
-      ])
-      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
-      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
-      .where('product.productName', 'like', `%${search}%`)
+    let data = await db.table('inventory').where('productName', 'like', `%${search}%`)
+    // let data = await db.table('product')
+    //   .select([
+    //     'product.productId',
+    //     'product.supplierId',
+    //     'product.productName',
+    //     'product.productPricePerUnit',
+    //     'product.productInStockQuantity',
+    //     'product.productUnitSizeInMilliliters',
+    //     'product.productProof',
+    //     'category.categoryId',
+    //     'category.categoryName',
+    //     'category.categoryDescription',
+    //     'productdetail.productImageUrl',
+    //     'productdetail.productDetailId',
+    //   ])
+    //   .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
+    //   .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
+    //   .where('product.productName', 'like', `%${search}%`)
     let result: Product[] = marshal<Product[]>(data);
     // const result: PaginationResult<Product[]> = { data, pagination };
     return result;
@@ -159,32 +148,12 @@ export async function searchInventory(search: string): Promise<Product[]> {
 
 export async function findInventoryItem(inventoryId: number): Promise<Product | null> {
   try {
-    let data = await db.table('product')
-      .select([
-        'product.productId',
-        'product.supplierId',
-        'product.productName',
-        'product.productPricePerUnit',
-        'product.productInStockQuantity',
-        'product.productUnitSizeInMilliliters',
-        'product.productProof',
-        'category.categoryId',
-        'category.categoryName',
-        'category.categoryDescription',
-        'productdetail.productImageUrl',
-        'productdetail.productDescription',
-        'productdetail.productSweetnessRating',
-        'productdetail.productDrynessRating',
-        'productdetail.productVersatilityRating',
-        'productdetail.productStrengthRating',
-      ])
-      .where('product.productId', inventoryId)
-      .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
-      .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId');
+    let data = await db.table<Product>('inventory').where("ProductId", inventoryId).select();
     let result: Product[] = marshal<Product[]>(data);
     if(result.length === 0) {
       throw Error('Product not found')
     }
+
     const [search] = result;
     return search;
   
@@ -233,31 +202,66 @@ export async function editProductImage(productId: number, file: File): Promise<R
   }
 }
 
-export async function updateInventory(product: Product): Promise<Product | null> {
+export async function updateInventory(product: Product, image: File | null = null): Promise<Product | null> {
   try {
-    const { productId, ...update } = product;
-    let insert = marshal(update, pascalCase);
-    const result = await db
-    .table<Product>('product')
-      .where("ProductId", productId)
-        .update({
-          ...insert,
-          SupplierId: 1,
-          ProductInStockQuantity: 1
-        });
-  
+    if(!product?.productId) throw Error('No inventory ID provided.');
 
-    if(result === 0) throw Error('Could not update inventory.')
-    const [newRow] = await db
-      .table<Product>('product')
-        .select(Object.keys(insert))
-          .where("ProductId", productId);
+    const productImageUrl = (async (image) => {
 
-    if(!newRow) {
-      throw Error('Inventory item updated but could not be retrieved.');
-    }
+      let oldImage: any = await db.table('productdetail').select('ProductImageUrl').where({
+        ProductId: product.productId
+      }).limit(1);
 
-    return marshal<Product>(newRow, camelCase)
+      [oldImage] = marshal(oldImage, camelCase);
+      oldImage.productImageUrl = oldImage.productImageUrl || null;
+
+
+      if(!image || image.size === 0 || image.name === 'undefined') {
+        return oldImage.productImageUrl
+      }
+      const signedUrl = await getSignedUrl(image);
+      return signedUrl || oldImage.productImageUrl
+    })
+
+    const signedUrl = await productImageUrl(image);
+    product = { ...product, productImageUrl: signedUrl, supplierId: 1 }
+    const values = marshal(product, pascalCase);
+
+    await db.query.transaction(async (trx) => {
+
+      // const query0 = await trx.table<Product>('product').select('ProductId').where("ProductId", values.ProductId);
+      
+      await trx('product')
+      // .where("ProductId", values.ProductId)
+        .insert({
+          ProductId: values.ProductId, 
+          CategoryId: values.CategoryId,
+          SupplierId: values.SupplierId,
+          ProductName: values.ProductName,
+          ProductInStockQuantity: values.ProductInStockQuantity,
+          ProductUnitSizeInMilliliters: values.ProductUnitSizeInMilliliters,
+          ProductPricePerUnit: values.ProductPricePerUnit,
+          ProductProof: values.ProductProof
+        }).onConflict('ProductId').merge();
+
+
+      await trx('productdetail')
+      .insert({
+        ProductId: values.ProductId,
+        ProductImageUrl: values.ProductImageUrl,
+        ProductDescription: values.ProductDescription,
+        ProductSweetnessRating: values.ProductSweetnessRating,
+        ProductDrynessRating: values.ProductDrynessRating,
+        ProductVersatilityRating: values.ProductVersatilityRating,
+        ProductStrengthRating: values.ProductStrengthRating
+      }).onConflict('ProductId').merge();     
+
+      await trx.commit();
+
+    });
+
+    return await findInventoryItem(values.ProductId)
+
 
   } catch(error: any) {
     console.error(error);

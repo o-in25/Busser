@@ -29,11 +29,22 @@
   export let result: FormSubmitResult = {};
 
   let slug = $page.params.id;
-  let productPricePerUnit = product?.productPricePerUnit;
+  let productPricePerUnit = product?.productPricePerUnit || 0.0;
   let productUnitSizeInMilliliters = product?.productUnitSizeInMilliliters;
   let productProof = product?.productProof;
   let categoryId = product?.categoryId;
   let productImageUrl = product?.productImageUrl;
+  let productInStockQuantity = product?.productInStockQuantity || 0;
+  let productSweetnessRating = product?.productSweetnessRating || 0.0;
+  let productDrynessRating = product?.productDrynessRating || 0.0;
+  let productStrengthRating = product?.productStrengthRating || 0.0;
+  let productVersatilityRating = product?.productVersatilityRating || 0.0;
+  let productDescription = product?.productDescription;
+
+  // TODO: add a column constraint to productId col and do it that way
+  let productDetailId = product?.productDetailId
+  $: {
+  }
   let modalOpen = false;
 
   const deleteItem = async () => {
@@ -42,7 +53,6 @@
     });
 
     const { success, error } = await response.json();
-    console.log(success, error)
     if(error) {
       $notificationStore.success = error.message
     } else {
@@ -88,7 +98,7 @@
     <div class="grid gap-6 mb-6 md:grid-cols-3">
       <div>
         <Label for="productPricePerUnit" class="mb-2">Price</Label>
-        <Input let:props required>
+        <Input let:props required step="any">
           <div slot="left" class="font-bold">$</div>
           <input
             name="productPricePerUnit"
@@ -131,22 +141,41 @@
       <div>
         <div class="mt-4">
           <Label for="productSweetnessRating" class="mb-2">Sweetness</Label>
-          <Range id="productSweetnessRating" name="productSweetnessRating" size="lg" value={50} />
+          <Range id="productSweetnessRating" name="productSweetnessRating" size="lg" bind:value={productSweetnessRating} min="0" max="10" step="0.1"/>
         </div>
         <div class="mt-4">
           <Label for="productDrynessRating" class="mb-2">Dryness</Label>
-          <Range id="productDrynessRating" name="productDrynessRating" size="lg" value={50} />
+          <Range id="productDrynessRating" name="productDrynessRating" size="lg" bind:value={productDrynessRating} min="0" max="10" step="0.1" />
         </div>
         <div class="mt-4">
-          <Label for="textarea-id" class="mb-2">Description</Label>
-          <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-          <Textarea id="textarea-id" rows="4" name="message"/>
+          <Label for="productVersatilityRating" class="mb-2">Versatility</Label>
+          <Range id="productVersatilityRating" name="productVersatilityRating" size="lg" bind:value={productVersatilityRating} min="0" max="10" step="0.1"/>
         </div>
         <div class="mt-4">
-          <Toggle checked={true}>In Stock</Toggle>
+          <Label for="productStrengthRating" class="mb-2">Strength</Label>
+          <Range id="productStrengthRating" name="productStrengthRating" size="lg" bind:value={productStrengthRating} min="0" max="10" step="0.1" />
+        </div>
+        <div class="mt-4 float-right">
+          <input name="productInStockQuantity" type="hidden" bind:value={productInStockQuantity}>
+          <Toggle checked={productInStockQuantity > 0} bind:value={productInStockQuantity} on:change={() => {
+            if(productInStockQuantity > 0) {
+              productInStockQuantity = 0
+            } else {
+              productInStockQuantity = 1;
+            }
+          }}>In Stock</Toggle>
         </div>
       </div>
     </div>
+    <div class="mb-6">
+      <div class="mt-4">
+          <Label for="textarea-id" class="mb-2">Description</Label>
+          <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
+          <Textarea name="productDescription" id="productDescription" rows="4" bind:value={productDescription}/>
+        </div>
+    </div>
+
+    <input type="hidden" value={productDetailId}>
 
     <!-- submit -->
     <div class="md:flex md:flex-row">
@@ -159,12 +188,13 @@
         </div>
       {/if}
         {#if result.success || result.error}
-          <div class="my-4 md:my-0 md:ml-4">
-            <Alert border color="{result.success? 'green' : 'red'}">
-              <InfoCircleSolid slot="icon" class="w-5 h-5" />
-              {#if result.error}<span class="font-medium">Could not save changes.</span>{/if}
-              {result.success?.message || result.error?.message}
-            </Alert>
+          <div class="my-4 md:my-0 md:ml-4 md:mt-4 md:w-full">
+            <div class="md:w-96 md:m-auto">
+              <Alert border color="{result.success? 'green' : 'red'}">
+                <InfoCircleSolid slot="icon" class="w-5 h-5" />
+                {#if result.error}<span class="font-medium">Could not save changes.</span>{:else}{result.success?.message}{/if}
+              </Alert>
+            </div>
           </div>
         {/if}
     </div>

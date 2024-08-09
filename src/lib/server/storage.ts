@@ -17,9 +17,9 @@ const storage = new Storage({
 const bucket = storage.bucket(BUCKET);
 
 
-export async function getSignedUrl(file: File): Promise<string> {
+export async function getSignedUrl(file: File, fileName: string = ''): Promise<string> {
   try {
-    const name = `${file.name}-${moment().format('MMDDYYYYSS')}`
+    const name = `${fileName || file.name}-${moment().format('MMDDYYYYSS')}`
     const newFile = bucket.file(name)
     const blob = await file.arrayBuffer();
     const data = Buffer.from(blob);
