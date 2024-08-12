@@ -214,16 +214,18 @@
             class="my-1 font-normal text-gray-700 dark:text-gray-400 leading-tight">
             {product.productDescription || product.categoryDescription}
           </p>
-          <div class="py-4">
-            <ScoreRating
-              desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
-              linkClass="hidden"
-              headerLabel={{ ...headerLabel, desc1, desc2 }}
-              {ratings}
-              {ratings2} />
-          </div>
+          {#if product.productProof > 0}
+            <div class="py-4">
+              <ScoreRating
+                desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
+                linkClass="hidden"
+                headerLabel={{ ...headerLabel, desc1, desc2 }}
+                {ratings}
+                {ratings2} />
+            </div>
+          {/if}
 
-          <div class="w-40">
+          <div class="w-40 mt-4">
             <FancyButton href="/inventory/{product.productId}/edit">
               Edit
             </FancyButton>
@@ -243,15 +245,17 @@
             class="my-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
             {product.productDescription || product.categoryDescription}
           </p>
-          <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
-          <div class="px-2 md:pb-4">
-            <ScoreRating
-              desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
-              linkClass="hidden"
-              headerLabel={{ ...headerLabel, desc1, desc2 }}
-              {ratings}
-              {ratings2} />
-          </div>
+          {#if product.productProof > 0}
+            <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+            <div class="px-2 md:pb-4">
+              <ScoreRating
+                desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
+                linkClass="hidden"
+                headerLabel={{ ...headerLabel, desc1, desc2 }}
+                {ratings}
+                {ratings2} />
+            </div>
+          {/if}
           <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
           <div class="gost">
             <FancyButton href="/inventory/{product.productId}/edit">Edit</FancyButton>

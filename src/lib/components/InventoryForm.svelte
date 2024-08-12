@@ -188,7 +188,7 @@
         </div>
       {/if}
         {#if result.success || result.error}
-          <div class="my-4 md:my-0 md:ml-4 md:mt-4 md:w-full">
+          <div class="my-4 md:ml-4">
             <div class="md:w-96 md:m-auto">
               <Alert border color="{result.success? 'green' : 'red'}">
                 <InfoCircleSolid slot="icon" class="w-5 h-5" />

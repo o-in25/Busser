@@ -34,7 +34,6 @@ export const actions = {
       productVersatilityRating: Number(formData.productVersatilityRating),
       productStrengthRating: Number(formData.productStrengthRating),
       productDescription: formData.productDescription?.toString(),
-      // productImageUrl: formData.productImageUrl?.toString(),
 
     };
     const { productImageUrl: file } = formData as { productImageUrl: File; };
@@ -46,20 +45,9 @@ export const actions = {
       } as FormSubmitResult;
     }
 
-    // if(file?.size > 0) {
-    //   const { productDetailId } = await editProductImage(productId, file);
-    //   console.log(productDetailId)
-    //   if(productDetailId === -1) {
-    //     // ERROR
-    //     return {
-    //       error: { message: 'Failed add image to inventory item.' }
-    //     } as FormSubmitResult;
-    //   }
-    // }
-
     // OK
     return {
-      args: {  },
+      args: {  product: newItem },
       success: { message: 'Inventory has been updated.' }
     } as FormSubmitResult;
   }

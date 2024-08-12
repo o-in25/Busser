@@ -213,8 +213,15 @@ export async function updateInventory(product: Product, image: File | null = nul
       }).limit(1);
 
       [oldImage] = marshal(oldImage, camelCase);
-      oldImage.productImageUrl = oldImage.productImageUrl || null;
+      
 
+      if(!oldImage?.productImageUrl) {
+        oldImage = {
+          productImageUrl: undefined
+        }
+      }
+      // check here
+      oldImage.productImageUrl = oldImage?.productImageUrl || null;
 
       if(!image || image.size === 0 || image.name === 'undefined') {
         return oldImage.productImageUrl
@@ -224,12 +231,11 @@ export async function updateInventory(product: Product, image: File | null = nul
     })
 
     const signedUrl = await productImageUrl(image);
+    console.log(signedUrl)
     product = { ...product, productImageUrl: signedUrl, supplierId: 1 }
     const values = marshal(product, pascalCase);
 
     await db.query.transaction(async (trx) => {
-
-      // const query0 = await trx.table<Product>('product').select('ProductId').where("ProductId", values.ProductId);
       
       await trx('product')
       // .where("ProductId", values.ProductId)
