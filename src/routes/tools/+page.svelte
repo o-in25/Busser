@@ -1,19 +1,19 @@
 <script lang="ts">
-    import { Input, Label } from 'flowbite-svelte';
+    import { Button, ButtonGroup, Heading, Input, InputAddon, Label, Select } from 'flowbite-svelte';
     import type { PageData } from './$types';
+	import Calculator from '$lib/components/Calculator.svelte';
     
     export let data: PageData;
+
+
 </script>
 
-<form>
-  <div class="grid gap-6 mb-6 md:grid-cols-2">
-    <div>
-      <Label for="first_name" class="mb-2">First name</Label>
-      <Input type="text" id="first_name" placeholder="John" required />
-    </div>
-    <div>
-      <Label for="last_name" class="mb-2">Last name</Label>
-      <Input type="text" id="last_name" placeholder="Doe" required />
-    </div>
-    </div>
-    </form>
+
+<div class="mt-5">
+  <Heading tag="h4" class="mb-4 flex flex-row justify-between">
+    Tools
+  </Heading>
+</div>
+<div class="px-4 py-2 md:py-4">
+  <Calculator/>
+</div>

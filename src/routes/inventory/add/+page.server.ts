@@ -1,4 +1,4 @@
-import { addProductImage, addToInventory, categorySelect } from '$lib/server/core';
+import { addProductImage, addToInventory, categorySelect, updateInventory } from '$lib/server/core';
 import { getSignedUrl } from '$lib/server/storage';
 import type { FormSubmitResult, Product } from '$lib/types';
 import type { PageServerLoad } from './$types';
@@ -17,43 +17,47 @@ export const load = (async () => {
 export const actions = {
   add: async({ request }) => {
     let formData = Object.fromEntries(await request.formData());
+    const productData = {
+      productDetailId: Number(formData.productDetailId || -1),
+      productName: formData.productName?.toString(),
+      categoryId: Number(formData.categoryId),
+      productProof: Number(formData.productProof),
+      productInStockQuantity: Number(formData.productInStockQuantity),
+      productPricePerUnit: Number(formData.productPricePerUnit),
+      productUnitSizeInMilliliters: Number(formData.productUnitSizeInMilliliters),
+      productSweetnessRating: Number(formData.productSweetnessRating),
+      productDrynessRating: Number(formData.productDrynessRating),
+      productVersatilityRating: Number(formData.productVersatilityRating),
+      productStrengthRating: Number(formData.productStrengthRating),
+      productDescription: formData.productDescription?.toString(),
 
-    let {
-      productName,
-      categoryId,
-      productInStockQuantity,
-      productPricePerUnit,
-      productUnitSizeInMilliliters,
-      productProof,
-      productImageUrl
-    } = formData;
-
-    const { productId } = await addToInventory({
-      productName,
-      categoryId: Number(categoryId),
-      productInStockQuantity: Number(productInStockQuantity),
-      productPricePerUnit: Number(productPricePerUnit),
-      productUnitSizeInMilliliters: Number(productUnitSizeInMilliliters),
-      productProof: Number(productProof),
-    } as Product);
-
-    if(productId === -1) {
+    };
+    const { productImageUrl: file } = formData as { productImageUrl: File; };
+    const newItem = await updateInventory(productData, file);
+    if(!newItem) {
       // ERROR
       return {
-        error: { message: 'Failed to create new inventory item.' }
+        error: { message: 'Inventory item not be updated.' }
       } as FormSubmitResult;
     }
 
-    if(productImageUrl) {
-      const { productImageUrl: file } = formData as { productImageUrl: File; };
-      const { productDetailId } = await addProductImage(productId, file);
-      if(productDetailId === -1) {
-        // ERROR
-        return {
-          error: { message: 'Failed add image to inventory item.' }
-        } as FormSubmitResult;
-      }
-    }
+    // if(productId =\) {
+    //   // ERROR
+    //   return {
+    //     error: { message: 'Failed to create new inventory item.' }
+    //   } as FormSubmitResult;
+    // }
+
+    // if(productImageUrl) {
+    //   const { productImageUrl: file } = formData as { productImageUrl: File; };
+    //   const { productDetailId } = await addProductImage(productId, file);
+    //   if(productDetailId === -1) {
+    //     // ERROR
+    //     return {
+    //       error: { message: 'Failed add image to inventory item.' }
+    //     } as FormSubmitResult;
+    //   }
+    // }
 
     // OK
     return {
