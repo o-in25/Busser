@@ -89,8 +89,8 @@
       <NavUl {activeUrl}>
         <NavLi href="/" active>Home</NavLi>
         <NavLi href="/inventory">Inventory</NavLi>
-        <!-- <NavLi href="/spirits">Spirits</NavLi>
-          <NavLi href="/tools">Tools</NavLi> -->
+        <!-- <NavLi href="/spirits">Spirits</NavLi> -->
+          <NavLi href="/tools">Tools</NavLi>
       </NavUl>
     {/if}
 

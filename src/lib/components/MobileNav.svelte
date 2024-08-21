@@ -2,6 +2,7 @@
   import {
     AdjustmentsVerticalOutline,
     ClipboardListOutline,
+    CogOutline,
     HomeSolid,
   } from "flowbite-svelte-icons";
 
@@ -30,7 +31,7 @@
   dark:divide-gray-700 
   border-gray-200 dark:border-gray-700 divide-gray-200 
   border-none bottom-0 start-0 h-16 border-t">
-  <div class="grid h-full max-w-lg mx-auto grid-cols-3 bot-nav">
+  <div class="grid h-full max-w-lg mx-auto grid-cols-4 bot-nav">
     <a
       aria-label="Settings"
       href="/inventory"
@@ -70,6 +71,25 @@
       </span>
     </a>
     <a
+      aria-label="Tools"
+      href="/tools"
+      class=" group inline-flex flex-col items-center justify-center px-5 {activeUrl.includes(
+        'settings',
+      )
+        ? styles.a.active
+        : styles.a.inactive}">
+      <AdjustmentsVerticalOutline
+        class="shrink-0 w-5 h-5 mb-1 {activeUrl.includes('tools')
+          ? styles.svg.active
+          : styles.svg.inactive}" />
+      <span
+        class="text-sm font-bold {activeUrl.includes('tools')
+          ? styles.span.active
+          : styles.span.inactive}">
+        Tools
+      </span>
+    </a>
+    <a
       aria-label="Settings"
       href="/settings"
       class=" group inline-flex flex-col items-center justify-center px-5 {activeUrl.includes(
@@ -77,7 +97,7 @@
       )
         ? styles.a.active
         : styles.a.inactive}">
-      <AdjustmentsVerticalOutline
+      <CogOutline
         class="shrink-0 w-5 h-5 mb-1 {activeUrl.includes('settings')
           ? styles.svg.active
           : styles.svg.inactive}" />
