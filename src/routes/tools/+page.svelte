@@ -1,11 +1,8 @@
 <script lang="ts">
-    import { Button, ButtonGroup, Heading, Input, InputAddon, Label, Select } from 'flowbite-svelte';
+    import { Heading } from 'flowbite-svelte';
     import type { PageData } from './$types';
-	import Calculator from '$lib/components/Calculator.svelte';
-    
+	  import Calculator from '$lib/components/Calculator.svelte';
     export let data: PageData;
-
-
 </script>
 
 
