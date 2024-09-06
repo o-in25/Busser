@@ -86,8 +86,15 @@
 <form>
   <div class="flex gap-4 mb-6">
   <div class="flex-1">
-    <Label for="input-addon" class="mb-2">Weight of Peels (Grams)</Label>
-    <Input id="input-addon" type="number" bind:value={fields.initialWgt.value}/>
+    <Label for="input-addon" class="mb-2">Peel Weight</Label>
+    <Input id="input-addon" type="number" let:props required>
+      <input
+        id="input-addon"
+        type="number"
+        placeholder=""
+        {...props}
+        bind:value={fields.initialWgt.value}  />
+      <div slot="right" class="font-bold">grams</div></Input>
 
   </div>
   <div>
