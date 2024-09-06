@@ -108,3 +108,11 @@ export type Notification = {
   success?: Record<'message', string> | null;
   error?: Record<'message', string> | null;
 };
+
+export type Spirit = {
+  recipeCategoryId: number,
+  recipeCategoryDescription: string,
+  recipeCategoryDescriptionText: string,
+  recipeCategoryDescriptionImageUrl: string
+
+}

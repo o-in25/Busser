@@ -1,5 +1,5 @@
 
-import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, SelectOption } from "$lib/types";
+import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, SelectOption, Spirit } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
@@ -294,5 +294,16 @@ export async function deleteInventoryItem(productId: number): Promise<number> {
   } catch(error) {
     console.error(error);
     return 0;
+  }
+}
+
+export async function getSpirits(): Promise<Array<Spirit>> {
+  try {
+    const dbResult = await db.table<Spirit>('spirits');
+    const result = marshal<Spirit>(dbResult);
+    return result;
+  } catch(error) {
+    console.error(error);
+    return [];
   }
 }
