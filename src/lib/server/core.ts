@@ -203,8 +203,9 @@ export async function editProductImage(productId: number, file: File): Promise<R
 }
 
 export async function updateInventory(product: Product, image: File | null = null): Promise<Product | null> {
+
   try {
-    if(!product?.productId) throw Error('No inventory ID provided.');
+    // if(!product?.productId) throw Error('No inventory ID provided.');
 
     const productImageUrl = (async (image) => {
 
@@ -305,5 +306,16 @@ export async function getSpirits(): Promise<Array<Spirit>> {
   } catch(error) {
     console.error(error);
     return [];
+  }
+}
+export async function getSpirit(id: number | string): Promise<Spirit | null> {
+  try {
+    const dbResult = await db.table<Spirit>('spirits').where('RecipeCategoryId', id);
+    const [result] = marshal<Spirit>(dbResult);
+    if(!result) throw Error('Spirit not found.')
+    return result;
+  } catch(error) {
+    console.error(error);
+    return null;
   }
 }

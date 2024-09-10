@@ -15,7 +15,7 @@
       {#each spirits as spirit}
         <Card
           img={spirit.recipeCategoryDescriptionImageUrl}
-          href="/"
+          href="/catalog/{spirit.recipeCategoryId}"
           horizontal
           size="xl">
           <h5

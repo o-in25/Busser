@@ -24,7 +24,7 @@
 <ProgressBar class="text-purple-600" />
 
 <!-- page -->
-<div class="container mx-auto p-4 flex-1">
+<div class="container mx-auto p-4">
   <slot />
 </div>
 

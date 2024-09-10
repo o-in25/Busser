@@ -16,18 +16,9 @@
     SidebarWrapper,
     SidebarGroup,
     SidebarItem,
-    SidebarDropdownWrapper,
-    SidebarDropdownItem,
   } from "flowbite-svelte";
   import {
-    ChartPieSolid,
-    CartSolid,
-    GridSolid,
-    MailBoxSolid,
-    UsersSolid,
-    ShoppingBagSolid,
     ArrowRightToBracketOutline,
-    EditOutline,
     ClipboardListOutline,
     GridOutline,
     HomeOutline,
@@ -110,7 +101,7 @@
     <NavUl
       {activeUrl}
       slideParams={{ delay: 250, duration: 500, easing: sineIn }}
-      on:click={() => console.log()}>
+    >
       <NavLi href="/" active>Home</NavLi>
       <NavLi href="/inventory">Inventory</NavLi>
       <NavLi href="/catalog">Catalog</NavLi>
