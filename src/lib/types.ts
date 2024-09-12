@@ -1,4 +1,13 @@
 import type { CookieSerializeOptions } from 'cookie';
+
+export type QueryResult<T> = {
+  status: "success";
+  data: T;
+} | {
+  status: "error";
+  error: string;
+};
+
 export type Result<T> = {
     data?: T,
     error?: Error;
@@ -17,23 +26,23 @@ export type User = {
 };
 
 export type Product = {
-  productId?: number,
+  productId: number | null, // can be null on insert
   categoryId: number,
-  supplierId?: number,
+  supplierId: number,
   productName: string,
   productInStockQuantity: number,
   productPricePerUnit: number,
   productUnitSizeInMilliliters: number,
   productProof: number,
-  productDetailId?: number,
-  productImageUrl?: string,
-  categoryName?: string,
-  categoryDescription?: string,
-  productDescription?: string
-  productSweetnessRating?: number
-  productDrynessRating?: number
-  productVersatilityRating?: number
-  productStrengthRating?: number
+  productDetailId: number,
+  productImageUrl: string,
+  categoryName: string,
+  categoryDescription: string,
+  productDescription: string
+  productSweetnessRating: number
+  productDrynessRating: number
+  productVersatilityRating: number
+  productStrengthRating: number
 };
 
 export type Category = {

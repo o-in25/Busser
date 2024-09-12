@@ -1,4 +1,5 @@
-import { addProductImage, addToInventory, categorySelect, updateInventory } from '$lib/server/core';
+// import { addProductImage, addToInventory, categorySelect, updateInventory } from '$lib/server/core';
+import { addToInventory } from '$lib/server/core';
 import { getSignedUrl } from '$lib/server/storage';
 import type { FormSubmitResult, Product } from '$lib/types';
 import type { PageServerLoad } from './$types';
@@ -17,6 +18,7 @@ export const load = (async () => {
 export const actions = {
   add: async({ request }) => {
     let formData = Object.fromEntries(await request.formData());
+    const { productImageUrl: file } = formData as { productImageUrl: File; };
     const productData = {
       productDetailId: Number(formData.productDetailId || -1),
       productName: formData.productName?.toString(),
@@ -32,8 +34,10 @@ export const actions = {
       productDescription: formData.productDescription?.toString(),
 
     };
-    const { productImageUrl: file } = formData as { productImageUrl: File; };
-    const newItem = await updateInventory(productData, file);
+    // productId, supplierId, productImageUrl, categoryName, categoryDescription
+    // const { productImageUrl: file } = formData as { productImageUrl: File; };
+    const newItem = {} //await addToInventory();
+
     if(!newItem) {
       // ERROR
       return {

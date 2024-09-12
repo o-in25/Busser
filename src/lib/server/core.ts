@@ -1,15 +1,14 @@
 
-import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, SelectOption, Spirit } from "$lib/types";
+import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, QueryResult, SelectOption, Spirit } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
 import { getSignedUrl } from "./storage";
-import { P } from "flowbite-svelte";
 
 const db = new DbProvider('app_t');
 
 const marshal = <T>(obj: any, fn: Function = camelCase) => {
-  if(!_.isObject(obj)) return obj as T ;
+  if(!_.isObject(obj)) return obj as T;
   if(_.isArray(obj)) return obj.map((v) => marshal<T>(v));
   return _.reduce(obj, (arr, curr, acc) => {
     return {
@@ -100,19 +99,42 @@ export async function categorySelect(): Promise<SelectOption[]> {
   }
 }
 
-export async function addToInventory(product: Product): Promise<Record<"productId", number>> {
+export async function addToInventory(product: Product): Promise<any> {
   try {
-    let insert = marshal(product, pascalCase);
-    const result = await db.table('product').insert({ 
-      ...insert,
-      SupplierId: 1,
-      ProductInStockQuantity: 1
+    await db.query.transaction(async (trx) => {
+
+      const parentRow = await trx('product')
+        // .where("ProductId", values.ProductId)
+        .insert({
+          CategoryId: product.categoryId,
+          SupplierId: product.supplierId,
+          ProductName: product.productName,
+          ProductInStockQuantity: product.productInStockQuantity,
+          ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
+          ProductPricePerUnit: product.productPricePerUnit,
+          ProductProof: product.productProof
+        });
+      console.log(parentRow)
+
+
+      // await trx('productdetail')
+      //   .insert({
+      //     ProductId: values.ProductId,
+      //     ProductImageUrl: values.ProductImageUrl,
+      //     ProductDescription: values.ProductDescription,
+      //     ProductSweetnessRating: values.ProductSweetnessRating,
+      //     ProductDrynessRating: values.ProductDrynessRating,
+      //     ProductVersatilityRating: values.ProductVersatilityRating,
+      //     ProductStrengthRating: values.ProductStrengthRating
+      //   }).onConflict('ProductId').merge();
+
+      await trx.commit();
+
     });
-    const [productId] =  result || [-1];
-    return { productId }
+
+    // return await findInventoryItem(values.ProductId)
   } catch(error: any) {
-    console.error(error);
-    return { productId: -1 }
+    console.log(error)
   }
 }
 
@@ -205,7 +227,7 @@ export async function editProductImage(productId: number, file: File): Promise<R
 export async function updateInventory(product: Product, image: File | null = null): Promise<Product | null> {
 
   try {
-    // if(!product?.productId) throw Error('No inventory ID provided.');
+    if(!product?.productId) throw Error('No inventory ID provided.');
 
     const productImageUrl = (async (image) => {
 
@@ -232,7 +254,7 @@ export async function updateInventory(product: Product, image: File | null = nul
     })
 
     const signedUrl = await productImageUrl(image);
-    console.log(signedUrl)
+
     product = { ...product, productImageUrl: signedUrl, supplierId: 1 }
     const values = marshal(product, pascalCase);
 
