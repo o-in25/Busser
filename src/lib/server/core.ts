@@ -103,18 +103,18 @@ export async function addToInventory(product: Product): Promise<any> {
   try {
     await db.query.transaction(async (trx) => {
 
-      const parentRow = await trx('product')
-        // .where("ProductId", values.ProductId)
-        .insert({
-          CategoryId: product.categoryId,
-          SupplierId: product.supplierId,
-          ProductName: product.productName,
-          ProductInStockQuantity: product.productInStockQuantity,
-          ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
-          ProductPricePerUnit: product.productPricePerUnit,
-          ProductProof: product.productProof
-        });
-      console.log(parentRow)
+      // const parentRow = await trx('product')
+      //   // .where("ProductId", values.ProductId)
+      //   .insert({
+      //     CategoryId: product.categoryId,
+      //     SupplierId: product.supplierId,
+      //     ProductName: product.productName,
+      //     ProductInStockQuantity: product.productInStockQuantity,
+      //     ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
+      //     ProductPricePerUnit: product.productPricePerUnit,
+      //     ProductProof: product.productProof
+      //   });
+      // console.log(parentRow)
 
 
       // await trx('productdetail')
