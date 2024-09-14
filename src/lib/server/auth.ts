@@ -37,7 +37,7 @@ export async function login(
 
         return user;
     } catch(error: any) {
-        await Logger.error(`User ${username} attempted to sign in with password ${password}.`)
+        await Logger.info(`User ${username} attempted to sign in.`)
         console.error(error);
         return null;
     }
