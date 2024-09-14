@@ -29,7 +29,9 @@
 </div>
 
 <!-- toast -->
-<Notification/>
+ <div id="" class="fixed flex items-center w-full" role="alert">
+  <Notification/>
+</div>
 
 <!-- footer -->
 <div class="hidden sm:block md:mt-auto md:text-center">

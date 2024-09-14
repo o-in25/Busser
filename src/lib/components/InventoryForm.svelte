@@ -52,14 +52,22 @@
       method: 'DELETE'
     });
 
-    const { success, error } = await response.json();
-    if(error) {
-      $notificationStore.success = error.message
+    const result = await response.json();
+    console.log(result)
+    if('data' in result) {
+      $notificationStore.success = { message: 'Inventory item deleted.'}
+      goto(`/inventory`);
     } else {
-      $notificationStore.success = success.message
+      $notificationStore.error = { message: result.error }
     }
+    // if(error) {
+    //   $notificationStore.success = error.message
+    // } else {
+    //   $notificationStore.success = success.message
+    // }
+
+    // console.log(success, error)
     
-    goto(`/inventory`);
   }
 
   const openModal = () => {

@@ -325,7 +325,8 @@ export async function updateInventory(product: Product, image: File | null = nul
   }
 }
 
-export async function deleteInventoryItem(productId: number): Promise<number> {
+export async function deleteInventoryItem(productId: number): Promise<QueryResult<number>> {
+  
   // need to delete https://storage.googleapis.com/busser/IMG_5139.JPEG-0724202448
   try {
     // const productDetail = await db
@@ -340,10 +341,18 @@ export async function deleteInventoryItem(productId: number): Promise<number> {
         .where('ProductId', productId)
           .del();
 
-    return rowsDeleted;
-  } catch(error) {
+    return {
+      status: 'success',
+      data: rowsDeleted
+    } satisfies QueryResult<number>;
+
+  } catch(error: any) {
     console.error(error);
-    return 0;
+    Logger.error(error.sqlMessage, error.sql)
+    return {
+      status: 'error',
+      error: 'Could not delete inventory item.'
+    } satisfies QueryResult<number>;
   }
 }
 

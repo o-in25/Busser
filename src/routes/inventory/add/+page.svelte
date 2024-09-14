@@ -1,12 +1,11 @@
 <script lang="ts">
-    import { Heading, P } from 'flowbite-svelte';
-    import type { ActionData, PageData } from './$types';
-    import { AngleRightOutline } from 'flowbite-svelte-icons';
+    import { Heading } from 'flowbite-svelte';
+    import type { ActionData } from './$types';
     import InventoryForm from '$lib/components/InventoryForm.svelte';
     import Breadcrumb from '$lib/components/Breadcrumb.svelte';
     import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
     
-    export let data: PageData;
+    // export let data: PageData;
     export let form: ActionData;
 
 
