@@ -2,21 +2,21 @@
     import { Toast } from "flowbite-svelte";
     import { CheckCircleSolid } from "flowbite-svelte-icons";
     import { notificationStore } from "../../stores";
+    import { onMount } from "svelte";
 
   let message;
   let showNotification = false;
-  let seconds = 3;
-
+  let seconds = 100;
 
   notificationStore.subscribe(({ success, error }) => {
     if(!success && !error) return;
-    message = success || error;
+    message = success?.message || error?.message;
     trigger()
 
   });
 
   function trigger() {
-    seconds = 5;
+    seconds = 100;
     showNotification = true;
     timeout();
   } 
@@ -28,6 +28,7 @@
     $notificationStore.error = null;
   }
 
+  // onMount(() => trigger())
 </script>
 
 <Toast position="top-right" bind:toastStatus={showNotification}>

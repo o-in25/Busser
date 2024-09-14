@@ -13,21 +13,14 @@ export const DELETE: RequestHandler = async ({ params }) => {
   let { productId } = params as any;
   productId = Number(productId);
 
+
   if(isNaN(productId)) {
     return json({
       error: { message: 'Invalid or malformed inventory ID.' }
     });
   }
 
-  // const result = await deleteInventoryItem(productId);
-  // if(result < 1) {
-  //   return json({
-  //     error: { message: 'Inventory item could not be deleted.' }
-  //   });
-  // }
-
-  return json({
-    success: { message: 'Inventory item successfully deleted.' }
-  });
+  const result = await deleteInventoryItem(productId);
+  return json(result);
 
 };

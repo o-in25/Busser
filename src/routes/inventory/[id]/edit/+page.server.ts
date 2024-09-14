@@ -1,10 +1,20 @@
 import { addProductImage, editProductImage, findInventoryItem, updateInventory } from '$lib/server/core';
 import type { FormSubmitResult } from '$lib/types';
+import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { StatusCodes, getReasonPhrase } from 'http-status-codes';
+const { NOT_FOUND } = StatusCodes;
 
 export const load = (async ({ request, params }) => {
   const { id } = params;
   const product = await findInventoryItem(Number(id));
+  if(!product) {
+    error(NOT_FOUND, {
+      reason: getReasonPhrase(NOT_FOUND),
+      code: NOT_FOUND,
+      message: 'Product not found.'
+    });
+  }
   return { args: { product } };
 }) satisfies PageServerLoad;
 
@@ -22,6 +32,10 @@ export const actions = {
     let formData = Object.fromEntries(await request.formData());
     const productData = {
       productId,
+      supplierId: 1, // not needed for insert
+      categoryName: '', // not needed for insert
+      categoryDescription: '', // not needed for insert
+      productImageUrl: '', // cast to file type
       productDetailId: Number(formData.productDetailId || -1),
       productName: formData.productName?.toString(),
       categoryId: Number(formData.categoryId),

@@ -183,8 +183,8 @@
   <div class="flex flex-col items-center justify-center gap-2 p-7">
     <div class="text-sm text-gray-700 dark:text-gray-400">
       Showing <span class="font-semibold text-gray-900 dark:text-white">{paginationData.from + 1}</span>
-      to <span class="font-semibold text-gray-900 dark:text-white">{paginationData.to}</span>
-      of <span class="font-semibold text-gray-900 dark:text-white">{paginationData.total}</span> Entries
+      through <span class="font-semibold text-gray-900 dark:text-white">{paginationData.to}</span>
+      out of <span class="font-semibold text-gray-900 dark:text-white">{paginationData.total}</span> items in inventory
     </div>
     <Pagination {pages} on:previous={previous} on:next={next} large>
       <svelte:fragment slot="prev">

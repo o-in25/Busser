@@ -1,15 +1,15 @@
 
-import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, SelectOption } from "$lib/types";
+import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, QueryResult, SelectOption, Spirit } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
-import { getSignedUrl } from "./storage";
-import { P } from "flowbite-svelte";
+import { deleteSignedUrl, getSignedUrl } from "./storage";
+import { Logger } from "./logger";
 
 const db = new DbProvider('app_t');
 
 const marshal = <T>(obj: any, fn: Function = camelCase) => {
-  if(!_.isObject(obj)) return obj as T ;
+  if(!_.isObject(obj)) return obj as T;
   if(_.isArray(obj)) return obj.map((v) => marshal<T>(v));
   return _.reduce(obj, (arr, curr, acc) => {
     return {
@@ -100,19 +100,68 @@ export async function categorySelect(): Promise<SelectOption[]> {
   }
 }
 
-export async function addToInventory(product: Product): Promise<Record<"productId", number>> {
+export async function addToInventory(product: Product, image: File | null = null): Promise<QueryResult<Product>> {
   try {
-    let insert = marshal(product, pascalCase);
-    const result = await db.table('product').insert({ 
-      ...insert,
-      SupplierId: 1,
-      ProductInStockQuantity: 1
+    let parentRowId: number | undefined, childRowId: number | undefined;
+    await db.query.transaction(async (trx) => {
+
+      const [parentRow] = await trx('product')
+        .insert({
+          CategoryId: product.categoryId,
+          SupplierId: product.supplierId,
+          ProductName: product.productName,
+          ProductInStockQuantity: product.productInStockQuantity,
+          ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
+          ProductPricePerUnit: product.productPricePerUnit,
+          ProductProof: product.productProof
+        });
+      parentRowId = parentRow;
+
+      const getProductImageUrl = async (image: File | null) => {
+        if(!image || image.size === 0 || image.name === 'undefined') return null;
+        const signedUrl = await getSignedUrl(image);
+        return (signedUrl.length? signedUrl : null);
+      }
+
+      const productImageUrl = await getProductImageUrl(image);
+      const [childRow] = await trx('productdetail')
+        .insert({
+          ProductId: parentRowId,
+          ProductImageUrl: productImageUrl,
+          ProductDescription: product.productDescription,
+          ProductSweetnessRating: product.productSweetnessRating,
+          ProductDrynessRating: product.productDrynessRating,
+          ProductVersatilityRating: product.productVersatilityRating,
+          ProductStrengthRating: product.productStrengthRating
+        }).onConflict('ProductId').merge();
+
+      childRowId = childRow;
+
+      await trx.commit();
     });
-    const [productId] =  result || [-1];
-    return { productId }
+
+    if(!parentRowId || !childRowId) {
+      throw Error('No rows have been inserted.')
+    }
+
+    const newRow = await findInventoryItem(parentRowId);
+    if(!newRow) {
+      throw Error('Cannot find newly inserted item.')
+    }
+
+    return {
+      status: 'success',
+      data: newRow
+    }
+    // const new 
+    // return await findInventoryItem(values.ProductId)
   } catch(error: any) {
-    console.error(error);
-    return { productId: -1 }
+    console.log(error);
+    Logger.error(error.sqlMessage, error.sql);
+    return {
+      status: 'error',
+      error: 'Could not add new item to inventory.'
+    }
   }
 }
 
@@ -203,6 +252,7 @@ export async function editProductImage(productId: number, file: File): Promise<R
 }
 
 export async function updateInventory(product: Product, image: File | null = null): Promise<Product | null> {
+
   try {
     if(!product?.productId) throw Error('No inventory ID provided.');
 
@@ -231,7 +281,7 @@ export async function updateInventory(product: Product, image: File | null = nul
     })
 
     const signedUrl = await productImageUrl(image);
-    console.log(signedUrl)
+
     product = { ...product, productImageUrl: signedUrl, supplierId: 1 }
     const values = marshal(product, pascalCase);
 
@@ -275,9 +325,34 @@ export async function updateInventory(product: Product, image: File | null = nul
   }
 }
 
-export async function deleteInventoryItem(productId: number): Promise<number> {
+export async function deleteInventoryItem(productId: number): Promise<QueryResult<number>> {
+  
   // need to delete https://storage.googleapis.com/busser/IMG_5139.JPEG-0724202448
   try {
+    let productImageUrl: string | undefined, rowsDeleted: number | undefined;
+    await db.query.transaction(async (trx) => {
+      let childRow  = await trx('productdetail')
+        .select('ProductImageUrl')
+        .where('ProductId', productId)
+        .first();
+      childRow = marshal(childRow, camelCase);
+      if(childRow?.productImageUrl) {
+        productImageUrl = childRow.productImageUrl;
+      }
+
+      const rows = await db
+        .table<Product>('product')
+        .where('ProductId', productId)
+        .del();
+
+      console.log(rows);
+      await trx.commit();
+    });
+
+    console.log(productImageUrl, '<-- here amigo')
+    if(productImageUrl) {
+      await deleteSignedUrl(productImageUrl);
+    }
     // const productDetail = await db
     //   .table<ProductDetail>('productdetail')
     //     .where('ProductId', productId)
@@ -285,14 +360,44 @@ export async function deleteInventoryItem(productId: number): Promise<number> {
 
     //       console.log(productDetail)
     // console.log(productDetail)
-    const rowsDeleted = await db
-      .table<Product>('product')
-        .where('ProductId', productId)
-          .del();
+    // const rowsDeleted = await db
+    //   .table<Product>('product')
+    //     .where('ProductId', productId)
+    //       .del();
 
-    return rowsDeleted;
+    return {
+      status: 'success',
+      data:1 //rowsDeleted
+    } satisfies QueryResult<number>;
+
+  } catch(error: any) {
+    console.error(error);
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace)
+    return {
+      status: 'error',
+      error: 'Could not delete inventory item.'
+    } satisfies QueryResult<number>;
+  }
+}
+
+export async function getSpirits(): Promise<Array<Spirit>> {
+  try {
+    const dbResult = await db.table<Spirit>('spirits');
+    const result = marshal<Spirit>(dbResult);
+    return result;
   } catch(error) {
     console.error(error);
-    return 0;
+    return [];
+  }
+}
+export async function getSpirit(id: number | string): Promise<Spirit | null> {
+  try {
+    const dbResult = await db.table<Spirit>('spirits').where('RecipeCategoryId', id);
+    const [result] = marshal<Spirit>(dbResult);
+    if(!result) throw Error('Spirit not found.')
+    return result;
+  } catch(error) {
+    console.error(error);
+    return null;
   }
 }

@@ -33,12 +33,12 @@
   </div>
   <Popover class=" text-sm font-light" triggeredBy="#btn-sign-up">Coming Soon!</Popover>
 {/if}
-<div class="flex items-center justify-center py-4 md:py-8 flex-wrap gap-3 mb-3 mx-auto">
+<!-- <div class="flex items-center justify-center py-4 md:py-8 flex-wrap gap-3 mb-3 mx-auto">
   {#if $page.data.user}
     <Button pill size="sm" outline>All</Button>
     {#each spirits as spirit}
       <Button pill size="sm" outline>{spirit}</Button>
     {/each}
   {/if}
-</div>
+</div> -->
 <Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3" />
