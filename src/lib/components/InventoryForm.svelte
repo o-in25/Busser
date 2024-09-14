@@ -25,11 +25,11 @@
     import { goto } from "$app/navigation";
 
   export let action: ComponentAction;
-  export let product: Product | null = null;
   export let result: FormSubmitResult = {};
+  export let product: Product | null = null;
 
   let slug = $page.params.id;
-  let productPricePerUnit = product?.productPricePerUnit || 0.0;
+  let productPricePerUnit = product?.productPricePerUnit;
   let productUnitSizeInMilliliters = product?.productUnitSizeInMilliliters;
   let productProof = product?.productProof;
   let categoryId = product?.categoryId;
@@ -192,7 +192,7 @@
             <div class="md:w-96 md:m-auto">
               <Alert border color="{result.success? 'green' : 'red'}">
                 <InfoCircleSolid slot="icon" class="w-5 h-5" />
-                {#if result.error}<span class="font-medium">Could not save changes.</span>{:else}{result.success?.message}{/if}
+                {#if result.error}<span class="font-medium">{result.error?.message}</span>{:else}{result.success?.message}{/if}
               </Alert>
             </div>
           </div>

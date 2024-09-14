@@ -34,7 +34,7 @@ export type Product = {
   productPricePerUnit: number,
   productUnitSizeInMilliliters: number,
   productProof: number,
-  productDetailId: number,
+  productDetailId: number | null,
   productImageUrl: string,
   categoryName: string,
   categoryDescription: string,

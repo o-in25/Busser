@@ -4,6 +4,7 @@ import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
 import { getSignedUrl } from "./storage";
+import { Logger } from "./logger";
 
 const db = new DbProvider('app_t');
 
@@ -99,42 +100,68 @@ export async function categorySelect(): Promise<SelectOption[]> {
   }
 }
 
-export async function addToInventory(product: Product): Promise<any> {
+export async function addToInventory(product: Product, image: File | null = null): Promise<QueryResult<Product>> {
   try {
+    let parentRowId: number | undefined, childRowId: number | undefined;
     await db.query.transaction(async (trx) => {
 
-      // const parentRow = await trx('product')
-      //   // .where("ProductId", values.ProductId)
-      //   .insert({
-      //     CategoryId: product.categoryId,
-      //     SupplierId: product.supplierId,
-      //     ProductName: product.productName,
-      //     ProductInStockQuantity: product.productInStockQuantity,
-      //     ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
-      //     ProductPricePerUnit: product.productPricePerUnit,
-      //     ProductProof: product.productProof
-      //   });
-      // console.log(parentRow)
+      const [parentRow] = await trx('product')
+        .insert({
+          CategoryId: product.categoryId,
+          SupplierId: product.supplierId,
+          ProductName: product.productName,
+          ProductInStockQuantity: product.productInStockQuantity,
+          ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
+          ProductPricePerUnit: product.productPricePerUnit,
+          ProductProof: product.productProof
+        });
+      parentRowId = parentRow;
 
+      const getProductImageUrl = async (image: File | null) => {
+        if(!image || image.size === 0 || image.name === 'undefined') return null;
+        const signedUrl = await getSignedUrl(image);
+        return (signedUrl.length? signedUrl : null);
+      }
 
-      // await trx('productdetail')
-      //   .insert({
-      //     ProductId: values.ProductId,
-      //     ProductImageUrl: values.ProductImageUrl,
-      //     ProductDescription: values.ProductDescription,
-      //     ProductSweetnessRating: values.ProductSweetnessRating,
-      //     ProductDrynessRating: values.ProductDrynessRating,
-      //     ProductVersatilityRating: values.ProductVersatilityRating,
-      //     ProductStrengthRating: values.ProductStrengthRating
-      //   }).onConflict('ProductId').merge();
+      const productImageUrl = await getProductImageUrl(image);
+      const [childRow] = await trx('productdetail')
+        .insert({
+          ProductId: parentRowId,
+          ProductImageUrl: productImageUrl,
+          ProductDescription: product.productDescription,
+          ProductSweetnessRating: product.productSweetnessRating,
+          ProductDrynessRating: product.productDrynessRating,
+          ProductVersatilityRating: product.productVersatilityRating,
+          ProductStrengthRating: product.productStrengthRating
+        }).onConflict('ProductId').merge();
+
+      childRowId = childRow;
 
       await trx.commit();
-
     });
 
+    if(!parentRowId || !childRowId) {
+      throw Error('No rows have been inserted.')
+    }
+
+    const newRow = await findInventoryItem(parentRowId);
+    if(!newRow) {
+      throw Error('Cannot find newly inserted item.')
+    }
+
+    return {
+      status: 'success',
+      data: newRow
+    }
+    // const new 
     // return await findInventoryItem(values.ProductId)
   } catch(error: any) {
-    console.log(error)
+    console.log(error);
+    Logger.error(error.sqlMessage, error.sql);
+    return {
+      status: 'error',
+      error: 'Could not add new item to inventory.'
+    }
   }
 }
 

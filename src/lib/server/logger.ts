@@ -11,7 +11,7 @@ export class Logger {
       await Logger.db.table<Log>('log').insert({
         logLevelId: 1,
         logMessage: message,
-        logDate: moment().format('YYYY-MM-DD HH:MM:SS'),
+        logDate: Logger.now(),
         logStackTrace: null
       });
     } catch(error: any) {
@@ -20,14 +20,14 @@ export class Logger {
 
   }
 
-  static async error(message: string): Promise<void> {
+  static async error(message: string, stackTrace: string | null = null): Promise<void> {
 
     try {
       await Logger.db.table<Log>('log').insert({
         logLevelId: 2,
         logMessage: message,
-        logDate: moment().format('YYYY-MM-DD HH:MM:SS'),
-        logStackTrace: null
+        logDate: Logger.now(),
+        logStackTrace: stackTrace
       });
     } catch(error: any) {
       console.error(error);
@@ -37,6 +37,6 @@ export class Logger {
   }
 
   static now() {
-    return moment().format('YYYY-MM-DD HH:MM:SS')
+    return moment().format('YYYY-MM-DD HH:MM:ss')
   }
 }

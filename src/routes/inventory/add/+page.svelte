@@ -21,7 +21,7 @@
 
 <div class="px-4 py-2 md:py-4">
   {#if form?.success || form?.error}
-    <InventoryForm action={'add'} result="{form}"/>
+    <InventoryForm action={'add'} result="{form}" product={form.args.product}/>
   {:else}
     <InventoryForm action={'add'}/>
   {/if}
