@@ -56,7 +56,7 @@
     console.log(result)
     if('data' in result) {
       $notificationStore.success = { message: 'Inventory item deleted.'}
-      goto(`/inventory`);
+      // goto(`/inventory`);
     } else {
       $notificationStore.error = { message: result.error }
     }

@@ -5,7 +5,7 @@
     import { onMount } from "svelte";
 
   let message;
-  let showNotification = true;
+  let showNotification = false;
   let seconds = 100;
 
   notificationStore.subscribe(({ success, error }) => {
@@ -28,7 +28,7 @@
     $notificationStore.error = null;
   }
 
-  onMount(() => trigger())
+  // onMount(() => trigger())
 </script>
 
 <Toast position="top-right" bind:toastStatus={showNotification}>

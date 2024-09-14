@@ -3,7 +3,7 @@ import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Prod
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
-import { getSignedUrl } from "./storage";
+import { deleteSignedUrl, getSignedUrl } from "./storage";
 import { Logger } from "./logger";
 
 const db = new DbProvider('app_t');
@@ -329,6 +329,30 @@ export async function deleteInventoryItem(productId: number): Promise<QueryResul
   
   // need to delete https://storage.googleapis.com/busser/IMG_5139.JPEG-0724202448
   try {
+    let productImageUrl: string | undefined, rowsDeleted: number | undefined;
+    await db.query.transaction(async (trx) => {
+      let childRow  = await trx('productdetail')
+        .select('ProductImageUrl')
+        .where('ProductId', productId)
+        .first();
+      childRow = marshal(childRow, camelCase);
+      if(childRow?.productImageUrl) {
+        productImageUrl = childRow.productImageUrl;
+      }
+
+      const rows = await db
+        .table<Product>('product')
+        .where('ProductId', productId)
+        .del();
+
+      console.log(rows);
+      await trx.commit();
+    });
+
+    console.log(productImageUrl, '<-- here amigo')
+    if(productImageUrl) {
+      await deleteSignedUrl(productImageUrl);
+    }
     // const productDetail = await db
     //   .table<ProductDetail>('productdetail')
     //     .where('ProductId', productId)
@@ -336,19 +360,19 @@ export async function deleteInventoryItem(productId: number): Promise<QueryResul
 
     //       console.log(productDetail)
     // console.log(productDetail)
-    const rowsDeleted = await db
-      .table<Product>('product')
-        .where('ProductId', productId)
-          .del();
+    // const rowsDeleted = await db
+    //   .table<Product>('product')
+    //     .where('ProductId', productId)
+    //       .del();
 
     return {
       status: 'success',
-      data: rowsDeleted
+      data:1 //rowsDeleted
     } satisfies QueryResult<number>;
 
   } catch(error: any) {
     console.error(error);
-    Logger.error(error.sqlMessage, error.sql)
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace)
     return {
       status: 'error',
       error: 'Could not delete inventory item.'

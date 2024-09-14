@@ -125,3 +125,13 @@ export type Spirit = {
   recipeCategoryDescriptionImageUrl: string
 
 }
+
+export type Upload = {
+  uploadId?: string
+  externalUploadId: string,
+  publicUrl: string,
+  name: string,
+  bucket: string,
+  contentType: string,
+  size: number
+}
