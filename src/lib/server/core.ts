@@ -1,5 +1,5 @@
 
-import type { Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, QueryResult, SelectOption, Spirit } from "$lib/types";
+import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, QueryResult, SelectOption, Spirit } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
@@ -345,11 +345,10 @@ export async function deleteInventoryItem(productId: number): Promise<QueryResul
         .where('ProductId', productId)
         .del();
 
-      console.log(rows);
+      rowsDeleted = rows;
       await trx.commit();
     });
 
-    console.log(productImageUrl, '<-- here amigo')
     if(productImageUrl) {
       await deleteSignedUrl(productImageUrl);
     }
@@ -367,7 +366,7 @@ export async function deleteInventoryItem(productId: number): Promise<QueryResul
 
     return {
       status: 'success',
-      data:1 //rowsDeleted
+      data: rowsDeleted || 0
     } satisfies QueryResult<number>;
 
   } catch(error: any) {
@@ -399,5 +398,29 @@ export async function getSpirit(id: number | string): Promise<Spirit | null> {
   } catch(error) {
     console.error(error);
     return null;
+  }
+}
+
+export async function getBasicRecipes(recipeCategoryId: number | string | null = null): Promise<QueryResult<Array<BasicRecipe>>> {
+  try {
+    let query = db.table<BasicRecipe>('basicrecipe');
+    if(recipeCategoryId) {
+      query.where('recipeCategoryId', recipeCategoryId);
+    }
+    const dbResult = await query;
+    const data = marshal<Array<BasicRecipe>>(dbResult);
+    const result: QueryResult<Array<BasicRecipe>> = {
+      status: 'success',
+      data
+    }
+    return result;
+  } catch(error: any) {
+    console.error(error);
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+    const result: QueryResult<Array<BasicRecipe>> = {
+      status: 'error',
+      error: 'Could not get basic recipes for specified query.'
+    };
+    return result;
   }
 }

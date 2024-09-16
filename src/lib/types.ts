@@ -126,12 +126,12 @@ export type Spirit = {
 
 }
 
-export type Upload = {
-  uploadId?: string
-  externalUploadId: string,
-  publicUrl: string,
-  name: string,
-  bucket: string,
-  contentType: string,
-  size: number
+export type BasicRecipe = {
+  recipeId: number,
+  recipeName: string,
+  recipeImageUrl: string | null,
+  recipeDescription: string | null,
+  recipeDescriptionImageUrl: string | null,
+  recipeTechniqueDilutionPercentage: number,
+  recipeTechniqueDescriptionText: string
 }
