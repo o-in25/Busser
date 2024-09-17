@@ -17,5 +17,5 @@
 </Heading>
 
 <div class="px-4 py-2 md:py-4">
-  <CatalogForm/>
+  <CatalogForm spirits={data.args.spirits}/>
 </div>
