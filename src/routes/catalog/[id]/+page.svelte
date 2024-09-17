@@ -29,7 +29,7 @@
   {data?.spirit?.recipeCategoryDescription}
 </Heading> -->
 
-<Gallery items={data.images} class="gap-4 grid-cols-2 md:grid-cols-3" />
+<!-- <Gallery items={data.images} class="gap-4 grid-cols-2 md:grid-cols-3" /> -->
 
 </div>
 <div class="px-4 py-2 md:py-4">

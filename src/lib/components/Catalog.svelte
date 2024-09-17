@@ -1,60 +1,85 @@
 <script lang="ts">
-    import type { BasicRecipe, Spirit } from "$lib/types";
-    import { Card, Listgroup, Avatar, Heading, ListgroupItem, Label, Input, Rating, List, Li } from "flowbite-svelte";
-    import FancyImage from "./FancyImage.svelte";
-    import CatalogItem from "./CatalogItem.svelte";
-    import FancyButton from "./FancyButton.svelte";
-    import { PlusOutline, SearchOutline, CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
-    import AccordionItem from "flowbite-svelte/AccordionItem.svelte";
-    import type { GeneratedContent } from "$lib/server/ai";
+  import type { BasicRecipe, Spirit } from "$lib/types";
+  import {
+    Card,
+    Listgroup,
+    Avatar,
+    Heading,
+    ListgroupItem,
+    Label,
+    Input,
+    Rating,
+    List,
+    Li,
+    P,
+  } from "flowbite-svelte";
+  import FancyImage from "./FancyImage.svelte";
+  import CatalogItem from "./CatalogItem.svelte";
+  import FancyButton from "./FancyButton.svelte";
+  import {
+    PlusOutline,
+    SearchOutline,
+    CheckCircleSolid,
+    CloseCircleSolid,
+  } from "flowbite-svelte-icons";
+  import AccordionItem from "flowbite-svelte/AccordionItem.svelte";
+  import type { GeneratedContent } from "$lib/server/ai";
+  import IconList from "./IconList.svelte";
 
-    // props
-    export let spirit: Spirit | null;
-    export let recipes: BasicRecipe[] | [];
-    export let content: GeneratedContent;
-      // props
+  // props
+  export let spirit: Spirit | null;
+  export let recipes: BasicRecipe[] | [];
+  export let content: GeneratedContent;
+  // props
 
-    const handleInput = () => {};
-</script>    
+  const handleInput = () => {};
+</script>
+
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <!-- col 1 -->
   <div>
-    <Heading tag="h4" class="mb-2 flex flex-row justify-between">{spirit?.recipeCategoryDescription}</Heading>
-    <div>
-      <p class="mb-6 text-gray-500 dark:text-gray-400">
-        {spirit?.recipeCategoryDescriptionText}
-      </p>
-      <p class="mb-6 text-gray-500 dark:text-gray-400">
-        {content.history}
-      </p>
-      <div>
-        <Heading tag="h2" customSize="text-lg font-semibold" class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Password requirements</Heading>
-<List tag="ul" class="space-y-1 text-gray-500 dark:text-gray-400" list="none">
-  <Li icon>
-    <CheckCircleSolid class="w-5 h-5 me-2 text-green-500 dark:text-green-400" />
-    At least 10 characters (and up to 100 characters)
-  </Li>
-  <Li icon>
-    <CheckCircleSolid class="w-5 h-5 me-2 text-green-500 dark:text-green-400" />
-    At least one lowercase character
-  </Li>
-  <Li icon>
-    <CloseCircleSolid class="w-5 h-5 me-2 text-gray-500 dark:text-gray-400" />
-    Inclusion of at least one special character, e.g., ! @ # ?
-  </Li>
-</List>
+    <Heading tag="h4" class="mb-2">
+      {spirit?.recipeCategoryDescription}
+    </Heading>
+    <P color="text-gray-500 dark:text-gray-400" class="mb-2">
+      {spirit?.recipeCategoryDescriptionText}
+    </P>
+    <div class="flex flex-row flex-nowrap justify-center">
+      <div class="flex-1">
+        <IconList type="success" list={content.goodWith} heading="Good With" />
+      </div>
+
+      <div class="flex-1">
+        <IconList type="error" list={content.avoidWith} heading="Avoid With" />
       </div>
     </div>
   </div>
-  <FancyImage src="{spirit?.recipeCategoryDescriptionImageUrl || ''}" alt={spirit?.recipeCategoryDescriptionText || ''} />
+
+  <!-- col 2 -->
+  <div class="m-auto">
+    <FancyImage
+      src={spirit?.recipeCategoryDescriptionImageUrl || ""}
+      alt={spirit?.recipeCategoryDescriptionText || ""} />
+  </div>
+</div>
+<div class="mb-6">
+  <Heading
+    tag="h6"
+    customSize="text-md font-semibold"
+    class="text-md font-semibold text-gray-900 dark:text-white">
+    History
+  </Heading>
+  <P color="text-gray-500 dark:text-gray-400">
+    {content.history}
+  </P>
 </div>
 
+<Heading tag="h5" class="mb-2">
+  Cocktails With {spirit?.recipeCategoryDescription}
+</Heading>
 <div class="flex justify-between">
-  <Label class="space-y-2 mb-6">
-    <Input
-      type="email"
-      size="md"
-      placeholder="Search"
-      on:keydown={handleInput}>
+  <Label class="space-y-2">
+    <Input type="email" size="md" placeholder="Search" on:keydown={handleInput}>
       <SearchOutline slot="left" class="w-5 h-5" />
     </Input>
   </Label>
@@ -67,26 +92,29 @@
 
   <Listgroup class="border-0 dark:!bg-transparent">
     {#each recipes as recipe}
-    <ListgroupItem active href="/">
-      <div class="flex items-center space-x-4 rtl:space-x-reverse">
-        <Avatar src={recipe.recipeImageUrl || ''} alt={recipe.recipeDescription|| ''} class="flex-shrink-1" />
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
-            {recipe.recipeName}
-          </p>
-          <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-            {recipe.recipeDescription}
-          </p>
+      <ListgroupItem active href="/">
+        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+          <Avatar
+            src={recipe.recipeImageUrl || ""}
+            alt={recipe.recipeDescription || ""}
+            class="flex-shrink-1" />
+          <div class="flex-1 min-w-0">
+            <p
+              class="text-sm font-medium text-gray-900 truncate dark:text-white">
+              {recipe.recipeName}
+            </p>
+            <p class="text-sm text-gray-500 truncate dark:text-gray-400">
+              {recipe.recipeDescription}
+            </p>
+          </div>
+          <!-- <Rating id="example-3" total={5} rating={3.4}>
+            <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">3.4 out of 5</p>
+          </Rating> -->
         </div>
-        <Rating id="example-3" total={5} rating={3.4}>
-          <!-- <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">3.4 out of 5</p> -->
-        </Rating>
-      </div>
-    </ListgroupItem>
+      </ListgroupItem>
     {/each}
   </Listgroup>
 </Card>
-
 
 <!-- <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased">
     <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">

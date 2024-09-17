@@ -34,7 +34,7 @@
 </div>
 
 <!-- footer -->
-<div class="hidden sm:block md:mt-auto md:text-center">
+<div class="mt-auto text-center">
   <Footer footerType="logo" class="rounded-none">
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
     <FooterCopyright by="Busser" />

@@ -16,7 +16,18 @@ export type GeneratedContent = {
   avoidWith: string[];
 }
 
-export async function generateContent(): Promise<GeneratedContent> {
+// trying to avoid injection
+
+export const buildPrompt = (param: string) => {
+
+  return `Tell me some facts about ${param}, including a brief history as well as a flavor profile. 
+    The flavor profile could include information such as the sweetness, dryness, etc. 
+    Also provide some ingredients (juices, liqueurs, etc) that pair well with 
+    ${param} or popular ${param} cocktails as well some ingredients (juices, liqueurs, etc) 
+    that do not pair well with ${param}.`
+}
+
+export async function generateContent(prompt: string): Promise<GeneratedContent> {
   const schema = z.object({
     history: z.string(),
     flavorProfile: z.array(z.string()),
@@ -29,7 +40,7 @@ export async function generateContent(): Promise<GeneratedContent> {
     messages: [
       {
         role: "user",
-        content: "Tell me some facts about Gin, including a brief history as well as a flavor profile. The flavor profile could include information such as the sweetness, dryness, etc. Also provide some ingredients (juices, liqueurs, etc) that pair well with Gin or popular gin cocktails as well some ingredients  (juices, liqueurs, etc) that do not pair well with Gin.",
+        content: prompt
       },
     ],
     response_format: zodResponseFormat(schema, 'page_content')
@@ -40,7 +51,7 @@ export async function generateContent(): Promise<GeneratedContent> {
 }
 
 export async function generateImage() {
-  const image = await openai.images.generate({ model: "dall-e-3", prompt: "Pictures of gin in glasses and bottles.", n: 1 });
+  const image = await openai.images.generate({ model: "dall-e-3", prompt: "Pictures of Gin in glasses and bottles.", n: 1 });
 
   return image.data;
 
