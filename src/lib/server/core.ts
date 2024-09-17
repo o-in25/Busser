@@ -1,5 +1,5 @@
 
-import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, Product, ProductDetail, QueryResult, SelectOption, Spirit } from "$lib/types";
+import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, PreparationMethod, Product, ProductDetail, QueryResult, SelectOption, Spirit } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
@@ -420,6 +420,27 @@ export async function getBasicRecipes(recipeCategoryId: number | string | null =
     const result: QueryResult<Array<BasicRecipe>> = {
       status: 'error',
       error: 'Could not get basic recipes for specified query.'
+    };
+    return result;
+  }
+}
+
+export async function getPreparationMethods(): Promise<QueryResult<Array<PreparationMethod>>> {
+  try {
+    const dbResult = await db.table<PreparationMethod>('preparationmethod');
+    const data = marshal<Array<PreparationMethod>>(dbResult);
+    const result: QueryResult<Array<PreparationMethod>> = {
+      status: 'success',
+      data
+    }
+
+    return result;
+  } catch(error: any) {
+    console.error(error);
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+    const result: QueryResult<Array<PreparationMethod>> = {
+      status: 'error',
+      error: 'Could not get preparation methods.'
     };
     return result;
   }

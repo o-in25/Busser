@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { Input, Label, Radio } from "flowbite-svelte";
+  import { Input, Label, Radio, Helper } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
   import { ArrowRightOutline } from "flowbite-svelte-icons";
-    import type { Spirit } from "$lib/types";
+  import type { PreparationMethod, Spirit } from "$lib/types";
 
   // props
   export let spirits: Spirit[];
+  export let preparationMethods: PreparationMethod[];
+  console.log(preparationMethods)
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -20,27 +22,46 @@
           placeholder="Plantation 3 Star"
           required />
       </div>
+
+      <div>
+        <Label for="productName" class="mb-2">Served</Label>
+        <ul
+          class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600"
+        >
+          {#each preparationMethods as prepMethod}
+          <li class="w-full">
+            <Radio name="hor-list" class="px-3 pt-1">{prepMethod.recipeTechniqueDescriptionText}</Radio>
+            <Helper id="helper-checkbox-text" class="ps-6 pb-1">
+              Adds {prepMethod.recipeTechniqueDilutionPercentage}% dilution
+            </Helper>
+          </li>
+          {/each}
+        </ul>
+      </div>
     </div>
 
     <Label for="productName" class="mb-2">Category</Label>
-
-    <div class="grid gap-6 w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+    <div
+      class="grid gap-6 w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
       {#each spirits as spirit}
-      <Radio name="custom" custom class="m-auto">
-        <div
-          class="inline-flex justify-between items-center text-gray-500 bg-white rounded-lg border border-gray-200 cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-primary-500 peer-checked:border-primary-600 peer-checked:text-primary-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
-          <div class="block">
-            <div class="h-auto w-16 md:w-24 rounded">
-              <img
-                src="{spirit.recipeCategoryDescriptionImageUrl}"
-                class="object-contain rounded" />
+        <Radio name="custom" custom class="m-auto">
+          <div
+            class="inline-flex justify-between items-center text-gray-500 bg-white rounded-lg border border-gray-200 cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-primary-500 peer-checked:border-primary-600 peer-checked:text-primary-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
+            <div class="block">
+              <div class="h-auto w-16 md:w-24 rounded">
+                <!-- svelte-ignore a11y-missing-attribute -->
+                <img
+                  src={spirit.recipeCategoryDescriptionImageUrl}
+                  class="object-contain rounded" />
+              </div>
+            </div>
+            <div class="w-20 text-center p-0.5">
+              <div class="w-full text-sm md:text-md font-semibold truncate">
+                {spirit.recipeCategoryDescription}
+              </div>
             </div>
           </div>
-          <div class="w-20 text-center p-0.5">
-            <div class="w-full text-sm md:text-md xl:text-lg font-semibold truncate">{spirit.recipeCategoryDescription}</div>
-          </div>
-        </div>
-      </Radio>
+        </Radio>
       {/each}
     </div>
 
