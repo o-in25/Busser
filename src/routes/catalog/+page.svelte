@@ -7,9 +7,9 @@
   const { spirits } = data.args;
 </script>
 
-<div class="mt-5 flex items-center justify-between gap-4 md:mb-8">
+<div class="mt-5 flex items-center justify-between gap-4">
   <Heading tag="h4" class="mb-4 w-auto">Catalog</Heading>
-  <A aClass="font-medium hover:underline flex items-center">
+  <A aClass="font-medium hover:underline flex items-center" href="/catalog/browse">
     Browse entire catalog
     <ArrowRightOutline class="ms-1 h-5 w-5"/>
   </A>
@@ -20,7 +20,7 @@
       {#each spirits as spirit}
         <Card
           img={spirit.recipeCategoryDescriptionImageUrl}
-          href="/catalog/{spirit.recipeCategoryId}"
+          href="/catalog/browse/{spirit.recipeCategoryId}"
           horizontal
           size="xl">
           <h5

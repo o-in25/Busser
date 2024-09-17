@@ -15,7 +15,7 @@
   <BreadcrumbItem name="Add To Inventory"></BreadcrumbItem>
 </Breadcrumb>
 <Heading tag="h4" class="mb-4 flex flex-row justify-between">
-  Inventory
+  New Inventory Item
 </Heading>
 
 <div class="px-4 py-2 md:py-4">

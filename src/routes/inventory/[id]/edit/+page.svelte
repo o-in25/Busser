@@ -15,7 +15,7 @@
   <BreadcrumbItem name="Edit Inventory"></BreadcrumbItem>
 </Breadcrumb>
 <Heading tag="h4" class="mb-4 flex flex-row justify-between">
-  Inventory
+  Edit {product.productName}
 </Heading>
 
 <div class="px-4 py-2 md:py-4">
