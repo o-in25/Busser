@@ -1,4 +1,4 @@
-import { getInventory } from '$lib/server/core';
+import { getBaseSpirits, getInventory } from '$lib/server/core';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url }) => {
@@ -7,7 +7,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
   let hrefValue = hrefParams.get('page');
   let page = Number(hrefValue);
   let { data, pagination } = await getInventory(page, 20);
-
+  // could probably keep these in a store
+  // let baseSpirits = await getBaseSpirits();
   // let { total, perPage } = pagination;
   // let pages: any = Math.ceil(total / perPage);
   // if(!Number.isNaN(pages)) {
