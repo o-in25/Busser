@@ -12,7 +12,7 @@
 <Breadcrumb name="Catalog" href="/inventory">
   <BreadcrumbItem name="Add To Catalog"></BreadcrumbItem>
 </Breadcrumb>
-<Heading tag="h4" class="mb-4 flex flex-row justify-between">
+<Heading tag="h2" class="mb-4 font-extrabold flex flex-row justify-between">
   New Catalog Item
 </Heading>
 

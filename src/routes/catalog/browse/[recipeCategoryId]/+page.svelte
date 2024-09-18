@@ -24,7 +24,7 @@
 <Breadcrumb name="Catalog" href="/catalog">
   <BreadcrumbItem name="{data?.spirit?.recipeCategoryDescription}"></BreadcrumbItem>
 </Breadcrumb>
-<Heading tag="h4" class="mb-4 flex flex-row justify-between">
+<Heading tag="h2" class="mb-4 flex flex-row justify-between font-extrabold">
   {data?.spirit?.recipeCategoryDescription}
 </Heading>
 <!-- <Heading tag="h4" class="mb-4 flex flex-row justify-between">

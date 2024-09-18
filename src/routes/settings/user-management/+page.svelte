@@ -21,7 +21,7 @@ import type { PageData } from "./$types";
   </TabItem>
 </Tabs>
 <div class="text-sm text-gray-500 dark:text-gray-400">
-  <Heading tag="h4" class="mb-4 flex flex-row justify-between">
+  <Heading tag="h4" class="mb-4 flex flex-row justify-between font-extrabold">
     User Management 
   </Heading>
   <div class="flex justify-left items-center">

@@ -13,7 +13,7 @@
   }
 </script>
 <div class="mt-5">
-  <Heading tag="h4" class="mb-4 flex flex-row justify-between">
+  <Heading tag="h2" class="mb-4 flex flex-row justify-between font-extrabold">
     Inventory
   </Heading>
 </div>

@@ -8,7 +8,7 @@
 </script>
 
 <div class="mt-5 flex items-center justify-between gap-4">
-  <Heading tag="h4" class="mb-4 w-auto">Catalog</Heading>
+  <Heading tag="h2" class="mb-4 w-auto font-extrabold">Catalog</Heading>
   <A aClass="font-medium hover:underline flex items-center" href="/catalog/browse">
     Browse entire catalog
     <ArrowRightOutline class="ms-1 h-5 w-5"/>

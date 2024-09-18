@@ -14,7 +14,7 @@
 <Breadcrumb name="Inventory" href="/inventory">
   <BreadcrumbItem name="Add To Inventory"></BreadcrumbItem>
 </Breadcrumb>
-<Heading tag="h4" class="mb-4 flex flex-row justify-between">
+<Heading tag="h2" class="mb-4 flex font-extrabold flex-row justify-between">
   New Inventory Item
 </Heading>
 
