@@ -10,16 +10,14 @@
 
 </script>
 
-<div class="mb-8">
 <Heading class="mb-4 pl-2 md:pl-0" tag="h1" customSize="text-3xl font-extrabold  md:text-5xl lg:text-6xl">
 	<div class="text-left md:text-center"><Span gradient gradientClass="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">More&nbsp;</Span>Than Just a Drink Menu</div>
 </Heading>
 <P class="px-2 text-left md:text-center">Busser makes it easy to manage your inventory and keep tabs on your stock.</P>
-</div>
 
 
 {#if !$page.data.user}
-  <div class="flex justify-center">
+  <div class="flex justify-center my-8">
     <ButtonGroup class="space-x-px">
       <GradientButton color="purpleToBlue" size="lg" href="/login">
         <ArrowLeftToBracketOutline/>
@@ -41,4 +39,4 @@
     {/each}
   {/if}
 </div> -->
-<Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3" />
+<Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3 mb-8" />
