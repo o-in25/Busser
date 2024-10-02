@@ -4,26 +4,30 @@
     Label,
     Radio,
     Textarea,
+    Button,
     Hr,
     Heading,
-    Card,
-    Indicator,
-    RadioButton,
-    InputAddon,
-    ButtonGroup,
     Helper,
   } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
-  import { ArrowRightOutline, CalendarWeekSolid } from "flowbite-svelte-icons";
   import type { PreparationMethod, Spirit } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
-  import { EyeOutline, EyeSlashOutline } from "flowbite-svelte-icons";
-  let unit = 'imperial';
+  import CatalogFormItem from "./CatalogFormItem.svelte";
+
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
-  console.log(preparationMethods);
-  let radioGroup = "notes";
+  let steps = [1];
+  
+  const addStep = () => steps = [...steps, steps[steps.length - 1] + 1];
+
+function onSomeEvent(data){
+
+  steps.splice(data - 1, 1);
+  steps = steps;
+  console.log(steps)
+;
+}
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -32,6 +36,8 @@
       <legend class="mb-6">
         <Heading tag="h6">Recipe Details</Heading>
       </legend>
+
+      <!-- name -->
       <div class="grid gap-6 grid-cols-1 mb-6">
         <div>
           <Label for="productName" class="mb-2">Name</Label>
@@ -42,22 +48,9 @@
             placeholder="Plantation 3 Star"
             required />
         </div>
-        <!-- <div>
-          <Label for="productName" class="mb-2">Served</Label>
-          <ul
-            class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600"
-          >
-            {#each preparationMethods as prepMethod}
-            <li class="w-full">
-              <Radio name="hor-list" class="px-3 pt-1">{prepMethod.recipeTechniqueDescriptionText}</Radio>
-              <Helper id="helper-checkbox-text" class="ps-6 pb-1">
-                Adds {prepMethod.recipeTechniqueDilutionPercentage}% dilution
-              </Helper>
-            </li>
-            {/each}
-          </ul>
-        </div> -->
       </div>
+
+      <!-- category -->
       <div class="mb-6">
         <Label for="productName" class="mb-2">Category</Label>
         <div
@@ -84,6 +77,8 @@
           {/each}
         </div>
       </div>
+
+      <!-- description -->
       <div class="mb-6">
         <Label for="textarea-id" class="mb-2">Description</Label>
         <Textarea id="textarea-id" rows="4" name="message" resizable="false" />
@@ -104,6 +99,8 @@
           {/each}
         </ul>
       </div>
+
+      <!-- image -->
       <div class="mb-6">
         <FileUpload name="productImageUrl" signedUrl={null}></FileUpload>
       </div>
@@ -116,71 +113,16 @@
       <legend>
         <Heading tag="h6">Recipe Steps</Heading>
       </legend>
-      <Card size="xl" class="relative">
-        <!-- <Indicator color="blue" border size="xl" placement="top-right" class="text-xs font-bold">18</Indicator> -->
+      {#each steps as step, index (step)}
+        <CatalogFormItem step={index + 1} {onSomeEvent}/>
+      {/each}
 
-        <div class="mb-6">
-          <Label for="first_name" class="mb-2">inventory Item</Label>
-          <Input type="text" id="first_name" required />
-        </div>
-        <div class="mb-6">
-          <Label for="first_name" class="mb-2">Quantity</Label>
+      <div class="md:flex md:flex-row">
+  <div class="my-4 md:mr-4">
+    <Button style="grow md:flex-none" on:click={addStep}>Add</Button>
+  </div>
+</div>
 
-          <ul
-            class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600 py-2">
-            <li class="w-full border-none">
-              <Radio name="quantity" class="px-3 pt-1">Dash</Radio>
-              <Helper id="helper-checkbox-text" class="ps-9 pb-1">
-                About
-                {#if unit === 'imperial'}
-                  <span class="diagonal-fractions">1/32</span>&nbsp;oz.
-                {:else}
-                  0.9 mL
-                {/if}
-              </Helper>
-            </li>
-            <li class="w-full border-none">
-              <Radio name="quantity" class="px-3 pt-1">Bar Spoon</Radio>
-              <Helper id="helper-checkbox-text" class="ps-9 pb-1">
-                About
-                {#if unit === 'imperial'}
-                  <span class="diagonal-fractions">1/6</span>&nbsp;oz.
-                {:else}
-                  5 mL
-                {/if}
-              </Helper>
-            </li>
-            <li class="w-full border-none">
-              <Radio name="quantity" class="px-3 pt-1">Custom</Radio>
-            </li>
-            <li class="w-full border-none p-3">
-              <div>
-                <ButtonGroup class="w-full">
-                  <Input id="show-password1" type="number" />
-
-                  <InputAddon>
-                    <button
-                      on:click|preventDefault={() => (unit = unit === 'imperial'? 'metric' : 'imperial' )}
-                      class="w-4">
-                      <span class="">
-                        {#if unit === 'imperial'}oz{:else}mL{/if}
-                      </span>
-                    </button>
-                  </InputAddon>
-                </ButtonGroup>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div class="mb-6">
-          <Label for="first_name" class="mb-2">Description</Label>
-          <Textarea
-            id="textarea-id"
-            rows="4"
-            name="message"
-            resizable="false" />
-        </div>
-      </Card>
     </fieldset>
 
     <!-- submit -->
