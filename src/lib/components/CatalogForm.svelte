@@ -14,38 +14,38 @@
   import FileUpload from "./FileUpload.svelte";
   import CatalogFormItem from "./CatalogFormItem.svelte";
   import { v4 as uuidv4 } from 'uuid';
+  import { PlusOutline } from "flowbite-svelte-icons";
 
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
-  let stepTemplate = {
+
+  const createStep = () => ({
     recipeStepId: uuidv4(),
     productId: 0,
     productIdQuantityInMilliliters: 0,
     recipeStepDescription: ''
-  }
+  })
 
-
-  let steps: RecipeStep[] = [stepTemplate];
+  let steps: RecipeStep[] = [createStep()];
 
   const addStep = () => {
-    const newStep = { ...stepTemplate, recipeStepId: uuidv4() };
-    steps = [...steps, newStep]
+    steps = [...steps, createStep()]
   };
 
-  function onSomeEvent(data) {
-    console.log(data)
-    steps.splice(data - 1, 1);
-    steps = steps;
-    console.log(steps);
+  function removeStep(stepNumber: number) {
+    if(steps.length > 1) {
+      steps.splice(stepNumber - 1, 1);
+      steps = steps;
+    }
   }
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
   <form class="relative" method="POST" enctype="multipart/form-data">
     <fieldset>
-      <legend class="mb-6">
-        <Heading tag="h6">Recipe Details</Heading>
+      <legend class="mb-3">
+        <Heading tag="h6">Details</Heading>
       </legend>
 
       <!-- name -->
@@ -120,21 +120,19 @@
     <Hr classHr="my-6" />
 
     <!-- inner form -->
-    <fieldset class="p-4">
-      <legend>
-        <Heading tag="h6">Recipe Steps</Heading>
+    <fieldset class="px-4">
+      <legend class="mb-3">
+        <Heading tag="h6">Details</Heading>
       </legend>
       {#each steps as step, stepNumber (step.recipeStepId)}
         <div class="py-4">
-          <CatalogFormItem {step} {stepNumber} {onSomeEvent} />
+          <CatalogFormItem {step} {stepNumber} clickHandler={removeStep} />
         </div>
       {/each}
 
-      <div class="md:flex md:flex-row">
-        <div class="my-4 md:mr-4">
-          <Button style="grow md:flex-none" on:click={addStep}>Add</Button>
+        <div class="my-4 flex flex-row justify-center">
+          <Button class="!p-2" pill={true} on:click={addStep}><PlusOutline class="w-6 h-6"/></Button>
         </div>
-      </div>
     </fieldset>
 
     <!-- submit -->

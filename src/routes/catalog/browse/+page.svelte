@@ -1,7 +1,8 @@
 <script lang="ts">
-    import type { PageData } from './$types';
+    import FancyButton from '$lib/components/FancyButton.svelte';
+import type { PageData } from './$types';
     
     export let data: PageData;
 </script>
 
-All of the people are here
+<FancyButton href="/catalog/add">Add New</FancyButton>

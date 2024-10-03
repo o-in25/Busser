@@ -13,7 +13,7 @@
   <BreadcrumbItem name="Add To Catalog"></BreadcrumbItem>
 </Breadcrumb>
 <Heading tag="h2" class="mb-4 font-extrabold flex flex-row justify-between">
-  New Catalog Item
+  New Cocktail
 </Heading>
 
 <div class="px-4 py-2 md:py-4">
