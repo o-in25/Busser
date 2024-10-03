@@ -15,6 +15,8 @@
   import CatalogFormItem from "./CatalogFormItem.svelte";
   import { v4 as uuidv4 } from 'uuid';
   import { PlusOutline } from "flowbite-svelte-icons";
+  import { applyAction, enhance } from "$app/forms";
+    import { goto } from "$app/navigation";
 
   // props
   export let spirits: Spirit[];
@@ -42,7 +44,16 @@
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
-  <form class="relative" method="POST" enctype="multipart/form-data">
+  <form class="relative" method="POST" enctype="multipart/form-data" use:enhance={({ formData }) => {
+    formData.append('recipeSteps', JSON.stringify(steps));
+    return async ({ result, update }) => {
+			if (result.type === 'redirect') {
+				goto(result.location);
+			} else {
+				await applyAction(result);
+			}
+    }
+  }}>
     <fieldset>
       <legend class="mb-3">
         <Heading tag="h6">Details</Heading>
@@ -54,8 +65,8 @@
           <Label for="productName" class="mb-2">Name</Label>
           <Input
             type="text"
-            id="productName"
-            name="productName"
+            id="recipeName"
+            name="recipeName"
             placeholder="Plantation 3 Star"
             required />
         </div>
@@ -63,11 +74,11 @@
 
       <!-- category -->
       <div class="mb-6">
-        <Label for="productName" class="mb-2">Category</Label>
+        <Label for="recipeCategoryId" class="mb-2">Category</Label>
         <div
           class="grid gap-6 w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6">
           {#each spirits as spirit}
-            <Radio name="custom" custom class="w-full">
+            <Radio name="recipeCategoryId" custom class="w-full" value={spirit.recipeCategoryId}>
               <div
                 class="inline-flex justify-between items-center text-gray-500 bg-white rounded-lg border border-gray-200 cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-primary-500 peer-checked:border-primary-600 peer-checked:text-primary-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
                 <div class="block">
@@ -91,16 +102,16 @@
 
       <!-- description -->
       <div class="mb-6">
-        <Label for="textarea-id" class="mb-2">Description</Label>
-        <Textarea id="textarea-id" rows="4" name="message" resizable="false" />
+        <Label for="RecipeCategoryDescriptionText" class="mb-2">Description</Label>
+        <Textarea name="RecipeCategoryDescriptionText" id="RecipeCategoryDescriptionText" rows="4" resizable="false" />
       </div>
       <div class="mb-6">
-        <Label for="productName" class="mb-2">Served</Label>
+        <Label for="recipeTechniqueDescriptionId" class="mb-2">Served</Label>
         <ul
           class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600">
           {#each preparationMethods as prepMethod}
             <li class="w-full border-none">
-              <Radio name="hor-list" class="px-3 pt-1">
+              <Radio name="recipeTechniqueDescriptionId" class="px-3 pt-1" value={prepMethod.recipeTechniqueDescriptionId}>
                 {prepMethod.recipeTechniqueDescriptionText}
               </Radio>
               <Helper id="helper-checkbox-text" class="ps-9 pb-1">
@@ -138,10 +149,10 @@
     <!-- submit -->
     <div class="md:flex md:flex-row">
       <div class="my-4 md:mr-4">
-        <FancyButton style="grow md:flex-none" on:clicked={event => {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          console.log(steps)
+        <FancyButton style="grow md:flex-none" type="submit" on:clicked={event => {
+          // event.preventDefault();
+          // event.stopImmediatePropagation();
+          // console.log(steps)
         }}>Save</FancyButton>
       </div>
     </div>

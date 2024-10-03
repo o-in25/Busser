@@ -12,3 +12,14 @@ export const load = (async ({ request }) => {
 
   return pageData;
 }) satisfies PageServerLoad;
+
+
+export const actions = {
+  default: async ({ request }) => {
+    const formData = await request.formData();
+    console.log(formData);
+    return {
+      success: { message: 'User has been created.' }
+    };
+  }
+};

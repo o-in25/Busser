@@ -48,18 +48,16 @@
       label="Category"
       placeholder="Whiskey"
       fetchUrl="/api/select"
-      name="categoryId"
       bind:value={step.productId}
       key="" />
   </div>
   <div class="mb-6">
-    <Label for="first_name" class="mb-2">Quantity</Label>
-
+    <Label class="mb-2">Quantity</Label>
     <ul
       class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600 py-2">
       <li class="w-full border-none">
         <Radio
-          name="quantity-{group}"
+          
           class="px-3 pt-1"
           value={3}
           bind:group={step.productIdQuantityInMilliliters}
@@ -79,7 +77,7 @@
       </li>
       <li class="w-full border-none">
         <Radio
-          name="quantity-{group}"
+          
           class="px-3 pt-1 text-nowrap"
           value={6}
           bind:group={step.productIdQuantityInMilliliters}
@@ -98,13 +96,12 @@
         </Helper>
       </li>
       <li class="w-full border-none">
-        <Radio name="quantity-{group}" class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
+        <Radio  class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
       </li>
       <li class="w-full border-none p-3">
         <div>
           <ButtonGroup class="w-full">
             <Input
-              name="quantity-{group}"
               bind:value={customChoice}
               on:change={() => step.productIdQuantityInMilliliters = customChoice}
               {disabled}
@@ -116,7 +113,7 @@
                   (unit = unit === "imperial" ? "metric" : "imperial")}
                 class="w-4"
               >
-                <span class="">
+                <span >
                   {#if unit === "imperial"}oz{:else}mL{/if}
                 </span>
               </button>
@@ -127,11 +124,9 @@
     </ul>
   </div>
   <div class="mb-6">
-    <Label for="first_name" class="mb-2">Description</Label>
+    <Label for="recipeStepDescription" class="mb-2">Description</Label>
     <Textarea
-      id="textarea-id"
       rows="4"
-      name="message"
       resizable="false"
       bind:value={step.recipeStepDescription} />
   </div>
