@@ -34,8 +34,8 @@
   };
 
   function removeStep(stepNumber: number) {
-    if(steps.length > 1) {
-      steps.splice(stepNumber - 1, 1);
+    if(steps.length > 0) {
+      steps.splice(stepNumber, 1);
       steps = steps;
     }
   }

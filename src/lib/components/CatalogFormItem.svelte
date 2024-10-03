@@ -22,12 +22,9 @@
   export let clickHandler: Function;
 
   let unit = 'imperial';
-  $: stepNumber++;
   let customChoice = step.productIdQuantityInMilliliters;
   $: customChoice = Number(customChoice) || 0
   let disabled = false;
-  import { v4 as uuidv4 } from 'uuid';
-    import P from "flowbite-svelte/P.svelte";
 
   let group = step.recipeStepId;
 
@@ -37,10 +34,9 @@
 </script>
 
 <Card size="xl" class="relative">
-  <Heading tag="h6">Step {stepNumber}</Heading>
-  <P>{group}</P>
-  <!-- <h6>{step}</h6> -->
-  {#if stepNumber > 1}
+  <Heading tag="h6">Step {stepNumber + 1}</Heading>
+  <!-- <h6>{step}</h6> --> 
+  {#if stepNumber > 0}
     <button on:click|preventDefault={() => clickHandler(stepNumber)}>
       <Indicator color="red" border size="xl" placement="top-right">
         <span class="text-white text-xs font-bold"><MinusOutline /></span>
