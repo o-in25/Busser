@@ -13,10 +13,16 @@
   import type { PreparationMethod, RecipeStep, Spirit } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
   import CatalogFormItem from "./CatalogFormItem.svelte";
-  import { v4 as uuidv4 } from 'uuid';
+  import { v4 as uuidv4 } from "uuid";
   import { PlusOutline } from "flowbite-svelte-icons";
   import { applyAction, enhance } from "$app/forms";
-    import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
+  import { RadioButton, ButtonGroup } from "flowbite-svelte";
+  import {
+    ListMusicSolid,
+    OrderedListOutline,
+    ListOutline,
+  } from "flowbite-svelte-icons";
 
   // props
   export let spirits: Spirit[];
@@ -26,34 +32,46 @@
     recipeStepId: uuidv4(),
     productId: 0,
     productIdQuantityInMilliliters: 0,
-    recipeStepDescription: ''
-  })
+    recipeStepDescription: "",
+  });
 
   let steps: RecipeStep[] = [createStep()];
 
   const addStep = () => {
-    steps = [...steps, createStep()]
+    steps = [...steps, createStep()];
   };
 
-  function removeStep(stepNumber: number) {
-    if(steps.length > 0) {
+  const removeStep = (stepNumber: number) => {
+    if (steps.length > 0) {
       steps.splice(stepNumber, 1);
       steps = steps;
     }
-  }
+  };
+
+  // default to first choice
+  let [defaultPrepMethodChoice] = preparationMethods;
+  let [defaultSpirit] = spirits;
+  let prepMethodChoice = defaultPrepMethodChoice.recipeTechniqueDescriptionId;
+  let defaultSpiritChoice = defaultSpirit.recipeCategoryId;
+
+  $: prepMethodDilutionPct = defaultPrepMethodChoice.recipeTechniqueDilutionPercentage
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
-  <form class="relative" method="POST" enctype="multipart/form-data" use:enhance={({ formData }) => {
-    formData.append('recipeSteps', JSON.stringify(steps));
-    return async ({ result, update }) => {
-			if (result.type === 'redirect') {
-				goto(result.location);
-			} else {
-				await applyAction(result);
-			}
-    }
-  }}>
+  <form
+    class="relative"
+    method="POST"
+    enctype="multipart/form-data"
+    use:enhance={({ formData }) => {
+      formData.append("recipeSteps", JSON.stringify(steps));
+      return async ({ result, update }) => {
+        if (result.type === "redirect") {
+          goto(result.location);
+        } else {
+          await applyAction(result);
+        }
+      };
+    }}>
     <fieldset>
       <legend class="mb-3">
         <Heading tag="h6">Details</Heading>
@@ -78,7 +96,13 @@
         <div
           class="grid gap-6 w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6">
           {#each spirits as spirit}
-            <Radio name="recipeCategoryId" custom class="w-full" value={spirit.recipeCategoryId}>
+            <Radio
+              name="recipeCategoryId"
+              custom
+              class="w-full"
+              value={spirit.recipeCategoryId}
+              bind:group={defaultSpiritChoice}
+              >
               <div
                 class="inline-flex justify-between items-center text-gray-500 bg-white rounded-lg border border-gray-200 cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-primary-500 peer-checked:border-primary-600 peer-checked:text-primary-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700">
                 <div class="block">
@@ -102,12 +126,20 @@
 
       <!-- description -->
       <div class="mb-6">
-        <Label for="RecipeCategoryDescriptionText" class="mb-2">Description</Label>
-        <Textarea name="RecipeCategoryDescriptionText" id="RecipeCategoryDescriptionText" rows="4" resizable="false" />
+        <Label for="RecipeCategoryDescriptionText" class="mb-2">
+          Description
+        </Label>
+        <Textarea
+          name="RecipeCategoryDescriptionText"
+          id="RecipeCategoryDescriptionText"
+          rows="4"
+          resizable="false" />
       </div>
+
+      <!-- served -->
       <div class="mb-6">
         <Label for="recipeTechniqueDescriptionId" class="mb-2">Served</Label>
-        <ul
+        <!-- <ul
           class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600">
           {#each preparationMethods as prepMethod}
             <li class="w-full border-none">
@@ -119,7 +151,22 @@
               </Helper>
             </li>
           {/each}
-        </ul>
+        </ul> -->
+        <ButtonGroup class="grid grid-flow-col justify-items-stretch rounded-sm shadow-sm">
+          {#each preparationMethods as prepMethod}
+            <RadioButton
+              size="md"
+              value={prepMethod.recipeTechniqueDescriptionId}
+              name="recipeTechniqueDescriptionId"
+              on:click={() => (prepMethodDilutionPct = prepMethod.recipeTechniqueDilutionPercentage)}
+              bind:group={prepMethodChoice}>
+              <span class="w-">{prepMethod.recipeTechniqueDescriptionText}</span>
+            </RadioButton>
+          {/each}
+        </ButtonGroup>
+        <Helper id="helper-checkbox-text" class="ps-1 py-1">
+          Adds {prepMethodDilutionPct}% dilution by water.
+        </Helper>
       </div>
 
       <!-- image -->
@@ -141,19 +188,26 @@
         </div>
       {/each}
 
-        <div class="my-4 flex flex-row justify-center">
-          <Button class="!p-2" pill={true} on:click={addStep}><PlusOutline class="w-6 h-6"/></Button>
-        </div>
+      <div class="my-4 flex flex-row justify-center">
+        <Button class="!p-2" pill={true} on:click={addStep}>
+          <PlusOutline class="w-6 h-6" />
+        </Button>
+      </div>
     </fieldset>
 
     <!-- submit -->
     <div class="md:flex md:flex-row">
       <div class="my-4 md:mr-4">
-        <FancyButton style="grow md:flex-none" type="submit" on:clicked={event => {
-          // event.preventDefault();
-          // event.stopImmediatePropagation();
-          // console.log(steps)
-        }}>Save</FancyButton>
+        <FancyButton
+          style="grow md:flex-none"
+          type="submit"
+          on:clicked={(event) => {
+            // event.preventDefault();
+            // event.stopImmediatePropagation();
+            // console.log(steps)
+          }}>
+          Save
+        </FancyButton>
       </div>
     </div>
   </form>
