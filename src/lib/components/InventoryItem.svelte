@@ -1,25 +1,20 @@
 <script lang="ts">
   import type { Product } from "$lib/types";
-      import placeholder from "$lib/assets/placeholder@2x.jpg";
+  import placeholder from "$lib/assets/placeholder@2x.jpg";
 
   import {
     ImagePlaceholder,
-    P,
+    A,
     Heading,
-    ButtonGroup,
-    GradientButton,
     ScoreRating,
     Badge,
-    Progressbar,
     Card,
-    Button,
     Secondary,
+    Popover,
   } from "flowbite-svelte";
   import {
     ArrowRightOutline,
-    EditOutline,
-    EditSolid,
-    TrashBinOutline,
+    InfoCircleSolid,
   } from "flowbite-svelte-icons";
   import FancyButton from "./FancyButton.svelte";
   export let product: Product;
@@ -189,6 +184,27 @@
   };
 
   const { ratings, ratings2, desc1, desc2, style } = generateRatings();
+
+  let popoverData = {
+    categoryName: '',
+    categoryDescription: ''
+  }
+
+  const setPopoverData = ({ categoryName, categoryDescription }) => {
+    popoverData = { categoryName, categoryDescription }
+  }
+
+  const isBaseSpirit = (categoryName: string) => {
+    // TODO: this should come from the row 
+    // and not hardcoded here like a lazy asshole
+    let spirits = [
+      'gin', 'whiskey', 'tequila', 'rum', 'vodka', 'brandy', 'cognac', 'mezcal'
+    ]
+
+    spirits = spirits.map(item => ` ${item}`);
+    return spirits.some(item => categoryName.toLowerCase().includes(item))
+  }
+
 </script>
 
 <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
@@ -208,8 +224,18 @@
         >
         <div class="card-content">
           <Heading tag="h5">
-            <span class="block w-96">{product.productName}</span>
+             {product.productName}
+             {#if product.productName !== product.categoryName}
+              <Secondary class="block">
+                <button class="flex items-center" id="popover-image" on:click={() => setPopoverData(product)}>
+                  {product.categoryName}&nbsp;<InfoCircleSolid class="w-5 h-5" />
+                </button>
+              </Secondary>
+            {/if}
           </Heading>
+          {#if isBaseSpirit(product.categoryName)}
+            <Badge class="my-1">Base Spirit</Badge>
+          {/if}
           <p
             class="my-1 font-normal text-gray-700 dark:text-gray-400 leading-tight">
             {product.productDescription || product.categoryDescription}
@@ -238,9 +264,18 @@
       <Card img={product.productImageUrl || placeholder} size="md" href={null} padding="sm" class="shadow-2xl">
         <div class="card-content">
           <Heading tag="h5">
-            <span class="block">{product.productName}</span>
-            <Secondary class="mt-0">{product.categoryName}</Secondary>
+             {product.productName}
+             {#if product.productName !== product.categoryName}
+              <Secondary class="block">
+                <button class="flex items-center" id="popover-image" on:click={() => setPopoverData(product)}>
+                  {product.categoryName}&nbsp;<InfoCircleSolid class="w-5 h-5" />
+                </button>
+              </Secondary>
+            {/if}
           </Heading>
+          {#if isBaseSpirit(product.categoryName)}
+            <Badge class="my-1">Base Spirit</Badge>
+          {/if}
           <p
             class="my-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
             {product.productDescription || product.categoryDescription}
@@ -265,8 +300,25 @@
     </div>
   </div>
 {:else}
-  <!-- <ImagePlaceholder /> -->
+  <ImagePlaceholder />
 {/if}
+
+<Popover triggeredBy="#popover-image" class="w-96 text-sm font-light" defaultClass="">
+  <div class="space-y-2 p-3">
+    <h3 class="font-semibold text-gray-900 dark:text-white">
+      {popoverData.categoryName}
+      <h3>
+        {popoverData.categoryDescription}
+        <!-- <p class="text-gray-500 dark:text-gray-500">Italy is located in the middle of the Mediterranean Sea, in Southern Europe it is also considered part of Western Europe. A unitary parliamentary republic with Rome as its capital and largest city.</p>
+        <a href="/" class="flex items-center font-medium text-primary-600 dark:text-primary-500 dark:hover:text-primary-600 hover:text-primary-700">
+          Read more <ChevronRightOutline class="w-2 h-2 ms-1.5 text-primary-600 dark:text-primary-500" />
+        </a> -->
+      </h3>
+      <A aClass="font-medium hover:underline flex items-center py-2">Edit<ArrowRightOutline class="ms-1 h-5 w-5"/>
+      </A>
+    </h3>
+  </div>
+</Popover>
 
 <style lang="scss">
   @media (min-width: 768px) {

@@ -38,9 +38,9 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
   <!-- col 1 -->
   <div>
-    <Heading tag="h4" class="mb-2">
+    <!-- <Heading tag="h4" class="mb-2">
       {spirit?.recipeCategoryDescription}
-    </Heading>
+    </Heading> -->
     <P color="text-gray-500 dark:text-gray-400" class="mb-2">
       {spirit?.recipeCategoryDescriptionText}
     </P>
@@ -84,7 +84,7 @@
     </Input>
   </Label>
   <div class="test">
-    <FancyButton href="/inventory/add"><PlusOutline /></FancyButton>
+    <FancyButton href="/catalog/add"><PlusOutline /></FancyButton>
   </div>
 </div>
 <Card padding="xl" size="xl">

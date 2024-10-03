@@ -1,13 +1,18 @@
 <script lang="ts">
-  import { Card, Heading } from "flowbite-svelte";
+  import { Card, Heading, A } from "flowbite-svelte";
   import type { PageData } from "./$types";
+    import { ArrowRightOutline } from "flowbite-svelte-icons";
 
   export let data: PageData;
   const { spirits } = data.args;
 </script>
 
-<div class="mt-5">
-  <Heading tag="h4" class="mb-4 flex flex-row justify-between">Catalog</Heading>
+<div class="mt-5 flex items-center justify-between gap-4">
+  <Heading tag="h2" class="mb-4 w-auto font-extrabold">Catalog</Heading>
+  <A aClass="font-medium hover:underline flex items-center" href="/catalog/browse">
+    Browse entire catalog
+    <ArrowRightOutline class="ms-1 h-5 w-5"/>
+  </A>
 </div>
 <div class="px-4 py-2 md:py-4">
   <div class="space-y-4">
@@ -15,7 +20,7 @@
       {#each spirits as spirit}
         <Card
           img={spirit.recipeCategoryDescriptionImageUrl}
-          href="/catalog/{spirit.recipeCategoryId}"
+          href="/catalog/browse/{spirit.recipeCategoryId}"
           horizontal
           size="xl">
           <h5

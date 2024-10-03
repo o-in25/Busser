@@ -135,3 +135,17 @@ export type BasicRecipe = {
   recipeTechniqueDilutionPercentage: number,
   recipeTechniqueDescriptionText: string
 }
+
+export type PreparationMethod = {
+  recipeTechniqueDescriptionId: number,
+  recipeTechniqueDescriptionText: string, 
+  recipeTechniqueDilutionPercentage: number;
+}
+
+export type RecipeStep = {
+  recipeStepId?: string,
+  recipeId?: number,
+  productId: number,
+  productIdQuantityInMilliliters: number,
+  recipeStepDescription: string
+}

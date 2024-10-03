@@ -6,7 +6,7 @@
   export let value;
   export let fetchUrl;
   export let placeholder = '';
-  export let name;
+  export let name = '';
   export let key;
   let items = [
     // { name: 'Profile', mycustomfield: 'data1', current: true },
@@ -47,8 +47,13 @@
 </script>
 <div class="w-full">
   <slot> </slot>
-  <Label for="{name}" class="mb-2">{label}</Label>
-  <input  id="{name}" {name} class="hidden" bind:value={value}>
+  {#if name}
+    <Label for="{name}" class="mb-2">{label}</Label>
+    <input id="{name}" {name} class="hidden" bind:value={value}>
+  {:else}
+    <Label for="autoselect" class="mb-2">{label}</Label>
+    <input id="autoselect" class="hidden" bind:value={value}>
+  {/if}
   <Input type="text" placeholder="{placeholder}"
     on:blur={hideAutocomplete}
     on:focus={showAutocomplete} 
@@ -58,7 +63,7 @@
   {#if show}
   <div class="relative">
     <Listgroup active class="absolute w-full max-h-44 overflow-y-auto z-20">
-      {#each search as button, name}
+      {#each search as button}
         <ListgroupItem on:click={handleClick}>{button.name}</ListgroupItem>
       {/each}
       {#if !search.length}

@@ -4,7 +4,7 @@ import type { BasicRecipe } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ params }) => {
-  const spirit = await getSpirit(params.id);
+  const spirit = await getSpirit(params.recipeCategoryId);
   // let content = {
   //   history: "Gin originated in the 17th century, primarily in the Netherlands, where it was known as 'jenever.' It was initially used for medicinal purposes before becoming popular as a recreational drink in England, particularly during the Gin Craze of the early 18th century. The production methods of gin evolved, leading to the creation of different styles, most notably London Dry Gin, which is characterized by its juniper focus and lack of added sugar. Throughout the 19th and 20th centuries, gin became a staple ingredient in many classic cocktails, solidifying its place in the spirits world.",
   //   flavorProfile: [
@@ -39,11 +39,11 @@ export const load = (async ({ params }) => {
   //  content = await generateContent();
   let content = await generateContent(buildPrompt(spirit?.recipeCategoryDescription || ''));
   let images: any = [];
-  images = images.map(({ url }) => ({ src: url, alt: 'test'}))
-  let queryResult = await getBasicRecipes(params.id);
+  images = images.map(({ url }) => ({ src: url, alt: 'test' }));
+  let queryResult = await getBasicRecipes(params.recipeCategoryId);
   let recipes: BasicRecipe[] = [];
   if('data' in queryResult) {
-    recipes = queryResult.data
+    recipes = queryResult.data;
   }
-  return { spirit, recipes: recipes, images, content }
+  return { spirit, recipes: recipes, images, content };
 }) satisfies PageServerLoad;
