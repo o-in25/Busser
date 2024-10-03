@@ -10,24 +10,31 @@
     Helper,
   } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
-  import type { PreparationMethod, Spirit } from "$lib/types";
+  import type { PreparationMethod, RecipeStep, Spirit } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
   import CatalogFormItem from "./CatalogFormItem.svelte";
 
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
-  let steps = [1];
-  
-  const addStep = () => steps = [...steps, steps[steps.length - 1] + 1];
 
-function onSomeEvent(data){
 
-  steps.splice(data - 1, 1);
-  steps = steps;
-  console.log(steps)
-;
-}
+
+  let steps: RecipeStep[] = [
+    {
+        productId: 0,
+        productIdQuantityInMilliliters: 0,
+        recipeStepDescription: ''
+    }
+  ];
+
+  const addStep = () => {};
+
+  function onSomeEvent(data) {
+    steps.splice(data - 1, 1);
+    steps = steps;
+    console.log(steps);
+  }
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -114,21 +121,24 @@ function onSomeEvent(data){
         <Heading tag="h6">Recipe Steps</Heading>
       </legend>
       {#each steps as step, index (step)}
-        <CatalogFormItem step={index + 1} {onSomeEvent}/>
+        <CatalogFormItem {step} {onSomeEvent} />
       {/each}
 
       <div class="md:flex md:flex-row">
-  <div class="my-4 md:mr-4">
-    <Button style="grow md:flex-none" on:click={addStep}>Add</Button>
-  </div>
-</div>
-
+        <div class="my-4 md:mr-4">
+          <Button style="grow md:flex-none" on:click={addStep}>Add</Button>
+        </div>
+      </div>
     </fieldset>
 
     <!-- submit -->
     <div class="md:flex md:flex-row">
       <div class="my-4 md:mr-4">
-        <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
+        <FancyButton style="grow md:flex-none" on:clicked={event => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          console.log(steps)
+        }}>Save</FancyButton>
       </div>
     </div>
   </form>

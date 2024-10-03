@@ -12,31 +12,37 @@
     Input,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
-    import { MinusOutline } from "flowbite-svelte-icons";
+  import { MinusOutline } from "flowbite-svelte-icons";
+  import type { RecipeStep } from "$lib/types";
 
   // props
-  export let step;
-export let onSomeEvent;
+  export let step: RecipeStep;
+  export let onSomeEvent;
+
+  let unit = 'imperial';
+  let customChoice = '';
+  $: customChoice = customChoice
+  let disabled = false;
+
+  // $: step.productIdQuantityInMilliliters = Number(customChoice) || 29;
 
 
-  let unit = "imperial";
-  let categoryId;
 </script>
 
 <Card size="xl" class="relative">
-  <h6>{step}</h6>
-<button  on:click|preventDefault={() => onSomeEvent(step)}>
-      <Indicator color="red" border size="xl" placement="top-right">
-    <span class="text-white text-xs font-bold"><MinusOutline/></span>
-  </Indicator>
-</button>
+  <!-- <h6>{step}</h6> -->
+  <button on:click|preventDefault={() => onSomeEvent(step)}>
+    <Indicator color="red" border size="xl" placement="top-right">
+      <span class="text-white text-xs font-bold"><MinusOutline /></span>
+    </Indicator>
+  </button>
   <div class="mb-6">
     <Autocomplete
       label="Category"
       placeholder="Whiskey"
       fetchUrl="/api/select"
       name="categoryId"
-      bind:value={categoryId}
+      bind:value={step.productId}
       key="" />
   </div>
   <div class="mb-6">
@@ -45,7 +51,15 @@ export let onSomeEvent;
     <ul
       class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600 py-2">
       <li class="w-full border-none">
-        <Radio name="quantity" class="px-3 pt-1">Dash</Radio>
+        <Radio
+          name="quantity"
+          class="px-3 pt-1"
+          value={3}
+          bind:group={step.productIdQuantityInMilliliters}
+          on:click={() => disabled = true}
+          >
+          Dash
+        </Radio>
         <Helper id="helper-checkbox-text" class="ps-9 pb-1">
           About
           {#if unit === "imperial"}
@@ -57,7 +71,15 @@ export let onSomeEvent;
         </Helper>
       </li>
       <li class="w-full border-none">
-        <Radio name="quantity" class="px-3 pt-1 text-nowrap">Bar Spoon</Radio>
+        <Radio
+          name="quantity"
+          class="px-3 pt-1 text-nowrap"
+          value={6}
+          bind:group={step.productIdQuantityInMilliliters}
+          on:click={() => disabled = true}
+        >
+          Bar Spoon
+        </Radio>
         <Helper id="helper-checkbox-text" class="ps-9 pb-1">
           About
           {#if unit === "imperial"}
@@ -69,18 +91,25 @@ export let onSomeEvent;
         </Helper>
       </li>
       <li class="w-full border-none">
-        <Radio name="quantity" class="px-3 pt-1">Custom</Radio>
+        <Radio name="quantity" class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
       </li>
       <li class="w-full border-none p-3">
         <div>
           <ButtonGroup class="w-full">
-            <Input id="show-password1" type="number" />
+            <Input
+              name="quantity"
+              bind:value={customChoice}
+              on:change={() => step.productIdQuantityInMilliliters = customChoice}
+              {disabled}
+             />
 
             <InputAddon>
               <button
                 on:click|preventDefault={() =>
                   (unit = unit === "imperial" ? "metric" : "imperial")}
-                class="w-4">
+                class="w-4"
+                {disabled}
+              >
                 <span class="">
                   {#if unit === "imperial"}oz{:else}mL{/if}
                 </span>
@@ -93,6 +122,11 @@ export let onSomeEvent;
   </div>
   <div class="mb-6">
     <Label for="first_name" class="mb-2">Description</Label>
-    <Textarea id="textarea-id" rows="4" name="message" resizable="false" />
+    <Textarea
+      id="textarea-id"
+      rows="4"
+      name="message"
+      resizable="false"
+      bind:value={step.recipeStepDescription} />
   </div>
 </Card>
