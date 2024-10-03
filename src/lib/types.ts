@@ -143,6 +143,7 @@ export type PreparationMethod = {
 }
 
 export type RecipeStep = {
+  recipeStepId?: string,
   recipeId?: number,
   productId: number,
   productIdQuantityInMilliliters: number,

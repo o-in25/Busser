@@ -14,13 +14,16 @@
   import Autocomplete from "./Autocomplete.svelte";
   import { MinusOutline } from "flowbite-svelte-icons";
   import type { RecipeStep } from "$lib/types";
+    import Heading from "flowbite-svelte/Heading.svelte";
 
   // props
   export let step: RecipeStep;
+  export let stepNumber: number;
   export let onSomeEvent;
 
   let unit = 'imperial';
-  let customChoice = '';
+  $: stepNumber++;
+  let customChoice = step.productIdQuantityInMilliliters;
   $: customChoice = customChoice
   let disabled = false;
 
@@ -30,8 +33,9 @@
 </script>
 
 <Card size="xl" class="relative">
+  <Heading tag="h6">Step {stepNumber}</Heading>
   <!-- <h6>{step}</h6> -->
-  <button on:click|preventDefault={() => onSomeEvent(step)}>
+  <button on:click|preventDefault={() => onSomeEvent(stepNumber)}>
     <Indicator color="red" border size="xl" placement="top-right">
       <span class="text-white text-xs font-bold"><MinusOutline /></span>
     </Indicator>
@@ -108,7 +112,6 @@
                 on:click|preventDefault={() =>
                   (unit = unit === "imperial" ? "metric" : "imperial")}
                 class="w-4"
-                {disabled}
               >
                 <span class="">
                   {#if unit === "imperial"}oz{:else}mL{/if}

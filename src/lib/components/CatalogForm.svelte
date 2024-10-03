@@ -13,24 +13,28 @@
   import type { PreparationMethod, RecipeStep, Spirit } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
   import CatalogFormItem from "./CatalogFormItem.svelte";
+  import { v4 as uuidv4 } from 'uuid';
 
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
+  let stepTemplate = {
+    recipeStepId: uuidv4(),
+    productId: 0,
+    productIdQuantityInMilliliters: 0,
+    recipeStepDescription: ''
+  }
 
 
+  let steps: RecipeStep[] = [stepTemplate];
 
-  let steps: RecipeStep[] = [
-    {
-        productId: 0,
-        productIdQuantityInMilliliters: 0,
-        recipeStepDescription: ''
-    }
-  ];
-
-  const addStep = () => {};
+  const addStep = () => {
+    const newStep = { ...stepTemplate, recipeStepId: uuidv4() };
+    steps = [...steps, newStep]
+  };
 
   function onSomeEvent(data) {
+    console.log(data)
     steps.splice(data - 1, 1);
     steps = steps;
     console.log(steps);
@@ -120,8 +124,10 @@
       <legend>
         <Heading tag="h6">Recipe Steps</Heading>
       </legend>
-      {#each steps as step, index (step)}
-        <CatalogFormItem {step} {onSomeEvent} />
+      {#each steps as step, stepNumber (step.recipeStepId)}
+        <div class="py-4">
+          <CatalogFormItem {step} {stepNumber} {onSomeEvent} />
+        </div>
       {/each}
 
       <div class="md:flex md:flex-row">
