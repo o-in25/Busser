@@ -14,9 +14,7 @@
   import Autocomplete from "./Autocomplete.svelte";
   import { MinusOutline } from "flowbite-svelte-icons";
   import type { RecipeStep } from "$lib/types";
-    import Heading from "flowbite-svelte/Heading.svelte";
-    import { fade, scale } from "svelte/transition";
-	import { quintOut } from 'svelte/easing';
+  import Heading from "flowbite-svelte/Heading.svelte";
 
   // props
   export let step: RecipeStep;
@@ -35,8 +33,7 @@
 
 </script>
 
-<div transition:scale={{ duration: 250, delay: 0, opacity: 0.5, start: 0, easing: quintOut }}>
-  <Card size="xl" class="relative" >
+  <Card size="xl" class="relative mx-auto">
     <Heading tag="h6">Step {stepNumber + 1}</Heading>
     <!-- <h6>{step}</h6> -->
     {#if stepNumber > 0}
@@ -134,4 +131,3 @@
         bind:value={step.recipeStepDescription} />
     </div>
   </Card>
-</div>

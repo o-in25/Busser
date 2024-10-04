@@ -1,5 +1,5 @@
 
-import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, PreparationMethod, Product, ProductDetail, QueryResult, SelectOption, Spirit } from "$lib/types";
+import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, PreparationMethod, Product, ProductDetail, QueryResult, SelectOption, Spirit, Table, QueryRequest } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
@@ -444,4 +444,28 @@ export async function getPreparationMethods(): Promise<QueryResult<Array<Prepara
     };
     return result;
   }
+}
+
+export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File) {
+  // add recipe desc.
+  // get signed file url
+  // add recipe + file
+  // add prep method
+  // add steps
+
+  const getProductImageUrl = async (image: File | null) => {
+    if(!image || image.size === 0 || image.name === 'undefined') return null;
+    const signedUrl = await getSignedUrl(image);
+    return (signedUrl.length ? signedUrl : null);
+  };
+
+
+  let newRecipeTechnique = {
+
+  }
+  
+  console.log({
+    recipe, recipeSteps
+  })
+  // const productImageUrl = await getProductImageUrl(image);
 }

@@ -149,3 +149,57 @@ export type RecipeStep = {
   productIdQuantityInMilliliters: number,
   recipeStepDescription: string
 }
+
+export namespace Table {
+  export type Recipe = {
+    recipeId?: number,
+    recipeCategoryId: number,
+    recipeDescriptionId: number,
+    recipeName: string,
+    recipeImageUrl: string | null;
+  };
+
+  export type RecipeDescription = {
+    recipeDescriptionId?: number,
+    recipeDescription: string | null,
+    recipeDescriptionImageUrl: string | null
+  }
+
+  export type RecipeStep = {
+    recipeStepId?: number,
+    recipeId: number,
+    productId: number,
+    productIdQuantityInMilliliters: number,
+    recipeStepDescription: string | null
+  }
+
+  export type RecipeTechnique = {
+    recipeTechniqueId?: number,
+    recipeTechniqueDescriptionId: number,
+    recipeId: number,
+    recipeTechniqueDilutionPercentage: number
+  }
+
+  export type RecipeTechniqueDescription = {
+    recipeTechniqueDescriptionId?: number,
+    recipeTechniqueDescriptionText: string,
+    recipeTechniqueDilutionPercentage: number
+  }
+}
+
+export namespace QueryRequest {
+  export type Recipe = {
+    recipeId?: number,
+    recipeName: string,
+    recipeCategoryId: number,
+    recipeCategoryDescriptionText: string
+    recipeTechniqueDescriptionId: number
+  }
+
+  export type RecipeSteps = {
+    recipeStepId?: number,
+    productId: number,
+    productIdQuantityInMilliliters: number,
+    recipeStepDescription: string
+  }
+}

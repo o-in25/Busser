@@ -23,6 +23,8 @@
     OrderedListOutline,
     ListOutline,
   } from "flowbite-svelte-icons";
+    import { quintOut } from "svelte/easing";
+    import { scale } from "svelte/transition";
 
   // props
   export let spirits: Spirit[];
@@ -126,12 +128,12 @@
 
       <!-- description -->
       <div class="mb-6">
-        <Label for="RecipeCategoryDescriptionText" class="mb-2">
+        <Label for="recipeCategoryDescriptionText" class="mb-2">
           Description
         </Label>
         <Textarea
-          name="RecipeCategoryDescriptionText"
-          id="RecipeCategoryDescriptionText"
+          name="recipeCategoryDescriptionText"
+          id="recipeCategoryDescriptionText"
           rows="4"
           resizable="false" />
       </div>
@@ -171,7 +173,7 @@
 
       <!-- image -->
       <div class="mb-6">
-        <FileUpload name="productImageUrl" signedUrl={null}></FileUpload>
+        <FileUpload name="recipeImageUrl" signedUrl={null}></FileUpload>
       </div>
     </fieldset>
 
@@ -183,14 +185,14 @@
         <Heading tag="h6">Details</Heading>
       </legend>
       {#each steps as step, stepNumber (step.recipeStepId)}
-        <div class="py-4">
+        <div class="py-4" transition:scale={{ duration: 250, delay: 0, opacity: 0.5, start: 0, easing: quintOut }}>
           <CatalogFormItem {step} {stepNumber} clickHandler={removeStep} />
         </div>
       {/each}
 
       <div class="my-4 flex flex-row justify-center">
         <Button class="!p-2" pill={true} on:click={addStep}>
-          <PlusOutline class="w-6 h-6" />
+          <PlusOutline class="w-6 h-6" /><span class="hidden lg:block pe-2">Add Another Step</span>
         </Button>
       </div>
     </fieldset>

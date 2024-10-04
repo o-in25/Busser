@@ -4,6 +4,7 @@
   import type { PageData } from './$types';
   import { page } from '$app/stores';
   import { ArrowLeftToBracketOutline, ArrowRightToBracketOutline, MailBoxOutline, MailBoxSolid } from 'flowbite-svelte-icons';
+    import Excerpt from '$lib/components/Excerpt.svelte';
   export let data: PageData;	
 
   const { gallery, spirits } = data.args;
@@ -40,3 +41,4 @@
   {/if}
 </div>
 <Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3 mb-8" />
+<Excerpt/>
