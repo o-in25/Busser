@@ -177,7 +177,7 @@ export namespace Table {
     recipeTechniqueId?: number,
     recipeTechniqueDescriptionId: number,
     recipeId: number,
-    recipeTechniqueDilutionPercentage: number
+    recipeTechniqueDilutionPercentage: number | null
   }
 
   export type RecipeTechniqueDescription = {
@@ -192,7 +192,7 @@ export namespace QueryRequest {
     recipeId?: number,
     recipeName: string,
     recipeCategoryId: number,
-    recipeCategoryDescriptionText: string
+    recipeDescription: string
     recipeTechniqueDescriptionId: number
   }
 

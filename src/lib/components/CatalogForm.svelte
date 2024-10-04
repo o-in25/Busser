@@ -128,12 +128,12 @@
 
       <!-- description -->
       <div class="mb-6">
-        <Label for="recipeCategoryDescriptionText" class="mb-2">
+        <Label for="recipeDescription" class="mb-2">
           Description
         </Label>
         <Textarea
-          name="recipeCategoryDescriptionText"
-          id="recipeCategoryDescriptionText"
+          name="recipeDescription"
+          id="recipeDescription"
           rows="4"
           resizable="false" />
       </div>

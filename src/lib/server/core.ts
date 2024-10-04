@@ -447,25 +447,82 @@ export async function getPreparationMethods(): Promise<QueryResult<Array<Prepara
 }
 
 export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File) {
-  // add recipe desc.
-  // get signed file url
-  // add recipe + file
-  // add prep method
-  // add steps
+  // STEP 1: get signed file url
+  // STEP 2: add recipe desc.
+  // STEP 3: add recipe + file url
+  // STEP 4: add prep method
+  // STEP 5: steps
 
-  const getProductImageUrl = async (image: File | null) => {
-    if(!image || image.size === 0 || image.name === 'undefined') return null;
-    const signedUrl = await getSignedUrl(image);
-    return (signedUrl.length ? signedUrl : null);
-  };
+  try {
+
+    if(!recipeSteps.length) throw Error('Recipe does not contain any recipe steps.')
+
+    const getProductImageUrl = async (image: File | null) => {
+      if(!image || image.size === 0 || image.name === 'undefined') return null;
+      const signedUrl = await getSignedUrl(image);
+      return (signedUrl.length ? signedUrl : null);
+    };
+
+    // step 1
+    const recipeImageUrl = await getProductImageUrl(file);
+
+    await db.query.transaction(async (trx) => {
+      let newRecipeDescription: Table.RecipeDescription = {
+        recipeDescription: recipe.recipeDescription,
+        recipeDescriptionImageUrl: null
+      };
+      newRecipeDescription = marshal(newRecipeDescription, pascalCase);
+      // step 2
+      const [recipeDescriptionId] = await trx('recipedescription').insert(newRecipeDescription);
+      console.log(recipeDescriptionId)
+      let newRecipe: Table.Recipe = {
+        recipeCategoryId: recipe.recipeCategoryId,
+        recipeName: recipe.recipeName,
+        recipeDescriptionId,
+        recipeImageUrl
+      }
+      newRecipe = marshal(newRecipe, pascalCase);
+      // step 3
+      const [recipeId] = await trx('recipe').insert(newRecipe);
+      console.log(recipeId)
+
+      let newRecipeTechnique: Table.RecipeTechnique = {
+        recipeTechniqueDescriptionId: recipe.recipeTechniqueDescriptionId,
+        recipeTechniqueDilutionPercentage: null,
+        recipeId
+      }
+      newRecipeTechnique = marshal(newRecipeTechnique, pascalCase);
+      // step 4
+      const [recipeTechniqueId] = await trx('recipetechnique').insert(newRecipeTechnique);
+      console.log(recipeTechniqueId)
+
+      let newRecipeSteps = recipeSteps.map(step => ({ ...step, recipeId }))
+      newRecipeSteps = marshal(newRecipeSteps, pascalCase);
+      // step 5
+      const rows = await trx('recipestep').insert(newRecipeSteps);
+      console.log(rows)
+
+      // let recipe: Table.Recipe = {
+
+      // }
+
+    });
 
 
-  let newRecipeTechnique = {
+    let newRecipeTechnique = {
 
+    };
+
+    console.log('done')
+
+  } catch(error: any) {
+    console.error(error);
+    // Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+    // const result: QueryResult<Array<PreparationMethod>> = {
+    //   status: 'error',
+    //   error: 'Could not get preparation methods.'
+    // };
+    // return result;
   }
-  
-  console.log({
-    recipe, recipeSteps
-  })
   // const productImageUrl = await getProductImageUrl(image);
 }

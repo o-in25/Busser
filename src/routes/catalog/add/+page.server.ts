@@ -30,7 +30,7 @@ export const actions = {
     recipeSteps = JSON.parse(recipeSteps as string);
     recipeSteps = recipeSteps.map(({ recipeStepId, ...rest }) => rest);
 
-    addRecipe(recipe, recipeSteps, file);
+    await addRecipe(recipe, recipeSteps, file);
 
 
     // addRecipe
