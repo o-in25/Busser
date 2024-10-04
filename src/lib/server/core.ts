@@ -475,6 +475,7 @@ export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryR
       // step 2
       const [recipeDescriptionId] = await trx('recipedescription').insert(newRecipeDescription);
       console.log(recipeDescriptionId)
+      
       let newRecipe: Table.Recipe = {
         recipeCategoryId: recipe.recipeCategoryId,
         recipeName: recipe.recipeName,
