@@ -5,6 +5,8 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { OPENAI_API_KEY } from "$env/static/private";
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
+let sampleImg = 'https://media.liquormax.com/eq4rxnkvcouvc1anfqqhe/stoli-l.jpg'
+sampleImg = 'https://cdn.shoplightspeed.com/shops/636686/files/24395938/rittenhouse-100-proof-rye-750-ml.jpg'
 export type ImageData = {
   url: string
 }
@@ -55,4 +57,25 @@ export async function generateImage() {
 
   return image.data;
 
+}
+
+export async function scanImage() {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "What is the name of the bottle in the image and its size in milliliters?" },
+          {
+            type: "image_url",
+            image_url: {
+              "url": sampleImg,
+            },
+          },
+        ],
+      },
+    ],
+  });
+  console.log(response.choices[0]);
 }
