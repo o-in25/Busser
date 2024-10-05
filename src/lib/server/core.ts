@@ -60,7 +60,7 @@ export async function seedGallery(): Promise<GallerySeeding[]> {
     let images = await db.table<any>('recipe')
       .select('RecipeImageUrl')
       .whereNotNull('RecipeImageUrl');
-    images = images.map(item => Object.assign({}, { src: item.RecipeImageUrl }));
+    images = images.map(item => Object.assign({}, { src: item.RecipeImageUrl, href: '/inventory' }));
     images = marshal(images);
     images = images.filter(({ src }) => src !== 'https://i.imgur.com/aOQBTkN.png') // this pic sucks
     return images;

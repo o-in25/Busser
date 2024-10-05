@@ -4,7 +4,7 @@
 </script>
 
 <Hr classHr="my-8" />
-<div class="my-4 px-16 text-center">
+<div class="my-4  text-center">
   <Heading tag="h4">The Fundamental Law of Traditional Cocktails</Heading>
   <P weight="light" color="text-gray-500 dark:text-gray-400">
     Remember our definition of traditional cocktails: the only ingredients are
@@ -44,7 +44,7 @@
   </P>
 </div>
 <Hr classHr="my-8" />
-<div class="my-4 px-16 text-center">
+<div class="my-4  text-center">
   <Heading tag="h4">
     How Ice Forms
     <small class="ms-2 font-light text-gray-500 dark:text-gray-400 italic">
@@ -164,6 +164,6 @@
   </P>
 </div>
 <Hr classHr="my-8" />
-<div class="my-4 px-16 text-center">
+<div class="my-4  text-center">
   <Blockquote size="sm">All excerpts taken from <Span italic underline><a href="https://www.amazon.com/Liquid-Intelligence-Science-Perfect-Cocktail/dp/0393089037">Liquid Intelligence: The Art and Science of the Perfect Cocktail</a></Span> by Dave Arnold.</Blockquote>
 </div>
