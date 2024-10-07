@@ -2,9 +2,10 @@
     import type { BasicRecipe } from "$lib/types";
     import { Card, Listgroup, ListgroupItem, Avatar } from "flowbite-svelte";
     export let recipes: BasicRecipe[];
-  
+      import placeholder from "$lib/assets/placeholder@2x.jpg";
+
 </script>
-<Card padding="xl" size="xl">
+<Card padding="xl" size="xl" class="mx-auto">
   <!-- search -->
 
   <Listgroup class="border-0 dark:!bg-transparent">
@@ -12,13 +13,14 @@
       <ListgroupItem active href="/">
         <div class="flex items-center space-x-4 rtl:space-x-reverse">
           <Avatar
-            src={recipe.recipeImageUrl || ""}
+            src={recipe.recipeImageUrl || placeholder || ""}
             alt={recipe.recipeDescription || ""}
             class="flex-shrink-1" />
           <div class="flex-1 min-w-0">
             <p
-              class="text-sm font-medium text-gray-900 truncate dark:text-white">
+              class="text-sm font-medium text-gray-900 truncate dark:text-white block">
               {recipe.recipeName}
+              <span class="block text-sm font-light text-gray-500 dark:text-gray-400">{recipe.recipeCategoryDescription}</span>
             </p>
             <p class="text-sm text-gray-500 truncate dark:text-gray-400">
               {recipe.recipeDescription}

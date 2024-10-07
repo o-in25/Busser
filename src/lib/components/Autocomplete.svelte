@@ -63,7 +63,7 @@
       bind:value={selectValue}
     >
     </Input>
-    <Button><PlusOutline/></Button>
+    <Button color="purple" href="/inventory/category/add"><PlusOutline/></Button>
   </ButtonGroup>
   {#if show}
   <div class="relative">

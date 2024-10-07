@@ -1,8 +1,8 @@
 import type { CookieSerializeOptions } from 'cookie';
 
-export type QueryResult<T> = {
+export type QueryResult<T = void> = {
   status: "success";
-  data: T;
+  data?: T;
 } | {
   status: "error";
   error: string;
@@ -133,7 +133,8 @@ export type BasicRecipe = {
   recipeDescription: string | null,
   recipeDescriptionImageUrl: string | null,
   recipeTechniqueDilutionPercentage: number,
-  recipeTechniqueDescriptionText: string
+  recipeTechniqueDescriptionText: string,
+  recipeCategoryDescription: string
 }
 
 export type PreparationMethod = {
@@ -185,6 +186,12 @@ export namespace Table {
     recipeTechniqueDescriptionText: string,
     recipeTechniqueDilutionPercentage: number
   }
+
+  export type Category = {
+    categoryId?: number,
+    categoryName: string,
+    categoryDescription: string;
+  };
 }
 
 export namespace QueryRequest {
@@ -202,4 +209,5 @@ export namespace QueryRequest {
     productIdQuantityInMilliliters: number,
     recipeStepDescription: string
   }
+
 }

@@ -527,3 +527,23 @@ export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryR
   }
   // const productImageUrl = await getProductImageUrl(image);
 }
+
+export async function addCategory(categoryName: string, categoryDescription: string | null): Promise<QueryResult> {
+  try {
+
+    let newCategory = marshal({ categoryName, categoryDescription }, pascalCase);
+
+    const data = db.table<Table.Category>('category').insert(newCategory);
+    console.log(data)
+    return {
+      status: "success"
+    } as QueryResult
+  } catch(error: any) {
+    console.error(error);
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+    return {
+      status: "error",
+      error: ""
+    } as QueryResult
+  }
+} 
