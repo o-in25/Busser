@@ -216,6 +216,21 @@ export namespace View {
     recipeImageUrl: string | null,
     recipeCategoryDescriptionImageUrl: string | null
   };
+
+  export type BasicRecipeStep = {
+    recipeId: number;
+    recipeStepDescription: string | null;
+    productName: string;
+    categoryName: string;
+    categoryDescription: string | null;
+    supplierName: string;
+    supplierDetails: string | null;
+    productIdQuantityInMilliliters: number;
+    productInStockQuantity: number;
+    productPricePerUnit: number;
+    productUnitSizeInMilliliters: number;
+    productProof: number;
+  }
 }
 
 export namespace QueryRequest {

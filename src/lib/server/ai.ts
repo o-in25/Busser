@@ -53,9 +53,10 @@ export async function generateContent(prompt: string): Promise<GeneratedContent>
 }
 
 export async function generateImage() {
-  const image = await openai.images.generate({ model: "dall-e-3", prompt: "Pictures of Gin in glasses and bottles.", n: 1 });
-
+  const image = await openai.images.generate({ model: "dall-e-3", prompt: "Small SVG of a user avatar for a website nav bar. Incorporate a color theme of neon pinks, purples, light blues. It should look modern and sleek -- yet have an unfamiliar retro-futuristic vibe. Most importantly, it should be VERY minimalistic. Prefer just solid colors over complex shapes.", n: 1 });
+  console.log(image)
   return image.data;
+
 
 }
 

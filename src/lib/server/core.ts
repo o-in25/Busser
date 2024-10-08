@@ -1,5 +1,5 @@
 
-import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, PreparationMethod, Product, ProductDetail, QueryResult, SelectOption, Spirit, Table, QueryRequest } from "$lib/types";
+import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, PreparationMethod, Product, ProductDetail, QueryResult, SelectOption, Spirit, Table, QueryRequest, View } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
@@ -553,12 +553,27 @@ export async function addCategory(categoryName: string, categoryDescription: str
   }
 } 
 
-export async function getRecipe(recipeId: string) {
+export async function getRecipe(recipeId: string): Promise<QueryResult<{ recipe: View.BasicRecipe, recipeSteps: View.BasicRecipeStep[]}>> {
   try {
+    let recipe: View.BasicRecipe | undefined = undefined;
+    let recipeSteps: View.BasicRecipeStep[] | undefined = undefined;
+
     await db.query.transaction(async (trx) => {
-      const rows = await trx('basicrecipe').select().where({ recipeId });
-      console.log(rows)
+      let [dbResult] = await trx('basicrecipe').select().where({ recipeId });
+      recipe = marshal<View.BasicRecipe>(dbResult, camelCase);
+      dbResult = await trx('basicrecipestep').select().where({ recipeId });
+      recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
     });
+
+    if(!recipe || !recipeSteps) {
+      throw Error('Could not get recipe details.')
+    }
+
+    return {
+      status: "success",
+      data: { recipe, recipeSteps }
+    }
+    
   } catch(error: any) {
     console.error(error);
     Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
