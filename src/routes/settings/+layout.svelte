@@ -22,7 +22,7 @@
       </a>
    </li>
   <li class="group" role="presentation">
-      <a href="/settings/account" type="button" role="tab" class="{activeUrl$.includes('account')? activeClass : defaultClass}" >
+      <a href="/settings/user-account" type="button" role="tab" class="{activeUrl$.includes('account')? activeClass : defaultClass}" >
          <div class="flex items-center gap-2">
           <UserSettingsOutline size="md" />Account
          </div>
