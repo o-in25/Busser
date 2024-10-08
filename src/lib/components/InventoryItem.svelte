@@ -267,7 +267,7 @@
              {product.productName}
              {#if product.productName !== product.categoryName}
               <Secondary class="block">
-                <button class="flex items-center" id="popover-image" on:click={() => setPopoverData(product)}>
+                <button class="flex items-center" id="popover-image" on:click|preventDefault={() => setPopoverData(product)}>
                   {product.categoryName}&nbsp;<InfoCircleSolid class="w-5 h-5" />
                 </button>
               </Secondary>

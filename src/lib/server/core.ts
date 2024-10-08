@@ -19,9 +19,9 @@ const marshal = <T>(obj: any, fn: Function = camelCase) => {
   }, {});
 };
 
-const pascalCase = (str: string) => changeCase.pascalCase(str)
-const camelCase = (str: string) => changeCase.camelCase(str)
-
+const pascalCase = (str: string) => changeCase.pascalCase(str) // GoodDrinks
+const camelCase = (str: string) => changeCase.camelCase(str) // goodDrinks
+const titleCase = (str: string) => changeCase.capitalCase(str); // Good Drinks
 const paginationData = {
   total: 0,
   currentPage: 0,
@@ -528,22 +528,27 @@ export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryR
   // const productImageUrl = await getProductImageUrl(image);
 }
 
-export async function addCategory(categoryName: string, categoryDescription: string | null): Promise<QueryResult> {
+export async function addCategory(categoryName: string, categoryDescription: string | null): Promise<QueryResult<number>> {
   try {
 
-    let newCategory = marshal({ categoryName, categoryDescription }, pascalCase);
-
-    const data = db.table<Table.Category>('category').insert(newCategory);
-    console.log(data)
+    let newCategory: any = { categoryName, categoryDescription };
+    newCategory = { 
+      ...newCategory, 
+      categoryName: titleCase(categoryName.trim()) // enforcing unique index i
+    }
+    newCategory = marshal(newCategory, pascalCase);
+    const [categoryId] = await db.table<Table.Category>('category').insert(newCategory);
     return {
-      status: "success"
-    } as QueryResult
+      status: "success",
+      data: categoryId
+    }
   } catch(error: any) {
     console.error(error);
     Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+
     return {
       status: "error",
-      error: ""
-    } as QueryResult
+      error: error?.code || 'An unknown error occurred.'
+    }
   }
 } 

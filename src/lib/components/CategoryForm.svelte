@@ -9,22 +9,16 @@
   } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
+import type { QueryResult } from "$lib/types";
+    import { enhance } from "$app/forms";
   let error = false;
+  export let result: QueryResult;
 
-  const openModal = () => {};
 
-  let result = {
-    success: {
-      message: "Inventory category added.",
-    },
-    error: {
-      message: "",
-    },
-  };
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
-  <form class="grid gap-6 mb-6" method="POST">
+  <form class="grid gap-6 mb-6" method="POST" use:enhance>
     <div>
       <Label for="categoryName" color={error ? "red" : "gray"} class="block mb-2">
         Name
@@ -61,18 +55,18 @@
           Delete
         </FancyButton>
       </div> -->
-      <!-- {#if result.success || result.error}
+      {#if result?.status === 'success' || result?.status === 'error'}
         <div class="my-4 md:ml-4">
           <div class="md:w-96 md:m-auto">
-            <Alert border color={result.success ? "green" : "red"}>
+            <Alert border color={'error' in result ? "red" : "green"}>
               <InfoCircleSolid slot="icon" class="w-5 h-5" />
-              {#if result.error}<span class="font-medium">
-                  {result.error?.message}
-                </span>{:else}{result.success?.message}{/if}
+              {#if 'error' in result}<span class="font-medium">
+                  {result.error}
+                </span>{:else}Category added to inventory.{/if}
             </Alert>
           </div>
         </div>
-      {/if} -->
+      {/if}
     </div>
   </form>
 </div>
