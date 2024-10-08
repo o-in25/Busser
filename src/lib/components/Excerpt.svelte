@@ -1,10 +1,107 @@
 <script>
-  import { P, Blockquote, Heading, Span, Card, Layout, Hr } from "flowbite-svelte";
-  import { QuoteSolid } from "flowbite-svelte-icons";
+  import {
+    Hr,
+    Heading,
+    P,
+    Span,
+    Blockquote,
+    Layout,
+    Timeline,
+    TimelineItem,
+    Button,
+    List,
+    Li,
+  } from "flowbite-svelte";
+  import { ArrowRightOutline, QuoteSolid } from "flowbite-svelte-icons";
+
+  const timeline = [
+    {
+      title: "Hey, I just wanna make some good drinks",
+      date: "Beginner",
+      divClass: "!bg-green-500",
+      items: [
+        "Good jigger set",
+        "Hawthorn strainer",
+        "Julep strainer",
+        "Tea strainer",
+        "Muddler",
+        "Paring knife",
+        "Y-Peeler",
+      ],
+    },
+    {
+      title: "I wanna act like a fancy pro without breaking the bank",
+      date: "Beginner",
+      divClass: "!bg-green-500",
+      items: [
+        "Bar mat",
+        "Ice pick",
+        "Dasher tops for bitters",
+        "Flat-bladed slicing knife",
+        "Ice bucket and scoop",
+        "2-inch ice-cube molds",
+        "Small rectangular Igloo cooler",
+        "Glass bottles with eyedroppers",
+        "Hand citrus press",
+        "Lewis Bag or other ice crusher",
+      ],
+    },
+    {
+      title: "This is good for my kitchen too",
+      date: "Intermediate",
+      divClass: "!bg-yellow-500",
+      items: ["High-speed blender,", "Whipped cream siphon", "Champion juicer"],
+    },
+    {
+      title: "I’m gonna make some recipes that require accuracy",
+      date: "Intermediate",
+      divClass: "!bg-yellow-500",
+      items: [
+        "Drug scale: 250 grams by the 1/10 gram",
+        "Kitchen scale: 5 kilos by the gram",
+        "Digital thermometer",
+        "50 ml, 250 ml, and 1000 ml plastic graduated cylinders",
+      ],
+    },
+    {
+      title: "Bubbles",
+      date: "Advanced",
+      divClass: "!bg-orange-500",
+      items: [
+        "5- or 20-pound CO2 tank",
+        "Regulator, hose, ball-lock connector",
+        "Liquid Bread carbonator caps",
+      ],
+    },
+    {
+      title: "I’m an experimenter or a stickler for accuracy",
+      date: "Advanced",
+      divClass: "!bg-orange-500",
+      items: ["Refractometer", "Micropipette"],
+    },
+    {
+      title: "I’m crazy",
+      date: "Expert",
+      divClass: "!bg-red-500",
+      items: ["Professional ice shaver", "Red-hot poker"],
+    },
+    {
+      title:
+        "I’m not bankrupt yet: big-ticket tech i’m gonna get one at a time, if ever",
+      date: "Expert",
+      divClass: "!bg-red-500",
+      items: [
+        "Liquid nitrogen",
+        "Vacuum machine",
+        "Centrifuge",
+        "Rotary evaporator",
+      ],
+    },
+  ];
 </script>
 
 <Hr classHr="my-8" />
-<div class="my-4  text-center">
+<div class="my-4 text-center">
   <Heading tag="h4">The Fundamental Law of Traditional Cocktails</Heading>
   <P weight="light" color="text-gray-500 dark:text-gray-400">
     Remember our definition of traditional cocktails: the only ingredients are
@@ -16,26 +113,27 @@
     <Span italic class="text-gray-500 dark:text-gray-400 font-light	">
       Fundamental Law of Traditional Cocktails:
     </Span>
-      <figure class="mx-auto max-w-screen-md text-center">
-    <QuoteSolid
-      class="mx-auto mb-3 w-12 h-12 text-gray-400 dark:text-gray-600" />
-    <Blockquote alignment="center" size="2xl">
-      "There is no chilling without dilution, and there is no dilution without
-      chilling."
-    </Blockquote>
-    <figcaption
-      class="flex justify-center items-center my-6 space-x-3 rtl:space-x-reverse">
-      <div
-        class="flex items-center divide-x-2 rtl:divide-x-reverse divide-gray-500 dark:divide-gray-700">
-        <cite class="pe-3 font-medium text-gray-900 dark:text-white">
-          Dave Arnold
-        </cite>
-        <cite class="ps-3 text-sm font-light text-gray-500 dark:text-gray-400">
-          Liquid Intelligence
-        </cite>
-      </div>
-    </figcaption>
-  </figure>
+    <figure class="mx-auto max-w-screen-md text-center">
+      <QuoteSolid
+        class="mx-auto mb-3 w-12 h-12 text-gray-400 dark:text-gray-600" />
+      <Blockquote alignment="center" size="2xl">
+        "There is no chilling without dilution, and there is no dilution without
+        chilling."
+      </Blockquote>
+      <figcaption
+        class="flex justify-center items-center my-6 space-x-3 rtl:space-x-reverse">
+        <div
+          class="flex items-center divide-x-2 rtl:divide-x-reverse divide-gray-500 dark:divide-gray-700">
+          <cite class="pe-3 font-medium text-gray-900 dark:text-white">
+            Dave Arnold
+          </cite>
+          <cite
+            class="ps-3 text-sm font-light text-gray-500 dark:text-gray-400">
+            Liquid Intelligence
+          </cite>
+        </div>
+      </figcaption>
+    </figure>
     The two are inextricably linked. The only reason a cocktail gets diluted is that
     ice melts and turns into water. Conversely, the only way ice can melt is if it
     chills your drink. Stupidly simple, but the ramifications are deep. The law explains,
@@ -44,10 +142,10 @@
   </P>
 </div>
 <Hr classHr="my-8" />
-<div class="my-4  text-center">
+<div class="my-4 text-center">
   <Heading tag="h4">
     How Ice Forms
-    <small class="ms-2 font-light text-gray-500 dark:text-gray-400 italic">
+    <small class="ms-1 font-light text-gray-500 dark:text-gray-400 italic">
       (any why does it matter?)
     </small>
   </Heading>
@@ -164,6 +262,41 @@
   </P>
 </div>
 <Hr classHr="my-8" />
-<div class="my-4  text-center">
-  <Blockquote size="sm">All excerpts taken from <Span italic underline><a href="https://www.amazon.com/Liquid-Intelligence-Science-Perfect-Cocktail/dp/0393089037">Liquid Intelligence: The Art and Science of the Perfect Cocktail</a></Span> by Dave Arnold.</Blockquote>
+<div class="my-4">
+  <Heading tag="h4" class="text-center">Shopping List</Heading>
+  <P class="mb-3" weight="light" color="text-gray-500 dark:text-gray-400">
+    These shopping lists will help you navigate the maze of cocktail equipment.
+    They are organized by desires and needs. Don’t want to make carbonated
+    drinks? Skip the bubbles section. Want to try carbonation but don’t want to
+    buy the rig on my list? I’ll give other options later. The only mandatory
+    shopping list is the first one. After you have your basic setup, you can add
+    equipment from other lists as you wish.
+  </P>
+  <Timeline>
+    {#each timeline as _timeline}
+      <TimelineItem
+        title={_timeline.title}
+        date={_timeline.date}
+        classDiv={_timeline.divClass}>
+        <List list="none">
+          {#each _timeline.items as _item}
+            <Li class="font-normal text-gray-500 dark:text-gray-400">
+              {_item}
+            </Li>
+          {/each}
+        </List>
+      </TimelineItem>
+    {/each}
+  </Timeline>
+</div>
+<Hr classHr="my-8" />
+<div class="my-4 text-center">
+  <Blockquote size="sm">
+    All excerpts taken from <Span italic underline>
+      <a
+        href="https://www.amazon.com/Liquid-Intelligence-Science-Perfect-Cocktail/dp/0393089037">
+        Liquid Intelligence: The Art and Science of the Perfect Cocktail
+      </a>
+    </Span> by Dave Arnold.
+  </Blockquote>
 </div>
