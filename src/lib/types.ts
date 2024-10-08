@@ -192,6 +192,30 @@ export namespace Table {
     categoryName: string,
     categoryDescription: string;
   };
+
+  // export type RecipeStep = {
+  //   recipeStepId,
+  //   recipeId, 
+  //   productId, 
+  //   productIdQuantityInMilliliters, 
+  //   recipeStepDescription
+  // }
+  
+}
+
+export namespace View {
+  export type BasicRecipe = {
+    recipeId: number,
+    recipeName: string,
+    recipeCategoryDescription: string,
+    recipeDescription: string,
+    recipeCategoryDescriptionText: string | null,
+    recipeTechniqueDescriptionText: string | null,
+    recipeTechniqueDilutionPercentage: number,
+    recipeDescriptionImageUrl: string | null,
+    recipeImageUrl: string | null,
+    recipeCategoryDescriptionImageUrl: string | null
+  };
 }
 
 export namespace QueryRequest {

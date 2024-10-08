@@ -227,7 +227,7 @@
              {product.productName}
              {#if product.productName !== product.categoryName}
               <Secondary class="block">
-                <button class="flex items-center" id="popover-image" on:click={() => setPopoverData(product)}>
+                <button class="flex items-center" id="popover-image">
                   {product.categoryName}&nbsp;<InfoCircleSolid class="w-5 h-5" />
                 </button>
               </Secondary>
@@ -306,9 +306,9 @@
 <Popover triggeredBy="#popover-image" class="w-96 text-sm font-light" defaultClass="">
   <div class="space-y-2 p-3">
     <h3 class="font-semibold text-gray-900 dark:text-white">
-      {popoverData.categoryName}
+      {product.categoryName}
       <h3>
-        {popoverData.categoryDescription}
+        {product.categoryDescription}
         <!-- <p class="text-gray-500 dark:text-gray-500">Italy is located in the middle of the Mediterranean Sea, in Southern Europe it is also considered part of Western Europe. A unitary parliamentary republic with Rome as its capital and largest city.</p>
         <a href="/" class="flex items-center font-medium text-primary-600 dark:text-primary-500 dark:hover:text-primary-600 hover:text-primary-700">
           Read more <ChevronRightOutline class="w-2 h-2 ms-1.5 text-primary-600 dark:text-primary-500" />

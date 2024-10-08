@@ -552,3 +552,20 @@ export async function addCategory(categoryName: string, categoryDescription: str
     }
   }
 } 
+
+export async function getRecipe(recipeId: string) {
+  try {
+    await db.query.transaction(async (trx) => {
+      const rows = await trx('basicrecipe').select().where({ recipeId });
+      console.log(rows)
+    });
+  } catch(error: any) {
+    console.error(error);
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+
+    return {
+      status: "error",
+      error: error?.code || 'An unknown error occurred.'
+    }
+  }
+}

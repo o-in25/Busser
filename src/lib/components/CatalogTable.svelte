@@ -10,7 +10,7 @@
 
   <Listgroup class="border-0 dark:!bg-transparent">
     {#each recipes as recipe}
-      <ListgroupItem active href="/">
+      <ListgroupItem active href="/catalog/{recipe.recipeId}">
         <div class="flex items-center space-x-4 rtl:space-x-reverse">
           <Avatar
             src={recipe.recipeImageUrl || placeholder || ""}

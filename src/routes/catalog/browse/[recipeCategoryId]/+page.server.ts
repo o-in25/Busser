@@ -41,7 +41,7 @@ export const load = (async ({ params }) => {
   let images: any = [];
   images = images.map(({ url }) => ({ src: url, alt: 'test' }));
   let queryResult = await getBasicRecipes(params.recipeCategoryId);
-  let recipes: BasicRecipe[] = [];
+  let recipes: BasicRecipe[] | undefined = [];
   if('data' in queryResult) {
     recipes = queryResult.data;
   }

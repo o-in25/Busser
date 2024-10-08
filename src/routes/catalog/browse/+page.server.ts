@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 
 export const load = (async () => {
   const recipes = await getBasicRecipes();
-  let data: BasicRecipe[] = [];
+  let data: BasicRecipe[] | undefined = [];
   if('data' in recipes) {
     data = recipes.data;
   }
