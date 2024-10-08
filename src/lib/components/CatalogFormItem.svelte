@@ -28,12 +28,14 @@
 
   let group = step.recipeStepId;
 
+  let testClss = ''//'border-solid border-2 !border-green-500'
   // $: step.productIdQuantityInMilliliters = Number(customChoice) || 29;
 
 
 </script>
 
-  <Card size="xl" class="relative mx-auto">
+
+  <Card size="xl" class="relative mx-auto {testClss}">
     <Heading tag="h6">Step {stepNumber + 1}</Heading>
     <!-- <h6>{step}</h6> -->
     {#if stepNumber > 0}

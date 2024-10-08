@@ -10,6 +10,7 @@
   export let placeholder = '';
   export let name = '';
   export let key;
+  export let required = false;
   let items = [
     // { name: 'Profile', mycustomfield: 'data1', current: true },
     // { name: 'Settings', mycustomfield: 'data2' },
@@ -61,6 +62,7 @@
       on:blur={hideAutocomplete}
       on:focus={showAutocomplete}
       bind:value={selectValue}
+      bind:required={required}
     >
     </Input>
     <Button color="purple" href="/inventory/category/add"><PlusOutline/></Button>

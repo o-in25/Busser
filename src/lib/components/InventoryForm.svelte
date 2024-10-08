@@ -99,8 +99,10 @@
           placeholder="Whiskey"
           fetchUrl="/api/select"
           name="categoryId"
+          key={product?.categoryName}
+          required={true}
           bind:value={categoryId}
-          key={product?.categoryName} />
+        />
       </div>
     </div>
     <div class="grid gap-6 mb-6 md:grid-cols-3">
