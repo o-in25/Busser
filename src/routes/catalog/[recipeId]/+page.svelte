@@ -24,9 +24,9 @@
   <BreadcrumbItem name="Browse Catalog" href="/catalog/browse"></BreadcrumbItem>
   <BreadcrumbItem name="Recipe"></BreadcrumbItem>
 </Breadcrumb>
-<Heading tag="h2" class="mb-4 font-extrabold flex flex-row justify-between">
+<!-- <Heading tag="h2" class="mb-4 font-extrabold flex flex-row justify-between">
   {recipe.recipeName}
-</Heading>
+</Heading> -->
 
 <div class="px-4 py-2 md:py-4">
   {#if 'data' in result}
