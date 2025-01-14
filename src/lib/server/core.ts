@@ -389,6 +389,7 @@ export async function getSpirits(): Promise<Array<Spirit>> {
     return [];
   }
 }
+
 export async function getSpirit(id: number | string): Promise<Spirit | null> {
   try {
     const dbResult = await db.table<Spirit>('spirits').where('RecipeCategoryId', id);
@@ -553,7 +554,7 @@ export async function addCategory(categoryName: string, categoryDescription: str
   }
 } 
 
-export async function getRecipe(recipeId: string): Promise<QueryResult<{ recipe: View.BasicRecipe, recipeSteps: View.BasicRecipeStep[]}>> {
+export async function getBasicRecipe(recipeId: string): Promise<QueryResult<{ recipe: View.BasicRecipe, recipeSteps: View.BasicRecipeStep[]}>> {
   try {
     let recipe: View.BasicRecipe | undefined = undefined;
     let recipeSteps: View.BasicRecipeStep[] | undefined = undefined;
@@ -585,18 +586,35 @@ export async function getRecipe(recipeId: string): Promise<QueryResult<{ recipe:
   }
 }
 
-export async function spiritSelect(): Promise<SelectOption[]> {
+export async function getRecipe(recipeId: number): Promise<QueryResult<{recipe: Table.Recipe, recipeSteps: Table.RecipeStep[]}>> {
   try {
-    let result = await db.table('spirits')
-      .select('RecipeCategoryId', 'RecipeCategoryDescription');
-    let categories: Spirit[] = marshal<Spirit[]>(result);
-    let selectOptions: SelectOption[] = categories.map(({ recipeCategoryId, recipeCategoryDescription }) => ({
-      name: recipeCategoryDescription,
-      value: recipeCategoryId
-    }));
-    return selectOptions;
+    let recipe: Table.Recipe | undefined = undefined;
+    let recipeSteps: Table.RecipeStep[] | undefined = undefined;
+
+    await db.query.transaction(async (trx) => {
+      
+      // let [dbResult] = await trx('basicrecipe').select().where({ recipeId });
+      // recipe = marshal<View.BasicRecipe>(dbResult, camelCase);
+      // dbResult = await trx('basicrecipestep').select().where({ recipeId });
+      // recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
+
+    });
+
+    if(!recipe || !recipeSteps) {
+      throw Error('Could not get recipe details.');
+    }
+
+    return {
+      status: "success",
+      data: { recipe, recipeSteps }
+    };
+
   } catch(error: any) {
     console.error(error);
-    return [];
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+    return {
+      status: "error",
+      error: error?.code || 'An unknown error occurred.'
+    };
   }
 }

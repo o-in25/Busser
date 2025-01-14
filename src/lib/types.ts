@@ -205,6 +205,9 @@ export namespace Table {
 
 export namespace View {
   export type BasicRecipe = {
+    recipeCategoryId?: number,
+    recipeTechniqueDescriptionId?: number,
+
     recipeId: number,
     recipeName: string,
     recipeCategoryDescription: string,
@@ -218,6 +221,9 @@ export namespace View {
   };
 
   export type BasicRecipeStep = {
+    recipeStepId?: number,
+    productId?: number,
+
     recipeId: number;
     recipeStepDescription: string | null;
     productName: string;

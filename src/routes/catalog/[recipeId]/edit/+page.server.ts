@@ -1,13 +1,14 @@
 // import { generateImage } from '$lib/server/ai';
-import { getPreparationMethods, getRecipe, getSpirits } from '$lib/server/core';
+import { getPreparationMethods, getBasicRecipe, getSpirits } from '$lib/server/core';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ params }) => {
   const { recipeId } = params;
   const spirits = await getSpirits();
-
   const preparationMethods = await getPreparationMethods();
-  const recipe = await getRecipe(recipeId);
+
+
+  const recipe = await getBasicRecipe(recipeId);
 
   let pageData: any = { args: { spirits } };
   if('data' in preparationMethods) {

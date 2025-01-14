@@ -13,11 +13,11 @@
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import { MinusOutline } from "flowbite-svelte-icons";
-  import type { RecipeStep } from "$lib/types";
+  import type { RecipeStep, View } from "$lib/types";
   import Heading from "flowbite-svelte/Heading.svelte";
 
   // props
-  export let step: RecipeStep;
+  export let step: View.BasicRecipeStep;
   export let stepNumber: number;
   export let clickHandler: Function;
 
@@ -32,6 +32,7 @@
   let testClss = ''//'border-solid border-2 !border-green-500'
   // $: step.productIdQuantityInMilliliters = Number(customChoice) || 29;
 
+  console.log(customChoice)
 
 </script>
 
@@ -52,7 +53,7 @@
         placeholder="Whiskey"
         fetchUrl="/api/select/categories"
         bind:value={step.productId}
-        key="" />
+        key="{step.productName}" />
     </div>
     <div class="mb-6">
       <Label class="mb-2">Quantity</Label>

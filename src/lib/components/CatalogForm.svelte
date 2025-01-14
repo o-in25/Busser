@@ -10,7 +10,7 @@
     Helper,
   } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
-  import type { BasicRecipe, ComponentAction, PreparationMethod, RecipeStep, Spirit } from "$lib/types";
+  import type { BasicRecipe, ComponentAction, PreparationMethod, RecipeStep, Spirit, View } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
   import CatalogFormItem from "./CatalogFormItem.svelte";
   import { v4 as uuidv4 } from "uuid";
@@ -31,10 +31,12 @@
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
   export let action: ComponentAction = 'add';
-  export let recipe: BasicRecipe = {} as BasicRecipe;
-  export let recipeSteps: RecipeStep[] = [];
 
-  console.log(recipeSteps)
+
+  export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
+  export let recipeSteps: View.BasicRecipeStep[] = [];
+
+  console.log(recipe)
 
   const createSteps = () => {
     if(recipeSteps.length) {
@@ -44,13 +46,23 @@
     return createStep();
   };
   const createStep = () => ({
+    recipeId:  uuidv4(),
     recipeStepId: uuidv4(),
     productId: 0,
+    recipeStepDescription: null,
+    productName: "",
+    categoryName: "",
+    categoryDescription: null,
+    supplierName: "",
+    supplierDetails: null,
     productIdQuantityInMilliliters: 0,
-    recipeStepDescription: "",
+    productInStockQuantity: 0,
+    productPricePerUnit: 0,
+    productUnitSizeInMilliliters: 0,
+    productProof: 0
   });
 
-  let steps: RecipeStep[] = recipeSteps.length? recipeSteps : [createStep()];
+  let steps = recipeSteps.length? recipeSteps : [createStep()];
 
   const addStep = () => {
     steps = [...steps, createStep()];
@@ -72,8 +84,8 @@
 
 
   // TODO: maybe add the ids to the basicrecipe[] instead of filtering
-  let defaultSpiritChoice = spirits.find(({ recipeCategoryDescription }) => recipe.recipeCategoryDescription === recipeCategoryDescription)?.recipeCategoryId || defaultSpirit.recipeCategoryId;
-  let prepMethodChoice = preparationMethods.find(({ recipeTechniqueDescriptionText }) => recipe.recipeTechniqueDescriptionText === recipeTechniqueDescriptionText)?.recipeTechniqueDescriptionId || defaultPrepMethodChoice.recipeTechniqueDescriptionId
+  let defaultSpiritChoice = recipe.recipeCategoryId || defaultSpirit.recipeCategoryId;
+  let prepMethodChoice = recipe.recipeTechniqueDescriptionId || defaultPrepMethodChoice.recipeTechniqueDescriptionId
   
   $: prepMethodDilutionPct = defaultPrepMethodChoice.recipeTechniqueDilutionPercentage
 </script>
@@ -208,7 +220,7 @@
       </legend>
       {#each steps as step, stepNumber (step.recipeStepDescription)}
         <div class="py-4" transition:scale={{ duration: 250, delay: 0, opacity: 0.5, start: 0, easing: quintOut }}>
-          <CatalogFormItem {step} {stepNumber} clickHandler={removeStep} />
+          <CatalogFormItem step={step} {stepNumber} clickHandler={removeStep} />
         </div>
       {/each}
 
