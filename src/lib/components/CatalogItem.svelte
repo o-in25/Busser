@@ -20,10 +20,10 @@
     MessagesSolid,
     UserCircleSolid,
   } from "flowbite-svelte-icons";
+  import placeholder from "$lib/assets/placeholder@2x.jpg";
 
   export let recipe: View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[];
-
 </script>
 
 <!-- <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased"> -->
@@ -33,18 +33,18 @@
       <div class="shrink-0 max-w-md lg:max-w-md mx-auto">
         <img
           class="w-full dark:hidden rounded-md"
-          src={recipe.recipeImageUrl}
+          src={recipe.recipeImageUrl || placeholder}
           alt="" />
         <img
           class="w-full hidden dark:block rounded-md"
-          src={recipe.recipeImageUrl}
+          src={recipe.recipeImageUrl || placeholder}
           alt="" />
       </div>
 
       <div class="mt-6 sm:mt-8 lg:mt-0">
         <Heading>
           {recipe.recipeName}
-          <Secondary class="block text-[18px] ms-[3px]">
+          <Secondary>
             {recipe.recipeCategoryDescription} Cocktail
           </Secondary>
         </Heading>
@@ -60,7 +60,7 @@
         </div>
 
         <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-          <Button color="alternative">
+          <Button color="alternative" href="/catalog/1/edit">
             <EditOutline />
             <span class="ms-2">Edit</span>
           </Button>
@@ -76,7 +76,7 @@
           {recipe.recipeDescription}
         </P>
 
-                <hr class="my-4 md:my-6 border-gray-200 dark:border-gray-800" />
+        <hr class="my-4 md:my-6 border-gray-200 dark:border-gray-800" />
 
         <div class="my-4">
           <div
