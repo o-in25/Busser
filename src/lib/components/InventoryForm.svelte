@@ -97,7 +97,7 @@
         <Autocomplete
           label="Category"
           placeholder="Whiskey"
-          fetchUrl="/api/select"
+          fetchUrl="/api/select/categories"
           name="categoryId"
           key={product?.categoryName}
           required={true}

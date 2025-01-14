@@ -60,7 +60,7 @@
         </div>
 
         <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-          <Button color="alternative" href="/catalog/1/edit">
+          <Button color="alternative" href="/catalog/{recipe.recipeId}/edit">
             <EditOutline />
             <span class="ms-2">Edit</span>
           </Button>

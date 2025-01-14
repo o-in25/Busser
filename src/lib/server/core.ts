@@ -584,3 +584,19 @@ export async function getRecipe(recipeId: string): Promise<QueryResult<{ recipe:
     }
   }
 }
+
+export async function spiritSelect(): Promise<SelectOption[]> {
+  try {
+    let result = await db.table('spirits')
+      .select('RecipeCategoryId', 'RecipeCategoryDescription');
+    let categories: Spirit[] = marshal<Spirit[]>(result);
+    let selectOptions: SelectOption[] = categories.map(({ recipeCategoryId, recipeCategoryDescription }) => ({
+      name: recipeCategoryDescription,
+      value: recipeCategoryId
+    }));
+    return selectOptions;
+  } catch(error: any) {
+    console.error(error);
+    return [];
+  }
+}

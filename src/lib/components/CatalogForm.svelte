@@ -10,7 +10,7 @@
     Helper,
   } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
-  import type { PreparationMethod, RecipeStep, Spirit } from "$lib/types";
+  import type { BasicRecipe, ComponentAction, PreparationMethod, RecipeStep, Spirit } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
   import CatalogFormItem from "./CatalogFormItem.svelte";
   import { v4 as uuidv4 } from "uuid";
@@ -25,11 +25,24 @@
   } from "flowbite-svelte-icons";
     import { quintOut } from "svelte/easing";
     import { scale } from "svelte/transition";
+    import CategorySelect from "./SpiritSelect.svelte";
 
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
+  export let action: ComponentAction = 'add';
+  export let recipe: BasicRecipe = {} as BasicRecipe;
+  export let recipeSteps: RecipeStep[] = [];
 
+  console.log(recipeSteps)
+
+  const createSteps = () => {
+    if(recipeSteps.length) {
+      return recipeSteps;
+    } 
+
+    return createStep();
+  };
   const createStep = () => ({
     recipeStepId: uuidv4(),
     productId: 0,
@@ -37,7 +50,7 @@
     recipeStepDescription: "",
   });
 
-  let steps: RecipeStep[] = [createStep()];
+  let steps: RecipeStep[] = recipeSteps.length? recipeSteps : [createStep()];
 
   const addStep = () => {
     steps = [...steps, createStep()];
@@ -52,12 +65,19 @@
 
   // default to first choice
   let [defaultPrepMethodChoice] = preparationMethods;
-  let [defaultSpirit] = spirits;
-  let prepMethodChoice = defaultPrepMethodChoice.recipeTechniqueDescriptionId;
-  let defaultSpiritChoice = defaultSpirit.recipeCategoryId;
+  let [defaultSpirit] = spirits; 
 
+  // let prepMethodChoice = defaultPrepMethodChoice.recipeTechniqueDescriptionId;
+  //let defaultSpiritChoice = defaultSpirit.recipeCategoryId;
+
+
+  // TODO: maybe add the ids to the basicrecipe[] instead of filtering
+  let defaultSpiritChoice = spirits.find(({ recipeCategoryDescription }) => recipe.recipeCategoryDescription === recipeCategoryDescription)?.recipeCategoryId || defaultSpirit.recipeCategoryId;
+  let prepMethodChoice = preparationMethods.find(({ recipeTechniqueDescriptionText }) => recipe.recipeTechniqueDescriptionText === recipeTechniqueDescriptionText)?.recipeTechniqueDescriptionId || defaultPrepMethodChoice.recipeTechniqueDescriptionId
+  
   $: prepMethodDilutionPct = defaultPrepMethodChoice.recipeTechniqueDilutionPercentage
 </script>
+
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
   <form
@@ -88,6 +108,7 @@
             id="recipeName"
             name="recipeName"
             placeholder="Plantation 3 Star"
+            bind:value={recipe.recipeName}
             required />
         </div>
       </div>
@@ -135,7 +156,8 @@
           name="recipeDescription"
           id="recipeDescription"
           rows="4"
-          resizable="false" />
+          resizable="false" 
+          bind:value={recipe.recipeDescription}/>
       </div>
 
       <!-- served -->
@@ -173,7 +195,7 @@
 
       <!-- image -->
       <div class="mb-6">
-        <FileUpload name="recipeImageUrl" signedUrl={null}></FileUpload>
+        <FileUpload name="recipeImageUrl" signedUrl={recipe.recipeImageUrl || null}></FileUpload>
       </div>
     </fieldset>
 
@@ -184,7 +206,7 @@
       <legend class="mb-3">
         <Heading tag="h6">Details</Heading>
       </legend>
-      {#each steps as step, stepNumber (step.recipeStepId)}
+      {#each steps as step, stepNumber (step.recipeStepDescription)}
         <div class="py-4" transition:scale={{ duration: 250, delay: 0, opacity: 0.5, start: 0, easing: quintOut }}>
           <CatalogFormItem {step} {stepNumber} clickHandler={removeStep} />
         </div>

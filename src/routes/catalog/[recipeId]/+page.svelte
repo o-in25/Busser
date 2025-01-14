@@ -10,6 +10,7 @@
     const { result } = data;
     let recipe: View.BasicRecipe = {} as View.BasicRecipe;
     let recipeSteps: View.BasicRecipeStep[] = [] as View.BasicRecipeStep[];
+    
     if('data' in result) {
       if(result.data?.recipe) {
         recipe = result.data?.recipe;
