@@ -1,8 +1,8 @@
 import type { CookieSerializeOptions } from 'cookie';
 
-export type QueryResult<T> = {
+export type QueryResult<T = void> = {
   status: "success";
-  data: T;
+  data?: T;
 } | {
   status: "error";
   error: string;
@@ -133,7 +133,8 @@ export type BasicRecipe = {
   recipeDescription: string | null,
   recipeDescriptionImageUrl: string | null,
   recipeTechniqueDilutionPercentage: number,
-  recipeTechniqueDescriptionText: string
+  recipeTechniqueDescriptionText: string,
+  recipeCategoryDescription: string
 }
 
 export type PreparationMethod = {
@@ -148,4 +149,110 @@ export type RecipeStep = {
   productId: number,
   productIdQuantityInMilliliters: number,
   recipeStepDescription: string
+}
+
+export namespace Table {
+  export type Recipe = {
+    recipeId?: number,
+    recipeCategoryId: number,
+    recipeDescriptionId: number,
+    recipeName: string,
+    recipeImageUrl: string | null;
+  };
+
+  export type RecipeDescription = {
+    recipeDescriptionId?: number,
+    recipeDescription: string | null,
+    recipeDescriptionImageUrl: string | null
+  }
+
+  export type RecipeStep = {
+    recipeStepId?: number,
+    recipeId: number,
+    productId: number,
+    productIdQuantityInMilliliters: number,
+    recipeStepDescription: string | null
+  }
+
+  export type RecipeTechnique = {
+    recipeTechniqueId?: number,
+    recipeTechniqueDescriptionId: number,
+    recipeId: number,
+    recipeTechniqueDilutionPercentage: number | null
+  }
+
+  export type RecipeTechniqueDescription = {
+    recipeTechniqueDescriptionId?: number,
+    recipeTechniqueDescriptionText: string,
+    recipeTechniqueDilutionPercentage: number
+  }
+
+  export type Category = {
+    categoryId?: number,
+    categoryName: string,
+    categoryDescription: string;
+  };
+
+  // export type RecipeStep = {
+  //   recipeStepId,
+  //   recipeId, 
+  //   productId, 
+  //   productIdQuantityInMilliliters, 
+  //   recipeStepDescription
+  // }
+  
+}
+
+export namespace View {
+  export type BasicRecipe = {
+    recipeCategoryId?: number,
+    recipeTechniqueDescriptionId?: number,
+
+    recipeId: number,
+    recipeName: string,
+    recipeCategoryDescription: string,
+    recipeDescription: string,
+    recipeCategoryDescriptionText: string | null,
+    recipeTechniqueDescriptionText: string | null,
+    recipeTechniqueDilutionPercentage: number,
+    recipeDescriptionImageUrl: string | null,
+    recipeImageUrl: string | null,
+    recipeCategoryDescriptionImageUrl: string | null
+  };
+
+  export type BasicRecipeStep = {
+    recipeStepId?: number,
+    productId?: number,
+
+    recipeId: number;
+    recipeStepDescription: string | null;
+    productName: string;
+    categoryName: string;
+    categoryDescription: string | null;
+    supplierName: string;
+    supplierDetails: string | null;
+    productIdQuantityInMilliliters: number;
+    productInStockQuantity: number;
+    productPricePerUnit: number;
+    productUnitSizeInMilliliters: number;
+    productProof: number;
+  }
+}
+
+export namespace QueryRequest {
+  export type Recipe = {
+    recipeId?: number,
+    recipeName: string,
+    recipeCategoryId: number,
+    recipeDescription: string
+    recipeTechniqueDescriptionId: number
+  }
+
+  export type RecipeSteps = {
+    recipeStepId?: number,
+    productId: number,
+    productIdQuantityInMilliliters: number,
+    recipeStepDescription: string
+  }
+
 }

@@ -13,16 +13,15 @@
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import { MinusOutline } from "flowbite-svelte-icons";
-  import type { RecipeStep } from "$lib/types";
-    import Heading from "flowbite-svelte/Heading.svelte";
-    import { fade, scale } from "svelte/transition";
-	import { quintOut } from 'svelte/easing';
+  import type { RecipeStep, View } from "$lib/types";
+  import Heading from "flowbite-svelte/Heading.svelte";
 
   // props
-  export let step: RecipeStep;
+  export let step: View.BasicRecipeStep;
   export let stepNumber: number;
   export let clickHandler: Function;
 
+  console.log(step.productId)
   let unit = 'imperial';
   let customChoice = step.productIdQuantityInMilliliters;
   $: customChoice = Number(customChoice) || 0
@@ -30,13 +29,15 @@
 
   let group = step.recipeStepId;
 
+  let testClss = ''//'border-solid border-2 !border-green-500'
   // $: step.productIdQuantityInMilliliters = Number(customChoice) || 29;
 
+  console.log(customChoice)
 
 </script>
 
-<div transition:scale={{ duration: 250, delay: 0, opacity: 0.5, start: 0, easing: quintOut }}>
-  <Card size="xl" class="relative" >
+
+  <Card size="xl" class="relative mx-auto {testClss}">
     <Heading tag="h6">Step {stepNumber + 1}</Heading>
     <!-- <h6>{step}</h6> -->
     {#if stepNumber > 0}
@@ -50,9 +51,9 @@
       <Autocomplete
         label="Category"
         placeholder="Whiskey"
-        fetchUrl="/api/select"
+        fetchUrl="/api/select/products"
         bind:value={step.productId}
-        key="" />
+        key="{step.productName}" />
     </div>
     <div class="mb-6">
       <Label class="mb-2">Quantity</Label>
@@ -62,7 +63,7 @@
           <Radio
   
             class="px-3 pt-1"
-            value={3}
+            value={0.86}
             bind:group={step.productIdQuantityInMilliliters}
             on:click={() => disabled = true}
             >
@@ -82,7 +83,7 @@
           <Radio
   
             class="px-3 pt-1 text-nowrap"
-            value={6}
+            value={1.77}
             bind:group={step.productIdQuantityInMilliliters}
             on:click={() => disabled = true}
           >
@@ -99,7 +100,7 @@
           </Helper>
         </li>
         <li class="w-full border-none">
-          <Radio  class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
+          <Radio class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
         </li>
         <li class="w-full border-none p-3">
           <div>
@@ -134,4 +135,3 @@
         bind:value={step.recipeStepDescription} />
     </div>
   </Card>
-</div>

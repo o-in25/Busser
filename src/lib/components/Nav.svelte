@@ -38,13 +38,15 @@
     const response = await fetch("/logout", {
       method: "POST",
     });
-    if (response.ok) {
+    if(response.ok) {
       await invalidateAll();
       await goto(`/`);
+      showDrawer = true;
     }
+
   }
 
-  let showDrawer = true;
+  $: showDrawer = true;
   let transitionParams = {
     x: -320,
     duration: 200,
@@ -198,7 +200,7 @@
 
         <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
 
-        <SidebarItem label="Log Out">
+        <SidebarItem label="Log Out" on:click={async () => await logout()}>
           <svelte:fragment slot="icon">
             <ArrowRightToBracketOutline
               class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />

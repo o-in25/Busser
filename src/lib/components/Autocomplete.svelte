@@ -1,5 +1,7 @@
 <script>
-  import { Label, Listgroup, ListgroupItem, Input } from "flowbite-svelte";
+  import { Label, Listgroup, ListgroupItem, Input, ButtonGroup, Button } from "flowbite-svelte";
+    import { PlusOutline } from "flowbite-svelte-icons";
+    import InputAddon from "flowbite-svelte/InputAddon.svelte";
   import { onMount } from "svelte";
 
   export let label;
@@ -8,6 +10,7 @@
   export let placeholder = '';
   export let name = '';
   export let key;
+  export let required = false;
   let items = [
     // { name: 'Profile', mycustomfield: 'data1', current: true },
     // { name: 'Settings', mycustomfield: 'data2' },
@@ -54,12 +57,16 @@
     <Label for="autoselect" class="mb-2">{label}</Label>
     <input id="autoselect" class="hidden" bind:value={value}>
   {/if}
-  <Input type="text" placeholder="{placeholder}"
-    on:blur={hideAutocomplete}
-    on:focus={showAutocomplete} 
-    bind:value={selectValue}
-  >
-  </Input>
+  <ButtonGroup divClass="flex">
+    <Input type="text" placeholder="{placeholder}"
+      on:blur={hideAutocomplete}
+      on:focus={showAutocomplete}
+      bind:value={selectValue}
+      bind:required={required}
+    >
+    </Input>
+    <Button color="purple" href="/inventory/category/add"><PlusOutline/></Button>
+  </ButtonGroup>
   {#if show}
   <div class="relative">
     <Listgroup active class="absolute w-full max-h-44 overflow-y-auto z-20">

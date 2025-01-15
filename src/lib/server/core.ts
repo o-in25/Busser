@@ -1,5 +1,5 @@
 
-import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, PreparationMethod, Product, ProductDetail, QueryResult, SelectOption, Spirit } from "$lib/types";
+import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, PreparationMethod, Product, ProductDetail, QueryResult, SelectOption, Spirit, Table, QueryRequest, View } from "$lib/types";
 import { DbProvider } from "./db";
 import _ from 'lodash';
 import * as changeCase from "change-case";
@@ -19,9 +19,9 @@ const marshal = <T>(obj: any, fn: Function = camelCase) => {
   }, {});
 };
 
-const pascalCase = (str: string) => changeCase.pascalCase(str)
-const camelCase = (str: string) => changeCase.camelCase(str)
-
+const pascalCase = (str: string) => changeCase.pascalCase(str) // GoodDrinks
+const camelCase = (str: string) => changeCase.camelCase(str) // goodDrinks
+const titleCase = (str: string) => changeCase.capitalCase(str); // Good Drinks
 const paginationData = {
   total: 0,
   currentPage: 0,
@@ -60,7 +60,7 @@ export async function seedGallery(): Promise<GallerySeeding[]> {
     let images = await db.table<any>('recipe')
       .select('RecipeImageUrl')
       .whereNotNull('RecipeImageUrl');
-    images = images.map(item => Object.assign({}, { src: item.RecipeImageUrl }));
+    images = images.map(item => Object.assign({}, { src: item.RecipeImageUrl, href: '/inventory' }));
     images = marshal(images);
     images = images.filter(({ src }) => src !== 'https://i.imgur.com/aOQBTkN.png') // this pic sucks
     return images;
@@ -389,6 +389,7 @@ export async function getSpirits(): Promise<Array<Spirit>> {
     return [];
   }
 }
+
 export async function getSpirit(id: number | string): Promise<Spirit | null> {
   try {
     const dbResult = await db.table<Spirit>('spirits').where('RecipeCategoryId', id);
@@ -443,5 +444,194 @@ export async function getPreparationMethods(): Promise<QueryResult<Array<Prepara
       error: 'Could not get preparation methods.'
     };
     return result;
+  }
+}
+
+export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File) {
+  // STEP 1: get signed file url
+  // STEP 2: add recipe desc.
+  // STEP 3: add recipe + file url
+  // STEP 4: add prep method
+  // STEP 5: steps
+
+  try {
+
+    if(!recipeSteps.length) throw Error('Recipe does not contain any recipe steps.')
+
+    const getProductImageUrl = async (image: File | null) => {
+      if(!image || image.size === 0 || image.name === 'undefined') return null;
+      const signedUrl = await getSignedUrl(image);
+      return (signedUrl.length ? signedUrl : null);
+    };
+
+    // step 1
+    const recipeImageUrl = await getProductImageUrl(file);
+
+    await db.query.transaction(async (trx) => {
+      let newRecipeDescription: Table.RecipeDescription = {
+        recipeDescription: recipe.recipeDescription,
+        recipeDescriptionImageUrl: null
+      };
+      newRecipeDescription = marshal(newRecipeDescription, pascalCase);
+      // step 2
+      const [recipeDescriptionId] = await trx('recipedescription').insert(newRecipeDescription);
+      console.log(recipeDescriptionId)
+      
+      let newRecipe: Table.Recipe = {
+        recipeCategoryId: recipe.recipeCategoryId,
+        recipeName: recipe.recipeName,
+        recipeDescriptionId,
+        recipeImageUrl
+      }
+      newRecipe = marshal(newRecipe, pascalCase);
+      // step 3
+      const [recipeId] = await trx('recipe').insert(newRecipe);
+      console.log(recipeId)
+
+      let newRecipeTechnique: Table.RecipeTechnique = {
+        recipeTechniqueDescriptionId: recipe.recipeTechniqueDescriptionId,
+        recipeTechniqueDilutionPercentage: null,
+        recipeId
+      }
+      newRecipeTechnique = marshal(newRecipeTechnique, pascalCase);
+      // step 4
+      const [recipeTechniqueId] = await trx('recipetechnique').insert(newRecipeTechnique);
+      console.log(recipeTechniqueId)
+
+      let newRecipeSteps = recipeSteps.map(step => ({ ...step, recipeId }))
+      newRecipeSteps = marshal(newRecipeSteps, pascalCase);
+      // step 5
+      const rows = await trx('recipestep').insert(newRecipeSteps);
+      console.log(rows)
+
+      // let recipe: Table.Recipe = {
+
+      // }
+
+    });
+
+
+    let newRecipeTechnique = {
+
+    };
+
+    console.log('done')
+
+  } catch(error: any) {
+    console.error(error);
+    // Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+    // const result: QueryResult<Array<PreparationMethod>> = {
+    //   status: 'error',
+    //   error: 'Could not get preparation methods.'
+    // };
+    // return result;
+  }
+  // const productImageUrl = await getProductImageUrl(image);
+}
+
+export async function addCategory(categoryName: string, categoryDescription: string | null): Promise<QueryResult<number>> {
+  try {
+
+    let newCategory: any = { categoryName, categoryDescription };
+    newCategory = { 
+      ...newCategory, 
+      categoryName: titleCase(categoryName.trim()) // enforcing unique index i
+    }
+    newCategory = marshal(newCategory, pascalCase);
+    const [categoryId] = await db.table<Table.Category>('category').insert(newCategory);
+    return {
+      status: "success",
+      data: categoryId
+    }
+  } catch(error: any) {
+    console.error(error);
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+
+    return {
+      status: "error",
+      error: error?.code || 'An unknown error occurred.'
+    }
+  }
+} 
+
+export async function getBasicRecipe(recipeId: string): Promise<QueryResult<{ recipe: View.BasicRecipe, recipeSteps: View.BasicRecipeStep[]}>> {
+  try {
+    let recipe: View.BasicRecipe | undefined = undefined;
+    let recipeSteps: View.BasicRecipeStep[] | undefined = undefined;
+
+    await db.query.transaction(async (trx) => {
+      let [dbResult] = await trx('basicrecipe').select().where({ recipeId });
+      recipe = marshal<View.BasicRecipe>(dbResult, camelCase);
+      dbResult = await trx('basicrecipestep').select().where({ recipeId });
+      recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
+    });
+
+    if(!recipe || !recipeSteps) {
+      throw Error('Could not get recipe details.')
+    }
+
+    return {
+      status: "success",
+      data: { recipe, recipeSteps }
+    }
+    
+  } catch(error: any) {
+    console.error(error);
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+
+    return {
+      status: "error",
+      error: error?.code || 'An unknown error occurred.'
+    }
+  }
+}
+
+export async function getRecipe(recipeId: number): Promise<QueryResult<{recipe: Table.Recipe, recipeSteps: Table.RecipeStep[]}>> {
+  try {
+    let recipe: Table.Recipe | undefined = undefined;
+    let recipeSteps: Table.RecipeStep[] | undefined = undefined;
+
+    await db.query.transaction(async (trx) => {
+      
+      // let [dbResult] = await trx('basicrecipe').select().where({ recipeId });
+      // recipe = marshal<View.BasicRecipe>(dbResult, camelCase);
+      // dbResult = await trx('basicrecipestep').select().where({ recipeId });
+      // recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
+
+    });
+
+    if(!recipe || !recipeSteps) {
+      throw Error('Could not get recipe details.');
+    }
+
+    return {
+      status: "success",
+      data: { recipe, recipeSteps }
+    };
+
+  } catch(error: any) {
+    console.error(error);
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+    return {
+      status: "error",
+      error: error?.code || 'An unknown error occurred.'
+    };
+  }
+}
+
+
+export async function productSelect(): Promise<SelectOption[]> {
+  try {
+    let result = await db.table('product')
+      .select('ProductId', 'ProductName');
+    let products: Product[] = marshal<Product[]>(result);
+    let selectOptions: SelectOption[] = products.map(({ productId, productName }) => ({
+      name: productName,
+      value: productId || 0
+    }));
+    return selectOptions;
+  } catch(error: any) {
+    console.error(error);
+    return [];
   }
 }

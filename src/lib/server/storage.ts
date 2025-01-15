@@ -8,7 +8,6 @@ const base64Encode = (str: string) => Buffer.from(str).toString('base64');
 const base64Decode = (str: string) => Buffer.from(GOOGLE_SERVICE_KEY, 'base64').toString(); 
 
 const { client_email, private_key } = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY));
-
 const storage = new Storage({
   credentials: {
     client_email,
@@ -102,4 +101,20 @@ export async function getSignedUrl(file: File, fileName: string = ''): Promise<s
     console.error(error);
     return '';
   }
+}
+
+// 15 minutes expiration
+export async function getSignedUrlFromUnsignedUrl(unsignedUrl: string, expires: number = 15 * 60 * 1000) {
+  const regex = /https:\/\/(?:[^/]+)\/(.+)/;
+  let [, fileName] = unsignedUrl.match(regex) || [];
+  fileName = fileName.split('/').pop() || '';
+  const file = bucket.file(fileName);
+  const [signedUrl] = await file.getSignedUrl({
+    version: 'v4',
+    action: 'read',
+    expires: Date.now() + expires
+  });
+
+  return signedUrl;
+
 }
