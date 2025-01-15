@@ -7,30 +7,26 @@
   export let divStyle: string =
     "rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex w-full max-w-sm flex-col";
   export let imgStyle: string = "rounded-lg";
-  export let isUnsigned: boolean = false;
 
-  export let unsignedUrl = src; 
-  let signedUrl = '';
+  // const getSignedUrl = async (unsignedUrl) => {
+  //   let data = await fetch(`/storage/get-signed-url`, {
+  //     method: "POST",
+  //     body: JSON.stringify({ unsignedUrl }),
+  //   });
+  //   let { signed } = await data.json();
+  //   return signed;
+  // };
 
-  const getSignedUrl = async (unsignedUrl) => {
-    let data = await fetch(`/storage/get-signed-url`, {
-      method: "POST",
-      body: JSON.stringify({ unsignedUrl }),
-    });
-    let { signed } = await data.json();
-    return signed;
-  };
-
-  onMount(() => {
-    if(isUnsigned && unsignedUrl) {
-      getSignedUrl(unsignedUrl).then((signed) => {
-        signedUrl = signed;
-      });
-    }
-  });
+  // onMount(() => {
+  //   if(isUnsigned && unsignedUrl) {
+  //     getSignedUrl(unsignedUrl).then((signed) => {
+  //       signedUrl = signed;
+  //     });
+  //   }
+  // });
 
 </script>
 
 <div class={divStyle}>
-  <img class={imgStyle} src={signedUrl || unsignedUrl} {alt} />
+  <img class={imgStyle} {src} {alt} />
 </div>

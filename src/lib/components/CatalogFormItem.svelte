@@ -100,7 +100,7 @@
           </Helper>
         </li>
         <li class="w-full border-none">
-          <Radio  class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
+          <Radio class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
         </li>
         <li class="w-full border-none p-3">
           <div>

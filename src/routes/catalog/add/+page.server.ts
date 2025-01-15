@@ -28,8 +28,21 @@ export const actions = {
     }
 
     recipeSteps = JSON.parse(recipeSteps as string);
-    recipeSteps = recipeSteps.map(({ recipeStepId, ...rest }) => rest);
+    recipeSteps = recipeSteps.map(({ 
+      recipeStepId, 
+      categoryDescription,
+      categoryName,
+      supplierName,
+      supplierDetails,
+      productName,
+      productInStockQuantity,
+      productPricePerUnit,
+      productUnitSizeInMilliliters,
+      productProof,
+      ...rest 
+    }) => rest);
 
+    console.log(recipeSteps, recipe)
     await addRecipe(recipe, recipeSteps, file);
 
 

@@ -218,7 +218,7 @@
       <legend class="mb-3">
         <Heading tag="h6">Details</Heading>
       </legend>
-      {#each steps as step, stepNumber (step.recipeStepDescription)}
+      {#each steps as step, stepNumber (step.recipeStepId)}
         <div class="py-4" transition:scale={{ duration: 250, delay: 0, opacity: 0.5, start: 0, easing: quintOut }}>
           <CatalogFormItem step={step} {stepNumber} clickHandler={removeStep} />
         </div>
