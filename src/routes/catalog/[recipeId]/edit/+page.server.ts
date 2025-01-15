@@ -1,5 +1,7 @@
 // import { generateImage } from '$lib/server/ai';
 import { getPreparationMethods, getBasicRecipe, getSpirits } from '$lib/server/core';
+import type { FormSubmitResult } from '$lib/types';
+import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ params }) => {
@@ -30,7 +32,7 @@ export const load = (async ({ params }) => {
 
 
 export const actions = {
-  default: async ({ request }) => {
+  default: async ({ request, params }) => {
     let formData: any = Object.fromEntries(await request.formData());
     let { recipeImageUrl, recipeSteps, ...payload } = formData;
     const { recipeImageUrl: file } = formData as { recipeImageUrl: File; };
@@ -45,7 +47,7 @@ export const actions = {
     recipeSteps = recipeSteps.map(({ recipeStepId, ...rest }) => rest);
 
 
-    console.log(recipe)
+    console.log(file)
     // await addRecipe(recipe, recipeSteps, file);
 
 
@@ -88,8 +90,13 @@ export const actions = {
     // recipeTechniqueDescriptionId = Number(recipeTechniqueDescriptionId);
     // const { productImageUrl: file } = formData as { productImageUrl: File; };
 
-    return {
-      success: { message: 'User has been created.' }
-    };
+    return fail(500, { message: 'Stuff happened'})
+    
+    const submitResult: FormSubmitResult = {
+      success: {
+        message: 'Product created!'
+      }
+    }
+    return submitResult;
   }
 };

@@ -51,7 +51,7 @@
       <Autocomplete
         label="Category"
         placeholder="Whiskey"
-        fetchUrl="/api/select/categories"
+        fetchUrl="/api/select/products"
         bind:value={step.productId}
         key="{step.productName}" />
     </div>
@@ -63,7 +63,7 @@
           <Radio
   
             class="px-3 pt-1"
-            value={3}
+            value={0.86}
             bind:group={step.productIdQuantityInMilliliters}
             on:click={() => disabled = true}
             >
@@ -83,7 +83,7 @@
           <Radio
   
             class="px-3 pt-1 text-nowrap"
-            value={6}
+            value={1.77}
             bind:group={step.productIdQuantityInMilliliters}
             on:click={() => disabled = true}
           >

@@ -618,3 +618,20 @@ export async function getRecipe(recipeId: number): Promise<QueryResult<{recipe: 
     };
   }
 }
+
+
+export async function productSelect(): Promise<SelectOption[]> {
+  try {
+    let result = await db.table('product')
+      .select('ProductId', 'ProductName');
+    let products: Product[] = marshal<Product[]>(result);
+    let selectOptions: SelectOption[] = products.map(({ productId, productName }) => ({
+      name: productName,
+      value: productId || 0
+    }));
+    return selectOptions;
+  } catch(error: any) {
+    console.error(error);
+    return [];
+  }
+}

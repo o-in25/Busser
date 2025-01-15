@@ -1,14 +1,19 @@
-import { addRecipe, getPreparationMethods, getSpirits } from '$lib/server/core';
+import { addRecipe, getPreparationMethods, getSpirits, productSelect } from '$lib/server/core';
 import type { Table } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ request }) => {
   // await info('test')
   const spirits = await getSpirits();
-  let preparationMethods = await getPreparationMethods();
-  let pageData: any = { args: { spirits, preparationMethods } };
+  const preparationMethods = await getPreparationMethods();
+  const products = await productSelect();
+  const pageData: any = { args: { spirits, preparationMethods } };
   if('data' in preparationMethods) {
     pageData.args = { ...pageData.args, preparationMethods: preparationMethods.data }
+  }
+
+  if('data' in products) {
+    pageData.args = { ...pageData.args, products: products.data };
   }
 
   return pageData;

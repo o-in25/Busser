@@ -10,7 +10,7 @@
     Helper,
   } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
-  import type { BasicRecipe, ComponentAction, PreparationMethod, RecipeStep, Spirit, View } from "$lib/types";
+  import type { ComponentAction, PreparationMethod, Spirit, View } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
   import CatalogFormItem from "./CatalogFormItem.svelte";
   import { v4 as uuidv4 } from "uuid";
@@ -18,24 +18,25 @@
   import { applyAction, enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import { RadioButton, ButtonGroup } from "flowbite-svelte";
-  import {
-    ListMusicSolid,
-    OrderedListOutline,
-    ListOutline,
-  } from "flowbite-svelte-icons";
-    import { quintOut } from "svelte/easing";
+  import { quintOut } from "svelte/easing";
     import { scale } from "svelte/transition";
-    import CategorySelect from "./SpiritSelect.svelte";
+    import { createEventDispatcher } from "svelte";
+    import { notificationStore } from "../../stores";
 
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
+
   export let action: ComponentAction = 'add';
 
 
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
 
+
+    const dispatch = createEventDispatcher();
+
+    
   console.log(recipe)
 
   const createSteps = () => {
@@ -88,6 +89,8 @@
   let prepMethodChoice = recipe.recipeTechniqueDescriptionId || defaultPrepMethodChoice.recipeTechniqueDescriptionId
   
   $: prepMethodDilutionPct = defaultPrepMethodChoice.recipeTechniqueDilutionPercentage
+
+  const handleUpdate = (data) => console.log(data)
 </script>
 
 
@@ -96,6 +99,7 @@
     class="relative"
     method="POST"
     enctype="multipart/form-data"
+    on:submit
     use:enhance={({ formData }) => {
       formData.append("recipeSteps", JSON.stringify(steps));
       return async ({ result, update }) => {
@@ -103,6 +107,8 @@
           goto(result.location);
         } else {
           await applyAction(result);
+          if(result.type === 'failure') $notificationStore.error = { message: result?.data?.message?.toString() || ''}
+          if(result.type === 'success') $notificationStore.error = { message: 'Done!'}
         }
       };
     }}>
@@ -237,11 +243,7 @@
         <FancyButton
           style="grow md:flex-none"
           type="submit"
-          on:clicked={(event) => {
-            // event.preventDefault();
-            // event.stopImmediatePropagation();
-            // console.log(steps)
-          }}>
+>
           Save
         </FancyButton>
       </div>
