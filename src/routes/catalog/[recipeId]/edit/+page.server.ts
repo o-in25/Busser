@@ -1,5 +1,5 @@
 // import { generateImage } from '$lib/server/ai';
-import { getPreparationMethods, getBasicRecipe, getSpirits } from '$lib/server/core';
+import { getPreparationMethods, getBasicRecipe, getSpirits, editRecipe } from '$lib/server/core';
 import type { FormSubmitResult } from '$lib/types';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -39,15 +39,19 @@ export const actions = {
 
     const recipe = {
       ...payload,
+      recipeId: params.recipeId,
       recipeCategoryId: Number(payload.recipeCategoryId) || -1,
       recipeTechniqueDescriptionId: Number(payload.recipeTechniqueDescriptionId) || -1,
     }
 
+    console.log(recipe)
     recipeSteps = JSON.parse(recipeSteps as string);
     recipeSteps = recipeSteps.map(({ recipeStepId, ...rest }) => rest);
 
 
     console.log(file)
+
+    await editRecipe(recipe, recipeSteps, file)
     // await addRecipe(recipe, recipeSteps, file);
 
 

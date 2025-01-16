@@ -635,3 +635,49 @@ export async function productSelect(): Promise<SelectOption[]> {
     return [];
   }
 }
+
+export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File) {
+  // STEP 1: get signed file url
+  // STEP 2: get recipe desc from recipe.
+  // STEP 3: add recipe + file url
+  // STEP 4: add prep method
+  // STEP 5: steps
+  try {
+
+    // step 1
+    const recipeImageUrl = await getProductImageUrl(file);
+
+    await db.query.transaction(async (trx) => {
+
+
+      type query = {};
+
+      // step 2
+      let oldRecipe = await trx('recipe')
+        .select('RecipeDescriptionId', 'RecipeCategoryId')
+        .where('RecipeId', recipe.recipeId)
+        .first();
+
+      oldRecipe = marshal(oldRecipe, camelCase);
+
+      console.log(oldRecipe)
+      
+    });
+
+
+  } catch(error: any) {
+    console.log(error)
+    Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+    const result: QueryResult<Array<PreparationMethod>> = {
+      status: 'error',
+      error: 'Could not get preparation methods.'
+    };
+    return result;
+  }
+}
+
+async function getProductImageUrl(image: File | null) {
+  if(!image || image.size === 0 || image.name === 'undefined') return null;
+  const signedUrl = await getSignedUrl(image);
+  return (signedUrl.length ? signedUrl : null);
+};
