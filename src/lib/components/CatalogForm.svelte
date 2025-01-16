@@ -83,6 +83,8 @@
 
   $: prepMethodDilutionPct =
     defaultPrepMethodChoice.recipeTechniqueDilutionPercentage;
+
+  let disabled = false;
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -92,12 +94,14 @@
     enctype="multipart/form-data"
     on:submit
     use:enhance={({ formData }) => {
+      disabled = true;
       formData.append("recipeSteps", JSON.stringify(steps));
       return async ({ result }) => {
         if (result.type === "redirect") {
           goto(result.location);
         } else {
           await applyAction(result);
+          disabled = false;
           if (result.type === "failure")
             $notificationStore.error = {
               message: result?.data?.message?.toString() || "",
@@ -238,7 +242,7 @@
       {/each}
 
       <div class="my-4 flex flex-row justify-center">
-        <Button class="!p-2" pill={true} on:click={addStep}>
+        <Button class="!p-2" pill={true} on:click={addStep} color="primary" outline>
           <PlusOutline class="w-6 h-6" />
           <span class="hidden lg:block pe-2">Add Another Step</span>
         </Button>
@@ -246,9 +250,9 @@
     </fieldset>
 
     <!-- submit -->
-    <div class="md:flex md:flex-row">
+    <div class="md:flex md:flex-row-reverse">
       <div class="my-4 md:mr-4">
-        <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
+        <Button class="w-full md:w-32" type="submit" size="xl" {disabled}>Save</Button>
       </div>
     </div>
   </form>

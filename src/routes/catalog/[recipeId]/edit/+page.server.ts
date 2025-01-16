@@ -44,14 +44,12 @@ export const actions = {
       recipeTechniqueDescriptionId: Number(payload.recipeTechniqueDescriptionId) || -1,
     }
 
-    console.log(recipe)
     recipeSteps = JSON.parse(recipeSteps as string);
     recipeSteps = recipeSteps.map(({ recipeStepId, ...rest }) => rest);
 
 
-    console.log(file)
-
-    await editRecipe(recipe, recipeSteps, file)
+    const newData = await editRecipe(recipe, recipeSteps, file);
+    console.log(newData)
     // await addRecipe(recipe, recipeSteps, file);
 
 

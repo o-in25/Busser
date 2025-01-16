@@ -19,6 +19,17 @@ const marshal = <T>(obj: any, fn: Function = camelCase) => {
   }, {});
 };
 
+const marshalToType = <T>(obj: any, fn: Function = camelCase): T => {
+  if(!_.isObject(obj)) return obj as T;
+  if(_.isArray(obj)) return obj.map((v) => marshal<T>(v)) as T;
+  return _.reduce(obj, (arr, curr, acc) => {
+    return {
+      ...arr,
+      [fn(acc)]: marshal<T>(curr)
+    };
+  }, {}) as T;
+};
+
 const pascalCase = (str: string) => changeCase.pascalCase(str) // GoodDrinks
 const camelCase = (str: string) => changeCase.camelCase(str) // goodDrinks
 const titleCase = (str: string) => changeCase.capitalCase(str); // Good Drinks
@@ -636,7 +647,9 @@ export async function productSelect(): Promise<SelectOption[]> {
   }
 }
 
-export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File) {
+
+// change to update catalog
+export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File): Promise<QueryResult<{recipe: View.BasicRecipe, recipeSteps: View.BasicRecipeStep[]}>> {
   // STEP 1: get signed file url
   // STEP 2: get recipe desc from recipe.
   // STEP 3: add recipe + file url
@@ -647,11 +660,13 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
     // step 1
     const recipeImageUrl = await getProductImageUrl(file);
 
-    await db.query.transaction(async (trx) => {
 
+    let newRecipe: { 
+      recipe: View.BasicRecipe,
+      recipeSteps: View.BasicRecipeStep[] 
+    } = { recipe: {} as View.BasicRecipe, recipeSteps: [] };
 
-      type query = {};
-
+    const trx = await db.query.transaction(async (trx) => {
       // step 2
       let oldRecipe = await trx('recipe')
         .select('RecipeDescriptionId', 'RecipeCategoryId')
@@ -659,14 +674,43 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
         .first();
 
       oldRecipe = marshal(oldRecipe, camelCase);
-
-      console.log(oldRecipe)
+      if(!oldRecipe) throw new Error('Recipe not found.');
       
+      let dbResult: any = await trx('recipedescription')
+        .where('RecipeDescriptionId', oldRecipe.recipeDescriptionId)
+          .update({
+            RecipeDescription: recipe.recipeDescription,
+            // RecipeDescriptionUrl: null
+          })
+        
+      if(!dbResult) throw new Error('Recipe description not found.');
+
+      dbResult = await trx('basicrecipe').select().where({ recipeId: recipe.recipeId }).first();
+      newRecipe.recipe = marshalToType<View.BasicRecipe>(dbResult, camelCase);
+      dbResult = await trx('basicrecipestep').select().where({ recipeId: recipe.recipeId });
+      newRecipe.recipeSteps = marshalToType<View.BasicRecipeStep[]>(dbResult, camelCase);
+
+
+      // recipe = marshal<View.BasicRecipe>(query, camelCase);
+      // query = await trx('basicrecipestep').select().where({ recipeId: recipe.recipeId });
+      // recipeSteps = marshal<View.BasicRecipeStep[]>(query, camelCase);
+
+      // newRecipe = { recipe, recipeSteps };
+      // find recipe step tech id with recipe id 
+      // change desc id.
+
+
+      // use update().merge() on pk
     });
+
+    return {
+      status: "success",
+      data: newRecipe
+    };
 
 
   } catch(error: any) {
-    console.log(error)
+    console.log(error.message)
     Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
     const result: QueryResult<Array<PreparationMethod>> = {
       status: 'error',
