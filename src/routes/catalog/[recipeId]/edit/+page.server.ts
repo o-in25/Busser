@@ -49,6 +49,14 @@ export const actions = {
 
 
     const newData = await editRecipe(recipe, recipeSteps, file);
+
+    if(newData.status === 'error') {
+      return fail(500, newData);
+
+    }
+
+    return newData;
+    
     console.log(newData)
     // await addRecipe(recipe, recipeSteps, file);
 

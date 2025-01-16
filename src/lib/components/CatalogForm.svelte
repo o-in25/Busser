@@ -107,7 +107,7 @@
               message: result?.data?.message?.toString() || "",
             };
           if (result.type === "success")
-            $notificationStore.error = { message: "Done!" };
+            $notificationStore.success = { message: "Catalog updated." };
         }
       };
     }}>
