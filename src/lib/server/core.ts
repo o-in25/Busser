@@ -650,23 +650,28 @@ export async function productSelect(): Promise<SelectOption[]> {
 
 // change to update catalog
 export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File): Promise<QueryResult<{recipe: View.BasicRecipe, recipeSteps: View.BasicRecipeStep[]}>> {
-  // STEP 1: get signed file url
+  // STEP 1: [NOT NEEDED] get signed file url
+              // image url will be set via webhook not in form itself
   // STEP 2: get recipe desc from recipe.
-  // STEP 3: add recipe + file url
-  // STEP 4: add prep method
-  // STEP 5: steps
+  // STEP 3: update recipe desc
+  // STEP 4: update recipe tech 
+  // STEP 5: update recipe
+  // STEP 6: update recipe steps
+  // STEP 7: delete old recipe steps (might have to be done before step 6)
+
+  console.log(recipeSteps)
   try {
 
     // step 1
-    const recipeImageUrl = await getProductImageUrl(file);
-
+    // const recipeImageUrl = await getProductImageUrl(file);
 
     let newRecipe: { 
       recipe: View.BasicRecipe,
       recipeSteps: View.BasicRecipeStep[] 
     } = { recipe: {} as View.BasicRecipe, recipeSteps: [] };
 
-    const trx = await db.query.transaction(async (trx) => {
+    await db.query.transaction(async (trx) => {
+
       // step 2
       let oldRecipe = await trx('recipe')
         .select('RecipeDescriptionId', 'RecipeCategoryId')
@@ -676,15 +681,77 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
       oldRecipe = marshal(oldRecipe, camelCase);
       if(!oldRecipe) throw new Error('Recipe not found.');
       
+      // step 3
       let dbResult: any = await trx('recipedescription')
         .where('RecipeDescriptionId', oldRecipe.recipeDescriptionId)
           .update({
             RecipeDescription: recipe.recipeDescription,
             // RecipeDescriptionUrl: null
-          })
+          },)
+
+      console.log(dbResult)
         
       if(!dbResult) throw new Error('Recipe description not found.');
 
+      // step 4
+      dbResult = await trx('recipetechnique')
+        .insert({
+          RecipeTechniqueDescriptionId: recipe.recipeTechniqueDescriptionId,
+          RecipeId: recipe.recipeId
+        })
+          .onConflict('RecipeId')
+            .merge();
+
+
+      // step 5
+      dbResult = await trx('recipe')
+        .insert({
+          RecipeId: recipe.recipeId,
+          RecipeCategoryId: recipe.recipeCategoryId,
+          RecipeDescriptionId: oldRecipe.recipeDescriptionId,
+          RecipeName: recipe.recipeName
+          // RecipeImageUrl: <signed url>
+        })
+          .onConflict('RecipeId')
+            .merge();
+
+      // the recipe id for the steps isnt included in the form request
+      // so we add them here. otherwise they would have the be done client side
+      let steps: Table.RecipeStep[] = recipeSteps.map(({
+        recipeStepId,
+        productId,
+        productIdQuantityInMilliliters,
+        recipeStepDescription,
+      }) => ({
+        recipeId: recipe.recipeId || -1,
+        recipeStepId: recipeStepId || -1,
+        productId,
+        productIdQuantityInMilliliters,
+        recipeStepDescription
+      }));
+
+
+      // let steps: Table.RecipeStep[] = recipeSteps.map(({
+      //   recipeStepId,
+      //   productId,
+      //   productIdQuantityInMilliliters,
+      //   recipeStepDescription,
+      // }) => ({ 
+      //   RecipeStepId: step.recipeStepId;
+      //   RecipeId: recipe.recipeId,
+      //   productId: step.productId,
+      //   productIdQuantityInMilliliters: s;
+      //   recipeStepDescription:
+      //  }));
+
+      // step 6
+      dbResult = await trx('recipestep').insert(steps).onConflict('RecipeId').merge();
+
+
+      
+      
+
+      // return updated view (since returning() isnt supported)
       dbResult = await trx('basicrecipe').select().where({ recipeId: recipe.recipeId }).first();
       newRecipe.recipe = marshalToType<View.BasicRecipe>(dbResult, camelCase);
       dbResult = await trx('basicrecipestep').select().where({ recipeId: recipe.recipeId });
@@ -714,13 +781,14 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
     Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
     const result: QueryResult<Array<PreparationMethod>> = {
       status: 'error',
-      error: 'Could not get preparation methods.'
+      error: 'Cannot save changes.'
     };
     return result;
   }
 }
 
 async function getProductImageUrl(image: File | null) {
+  console.log(image)
   if(!image || image.size === 0 || image.name === 'undefined') return null;
   const signedUrl = await getSignedUrl(image);
   return (signedUrl.length ? signedUrl : null);

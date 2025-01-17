@@ -167,7 +167,7 @@ export namespace Table {
   }
 
   export type RecipeStep = {
-    recipeStepId?: number,
+    recipeStepId: number,
     recipeId: number,
     productId: number,
     productIdQuantityInMilliliters: number,

@@ -21,9 +21,9 @@
   export let stepNumber: number;
   export let clickHandler: Function;
 
-  console.log(step.productId)
   let unit = 'imperial';
   let customChoice = step.productIdQuantityInMilliliters;
+  $: step.productId = step.productId !== 0? step.productId : 0;
   $: customChoice = Number(customChoice) || 0
   let disabled = false;
 
@@ -31,8 +31,6 @@
 
   let testClss = ''//'border-solid border-2 !border-green-500'
   // $: step.productIdQuantityInMilliliters = Number(customChoice) || 29;
-
-  console.log(customChoice)
 
 </script>
 
@@ -51,6 +49,7 @@
       <Autocomplete
         label="Category"
         placeholder="Whiskey"
+        name="productId"
         fetchUrl="/api/select/products"
         bind:value={step.productId}
         key="{step.productName}" />

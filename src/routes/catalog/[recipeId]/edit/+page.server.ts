@@ -44,8 +44,8 @@ export const actions = {
       recipeTechniqueDescriptionId: Number(payload.recipeTechniqueDescriptionId) || -1,
     }
 
-    recipeSteps = JSON.parse(recipeSteps as string);
-    recipeSteps = recipeSteps.map(({ recipeStepId, ...rest }) => rest);
+    recipeSteps = JSON.parse(recipeSteps as string || '[]');
+    // recipeSteps = recipeSteps.map(({ recipeStepId, ...rest }) => rest);
 
 
     const newData = await editRecipe(recipe, recipeSteps, file);
@@ -56,7 +56,7 @@ export const actions = {
     }
 
     return newData;
-    
+
     console.log(newData)
     // await addRecipe(recipe, recipeSteps, file);
 

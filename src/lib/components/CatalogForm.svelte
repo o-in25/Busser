@@ -104,7 +104,7 @@
           disabled = false;
           if (result.type === "failure")
             $notificationStore.error = {
-              message: result?.data?.message?.toString() || "",
+              message: result?.data?.error?.toString() || "",
             };
           if (result.type === "success")
             $notificationStore.success = { message: "Catalog updated." };
