@@ -486,7 +486,6 @@ export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryR
       newRecipeDescription = marshal(newRecipeDescription, pascalCase);
       // step 2
       const [recipeDescriptionId] = await trx('recipedescription').insert(newRecipeDescription);
-      console.log(recipeDescriptionId)
       
       let newRecipe: Table.Recipe = {
         recipeCategoryId: recipe.recipeCategoryId,
@@ -497,7 +496,6 @@ export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryR
       newRecipe = marshal(newRecipe, pascalCase);
       // step 3
       const [recipeId] = await trx('recipe').insert(newRecipe);
-      console.log(recipeId)
 
       let newRecipeTechnique: Table.RecipeTechnique = {
         recipeTechniqueDescriptionId: recipe.recipeTechniqueDescriptionId,
@@ -507,13 +505,11 @@ export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryR
       newRecipeTechnique = marshal(newRecipeTechnique, pascalCase);
       // step 4
       const [recipeTechniqueId] = await trx('recipetechnique').insert(newRecipeTechnique);
-      console.log(recipeTechniqueId)
 
       let newRecipeSteps = recipeSteps.map(step => ({ ...step, recipeId }))
       newRecipeSteps = marshal(newRecipeSteps, pascalCase);
       // step 5
       const rows = await trx('recipestep').insert(newRecipeSteps);
-      console.log(rows)
 
       // let recipe: Table.Recipe = {
 
@@ -526,7 +522,6 @@ export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryR
 
     };
 
-    console.log('done')
 
   } catch(error: any) {
     console.error(error);
@@ -689,7 +684,6 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
             // RecipeDescriptionUrl: null
           },)
 
-      console.log(dbResult)
         
       if(!dbResult) throw new Error('Recipe description not found.');
 
@@ -715,8 +709,27 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
           .onConflict('RecipeId')
             .merge();
 
+
+
+      // step 6
+      dbResult = await trx('recipestep')
+        .where('RecipeId', recipe.recipeId)
+          .del();
       // the recipe id for the steps isnt included in the form request
       // so we add them here. otherwise they would have the be done client side
+
+      console.log(dbResult, '<=== deleted')
+
+      /**
+       * 
+       * 
+       * READ THIS
+       * 
+       * before going forward, think about how we delete
+       * steps that someone removes.
+       * we probably have to iterate over each step, 
+       * check if its id exists and delete it if it doesnt
+      //  */
       let steps: Table.RecipeStep[] = recipeSteps.map(({
         recipeStepId,
         productId,
@@ -744,7 +757,7 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
       //   recipeStepDescription:
       //  }));
 
-      // step 6
+      // step 7
       dbResult = await trx('recipestep').insert(steps).onConflict('RecipeId').merge();
 
 
@@ -788,7 +801,6 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
 }
 
 async function getProductImageUrl(image: File | null) {
-  console.log(image)
   if(!image || image.size === 0 || image.name === 'undefined') return null;
   const signedUrl = await getSignedUrl(image);
   return (signedUrl.length ? signedUrl : null);

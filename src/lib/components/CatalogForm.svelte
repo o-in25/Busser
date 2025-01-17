@@ -237,6 +237,7 @@
             start: 0,
             easing: quintOut,
           }}>
+          STEP {step.productId}
           <CatalogFormItem {step} {stepNumber} clickHandler={removeStep} />
         </div>
       {/each}

@@ -34,9 +34,8 @@
 
 </script>
 
-
   <Card size="xl" class="relative mx-auto {testClss}">
-    <Heading tag="h6">Step {stepNumber + 1}</Heading>
+    <Heading tag="h6">Step {stepNumber + 1} {step.productId}</Heading>
     <!-- <h6>{step}</h6> -->
     {#if stepNumber > 0}
       <button on:click|preventDefault={() => clickHandler(stepNumber)}>
