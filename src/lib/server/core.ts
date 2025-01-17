@@ -653,8 +653,8 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
   // STEP 5: update recipe
   // STEP 6: update recipe steps
   // STEP 7: delete old recipe steps (might have to be done before step 6)
+  // STEP 8: return new view
 
-  console.log(recipeSteps)
   try {
 
     // step 1
@@ -718,8 +718,6 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
       // the recipe id for the steps isnt included in the form request
       // so we add them here. otherwise they would have the be done client side
 
-      console.log(dbResult, '<=== deleted')
-
       /**
        * 
        * 
@@ -730,55 +728,26 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
        * we probably have to iterate over each step, 
        * check if its id exists and delete it if it doesnt
       //  */
+
       let steps: Table.RecipeStep[] = recipeSteps.map(({
-        recipeStepId,
         productId,
         productIdQuantityInMilliliters,
         recipeStepDescription,
       }) => ({
-        recipeId: recipe.recipeId || -1,
-        recipeStepId: recipeStepId || -1,
+        recipeId: recipe.recipeId || 0,
         productId,
         productIdQuantityInMilliliters,
         recipeStepDescription
       }));
 
-
-      // let steps: Table.RecipeStep[] = recipeSteps.map(({
-      //   recipeStepId,
-      //   productId,
-      //   productIdQuantityInMilliliters,
-      //   recipeStepDescription,
-      // }) => ({ 
-      //   RecipeStepId: step.recipeStepId;
-      //   RecipeId: recipe.recipeId,
-      //   productId: step.productId,
-      //   productIdQuantityInMilliliters: s;
-      //   recipeStepDescription:
-      //  }));
-
       // step 7
       dbResult = await trx('recipestep').insert(steps).onConflict('RecipeId').merge();
 
-
-      
-      
-
-      // return updated view (since returning() isnt supported)
+      // step 8
       dbResult = await trx('basicrecipe').select().where({ recipeId: recipe.recipeId }).first();
       newRecipe.recipe = marshalToType<View.BasicRecipe>(dbResult, camelCase);
       dbResult = await trx('basicrecipestep').select().where({ recipeId: recipe.recipeId });
       newRecipe.recipeSteps = marshalToType<View.BasicRecipeStep[]>(dbResult, camelCase);
-
-
-      // recipe = marshal<View.BasicRecipe>(query, camelCase);
-      // query = await trx('basicrecipestep').select().where({ recipeId: recipe.recipeId });
-      // recipeSteps = marshal<View.BasicRecipeStep[]>(query, camelCase);
-
-      // newRecipe = { recipe, recipeSteps };
-      // find recipe step tech id with recipe id 
-      // change desc id.
-
 
       // use update().merge() on pk
     });

@@ -23,7 +23,7 @@
 
   let unit = 'imperial';
   let customChoice = step.productIdQuantityInMilliliters;
-  $: step.productId = step.productId !== 0? step.productId : 0;
+  // $: step.productId = step.productId !== 0? step.productId : 0;
   $: customChoice = Number(customChoice) || 0
   let disabled = false;
 
@@ -35,7 +35,7 @@
 </script>
 
   <Card size="xl" class="relative mx-auto {testClss}">
-    <Heading tag="h6">Step {stepNumber + 1} {step.productId}</Heading>
+    <Heading tag="h6">Step {stepNumber + 1}</Heading>
     <!-- <h6>{step}</h6> -->
     {#if stepNumber > 0}
       <button on:click|preventDefault={() => clickHandler(stepNumber)}>

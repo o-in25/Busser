@@ -36,10 +36,10 @@
 
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
-
+  // recipeSteps = recipeSteps.map(step => ({ ...step, key: uuidv4() }));
   const createStep = () => ({
-    recipeId: uuidv4(),
-    recipeStepId: uuidv4(),
+    recipeId: recipe.recipeId || 0,
+    recipeStepId: 0,
     productId: 0,
     recipeStepDescription: null,
     productName: "",
@@ -52,6 +52,7 @@
     productPricePerUnit: 0,
     productUnitSizeInMilliliters: 0,
     productProof: 0,
+    // key: uuidv4()
   });
 
   let steps = recipeSteps.length ? recipeSteps : [createStep()];
@@ -227,7 +228,7 @@
       <legend class="mb-3">
         <Heading tag="h6">Details</Heading>
       </legend>
-      {#each steps as step, stepNumber (step.recipeStepId)}
+      {#each steps as step, stepNumber (uuidv4())}
         <div
           class="py-4"
           transition:scale={{
@@ -237,7 +238,6 @@
             start: 0,
             easing: quintOut,
           }}>
-          STEP {step.productId}
           <CatalogFormItem {step} {stepNumber} clickHandler={removeStep} />
         </div>
       {/each}

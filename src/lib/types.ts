@@ -167,7 +167,7 @@ export namespace Table {
   }
 
   export type RecipeStep = {
-    recipeStepId: number,
+    recipeStepId?: number,
     recipeId: number,
     productId: number,
     productIdQuantityInMilliliters: number,
@@ -222,9 +222,8 @@ export namespace View {
 
   export type BasicRecipeStep = {
     recipeStepId?: number,
-    productId?: number,
-
-    recipeId: number;
+    recipeId?: number;
+    productId: number,
     recipeStepDescription: string | null;
     productName: string;
     categoryName: string;
