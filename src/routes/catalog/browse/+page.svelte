@@ -3,12 +3,14 @@
   import CatalogTable from "$lib/components/CatalogTable.svelte";
   import FancyButton from "$lib/components/FancyButton.svelte";
   import type { BasicRecipe } from "$lib/types";
-  import { Heading } from "flowbite-svelte";
+  import { Heading, TabItem, Tabs } from "flowbite-svelte";
   import type { PageData } from "./$types";
   import BreadcrumbItem from "$lib/components/BreadcrumbItem.svelte";
 
   export let data: PageData;
-  let recipes: BasicRecipe[] = data.recipes;
+  let recipes: BasicRecipe[] = data.recipes || [];
+  let filterField = 'all';
+  $: filter = filterField === 'all'? recipes : recipes.filter(({ recipeCategoryDescription }) => recipeCategoryDescription === filterField);
 </script>
 
 <Breadcrumb name="Catalog" href="/catalog">
@@ -20,5 +22,11 @@
 <div class="p-4">
   <FancyButton href="/catalog/add">Add New</FancyButton>
 </div>
-
-<CatalogTable {recipes}></CatalogTable>
+<Tabs tabStyle="underline">
+  <TabItem title="All" on:click={() => filterField = 'all'} open>
+      <CatalogTable recipes={filter}></CatalogTable>
+  </TabItem>
+  <TabItem title="Vodka" on:click={() => filterField = 'Vodka'}>
+    <CatalogTable recipes={filter}></CatalogTable>
+  </TabItem>
+</Tabs>

@@ -235,6 +235,9 @@ export namespace View {
     productPricePerUnit: number;
     productUnitSizeInMilliliters: number;
     productProof: number;
+
+    // TODO: do we need this?
+    key?: string | number | null;
   }
 }
 
