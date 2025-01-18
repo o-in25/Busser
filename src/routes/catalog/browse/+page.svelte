@@ -3,14 +3,41 @@
   import CatalogTable from "$lib/components/CatalogTable.svelte";
   import FancyButton from "$lib/components/FancyButton.svelte";
   import type { BasicRecipe } from "$lib/types";
-  import { Heading, TabItem, Tabs } from "flowbite-svelte";
+  import {
+    Button,
+    Dropdown,
+    DropdownDivider,
+    DropdownItem,
+    Heading,
+    Input,
+    Label,
+    TabItem,
+    Tabs,
+  } from "flowbite-svelte";
   import type { PageData } from "./$types";
   import BreadcrumbItem from "$lib/components/BreadcrumbItem.svelte";
+  import {
+    ChevronDownOutline,
+    ChevronRightOutline,
+    DotsHorizontalOutline,
+    FilterOutline,
+    GridOutline,
+    HeartOutline,
+    PlusOutline,
+    SearchOutline,
+    UserCircleSolid,
+  } from "flowbite-svelte-icons";
 
   export let data: PageData;
   let recipes: BasicRecipe[] = data.recipes || [];
-  let filterField = 'all';
-  $: filter = filterField === 'all'? recipes : recipes.filter(({ recipeCategoryDescription }) => recipeCategoryDescription === filterField);
+  let filterField = "all";
+  $: filter =
+    filterField === "all"
+      ? recipes
+      : recipes.filter(
+          ({ recipeCategoryDescription }) =>
+            recipeCategoryDescription === filterField,
+        );
 </script>
 
 <Breadcrumb name="Catalog" href="/catalog">
@@ -19,14 +46,58 @@
 <Heading tag="h2" class="mb-4 flex flex-row justify-between font-extrabold">
   Browse Catalog
 </Heading>
-<div class="p-4">
-  <FancyButton href="/catalog/add">Add New</FancyButton>
+<div class="flex justify-between">
+  <Label class="space-y-2 mb-6">
+    <Input type="email" size="sm" placeholder="Search catalog...">
+      <SearchOutline slot="left" class="w-5 h-5" />
+    </Input>
+  </Label>
+  <div class="w-=">
+    <Button><ChevronDownOutline
+        class="w-6 h-6 text-white dark:text-white" />
+    </Button>
+    <Dropdown containerClass="min-w-32">
+      <DropdownItem href="/catalog/add">
+        <span class="flex"><PlusOutline class="me-2"/>Add</span>
+      </DropdownItem>
+      <DropdownDivider/>
+      <DropdownItem class="flex items-center justify-between">
+        <span class="flex"><FilterOutline class="me-2"/>Sort...</span>
+      </DropdownItem>
+      <Dropdown placement="right-start" open={false}>
+        <!-- TODO: get this from the db  -->
+        {#each [
+          'Whiskey',
+          'Gin',
+          'Vodka',
+          'Rum',
+          'Brandy',
+          'Tequila',
+          ] as category
+        }
+                <DropdownItem on:click={() => filterField = category}><span class="{filterField === category? 'font-extrabold' : ''}">{category}</span></DropdownItem>
+        {/each}
+      </Dropdown>
+    </Dropdown>
+  </div>
 </div>
 <Tabs tabStyle="underline">
-  <TabItem title="All" on:click={() => filterField = 'all'} open>
-      <CatalogTable recipes={filter}></CatalogTable>
-  </TabItem>
-  <TabItem title="Vodka" on:click={() => filterField = 'Vodka'}>
+  <TabItem open>
+    <div slot="title" class="flex items-center gap-2">
+      <GridOutline size="md" />
+      All
+    </div>
     <CatalogTable recipes={filter}></CatalogTable>
+  </TabItem>
+  <TabItem>
+    <div slot="title" class="flex items-center gap-2">
+      <HeartOutline size="md" />
+      Favorites
+    </div>
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      <b>Profile:</b>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+      incididunt ut labore et dolore magna aliqua.
+    </p>
   </TabItem>
 </Tabs>

@@ -1,10 +1,13 @@
 <script lang="ts">
     import type { BasicRecipe } from "$lib/types";
-    import { Card, Listgroup, ListgroupItem, Avatar } from "flowbite-svelte";
+    import { Card, Listgroup, ListgroupItem, Avatar, Input, Label } from "flowbite-svelte";
     export let recipes: BasicRecipe[];
       import placeholder from "$lib/assets/placeholder@2x.jpg";
+    import { SearchOutline, PlusOutline } from "flowbite-svelte-icons";
+    import FancyButton from "./FancyButton.svelte";
 
 </script>
+
 <Card padding="xl" size="xl" class="mx-auto">
   <!-- search -->
 
