@@ -2,6 +2,7 @@
   import { Card, Heading, A } from "flowbite-svelte";
   import type { PageData } from "./$types";
     import { ArrowRightOutline } from "flowbite-svelte-icons";
+    import Excerpt from "$lib/components/Excerpt.svelte";
 
   export let data: PageData;
   const { spirits } = data.args;
@@ -36,3 +37,4 @@
     </div>
   </div>
 </div>
+<Excerpt/>

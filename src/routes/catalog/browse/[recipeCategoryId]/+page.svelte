@@ -35,6 +35,6 @@
 
 <div class="px-4 py-2 md:py-4">
   <div class="space-y-4">
-    <Catalog spirit={data.spirit} recipes={data.recipes} content={data.content}/>
+    <Catalog spirit={data.spirit} recipes={data.recipes || []} content={data.content}/>
   </div>
 </div>

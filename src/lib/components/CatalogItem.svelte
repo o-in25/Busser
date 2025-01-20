@@ -63,14 +63,14 @@
       </div>
 
       <div class="mt-6 sm:mt-8 lg:mt-0">
-        <Heading class="flex items-center">
+        <Heading>
           {recipe.recipeName}
-          <Badge class="text-xl font-semibold ms-4">
+        </Heading>
+        <div class="mt-4">
+          <Badge class="text-xl font-semibold">
             {recipe.recipeCategoryDescription}
           </Badge>
-        </Heading>
-
-        <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
+        </div>    <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
           <Rating id="example-3" total={5} rating={3.4}>
             <p
               slot="text"
