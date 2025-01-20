@@ -253,6 +253,9 @@
     <!-- submit -->
     <div class="md:flex md:flex-row-reverse">
       <div class="my-4 md:mr-4">
+        <Button class="w-full md:w-32" type="button" size="xl" {disabled}; color="red">Delete</Button>
+      </div>
+      <div class="my-4 md:mr-4">
         <Button class="w-full md:w-32" type="submit" size="xl" {disabled}>Save</Button>
       </div>
     </div>

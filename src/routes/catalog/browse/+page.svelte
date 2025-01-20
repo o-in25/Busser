@@ -30,6 +30,8 @@
 
   export let data: PageData;
   let recipes: BasicRecipe[] = data.recipes || [];
+
+  let searchField = '';
   let filterField = "all";
   $: filter =
     filterField === "all"
@@ -38,6 +40,25 @@
           ({ recipeCategoryDescription }) =>
             recipeCategoryDescription === filterField,
         );
+
+
+  const applyFilter = (searchField, filterField) => {
+    let filtered = recipes;
+    if(searchField.length) {
+      filtered = filtered.filter(({ recipeName }) => recipeName.toLowerCase().includes(searchField.toLowerCase()));
+    }
+
+    if(filterField !== 'all') {
+      filtered = filtered.filter(
+          ({ recipeCategoryDescription }) =>
+            recipeCategoryDescription === filterField,
+        );
+    }
+
+    return filtered;
+  }
+
+  $: search = applyFilter(searchField, filterField);
 </script>
 
 <Breadcrumb name="Catalog" href="/catalog">
@@ -48,7 +69,7 @@
 </Heading>
 <div class="flex justify-between">
   <Label class="space-y-2 mb-6">
-    <Input type="email" size="sm" placeholder="Search catalog...">
+    <Input type="email" size="sm" placeholder="Search catalog..." bind:value={searchField}>
       <SearchOutline slot="left" class="w-5 h-5" />
     </Input>
   </Label>
@@ -65,6 +86,7 @@
         <span class="flex"><FilterOutline class="me-2"/>Sort...</span>
       </DropdownItem>
       <Dropdown placement="right-start" open={false}>
+          <DropdownItem on:click={() => filterField = 'all'}><span class="{filterField === 'all'? 'font-extrabold' : ''}">All</span></DropdownItem>
         <!-- TODO: get this from the db  -->
         {#each [
           'Whiskey',
@@ -75,7 +97,7 @@
           'Tequila',
           ] as category
         }
-                <DropdownItem on:click={() => filterField = category}><span class="{filterField === category? 'font-extrabold' : ''}">{category}</span></DropdownItem>
+            <DropdownItem on:click={() => filterField = category}><span class="{filterField === category? 'font-extrabold' : ''}">{category}</span></DropdownItem>
         {/each}
       </Dropdown>
     </Dropdown>
@@ -87,7 +109,7 @@
       <GridOutline size="md" />
       All
     </div>
-    <CatalogTable recipes={filter}></CatalogTable>
+    <CatalogTable recipes={search}></CatalogTable>
   </TabItem>
   <TabItem>
     <div slot="title" class="flex items-center gap-2">
