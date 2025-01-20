@@ -9,7 +9,6 @@
     Heading,
     Helper,
   } from "flowbite-svelte";
-  import FancyButton from "./FancyButton.svelte";
   import type {
     ComponentAction,
     PreparationMethod,
@@ -25,7 +24,6 @@
   import { RadioButton, ButtonGroup } from "flowbite-svelte";
   import { quintOut } from "svelte/easing";
   import { scale } from "svelte/transition";
-  import { createEventDispatcher } from "svelte";
   import { notificationStore } from "../../stores";
 
   // props
@@ -36,7 +34,7 @@
 
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
-  recipeSteps = recipeSteps.map(step => ({ ...step, key: uuidv4() }));
+  recipeSteps = recipeSteps.map((step) => ({ ...step, key: uuidv4() }));
   const createStep = () => ({
     recipeId: recipe.recipeId || 0,
     recipeStepId: 0,
@@ -52,7 +50,7 @@
     productPricePerUnit: 0,
     productUnitSizeInMilliliters: 0,
     productProof: 0,
-    key: uuidv4()
+    key: uuidv4(),
   });
 
   let steps = recipeSteps.length ? recipeSteps : [createStep()];
@@ -243,7 +241,12 @@
       {/each}
 
       <div class="my-4 flex flex-row justify-center">
-        <Button class="!p-2" pill={true} on:click={addStep} color="primary" outline>
+        <Button
+          class="!p-2"
+          pill={true}
+          on:click={addStep}
+          color="primary"
+          outline>
           <PlusOutline class="w-6 h-6" />
           <span class="hidden lg:block pe-2">Add Another Step</span>
         </Button>
@@ -253,10 +256,19 @@
     <!-- submit -->
     <div class="md:flex md:flex-row-reverse">
       <div class="my-4 md:mr-4">
-        <Button class="w-full md:w-32" type="button" size="xl" {disabled} color="red">Delete</Button>
+        <Button
+          class="w-full md:w-32"
+          type="button"
+          size="xl"
+          {disabled}
+          color="red">
+          Delete
+        </Button>
       </div>
       <div class="my-4 md:mr-4">
-        <Button class="w-full md:w-32" type="submit" size="xl" {disabled}>Save</Button>
+        <Button class="w-full md:w-32" type="submit" size="xl" {disabled}>
+          Save
+        </Button>
       </div>
     </div>
   </form>

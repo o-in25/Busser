@@ -1,12 +1,18 @@
 <script lang="ts">
-    import type { BasicRecipe } from "$lib/types";
-    import { Card, Listgroup, ListgroupItem, Avatar, Input, Label } from "flowbite-svelte";
-    export let recipes: BasicRecipe[];
-      import placeholder from "$lib/assets/placeholder@2x.jpg";
-    import { SearchOutline, PlusOutline } from "flowbite-svelte-icons";
-    import FancyButton from "./FancyButton.svelte";
-
-</script>
+  import type { BasicRecipe } from "$lib/types";
+  import {
+    Card,
+    Listgroup,
+    ListgroupItem,
+    Avatar,
+    Alert,
+  } from "flowbite-svelte";
+  export let recipes: BasicRecipe[];
+  import placeholder from "$lib/assets/placeholder@2x.jpg";
+  import {
+    InfoCircleSolid,
+  } from "flowbite-svelte-icons";
+  </script>
 
 <Card padding="xl" size="xl" class="mx-auto">
   <!-- search -->
@@ -23,7 +29,10 @@
             <p
               class="text-sm font-medium text-gray-900 truncate dark:text-white block">
               {recipe.recipeName}
-              <span class="block text-sm font-light text-gray-500 dark:text-gray-400">{recipe.recipeCategoryDescription}</span>
+              <span
+                class="block text-sm font-light text-gray-500 dark:text-gray-400">
+                {recipe.recipeCategoryDescription}
+              </span>
             </p>
             <p class="text-sm text-gray-500 truncate dark:text-gray-400">
               {recipe.recipeDescription}
@@ -35,5 +44,13 @@
         </div>
       </ListgroupItem>
     {/each}
+    {#if !recipes.length}
+      <div class="flex flex-col items-center space-x-4">
+        <Alert color="dark">
+          <InfoCircleSolid slot="icon" />
+          No Results
+        </Alert>
+      </div>
+    {/if}
   </Listgroup>
 </Card>

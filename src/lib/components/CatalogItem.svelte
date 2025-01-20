@@ -6,24 +6,45 @@
     Heading,
     P,
     Rating,
-    Secondary,
-    Span,
-    Card,
     Progressbar,
-    Listgroup,
+    Badge,
   } from "flowbite-svelte";
-  import FancyButton from "./FancyButton.svelte";
   import { EditOutline, HeartOutline } from "flowbite-svelte-icons";
-  import {
-    AdjustmentsHorizontalSolid,
-    DownloadSolid,
-    MessagesSolid,
-    UserCircleSolid,
-  } from "flowbite-svelte-icons";
   import placeholder from "$lib/assets/placeholder@2x.jpg";
-
   export let recipe: View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[];
+
+  // TODO: maybe do this server side?
+  const dilutionByShaken = (abv: number) =>
+    1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;
+  const dilutionByStirred = (abv: number) =>
+    -1.21 * Math.pow(abv, 2) + 1.246 * abv + 0.145;
+
+  const strength = (() => {
+    // in ml
+    let volume = recipeSteps.reduce(
+      (acc, { productIdQuantityInMilliliters }) =>
+        acc + productIdQuantityInMilliliters,
+      0,
+    );
+    let abv = recipeSteps.reduce(
+      (acc, { productProof, productIdQuantityInMilliliters }) => {
+        acc += (productProof / 2 / 100) * productIdQuantityInMilliliters;
+        return acc;
+      },
+      0,
+    );
+
+    if (recipe.recipeTechniqueDescriptionId === 1) {
+      volume += dilutionByStirred(abv / 100);
+    } else {
+      // TODO: we don't have a formula for dry shakes
+      volume += dilutionByShaken(abv / 100);
+    }
+    let total = abv / volume;
+    total = (Math.ceil(total * 100) / 100) * 100;
+    return total;
+  })();
 </script>
 
 <!-- <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased"> -->
@@ -42,11 +63,11 @@
       </div>
 
       <div class="mt-6 sm:mt-8 lg:mt-0">
-        <Heading>
+        <Heading class="flex items-center">
           {recipe.recipeName}
-          <Secondary>
-            {recipe.recipeCategoryDescription} Cocktail
-          </Secondary>
+          <Badge class="text-xl font-semibold ms-4">
+            {recipe.recipeCategoryDescription}
+          </Badge>
         </Heading>
 
         <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
@@ -80,10 +101,13 @@
 
         <div class="my-4">
           <div
-            class="mb-1 text-base font-medium text-gray-500 dark:text-gray-400">
-            Strength
+            class="flex justify-between mb-1 text-base font-medium text-gray-500 dark:text-gray-400">
+            <div>Strength</div>
+            <div>
+              {strength}%
+            </div>
           </div>
-          <Progressbar progress="50" color="red" />
+          <Progressbar progress={strength} />
         </div>
 
         <div
