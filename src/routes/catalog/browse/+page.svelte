@@ -69,11 +69,11 @@
 </Heading>
 <div class="flex justify-between">
   <Label class="space-y-2 mb-6">
-    <Input type="email" size="sm" placeholder="Search catalog..." bind:value={searchField}>
+    <Input type="email" size="md" placeholder="Search catalog..." bind:value={searchField}>
       <SearchOutline slot="left" class="w-5 h-5" />
     </Input>
   </Label>
-  <div class="w-=">
+  <div class="">
     <Button><ChevronDownOutline
         class="w-6 h-6 text-white dark:text-white" />
     </Button>
@@ -103,7 +103,7 @@
     </Dropdown>
   </div>
 </div>
-<Tabs tabStyle="underline">
+<Tabs tabStyle="underline" contentClass="mt-4">
   <TabItem open>
     <div slot="title" class="flex items-center gap-2">
       <GridOutline size="md" />
