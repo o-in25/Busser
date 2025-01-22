@@ -24,7 +24,7 @@
   let unit = 'imperial';
   let customChoice = step.productIdQuantityInMilliliters;
   // $: step.productId = step.productId !== 0? step.productId : 0;
-  $: customChoice = Number(customChoice) || 0
+  $: customChoice = Number(customChoice)
   let disabled = false;
 
   let group = step.recipeStepId;
@@ -59,7 +59,8 @@
         class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600 py-2">
         <li class="w-full border-none">
           <Radio
-  
+
+            name="productIdQuantityInMilliliters"
             class="px-3 pt-1"
             value={0.86}
             bind:group={step.productIdQuantityInMilliliters}
@@ -79,7 +80,7 @@
         </li>
         <li class="w-full border-none">
           <Radio
-  
+            name="productIdQuantityInMilliliters"
             class="px-3 pt-1 text-nowrap"
             value={1.77}
             bind:group={step.productIdQuantityInMilliliters}
@@ -98,7 +99,7 @@
           </Helper>
         </li>
         <li class="w-full border-none">
-          <Radio class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
+          <Radio name="productIdQuantityInMilliliters" class="px-3 pt-1" bind:group={step.productIdQuantityInMilliliters} value={customChoice} on:click={() => disabled = false}>Custom</Radio>
         </li>
         <li class="w-full border-none p-3">
           <div>

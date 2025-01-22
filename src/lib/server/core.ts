@@ -152,12 +152,12 @@ export async function addToInventory(product: Product, image: File | null = null
     });
 
     if(!parentRowId || !childRowId) {
-      throw Error('No rows have been inserted.')
+      throw new Error('No rows have been inserted.')
     }
 
     const newRow = await findInventoryItem(parentRowId);
     if(!newRow) {
-      throw Error('Cannot find newly inserted item.')
+      throw new Error('Cannot find newly inserted item.')
     }
 
     return {
@@ -167,7 +167,7 @@ export async function addToInventory(product: Product, image: File | null = null
     // const new 
     // return await findInventoryItem(values.ProductId)
   } catch(error: any) {
-    console.log(error);
+    console.error(error);
     Logger.error(error.sqlMessage, error.sql);
     return {
       status: 'error',
@@ -467,7 +467,7 @@ export async function addRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryR
 
   try {
 
-    if(!recipeSteps.length) throw Error('Recipe does not contain any recipe steps.')
+    if(!recipeSteps.length) throw new Error('Recipe does not contain any recipe steps.')
 
     const getProductImageUrl = async (image: File | null) => {
       if(!image || image.size === 0 || image.name === 'undefined') return null;
@@ -607,7 +607,7 @@ export async function getRecipe(recipeId: number): Promise<QueryResult<{recipe: 
     });
 
     if(!recipe || !recipeSteps) {
-      throw Error('Could not get recipe details.');
+      throw new Error('Could not get recipe details.');
     }
 
     return {
@@ -644,15 +644,15 @@ export async function productSelect(): Promise<SelectOption[]> {
 
 
 // change to update catalog
-export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File): Promise<QueryResult<{recipe: View.BasicRecipe, recipeSteps: View.BasicRecipeStep[]}>> {
+export async function updateCatalog(recipe: QueryRequest.Recipe, recipeSteps: QueryRequest.RecipeSteps[], file: File): Promise<QueryResult<{recipe: View.BasicRecipe, recipeSteps: View.BasicRecipeStep[]}>> {
   // STEP 1: [NOT NEEDED] get signed file url
               // image url will be set via webhook not in form itself
   // STEP 2: get recipe desc from recipe.
   // STEP 3: update recipe desc
   // STEP 4: update recipe tech 
   // STEP 5: update recipe
-  // STEP 6: update recipe steps
-  // STEP 7: delete old recipe steps (might have to be done before step 6)
+  // STEP 6: delete old recipe steps (might have to be done before step 6)
+  // STEP 7: update recipe steps
   // STEP 8: return new view
 
   try {
@@ -666,55 +666,96 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
     } = { recipe: {} as View.BasicRecipe, recipeSteps: [] };
 
     await db.query.transaction(async (trx) => {
+      // keys to look up tables
+      let keys: { recipeDescriptionId: number | undefined, recipeId: number | undefined } = {
+        // recipeCategoryId: null,
+        recipeDescriptionId: undefined,
+        recipeId: undefined
+      }
+
+      let dbResult: any;
 
       // step 2
       let oldRecipe = await trx('recipe')
-        .select('RecipeDescriptionId', 'RecipeCategoryId')
+        // TODO: do we need RecipeCategoryId?
+        .select('RecipeDescriptionId', 'RecipeCategoryId') 
         .where('RecipeId', recipe.recipeId)
         .first();
 
       oldRecipe = marshal(oldRecipe, camelCase);
-      if(!oldRecipe) throw new Error('Recipe not found.');
-      
+
+      if(!oldRecipe) {
+        [dbResult] = await trx('recipedescription')
+          .insert({
+            RecipeDescription: recipe.recipeDescription,
+            RecipeDescriptionImageUrl: null
+          });
+
+        if(!dbResult) throw new Error('Cannot create recipe description.');
+        keys.recipeDescriptionId = dbResult;
+
+        [dbResult] = await trx('recipe').insert({
+          RecipeCategoryId: recipe.recipeCategoryId,
+          RecipeDescriptionId: keys.recipeDescriptionId,
+          RecipeName: recipe.recipeName,
+          RecipeImageUrl: null /* <signed url> */
+        });
+
+        if(!dbResult) throw new Error('Cannot create recipe.');
+        keys.recipeId = dbResult;
+      } else {
+        keys = { 
+          recipeDescriptionId: oldRecipe.recipeDescriptionId, 
+          recipeId: recipe.recipeId
+         }
+      }
+
+
       // step 3
-      let dbResult: any = await trx('recipedescription')
-        .where('RecipeDescriptionId', oldRecipe.recipeDescriptionId)
+      if(oldRecipe) {
+        dbResult = await trx('recipedescription')
+          .where('RecipeDescriptionId', keys.recipeDescriptionId)
           .update({
             RecipeDescription: recipe.recipeDescription,
             // RecipeDescriptionUrl: null
-          },)
+          });
 
-        
-      if(!dbResult) throw new Error('Recipe description not found.');
+        if(!dbResult) throw new Error('Recipe description not found.');
+      }
+
+
 
       // step 4
       dbResult = await trx('recipetechnique')
         .insert({
           RecipeTechniqueDescriptionId: recipe.recipeTechniqueDescriptionId,
-          RecipeId: recipe.recipeId
+          RecipeId: keys.recipeId //recipe.recipeId
         })
           .onConflict('RecipeId')
             .merge();
 
 
       // step 5
-      dbResult = await trx('recipe')
-        .insert({
-          RecipeId: recipe.recipeId,
-          RecipeCategoryId: recipe.recipeCategoryId,
-          RecipeDescriptionId: oldRecipe.recipeDescriptionId,
-          RecipeName: recipe.recipeName
-          // RecipeImageUrl: <signed url>
-        })
+      if(oldRecipe) {
+
+        dbResult = await trx('recipe')
+          .insert({
+            RecipeId: recipe.recipeId,
+            RecipeCategoryId: recipe.recipeCategoryId,
+            RecipeDescriptionId: keys.recipeDescriptionId,
+            RecipeName: recipe.recipeName
+            // RecipeImageUrl: <signed url>
+          })
           .onConflict('RecipeId')
-            .merge();
+          .merge();
 
-
-
-      // step 6
-      dbResult = await trx('recipestep')
-        .where('RecipeId', recipe.recipeId)
+        // step 6
+        dbResult = await trx('recipestep')
+          .where('RecipeId', keys.recipeId)
           .del();
+      }
+
+
       // the recipe id for the steps isnt included in the form request
       // so we add them here. otherwise they would have the be done client side
 
@@ -734,7 +775,7 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
         productIdQuantityInMilliliters,
         recipeStepDescription,
       }) => ({
-        recipeId: recipe.recipeId || 0,
+        recipeId: keys.recipeId || 0,
         productId,
         productIdQuantityInMilliliters,
         recipeStepDescription
@@ -744,9 +785,9 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
       dbResult = await trx('recipestep').insert(steps).onConflict('RecipeId').merge();
 
       // step 8
-      dbResult = await trx('basicrecipe').select().where({ recipeId: recipe.recipeId }).first();
+      dbResult = await trx('basicrecipe').select().where({ recipeId: keys.recipeId }).first();
       newRecipe.recipe = marshalToType<View.BasicRecipe>(dbResult, camelCase);
-      dbResult = await trx('basicrecipestep').select().where({ recipeId: recipe.recipeId });
+      dbResult = await trx('basicrecipestep').select().where({ recipeId: keys.recipeId });
       newRecipe.recipeSteps = marshalToType<View.BasicRecipeStep[]>(dbResult, camelCase);
 
       // use update().merge() on pk
@@ -759,7 +800,7 @@ export async function editRecipe(recipe: QueryRequest.Recipe, recipeSteps: Query
 
 
   } catch(error: any) {
-    console.log(error.message)
+    console.error(error.message)
     Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
     const result: QueryResult<Array<PreparationMethod>> = {
       status: 'error',

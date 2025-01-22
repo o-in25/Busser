@@ -1,5 +1,5 @@
 // import { generateImage } from '$lib/server/ai';
-import { getPreparationMethods, getBasicRecipe, getSpirits, editRecipe } from '$lib/server/core';
+import { getPreparationMethods, getBasicRecipe, getSpirits, updateCatalog } from '$lib/server/core';
 import type { FormSubmitResult } from '$lib/types';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -48,7 +48,7 @@ export const actions = {
     // recipeSteps = recipeSteps.map(({ recipeStepId, ...rest }) => rest);
 
 
-    const newData = await editRecipe(recipe, recipeSteps, file);
+    const newData = await updateCatalog(recipe, recipeSteps, file);
 
     if(newData.status === 'error') {
       return fail(500, newData);

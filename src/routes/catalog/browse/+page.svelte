@@ -138,7 +138,7 @@
       <Card
         size="xl"
         padding="sm"
-        class="cursor-pointer transition transform hover:bg-gray-100 active:scale-95 -z-10"
+        class="cursor-pointer transition transform hover:bg-gray-100 active:scale-95"
         href="/catalog/{recipe.recipeId}">
         <div class="flex justify-center">
           <div class="p-4 m-auto">
