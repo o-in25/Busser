@@ -31,14 +31,15 @@
     SearchOutline,
     UserCircleSolid,
   } from "flowbite-svelte-icons";
+  import placeholder from "$lib/assets/placeholder@2x.jpg";
 
   export let data: PageData;
   let recipes: BasicRecipe[] = data.recipes || [];
 
-
   let searchField = "";
   let filterField = "all";
   let dropdownOpen = false;
+
   // $: filter =
   //   filterField === "all"
   //     ? recipes
@@ -68,7 +69,7 @@
   const handleDropdownOpen = (category: string) => {
     filterField = category;
     dropdownOpen = false;
-  }
+  };
 
   $: search = applyFilter(searchField, filterField);
 </script>
@@ -97,7 +98,12 @@
       <Button>
         <ChevronDownOutline class="w-6 h-6 text-white dark:text-white" />
       </Button>
-      <Dropdown containerClass="min-w-32" bind:open={dropdownOpen}>
+
+      <!-- controls -->
+      <Dropdown
+        containerClass="min-w-32"
+        bind:open={dropdownOpen}
+        placement="bottom">
         <DropdownItem href="/catalog/add">
           <span class="flex"><PlusOutline class="me-2" />Add</span>
         </DropdownItem>
@@ -105,16 +111,22 @@
         <DropdownItem class="flex items-center justify-between">
           <span class="flex"><FilterOutline class="me-2" />Sort...</span>
         </DropdownItem>
-        <Dropdown placement="right-start" open={false}>
-          <DropdownItem on:click={() => handleDropdownOpen('all')} class={filterField === 'all' ? "bg-gray-100 dark:bg-gray-600" : ""}>
-                 All
 
+        <!-- filter -->
+        <Dropdown placement="bottom-start" open={false}>
+          <DropdownItem
+            on:click={() => handleDropdownOpen("all")}
+            class={filterField === "all" ? "bg-gray-100 dark:bg-gray-600" : ""}>
+            All
           </DropdownItem>
           <!-- TODO: get this from the db  -->
           {#each ["Whiskey", "Gin", "Vodka", "Rum", "Brandy", "Tequila"] as category}
-            <DropdownItem on:click={() => handleDropdownOpen(category)} class={filterField === category ? "bg-gray-100 dark:bg-gray-600" : ""}>
-                        {category}
-
+            <DropdownItem
+              on:click={() => handleDropdownOpen(category)}
+              class={filterField === category
+                ? "bg-gray-100 dark:bg-gray-600"
+                : ""}>
+              {category}
             </DropdownItem>
           {/each}
         </Dropdown>
@@ -123,12 +135,16 @@
   </div>
   <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-2">
     {#each search as recipe}
-      <Card size="xl" padding="sm">
+      <Card
+        size="xl"
+        padding="sm"
+        class="cursor-pointer transition transform hover:bg-gray-100 active:scale-95 -z-10"
+        href="/catalog/{recipe.recipeId}">
         <div class="flex justify-center">
           <div class="p-4 m-auto">
             <Avatar
-              src={recipe.recipeImageUrl || ""}
-              alt={recipe.recipeDescription || ""}
+              src={recipe.recipeImageUrl || placeholder}
+              alt={recipe.recipeDescription || "Recipe Image"}
               class="" />
           </div>
           <div class="flex-1">
@@ -136,7 +152,9 @@
             <p class="text-sm text-gray-600">
               {recipe.recipeCategoryDescription}
             </p>
-            <p class="text-sm text-gray-500 line-clamp-2">{recipe.recipeDescription}</p>
+            <p class="text-sm text-gray-500 line-clamp-2">
+              {recipe.recipeDescription}
+            </p>
           </div>
         </div>
       </Card>
