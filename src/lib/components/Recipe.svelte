@@ -8,6 +8,7 @@
     Rating,
     Progressbar,
     Badge,
+    ScoreRating,
   } from "flowbite-svelte";
   import { EditOutline, HeartOutline } from "flowbite-svelte-icons";
   import placeholderLight from "$lib/assets/placeholder-alt-light.png";
@@ -15,7 +16,15 @@
 
   export let recipe: View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[];
-
+  let headerLabel = {
+    desc1: '8.7',
+    desc2: 'Excellent',
+    desc3: '',
+    link: {
+      label: '',
+      url: ''
+    }
+  };
   // TODO: maybe do this server side?
   const dilutionByShaken = (abv: number) =>
     1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;
@@ -52,7 +61,11 @@
 <!-- <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased"> -->
 <section class="bg-white dark:bg-gray-900 antialiased">
   <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">
-    <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
+<!-- lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16 grid-rows-[auto_1fr] -->
+    <!-- grid -->
+    <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16 grid-rows-[auto_1fr] h-full">
+
+      <!-- image / col 1 -->
       <div class="shrink-0 max-w-md lg:max-w-md mx-auto">
         <img
           class="w-full dark:hidden rounded-md"
@@ -64,7 +77,10 @@
           alt="" />
       </div>
 
-      <div class="mt-6 sm:mt-8 lg:mt-0">
+      <!-- col 2 -->
+      <div class="mt-6 sm:mt-8 lg:mt-0 row-span-2">
+
+        <!-- name / info -->
         <Heading>
           {recipe.recipeName}
         </Heading>
@@ -82,6 +98,7 @@
           </Rating>
         </div>
 
+        <!-- actions -->
         <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
           <Button color="alternative" href="/catalog/{recipe.recipeId}/edit">
             <EditOutline />
@@ -127,6 +144,24 @@
           {/each}
         </ul>
       </div>
+
+      <div class="mt-6 sm:mt-8 lg:mt-0">
+
+<ScoreRating
+  {headerLabel}
+  ratings={[
+    { label: 'Staff', rating: 8.8 },
+    { label: 'Comfort', rating: 8.9 },
+    { label: 'Free WiFi', rating: 8.8 },
+    { label: 'Facilities', rating: 5.4 }
+  ]}
+  ratings2={[
+    { label: 'Value for money', rating: 8.9 },
+    { label: 'Cleanliness', rating: 7.0 },
+    { label: 'Location', rating: 8.0 }
+  ]} />      </div>
+
+  
     </div>
   </div>
 </section>

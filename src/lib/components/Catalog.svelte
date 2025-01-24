@@ -1,30 +1,13 @@
 <script lang="ts">
+  import type { GeneratedContent } from "$lib/server/ai";
   import type { BasicRecipe, Spirit } from "$lib/types";
   import {
-    Card,
-    Listgroup,
-    Avatar,
-    Heading,
-    ListgroupItem,
-    Label,
-    Input,
-    Rating,
-    List,
-    Li,
-    P,
+      Heading,
+      P,
   } from "flowbite-svelte";
+  import CatalogItem from "./CatalogItem.svelte";
   import FancyImage from "./FancyImage.svelte";
-  import FancyButton from "./FancyButton.svelte";
-  import {
-    PlusOutline,
-    SearchOutline,
-    CheckCircleSolid,
-    CloseCircleSolid,
-  } from "flowbite-svelte-icons";
-  import AccordionItem from "flowbite-svelte/AccordionItem.svelte";
-  import type { GeneratedContent } from "$lib/server/ai";
   import IconList from "./IconList.svelte";
-    import CatalogItem from "./CatalogItem.svelte";
 
   // props
   export let spirit: Spirit | null;
