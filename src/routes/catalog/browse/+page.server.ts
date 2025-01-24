@@ -1,15 +1,22 @@
-import { categorySelect, getBasicRecipes, getSpirits } from '$lib/server/core';
-import type { BasicRecipe } from '$lib/types';
+import { categorySelect, getBaseSpirits, getBasicRecipes, getSpirits } from '$lib/server/core';
+import type { BasicRecipe, SelectOption } from '$lib/types';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load = (async () => {
-  const recipes = await getBasicRecipes();
-  let data: BasicRecipe[] | undefined = [];
-  if('data' in recipes) {
-    data = recipes.data;
+  const queryResult = await getBasicRecipes();
+  const baseSpirits = await getBaseSpirits();
+  let recipes: BasicRecipe[] | undefined = [];
+
+  if(queryResult.status === 'error') {
+    return error(500, { message: queryResult.error } as App.Error);
   }
 
-  return { recipes: data }
+  if(queryResult.status === 'success') {
+    recipes = queryResult.data;
+  }
+
+  return { recipes, baseSpirits }
 
 }) satisfies PageServerLoad;
 

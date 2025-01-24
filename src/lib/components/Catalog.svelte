@@ -14,7 +14,6 @@
     P,
   } from "flowbite-svelte";
   import FancyImage from "./FancyImage.svelte";
-  import CatalogItem from "./CatalogItem.svelte";
   import FancyButton from "./FancyButton.svelte";
   import {
     PlusOutline,
@@ -25,6 +24,7 @@
   import AccordionItem from "flowbite-svelte/AccordionItem.svelte";
   import type { GeneratedContent } from "$lib/server/ai";
   import IconList from "./IconList.svelte";
+    import CatalogItem from "./CatalogItem.svelte";
 
   // props
   export let spirit: Spirit | null;
@@ -77,7 +77,7 @@
 <Heading tag="h5" class="mb-2">
   Cocktails With {spirit?.recipeCategoryDescription}
 </Heading>
-<div class="flex justify-between">
+<!-- <div class="flex justify-between">
   <Label class="space-y-2">
     <Input type="email" size="md" placeholder="Search" on:keydown={handleInput}>
       <SearchOutline slot="left" class="w-5 h-5" />
@@ -86,35 +86,12 @@
   <div class="test">
     <FancyButton href="/catalog/add"><PlusOutline /></FancyButton>
   </div>
-</div>
-<Card padding="xl" size="xl">
-  <!-- search -->
-
-  <Listgroup class="border-0 dark:!bg-transparent">
+</div> -->
+  <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-2">
     {#each recipes as recipe}
-      <ListgroupItem active href="/">
-        <div class="flex items-center space-x-4 rtl:space-x-reverse">
-          <Avatar
-            src={recipe.recipeImageUrl || ""}
-            alt={recipe.recipeDescription || ""}
-            class="flex-shrink-1" />
-          <div class="flex-1 min-w-0">
-            <p
-              class="text-sm font-medium text-gray-900 truncate dark:text-white">
-              {recipe.recipeName}
-            </p>
-            <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-              {recipe.recipeDescription}
-            </p>
-          </div>
-          <!-- <Rating id="example-3" total={5} rating={3.4}>
-            <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">3.4 out of 5</p>
-          </Rating> -->
-        </div>
-      </ListgroupItem>
+      <CatalogItem {recipe}/>
     {/each}
-  </Listgroup>
-</Card>
+  </div>
 
 <!-- <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased">
     <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">

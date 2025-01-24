@@ -1,7 +1,5 @@
 <script lang="ts">
   import Breadcrumb from "$lib/components/Breadcrumb.svelte";
-  import CatalogTable from "$lib/components/CatalogTable.svelte";
-  import FancyButton from "$lib/components/FancyButton.svelte";
   import type { BasicRecipe } from "$lib/types";
   import {
     Avatar,
@@ -13,28 +11,24 @@
     Heading,
     Input,
     Label,
-    Listgroup,
-    ListgroupItem,
-    TabItem,
-    Tabs,
   } from "flowbite-svelte";
   import type { PageData } from "./$types";
   import BreadcrumbItem from "$lib/components/BreadcrumbItem.svelte";
   import {
     ChevronDownOutline,
-    ChevronRightOutline,
-    DotsHorizontalOutline,
     FilterOutline,
-    GridOutline,
-    HeartOutline,
     PlusOutline,
     SearchOutline,
-    UserCircleSolid,
   } from "flowbite-svelte-icons";
-  import placeholder from "$lib/assets/placeholder@2x.jpg";
+  // import placeholder from "$lib/assets/placeholder@2x.jpg";
+
+  import placeholderLight from  "$lib/assets/placeholder-alt-light.png";
+  import placeholderDark from  "$lib/assets/placeholder-alt-dark.png";
+    import CatalogItem from "$lib/components/CatalogItem.svelte";
 
   export let data: PageData;
   let recipes: BasicRecipe[] = data.recipes || [];
+  let baseSpirits: string[] = data.baseSpirits || [];
 
   let searchField = "";
   let filterField = "all";
@@ -95,13 +89,12 @@
 
     <!-- dropdown -->
     <div>
-      <Button>
-        <ChevronDownOutline class="w-6 h-6 text-white dark:text-white" />
+      <Button color="alternative">
+        <ChevronDownOutline class="w-6 h-6 " />
       </Button>
 
       <!-- controls -->
       <Dropdown
-        containerClass="min-w-32"
         bind:open={dropdownOpen}
         placement="bottom">
         <DropdownItem href="/catalog/add">
@@ -120,13 +113,13 @@
             All
           </DropdownItem>
           <!-- TODO: get this from the db  -->
-          {#each ["Whiskey", "Gin", "Vodka", "Rum", "Brandy", "Tequila"] as category}
+          {#each baseSpirits as baseSpirit}
             <DropdownItem
-              on:click={() => handleDropdownOpen(category)}
-              class={filterField === category
+              on:click={() => handleDropdownOpen(baseSpirit)}
+              class={filterField === baseSpirit
                 ? "bg-gray-100 dark:bg-gray-600"
                 : ""}>
-              {category}
+              {baseSpirit}
             </DropdownItem>
           {/each}
         </Dropdown>
@@ -135,29 +128,7 @@
   </div>
   <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-2">
     {#each search as recipe}
-      <Card
-        size="xl"
-        padding="sm"
-        class="cursor-pointer transition transform hover:bg-gray-100 active:scale-95"
-        href="/catalog/{recipe.recipeId}">
-        <div class="flex justify-center">
-          <div class="p-4 m-auto">
-            <Avatar
-              src={recipe.recipeImageUrl || placeholder}
-              alt={recipe.recipeDescription || "Recipe Image"}
-              class="" />
-          </div>
-          <div class="flex-1">
-            <h3 class="text-lg font-bold">{recipe.recipeName}</h3>
-            <p class="text-sm text-gray-600">
-              {recipe.recipeCategoryDescription}
-            </p>
-            <p class="text-sm text-gray-500 line-clamp-2">
-              {recipe.recipeDescription}
-            </p>
-          </div>
-        </div>
-      </Card>
+      <CatalogItem {recipe}/>
     {/each}
   </div>
 </div>
