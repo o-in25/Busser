@@ -744,10 +744,18 @@ export async function updateCatalog(
   // STEP 7: update recipe steps
   // STEP 8: return new view
 
-  try {
-    // step 1
-    // const recipeImageUrl = await getProductImageUrl(file);
 
+  const getRecipeImageUrl = async (image: File | null): Promise<string | null> => {
+    if (!image || image.size === 0 || image.name === "undefined") return null;
+    const signedUrl = await getSignedUrl(image);
+    return signedUrl.length ? signedUrl : null;
+  }
+
+
+  // step 1 (originally)
+  const recipeImageUrl = await getRecipeImageUrl(file);
+
+  try {
     let newRecipe: {
       recipe: View.BasicRecipe;
       recipeSteps: View.BasicRecipeStep[];
@@ -788,7 +796,7 @@ export async function updateCatalog(
           RecipeCategoryId: recipe.recipeCategoryId,
           RecipeDescriptionId: keys.recipeDescriptionId,
           RecipeName: recipe.recipeName,
-          RecipeImageUrl: null /* <signed url> */,
+          RecipeImageUrl: recipeImageUrl /* <signed url> */,
         });
 
         if (!dbResult) throw new Error("Cannot create recipe.");
@@ -823,14 +831,25 @@ export async function updateCatalog(
 
       // step 5
       if (oldRecipe) {
+
+        // TODO: we should come up with a better fix for this
+        // otherwise a user cant delete an image. until then
+        // we dont update the query with the image if its null (ie deleted)
+
+        let query: any = {
+          RecipeId: recipe.recipeId,
+          RecipeCategoryId: recipe.recipeCategoryId,
+          RecipeDescriptionId: keys.recipeDescriptionId,
+          RecipeName: recipe.recipeName,
+        };
+
+        if(recipeImageUrl !== null) {
+          query = { ...query, recipeImageUrl }
+        }
+
+
         dbResult = await trx("recipe")
-          .insert({
-            RecipeId: recipe.recipeId,
-            RecipeCategoryId: recipe.recipeCategoryId,
-            RecipeDescriptionId: keys.recipeDescriptionId,
-            RecipeName: recipe.recipeName,
-            // RecipeImageUrl: <signed url>
-          })
+          .insert(query)
           .onConflict("RecipeId")
           .merge();
 
@@ -906,10 +925,4 @@ export async function updateCatalog(
     };
     return result;
   }
-}
-
-async function getProductImageUrl(image: File | null) {
-  if (!image || image.size === 0 || image.name === "undefined") return null;
-  const signedUrl = await getSignedUrl(image);
-  return signedUrl.length ? signedUrl : null;
 }
