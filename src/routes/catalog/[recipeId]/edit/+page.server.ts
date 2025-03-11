@@ -47,7 +47,7 @@ export const actions = {
     recipeSteps = JSON.parse(recipeSteps as string || '[]');
 
     const newData = await updateCatalog(recipe, recipeSteps, file);
-    if(newData.status === 'error') {
+    if(newData.status === 'error') {  
       return fail(500, newData);
 
     }
