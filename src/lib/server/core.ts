@@ -1,7 +1,6 @@
 
 import type { BasicRecipe, Category, FormSubmitResult, GallerySeeding, PaginationResult, PreparationMethod, Product, ProductDetail, QueryResult, SelectOption, Spirit, Table, QueryRequest, View } from "$lib/types";
 import { DbProvider } from "./db";
-import _ from 'lodash';
 import * as changeCase from "change-case";
 import { deleteSignedUrl, getSignedUrl } from "./storage";
 import { Logger } from "./logger";
@@ -9,14 +8,21 @@ import { Logger } from "./logger";
 const db = new DbProvider('app_t');
 
 const marshal = <T>(obj: any, fn: Function = camelCase) => {
-  if(!_.isObject(obj)) return obj as T;
-  if(_.isArray(obj)) return obj.map((v) => marshal<T>(v));
-  return _.reduce(obj, (arr, curr, acc) => {
-    return {
-      ...arr,
-      [fn(acc)]: marshal<T>(curr)
-    };
-  }, {});
+  // Check if obj is an array
+  if(Array.isArray(obj)) {
+    return obj.map((v) => marshal<T>(v, fn)); // Recursively marshal each element
+  }
+
+  // Check if obj is an object (not null or array)
+  if(obj && typeof obj === 'object') {
+    return Object.keys(obj).reduce((arr, key) => {
+      arr[fn(key)] = marshal<T>(obj[key], fn); // Apply function to the key and recursively marshal the value
+      return arr;
+    }, {} as Record<string, T>); // Initialize the accumulator as an empty object
+  }
+
+  // If it's neither an object nor an array, return it as is
+  return obj as T;
 };
 
 const pascalCase = (str: string) => changeCase.pascalCase(str) // GoodDrinks

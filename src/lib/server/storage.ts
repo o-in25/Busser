@@ -1,5 +1,8 @@
 import { Storage } from '@google-cloud/storage';
-import { GOOGLE_SERVICE_KEY, BUCKET} from '$env/static/private';
+// import { env } from '$env/dynamic/private';
+
+const { GOOGLE_SERVICE_KEY, BUCKET } = {
+  GOOGLE_SERVICE_KEY: 'eyJjcmVkZW50aWFscyI6eyJjbGllbnRfZW1haWwiOiJibGFoQGJsYWguY29tIiwicHJpdmF0ZV9rZXkiOiJ5b3V0aG91Z2hiaXRjaCJ9fQ==', BUCKET: 'hooplah' };
 import moment from 'moment';
 import { DbProvider } from './db';
 import { Logger } from './logger';

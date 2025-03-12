@@ -1,4 +1,6 @@
-import { HOSTNAME, PASSWORD, PORT, USER } from '$env/static/private';
+// import { env } from '$env/dynamic/private';
+
+const { HOSTNAME, PASSWORD, PORT, USER } = { HOSTNAME: '', PASSWORD: '', PORT: 121, USER: ''};
 import { attachPaginate } from 'knex-paginate';
 import knex from 'knex';
 
