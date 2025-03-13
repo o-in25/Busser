@@ -1,13 +1,15 @@
 import { Storage } from '@google-cloud/storage';
-import { GOOGLE_SERVICE_KEY, BUCKET} from '$env/static/private';
 import moment from 'moment';
 import { DbProvider } from './db';
 import { Logger } from './logger';
 
-const base64Encode = (str: string) => Buffer.from(str).toString('base64');
-const base64Decode = (str: string) => Buffer.from(GOOGLE_SERVICE_KEY, 'base64').toString(); 
+const { GOOGLE_SERVICE_KEY, BUCKET } = process.env;
 
-const { client_email, private_key } = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY));
+// const { GOOGLE_SERVICE_KEY, BUCKET } = env;
+const base64Encode = (str: string) => Buffer.from(str).toString('base64');
+const base64Decode = (str: string) => str? Buffer.from(str, 'base64').toString() : '{}'; 
+
+const { client_email, private_key } = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY || ''));
 const storage = new Storage({
   credentials: {
     client_email,
@@ -15,7 +17,7 @@ const storage = new Storage({
   }
 });
 
-const bucket = storage.bucket(BUCKET);
+const bucket = storage.bucket(BUCKET || '');
 
 const db = new DbProvider('user_t');
 
