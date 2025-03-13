@@ -13,7 +13,6 @@ import type {
   View,
 } from "$lib/types";
 import { DbProvider } from "./db";
-import _ from "lodash";
 import * as changeCase from "change-case";
 import { deleteSignedUrl, getSignedUrl } from "./storage";
 import { Logger } from "./logger";
@@ -21,38 +20,38 @@ import { Logger } from "./logger";
 const db = new DbProvider("app_t");
 
 const marshal = <T>(obj: any, fn: Function = camelCase) => {
-  if (!_.isObject(obj)) return obj as T;
-  if (_.isArray(obj)) return obj.map((v) => marshal<T>(v));
-  return _.reduce(
-    obj,
-    (arr, curr, acc) => {
-      return {
-        ...arr,
-        [fn(acc)]: marshal<T>(curr),
-      };
-    },
-    {},
-  );
+  if(Array.isArray(obj)) {
+    return obj.map((v) => marshal<T>(v, fn));
+  }
+
+  if(obj && typeof obj === 'object') {
+    return Object.keys(obj).reduce((arr, key) => {
+      arr[fn(key)] = marshal<T>(obj[key], fn); 
+      return arr;
+    }, {} as Record<string, T>);
+  }
+
+  return obj as T;
+
 };
 
+
 const marshalToType = <T>(obj: any, fn: Function = camelCase): T => {
-  if (!_.isObject(obj)) return obj as T;
-  if (_.isArray(obj)) return obj.map((v) => marshal<T>(v)) as T;
-  return _.reduce(
-    obj,
-    (arr, curr, acc) => {
-      return {
-        ...arr,
-        [fn(acc)]: marshal<T>(curr),
-      };
-    },
-    {},
-  ) as T;
+  if(!obj && typeof obj === 'object') return obj as T;
+  if(Array.isArray(obj)) return obj.map((v) => marshal<T>(v)) as T;
+  return Object.entries(obj).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [fn(key)]: marshal<T>(value),
+    }),
+    {} as T
+  );
 };
 
 const pascalCase = (str: string) => changeCase.pascalCase(str); // GoodDrinks
 const camelCase = (str: string) => changeCase.camelCase(str); // goodDrinks
 const titleCase = (str: string) => changeCase.capitalCase(str); // Good Drinks
+
 const paginationData = {
   total: 0,
   currentPage: 0,

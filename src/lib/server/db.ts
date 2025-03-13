@@ -1,4 +1,4 @@
-import { HOSTNAME, PASSWORD, PORT, USER } from '$env/static/private';
+const { DB_HOSTNAME, DB_USER, DB_PASSWORD, DB_PORT } = process.env;
 import { attachPaginate } from 'knex-paginate';
 import knex from 'knex';
 
@@ -23,10 +23,10 @@ export class DbProvider {
         this.knex = knex({
             client: 'mysql',
             connection: {
-              host: HOSTNAME,
-              port: Number(PORT),
-              user: USER,
-              password: PASSWORD,
+              host: DB_HOSTNAME,
+              port: Number(DB_PORT),
+              user: DB_USER,
+              password: DB_PASSWORD,
               database
             },
           pool: { min: 0, max: 10 },
