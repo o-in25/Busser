@@ -1,6 +1,6 @@
-// import { env } from '$env/dynamic/private';
+import { env } from '$env/dynamic/private';
 
-const { HOSTNAME, PASSWORD, PORT, USER } = { HOSTNAME: '', PASSWORD: '', PORT: 121, USER: ''};
+const { HOSTNAME, PASSWORD, PORT, USER } = env;
 import { attachPaginate } from 'knex-paginate';
 import knex from 'knex';
 
@@ -25,10 +25,10 @@ export class DbProvider {
         this.knex = knex({
             client: 'mysql',
             connection: {
-              host: HOSTNAME,
-              port: Number(PORT),
-              user: USER,
-              password: PASSWORD,
+              host: '127.0.0.1',
+              port: 3306,
+              user: 'eoin',
+              password: 'XdhzqvqceAKydx9Hc7fb',
               database
             },
           pool: { min: 0, max: 10 },
