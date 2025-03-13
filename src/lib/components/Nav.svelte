@@ -24,6 +24,7 @@
     HomeOutline,
     CogOutline,
     RulerCombinedOutline,
+    ArrowLeftToBracketOutline,
   } from "flowbite-svelte-icons";
   import { sineIn } from "svelte/easing";
   import { goto, invalidateAll } from "$app/navigation";
@@ -82,18 +83,17 @@
       </div>
     </div>
     <!-- dropdown -->
-    <Dropdown placement="right" triggeredBy="#avatar-menu" class="py-4">
+    <Dropdown placement="right" triggeredBy="#avatar-menu">
       <DropdownHeader>
         <span class="block text-sm">{user?.username}</span>
         <span class="block truncate text-sm font-medium">
           {user.email}
-        </span>
       </DropdownHeader>
-      <DropdownItem href="/settings">Settings</DropdownItem>
-      <DropdownItem href="/tools">Tools</DropdownItem>
+      <DropdownItem href="/settings"><span class="flex"><CogOutline class="me-2" />Settings</span></DropdownItem>
+      <DropdownItem href="/tools"><span class="flex"><RulerCombinedOutline class="me-2"/>Tools</span></DropdownItem>
       <DropdownDivider />
       <DropdownItem on:click={logout}>
-        {#if user}Log out{:else}Log In{/if}
+        {#if user}<span class="flex"><ArrowRightToBracketOutline class="me-2"/>Log out</span>{:else}<span class="flex"><ArrowLeftToBracketOutline class="me-2"/>Log out</span>{/if}
       </DropdownItem>
     </Dropdown>
   {/if}

@@ -3,7 +3,7 @@
   import BreadcrumbItem from "$lib/components/BreadcrumbItem.svelte";
   import { Heading } from "flowbite-svelte";
   import type { PageData } from "./$types";
-  import CatalogItem from "$lib/components/CatalogItem.svelte";
+  import Recipe from "$lib/components/Recipe.svelte";
   import type { View } from "$lib/types";
 
   export let data: PageData;
@@ -31,6 +31,6 @@
 
 <div class="px-4 py-2 md:py-4">
   {#if "data" in result}
-    <CatalogItem {recipe} {recipeSteps}></CatalogItem>
+    <Recipe {recipe} {recipeSteps}/>
   {/if}
 </div>

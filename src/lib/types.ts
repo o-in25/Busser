@@ -222,9 +222,8 @@ export namespace View {
 
   export type BasicRecipeStep = {
     recipeStepId?: number,
-    productId?: number,
-
-    recipeId: number;
+    recipeId?: number;
+    productId: number,
     recipeStepDescription: string | null;
     productName: string;
     categoryName: string;
@@ -236,6 +235,9 @@ export namespace View {
     productPricePerUnit: number;
     productUnitSizeInMilliliters: number;
     productProof: number;
+
+    // TODO: do we need this?
+    key?: string | number | null;
   }
 }
 

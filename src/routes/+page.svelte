@@ -42,7 +42,7 @@
 </div>
 <!-- add clickable gallery -->
 <Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3 mb-8" />
-<Excerpt/>
+<!-- <Excerpt/> -->
 
 
 <!-- 

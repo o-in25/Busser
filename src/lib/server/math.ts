@@ -11,7 +11,7 @@
 */
 
 // Dilution of a stirred drink stirred quickly with 120 grams of ¼-inch cubes for 15 seconds
-const dilutionByStirred = (abv: number) => -1.21 * Math.pow(abv, 2) + 1.246 * abv + 0.145;
+export const dilutionByStirred = (abv: number) => -1.21 * Math.pow(abv, 2) + 1.246 * abv + 0.145;
 
 // Dilution of a shaken drink shaken with 120 grams of ¼-inch cubes for 10 seconds:
-const dilutionByShaken = (abv: number) => 1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;
+export const dilutionByShaken = (abv: number) => 1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;

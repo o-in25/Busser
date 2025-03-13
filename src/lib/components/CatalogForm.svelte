@@ -9,7 +9,6 @@
     Heading,
     Helper,
   } from "flowbite-svelte";
-  import FancyButton from "./FancyButton.svelte";
   import type {
     ComponentAction,
     PreparationMethod,
@@ -25,7 +24,6 @@
   import { RadioButton, ButtonGroup } from "flowbite-svelte";
   import { quintOut } from "svelte/easing";
   import { scale } from "svelte/transition";
-  import { createEventDispatcher } from "svelte";
   import { notificationStore } from "../../stores";
 
   // props
@@ -36,10 +34,10 @@
 
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
-
+  recipeSteps = recipeSteps.map((step) => ({ ...step, key: uuidv4() }));
   const createStep = () => ({
-    recipeId: uuidv4(),
-    recipeStepId: uuidv4(),
+    recipeId: recipe.recipeId || 0,
+    recipeStepId: 0,
     productId: 0,
     recipeStepDescription: null,
     productName: "",
@@ -52,6 +50,7 @@
     productPricePerUnit: 0,
     productUnitSizeInMilliliters: 0,
     productProof: 0,
+    key: uuidv4(),
   });
 
   let steps = recipeSteps.length ? recipeSteps : [createStep()];
@@ -83,6 +82,8 @@
 
   $: prepMethodDilutionPct =
     defaultPrepMethodChoice.recipeTechniqueDilutionPercentage;
+
+  let disabled = false;
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -92,18 +93,20 @@
     enctype="multipart/form-data"
     on:submit
     use:enhance={({ formData }) => {
+      disabled = true;
       formData.append("recipeSteps", JSON.stringify(steps));
       return async ({ result }) => {
         if (result.type === "redirect") {
           goto(result.location);
         } else {
           await applyAction(result);
+          disabled = false;
           if (result.type === "failure")
             $notificationStore.error = {
-              message: result?.data?.message?.toString() || "",
+              message: result?.data?.error?.toString() || "",
             };
           if (result.type === "success")
-            $notificationStore.error = { message: "Done!" };
+            $notificationStore.success = { message: "Catalog updated." };
         }
       };
     }}>
@@ -223,7 +226,7 @@
       <legend class="mb-3">
         <Heading tag="h6">Details</Heading>
       </legend>
-      {#each steps as step, stepNumber (step.recipeStepId)}
+      {#each steps as step, stepNumber (step.key)}
         <div
           class="py-4"
           transition:scale={{
@@ -238,7 +241,12 @@
       {/each}
 
       <div class="my-4 flex flex-row justify-center">
-        <Button class="!p-2" pill={true} on:click={addStep}>
+        <Button
+          class="!p-2"
+          pill={true}
+          on:click={addStep}
+          color="primary"
+          outline>
           <PlusOutline class="w-6 h-6" />
           <span class="hidden lg:block pe-2">Add Another Step</span>
         </Button>
@@ -246,9 +254,21 @@
     </fieldset>
 
     <!-- submit -->
-    <div class="md:flex md:flex-row">
+    <div class="md:flex md:flex-row-reverse">
       <div class="my-4 md:mr-4">
-        <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
+        <Button
+          class="w-full md:w-32"
+          type="button"
+          size="xl"
+          {disabled}
+          color="red">
+          Delete
+        </Button>
+      </div>
+      <div class="my-4 md:mr-4">
+        <Button class="w-full md:w-32" type="submit" size="xl" {disabled}>
+          Save
+        </Button>
       </div>
     </div>
   </form>

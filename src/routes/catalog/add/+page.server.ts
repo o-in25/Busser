@@ -1,5 +1,6 @@
-import { addRecipe, getPreparationMethods, getSpirits, productSelect } from '$lib/server/core';
+import { addRecipe, getPreparationMethods, getSpirits, productSelect, updateCatalog } from '$lib/server/core';
 import type { Table } from '$lib/types';
+import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ request }) => {
@@ -47,9 +48,14 @@ export const actions = {
       ...rest 
     }) => rest);
 
-    console.log(recipeSteps, recipe)
-    await addRecipe(recipe, recipeSteps, file);
+  const newData = await updateCatalog(recipe, recipeSteps, file);
 
+    if(newData.status === 'error') {
+      return fail(500, newData);
+
+    }
+
+    return newData;
 
     // addRecipe
     // {

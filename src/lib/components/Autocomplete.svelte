@@ -30,7 +30,7 @@
   let show = false;
   $: selectValue = key || '';
   $: search = items.filter(({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1);
-  $: value = items.find(({ name }) => name.toLowerCase() === selectValue.toLocaleLowerCase())?.value || 0;
+  $: value = items.find(({ name }) => name.toLowerCase() === selectValue.toLocaleLowerCase())?.value || value || null;
 
   const showAutocomplete = () => show = true;
   // theres a race condition b/w onblur and onclick, so we timeout 
