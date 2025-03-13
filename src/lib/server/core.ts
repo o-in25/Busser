@@ -8,26 +8,25 @@ import { Logger } from "./logger";
 const db = new DbProvider('app_t');
 
 const marshal = <T>(obj: any, fn: Function = camelCase) => {
-  // Check if obj is an array
   if(Array.isArray(obj)) {
-    return obj.map((v) => marshal<T>(v, fn)); // Recursively marshal each element
+    return obj.map((v) => marshal<T>(v, fn));
   }
 
-  // Check if obj is an object (not null or array)
   if(obj && typeof obj === 'object') {
     return Object.keys(obj).reduce((arr, key) => {
-      arr[fn(key)] = marshal<T>(obj[key], fn); // Apply function to the key and recursively marshal the value
+      arr[fn(key)] = marshal<T>(obj[key], fn); 
       return arr;
-    }, {} as Record<string, T>); // Initialize the accumulator as an empty object
+    }, {} as Record<string, T>);
   }
 
-  // If it's neither an object nor an array, return it as is
   return obj as T;
+
 };
 
 const pascalCase = (str: string) => changeCase.pascalCase(str) // GoodDrinks
 const camelCase = (str: string) => changeCase.camelCase(str) // goodDrinks
 const titleCase = (str: string) => changeCase.capitalCase(str); // Good Drinks
+
 const paginationData = {
   total: 0,
   currentPage: 0,

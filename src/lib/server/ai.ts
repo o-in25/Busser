@@ -2,9 +2,8 @@
 import OpenAI from "openai";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
-// import { env } from '$env/dynamic/private';
+const { OPENAI_API_KEY } = process.env;
 
-const { OPENAI_API_KEY } = { OPENAI_API_KEY: ''};
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 let sampleImg = 'https://media.liquormax.com/eq4rxnkvcouvc1anfqqhe/stoli-l.jpg'
