@@ -13,3 +13,4 @@ vite.config.ts.timestamp-*
 .prettierrc
 .vercel/
 .fly/*
+service-account.json

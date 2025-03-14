@@ -14,7 +14,8 @@ ARG DB_PORT
 ARG BUCKET
 ARG GOOGLE_SERVICE_KEY
 ARG OPENAI_API_KEY
-ARG INSTANCE_CONNECTION_NAME  # Cloud SQL instance connection name
+ARG INSTANCE_CONNECTION_NAME 
+# Cloud SQL instance connection name
 
 # SvelteKit app lives here
 WORKDIR /app
