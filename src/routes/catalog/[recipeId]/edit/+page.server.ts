@@ -3,12 +3,14 @@ import { getPreparationMethods, getBasicRecipe, getSpirits, updateCatalog } from
 import type { FormSubmitResult } from '$lib/types';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { deleteSignedUrl } from '$lib/server/storage';
 
 export const load = (async ({ params }) => {
   const { recipeId } = params;
   const spirits = await getSpirits();
   const preparationMethods = await getPreparationMethods();
 
+  await deleteSignedUrl('https://storage.googleapis.com/busser/images.jpeg-0321202507')
 
   const recipe = await getBasicRecipe(recipeId);
 

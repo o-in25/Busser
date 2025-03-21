@@ -1,4 +1,4 @@
-import { addRecipe, getPreparationMethods, getSpirits, productSelect, updateCatalog } from '$lib/server/core';
+import { getPreparationMethods, getSpirits, productSelect, updateCatalog } from '$lib/server/core';
 import type { Table } from '$lib/types';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
