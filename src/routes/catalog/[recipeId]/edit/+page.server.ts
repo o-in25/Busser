@@ -31,6 +31,14 @@ export const load = (async ({ params }) => {
 
 
 
+// on submit:
+// if ml -> done
+// if oz -> convert to ml save oz
+
+// on load
+// if ml -> done
+// if oz -> convert ml to oz
+
 export const actions = {
   default: async ({ request, params }) => {
     let formData: any = Object.fromEntries(await request.formData());

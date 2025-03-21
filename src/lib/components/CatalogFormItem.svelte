@@ -141,8 +141,8 @@
     <div class="mb-6">
       <Label for="recipeStepDescription" class="mb-2">Amount</Label>
       <div class="flex">
-        <Input placeholder="Choose the state" class="!rounded-e-none" bind:value={step.productIdQuantityInMilliliters}/>
-        <select class={selectClass} bind:value={step.productIdQuantityUnit}>
+        <Input name="productIdQuantityInMilliliters" type="number" class="!rounded-e-none" bind:value={step.productIdQuantityInMilliliters}/>
+        <select name="productIdQuantityUnit" class={selectClass} bind:value={step.productIdQuantityUnit}>
           {#each ['oz', 'ml', 'dash', 'drop', 'cube'] as unit} 
             <option selected>{unit}</option>
           {/each}

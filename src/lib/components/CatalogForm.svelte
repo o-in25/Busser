@@ -76,7 +76,6 @@
 
 
     const result = await response.json();
-    console.log(result)
     if('data' in result) {
       $notificationStore.success = { message: 'Catalog item deleted.'}
       // goto(`/inventory`);
@@ -140,7 +139,6 @@
             type="text"
             id="recipeName"
             name="recipeName"
-            placeholder="Plantation 3 Star"
             bind:value={recipe.recipeName}
             required />
         </div>
