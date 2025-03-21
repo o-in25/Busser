@@ -48,6 +48,7 @@
     supplierName: "",
     supplierDetails: null,
     productIdQuantityInMilliliters: 0,
+    productIdQuantityUnit: 'ml', //  ONLY right here can we pull in a user preference for the default value
     productInStockQuantity: 0,
     productPricePerUnit: 0,
     productUnitSizeInMilliliters: 0,
@@ -235,12 +236,12 @@
       </div>
     </fieldset>
 
-    <Hr classHr="my-6" />
+    <Hr classHr="my-4" />
 
     <!-- inner form -->
-    <fieldset class="px-4">
-      <legend class="mb-3">
-        <Heading tag="h6">Details</Heading>
+    <fieldset class="px-1 md:py-2">
+      <legend class="mb-2">
+        <Heading tag="h6">Steps</Heading>
       </legend>
       {#each steps as step, stepNumber (step.key)}
         <div

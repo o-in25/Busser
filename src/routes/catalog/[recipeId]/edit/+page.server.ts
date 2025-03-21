@@ -10,8 +10,6 @@ export const load = (async ({ params }) => {
   const spirits = await getSpirits();
   const preparationMethods = await getPreparationMethods();
 
-  await deleteSignedUrl('https://storage.googleapis.com/busser/images.jpeg-0321202507')
-
   const recipe = await getBasicRecipe(recipeId);
 
   let pageData: any = { args: { spirits } };

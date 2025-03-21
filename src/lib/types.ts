@@ -171,7 +171,8 @@ export namespace Table {
     recipeId: number,
     productId: number,
     productIdQuantityInMilliliters: number,
-    recipeStepDescription: string | null
+    recipeStepDescription: string | null,
+    productIdQuantityUnit: string
   }
 
   export type RecipeTechnique = {
@@ -234,6 +235,7 @@ export namespace View {
     productInStockQuantity: number;
     productPricePerUnit: number;
     productUnitSizeInMilliliters: number;
+    productIdQuantityUnit: string;
     productProof: number;
 
     // TODO: do we need this?
@@ -254,6 +256,7 @@ export namespace QueryRequest {
     recipeStepId?: number,
     productId: number,
     productIdQuantityInMilliliters: number,
+    productIdQuantityUnit: string
     recipeStepDescription: string
   }
 

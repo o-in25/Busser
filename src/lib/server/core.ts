@@ -787,17 +787,14 @@ export async function updateCatalog(
       };
 
       let dbResult;
-      let oldRecipe;
-      if(recipe.recipeId) {
-        // step 2
-        let oldRecipe = await trx("recipe")
-          // TODO: do we need RecipeCategoryId?
-          .select("RecipeDescriptionId", "RecipeCategoryId")
-          .where("RecipeId", recipe.recipeId)
-          .first();
+      
+      let oldRecipe = await trx("recipe")
+        // TODO: do we need RecipeCategoryId?
+        .select("RecipeDescriptionId", "RecipeCategoryId")
+        .where("RecipeId", recipe.recipeId || -1)
+        .first();
 
-        oldRecipe = marshal(oldRecipe, camelCase);
-      }
+      oldRecipe = marshal(oldRecipe, camelCase);
 
       if (!oldRecipe) {
         [dbResult] = await trx("recipedescription").insert({
@@ -817,7 +814,7 @@ export async function updateCatalog(
 
         if (!dbResult) throw new Error("Cannot create recipe.");
         keys.recipeId = dbResult;
-        oldRecipe = keys;
+        // oldRecipe = keys;
 
       } else {
         keys = {
@@ -895,11 +892,13 @@ export async function updateCatalog(
         ({
           productId,
           productIdQuantityInMilliliters,
+          productIdQuantityUnit,
           recipeStepDescription,
         }) => ({
           recipeId: keys.recipeId || 0,
           productId,
           productIdQuantityInMilliliters,
+          productIdQuantityUnit,
           recipeStepDescription,
         }),
       );
@@ -977,6 +976,7 @@ export async function deleteCatalogItem(
         recipeImageUrl, deletedRows
       }
     });
+
 
     if(recipeImageUrl) {
       await deleteSignedUrl(recipeImageUrl);
