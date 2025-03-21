@@ -53,7 +53,6 @@
     });
 
     const result = await response.json();
-    console.log(result)
     if('data' in result) {
       $notificationStore.success = { message: 'Inventory item deleted.'}
       // goto(`/inventory`);

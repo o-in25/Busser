@@ -1,3 +1,14 @@
+/**
+ * this code sucks
+ * 
+ * i should probably (definitely) be using an orm like prisma
+ * 
+ * this is what happens when you start with just a poc to get something working
+ * and youre too lazy to back and refactor it so you just keep adding on 
+ * until you arrive at this monstrosity 
+ * 
+ * im in too deep
+ */
 import type {
   BasicRecipe,
   Category,
@@ -403,6 +414,9 @@ export async function deleteInventoryItem(
         productImageUrl = childRow.productImageUrl;
       }
 
+
+      // TODO: use a foreign key constraint to delete
+      // idk why i didnt do this to begin with
       const rows = await db
         .table<Product>("product")
         .where("ProductId", productId)
@@ -744,6 +758,7 @@ export async function updateCatalog(
   // STEP 8: return new view
 
 
+
   const getRecipeImageUrl = async (image: File | null): Promise<string | null> => {
     if (!image || image.size === 0 || image.name === "undefined") return null;
     const signedUrl = await getSignedUrl(image);
@@ -771,16 +786,18 @@ export async function updateCatalog(
         recipeId: undefined,
       };
 
-      let dbResult: any;
+      let dbResult;
+      let oldRecipe;
+      if(recipe.recipeId) {
+        // step 2
+        let oldRecipe = await trx("recipe")
+          // TODO: do we need RecipeCategoryId?
+          .select("RecipeDescriptionId", "RecipeCategoryId")
+          .where("RecipeId", recipe.recipeId)
+          .first();
 
-      // step 2
-      let oldRecipe = await trx("recipe")
-        // TODO: do we need RecipeCategoryId?
-        .select("RecipeDescriptionId", "RecipeCategoryId")
-        .where("RecipeId", recipe.recipeId)
-        .first();
-
-      oldRecipe = marshal(oldRecipe, camelCase);
+        oldRecipe = marshal(oldRecipe, camelCase);
+      }
 
       if (!oldRecipe) {
         [dbResult] = await trx("recipedescription").insert({
@@ -800,6 +817,8 @@ export async function updateCatalog(
 
         if (!dbResult) throw new Error("Cannot create recipe.");
         keys.recipeId = dbResult;
+        oldRecipe = keys;
+
       } else {
         keys = {
           recipeDescriptionId: oldRecipe.recipeDescriptionId,
@@ -913,6 +932,58 @@ export async function updateCatalog(
       data: newRecipe,
     };
   } catch (error: any) {
+    console.error(error.message);
+    Logger.error(
+      error.sqlMessage || error.message,
+      error.sql || error.stackTrace,
+    );
+    const result: QueryResult<Array<PreparationMethod>> = {
+      status: "error",
+      error: "Cannot save changes.",
+    };
+    return result;
+  }
+}
+
+
+export async function deleteCatalogItem(
+  recipeId: number,
+): Promise<QueryResult<number>> {
+  try {
+    // FK_RecipeDescription_Recipe
+    // FK_Recipe_RecipeDescription
+    // so deleting RecipeDescription should be all we need to do
+    const { deletedRows, recipeImageUrl } = await db.query.transaction(async (trx) => {
+      const dbResult = await trx('recipe')
+        .select("RecipeDescriptionId", "RecipeImageUrl")
+        .where("RecipeId", recipeId);
+
+      // get recipedescriptionid
+      const [parentRow] = marshal(dbResult, camelCase);
+
+      if(!parentRow) throw new Error('Recipe not found.');
+      const { recipeDescriptionId, recipeImageUrl } = parentRow;
+
+      const deletedRows = await trx('recipedescription')
+        .where("RecipeDescriptionId", recipeDescriptionId)
+        .del();
+
+      if(deletedRows < 1) throw new Error('Could not delete recipe because no rows were affected.')
+      // let dbResult2 = 1;
+      // const [rowsDeleted] = marshal<Number>(dbResult2, camelCase);
+      //   console.log(rowsDeleted)
+
+      return {
+        recipeImageUrl, deletedRows
+      }
+    });
+
+    return {
+      status: "success",
+      data: 0
+    } satisfies QueryResult<number>;
+
+  } catch(error: any) {
     console.error(error.message);
     Logger.error(
       error.sqlMessage || error.message,

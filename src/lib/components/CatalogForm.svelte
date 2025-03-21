@@ -8,6 +8,9 @@
     Hr,
     Heading,
     Helper,
+		Modal,
+		Span,
+		P,
   } from "flowbite-svelte";
   import type {
     ComponentAction,
@@ -29,11 +32,10 @@
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
-
-  export let action: ComponentAction = "add";
-
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
+
+  // recipe model
   recipeSteps = recipeSteps.map((step) => ({ ...step, key: uuidv4() }));
   const createStep = () => ({
     recipeId: recipe.recipeId || 0,
@@ -66,14 +68,26 @@
     }
   };
 
-  // default to first choice
+  const deleteRecipe = async() => {
+    const response = await fetch(`/api/catalog/${recipe.recipeId}`, {
+      method: 'DELETE'
+    });
+
+
+    const result = await response.json();
+    console.log(result)
+    if('data' in result) {
+      $notificationStore.success = { message: 'Catalog item deleted.'}
+      // goto(`/inventory`);
+    } else {
+      $notificationStore.error = { message: result.error }
+    }
+
+  }
+
+  // form props
   let [defaultPrepMethodChoice] = preparationMethods;
   let [defaultSpirit] = spirits;
-
-  // let prepMethodChoice = defaultPrepMethodChoice.recipeTechniqueDescriptionId;
-  //let defaultSpiritChoice = defaultSpirit.recipeCategoryId;
-
-  // TODO: maybe add the ids to the basicrecipe[] instead of filtering
   let defaultSpiritChoice =
     recipe.recipeCategoryId || defaultSpirit.recipeCategoryId;
   let prepMethodChoice =
@@ -84,6 +98,8 @@
     defaultPrepMethodChoice.recipeTechniqueDilutionPercentage;
 
   let disabled = false;
+  let modalOpen = false;
+  
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -256,22 +272,39 @@
     <!-- submit -->
     <div class="md:flex md:flex-row-reverse">
       <div class="my-4 md:mr-4">
-        <Button
-          class="w-full md:w-32"
-          type="button"
-          size="xl"
-          {disabled}
-          color="red">
-          Delete
-        </Button>
+        {#if recipe.recipeId}
+          <Button
+            class="w-full md:w-32"
+            type="button"
+            size="xl"
+            color="red"
+            on:click={() => modalOpen = true}>
+            Delete
+          </Button>
+        {/if}
       </div>
+      <!-- delete -->
       <div class="my-4 md:mr-4">
         <Button class="w-full md:w-32" type="submit" size="xl" {disabled}>
           Save
         </Button>
+        </div>
       </div>
-    </div>
   </form>
+    {#if recipe.recipeId}
+      <Modal title="Confirm Delete" bind:open={modalOpen} autoclose>
+        <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+          Delete&nbsp;<Span>{recipe?.recipeName}</Span>&nbsp;from catalog?
+          <P color="text-red-700 dark:text-red-500" weight="bold">Once deleted, it can't be recovered.</P>
+        </p>
+        <svelte:fragment slot="footer">
+          <Button color="red" on:click={async () => {
+            await deleteRecipe();
+          }}>Delete</Button>
+          <Button color="alternative">Cancel</Button>
+        </svelte:fragment>
+      </Modal>
+    {/if}
 </div>
 
 <style lang="scss">
