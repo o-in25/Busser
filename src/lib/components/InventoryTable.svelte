@@ -14,10 +14,17 @@
     Label,
     Progressbar,
     Badge,
+		Dropdown,
+		DropdownDivider,
+		DropdownItem,
+		Button,
+		P,
   } from "flowbite-svelte";
   import {
+	ChevronDownOutline,
     ChevronLeftOutline,
     ChevronRightOutline,
+    FilterOutline,
     InfoCircleSolid,
     PlusOutline,
     SearchOutline,
@@ -82,42 +89,86 @@
   //   search = products.filter(({ productName }) => productName.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1)
   // })
 
-  const handleSearch = async (value: string) => {
-    let data = await fetch(`/api/inventory?name=${value}`);
-    let result = await data.json();
+  const handleSearch = async (params: { [key: string]: string | number }[]) => {
+    const query = params
+      .map(param => {
+        return Object.entries(param)
+          .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+          .join('&');
+      })
+      .join('&');
+    
+
+      // TODO: we should just submit to same location 
+    const data = await fetch(`/api/inventory?${query}`);
+    
+    const result = await data.json();
     return result;
   };
 
   const handleInput = ({ target }) => {
     setTimeout(async () => {
       searchTerm = target.value;
-      const { result } = await handleSearch(searchTerm);
+      const { result } = await handleSearch([{ name: searchTerm }]);
       search = result;
+      
     }, 300);
   };
-  
+    let filterField = "all";
+  let dropdownOpen = false;
+
+    const handleDropdownOpen = (category: string) => {
+    filterField = category;
+    dropdownOpen = false;
+  };
+
+  const filter = (quantity: number) => {
+    setTimeout(async() => {
+      const { result } = await handleSearch([{ quantity }]);
+      search = result;
+      dropdownOpen = false;
+    }, 300)
+  }
 </script>
 
-<!-- <input on:keydown={(event) => handleInput(event)}> -->
-<div>
-  <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
-</div>
-<!-- search -->
-<div class="flex justify-between">
-  <Label class="space-y-2 mb-6">
-    <Input
-      type="email"
-      size="md"
-      placeholder="Search inventory..."
-      on:keydown={handleInput}>
-      <SearchOutline slot="left" class="w-5 h-5" />
-    </Input>
-  </Label>
-  <div class="test">
-    <FancyButton href="/inventory/add"><PlusOutline /></FancyButton>
-  </div>
-</div>
+  <div class="flex justify-between">
+    <!-- search -->
+    <Label class="space-y-2 mb-6">
+      <Input
+        type="email"
+        size="md"
+        placeholder="Search catalog..."
+        on:keydown={handleInput}>
+        <SearchOutline slot="left" class="w-5 h-5" />
+      </Input>
+    </Label>
 
+    <!-- dropdown -->
+    <div>
+      <Button color="alternative">
+        <ChevronDownOutline class="w-6 h-6 " />
+      </Button>
+
+      <!-- controls -->
+      <Dropdown
+        bind:open={dropdownOpen}
+        placement="bottom">
+        <DropdownItem href="/catalog/add">
+          <span class="flex"><PlusOutline class="me-2" />Add</span>
+        </DropdownItem>
+        <DropdownDivider />
+        <DropdownItem class="flex items-center justify-between" on:click={() => filter(1)}>
+          <span class="flex"><FilterOutline class="me-2" />Show In Stock</span>
+        </DropdownItem>
+        <DropdownItem class="flex items-center justify-between">
+          <span class="flex"><FilterOutline class="me-2" />Show Out Stock</span>
+        </DropdownItem>
+        <DropdownItem class="flex items-center justify-between">
+          <span class="flex"><FilterOutline class="me-2" />All</span>
+        </DropdownItem>
+      </Dropdown>
+    </div>
+  </div>
 <!-- table -->
 <Table divClass="relative overflow-x-auto rounded-lg" hoverable={true}>
   <!-- head -->

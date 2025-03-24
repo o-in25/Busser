@@ -224,11 +224,25 @@ export async function addToInventory(
   }
 }
 
-export async function searchInventory(search: string): Promise<Product[]> {
+export async function searchInventory(search: string, showOutOfStock: boolean = true): Promise<Product[]> {
   try {
-    let data = await db
-      .table("inventory")
+
+    let query = db
+      .table('inventory')
       .where("productName", "like", `%${search}%`);
+
+    if(showOutOfStock) {
+      query = query.andWhere('productInStockQuantity', '>', 0);
+    }
+
+    const dbResult = await query;
+
+    
+    // let data = await db
+    //   .table("inventory")
+    //   .where("productName", "like", `%${search}%`);
+
+
     // let data = await db.table('product')
     //   .select([
     //     'product.productId',
@@ -247,7 +261,7 @@ export async function searchInventory(search: string): Promise<Product[]> {
     //   .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
     //   .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
     //   .where('product.productName', 'like', `%${search}%`)
-    let result: Product[] = marshal<Product[]>(data);
+    let result: Product[] = marshal<Product[]>(dbResult);
     // const result: PaginationResult<Product[]> = { data, pagination };
     return result;
   } catch (error: any) {
