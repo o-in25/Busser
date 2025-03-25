@@ -16,6 +16,14 @@
   }
 
 
+  const handleSubmit = (data) => {
+    // const foo = $page.url.searchParams.get('productName');
+
+    // console.log(foo)
+    // // console.log('handled')
+    // // console.log($page.url.searchParams)
+    // goto(`?${$page.url.searchParams.toString()}`);
+  }
   // async function handleSubmit(event: SubmitEvent) {
   //   event.preventDefault(); // Prevent default form submission
 
@@ -38,9 +46,7 @@
   </Heading>
 </div>
 <div class="px-4 py-2 md:py-4">
-  <form method="GET" action="/inventory">
-    <InventoryTable products={result.data} paginationData={result.pagination}></InventoryTable>
-  </form>
+  <InventoryTable products={result.data} paginationData={result.pagination}></InventoryTable>
 </div>
 
 <style lang="scss">
