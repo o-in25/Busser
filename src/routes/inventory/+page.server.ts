@@ -1,12 +1,21 @@
 import { getBaseSpirits, getInventory } from '$lib/server/core';
+import type { Product } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url }) => {
   let queryString = url.href.split('?').slice(1).join('?');
+  console.log(queryString)
   const hrefParams = new URLSearchParams(queryString);
   let hrefValue = hrefParams.get('page');
   let page = Number(hrefValue);
-  let { data, pagination } = await getInventory(page, 20);
+  let filter: Partial<Product> = {};
+  hrefValue = hrefParams.get('productName');
+  if(hrefValue) {
+    filter = {
+      productName: hrefValue
+    }
+  }
+  let { data, pagination } = await getInventory(page, 20, filter);
   // could probably keep these in a store
   // let baseSpirits = await getBaseSpirits();
   // let { total, perPage } = pagination;
@@ -20,6 +29,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
   // }
 
 
+  // console.log(data)
   // pagination = { ...pagination, pages }
   return { args: { data, pagination } };
 };

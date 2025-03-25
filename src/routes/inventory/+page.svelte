@@ -18,7 +18,9 @@
   </Heading>
 </div>
 <div class="px-4 py-2 md:py-4">
-  <InventoryTable products={result.data} paginationData={result.pagination}></InventoryTable>
+  <form method="GET" action="/inventory">
+    <InventoryTable products={result.data} paginationData={result.pagination}></InventoryTable>
+  </form>
 </div>
 
 <style lang="scss">

@@ -77,12 +77,27 @@ const paginationData = {
 export async function getInventory(
   currentPage: number,
   perPage: number = 25,
+  filter: Partial<Product> | null = null
 ): Promise<PaginationResult<Product[]>> {
   try {
-    let { data, pagination } = await db
-      .table("inventory")
+
+    let dbResult = db.table('inventory');
+    if(filter?.productName) {
+      dbResult = dbResult.where("productName", "like", `%${filter.productName}%`);
+    }
+
+    if(filter?.productInStockQuantity) {
+      dbResult = dbResult.andWhere("productInStockQuantity", ">=", `%${filter.productInStockQuantity}%`);
+    }
+
+    let { data, pagination } = await dbResult
       .select()
       .paginate({ perPage, currentPage, isLengthAware: true });
+    
+    // let { data, pagination } = await db
+    //   .table("inventory")
+    //   .select()
+    //   .paginate({ perPage, currentPage, isLengthAware: true });
 
     // let { data, pagination } = await db.table('inventory').paginate({ perPage, currentPage, isLengthAware: true })
     data = data.map((item) => Object.assign({}, item));
