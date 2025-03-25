@@ -37,7 +37,6 @@
 	let openRow: number | null;
 	// let details: { name: any; }
 	// let doubleClickModal = false
-	let searchTerm = '';
 
 	const rowControl = (row: number) => (openRow = openRow === row ? null : row);
 
@@ -49,22 +48,16 @@
 			.map((_, index) => index + 1)
 			.map(page => page.toString())
 			.map((page) => {
-        const searchParams = new URLSearchParams();
-        for (const [key, value] of $page.url.searchParams.entries()) {
-          if(!searchParams.has(key)) {
-            searchParams.set(key, value)
-          }
-        }
-        // $page.url.searchParams.entries()?.forEach(([key, value]) => {
-        //   console.log(key, value)
-        // });
+        // ive tried doing this so many other ways
 
-        if(!searchParams.has('page')) {
-          searchParams.append('page', page)
+        let href = `/inventory?page=${page}`;
+        if(searchTerm) {
+          href += `&productName=${searchTerm}`;
         }
+        // if(searchTerm)
         return {
           name: page,
-          href: `/inventory?${searchParams.toString()}`,
+          href,
           active: false,
         }
 			});
@@ -74,10 +67,13 @@
 	// $: search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
 	$: activeUrl = $page.url.searchParams.get('page');
 	$: pages = paginate(paginationData);
+  let searchTerm = $page.url.searchParams.get('productName') || '';
 	$: {
 		if (!activeUrl) {
 			const [first] = pages;
-			first.active = true;
+      if(first) {
+        first.active = true;
+      }
 		} else {
 			pages?.forEach(page => {
 				let queryString = page.href.split('?').slice(1).join('?');
@@ -118,7 +114,7 @@
   //   getRouteInfo(paginationData.nextPage || paginationData.currentPage)
   // }
 
-  const previous = () => goto(`/inventory?page=${paginationData.prevPage || paginationData.currentPage}`)
+  const previous = () => goto(`/inventory?page=${paginationData.prevPage || paginationData.currentPage}`) // needs to be submit 
   const next = async () => await goto(`/inventory?page=${paginationData.nextPage || paginationData.currentPage}`)
 	const parseSize = (ml: number) => {
 		if (ml === 0) return 'N/A';
@@ -175,7 +171,7 @@
 	<!-- search -->
 	<Label class="space-y-2 mb-6">
     <ButtonGroup>
-      <Input size="md" name="productName" type="text"/>
+      <Input size="md" name="productName" type="text" bind:value={searchTerm}/>
       <Button color="primary" type="submit">Search</Button>
     </ButtonGroup>
 	</Label>
@@ -277,7 +273,6 @@
 		</Alert>
 	</div>
 {/if}
-{#if searchTerm === ''}
 	<div class="flex flex-col items-center justify-center gap-2 p-7">
 		<div class="text-sm text-gray-700 dark:text-gray-400">
 			Showing <span class="font-semibold text-gray-900 dark:text-white">
@@ -308,7 +303,6 @@
 			</svelte:fragment>
 		</Pagination>
 	</div>
-{/if}
 
 <!-- <Modal title={details?.name} bind:open={doubleClickModal} autoclose outsideclose>
   <ImagePlaceholder />
