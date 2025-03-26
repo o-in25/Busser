@@ -69,7 +69,12 @@
 	// $: search = products.filter(({ productName }) => productName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
 	$: activeUrl = $page.url.searchParams.get('page');
 	$: pages = paginate(paginationData);
+
+  // trying new naming for reactive expressions
+  $: urlParams_$ = $page.url.searchParams;
   let searchTerm = $page.url.searchParams.get('productName') || '';
+
+  let form: HTMLFormElement;
 	$: {
 		if (!activeUrl) {
 			const [first] = pages;
@@ -86,90 +91,33 @@
 		}
 	}
 
-  const getRouteInfo = (page) => {
-    // Object.entries($page.url.searchParams).reduce((acc, curr) => {
-    //   console.log(curr)
-    //   return '';
-    // }, '');
-
-    // let params = $page.url.searchParams.entries();
-    // let newUrl = new URL('/inventory');
-    // const productName = $page.url.searchParams.get('productName');
-    // const searchParams = new URLSearchParams();
-    // if(productName) {
-    //   searchParams.set('productName', productName);
-    // }
-
-    // searchParams.set('page', page);
-    // console.log(searchParams.toString())
-    // goto(`/inventory?productName=asasa&page=2`, { invalidateAll: true })
-    // newUrl.search = searchParams.toString();
-    // console.log(newUrl.toString())
-    // goto(newUrl.toString())
-
-    // params.entries().forEach(val => console.log(val))
-    // console.log(params.entries())
+  const navigate = (route: string, page: string | number) => {
+    const urlParams = new URLSearchParams();
+    urlParams.set('page', page.toString())
+    urlParams_$.entries().forEach(([key, value]) => {
+      if(key !== 'page') {
+        urlParams.set(key, value)
+      }
+    })
+    goto(`/${route}?${urlParams.toString()}`);
   }
 
-	// const previous = () => getRouteInfo(paginationData.prevPage || paginationData.currentPage)
-	// const next = () => {
-  //   getRouteInfo(paginationData.nextPage || paginationData.currentPage)
-  // }
 
-  const previous = () => goto(`/inventory?page=${paginationData.prevPage || paginationData.currentPage}`) // needs to be submit 
-  const next = async () => await goto(`/inventory?page=${paginationData.nextPage || paginationData.currentPage}`)
-	const parseSize = (ml: number) => {
-		if (ml === 0) return 'N/A';
-		if (ml < 1000) return `${ml} ML`;
-		return `${ml / 1000} L`;
-	};
-
-	//  const handleInput = debounce((e: Event) => {
-	//   const detail = (<CustomEvent>e).detail;
-	//   search = products.filter(({ productName }) => productName.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1)
-	// })
-
-	// const handleSearch = async (params: {[key: string]: string | number}[]) => {
-	// 	const query = params
-	// 		.map(param => {
-	// 			return Object.entries(param)
-	// 				.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-	// 				.join('&');
-	// 		})
-	// 		.join('&');
-
-	// 	// TODO: we should just submit to same location
-	// 	const data = await fetch(`/api/inventory?${query}`);
-
-	// 	const result = await data.json();
-	// 	return result;
-	// };
-
-	const handleInput = ({target}) => {
-		// setTimeout(async () => {
-		// 	searchTerm = target.value;
-		// 	const {result} = await handleSearch([{name: searchTerm}]);
-		// 	search = result;
-		// }, 300);
-	};
-	// let filterField = 'all';
-	// let dropdownOpen = false;
-
-	// const handleDropdownOpen = (category: string) => {
-	// 	filterField = category;
-	// 	dropdownOpen = false;
-	// };
-
-	// const filter = (quantity: number) => {
-	// 	setTimeout(async () => {
-	// 		const {result} = await handleSearch([{quantity}]);
-	// 		search = result;
-	// 		dropdownOpen = false;
-	// 	}, 300);
-	// };
 </script>
 
-<form action="/inventory" method="GET">
+<form action="/inventory" method="GET" on:submit|preventDefault={() => {
+  let url = '/inventory';
+  if(searchTerm !== '') {
+    url = url.concat('?', `productName=${searchTerm}`)
+    url = url.concat('&', `page=1`)
+  } else {
+    url = url.concat('?', `page=1`)
+  }
+
+  console.log(url)
+  goto(url, { replaceState: true, invalidateAll: true });
+
+}} bind:this={form}>
   <div class="flex justify-between">
     <!-- search -->
     <Label class="space-y-2 mb-6">
@@ -266,6 +214,7 @@
       {/each}
     </TableBody>
   </Table>
+</form>
   {#if !search.length}
     <div class="flex flex-col items-center py-4">
       <Alert color="dark">
@@ -276,37 +225,38 @@
       </Alert>
     </div>
   {/if}
-    <div class="flex flex-col items-center justify-center gap-2 p-7">
-      <div class="text-sm text-gray-700 dark:text-gray-400">
-        Showing <span class="font-semibold text-gray-900 dark:text-white">
-          {paginationData.from + 1}
-        </span>
-        through
-        <span class="font-semibold text-gray-900 dark:text-white">
-          {paginationData.to}
-        </span>
-        out of
-        <span class="font-semibold text-gray-900 dark:text-white">
-          {paginationData.total}
-        </span>
-        items in inventory
-      </div>
-      <Pagination
-        {pages}
-        on:previous={previous}
-        on:next={next}
-        large>
-        <svelte:fragment slot="prev">
-          <span class="sr-only">Previous</span>
-          <ChevronLeftOutline class="w-6 h-6" />
-        </svelte:fragment>
-        <svelte:fragment slot="next">
-          <span class="sr-only">Next</span>
-          <ChevronRightOutline class="w-6 h-6" />
-        </svelte:fragment>
-      </Pagination>
-    </div>
-</form>
+{#if search.length}
+<div class="flex flex-col items-center justify-center gap-2 p-7">
+  <div class="text-sm text-gray-700 dark:text-gray-400">
+    Page <span class="font-semibold text-gray-900 dark:text-white">
+      {paginationData.from + 1}
+    </span>
+    of 
+    <span class="font-semibold text-gray-900 dark:text-white">
+      {paginationData.to}
+    </span>
+    out of
+    <span class="font-semibold text-gray-900 dark:text-white">
+      {paginationData.total}
+    </span>
+    items in inventory
+  </div>
+  <Pagination
+    {pages}
+    on:previous={() => navigate('inventory', paginationData.prevPage || paginationData.currentPage)}
+    on:next={() => navigate('inventory', paginationData.nextPage || paginationData.currentPage)}
+    large>
+    <svelte:fragment slot="prev">
+        <span class="sr-only">Previous</span>
+        <ChevronLeftOutline class="w-6 h-6" />
+    </svelte:fragment>
+    <svelte:fragment slot="next">
+        <span class="sr-only">Next</span>
+        <ChevronRightOutline class="w-6 h-6" />
+    </svelte:fragment>
+  </Pagination>
+</div>
+{/if}
 
 <!-- <Modal title={details?.name} bind:open={doubleClickModal} autoclose outsideclose>
   <ImagePlaceholder />

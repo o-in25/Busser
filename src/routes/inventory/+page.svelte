@@ -7,6 +7,7 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
   
   export let data: PageData;
   export let result: PaginationResult<Product[]> = data.args;
@@ -16,6 +17,17 @@
   }
 
 
+
+  // onMount(() => {
+  //   const params = new URLSearchParams($page.url.searchParams);
+  //   console.log(params)
+  //   if (!params.has('page')) {
+  //     params.set('page', '1');
+  //     goto(`/inventory?${params.toString()}`, { replaceState: true });
+  //   }
+  // });
+
+  
   const handleSubmit = (data) => {
     // const foo = $page.url.searchParams.get('productName');
 
