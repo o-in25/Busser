@@ -45,11 +45,17 @@ export const actions = {
     let { recipeImageUrl, recipeSteps, ...payload } = formData;
     const { recipeImageUrl: file } = formData as { recipeImageUrl: File; };
 
+
+    console.log(payload)
     const recipe = {
       ...payload,
       recipeId: params.recipeId,
       recipeCategoryId: Number(payload.recipeCategoryId) || -1,
       recipeTechniqueDescriptionId: Number(payload.recipeTechniqueDescriptionId) || -1,
+      productSweetnessRating: Number(payload.productSweetnessRating || '0'),
+      productDrynessRating: Number(payload.productDrynessRating || '0'),
+      productVersatilityRating: Number(payload.productVersatilityRating || '0'),
+      productStrengthRating: Number(payload.productStrengthRating || '0')
     }
 
     recipeSteps = JSON.parse(recipeSteps as string || '[]');

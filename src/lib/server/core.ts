@@ -828,9 +828,14 @@ export async function updateCatalog(
       if (!oldRecipe) {
         [dbResult] = await trx("recipedescription").insert({
           RecipeDescription: recipe.recipeDescription,
-          RecipeDescriptionImageUrl: null,
+          RecipeDescriptionImageUrl: null, // TODO: add option for this on front end
+          RecipeSweetnessRating: recipe.recipeSweetnessRating,
+          RecipeDrynessRating: recipe.recipeDrynessRating,
+          RecipeStrengthRating: recipe.recipeStrengthRating,
+          RecipeVersatilityRating: recipe.recipeVersatilityRating,
         });
 
+        
         if (!dbResult) throw new Error("Cannot create recipe description.");
         keys.recipeDescriptionId = dbResult;
 
@@ -854,11 +859,17 @@ export async function updateCatalog(
 
       // step 3
       if (oldRecipe) {
+
+        console.log(recipe)
         dbResult = await trx("recipedescription")
           .where("RecipeDescriptionId", keys.recipeDescriptionId)
           .update({
             RecipeDescription: recipe.recipeDescription,
             // RecipeDescriptionUrl: null
+            RecipeSweetnessRating: recipe.recipeSweetnessRating,
+            RecipeDrynessRating: recipe.recipeDrynessRating,
+            RecipeStrengthRating: recipe.recipeStrengthRating,
+            RecipeVersatilityRating: recipe.recipeVersatilityRating,
           });
 
         if (!dbResult) throw new Error("Recipe description not found.");
@@ -885,6 +896,7 @@ export async function updateCatalog(
           RecipeCategoryId: recipe.recipeCategoryId,
           RecipeDescriptionId: keys.recipeDescriptionId,
           RecipeName: recipe.recipeName,
+          
         };
 
         if(recipeImageUrl !== null) {

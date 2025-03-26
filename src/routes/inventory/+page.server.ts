@@ -20,20 +20,6 @@ export const load: PageServerLoad = async ({ params, url }) => {
     }
   }
   let { data, pagination } = await getInventory(page, 20, filter);
-  // could probably keep these in a store
-  // let baseSpirits = await getBaseSpirits();
-  // let { total, perPage } = pagination;
-  // let pages: any = Math.ceil(total / perPage);
-  // if(!Number.isNaN(pages)) {
-  //   pages = [...Array(pages)].map((_, index) => ({
-  //     name: (index + 1).toString(),
-  //     href: `/inventory?page=${index + 1}`,
-  //     active: false
-  //   }));
-  // }
 
-
-  // console.log(data)
-  // pagination = { ...pagination, pages }
   return { args: { data, pagination } };
 };

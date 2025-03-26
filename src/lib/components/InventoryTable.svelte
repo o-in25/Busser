@@ -153,7 +153,7 @@
     <TableBody tableBodyClass="divide-y">
       <!-- rows -->
       {#each search as product, row}
-        <TableBodyRow on:click={() => rowControl(row)}>
+        <TableBodyRow on:click={() => rowControl(row)} class="cursor-pointer">
           <TableBodyCell>{product.productName}</TableBodyCell>
           <TableBodyCell
             tdClass="hidden sm:table-cell sm:px-6 sm:py-4 sm:whitespace-nowrap">

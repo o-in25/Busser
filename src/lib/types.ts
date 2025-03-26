@@ -164,6 +164,10 @@ export namespace Table {
     recipeDescriptionId?: number,
     recipeDescription: string | null,
     recipeDescriptionImageUrl: string | null
+    recipeSweetnessRating: number,
+    recipeDrynessRating: number
+    recipeStrengthRating: number
+    recipeVersatilityRating: number
   }
 
   export type RecipeStep = {
@@ -219,6 +223,11 @@ export namespace View {
     recipeDescriptionImageUrl: string | null,
     recipeImageUrl: string | null,
     recipeCategoryDescriptionImageUrl: string | null
+
+    recipeSweetnessRating: number,
+    recipeDrynessRating: number
+    recipeStrengthRating: number
+    recipeVersatilityRating: number
   };
 
   export type BasicRecipeStep = {
@@ -243,6 +252,9 @@ export namespace View {
   }
 }
 
+
+// TODO: change this to use the view
+// we have way too many overlapping types
 export namespace QueryRequest {
   export type Recipe = {
     recipeId?: number,
@@ -250,6 +262,10 @@ export namespace QueryRequest {
     recipeCategoryId: number,
     recipeDescription: string
     recipeTechniqueDescriptionId: number
+    recipeSweetnessRating: number,
+    recipeDrynessRating: number
+    recipeStrengthRating: number
+    recipeVersatilityRating: number
   }
 
   export type RecipeSteps = {

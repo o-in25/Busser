@@ -11,6 +11,7 @@
 		Modal,
 		Span,
 		P,
+    Range
   } from "flowbite-svelte";
   import type {
     ComponentAction,
@@ -231,6 +232,29 @@
         <FileUpload
           name="recipeImageUrl"
           signedUrl={recipe.recipeImageUrl || null}></FileUpload>
+      </div>
+    </fieldset>
+
+    <!-- rating -->
+    <fieldset>
+      <Label for="productName" class="mb-2">Ratings</Label>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="mt-4">
+          <Label for="recipeSweetnessRating" class="mb-2">Sweetness</Label>
+          <Range id="recipeSweetnessRating" name="recipeSweetnessRating" size="lg" bind:value={recipe.recipeSweetnessRating} min="0" max="10" step="0.1"/>
+        </div>
+        <div class="mt-4">
+          <Label for="recipeDrynessRating" class="mb-2">Dryness</Label>
+          <Range id="recipeDrynessRating" name="recipeDrynessRating" size="lg" bind:value={recipe.recipeDrynessRating} min="0" max="10" step="0.1" />
+        </div>
+        <div class="mt-4">
+          <Label for="recipeVersatilityRating" class="mb-2">Versatility</Label>
+          <Range id="recipeVersatilityRating" name="recipeVersatilityRating" size="lg" bind:value={recipe.recipeVersatilityRating} min="0" max="10" step="0.1"/>
+        </div>
+        <div class="mt-4">
+          <Label for="recipeStrengthRating" class="mb-2">Strength</Label>
+          <Range id="recipeStrengthRating" name="recipeStrengthRating" size="lg" bind:value={recipe.recipeStrengthRating} min="0" max="10" step="0.1" />
+        </div>
       </div>
     </fieldset>
 
