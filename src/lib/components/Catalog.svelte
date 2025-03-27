@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { BasicRecipe, GeneratedContent, Spirit } from "$lib/types";
+  import type { BasicRecipe, Spirit } from "$lib/types";
   import {
       Heading,
       P,
@@ -7,11 +7,12 @@
   import CatalogItem from "./CatalogItem.svelte";
   import FancyImage from "./FancyImage.svelte";
   import IconList from "./IconList.svelte";
+	import type { CatalogGeneratorSchema } from "$lib/server/generators/catalog-generator";
 
   // props
   export let spirit: Spirit | null;
   export let recipes: BasicRecipe[] | [];
-  export let content: GeneratedContent.Catalog;
+  export let content: CatalogGeneratorSchema
   // props
 
   const handleInput = () => {};

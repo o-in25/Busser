@@ -11,19 +11,26 @@
 		ScoreRating,
 		Accordion,
 		AccordionItem,
+		Skeleton,
 	} from 'flowbite-svelte';
 	import {EditOutline, HeartOutline} from 'flowbite-svelte-icons';
 	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
-	import { calculateOverallScore, dilutionByShaken, dilutionByStirred } from '$lib/math';
+	import {
+		calculateOverallScore,
+		dilutionByShaken,
+		dilutionByStirred,
+	} from '$lib/math';
+	import type {RecipeGeneratorSchema} from '$lib/server/generators/recipe-generator';
+	import {onMount} from 'svelte';
 
 	export let recipe: View.BasicRecipe;
 	export let recipeSteps: View.BasicRecipeStep[];
+	let content: RecipeGeneratorSchema;
 
-  let steps = recipeSteps.map(step => ({ ...step, checked: false }));
+	let steps = recipeSteps.map(step => ({...step, checked: false}));
 
-
-  // TODO: move this to shared component
+	// TODO: move this to shared component
 	const calculateAbv = () => {
 		// in ml
 		let volume = recipeSteps.reduce(
@@ -50,35 +57,88 @@
 		return `${total}% abv`;
 	};
 
+	const getScore = () => {
+		const ratingsMap = [
+			{
+				max: 0,
+				desc2: 'No Rating',
+				style: 'text-white dark:bg-gray-500 bg-gray-500',
+			},
+			{max: 1, desc2: 'Swill', style: 'text-white dark:bg-red-500 bg-red-500'},
+			{
+				max: 2,
+				desc2: 'Forgettable',
+				style: 'text-white dark:bg-red-500 bg-red-500',
+			},
+			{
+				max: 3,
+				desc2: 'Bottom Shelf',
+				style: 'text-white dark:bg-red-500 bg-red-500',
+			},
+			{
+				max: 4,
+				desc2: 'Decent',
+				style: 'text-white dark:bg-yellow-500 bg-yellow-500',
+			},
+			{
+				max: 5,
+				desc2: 'Standard Pour',
+				style: 'text-white dark:bg-yellow-500 bg-yellow-500',
+			},
+			{
+				max: 6,
+				desc2: 'Good Stuff',
+				style: 'text-white dark:bg-green-500 bg-green-500',
+			},
+			{
+				max: 7,
+				desc2: 'Top Shelf',
+				style: 'text-white dark:bg-green-500 bg-green-500',
+			},
+			{
+				max: 8,
+				desc2: "Connoisseur's Choice",
+				style: 'text-white dark:bg-green-500 bg-green-500',
+			},
+			{
+				max: 9,
+				desc2: "Bartender's Favorite",
+				style: 'text-white dark:bg-blue-500 bg-blue-500',
+			},
+		];
 
-  const getScore = () => {
-    const ratingsMap = [
-      { max: 0, desc2: "No Rating", style: "text-white dark:bg-gray-500 bg-gray-500" },
-      { max: 1, desc2: "Swill", style: "text-white dark:bg-red-500 bg-red-500" },
-      { max: 2, desc2: "Forgettable", style: "text-white dark:bg-red-500 bg-red-500" },
-      { max: 3, desc2: "Bottom Shelf", style: "text-white dark:bg-red-500 bg-red-500" },
-      { max: 4, desc2: "Decent", style: "text-white dark:bg-yellow-500 bg-yellow-500" },
-      { max: 5, desc2: "Standard Pour", style: "text-white dark:bg-yellow-500 bg-yellow-500" },
-      { max: 6, desc2: "Good Stuff", style: "text-white dark:bg-green-500 bg-green-500" },
-      { max: 7, desc2: "Top Shelf", style: "text-white dark:bg-green-500 bg-green-500" },
-      { max: 8, desc2: "Connoisseur's Choice", style: "text-white dark:bg-green-500 bg-green-500" },
-      { max: 9, desc2: "Bartender's Favorite", style: "text-white dark:bg-blue-500 bg-blue-500" },
-    ];
+		// i hate these names
+		const score = calculateOverallScore(
+			recipe.recipeVersatilityRating,
+			recipe.recipeSweetnessRating,
+			recipe.recipeDrynessRating,
+			recipe.recipeStrengthRating
+		);
+		const {desc2, style} = ratingsMap.find(({max}) => score <= max) || {
+			desc2: 'Best in House',
+			style: 'text-white dark:bg-violet-500 bg-violet-500',
+		};
+		const desc3 = calculateAbv();
+		const desc1 = score.toFixed(1);
+		return {
+			desc1,
+			desc2,
+			desc3,
+			style,
+		};
+	};
 
-    // i hate these names
-    const score = calculateOverallScore(recipe.recipeVersatilityRating, recipe.recipeSweetnessRating, recipe.recipeDrynessRating, recipe.recipeStrengthRating)
-    const { desc2, style } = ratingsMap.find(({ max }) => score <= max) || { desc2: "Best in House", style: "text-white dark:bg-violet-500 bg-violet-500" };
-    const desc3 = calculateAbv();
-    const desc1 = score.toFixed(1)
-    return {
-      desc1, desc2, desc3,
-      style
-    };
-  };
+	const {desc1, desc2, desc3, style} = getScore();
 
-  const { desc1, desc2, desc3, style} = getScore();
-
-
+  // fetch generated content on load
+	onMount(async () => {
+		const result = await fetch(`/api/generator/recipe`, {
+			method: 'POST',
+			body: JSON.stringify({recipeName: recipe.recipeName}),
+		});
+		const response = await result.json();
+		content = response;
+	});
 </script>
 
 <!-- <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased"> -->
@@ -89,7 +149,8 @@
 		<div
 			class="lg:grid lg:grid-cols-2 lg:gap-4 xl:gap-8 grid-rows-[auto_1fr] h-full">
 			<!-- image / col 1 -->
-			<div class="flex justify-center lg:justify-start shrink-0 max-w-md lg:max-w-md mx-auto">
+			<div
+				class="flex justify-center lg:justify-start shrink-0 max-w-md lg:max-w-md mx-auto">
 				<img
 					class="w-1/2 dark:hidden rounded-md"
 					src={recipe.recipeImageUrl || placeholderLight}
@@ -112,7 +173,7 @@
 					</Badge>
 				</div>
 
-        <!-- rating -->
+				<!-- rating -->
 				<div class="mt-4">
 					<ScoreRating
 						headerLabel={{
@@ -125,14 +186,14 @@
 							},
 						}}
 						ratings={[
-							{ label: 'Sweetness', rating: recipe.recipeSweetnessRating },
-							{ label: 'Dryness', rating: recipe.recipeDrynessRating },
+							{label: 'Sweetness', rating: recipe.recipeSweetnessRating},
+							{label: 'Dryness', rating: recipe.recipeDrynessRating},
 						]}
 						ratings2={[
-							{ label: 'Strength', rating: recipe.recipeStrengthRating },
-							{ label: 'Versatility', rating: recipe.recipeVersatilityRating },
+							{label: 'Strength', rating: recipe.recipeStrengthRating},
+							{label: 'Versatility', rating: recipe.recipeVersatilityRating},
 						]}
-            desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"/>
+						desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}" />
 				</div>
 
 				<!-- actions -->
@@ -154,32 +215,46 @@
 				</P> -->
 			</div>
 
-			<div class="mt-6 sm:mt-8 lg:mt-0">
-
-        
-      </div>
+			<div class="mt-6 sm:mt-8 lg:mt-0"></div>
 		</div>
-    <Accordion flush>
-      <AccordionItem>
-        <span slot="header">Description</span>
-        <p class="mb-2 text-gray-500 dark:text-gray-400">{recipe.recipeDescription}</p>
-      </AccordionItem>
-      <AccordionItem>
-        <span slot="header">Steps</span>
-        <ul
-        class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600">
-        {#each steps as recipeStep, step}
-          <li>
-            <Checkbox class="p-3" bind:checked={steps[step].checked}>
-              <span class={recipeStep.checked ? "line-through" : ""}>
-                {recipeStep.recipeStepDescription}
-              </span>
-            </Checkbox>
-          </li>
-        {/each}
-      </ul>
+		<Accordion flush>
+			<AccordionItem>
+				<span slot="header">Description</span>
+				<p class="my-8 text-gray-500 dark:text-gray-400">
+					{recipe.recipeDescription}
+				</p>
+			</AccordionItem>
+			<AccordionItem>
+				<span slot="header">Steps</span>
+				<ul
+					class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600">
+					{#each steps as recipeStep, step}
+						<li>
+							<Checkbox
+								class="p-3"
+								bind:checked={steps[step].checked}>
+								<span class={recipeStep.checked ? 'line-through' : ''}>
+									{recipeStep.recipeStepDescription}
+								</span>
+							</Checkbox>
+						</li>
+					{/each}
+				</ul>
+			</AccordionItem>
 
-      </AccordionItem>
-    </Accordion>
+			<!-- history -->
+			<AccordionItem>
+				<span slot="header">History & Trivia</span>
+				<div class="my-8">
+					{#if !content}
+						<Skeleton
+							size="sm"
+							class="!max-w-full" />
+					{:else}
+						<P>{content.history}</P>
+					{/if}
+				</div>
+			</AccordionItem>
+		</Accordion>
 	</div>
 </section>

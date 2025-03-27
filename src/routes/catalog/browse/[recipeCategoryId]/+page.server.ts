@@ -2,7 +2,7 @@ import { getBasicRecipes, getSpirit } from '$lib/server/core';
 import type { BasicRecipe } from '$lib/types';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { CatalogGenerator } from '$lib/server/generators/catalog';
+import { CatalogGenerator } from '$lib/server/generators/catalog-generator';
 
 export const load = (async ({ params }) => {
   const spirit = await getSpirit(params.recipeCategoryId);

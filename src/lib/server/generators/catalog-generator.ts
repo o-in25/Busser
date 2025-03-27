@@ -8,7 +8,7 @@ const schema = z.object({
   avoidWith: z.array(z.string()),
 });
 
-type CatalogGeneratorSchema = z.infer<typeof schema>;
+export type CatalogGeneratorSchema = z.infer<typeof schema>;
 
 export class CatalogGenerator extends LlmClient<CatalogGeneratorSchema> implements IGenerator<CatalogGeneratorSchema> {
   constructor() {
