@@ -277,3 +277,4 @@ export namespace QueryRequest {
   }
 
 }
+

@@ -23,6 +23,7 @@
   let steps = recipeSteps.map(step => ({ ...step, checked: false }));
 
 
+  // TODO: move this to shared component
 	const calculateAbv = () => {
 		// in ml
 		let volume = recipeSteps.reduce(
