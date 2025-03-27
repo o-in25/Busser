@@ -11,9 +11,12 @@
     Card,
     Secondary,
     Popover,
+		Button,
   } from "flowbite-svelte";
   import {
     ArrowRightOutline,
+    EditOutline,
+    HeartOutline,
     InfoCircleSolid,
   } from "flowbite-svelte-icons";
   import FancyButton from "./FancyButton.svelte";
@@ -139,9 +142,18 @@
           {/if}
 
           <div class="w-40 mt-4">
-            <FancyButton href="/inventory/{product.productId}/edit">
-              Edit
-            </FancyButton>
+            <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
+              <Button
+                color="alternative"
+                href="/inventory/{product.productId}/edit">
+                <EditOutline />
+                <span class="ms-2">Edit</span>
+              </Button>
+              <!-- <Button color="primary">
+                <HeartOutline />
+                <span class="ms-2">Add to favorites</span>
+              </Button> -->
+            </div>
           </div>
         </div>
       </Card>
@@ -179,8 +191,13 @@
             </div>
           {/if}
           <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
-          <div class="gost">
-            <FancyButton href="/inventory/{product.productId}/edit">Edit</FancyButton>
+            <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
+              <Button
+                color="alternative"
+                href="/inventory/{product.productId}/edit">
+                <EditOutline />
+                <span class="ms-2">Edit</span>
+              </Button>
           </div>
         </div>
       </Card>

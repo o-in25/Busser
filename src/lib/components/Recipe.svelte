@@ -54,7 +54,7 @@
 		}
 		let total = abv / volume;
 		total = (Math.ceil(total * 100) / 100) * 100;
-		return `${total}% abv`;
+		return `${total.toFixed(0)}% abv`;
 	};
 
 	const getScore = () => {
