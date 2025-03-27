@@ -17,6 +17,7 @@
     InfoCircleSolid,
   } from "flowbite-svelte-icons";
   import FancyButton from "./FancyButton.svelte";
+	import { weightedMean } from "$lib/math";
   export let product: Product;
 
   let headerLabel = {
@@ -33,154 +34,40 @@
   let productImage = product?.productImageUrl || placeholder;
   const imageLoadError = () => productImage = placeholder
 
-  const weightedMean = (arrValues: number[], arrWeights: number[]) => {
-    const result = arrValues
-      .map((value, i) => {
-        const weight = arrWeights[i]
-        const sum = value * weight
-        return [sum, weight]
-      })
-      .reduce((p, c) => [p[0] + c[0], p[1] + c[1]], [0, 0])
-
-    return result[0] / result[1]
-  }
-
   const generateRatings = () => {
-    let ratings = [
+    const ratings = [
       { label: "Dryness", rating: product.productDrynessRating || 0.0 },
       { label: "Sweetness", rating: product.productSweetnessRating || 0.0 },
     ];
 
-    let ratings2 = [
+    const ratings2 = [
       { label: "Strength", rating: product.productStrengthRating || 0.0 },
       { label: "Versatility", rating: product.productVersatilityRating || 0.0 },
     ];
-    let vec: number[] = ratings.concat(ratings2).map(({ rating }) => rating);
+    
+    const ratingsMap = [
+      { max: 0, desc2: "No Rating", style: "text-white dark:bg-gray-500 bg-gray-500" },
+      { max: 1, desc2: "Swill", style: "text-white dark:bg-red-500 bg-red-500" },
+      { max: 2, desc2: "Forgettable", style: "text-white dark:bg-red-500 bg-red-500" },
+      { max: 3, desc2: "Bottom Shelf", style: "text-white dark:bg-red-500 bg-red-500" },
+      { max: 4, desc2: "Decent", style: "text-white dark:bg-yellow-500 bg-yellow-500" },
+      { max: 5, desc2: "Standard Pour", style: "text-white dark:bg-yellow-500 bg-yellow-500" },
+      { max: 6, desc2: "Good Stuff", style: "text-white dark:bg-green-500 bg-green-500" },
+      { max: 7, desc2: "Top Shelf", style: "text-white dark:bg-green-500 bg-green-500" },
+      { max: 8, desc2: "Connoisseur's Choice", style: "text-white dark:bg-green-500 bg-green-500" },
+      { max: 9, desc2: "Bartender's Favorite", style: "text-white dark:bg-blue-500 bg-blue-500" },
+    ];
 
-    // let avg =
-    //   Math.round((vec.reduce((acc, curr) => acc + curr, 0) / vec.length) * 10) /
-    //   10;
-    let avg = weightedMean(vec, [6.5, 3.5, 0.95, 11.5])
-    if(avg === 0) {
-      return {
-        ratings,
-        ratings2,
-        desc1: Number(0).toFixed(1),
-        desc2: "No Rating",
-        style: "text-white dark:bg-gray-500 bg-gray-500",
-      };
-    }
-    if(avg <= 1) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Swill",
-        style: "text-white dark:bg-red-500 bg-red-500",
-      };
-    }
-    if(avg <= 2) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Forgettable",
-        style: "text-white dark:bg-red-500 bg-red-500",
-      };
-    }
-
-    if (avg <= 3) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Bottom Shelf",
-        style: "text-white dark:bg-red-500 bg-red-500",
-      };
-    }
-
-    if (avg <= 4) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Decent",
-        style: "text-white dark:bg-yellow-500 bg-yellow-500",
-      };
-    }
-
-    if (avg <= 5) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Standard Pour",
-        style: "text-white dark:bg-yellow-500 bg-yellow-500",
-      };
-    }
-
-    if (avg <= 6) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Good Stuff",
-        style: "text-white dark:bg-green-500 bg-green-500",
-      };
-    }
-
-    if (avg <= 7) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Top Shelf",
-        style: "text-white dark:bg-green-500 bg-green-500",
-      };
-    }
-
-    if (avg <= 8) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Connoisseur's Choice",
-        style: "text-white dark:bg-green-500 bg-green-500",
-      };
-    }
-
-    if (avg <= 9) {
-      //'dark:bg-red-500 bg-red-500'
-      return {
-        ratings,
-        ratings2,
-        desc1: avg.toFixed(1),
-        desc2: "Bartender's Favorite",
-        style: "text-white dark:bg-blue-500 bg-blue-500",
-      };
-    }
-
+    let vec: number[] | number = ratings.concat(ratings2).map(({ rating }) => rating);
+    vec = weightedMean(vec, [6.5, 3.5, 0.95, 11.5])
+    const { desc2, style } = ratingsMap.find(({ max }) => vec <= max) || { desc2: "Best in House", style: "text-white dark:bg-violet-500 bg-violet-500" };
     return {
       ratings,
       ratings2,
-      desc1: avg.toFixed(1),
-      desc2: "Best in House",
-      style: "text-white dark:bg-violet-500 bg-violet-500",
+      desc1: vec.toFixed(1),
+      desc2,
+      style
     };
-  };
-
-  const parseSize = (ml: number) => {
-    if (ml === 0) return "N/A";
-    if (ml < 1000) return `${ml} ML`;
-    return `${ml / 1000} L`;
   };
 
   const { ratings, ratings2, desc1, desc2, style } = generateRatings();

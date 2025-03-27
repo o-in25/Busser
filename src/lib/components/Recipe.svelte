@@ -15,19 +15,15 @@
 	import {EditOutline, HeartOutline} from 'flowbite-svelte-icons';
 	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
+	import { calculateOverallScore, dilutionByShaken, dilutionByStirred } from '$lib/math';
 
 	export let recipe: View.BasicRecipe;
 	export let recipeSteps: View.BasicRecipeStep[];
 
   let steps = recipeSteps.map(step => ({ ...step, checked: false }));
 
-	// TODO: maybe do this server side?
-	const dilutionByShaken = (abv: number) =>
-		1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;
-	const dilutionByStirred = (abv: number) =>
-		-1.21 * Math.pow(abv, 2) + 1.246 * abv + 0.145;
 
-	const strength = (() => {
+	const calculateAbv = () => {
 		// in ml
 		let volume = recipeSteps.reduce(
 			(acc, {productIdQuantityInMilliliters}) =>
@@ -51,7 +47,37 @@
 		let total = abv / volume;
 		total = (Math.ceil(total * 100) / 100) * 100;
 		return `${total}% abv`;
-	})();
+	};
+
+
+  const getScore = () => {
+    const ratingsMap = [
+      { max: 0, desc2: "No Rating", style: "text-white dark:bg-gray-500 bg-gray-500" },
+      { max: 1, desc2: "Swill", style: "text-white dark:bg-red-500 bg-red-500" },
+      { max: 2, desc2: "Forgettable", style: "text-white dark:bg-red-500 bg-red-500" },
+      { max: 3, desc2: "Bottom Shelf", style: "text-white dark:bg-red-500 bg-red-500" },
+      { max: 4, desc2: "Decent", style: "text-white dark:bg-yellow-500 bg-yellow-500" },
+      { max: 5, desc2: "Standard Pour", style: "text-white dark:bg-yellow-500 bg-yellow-500" },
+      { max: 6, desc2: "Good Stuff", style: "text-white dark:bg-green-500 bg-green-500" },
+      { max: 7, desc2: "Top Shelf", style: "text-white dark:bg-green-500 bg-green-500" },
+      { max: 8, desc2: "Connoisseur's Choice", style: "text-white dark:bg-green-500 bg-green-500" },
+      { max: 9, desc2: "Bartender's Favorite", style: "text-white dark:bg-blue-500 bg-blue-500" },
+    ];
+
+    // i hate these names
+    const score = calculateOverallScore(recipe.recipeVersatilityRating, recipe.recipeSweetnessRating, recipe.recipeDrynessRating, recipe.recipeStrengthRating)
+    const { desc2, style } = ratingsMap.find(({ max }) => score <= max) || { desc2: "Best in House", style: "text-white dark:bg-violet-500 bg-violet-500" };
+    const desc3 = calculateAbv();
+    const desc1 = score.toFixed(1)
+    return {
+      desc1, desc2, desc3,
+      style
+    };
+  };
+
+  const { desc1, desc2, desc3, style} = getScore();
+
+
 </script>
 
 <!-- <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased"> -->
@@ -89,9 +115,9 @@
 				<div class="mt-4">
 					<ScoreRating
 						headerLabel={{
-							desc1: '8.7',
-							desc2: 'Excellent',
-							desc3: strength,
+							desc1,
+							desc2,
+							desc3,
 							link: {
 								label: '',
 								url: '',
@@ -104,7 +130,8 @@
 						ratings2={[
 							{ label: 'Strength', rating: recipe.recipeStrengthRating },
 							{ label: 'Versatility', rating: recipe.recipeVersatilityRating },
-						]} />
+						]}
+            desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"/>
 				</div>
 
 				<!-- actions -->
