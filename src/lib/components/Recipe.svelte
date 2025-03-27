@@ -9,6 +9,8 @@
 		Progressbar,
 		Badge,
 		ScoreRating,
+		Accordion,
+		AccordionItem,
 	} from 'flowbite-svelte';
 	import {EditOutline, HeartOutline} from 'flowbite-svelte-icons';
 	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
@@ -58,15 +60,15 @@
 		<!-- lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16 grid-rows-[auto_1fr] -->
 		<!-- grid -->
 		<div
-			class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16 grid-rows-[auto_1fr] h-full">
+			class="lg:grid lg:grid-cols-2 lg:gap-4 xl:gap-8 grid-rows-[auto_1fr] h-full">
 			<!-- image / col 1 -->
-			<div class="shrink-0 max-w-md lg:max-w-md mx-auto">
+			<div class="flex justify-center lg:justify-start shrink-0 max-w-md lg:max-w-md mx-auto">
 				<img
-					class="w-full dark:hidden rounded-md"
+					class="w-1/2 dark:hidden rounded-md"
 					src={recipe.recipeImageUrl || placeholderLight}
 					alt="" />
 				<img
-					class="w-full hidden dark:block rounded-md"
+					class="w-1/2 hidden dark:block rounded-md"
 					src={recipe.recipeImageUrl || placeholderDark}
 					alt="" />
 			</div>
@@ -119,29 +121,37 @@
 					</Button>
 				</div>
 
-				<hr class="my-4 md:my-6 border-gray-200 dark:border-gray-800" />
-
-				<P color="text-gray-500 dark:text-gray-400">
+				<!-- <P color="text-gray-500 dark:text-gray-400">
 					{recipe.recipeDescription}
-				</P>
+				</P> -->
 			</div>
 
-			<div class="mt-6 sm:mt-8 lg:mt-0"></div>
+			<div class="mt-6 sm:mt-8 lg:mt-0">
+
+        
+      </div>
 		</div>
-		<div class="mb-1 text-base font-medium text-gray-500 dark:text-gray-400">
-			Steps
-		</div>
-		<ul
-			class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600">
-			{#each steps as recipeStep, step}
-				<li>
-					<Checkbox class="p-3" bind:checked={steps[step].checked}>
-            <span class={recipeStep.checked ? "line-through" : ""}>
-              {recipeStep.recipeStepDescription}
-            </span>
-          </Checkbox>
-				</li>
-			{/each}
-		</ul>
+    <Accordion flush>
+      <AccordionItem>
+        <span slot="header">Description</span>
+        <p class="mb-2 text-gray-500 dark:text-gray-400">{recipe.recipeDescription}</p>
+      </AccordionItem>
+      <AccordionItem>
+        <span slot="header">Steps</span>
+        <ul
+        class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600">
+        {#each steps as recipeStep, step}
+          <li>
+            <Checkbox class="p-3" bind:checked={steps[step].checked}>
+              <span class={recipeStep.checked ? "line-through" : ""}>
+                {recipeStep.recipeStepDescription}
+              </span>
+            </Checkbox>
+          </li>
+        {/each}
+      </ul>
+
+      </AccordionItem>
+    </Accordion>
 	</div>
 </section>

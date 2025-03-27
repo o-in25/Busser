@@ -30,14 +30,27 @@
   import { scale } from "svelte/transition";
   import { notificationStore } from "../../stores";
 
+
+  // const ML_TO_OZ = 29.5735
+
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
 
+  const units = {
+    'ml': { toMl: 1, fromMl: (ml) => ml },
+    'oz': { toMl: 30, fromMl: (ml: number) => ml / 30 },
+    'dash': { toMl: 0.92, fromMl: (ml: number) => ml / 0.92 },
+    'cube': { toMl: 2.5, fromMl: (ml: number) => ml / 2.5 },
+  };
+
+  const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
+  const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);
+
   // recipe model
-  recipeSteps = recipeSteps.map((step) => ({ ...step, key: uuidv4() }));
+  recipeSteps = recipeSteps.map((step) => ({ ...step, productIdQuantityInMilliliters: convertFromMl(step.productIdQuantityUnit, step.productIdQuantityInMilliliters), key: uuidv4() }));
   const createStep = () => ({
     recipeId: recipe.recipeId || 0,
     recipeStepId: 0,
@@ -59,6 +72,7 @@
 
   let steps = recipeSteps.length ? recipeSteps : [createStep()];
 
+
   const addStep = () => {
     steps = [...steps, createStep()];
   };
@@ -69,6 +83,10 @@
       steps = steps;
     }
   };
+
+  // const getRecipeSteps = () => {
+  //   const recipeSteps = steps.map((step: View.BasicRecipeStep) => ({ ...step, productUnitSizeInMilliliters: convertToMl(step.productIdQuantityUnit, step.productUnitSizeInMilliliters)}))
+  // }
 
   const deleteRecipe = async() => {
     const response = await fetch(`/api/catalog/${recipe.recipeId}`, {
@@ -111,7 +129,10 @@
     on:submit
     use:enhance={({ formData }) => {
       disabled = true;
-      formData.append("recipeSteps", JSON.stringify(steps));
+      let json = steps.map((step) => ({ ...step, productIdQuantityInMilliliters: convertToMl(step.productIdQuantityUnit, step.productIdQuantityInMilliliters)}));
+
+      console.log(json)
+      formData.append("recipeSteps", JSON.stringify(json));
       return async ({ result }) => {
         if (result.type === "redirect") {
           goto(result.location);
@@ -192,19 +213,6 @@
       <!-- served -->
       <div class="mb-6">
         <Label for="recipeTechniqueDescriptionId" class="mb-2">Served</Label>
-        <!-- <ul
-          class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600">
-          {#each preparationMethods as prepMethod}
-            <li class="w-full border-none">
-              <Radio name="recipeTechniqueDescriptionId" class="px-3 pt-1" value={prepMethod.recipeTechniqueDescriptionId}>
-                {prepMethod.recipeTechniqueDescriptionText}
-              </Radio>
-              <Helper id="helper-checkbox-text" class="ps-9 pb-1">
-                Adds {prepMethod.recipeTechniqueDilutionPercentage}% dilution
-              </Helper>
-            </li>
-          {/each}
-        </ul> -->
         <ButtonGroup
           class="grid grid-flow-col justify-items-stretch rounded-sm shadow-sm">
           {#each preparationMethods as prepMethod}
