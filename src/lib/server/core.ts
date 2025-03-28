@@ -86,8 +86,9 @@ export async function getInventory(
       dbResult = dbResult.where("productName", "like", `%${filter.productName}%`);
     }
 
-    if(filter?.productInStockQuantity) {
-      dbResult = dbResult.andWhere("productInStockQuantity", ">=", `%${filter.productInStockQuantity}%`);
+    if(typeof filter?.productInStockQuantity !== 'undefined') {
+      console.log(filter.productInStockQuantity)
+      dbResult = dbResult.andWhere("productInStockQuantity", "=", filter.productInStockQuantity);
     }
 
     let { data, pagination } = await dbResult

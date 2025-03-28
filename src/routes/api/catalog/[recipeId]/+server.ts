@@ -4,7 +4,6 @@ import { deleteCatalogItem, deleteInventoryItem } from '$lib/server/core';
 import { StatusCodes } from 'http-status-codes';
 
 export const DELETE: RequestHandler = async ({ params }) => {
-  console.log('here')
   let { recipeId } = params as any;
 
   

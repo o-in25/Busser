@@ -46,3 +46,28 @@ export const calculateOverallScore = (versatility: number, sweetness: number, dr
   return totalScore;
 }
 
+export const calculateAbv = (recipeSteps: { productIdQuantityInMilliliters: number, productProof: number}[], recipeTechniqueDescriptionId: number) => {
+  // in ml
+  let volume = recipeSteps.reduce(
+    (acc, {productIdQuantityInMilliliters}) =>
+      acc + productIdQuantityInMilliliters,
+    0
+  );
+  let abv = recipeSteps.reduce(
+    (acc, {productProof, productIdQuantityInMilliliters}) => {
+      acc += (productProof / 2 / 100) * productIdQuantityInMilliliters;
+      return acc;
+    },
+    0
+  );
+
+  if (recipeTechniqueDescriptionId === 1) {
+    volume += dilutionByStirred(abv / 100);
+  } else {
+    // TODO: we don't have a formula for dry shakes
+    volume += dilutionByShaken(abv / 100);
+  }
+  let total = abv / volume;
+  total = (Math.ceil(total * 100) / 100) * 100;
+  return `${total.toFixed(0)}% abv`;
+};

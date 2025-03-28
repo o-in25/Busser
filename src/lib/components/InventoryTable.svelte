@@ -29,6 +29,7 @@
 		ChevronRightOutline,
 		CloseCircleOutline,
 		CloseCircleSolid,
+		FilterOutline,
 		InfoCircleSolid,
 		MicrophoneSolid,
 		PlusOutline,
@@ -162,13 +163,15 @@
   <div class="flex my-2">
     <div class="relative">
       <Button class="rounded-e-none whitespace-nowrap border border-e-0 border-primary-700">
-        <ChevronDownOutline class="w-5 h-5" />
+        <FilterOutline class="w-5 h-5"/>
       </Button>
-      <Dropdown classContainer="w-40">
-        <DropdownItem href="/inventory?productName=rum2&page=1">Dashboard</DropdownItem>
-        <DropdownItem>Settings</DropdownItem>
-        <DropdownItem>Earnings</DropdownItem>
-        <DropdownItem>Sign out</DropdownItem>
+      <Dropdown classContainer="w-40 ">
+        <div slot="header" class="px-4 py-2">
+          <span class="block text-sm text-gray-900 dark:text-white">Sort By...</span>
+        </div>
+        <DropdownItem href="/inventory">All</DropdownItem>
+        <DropdownItem href="/inventory?productInStockQuantity=0">Out of Stock</DropdownItem>
+        <DropdownItem>In Stock</DropdownItem>
       </Dropdown>
     </div>
     <Search size="md" class="flex gap-2 items-center rounded-none py-2.5" placeholder="Search..." bind:value={searchTerm}>
@@ -181,7 +184,7 @@
       </button>
       {/if}
     </Search>    
-    <Button class="p-2.5! rounded-s-none" >
+    <Button class="p-2.5! rounded-s-none" href="/inventory/add">
       <PlusOutline class="w-5 h-5" />
     </Button>
   </div >

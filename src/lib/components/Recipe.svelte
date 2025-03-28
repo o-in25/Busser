@@ -17,6 +17,7 @@
 	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
 	import {
+	calculateAbv,
 		calculateOverallScore,
 		dilutionByShaken,
 		dilutionByStirred,
@@ -29,33 +30,8 @@
 	let content: RecipeGeneratorSchema;
 
 	let steps = recipeSteps.map(step => ({...step, checked: false}));
-
 	// TODO: move this to shared component
-	const calculateAbv = () => {
-		// in ml
-		let volume = recipeSteps.reduce(
-			(acc, {productIdQuantityInMilliliters}) =>
-				acc + productIdQuantityInMilliliters,
-			0
-		);
-		let abv = recipeSteps.reduce(
-			(acc, {productProof, productIdQuantityInMilliliters}) => {
-				acc += (productProof / 2 / 100) * productIdQuantityInMilliliters;
-				return acc;
-			},
-			0
-		);
 
-		if (recipe.recipeTechniqueDescriptionId === 1) {
-			volume += dilutionByStirred(abv / 100);
-		} else {
-			// TODO: we don't have a formula for dry shakes
-			volume += dilutionByShaken(abv / 100);
-		}
-		let total = abv / volume;
-		total = (Math.ceil(total * 100) / 100) * 100;
-		return `${total.toFixed(0)}% abv`;
-	};
 
 	const getScore = () => {
 		const ratingsMap = [
@@ -118,7 +94,7 @@
 			desc2: 'Best in House',
 			style: 'text-white dark:bg-violet-500 bg-violet-500',
 		};
-		const desc3 = calculateAbv();
+		const desc3 = calculateAbv(recipeSteps, recipe.recipeTechniqueDescriptionId || 1);
 		const desc1 = score.toFixed(1);
 		return {
 			desc1,
