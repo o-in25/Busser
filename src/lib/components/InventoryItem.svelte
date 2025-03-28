@@ -105,13 +105,13 @@
       <!-- svelte-ignore a11y-missing-attribute -->
       <img class="hidden" src={product.productImageUrl} on:error={imageLoadError}>
       <Card
-        img={productImage}
         horizontal
         size="xl"
-        class="!w-full shadow-2xl"
+        class="!w-full shadow-2xl object-contai"
         padding="xl"
         on:error={imageLoadError}
         >
+        <img slot="img" class="" src={productImage}>
         <div class="card-content">
           <Heading tag="h5">
              {product.productName}
@@ -123,14 +123,13 @@
               </Secondary>
             {/if}
           </Heading>
-          {#if isBaseSpirit(product.categoryName)}
-            <Badge class="my-1">Base Spirit</Badge>
-          {/if}
+          {#if isBaseSpirit(product.categoryName)}<Badge class="my-1">Base Spirit</Badge>{/if}
+          {#if product.productInStockQuantity < 1}<Badge class="my-1" color="red">Out of Stock</Badge>{/if}
           <p
             class="my-1 font-normal text-gray-700 dark:text-gray-400 leading-tight">
             {product.productDescription || product.categoryDescription}
           </p>
-          {#if product.productProof > 0}
+          {#if isBaseSpirit(product.categoryName)}
             <div class="py-4">
               <ScoreRating
                 desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
@@ -172,9 +171,8 @@
               </Secondary>
             {/if}
           </Heading>
-          {#if isBaseSpirit(product.categoryName)}
-            <Badge class="my-1">Base Spirit</Badge>
-          {/if}
+          {#if isBaseSpirit(product.categoryName)}<Badge class="my-1">Base Spirit</Badge>{/if}
+          {#if product.productInStockQuantity < 1}<Badge class="my-1">Out of Stock</Badge>{/if}
           <p
             class="my-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
             {product.productDescription || product.categoryDescription}
