@@ -21,7 +21,7 @@
 		"@types/crypto-js": "^4.2.2",
 		"autoprefixer": "^10.4.19",
 		"flowbite": "^2.4.1",
-		"flowbite-svelte": "^0.46.15",
+		"flowbite-svelte": "^0.47.4",
 		"flowbite-svelte-icons": "^1.6.1",
 		"postcss": "^8.4.40",
 		"prettier": "^3.2.5",

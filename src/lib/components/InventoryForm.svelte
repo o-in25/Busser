@@ -13,6 +13,7 @@
     Span,
     Textarea,
     Toggle,
+		Helper,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
@@ -88,14 +89,12 @@
           type="text"
           id="productName"
           name="productName"
-          placeholder="Plantation 3 Star"
           required
           value={product?.productName} />
       </div>
       <div class="w-full">
         <Autocomplete
           label="Category"
-          placeholder="Whiskey"
           fetchUrl="/api/select/categories"
           name="categoryId"
           key={product?.categoryName}
@@ -118,7 +117,7 @@
       </div>
       <div>
         <Label for="size" class="mb-2">Size</Label>
-        <Input for="productUnitSizeInMilliliters" let:props required>
+        <Input let:props required>
           <input
             id="productUnitSizeInMilliliters"
             name="productUnitSizeInMilliliters"
@@ -131,7 +130,7 @@
       </div>
       <div>
         <Label for="abv" class="mb-2">Proof</Label>
-        <Input for="productProof" let:props required>
+        <Input let:props required>
           <input
             id="productProof"
             name="productProof"
@@ -139,7 +138,7 @@
             max="200"
             {...props}
             bind:value={productProof} />
-          <div slot="right" class="font-bold">%</div>
+          <!-- <div slot="right" class="font-bold">%</div> -->
         </Input>
       </div>
     </div>
@@ -151,6 +150,10 @@
         <div class="mt-4">
           <Label for="productSweetnessRating" class="mb-2">Sweetness</Label>
           <Range id="productSweetnessRating" name="productSweetnessRating" size="lg" bind:value={productSweetnessRating} min="0" max="10" step="0.1"/>
+          <!-- <Helper class="text-xs">
+            We’ll never share your details. Read our <a href="/" class="font-medium text-primary-600 hover:underline dark:text-primary-500"> Privacy Policy </a>
+            .
+          </Helper> -->
         </div>
         <div class="mt-4">
           <Label for="productDrynessRating" class="mb-2">Dryness</Label>
@@ -180,7 +183,7 @@
       <div class="mt-4">
           <Label for="textarea-id" class="mb-2">Description</Label>
           <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-          <Textarea name="productDescription" id="productDescription" rows="4" bind:value={productDescription}/>
+          <Textarea name="productDescription" id="productDescription" rows={4} bind:value={productDescription}/>
         </div>
     </div>
 

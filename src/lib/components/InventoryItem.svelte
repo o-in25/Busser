@@ -15,6 +15,7 @@
   } from "flowbite-svelte";
   import {
     ArrowRightOutline,
+    ChevronRightOutline,
     EditOutline,
     HeartOutline,
     InfoCircleSolid,
@@ -105,30 +106,45 @@
       <!-- svelte-ignore a11y-missing-attribute -->
       <img class="hidden" src={product.productImageUrl} on:error={imageLoadError}>
       <Card
+        img={productImage}
         horizontal
         size="xl"
-        class="!w-full shadow-2xl object-contai"
-        padding="xl"
+        class="!w-full shadow-2xl"
+        padding="sm"
+        imgClass=""
         on:error={imageLoadError}
         >
-        <img slot="img" class="" src={productImage}>
         <div class="card-content">
-          <Heading tag="h5">
-             {product.productName}
-             {#if product.productName !== product.categoryName}
-              <Secondary class="block">
-                <button class="flex items-center" id="popover-image">
-                  {product.categoryName}&nbsp;<InfoCircleSolid class="w-5 h-5" />
-                </button>
-              </Secondary>
-            {/if}
-          </Heading>
-          {#if isBaseSpirit(product.categoryName)}<Badge class="my-1">Base Spirit</Badge>{/if}
-          {#if product.productInStockQuantity < 1}<Badge class="my-1" color="red">Out of Stock</Badge>{/if}
-          <p
-            class="my-1 font-normal text-gray-700 dark:text-gray-400 leading-tight">
-            {product.productDescription || product.categoryDescription}
-          </p>
+
+          <!-- heading -->
+          <div>
+            <Heading tag="h5">
+               {product.productName}
+               {#if product.productName !== product.categoryName}
+                <Secondary class="block">
+                  <button class="flex items-center" id="popover-image">
+                    {product.categoryName}&nbsp;<InfoCircleSolid class="w-5 h-5" />
+                  </button>
+                </Secondary>
+              {/if}
+              <!-- tags -->
+              <div>
+                {#if isBaseSpirit(product.categoryName)}<Badge class="my-1">Base Spirit</Badge>{/if}
+                {#if product.productInStockQuantity < 1}<Badge class="my-1" color="red">Out of Stock</Badge>{/if}
+              </div>
+            </Heading>
+          </div>
+
+
+          <!-- desc -->
+          <div class="py-4">
+            <p
+              class="my-1 font-normal text-gray-700 dark:text-gray-400 leading-tight">
+              {product.productDescription || product.categoryDescription}
+            </p>
+          </div>
+
+          <!-- score -->
           {#if isBaseSpirit(product.categoryName)}
             <div class="py-4">
               <ScoreRating
@@ -139,34 +155,33 @@
                 {ratings2} />
             </div>
           {/if}
-
-          <div class="w-40 mt-4">
-            <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-              <Button
-                color="alternative"
-                href="/inventory/{product.productId}/edit">
-                <EditOutline />
-                <span class="ms-2">Edit</span>
-              </Button>
-              <!-- <Button color="primary">
-                <HeartOutline />
-                <span class="ms-2">Add to favorites</span>
-              </Button> -->
-            </div>
+          <div class="sm:gap-4 sm:items-center sm:flex">
+            <Button
+              color="alternative"
+              href="/inventory/{product.productId}/edit">
+              <EditOutline />
+              <span class="ms-2">Edit</span>
+            </Button>
+            <!-- <Button color="primary">
+              <HeartOutline />
+              <span class="ms-2">Add to favorites</span>
+            </Button> -->
           </div>
         </div>
       </Card>
     </div>
     <!-- mobile only -->
     <div class="sm:hidden flex justify-center px-2 py-4 md:pb-4 w-full">
-      <Card img={product.productImageUrl || placeholder} size="md" href={null} padding="sm" class="shadow-2xl">
+      <Card img={product.productImageUrl || placeholder} size="md" padding="sm" class="shadow-2xl">
         <div class="card-content">
           <Heading tag="h5">
              {product.productName}
              {#if product.productName !== product.categoryName}
-              <Secondary class="block">
-                <button class="flex items-center" id="popover-image" on:click|preventDefault={() => setPopoverData(product)}>
-                  {product.categoryName}&nbsp;<InfoCircleSolid class="w-5 h-5" />
+              <Secondary class="flex items-center">
+                <span class="">{product.categoryName}</span>
+                <button id="popover-image" on:click|preventDefault={() => setPopoverData(product)}>
+                  <InfoCircleSolid class="w-5 h-5 ms-1.5" />
+                  <span class="sr-only">Show information</span>
                 </button>
               </Secondary>
             {/if}
@@ -177,7 +192,7 @@
             class="my-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
             {product.productDescription || product.categoryDescription}
           </p>
-          {#if product.productProof > 0}
+          {#if isBaseSpirit(product.categoryName)}
             <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
             <div class="px-2 md:pb-4">
               <ScoreRating
@@ -187,8 +202,9 @@
                 {ratings}
                 {ratings2} />
             </div>
+            <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+
           {/if}
-          <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
             <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
               <Button
                 color="alternative"
@@ -205,20 +221,11 @@
   <ImagePlaceholder />
 {/if}
 
-<Popover triggeredBy="#popover-image" class="w-96 text-sm font-light" defaultClass="">
-  <div class="space-y-2 p-3">
-    <h3 class="font-semibold text-gray-900 dark:text-white">
-      {product.categoryName}
-      <h3>
-        {product.categoryDescription}
-        <!-- <p class="text-gray-500 dark:text-gray-500">Italy is located in the middle of the Mediterranean Sea, in Southern Europe it is also considered part of Western Europe. A unitary parliamentary republic with Rome as its capital and largest city.</p>
-        <a href="/" class="flex items-center font-medium text-primary-600 dark:text-primary-500 dark:hover:text-primary-600 hover:text-primary-700">
-          Read more <ChevronRightOutline class="w-2 h-2 ms-1.5 text-primary-600 dark:text-primary-500" />
-        </a> -->
-      </h3>
-      <A aClass="font-medium hover:underline flex items-center py-2">Edit<ArrowRightOutline class="ms-1 h-5 w-5"/>
-      </A>
-    </h3>
+<Popover triggeredBy="#popover-image" class="!w-1/2 !max-w-2/3 text-sm font-light text-gray-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400" placement="top-start" title={product.categoryName}>
+  <div class="space-y-2">
+    <p>{product.categoryDescription}</p>
+    <A aClass="font-medium hover:underline flex items-center py-2">Edit<ArrowRightOutline class="ms-1 h-5 w-5"/>
+    </A>
   </div>
 </Popover>
 

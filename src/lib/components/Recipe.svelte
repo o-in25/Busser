@@ -249,7 +249,7 @@
 					{#if !content}
 						<Skeleton
 							size="sm"
-							class="!max-w-full" />
+							divClass="!max-w-full" />
 					{:else}
 						<P>{content.history}</P>
 					{/if}

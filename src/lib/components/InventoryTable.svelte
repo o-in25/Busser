@@ -120,9 +120,9 @@
 }} bind:this={form}>
   <div class="flex justify-between">
     <!-- search -->
-    <Label class="space-y-2 mb-6">
+    <Label class="space-y-2 space-x-4 mb-6">
       <ButtonGroup>
-        <Input size="md" name="productName" type="text" bind:value={searchTerm}/>
+        <Input size="md" name="productName" type="text" bind:value={searchTerm} class="w-1/2 md:w-full"/>
         <Button color="primary" type="submit">Search</Button>
       </ButtonGroup>
     </Label>
@@ -145,7 +145,7 @@
     <TableHead>
       <TableHeadCell>Product Name</TableHeadCell>
       <TableHeadCell class="hidden sm:table-cell">Category</TableHeadCell>
-      <TableHeadCell class="hidden sm:table-cell">Inventory</TableHeadCell>
+      <TableHeadCell class="hidden sm:table-cell">Status</TableHeadCell>
       <TableHeadCell class="hidden sm:table-cell">Strength</TableHeadCell>
     </TableHead>
   
@@ -200,7 +200,7 @@
               // details = product;
             }}>
             <TableBodyCell
-              colspan="6"
+              colspan={6}
               class="p-0"
               tdClass="border-b last:border-b-0 bg-white dark:bg-gray-800 dark:border-gray-700">
               <div
