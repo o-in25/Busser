@@ -205,8 +205,7 @@
         <Textarea
           name="recipeDescription"
           id="recipeDescription"
-          rows="4"
-          resizable="false"
+          rows={4}
           bind:value={recipe.recipeDescription} />
       </div>
 

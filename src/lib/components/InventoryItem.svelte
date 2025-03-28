@@ -96,6 +96,8 @@
     return spirits.some(item => categoryName.toLowerCase().includes(item))
   }
 
+  console.log(product)
+
 </script>
 
 <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
@@ -176,7 +178,6 @@
         <div class="card-content">
           <Heading tag="h5">
              {product.productName}
-             {#if product.productName !== product.categoryName}
               <Secondary class="flex items-center">
                 <span class="">{product.categoryName}</span>
                 <button id="popover-image" on:click|preventDefault={() => setPopoverData(product)}>
@@ -184,7 +185,6 @@
                   <span class="sr-only">Show information</span>
                 </button>
               </Secondary>
-            {/if}
           </Heading>
           {#if isBaseSpirit(product.categoryName)}<Badge class="my-1">Base Spirit</Badge>{/if}
           {#if product.productInStockQuantity < 1}<Badge class="my-1">Out of Stock</Badge>{/if}
