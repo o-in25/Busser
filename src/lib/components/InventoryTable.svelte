@@ -24,6 +24,7 @@
 		DropdownItem,
 	} from 'flowbite-svelte';
 	import {
+	ArrowDownOutline,
 	ChevronDownOutline,
 		ChevronLeftOutline,
 		ChevronRightOutline,
@@ -44,6 +45,7 @@
 	export let paginationData: PaginationData;
 
 	let openRow: number | null;
+  let openDropdown: boolean = false;
 	// let details: { name: any; }
 	// let doubleClickModal = false
 
@@ -110,38 +112,6 @@
 		goto(`/${route}?${urlParams.toString()}`);
 	};
 
-	// we are implementing our own sort
-	// but the flowbite table component requires sort
-	const sort = () => 0;
-
-	const sort2 = () => {
-		search = search.sort((curr, next) =>
-			direction === 'asc'
-				? curr.productInStockQuantity - next.productInStockQuantity
-				: next.productInStockQuantity - curr.productInStockQuantity
-		);
-	};
-
-
-  const items = [
-    {
-      label: 'All categories'
-    },
-    {
-      label: 'Mockups'
-    },
-    {
-      label: 'Templates'
-    },
-    {
-      label: 'Design'
-    },
-    {
-      label: 'Logos'
-    }
-  ]
-
-  let selectCategory = 'All categories'
 </script>
 
 <form
@@ -162,16 +132,17 @@
 	bind:this={form}>
   <div class="flex my-2">
     <div class="relative">
-      <Button class="rounded-e-none whitespace-nowrap border border-e-0 border-primary-700">
+      <Button color="light" class="rounded-e-none whitespace-nowrap border border-e-0 border-primary-700">
         <FilterOutline class="w-5 h-5"/>
+        <ChevronDownOutline class="w-5 h-5"/>
       </Button>
-      <Dropdown classContainer="w-40 ">
+      <Dropdown classContainer="w-40" bind:open={openDropdown}>
         <div slot="header" class="px-4 py-2">
           <span class="block text-sm text-gray-900 dark:text-white">Sort By...</span>
         </div>
-        <DropdownItem href="/inventory">All</DropdownItem>
-        <DropdownItem href="/inventory?productInStockQuantity=0">Out of Stock</DropdownItem>
-        <DropdownItem>In Stock</DropdownItem>
+        <DropdownItem href="/inventory" on:click={() => openDropdown = false}>All</DropdownItem>
+        <DropdownItem href="/inventory?productInStockQuantity=0" on:click={() => openDropdown = false}>Out of Stock</DropdownItem>
+        <DropdownItem href="/inventory?productInStockQuantity=1" on:click={() => openDropdown = false}>In Stock</DropdownItem>
       </Dropdown>
     </div>
     <Search size="md" class="flex gap-2 items-center rounded-none py-2.5" placeholder="Search..." bind:value={searchTerm}>

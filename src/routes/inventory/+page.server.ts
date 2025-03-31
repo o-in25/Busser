@@ -12,10 +12,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
   let page: string | number = url.searchParams.get('page') || '1'
   page = Number(page);
 
-  let productInStockQuantity = url.searchParams.get('productInStockQuantity');
+  const productInStockQuantity = url.searchParams.get('productInStockQuantity');
   // productInStockQuantity = Number(productInStockQuantity);
-
-  console.log(productInStockQuantity)
 
   const productName = url.searchParams.get('productName')
 
@@ -24,13 +22,16 @@ export const load: PageServerLoad = async ({ params, url }) => {
     filter = { productName }
   }
 
+  if(productInStockQuantity) {
+    filter = { ...filter, productInStockQuantity }
+  }
+
   // if(!isNaN(productInStockQuantity)) {
 
   //   filter = { ...filter, productInStockQuantity }
 
   // }
 
-  console.log(filter)
 
 
   // console.log(url.searchParams.get('productName'))
