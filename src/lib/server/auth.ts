@@ -3,61 +3,62 @@ import { DbProvider } from "./db";
 import sha256 from "crypto-js/sha256";
 import { Logger } from "./logger";
 import type { User } from "$lib/types/auth";
+import jwt from "jsonwebtoken";
+
+// fake key, move to env before 
+// deploying
+const JWT_SIGNING_KEY = "be096a4d98d02ef865c6fa2304479b703cfd753a68f83a1721d73ca31a192ad3a34e37b0792d9ebfc6eae09100d03e0aac25170373f4aafa61d556a6a7f9776a"
 const db = new DbProvider('user_t');
 
 
-export function hashPassword(password: string) {
-    return sha256(password).toString();
-}
+export const hashPassword = (password: string) => sha256(password).toString();
 
-export async function authenticate(cookies: Cookies): Promise<User | null> {
-    const userId = cookies.get("session_token");
+// TODO
+// just verify the jwt
+export async function authenticate(userToken: string | undefined): Promise<User | null> {    
     try {
-        if(!userId) return null;
-        const user = Object.assign(
-            {},
-            await db
-                .table("userAccessControl")
-                .where({ userId })
-                .select("userId", "username", "email", "permissions", "roles")
-                .first(),
-        );
-        if(!user?.userId) throw Error("User not found.");
-        user.permissions = user.permissions?.split(',')
-        user.roles = user.roles?.split(',');
-        return user as User;
+      if(!userToken) throw new Error('User token is invalid or expired.');
+      const user = jwt.verify(userToken, JWT_SIGNING_KEY) as User;  
+      return user;
+
     } catch(error: any) {
         console.error(error);
         return null;
     }
 }
 
+
+// TODO
+// sign token and return the jwt instead of the user
 export async function login(
   username: string,
   password: string,
-): Promise<Partial<User | null>> {
+): Promise<string | null> {
   try {
       const user = Object.assign(
           {},
           await db
-              .table<User>("user")
+              .table("userAccessControl")
               .where("username", username)
               .andWhere("password", hashPassword(password))
-              .select("userId", "username", "email")
+              .select("userId", "username", "email", "permissions", "roles")
               .first(),
       );
       if(!user?.userId) throw Error("User not found.");
-
+      user.permissions = user.permissions?.split(',')
+      user.roles = user.roles?.split(',');
       await db
         .table<User>('user')
         .update({ 
           lastActivityDate: Logger.now()
+          // TODO: add any session data here
         })
         .where({ 
           username 
         });
 
-      return user;
+      const userToken = jwt.sign(user, JWT_SIGNING_KEY, { algorithm: 'HS256'});
+      return userToken;
   } catch(error: any) {
       await Logger.info(`User ${username} attempted to sign in.`)
       console.error(error);
@@ -81,62 +82,4 @@ export async function resetPassword(userId: string, oldPassword: string, newPass
   }
 }
 
-export async function getUsers() {
-  try {
-    let users = await db.table<User>('user');
-    users = users.map(user => Object.assign({}, user));
-    return users;
-  } catch(error: any) {
-    console.error(error);
-    return [];
-  }
-}
 
-export async function addUser(user: User, password: string) {
-  try {
-      const result = await db
-        .table('user')
-          .insert({
-           ...user,
-            password: hashPassword(password)
-        });
-      return { rows: result?.length || 0 };
-  } catch(error) {
-      console.error(error);
-      return null;
-  }
-}
-
-export async function editUser(userId: string, user: User) {
-  try {
-      const result = await db
-        .table('user')
-        .where({ userId })
-          .update(user)
-      return result;
-  } catch(error) {
-      console.error(error);
-      return null;
-  }
-}
-
-export async function deleteUser(userId: string) {
-  let response = {};
-  try {
-    const result = await db
-      .table('user')
-      .where({ userId })
-        .del();
-    if(result !== 1) {
-      response = { error: 'Returned unexpected number of rows.'}
-    }
-  } catch(error: any) {
-    console.error(error);
-    response = { error: error.message || 'An error occurred.' }
-
-  } finally {
-    const refresh = await getUsers() || [];
-    response = { ...response, refresh }
-  }
-  return response;
-}

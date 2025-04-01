@@ -14,8 +14,8 @@ export const actions = {
 			return fail(StatusCodes.BAD_REQUEST, { err: true } as any);
 		}
 
-		const { userId } = await login(username, password) || {};
-		if(!userId) {
+		const userToken = await login(username, password);
+		if(!userToken) {
 			return fail(StatusCodes.BAD_REQUEST, { err: true, username } as any);
 		}
 
@@ -23,7 +23,7 @@ export const actions = {
     // TODO: include the permission 
     // info by signing it to a jwt and
     // decoding in in auth.js
-		cookies.set('session_token', userId, {
+		cookies.set('userToken', userToken, {
 			path: '/',
 			httpOnly: true,
 			sameSite: 'strict',

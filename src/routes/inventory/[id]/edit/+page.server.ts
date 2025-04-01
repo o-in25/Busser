@@ -3,16 +3,22 @@ import type { FormSubmitResult } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
-const { NOT_FOUND } = StatusCodes;
 
-export const load = (async ({ locals, request, params }) => {
-  console.log(locals)
+export const load = (async ({ locals, params }) => {
+  if(!locals.user?.permissions.includes('edit_inventory')) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to access this resource.'
+    });
+  }
+
   const { id } = params;
   const product = await findInventoryItem(Number(id));
   if(!product) {
-    error(NOT_FOUND, {
-      reason: getReasonPhrase(NOT_FOUND),
-      code: NOT_FOUND,
+    error(StatusCodes.NOT_FOUND, {
+      reason: getReasonPhrase(StatusCodes.NOT_FOUND),
+      code: StatusCodes.NOT_FOUND,
       message: 'Product not found.'
     });
   }

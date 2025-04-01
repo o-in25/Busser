@@ -1,4 +1,4 @@
-import { authenticate } from '$lib/server/auth';
+import { authenticate, hashPassword } from '$lib/server/auth';
 import { redirect, type Handle } from "@sveltejs/kit"
 import { StatusCodes } from 'http-status-codes';
 
@@ -7,7 +7,13 @@ const publicRoutes = ['/login', '/logout', '/'];
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     const { cookies, url } = event;
     const slug = url.pathname;
-    event.locals.user = await authenticate(cookies);
+
+    console.log(hashPassword('Leonidas!'))
+    // TODO 
+    // instead of calling the db 
+    // we will just check the status of our token
+    const userToken = cookies.get("userToken");
+    event.locals.user = await authenticate(userToken);
 
     if(!event.locals.user && !publicRoutes.includes(slug)) {
         return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
