@@ -19,6 +19,10 @@ export const actions = {
 			return fail(StatusCodes.BAD_REQUEST, { err: true, username } as any);
 		}
 
+
+    // TODO: include the permission 
+    // info by signing it to a jwt and
+    // decoding in in auth.js
 		cookies.set('session_token', userId, {
 			path: '/',
 			httpOnly: true,
