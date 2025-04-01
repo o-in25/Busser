@@ -2,32 +2,29 @@
   import {
     Label,
     Input,
-    GradientButton,
-    Card,
     Range,
     Button,
-    Fileupload,
     Alert,
     Modal,
     P,
     Span,
     Textarea,
     Toggle,
-		Helper,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
-  import FancyButton from "./FancyButton.svelte";
   import FileUpload from "./FileUpload.svelte";
   import { enhance } from "$app/forms";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
   import { page } from "$app/stores";
   import { notificationStore } from "../../stores";
-    import { goto } from "$app/navigation";
+  import { getContext } from "svelte";
 
   export let action: ComponentAction;
   export let result: FormSubmitResult = {};
   export let product: Product | null = null;
+
+  const permissions: string[] = getContext('permissions');
 
   let slug = $page.params.id;
   let productPricePerUnit = product?.productPricePerUnit;
@@ -60,13 +57,7 @@
     } else {
       $notificationStore.error = { message: result.message || result.error }
     }
-    // if(error) {
-    //   $notificationStore.success = error.message
-    // } else {
-    //   $notificationStore.success = success.message
-    // }
 
-    // console.log(success, error)
     
   }
 
@@ -96,7 +87,9 @@
         <Autocomplete
           label="Category"
           fetchUrl="/api/select/categories"
+          actionUrl="/inventory/category/add"
           name="categoryId"
+          grant="add_category"
           key={product?.categoryName}
           required={true}
           bind:value={categoryId}
@@ -192,11 +185,11 @@
     <!-- submit -->
     <div class="md:flex md:flex-row">
       <div class="my-4 md:mr-4">
-        <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
+        <Button type="submit" size="lg">Save</Button>
       </div>
-      {#if action === 'edit'}
+      {#if action === 'edit' && permissions.includes('delete_inventory')}
         <div class="my-4">
-          <FancyButton style="grow md:flex-none" type="button" color="orangeToRed" on:clicked={openModal}>Delete</FancyButton>
+          <Button type="button" size="lg" color="red" on:click={openModal}>Delete</Button>
         </div>
       {/if}
         {#if result.success || result.error}

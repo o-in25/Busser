@@ -4,6 +4,7 @@
     Input,
     Textarea,
     Alert,
+		Button,
   } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
@@ -33,13 +34,13 @@
     </div>
     <div>
       <Label for="categoryDescription" class="mb-2">Description</Label>
-      <Textarea id="categoryDescription" name="categoryDescription" rows="4" />
+      <Textarea id="categoryDescription" name="categoryDescription" rows={4} />
     </div>
 
     <!-- submit -->
     <div class="md:flex md:flex-row">
       <div class="my-4 md:mr-4">
-        <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
+        <Button size="lg" type="submit">Save</Button>
       </div>
       <!-- <div class="my-4">
         <FancyButton

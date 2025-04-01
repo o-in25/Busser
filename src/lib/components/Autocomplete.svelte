@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
   import { Label, Listgroup, ListgroupItem, Input, ButtonGroup, Button } from "flowbite-svelte";
     import { PlusOutline } from "flowbite-svelte-icons";
     import InputAddon from "flowbite-svelte/InputAddon.svelte";
-  import { onMount } from "svelte";
+  import { getContext, onMount } from "svelte";
 
   export let label;
   export let value;
@@ -11,7 +11,11 @@
   export let name = '';
   export let key;
   export let required = false;
-  let items = [
+  export let actionUrl = '';
+  export let grant = ''
+  const permissions: string[] = getContext('permissions');
+
+  let items: any = [
     // { name: 'Profile', mycustomfield: 'data1', current: true },
     // { name: 'Settings', mycustomfield: 'data2' },
     // { name: 'Messages', mycustomfield: 'data3' },
@@ -65,7 +69,9 @@
       bind:required={required}
     >
     </Input>
-    <Button color="purple" href="/inventory/category/add"><PlusOutline/></Button>
+    {#if actionUrl && (!grant || grant && permissions.includes(grant))} 
+      <Button color="purple" href="/inventory/category/add"><PlusOutline/></Button>
+    {/if}
   </ButtonGroup>
   {#if show}
   <div class="relative">

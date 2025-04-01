@@ -28,7 +28,7 @@ export const load = (async ({ locals, params }) => {
 export const actions = {
   edit: async ({ locals, request, params }) => {
 
-    if(!locals.user?.permissions.includes('edit_invento!ry')) {
+    if(!locals.user?.permissions.includes('edit_inventory')) {
       return fail(StatusCodes.UNAUTHORIZED, {
         error: { message: 'You do not have permission to perform this action.' }
       });
