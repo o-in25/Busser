@@ -3,24 +3,50 @@ import { DbProvider } from "./db";
 import sha256 from "crypto-js/sha256";
 import { Logger } from "./logger";
 import type { User } from "$lib/types/auth";
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
+import { promisify } from 'util';
 
-// fake key, move to env before 
-// deploying
-const JWT_SIGNING_KEY = "be096a4d98d02ef865c6fa2304479b703cfd753a68f83a1721d73ca31a192ad3a34e37b0792d9ebfc6eae09100d03e0aac25170373f4aafa61d556a6a7f9776a"
+const { JWT_SIGNING_KEY } = process.env;
+
 const db = new DbProvider('user_t');
 
+const verifyUserToken = (token: string): Promise<User> => {
+  return new Promise((resolve, reject) => {
+    if(!JWT_SIGNING_KEY) return reject(new Error('No JWT signing key found.'));
+    jwt.verify(token, JWT_SIGNING_KEY, (err, decoded) => {
+      if (err) {
+        console.error('Token verification failed:', err);
+        reject(err);
+      } else {
+        resolve(decoded as User);
+      }
+    });
+  });
+}
+
+function signUserToken(payload: User): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if(!JWT_SIGNING_KEY) return reject(new Error('No JWT signing key found.'));
+    jwt.sign(payload, JWT_SIGNING_KEY, { algorithm: 'HS256'}, (err, token) => {
+      if (err) {
+        console.error('Token signing failed:', err);
+        reject(err);
+      } else {
+        resolve(token as string);
+      }
+    });
+  });
+}
 
 export const hashPassword = (password: string) => sha256(password).toString();
 
-// TODO
-// just verify the jwt
+// just verifies the jwt
 export async function authenticate(userToken: string | undefined): Promise<User | null> {    
     try {
-      if(!userToken) throw new Error('User token is invalid or expired.');
-      const user = jwt.verify(userToken, JWT_SIGNING_KEY) as User;  
+      if(!JWT_SIGNING_KEY) throw new Error('No JWT signing key found.');
+      if(!userToken) return null;
+      const user = await verifyUserToken(userToken) as User;  
       return user;
-
     } catch(error: any) {
         console.error(error);
         return null;
@@ -28,13 +54,13 @@ export async function authenticate(userToken: string | undefined): Promise<User 
 }
 
 
-// TODO
-// sign token and return the jwt instead of the user
+// signs token and return the jwt (instead of the user)
 export async function login(
   username: string,
   password: string,
 ): Promise<string | null> {
   try {
+    if(!JWT_SIGNING_KEY) throw new Error('No JWT signing key found.');
       const user = Object.assign(
           {},
           await db
@@ -57,7 +83,7 @@ export async function login(
           username 
         });
 
-      const userToken = jwt.sign(user, JWT_SIGNING_KEY, { algorithm: 'HS256'});
+      const userToken = signUserToken(user);
       return userToken;
   } catch(error: any) {
       await Logger.info(`User ${username} attempted to sign in.`)

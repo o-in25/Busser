@@ -8,10 +8,6 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     const { cookies, url } = event;
     const slug = url.pathname;
 
-    console.log(hashPassword('Leonidas!'))
-    // TODO 
-    // instead of calling the db 
-    // we will just check the status of our token
     const userToken = cookies.get("userToken");
     event.locals.user = await authenticate(userToken);
 
