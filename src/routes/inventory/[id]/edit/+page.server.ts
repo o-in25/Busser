@@ -5,7 +5,8 @@ import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 const { NOT_FOUND } = StatusCodes;
 
-export const load = (async ({ request, params }) => {
+export const load = (async ({ locals, request, params }) => {
+  console.log(locals)
   const { id } = params;
   const product = await findInventoryItem(Number(id));
   if(!product) {

@@ -1,5 +1,5 @@
-import type { User } from '$lib/types';
 import { addUser } from '$lib/server/auth';
+import type { User } from '$lib/types/auth';
 
 // const load = (async () => {
 //     return {};

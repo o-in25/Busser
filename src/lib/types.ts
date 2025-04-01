@@ -13,17 +13,6 @@ export type Result<T> = {
     error?: Error;
 };
 
-export type Session = {
-    userId?: string,
-    opts: CookieSerializeOptions & { path: string; };
-};
-
-export type User = {
-    userId?: string,
-    username?: string,
-    email?: string;
-    lastActivityDate?: Date | string
-};
 
 export type Product = {
   productId: number | null, // can be null on insert

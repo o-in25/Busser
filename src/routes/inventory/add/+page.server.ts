@@ -2,14 +2,22 @@
 import { addToInventory } from '$lib/server/core';
 import { getSignedUrl } from '$lib/server/storage';
 import type { FormSubmitResult, Product, QueryResult } from '$lib/types';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import type { PageServerLoad } from './$types';
 import multer from 'multer';
+const { UNAUTHORIZED } = StatusCodes;
 
 import { tmpdir } from 'os';
+import { error } from '@sveltejs/kit';
 
 const upload = multer({ dest: tmpdir() });
 
-export const load = (async () => {
+export const load = (async ({ locals }) => {
+      // error(UNAUTHORIZED, {
+      //   reason: getReasonPhrase(UNAUTHORIZED),
+      //   code: UNAUTHORIZED,
+      //   message: 'You do not have permission to view this page.'
+      // });
   // await categorySelect();
     return {};
 }) satisfies PageServerLoad;
