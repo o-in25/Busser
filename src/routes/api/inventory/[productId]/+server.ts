@@ -1,13 +1,32 @@
-import { fail, json } from '@sveltejs/kit';
+import { error, fail, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { deleteInventoryItem } from '$lib/server/core';
-import { StatusCodes } from 'http-status-codes';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-export const DELETE: RequestHandler = async ({ params }) => {
+export const DELETE: RequestHandler = async ({ locals, params }) => {
+
+  const err: App.Error = {
+    reason: getReasonPhrase(400),
+    code: 400,
+    message: 'Niw allowed'
+  }
+
+  if(!locals.user?.permissions.includes('delete_inventory')) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to perform this action.'
+    });
+  }
+
+
   if(!params?.productId) {
-    return json({
-      error: { message: 'Inventory item not found.'}
-    })
+
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.NOT_FOUND),
+      code: StatusCodes.NOT_FOUND,
+      message: 'Inventory item not found.'
+    });
   }
 
   let { productId } = params as any;

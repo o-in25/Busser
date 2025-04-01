@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { json } from '@sveltejs/kit';
-import { deleteUser } from '$lib/server/auth';
+import { deleteUser } from "$lib/server/user";
 export const GET: RequestHandler = async () => {
   return new Response();
 };

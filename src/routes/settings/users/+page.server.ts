@@ -1,4 +1,4 @@
-import { getUsers } from '$lib/server/auth';
+import { getUsers } from "$lib/server/user";
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
