@@ -8,10 +8,10 @@
   } from "flowbite-svelte";
   import FancyButton from "./FancyButton.svelte";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
-  import type { QueryResult } from "$lib/types";
+  import type { FormSubmitResult, QueryResult } from "$lib/types";
   import { enhance } from "$app/forms";
   let error = false;
-  export let result: QueryResult;
+  export let result: FormSubmitResult = {};
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -19,18 +19,14 @@
     <div>
       <Label
         for="categoryName"
-        color={error ? "red" : "gray"}
+        color={result.error ? "red" : "gray"}
         class="block mb-2">
         Name
       </Label>
       <Input
         id="categoryName"
         name="categoryName"
-        color={error ? "red" : "base"} />
-      <!-- <Helper class={error ? "mt-2" : "hidden"} color={error ? "red" : "gray"}>
-        <span class="font-medium">Well done!</span>
-        Some success message.
-      </Helper> -->
+        color={result.error ? "red" : "base"} />
     </div>
     <div>
       <Label for="categoryDescription" class="mb-2">Description</Label>
@@ -51,18 +47,16 @@
           Delete
         </FancyButton>
       </div> -->
-      {#if result?.status === "success" || result?.status === "error"}
-        <div class="my-4 md:ml-4">
-          <div class="md:w-96 md:m-auto">
-            <Alert border color={"error" in result ? "red" : "green"}>
-              <InfoCircleSolid slot="icon" class="w-5 h-5" />
-              {#if "error" in result}<span class="font-medium">
-                  {result.error}
-                </span>{:else}Category added to inventory.{/if}
-            </Alert>
-          </div>
+      {#if result.success || result.error}
+      <div class="my-4 md:mr-4">
+        <div class="md:m-auto">
+          <Alert border color="{result.success? 'green' : 'red'}">
+            <InfoCircleSolid slot="icon" class="w-5 h-5" />
+            {#if result.error}<span class="font-medium">{result.error?.message}</span>{:else}{result.success?.message}{/if}
+          </Alert>
         </div>
-      {/if}
+      </div>
+    {/if}
     </div>
   </form>
 </div>

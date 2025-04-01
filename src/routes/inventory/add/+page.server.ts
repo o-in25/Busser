@@ -30,7 +30,7 @@ export const actions = {
     if(!locals.user?.permissions.includes('add_inventory')) {
       return fail(StatusCodes.UNAUTHORIZED, {
         error: {
-          message: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+          message: "You do not have permission to access this resource",
         },
         args: {
           product: null
