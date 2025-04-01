@@ -22,6 +22,7 @@
   } from "flowbite-svelte-icons";
   import FancyButton from "./FancyButton.svelte";
 	import { weightedMean } from "$lib/math";
+	import { getContext } from "svelte";
   export let product: Product;
 
   let headerLabel = {
@@ -33,6 +34,8 @@
       url: "/",
     },
   };
+
+  const permissions: string[] = getContext('permissions');
 
   // fallback if image cant load 
   let productImage = product?.productImageUrl || placeholder;
@@ -158,12 +161,14 @@
             </div>
           {/if}
           <div class="sm:gap-4 sm:items-center sm:flex">
-            <Button
-              color="alternative"
-              href="/inventory/{product.productId}/edit">
-              <EditOutline />
-              <span class="ms-2">Edit</span>
-            </Button>
+            {#if permissions.includes('edit_inventory')}
+              <Button
+                color="alternative"
+                href="/inventory/{product.productId}/edit">
+                <EditOutline />
+                <span class="ms-2">Edit</span>
+              </Button>
+            {/if}
             <!-- <Button color="primary">
               <HeartOutline />
               <span class="ms-2">Add to favorites</span>

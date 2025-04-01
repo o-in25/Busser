@@ -1,4 +1,3 @@
-import { scanImage } from '$lib/server/ai';
 import { getBaseSpirits, seedGallery } from '$lib/server/core';
 // import { createOcrWorker } from '$lib/server/ocr';
 import type { PageServerLoad } from './$types';

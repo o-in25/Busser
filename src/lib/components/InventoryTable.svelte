@@ -36,13 +36,16 @@
 		PlusOutline,
 		SearchOutline,
 	} from 'flowbite-svelte-icons';
-
+  import { getContext } from 'svelte';
 	import {slide} from 'svelte/transition';
 	import {page} from '$app/stores';
 	import {goto} from '$app/navigation';
 	import InventoryItem from './InventoryItem.svelte';
+
 	export let products: Product[];
 	export let paginationData: PaginationData;
+
+  const permissions: string[] = getContext('permissions');
 
 	let openRow: number | null;
   let openDropdown: boolean = false;
@@ -145,7 +148,8 @@
         <DropdownItem href="/inventory?productInStockQuantity=1" on:click={() => openDropdown = false}>In Stock</DropdownItem>
       </Dropdown>
     </div>
-    <Search size="md" class="flex gap-2 items-center rounded-none py-2.5" placeholder="Search..." bind:value={searchTerm}>
+    
+    <Search size="md" class="flex gap-2 items-center py-2.5 {permissions.includes('edit_inventory')? 'rounded-none' : 'rounded-s-none'}" placeholder="Search..." bind:value={searchTerm}>
       {#if searchTerm}
       <button type="button" on:click={() => {
         searchTerm = '';
@@ -154,10 +158,12 @@
         <CloseCircleSolid class="w-5 h-5 me-2" />
       </button>
       {/if}
-    </Search>    
-    <Button class="p-2.5! rounded-s-none" href="/inventory/add">
-      <PlusOutline class="w-5 h-5" />
-    </Button>
+    </Search>
+    {#if permissions.includes('add_inventory')}
+      <Button class="p-2.5! rounded-s-none" href="/inventory/add">
+        <PlusOutline class="w-5 h-5" />
+      </Button>
+    {/if}
   </div >
 	<!-- table -->
 

@@ -8,23 +8,35 @@ import multer from 'multer';
 const { UNAUTHORIZED } = StatusCodes;
 
 import { tmpdir } from 'os';
-import { error } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 
 const upload = multer({ dest: tmpdir() });
 
 export const load = (async ({ locals }) => {
-      // error(UNAUTHORIZED, {
-      //   reason: getReasonPhrase(UNAUTHORIZED),
-      //   code: UNAUTHORIZED,
-      //   message: 'You do not have permission to view this page.'
-      // });
-  // await categorySelect();
-    return {};
+  if(!locals.user?.permissions.includes('add_inventory')) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to access this resource.'
+    });
+  }
+  return {};
 }) satisfies PageServerLoad;
 
 
 export const actions = {
-  add: async({ request }) => {
+  add: async({ locals, request }) => {
+
+    if(!locals.user?.permissions.includes('add_inventory')) {
+      return fail(StatusCodes.UNAUTHORIZED, {
+        error: {
+          message: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        },
+        args: {
+          product: null
+        }
+      });
+    }
 
     let formData = Object.fromEntries(await request.formData());
     const { productImageUrl: file } = formData as { productImageUrl: File; };
@@ -48,59 +60,10 @@ export const actions = {
       productVersatilityRating: parseFloat(formData.productVersatilityRating.toString()),
       productStrengthRating: parseFloat(formData.productStrengthRating.toString())
     } satisfies Product, file)    
-    // const { productImageUrl, ...rest } = formData;
-    // type query = { [key: string]: string | 0 }
-    // const q = Object.entries(rest).reduce((acc, [key, value]) => {
-    //   acc = { ...acc, [key]: !isNaN(0(value))? 0(value) : value.toString() };
-    //   return acc;
-    // }, {} as query);
 
-
-    // const product: Product = {
-    //   productId: null,
-    //   categoryId: q.categoryId,
-    //   supplierId: 0,
-    //   productName: '',
-    //   productInStockQuantity: 0,
-    //   productPricePerUnit: 0,
-    //   productUnitSizeInMilliliters: 0,
-    //   productProof: 0,
-    //   productDetailId: 0,
-    //   productImageUrl: '',
-    //   categoryName: '',
-    //   categoryDescription: '',
-    //   productDescription: '',
-    //   productSweetnessRating: 0,
-    //   productDrynessRating: 0,
-    //   productVersatilityRating: 0,
-    //   productStrengthRating: 0
-    // };
-
-
-
-
-    // await addToInventory(query);
-    // const productData = {
-    //   productDetailId: 0(formData.productDetailId || -1),
-    //   productName: formData.productName?.toString(),
-    //   categoryId: 0(formData.categoryId),
-    //   productProof: 0(formData.productProof),
-    //   productInStockQuantity: 0(formData.productInStockQuantity),
-    //   productPricePerUnit: 0(formData.productPricePerUnit),
-    //   productUnitSizeInMilliliters: 0(formData.productUnitSizeInMilliliters),
-    //   productSweetnessRating: 0(formData.productSweetnessRating),
-    //   productDrynessRating: 0(formData.productDrynessRating),
-    //   productVersatilityRating: 0(formData.productVersatilityRating),
-    //   productStrengthRating: 0(formData.productStrengthRating),
-    //   productDescription: formData.productDescription?.toString(),
-
-    // };
-    // productId, supplierId, productImageUrl, categoryName, categoryDescription
-    // const { productImageUrl: file } = formData as { productImageUrl: File; };
-    // const newItem = {} //await addToInventory();
     let submitResult: FormSubmitResult = {
       [newItem.status]: {
-        message: newItem.status === 'error' ? newItem.error : 'Inventory lookin good g!'
+        message: newItem.status === 'error' ? newItem.error : 'Inventory has been updated.'
       }
     }
 
@@ -109,35 +72,6 @@ export const actions = {
     }
 
     return submitResult;
-    // if(!newItem) {
-    //   // ERROR
-    //   return {
-    //     error: { message: 'Inventory item not be updated.' }
-    //   } as FormSubmitResult;
-    // }
-
-    // if(productId =\) {
-    //   // ERROR
-    //   return {
-    //     error: { message: 'Failed to create new inventory item.' }
-    //   } as FormSubmitResult;
-    // }
-
-    // if(productImageUrl) {
-    //   const { productImageUrl: file } = formData as { productImageUrl: File; };
-    //   const { productDetailId } = await addProductImage(productId, file);
-    //   if(productDetailId === -1) {
-    //     // ERROR
-    //     return {
-    //       error: { message: 'Failed add image to inventory item.' }
-    //     } as FormSubmitResult;
-    //   }
-    // }
-
-    // OK
-    // return {
-    //   success: { message: 'Inventory has been updated.' }
-    // } as FormSubmitResult;
   }
 }
 

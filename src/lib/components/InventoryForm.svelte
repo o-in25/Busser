@@ -58,7 +58,7 @@
       $notificationStore.success = { message: 'Inventory item deleted.'}
       // goto(`/inventory`);
     } else {
-      $notificationStore.error = { message: result.error }
+      $notificationStore.error = { message: result.message || result.error }
     }
     // if(error) {
     //   $notificationStore.success = error.message
@@ -201,7 +201,7 @@
       {/if}
         {#if result.success || result.error}
           <div class="my-4 md:ml-4">
-            <div class="md:w-96 md:m-auto">
+            <div class="md:m-auto">
               <Alert border color="{result.success? 'green' : 'red'}">
                 <InfoCircleSolid slot="icon" class="w-5 h-5" />
                 {#if result.error}<span class="font-medium">{result.error?.message}</span>{:else}{result.success?.message}{/if}
