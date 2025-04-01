@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --build-arg DB_HOSTNAME=${{secrets.DB_HOSTNAME}} DB_USER=${{secrets.DB_USER}} DB_PASSWORD=${{secrets.DB_PASSWORD}} DB_PORT=${{secrets.DB_PORT}} BUCKET=${{secrets.BUCKET}} OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}} GOOGLE_SERVICE_KEY=${{secrets.GOOGLE_SERVICE_KEY}} JWT_SIGNING_KEY=${{secrets.JWT_SIGNING_KEY}}
+      - run: flyctl deploy --remote-only --build-arg DB_HOSTNAME=${{secrets.DB_HOSTNAME}} --build-arg DB_USER=${{secrets.DB_USER}} --build-arg DB_PASSWORD=${{secrets.DB_PASSWORD}} --build-arg DB_PORT=${{secrets.DB_PORT}} --build-arg BUCKET=${{secrets.BUCKET}} --build-arg OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}} --build-arg GOOGLE_SERVICE_KEY=${{secrets.GOOGLE_SERVICE_KEY}} --build-arg JWT_SIGNING_KEY=${{secrets.JWT_SIGNING_KEY}}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           # DB_HOSTNAME: ${{ secrets.DB_HOSTNAME }}
