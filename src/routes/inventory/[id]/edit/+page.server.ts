@@ -1,17 +1,24 @@
 import { addProductImage, editProductImage, findInventoryItem, updateInventory } from '$lib/server/core';
 import type { FormSubmitResult } from '$lib/types';
-import { error } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
-const { NOT_FOUND } = StatusCodes;
 
-export const load = (async ({ request, params }) => {
+export const load = (async ({ locals, params }) => {
+  if(!locals.user?.permissions.includes('edit_inventory')) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to access this resource.'
+    });
+  }
+
   const { id } = params;
   const product = await findInventoryItem(Number(id));
   if(!product) {
-    error(NOT_FOUND, {
-      reason: getReasonPhrase(NOT_FOUND),
-      code: NOT_FOUND,
+    error(StatusCodes.NOT_FOUND, {
+      reason: getReasonPhrase(StatusCodes.NOT_FOUND),
+      code: StatusCodes.NOT_FOUND,
       message: 'Product not found.'
     });
   }
@@ -19,13 +26,20 @@ export const load = (async ({ request, params }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-  edit: async ({ request, params }) => {
+  edit: async ({ locals, request, params }) => {
+
+    if(!locals.user?.permissions.includes('edit_inventory')) {
+      return fail(StatusCodes.UNAUTHORIZED, {
+        error: { message: 'You do not have permission to perform this action.' }
+      });
+    }
+
     const productId = Number(params?.id || '');
     if(isNaN(productId)) {
       // ERROR
-      return {
+      return fail(StatusCodes.NOT_FOUND, {
         error: { message: 'Inventory item not found.' }
-      } as FormSubmitResult;
+      })
     }
 
     // let existingItem = await findInventoryItem(Number(id));

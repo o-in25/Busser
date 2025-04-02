@@ -1,8 +1,6 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import { Heading, P } from 'flowbite-svelte';
-
-    console.log($page)
     </script>
 
 <Heading tag="h2" customSize="text-4xl font-extrabold ">{$page.error?.reason || 'Error'}</Heading>

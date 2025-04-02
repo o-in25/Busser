@@ -9,12 +9,24 @@
   import { ProgressBar } from "@prgm/sveltekit-progress-bar";
   import Notification from "$lib/components/Notification.svelte";
   import Nav from "$lib/components/Nav.svelte";
+	import { setContext } from "svelte";
 
   export let data: LayoutData;
 
-  $: activeUrl = $page.url.pathname;
-  $: user = data.user;
+  const getActiveUrl = (url: string) => {
+    const routes = {
+      'home': '/',
+      'catalog': '/catalog',
+      'inventory': '/inventory'
+    }
 
+    const activeUrl = url.split('/').slice(1).shift() || 'home';
+    return routes[activeUrl];
+  }
+
+  $: activeUrl = getActiveUrl($page.url.pathname);
+  $: user = data.user;
+  $: setContext('permissions', user?.permissions || []);
 </script>
 
 <!-- top nav -->

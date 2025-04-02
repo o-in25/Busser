@@ -13,4 +13,5 @@ vite.config.ts.timestamp-*
 .prettierrc
 .vercel/
 .fly/*
+cloud-sql-proxy
 service-account.json

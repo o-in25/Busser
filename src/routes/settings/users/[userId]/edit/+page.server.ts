@@ -2,8 +2,8 @@ import { error, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import { DbProvider } from "$lib/server/db";
-import type { User } from "$lib/types";
-import { editUser } from "$lib/server/auth";
+import { editUser } from "$lib/server/user";
+import type { User } from "$lib/types/auth";
 const { NOT_FOUND } = StatusCodes;
 const db = new DbProvider('user_t');
 

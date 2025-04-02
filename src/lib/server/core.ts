@@ -1,3 +1,14 @@
+/**
+ * this code sucks
+ * 
+ * i should probably (definitely) be using an orm like prisma
+ * 
+ * this is what happens when you start with just a poc to get something working
+ * and youre too lazy to back and refactor it so you just keep adding on 
+ * until you arrive at this monstrosity 
+ * 
+ * im in too deep
+ */
 import type {
   BasicRecipe,
   Category,
@@ -66,12 +77,28 @@ const paginationData = {
 export async function getInventory(
   currentPage: number,
   perPage: number = 25,
+  filter: Partial<Product> | null = null
 ): Promise<PaginationResult<Product[]>> {
   try {
-    let { data, pagination } = await db
-      .table("inventory")
+
+    let dbResult = db.table('inventory');
+    if(filter?.productName) {
+      dbResult = dbResult.where("productName", "like", `%${filter.productName}%`);
+    }
+
+    if(typeof filter?.productInStockQuantity !== 'undefined') {
+      console.log(filter.productInStockQuantity)
+      dbResult = dbResult.andWhere("productInStockQuantity", "=", filter.productInStockQuantity);
+    }
+
+    let { data, pagination } = await dbResult
       .select()
       .paginate({ perPage, currentPage, isLengthAware: true });
+    
+    // let { data, pagination } = await db
+    //   .table("inventory")
+    //   .select()
+    //   .paginate({ perPage, currentPage, isLengthAware: true });
 
     // let { data, pagination } = await db.table('inventory').paginate({ perPage, currentPage, isLengthAware: true })
     data = data.map((item) => Object.assign({}, item));
@@ -213,11 +240,25 @@ export async function addToInventory(
   }
 }
 
-export async function searchInventory(search: string): Promise<Product[]> {
+export async function searchInventory(search: string, showOutOfStock: boolean = true): Promise<Product[]> {
   try {
-    let data = await db
-      .table("inventory")
+
+    let query = db
+      .table('inventory')
       .where("productName", "like", `%${search}%`);
+
+    if(showOutOfStock) {
+      query = query.andWhere('productInStockQuantity', '>', 0);
+    }
+
+    const dbResult = await query;
+
+    
+    // let data = await db
+    //   .table("inventory")
+    //   .where("productName", "like", `%${search}%`);
+
+
     // let data = await db.table('product')
     //   .select([
     //     'product.productId',
@@ -236,7 +277,7 @@ export async function searchInventory(search: string): Promise<Product[]> {
     //   .innerJoin('category', 'category.categoryId', '=', 'product.categoryId')
     //   .leftJoin('productdetail', 'product.ProductId', '=', 'productdetail.ProductId')
     //   .where('product.productName', 'like', `%${search}%`)
-    let result: Product[] = marshal<Product[]>(data);
+    let result: Product[] = marshal<Product[]>(dbResult);
     // const result: PaginationResult<Product[]> = { data, pagination };
     return result;
   } catch (error: any) {
@@ -403,6 +444,9 @@ export async function deleteInventoryItem(
         productImageUrl = childRow.productImageUrl;
       }
 
+
+      // TODO: use a foreign key constraint to delete
+      // idk why i didnt do this to begin with
       const rows = await db
         .table<Product>("product")
         .where("ProductId", productId)
@@ -524,82 +568,82 @@ export async function getPreparationMethods(): Promise<
   }
 }
 
-export async function addRecipe(
-  recipe: QueryRequest.Recipe,
-  recipeSteps: QueryRequest.RecipeSteps[],
-  file: File,
-) {
-  // STEP 1: get signed file url
-  // STEP 2: add recipe desc.
-  // STEP 3: add recipe + file url
-  // STEP 4: add prep method
-  // STEP 5: steps
+// export async function addRecipe(
+//   recipe: QueryRequest.Recipe,
+//   recipeSteps: QueryRequest.RecipeSteps[],
+//   file: File,
+// ) {
+//   // STEP 1: get signed file url
+//   // STEP 2: add recipe desc.
+//   // STEP 3: add recipe + file url
+//   // STEP 4: add prep method
+//   // STEP 5: steps
 
-  try {
-    if (!recipeSteps.length)
-      throw new Error("Recipe does not contain any recipe steps.");
+//   try {
+//     if (!recipeSteps.length)
+//       throw new Error("Recipe does not contain any recipe steps.");
 
-    const getProductImageUrl = async (image: File | null) => {
-      if (!image || image.size === 0 || image.name === "undefined") return null;
-      const signedUrl = await getSignedUrl(image);
-      return signedUrl.length ? signedUrl : null;
-    };
+//     const getProductImageUrl = async (image: File | null) => {
+//       if (!image || image.size === 0 || image.name === "undefined") return null;
+//       const signedUrl = await getSignedUrl(image);
+//       return signedUrl.length ? signedUrl : null;
+//     };
 
-    // step 1
-    const recipeImageUrl = await getProductImageUrl(file);
+//     // step 1
+//     const recipeImageUrl = await getProductImageUrl(file);
 
-    await db.query.transaction(async (trx) => {
-      let newRecipeDescription: Table.RecipeDescription = {
-        recipeDescription: recipe.recipeDescription,
-        recipeDescriptionImageUrl: null,
-      };
-      newRecipeDescription = marshal(newRecipeDescription, pascalCase);
-      // step 2
-      const [recipeDescriptionId] =
-        await trx("recipedescription").insert(newRecipeDescription);
+//     await db.query.transaction(async (trx) => {
+//       let newRecipeDescription: Table.RecipeDescription = {
+//         recipeDescription: recipe.recipeDescription,
+//         recipeDescriptionImageUrl: null,
+//       };
+//       newRecipeDescription = marshal(newRecipeDescription, pascalCase);
+//       // step 2
+//       const [recipeDescriptionId] =
+//         await trx("recipedescription").insert(newRecipeDescription);
 
-      let newRecipe: Table.Recipe = {
-        recipeCategoryId: recipe.recipeCategoryId,
-        recipeName: recipe.recipeName,
-        recipeDescriptionId,
-        recipeImageUrl,
-      };
-      newRecipe = marshal(newRecipe, pascalCase);
-      // step 3
-      const [recipeId] = await trx("recipe").insert(newRecipe);
+//       let newRecipe: Table.Recipe = {
+//         recipeCategoryId: recipe.recipeCategoryId,
+//         recipeName: recipe.recipeName,
+//         recipeDescriptionId,
+//         recipeImageUrl,
+//       };
+//       newRecipe = marshal(newRecipe, pascalCase);
+//       // step 3
+//       const [recipeId] = await trx("recipe").insert(newRecipe);
 
-      let newRecipeTechnique: Table.RecipeTechnique = {
-        recipeTechniqueDescriptionId: recipe.recipeTechniqueDescriptionId,
-        recipeTechniqueDilutionPercentage: null,
-        recipeId,
-      };
-      newRecipeTechnique = marshal(newRecipeTechnique, pascalCase);
-      // step 4
-      const [recipeTechniqueId] =
-        await trx("recipetechnique").insert(newRecipeTechnique);
+//       let newRecipeTechnique: Table.RecipeTechnique = {
+//         recipeTechniqueDescriptionId: recipe.recipeTechniqueDescriptionId,
+//         recipeTechniqueDilutionPercentage: null,
+//         recipeId,
+//       };
+//       newRecipeTechnique = marshal(newRecipeTechnique, pascalCase);
+//       // step 4
+//       const [recipeTechniqueId] =
+//         await trx("recipetechnique").insert(newRecipeTechnique);
 
-      let newRecipeSteps = recipeSteps.map((step) => ({ ...step, recipeId }));
-      newRecipeSteps = marshal(newRecipeSteps, pascalCase);
-      // step 5
-      const rows = await trx("recipestep").insert(newRecipeSteps);
+//       let newRecipeSteps = recipeSteps.map((step) => ({ ...step, recipeId }));
+//       newRecipeSteps = marshal(newRecipeSteps, pascalCase);
+//       // step 5
+//       const rows = await trx("recipestep").insert(newRecipeSteps);
 
-      // let recipe: Table.Recipe = {
+//       // let recipe: Table.Recipe = {
 
-      // }
-    });
+//       // }
+//     });
 
-    let newRecipeTechnique = {};
-  } catch (error: any) {
-    console.error(error);
-    // Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
-    // const result: QueryResult<Array<PreparationMethod>> = {
-    //   status: 'error',
-    //   error: 'Could not get preparation methods.'
-    // };
-    // return result;
-  }
-  // const productImageUrl = await getProductImageUrl(image);
-}
+//     let newRecipeTechnique = {};
+//   } catch (error: any) {
+//     console.error(error);
+//     // Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+//     // const result: QueryResult<Array<PreparationMethod>> = {
+//     //   status: 'error',
+//     //   error: 'Could not get preparation methods.'
+//     // };
+//     // return result;
+//   }
+//   // const productImageUrl = await getProductImageUrl(image);
+// }
 
 export async function addCategory(
   categoryName: string,
@@ -744,6 +788,7 @@ export async function updateCatalog(
   // STEP 8: return new view
 
 
+
   const getRecipeImageUrl = async (image: File | null): Promise<string | null> => {
     if (!image || image.size === 0 || image.name === "undefined") return null;
     const signedUrl = await getSignedUrl(image);
@@ -771,13 +816,12 @@ export async function updateCatalog(
         recipeId: undefined,
       };
 
-      let dbResult: any;
-
-      // step 2
+      let dbResult;
+      
       let oldRecipe = await trx("recipe")
         // TODO: do we need RecipeCategoryId?
         .select("RecipeDescriptionId", "RecipeCategoryId")
-        .where("RecipeId", recipe.recipeId)
+        .where("RecipeId", recipe.recipeId || -1)
         .first();
 
       oldRecipe = marshal(oldRecipe, camelCase);
@@ -785,9 +829,14 @@ export async function updateCatalog(
       if (!oldRecipe) {
         [dbResult] = await trx("recipedescription").insert({
           RecipeDescription: recipe.recipeDescription,
-          RecipeDescriptionImageUrl: null,
+          RecipeDescriptionImageUrl: null, // TODO: add option for this on front end
+          RecipeSweetnessRating: recipe.recipeSweetnessRating,
+          RecipeDrynessRating: recipe.recipeDrynessRating,
+          RecipeStrengthRating: recipe.recipeStrengthRating,
+          RecipeVersatilityRating: recipe.recipeVersatilityRating,
         });
 
+        
         if (!dbResult) throw new Error("Cannot create recipe description.");
         keys.recipeDescriptionId = dbResult;
 
@@ -800,6 +849,8 @@ export async function updateCatalog(
 
         if (!dbResult) throw new Error("Cannot create recipe.");
         keys.recipeId = dbResult;
+        // oldRecipe = keys;
+
       } else {
         keys = {
           recipeDescriptionId: oldRecipe.recipeDescriptionId,
@@ -809,11 +860,17 @@ export async function updateCatalog(
 
       // step 3
       if (oldRecipe) {
+
+        console.log(recipe)
         dbResult = await trx("recipedescription")
           .where("RecipeDescriptionId", keys.recipeDescriptionId)
           .update({
             RecipeDescription: recipe.recipeDescription,
             // RecipeDescriptionUrl: null
+            RecipeSweetnessRating: recipe.recipeSweetnessRating,
+            RecipeDrynessRating: recipe.recipeDrynessRating,
+            RecipeStrengthRating: recipe.recipeStrengthRating,
+            RecipeVersatilityRating: recipe.recipeVersatilityRating,
           });
 
         if (!dbResult) throw new Error("Recipe description not found.");
@@ -840,6 +897,7 @@ export async function updateCatalog(
           RecipeCategoryId: recipe.recipeCategoryId,
           RecipeDescriptionId: keys.recipeDescriptionId,
           RecipeName: recipe.recipeName,
+          
         };
 
         if(recipeImageUrl !== null) {
@@ -876,11 +934,13 @@ export async function updateCatalog(
         ({
           productId,
           productIdQuantityInMilliliters,
+          productIdQuantityUnit,
           recipeStepDescription,
         }) => ({
           recipeId: keys.recipeId || 0,
           productId,
           productIdQuantityInMilliliters,
+          productIdQuantityUnit,
           recipeStepDescription,
         }),
       );
@@ -913,6 +973,63 @@ export async function updateCatalog(
       data: newRecipe,
     };
   } catch (error: any) {
+    console.error(error.message);
+    Logger.error(
+      error.sqlMessage || error.message,
+      error.sql || error.stackTrace,
+    );
+    const result: QueryResult<Array<PreparationMethod>> = {
+      status: "error",
+      error: "Cannot save changes.",
+    };
+    return result;
+  }
+}
+
+
+export async function deleteCatalogItem(
+  recipeId: number,
+): Promise<QueryResult<number>> {
+  try {
+    // FK_RecipeDescription_Recipe
+    // FK_Recipe_RecipeDescription
+    // so deleting RecipeDescription should be all we need to do
+    const { deletedRows, recipeImageUrl } = await db.query.transaction(async (trx) => {
+      const dbResult = await trx('recipe')
+        .select("RecipeDescriptionId", "RecipeImageUrl")
+        .where("RecipeId", recipeId);
+
+      // get recipedescriptionid
+      const [parentRow] = marshal(dbResult, camelCase);
+
+      if(!parentRow) throw new Error('Recipe not found.');
+      const { recipeDescriptionId, recipeImageUrl } = parentRow;
+
+      const deletedRows = await trx('recipedescription')
+        .where("RecipeDescriptionId", recipeDescriptionId)
+        .del();
+
+      if(deletedRows < 1) throw new Error('Could not delete recipe because no rows were affected.')
+      // let dbResult2 = 1;
+      // const [rowsDeleted] = marshal<Number>(dbResult2, camelCase);
+      //   console.log(rowsDeleted)
+
+      return {
+        recipeImageUrl, deletedRows
+      }
+    });
+
+
+    if(recipeImageUrl) {
+      await deleteSignedUrl(recipeImageUrl);
+    }
+
+    return {
+      status: "success",
+      data: deletedRows
+    } satisfies QueryResult<number>;
+
+  } catch(error: any) {
     console.error(error.message);
     Logger.error(
       error.sqlMessage || error.message,

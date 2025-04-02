@@ -5,8 +5,6 @@
   export let heading: string;
   export let list: string[];
   export let maxItems: number = 3;
-
-  console.log(list)
   $: list = list.slice(0, 3)
 </script>
 

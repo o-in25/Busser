@@ -60,7 +60,7 @@
 <Navbar color="default" class="mb-3">
   {#if user}
     <NavHamburger
-      class1="w-full md:flex md:w-auto md:order-1"
+    classMenu="w-full md:flex md:w-auto md:order-1"
       onClick={() => {
         showDrawer = false;
       }} />
@@ -83,7 +83,7 @@
       </div>
     </div>
     <!-- dropdown -->
-    <Dropdown placement="right" triggeredBy="#avatar-menu">
+    <Dropdown placement="bottom" triggeredBy="#avatar-menu">
       <DropdownHeader>
         <span class="block text-sm">{user?.username}</span>
         <span class="block truncate text-sm font-medium">
@@ -104,7 +104,7 @@
       {activeUrl}
       slideParams={{ delay: 250, duration: 500, easing: sineIn }}
     >
-      <NavLi href="/" active>Home</NavLi>
+      <NavLi href="/">Home</NavLi>
       <NavLi href="/inventory">Inventory</NavLi>
       <NavLi href="/catalog">Catalog</NavLi>
       <!-- <NavLi href="/tools">Tools</NavLi> -->

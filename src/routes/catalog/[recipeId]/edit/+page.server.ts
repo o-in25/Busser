@@ -3,12 +3,12 @@ import { getPreparationMethods, getBasicRecipe, getSpirits, updateCatalog } from
 import type { FormSubmitResult } from '$lib/types';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { deleteSignedUrl } from '$lib/server/storage';
 
 export const load = (async ({ params }) => {
   const { recipeId } = params;
   const spirits = await getSpirits();
   const preparationMethods = await getPreparationMethods();
-
 
   const recipe = await getBasicRecipe(recipeId);
 
@@ -31,17 +31,31 @@ export const load = (async ({ params }) => {
 
 
 
+// on submit:
+// if ml -> done
+// if oz -> convert to ml save oz
+
+// on load
+// if ml -> done
+// if oz -> convert ml to oz
+
 export const actions = {
   default: async ({ request, params }) => {
     let formData: any = Object.fromEntries(await request.formData());
     let { recipeImageUrl, recipeSteps, ...payload } = formData;
     const { recipeImageUrl: file } = formData as { recipeImageUrl: File; };
 
+
+    console.log(payload)
     const recipe = {
       ...payload,
       recipeId: params.recipeId,
       recipeCategoryId: Number(payload.recipeCategoryId) || -1,
       recipeTechniqueDescriptionId: Number(payload.recipeTechniqueDescriptionId) || -1,
+      productSweetnessRating: Number(payload.productSweetnessRating || '0'),
+      productDrynessRating: Number(payload.productDrynessRating || '0'),
+      productVersatilityRating: Number(payload.productVersatilityRating || '0'),
+      productStrengthRating: Number(payload.productStrengthRating || '0')
     }
 
     recipeSteps = JSON.parse(recipeSteps as string || '[]');

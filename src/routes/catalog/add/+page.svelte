@@ -18,7 +18,7 @@
   New Catalog Item
 </Heading>
 
-<div class="px-4 py-2 md:py-4">
+<div class="px-2 md:p py-2 md:py-4">
   <CatalogForm
     spirits={data.args.spirits}
     preparationMethods={data.args.preparationMethods} 

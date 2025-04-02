@@ -109,7 +109,7 @@
 
   <div>
     <Label for="productName" class="mb-2">Citric Acid</Label>
-    <Input for="productUnitSizeInMilliliters" let:props required>
+    <Input let:props required>
       <input
         id="productUnitSizeInMilliliters"
         name="productUnitSizeInMilliliters"
@@ -125,7 +125,7 @@
   <!-- malic acid -->
   <div>
     <Label for="productName" class="mb-2">Malic Acid</Label>
-    <Input for="productUnitSizeInMilliliters" 
+    <Input 
       let:props 
       bind:disabled={fields.malicAcidWgt.enabled} 
       required
@@ -145,7 +145,7 @@
   <!-- msg -->
   <div>
     <Label for="productName" class="mb-2">MSG</Label>
-    <Input for="productUnitSizeInMilliliters" 
+    <Input 
       let:props 
       bind:disabled={fields.msgWgt.enabled} 
     >
@@ -164,7 +164,7 @@
     <!-- water -->
   <div>
     <Label for="productName" class="mb-2">Water</Label>
-    <Input for="productUnitSizeInMilliliters" let:props required>
+    <Input let:props required>
       <input
         id="productUnitSizeInMilliliters"
         name="productUnitSizeInMilliliters"
