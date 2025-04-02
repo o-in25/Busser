@@ -34,7 +34,10 @@ const signUserToken = (payload: User): Promise<string> => {
 	});
 };
 
-export const hashPassword = (password: string) => { /* TODO next fix this*/}
+export async function hashPassword(password: string) {
+  const hashedPassword = await hash(password, 10,);
+  return hashedPassword;
+}
 
 // just verifies the jwt
 export async function authenticate(
@@ -57,13 +60,13 @@ export async function login(
 ): Promise<string | null> {
 	try {
     // get user password
-    const { userId, password } = await db.table('user').where({ username }).select('userId', 'password').first();
+    const { userId, password: hashedPassword } = await db.table('user').where({ username }).select('userId', 'password').first();
     if(!userId || !password) {
       throw new Error('User not found.');
     }
 
     // check password
-    const isValid = await compare(username, password);
+    const isValid = await compare(password, hashedPassword);
     if(!isValid) {
       throw new Error('Incorrect password.');
     }
@@ -104,12 +107,14 @@ export async function resetPassword(
 	newPassword: string
 ): Promise<boolean> {
 	try {
+    const oldHashedPassword = await hashPassword(newPassword);
+    const newHashedPassword = await hashPassword(newPassword);
 		const result: any = await db
 			.table('user')
-			.where({userId, password: hashPassword(oldPassword)})
+			.where({userId, password: oldHashedPassword})
 			.update(
 				{
-					password: hashPassword(newPassword),
+					password: newHashedPassword,
 				},
 				['userId', 'username', 'email']
 			);

@@ -17,11 +17,12 @@ export async function getUsers() {
 
 export async function addUser(user: User, password: string) {
   try {
+    const hashedPassword = await hashPassword(password);
     const result = await db
       .table('user')
       .insert({
         ...user,
-        password: hashPassword(password)
+        password: hashedPassword
       });
     return { rows: result?.length || 0 };
   } catch(error) {
