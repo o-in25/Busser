@@ -1,10 +1,10 @@
 import type {Cookies} from '@sveltejs/kit';
 import {DbProvider} from './db';
-import sha256 from 'crypto-js/sha256';
 import {Logger} from './logger';
 import type {User} from '$lib/types/auth';
 import jwt, {type SignOptions} from 'jsonwebtoken';
 import {promisify} from 'util';
+import { compare, hash } from 'bcrypt'
 
 const {JWT_SIGNING_KEY} = process.env;
 
@@ -34,7 +34,7 @@ const signUserToken = (payload: User): Promise<string> => {
 	});
 };
 
-export const hashPassword = (password: string) => sha256(password).toString();
+export const hashPassword = (password: string) => { /* TODO next fix this*/}
 
 // just verifies the jwt
 export async function authenticate(
@@ -56,32 +56,43 @@ export async function login(
 	password: string
 ): Promise<string | null> {
 	try {
-		const user = Object.assign(
-			{},
-			await db
-				.table('userAccessControl')
-				.where('username', username)
-				.andWhere('password', hashPassword(password))
-				.select('userId', 'username', 'email', 'permissions', 'roles')
-				.first()
-		);
-		if (!user?.userId) throw Error('User not found.');
-		user.permissions = user.permissions?.split(',');
-		user.roles = user.roles?.split(',');
-		await db
-			.table<User>('user')
-			.update({
-				lastActivityDate: Logger.now(),
-				// TODO: add any session data here
-			})
-			.where({
-				username,
-			});
+    // get user password
+    const { userId, password } = await db.table('user').where({ username }).select('userId', 'password').first();
+    if(!userId || !password) {
+      throw new Error('User not found.');
+    }
 
-		const userToken = signUserToken(user);
-		return userToken;
+    // check password
+    const isValid = await compare(username, password);
+    if(!isValid) {
+      throw new Error('Incorrect password.');
+    }
+
+    // get user (could be combined in first query)
+    const user = await db.table<User>('user').where({ userId }).select().first();
+    if(!user) {
+      throw new Error('Could not obtain user data.');
+    }
+
+    // get grants
+    const { permissions, roles } = await db.table('userAccessControl').where({ userId }).select().first();
+    if(!permissions?.length || !roles.length) {
+      throw new Error('Could not obtain user grants.');
+    }
+
+    // set grants
+    user.permissions = permissions?.split(',');
+		user.roles = roles?.split(',');
+
+    // sign token
+    const userToken = await signUserToken(user);
+    return userToken;
+
 	} catch (error: any) {
-		await Logger.info(`User ${username} attempted to sign in.`);
+    await Logger.error(error);
+    if(username) {
+      await Logger.info(`User ${username} attempted to sign in.`);
+    }
 		console.error(error);
 		return null;
 	}

@@ -15,6 +15,6 @@ export type User = {
   email: string;
   lastActivityDate?: Date | string;
   // user control
-  roles: string | string[];
-  permissions: string | string[];
+  roles: string[];
+  permissions: string[];
 };
