@@ -22,7 +22,7 @@ export const load = (async ({ locals, params }) => {
       message: 'Product not found.'
     });
   }
-  return { args: { product } };
+  return { product };
 }) satisfies PageServerLoad;
 
 export const actions = {
@@ -30,16 +30,18 @@ export const actions = {
 
     if(!locals.user?.permissions.includes('edit_inventory')) {
       return fail(StatusCodes.UNAUTHORIZED, {
-        error: { message: 'You do not have permission to perform this action.' }
+        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        error: 'You do not have permission to access this resource.'
       });
     }
 
     const productId = Number(params?.id || '');
     if(isNaN(productId)) {
       // ERROR
-      return fail(StatusCodes.NOT_FOUND, {
-        error: { message: 'Inventory item not found.' }
-      })
+      return fail(StatusCodes.BAD_REQUEST, {
+        status: getReasonPhrase(StatusCodes.BAD_REQUEST),
+        error: 'Invalid inventory ID.'
+      });
     }
 
     // let existingItem = await findInventoryItem(Number(id));
@@ -65,18 +67,14 @@ export const actions = {
 
     };
     const { productImageUrl: file } = formData as { productImageUrl: File; };
-    const newItem = await updateInventory(productData, file);
-    if(!newItem) {
-      // ERROR
-      return {
-        error: { message: 'Inventory item not be updated.' }
-      } as FormSubmitResult;
+    const queryResult = await updateInventory(productData, file);
+    if(queryResult.status === 'error') {
+      return fail(StatusCodes.INTERNAL_SERVER_ERROR, {
+        status: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
+        error: queryResult.error
+      });
     }
 
-    // OK
-    return {
-      args: {  product: newItem },
-      success: { message: 'Inventory has been updated.' }
-    } as FormSubmitResult;
+    return queryResult;
   }
 }

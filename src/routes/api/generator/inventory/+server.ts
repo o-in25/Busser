@@ -5,6 +5,6 @@ import { json } from '@sveltejs/kit';
 export const POST: RequestHandler = async ({ request }) => {
   const body = await request.json();
   const generator = new InventoryGenerator();
-  const result = await generator.generateContent(body.productName)
+  const result = await generator.generateContent(body.trigger)
     return json(result);
 };

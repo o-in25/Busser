@@ -12,6 +12,7 @@
   import { applyAction, enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import { notificationStore } from "../../stores";
+	import Prompt from "./Prompt.svelte";
   let error = false;
   // export let result: FormSubmitResult = {};
   export let category: Table.Category = {} as Table.Category;
@@ -45,8 +46,11 @@
         bind:value={category.categoryName} />
     </div>
     <div>
-      <Label for="categoryDescription" class="mb-2">Description</Label>
-      <Textarea id="categoryDescription" name="categoryDescription" rows={4} bind:value={category.categoryDescription}/>
+      <!-- <Label for="categoryDescription" class="mb-2">Description</Label>
+      <Prompt bind:value={category.categoryDescription} triggeredBy={category.categoryName}/>
+      <Textarea id="categoryDescription" name="categoryDescription" rows={4} bind:value={category.categoryDescription}/> -->
+      <Prompt bind:value={category.categoryDescription} trigger={category.categoryName} id="categoryDescription" name="categoryDescription"/>
+
     </div>
 
     <!-- submit -->

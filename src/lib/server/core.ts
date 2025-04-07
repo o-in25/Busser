@@ -354,7 +354,7 @@ export async function editProductImage(
 export async function updateInventory(
   product: Product,
   image: File | null = null,
-): Promise<Product | null> {
+): Promise<QueryResult<Product>> {
   try {
     if (!product?.productId) throw Error("No inventory ID provided.");
 
@@ -421,10 +421,18 @@ export async function updateInventory(
       await trx.commit();
     });
 
-    return await findInventoryItem(values.ProductId);
+    const newItem = await findInventoryItem(values.ProductId);
+    if(!newItem) throw new Error('Inventory was succesfully updated, but the subquery returned no results.');
+    return {
+      status: 'success',
+      data: newItem
+    }
   } catch (error: any) {
     console.error(error);
-    return null;
+    return {
+      status: "error",
+      error: "Could not update inventory.",
+    };
   }
 }
 

@@ -27,14 +27,10 @@ export const load = (async ({ locals }) => {
 export const actions = {
   add: async({ locals, request }) => {
 
-    if(!locals.user?.permissions.includes('add_inventory')) {
+    if(!locals.user?.permissions.includes('add_cat!!egory')) {
       return fail(StatusCodes.UNAUTHORIZED, {
-        error: {
-          message: "You do not have permission to access this resource",
-        },
-        args: {
-          product: null
-        }
+        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        error: 'You do not have permission to access this resource.'
       });
     }
 
@@ -61,17 +57,15 @@ export const actions = {
       productStrengthRating: parseFloat(formData.productStrengthRating.toString())
     } satisfies Product, file)    
 
-    let submitResult: FormSubmitResult = {
-      [newItem.status]: {
-        message: newItem.status === 'error' ? newItem.error : 'Inventory has been updated.'
-      }
+
+    if(newItem.status === 'error') {
+      return fail(StatusCodes.UNAUTHORIZED, {
+        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        error: newItem.error
+      });
     }
 
-    if('data' in newItem) {
-      submitResult = { ...submitResult, args: { product: newItem.data }}
-    }
-
-    return submitResult;
+    return newItem;
   }
 }
 

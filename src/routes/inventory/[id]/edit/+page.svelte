@@ -5,9 +5,8 @@
     import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
     import InventoryForm from '$lib/components/InventoryForm.svelte';
     
-    export let data: PageData;
-    export let form: ActionData;
-    $: product = form?.args?.product || data.args.product;
+    let { data }: { data: PageData } = $props();
+
 
 </script>
 
@@ -15,13 +14,9 @@
   <BreadcrumbItem name="Edit Inventory"></BreadcrumbItem>
 </Breadcrumb>
 <Heading tag="h2" class="mb-4 flex flex-row justify-between font-extrabold">
-  Edit {product.productName}
+  Edit {data.product.productName}
 </Heading>
 
 <div class="px-4 py-2 md:py-4">
-  {#if form?.success || form?.error}
-    <InventoryForm action={'edit'} result="{form}" {product}/>
-  {:else}
-    <InventoryForm action={'edit'} {product} />
-  {/if}
+  <InventoryForm action={'edit'} product={data.product} />
 </div>

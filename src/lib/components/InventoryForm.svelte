@@ -18,18 +18,20 @@
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
-  import { enhance } from "$app/forms";
+  import { applyAction, enhance } from "$app/forms";
   import { BrainOutline, ImageOutline, InfoCircleSolid, WandMagicSparklesOutline } from "flowbite-svelte-icons";
   import { page } from "$app/stores";
   import { notificationStore } from "../../stores";
   import { getContext } from "svelte";
+	import Prompt from "./Prompt.svelte";
+	import { goto } from "$app/navigation";
 
   export let action: ComponentAction;
-  export let result: FormSubmitResult = {};
   export let product: Product | null = null;
 
   const permissions: string[] = getContext('permissions');
 
+  console.log(product)
   let slug = $page.params.id;
   let productName = product?.productName;
   let productPricePerUnit = product?.productPricePerUnit;
@@ -62,50 +64,8 @@
     } else {
       $notificationStore.error = { message: result.message || result.error }
     }
-
-    
   }
 
-
-  let showSpinner = false;
-  let helperText = {
-    show: false,
-    text: ''
-  };
-
-  const generateText = async () => {
-    if(!productName) {
-      helperText = {
-        show: true,
-        text: 'A product name is required.'
-      };
-      return;
-    }
-    showSpinner = true;
-    const response = await fetch('/api/generator/inventory', {
-      method: 'POST',
-      body: JSON.stringify({ productName })
-    });
-
-    const result = await response.json();
-    
-    showSpinner = false;
-
-    if(result.description) {
-
-      productDescription = result.description;
-      return;
-    }
-
-    helperText = {
-        show: true,
-        text: 'Could not generate description'
-    };
-    // setTimeout(() => {
-    //   productDescription = 'Hello';
-    //   showSpinner = false;
-    // }, 1500)
-  }
 
   const openModal = () => {
     modalOpen = true;
@@ -117,7 +77,21 @@
     class="relative"
     method="POST"
     action="{action === 'add'? '?/add' : '?/edit'}"
-    use:enhance
+    use:enhance={() => {
+      return async ({ result }) => {
+        if (result.type === "redirect") {
+          goto(result.location);
+        } else {
+          await applyAction(result);
+          if (result.type === "failure")
+            $notificationStore.error = {
+              message: result?.data?.error?.toString() || "",
+            };
+          if (result.type === "success")
+            $notificationStore.success = { message: "Inventory updated." };
+        }
+      };
+    }}
     enctype="multipart/form-data">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div>
@@ -219,26 +193,7 @@
       </div>
     </div>
     <div class="mb-6">
-      <Label for="textarea-id" class="mb-2">Description</Label>
-      <div class="mt-4">
-        <div class="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-          <ToolbarButton color="dark" class="text-gray-500 dark:text-gray-400" on:click={generateText}>
-            {#if showSpinner}
-            <Spinner class="w-6 h-6"/>
-            {:else}
-                <BrainOutline class="w-6 h-6" />
-                <span class="sr-only">Generate text</span>
-            {/if}
-          </ToolbarButton>
-          <Textarea id="chat" class="mx-4 bg-white dark:bg-gray-800" rows={4} bind:value={productDescription} disabled={showSpinner}/>
-          <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-        </div>
-        {#if helperText.show}
-        <Helper class="mt-2" color="red">
-          <span class="font-medium">Oh, snapp!</span>
-          {helperText.text}
-        </Helper>
-        {/if}
+      <Prompt bind:value={productDescription} trigger={productName} id="productDescription" name="productDescription"/>
     </div>
 
     <input type="hidden" value={productDetailId}>
@@ -253,16 +208,6 @@
           <Button type="button" size="lg" color="red" on:click={openModal}>Delete</Button>
         </div>
       {/if}
-        {#if result.success || result.error}
-          <div class="my-4 md:ml-4">
-            <div class="md:m-auto">
-              <Alert border color="{result.success? 'green' : 'red'}">
-                <InfoCircleSolid slot="icon" class="w-5 h-5" />
-                {#if result.error}<span class="font-medium">{result.error?.message}</span>{:else}{result.success?.message}{/if}
-              </Alert>
-            </div>
-          </div>
-        {/if}
     </div>
   </form>
   <Modal title="Confirm Delete" bind:open={modalOpen} autoclose>
