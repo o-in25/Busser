@@ -10,12 +10,16 @@
     Span,
     Textarea,
     Toggle,
+		Toolbar,
+		ToolbarButton,
+		Spinner,
+		Helper,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
   import { enhance } from "$app/forms";
-  import { InfoCircleSolid } from "flowbite-svelte-icons";
+  import { BrainOutline, ImageOutline, InfoCircleSolid, WandMagicSparklesOutline } from "flowbite-svelte-icons";
   import { page } from "$app/stores";
   import { notificationStore } from "../../stores";
   import { getContext } from "svelte";
@@ -27,6 +31,7 @@
   const permissions: string[] = getContext('permissions');
 
   let slug = $page.params.id;
+  let productName = product?.productName;
   let productPricePerUnit = product?.productPricePerUnit;
   let productUnitSizeInMilliliters = product?.productUnitSizeInMilliliters;
   let productProof = product?.productProof;
@@ -61,6 +66,47 @@
     
   }
 
+
+  let showSpinner = false;
+  let helperText = {
+    show: false,
+    text: ''
+  };
+
+  const generateText = async () => {
+    if(!productName) {
+      helperText = {
+        show: true,
+        text: 'A product name is required.'
+      };
+      return;
+    }
+    showSpinner = true;
+    const response = await fetch('/api/generator/inventory', {
+      method: 'POST',
+      body: JSON.stringify({ productName })
+    });
+
+    const result = await response.json();
+    
+    showSpinner = false;
+
+    if(result.description) {
+
+      productDescription = result.description;
+      return;
+    }
+
+    helperText = {
+        show: true,
+        text: 'Could not generate description'
+    };
+    // setTimeout(() => {
+    //   productDescription = 'Hello';
+    //   showSpinner = false;
+    // }, 1500)
+  }
+
   const openModal = () => {
     modalOpen = true;
   }
@@ -81,7 +127,7 @@
           id="productName"
           name="productName"
           required
-          value={product?.productName} />
+          bind:value={productName} />
       </div>
       <div class="w-full">
         <Autocomplete
@@ -173,11 +219,26 @@
       </div>
     </div>
     <div class="mb-6">
+      <Label for="textarea-id" class="mb-2">Description</Label>
       <div class="mt-4">
-          <Label for="textarea-id" class="mb-2">Description</Label>
+        <div class="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+          <ToolbarButton color="dark" class="text-gray-500 dark:text-gray-400" on:click={generateText}>
+            {#if showSpinner}
+            <Spinner class="w-6 h-6"/>
+            {:else}
+                <BrainOutline class="w-6 h-6" />
+                <span class="sr-only">Generate text</span>
+            {/if}
+          </ToolbarButton>
+          <Textarea id="chat" class="mx-4 bg-white dark:bg-gray-800" rows={4} bind:value={productDescription} disabled={showSpinner}/>
           <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-          <Textarea name="productDescription" id="productDescription" rows={4} bind:value={productDescription}/>
         </div>
+        {#if helperText.show}
+        <Helper class="mt-2" color="red">
+          <span class="font-medium">Oh, snapp!</span>
+          {helperText.text}
+        </Helper>
+        {/if}
     </div>
 
     <input type="hidden" value={productDetailId}>

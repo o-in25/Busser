@@ -1068,3 +1068,53 @@ export async function getCategory(categoryId: number): Promise<QueryResult<Table
     };
   }
 }
+
+export async function updateCategory(category: Table.Category): Promise<QueryResult<Table.Category>> {
+  try {
+    // new category
+    let dbResult: any;
+    let key = category.categoryId;
+    const { categoryName, categoryDescription } = category;
+    if(!key) {
+      [dbResult] = await db.table<Table.Category>('category').insert({ categoryName, categoryDescription });
+      if(!dbResult) throw new Error('Could not create new category.')
+      key = dbResult;
+    } else {
+      dbResult = await db.table<Table.Category>('category')
+        .update({ categoryName, categoryDescription })
+        .where('categoryId', key);
+      if(dbResult < 1) {
+        if(!dbResult) throw new Error('Could not update category.')
+      }
+    }
+
+    dbResult = await db.table<Table.Category>('category').where('categoryId', key).select();
+    const newCategory = marshalToType<Table.Category>(dbResult);
+
+
+ 
+    return {
+      status: "success",
+      data: newCategory,
+    };
+    // if(!dbResult) {
+    //   throw new Error('Could not update category: no rows were returned.')
+    // }
+
+    // dbResult = await db.table<Table.Category>('category').where 
+
+  } catch(error: any) {
+    console.error(error);
+
+    Logger.error(
+      error.sqlMessage || error.message,
+      error.sql || error.stackTrace,
+    );
+
+    return {
+      status: "error",
+      error: error?.message || "An unknown error occurred.",
+    };
+
+  }
+}

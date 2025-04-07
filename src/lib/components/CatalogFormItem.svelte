@@ -32,7 +32,7 @@
     <!-- product name -->
     <div class="mb-6">
       <Autocomplete
-        label="Category"
+        label="Inventory Item"
         placeholder="Whiskey"
         name="productId"
         fetchUrl="/api/select/products"

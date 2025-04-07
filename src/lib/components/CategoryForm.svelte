@@ -29,7 +29,7 @@
             message: result?.data?.error?.toString() || "",
           };
         if (result.type === "success")
-          $notificationStore.success = { message: "Catalog updated." };
+          $notificationStore.success = { message: "Category updated." };
       }
     };
   }}>

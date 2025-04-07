@@ -1,4 +1,4 @@
-import { addCategory } from '$lib/server/core';
+import { addCategory, updateCategory } from '$lib/server/core';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
@@ -17,34 +17,29 @@ export const load = (async ({ locals }) => {
 
 export const actions = {
   default: async ({ locals, request }) => {
-    if(!locals.user?.permissions.includes('add_inventory')) {
+    if(!locals.user?.permissions.includes('add_category')) {
       return fail(StatusCodes.UNAUTHORIZED, {
-        error: {
-          message: "You do not have permission to access this resource",
-        },
-        args: {
-          product: null
-        }
+        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        error: 'You do not have permission to access this resource.'
       });
     }
+    
 
+    const formData = await request.formData();
 
-    let formData = Object.fromEntries(await request.formData());
-    let categoryName = formData.categoryName.toString();
-    let categoryDescription = formData.categoryDescription.toString()
-    const newItem = await addCategory(categoryName, categoryDescription);
+    const newData = await updateCategory({
+      categoryDescription: formData.get('categoryDescription')?.toString() || '',
+      categoryName: formData.get('categoryName')?.toString() || ''
+    })
 
-
-    let submitResult: FormSubmitResult = {
-      [newItem.status]: {
-        message: newItem.status === 'error' ? newItem.error : 'Inventory has been updated.'
-      }
+    if(newData.status === 'error') {
+      return fail(StatusCodes.INTERNAL_SERVER_ERROR, {
+        status: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
+        error: newData.error
+      })
     }
 
-    if('data' in newItem) {
-      submitResult = { ...submitResult, args: { product: newItem.data }}
-    }
-    return submitResult;
+    return newData;
 
   }
 }
