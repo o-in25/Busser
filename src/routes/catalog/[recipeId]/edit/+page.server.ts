@@ -4,6 +4,7 @@ import type { FormSubmitResult } from '$lib/types';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { deleteSignedUrl } from '$lib/server/storage';
+import { StatusCodes } from 'http-status-codes';
 
 export const load = (async ({ params }) => {
   const { recipeId } = params;
@@ -62,7 +63,7 @@ export const actions = {
 
     const newData = await updateCatalog(recipe, recipeSteps, file);
     if(newData.status === 'error') {  
-      return fail(500, newData);
+      return fail(StatusCodes.INTERNAL_SERVER_ERROR, newData);
 
     }
 

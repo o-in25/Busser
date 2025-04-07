@@ -23,6 +23,7 @@
   import FancyButton from "./FancyButton.svelte";
 	import { weightedMean } from "$lib/math";
 	import { getContext } from "svelte";
+	import Catalog from "./Catalog.svelte";
   export let product: Product;
 
   let headerLabel = {
@@ -125,17 +126,16 @@
           <div>
             <Heading tag="h5">
                {product.productName}
-               {#if product.productName !== product.categoryName}
                 <Secondary class="block">
                   <button class="flex items-center" id="popover-image">
                     {product.categoryName}&nbsp;<InfoCircleSolid class="w-5 h-5" />
                   </button>
                 </Secondary>
-              {/if}
               <!-- tags -->
               <div>
                 {#if isBaseSpirit(product.categoryName)}<Badge class="my-1">Base Spirit</Badge>{/if}
                 {#if product.productInStockQuantity < 1}<Badge class="my-1" color="red">Out of Stock</Badge>{/if}
+                <!-- {#if product.productInStockQuantity < 1}<Badge class="my-1" color="red">{product.productPricePerUnit}</Badge>{/if} -->
               </div>
             </Heading>
           </div>
@@ -229,7 +229,7 @@
 <Popover triggeredBy="#popover-image" class="!w-1/2 !max-w-2/3 text-sm font-light text-gray-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400" placement="top-start" title={product.categoryName}>
   <div class="space-y-2">
     <p>{product.categoryDescription}</p>
-    <A aClass="font-medium hover:underline flex items-center py-2">Edit<ArrowRightOutline class="ms-1 h-5 w-5"/>
+    <A aClass="font-medium hover:underline flex items-center py-2" href="/inventory/category/{product.categoryId}/edit">Edit<ArrowRightOutline class="ms-1 h-5 w-5"/>
     </A>
   </div>
 </Popover>

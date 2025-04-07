@@ -5,8 +5,6 @@
 		Checkbox,
 		Heading,
 		P,
-		Rating,
-		Progressbar,
 		Badge,
 		ScoreRating,
 		Accordion,
@@ -19,8 +17,6 @@
 	import {
 	calculateAbv,
 		calculateOverallScore,
-		dilutionByShaken,
-		dilutionByStirred,
 	} from '$lib/math';
 	import type {RecipeGeneratorSchema} from '$lib/server/generators/recipe-generator';
 	import {onMount} from 'svelte';

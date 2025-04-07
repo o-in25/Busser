@@ -223,7 +223,8 @@ export namespace View {
     recipeStepId?: number,
     recipeId?: number;
     productId: number,
-    recipeStepDescription: string | null;
+    // recipeStepDescription: string | null;
+    recipeStepDescription: string;
     productName: string;
     categoryName: string;
     categoryDescription: string | null;

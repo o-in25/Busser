@@ -1042,3 +1042,29 @@ export async function deleteCatalogItem(
     return result;
   }
 }
+
+
+export async function getCategory(categoryId: number): Promise<QueryResult<Table.Category>> {
+
+  try {
+
+    const dbResult: Table.Category | undefined = await db.table<Table.Category>('category').where({ categoryId }).first();
+    if(!dbResult) throw new Error("No category found for given ID.");
+    const category = marshalToType<Table.Category>(dbResult);
+    return {
+      status: "success",
+      data: category,
+    };
+  } catch (error: any) {
+    console.error(error);
+
+    Logger.error(
+      error.sqlMessage || error.message,
+      error.sql || error.stackTrace,
+    );
+    return {
+      status: "error",
+      error: error?.message || "An unknown error occurred.",
+    };
+  }
+}

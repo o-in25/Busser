@@ -14,10 +14,10 @@
   <Breadcrumb name="Catalog" href="/catalog">
     <BreadcrumbItem name="Browse Catalog" href="/catalog/browse"></BreadcrumbItem>
     <BreadcrumbItem name="{recipe.recipeName}" href="/catalog/{recipe.recipeId}"></BreadcrumbItem>
-    <BreadcrumbItem name="Edit"></BreadcrumbItem>
+    <BreadcrumbItem name="Edit Catalog"></BreadcrumbItem>
   </Breadcrumb>
   <Heading tag="h2" class="mb-4 font-extrabold flex flex-row justify-between">
-    <!-- Edit {recipe.recipeName} -->
+    Edit Catalog Item
   </Heading>
   <div class="px-4 py-2 md:py-4">
     <CatalogForm {spirits} {preparationMethods} {recipe} {recipeSteps}/>
