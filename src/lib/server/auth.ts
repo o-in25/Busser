@@ -17,6 +17,7 @@ const verifyUserToken = (token: string): Promise<User> => {
 			if (err) {
 				return reject(err);
 			}
+
 			return resolve(decoded as User);
 		});
 	});
@@ -25,7 +26,7 @@ const verifyUserToken = (token: string): Promise<User> => {
 const signUserToken = (payload: User): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		if (!JWT_SIGNING_KEY) return reject(new Error('No JWT signing key found.'));
-		jwt.sign(payload, JWT_SIGNING_KEY, {algorithm: 'HS256'}, (err, token) => {
+		jwt.sign(JSON.parse(JSON.stringify(payload)), JWT_SIGNING_KEY, {algorithm: 'HS256'}, (err, token) => {
 			if (err) {
 				return reject(err);
 			}
