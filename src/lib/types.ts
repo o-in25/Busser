@@ -13,17 +13,6 @@ export type Result<T> = {
     error?: Error;
 };
 
-export type Session = {
-    userId?: string,
-    opts: CookieSerializeOptions & { path: string; };
-};
-
-export type User = {
-    userId?: string,
-    username?: string,
-    email?: string;
-    lastActivityDate?: Date | string
-};
 
 export type Product = {
   productId: number | null, // can be null on insert
@@ -164,6 +153,10 @@ export namespace Table {
     recipeDescriptionId?: number,
     recipeDescription: string | null,
     recipeDescriptionImageUrl: string | null
+    recipeSweetnessRating: number,
+    recipeDrynessRating: number
+    recipeStrengthRating: number
+    recipeVersatilityRating: number
   }
 
   export type RecipeStep = {
@@ -171,7 +164,8 @@ export namespace Table {
     recipeId: number,
     productId: number,
     productIdQuantityInMilliliters: number,
-    recipeStepDescription: string | null
+    recipeStepDescription: string | null,
+    productIdQuantityUnit: string
   }
 
   export type RecipeTechnique = {
@@ -218,6 +212,11 @@ export namespace View {
     recipeDescriptionImageUrl: string | null,
     recipeImageUrl: string | null,
     recipeCategoryDescriptionImageUrl: string | null
+
+    recipeSweetnessRating: number,
+    recipeDrynessRating: number
+    recipeStrengthRating: number
+    recipeVersatilityRating: number
   };
 
   export type BasicRecipeStep = {
@@ -234,6 +233,7 @@ export namespace View {
     productInStockQuantity: number;
     productPricePerUnit: number;
     productUnitSizeInMilliliters: number;
+    productIdQuantityUnit: string;
     productProof: number;
 
     // TODO: do we need this?
@@ -241,6 +241,9 @@ export namespace View {
   }
 }
 
+
+// TODO: change this to use the view
+// we have way too many overlapping types
 export namespace QueryRequest {
   export type Recipe = {
     recipeId?: number,
@@ -248,13 +251,19 @@ export namespace QueryRequest {
     recipeCategoryId: number,
     recipeDescription: string
     recipeTechniqueDescriptionId: number
+    recipeSweetnessRating: number,
+    recipeDrynessRating: number
+    recipeStrengthRating: number
+    recipeVersatilityRating: number
   }
 
   export type RecipeSteps = {
     recipeStepId?: number,
     productId: number,
     productIdQuantityInMilliliters: number,
+    productIdQuantityUnit: string
     recipeStepDescription: string
   }
 
 }
+

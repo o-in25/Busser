@@ -56,11 +56,11 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
       .file(row.name)
       .delete();
 
-    await db.table<Upload>('upload')
+   const res = await db.table<Upload>('upload')
       .where('name', row.name)
       .andWhere('bucket', row.bucket)
       .update('status', 'DELETED');
-
+    console.log(res)
     return {
       status: 'success',
       message: `Signed URL ${signedUrl} successfully deleted.`

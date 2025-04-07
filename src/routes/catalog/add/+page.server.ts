@@ -1,9 +1,18 @@
-import { addRecipe, getPreparationMethods, getSpirits, productSelect, updateCatalog } from '$lib/server/core';
+import { getPreparationMethods, getSpirits, productSelect, updateCatalog } from '$lib/server/core';
 import type { Table } from '$lib/types';
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-export const load = (async ({ request }) => {
+export const load = (async ({ locals }) => {
+  if(!locals.user?.permissions.includes('add_catalog')) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to access this resource.'
+    });
+  }
+
   // await info('test')
   const spirits = await getSpirits();
   const preparationMethods = await getPreparationMethods();
@@ -22,7 +31,14 @@ export const load = (async ({ request }) => {
 
 
 export const actions = {
-  default: async ({ request }) => {
+  default: async ({ request, locals }) => {
+    if(!locals.user?.permissions.includes('add_catalog')) {
+      fail(StatusCodes.UNAUTHORIZED, {
+        status: StatusCodes.UNAUTHORIZED,
+        error: 'You do not have permission to perform this action.'
+      });
+    }
+
     let formData: any = Object.fromEntries(await request.formData());
     let { recipeImageUrl, recipeSteps, ...payload } = formData;
     const { recipeImageUrl: file } = formData as { recipeImageUrl: File; };
@@ -48,11 +64,10 @@ export const actions = {
       ...rest 
     }) => rest);
 
-  const newData = await updateCatalog(recipe, recipeSteps, file);
+    const newData = await updateCatalog(recipe, recipeSteps, file);
 
     if(newData.status === 'error') {
       return fail(500, newData);
-
     }
 
     return newData;

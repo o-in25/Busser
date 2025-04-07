@@ -8,6 +8,10 @@
     Hr,
     Heading,
     Helper,
+		Modal,
+		Span,
+		P,
+    Range
   } from "flowbite-svelte";
   import type {
     ComponentAction,
@@ -26,15 +30,27 @@
   import { scale } from "svelte/transition";
   import { notificationStore } from "../../stores";
 
+
+  // const ML_TO_OZ = 29.5735
+
   // props
   export let spirits: Spirit[];
   export let preparationMethods: PreparationMethod[];
-
-  export let action: ComponentAction = "add";
-
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
-  recipeSteps = recipeSteps.map((step) => ({ ...step, key: uuidv4() }));
+
+  const units = {
+    'ml': { toMl: 1, fromMl: (ml) => ml },
+    'oz': { toMl: 30, fromMl: (ml: number) => ml / 30 },
+    'dash': { toMl: 0.92, fromMl: (ml: number) => ml / 0.92 },
+    'cube': { toMl: 2.5, fromMl: (ml: number) => ml / 2.5 },
+  };
+
+  const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
+  const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);
+
+  // recipe model
+  recipeSteps = recipeSteps.map((step) => ({ ...step, productIdQuantityInMilliliters: convertFromMl(step.productIdQuantityUnit, step.productIdQuantityInMilliliters), key: uuidv4() }));
   const createStep = () => ({
     recipeId: recipe.recipeId || 0,
     recipeStepId: 0,
@@ -46,6 +62,7 @@
     supplierName: "",
     supplierDetails: null,
     productIdQuantityInMilliliters: 0,
+    productIdQuantityUnit: 'ml', //  ONLY right here can we pull in a user preference for the default value
     productInStockQuantity: 0,
     productPricePerUnit: 0,
     productUnitSizeInMilliliters: 0,
@@ -54,6 +71,7 @@
   });
 
   let steps = recipeSteps.length ? recipeSteps : [createStep()];
+
 
   const addStep = () => {
     steps = [...steps, createStep()];
@@ -66,14 +84,29 @@
     }
   };
 
-  // default to first choice
+  // const getRecipeSteps = () => {
+  //   const recipeSteps = steps.map((step: View.BasicRecipeStep) => ({ ...step, productUnitSizeInMilliliters: convertToMl(step.productIdQuantityUnit, step.productUnitSizeInMilliliters)}))
+  // }
+
+  const deleteRecipe = async() => {
+    const response = await fetch(`/api/catalog/${recipe.recipeId}`, {
+      method: 'DELETE'
+    });
+
+
+    const result = await response.json();
+    if('data' in result) {
+      $notificationStore.success = { message: 'Catalog item deleted.'}
+      // goto(`/inventory`);
+    } else {
+      $notificationStore.error = { message: result.error }
+    }
+
+  }
+
+  // form props
   let [defaultPrepMethodChoice] = preparationMethods;
   let [defaultSpirit] = spirits;
-
-  // let prepMethodChoice = defaultPrepMethodChoice.recipeTechniqueDescriptionId;
-  //let defaultSpiritChoice = defaultSpirit.recipeCategoryId;
-
-  // TODO: maybe add the ids to the basicrecipe[] instead of filtering
   let defaultSpiritChoice =
     recipe.recipeCategoryId || defaultSpirit.recipeCategoryId;
   let prepMethodChoice =
@@ -84,6 +117,8 @@
     defaultPrepMethodChoice.recipeTechniqueDilutionPercentage;
 
   let disabled = false;
+  let modalOpen = false;
+  
 </script>
 
 <div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
@@ -94,7 +129,10 @@
     on:submit
     use:enhance={({ formData }) => {
       disabled = true;
-      formData.append("recipeSteps", JSON.stringify(steps));
+      let json = steps.map((step) => ({ ...step, productIdQuantityInMilliliters: convertToMl(step.productIdQuantityUnit, step.productIdQuantityInMilliliters)}));
+
+      console.log(json)
+      formData.append("recipeSteps", JSON.stringify(json));
       return async ({ result }) => {
         if (result.type === "redirect") {
           goto(result.location);
@@ -123,7 +161,6 @@
             type="text"
             id="recipeName"
             name="recipeName"
-            placeholder="Plantation 3 Star"
             bind:value={recipe.recipeName}
             required />
         </div>
@@ -168,27 +205,13 @@
         <Textarea
           name="recipeDescription"
           id="recipeDescription"
-          rows="4"
-          resizable="false"
+          rows={4}
           bind:value={recipe.recipeDescription} />
       </div>
 
       <!-- served -->
       <div class="mb-6">
         <Label for="recipeTechniqueDescriptionId" class="mb-2">Served</Label>
-        <!-- <ul
-          class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600">
-          {#each preparationMethods as prepMethod}
-            <li class="w-full border-none">
-              <Radio name="recipeTechniqueDescriptionId" class="px-3 pt-1" value={prepMethod.recipeTechniqueDescriptionId}>
-                {prepMethod.recipeTechniqueDescriptionText}
-              </Radio>
-              <Helper id="helper-checkbox-text" class="ps-9 pb-1">
-                Adds {prepMethod.recipeTechniqueDilutionPercentage}% dilution
-              </Helper>
-            </li>
-          {/each}
-        </ul> -->
         <ButtonGroup
           class="grid grid-flow-col justify-items-stretch rounded-sm shadow-sm">
           {#each preparationMethods as prepMethod}
@@ -219,12 +242,35 @@
       </div>
     </fieldset>
 
-    <Hr classHr="my-6" />
+    <!-- rating -->
+    <fieldset>
+      <Label for="productName" class="mb-2">Ratings</Label>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="mt-4">
+          <Label for="recipeSweetnessRating" class="mb-2">Sweetness</Label>
+          <Range id="recipeSweetnessRating" name="recipeSweetnessRating" size="lg" bind:value={recipe.recipeSweetnessRating} min="0" max="10" step="0.1"/>
+        </div>
+        <div class="mt-4">
+          <Label for="recipeDrynessRating" class="mb-2">Dryness</Label>
+          <Range id="recipeDrynessRating" name="recipeDrynessRating" size="lg" bind:value={recipe.recipeDrynessRating} min="0" max="10" step="0.1" />
+        </div>
+        <div class="mt-4">
+          <Label for="recipeVersatilityRating" class="mb-2">Versatility</Label>
+          <Range id="recipeVersatilityRating" name="recipeVersatilityRating" size="lg" bind:value={recipe.recipeVersatilityRating} min="0" max="10" step="0.1"/>
+        </div>
+        <div class="mt-4">
+          <Label for="recipeStrengthRating" class="mb-2">Strength</Label>
+          <Range id="recipeStrengthRating" name="recipeStrengthRating" size="lg" bind:value={recipe.recipeStrengthRating} min="0" max="10" step="0.1" />
+        </div>
+      </div>
+    </fieldset>
+
+    <Hr classHr="my-4" />
 
     <!-- inner form -->
-    <fieldset class="px-4">
-      <legend class="mb-3">
-        <Heading tag="h6">Details</Heading>
+    <fieldset class="px-1 md:py-2">
+      <legend class="mb-2">
+        <Heading tag="h6">Steps</Heading>
       </legend>
       {#each steps as step, stepNumber (step.key)}
         <div
@@ -256,22 +302,39 @@
     <!-- submit -->
     <div class="md:flex md:flex-row-reverse">
       <div class="my-4 md:mr-4">
-        <Button
-          class="w-full md:w-32"
-          type="button"
-          size="xl"
-          {disabled}
-          color="red">
-          Delete
-        </Button>
+        {#if recipe.recipeId}
+          <Button
+            class="w-full md:w-32"
+            type="button"
+            size="xl"
+            color="red"
+            on:click={() => modalOpen = true}>
+            Delete
+          </Button>
+        {/if}
       </div>
+      <!-- delete -->
       <div class="my-4 md:mr-4">
         <Button class="w-full md:w-32" type="submit" size="xl" {disabled}>
           Save
         </Button>
+        </div>
       </div>
-    </div>
   </form>
+    {#if recipe.recipeId}
+      <Modal title="Confirm Delete" bind:open={modalOpen} autoclose>
+        <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+          Delete&nbsp;<Span>{recipe?.recipeName}</Span>&nbsp;from catalog?
+          <P color="text-red-700 dark:text-red-500" weight="bold">Once deleted, it can't be recovered.</P>
+        </p>
+        <svelte:fragment slot="footer">
+          <Button color="red" on:click={async () => {
+            await deleteRecipe();
+          }}>Delete</Button>
+          <Button color="alternative">Cancel</Button>
+        </svelte:fragment>
+      </Modal>
+    {/if}
 </div>
 
 <style lang="scss">

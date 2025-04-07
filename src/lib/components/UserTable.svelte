@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { User } from "$lib/types";
   import { InfoCircleSolid, UserAddOutline, UserEditOutline, UserRemoveOutline } from "flowbite-svelte-icons";
   import { Alert, Button, ButtonGroup,Modal,
     P,
@@ -12,6 +11,7 @@
     TableHeadCell,
   } from "flowbite-svelte";
   import moment from 'moment';
+	import type { User } from "$lib/types/auth";
 
 
   // props

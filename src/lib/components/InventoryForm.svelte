@@ -2,11 +2,8 @@
   import {
     Label,
     Input,
-    GradientButton,
-    Card,
     Range,
     Button,
-    Fileupload,
     Alert,
     Modal,
     P,
@@ -16,17 +13,18 @@
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
-  import FancyButton from "./FancyButton.svelte";
   import FileUpload from "./FileUpload.svelte";
   import { enhance } from "$app/forms";
   import { InfoCircleSolid } from "flowbite-svelte-icons";
   import { page } from "$app/stores";
   import { notificationStore } from "../../stores";
-    import { goto } from "$app/navigation";
+  import { getContext } from "svelte";
 
   export let action: ComponentAction;
   export let result: FormSubmitResult = {};
   export let product: Product | null = null;
+
+  const permissions: string[] = getContext('permissions');
 
   let slug = $page.params.id;
   let productPricePerUnit = product?.productPricePerUnit;
@@ -53,20 +51,13 @@
     });
 
     const result = await response.json();
-    console.log(result)
     if('data' in result) {
       $notificationStore.success = { message: 'Inventory item deleted.'}
       // goto(`/inventory`);
     } else {
-      $notificationStore.error = { message: result.error }
+      $notificationStore.error = { message: result.message || result.error }
     }
-    // if(error) {
-    //   $notificationStore.success = error.message
-    // } else {
-    //   $notificationStore.success = success.message
-    // }
 
-    // console.log(success, error)
     
   }
 
@@ -89,16 +80,16 @@
           type="text"
           id="productName"
           name="productName"
-          placeholder="Plantation 3 Star"
           required
           value={product?.productName} />
       </div>
       <div class="w-full">
         <Autocomplete
           label="Category"
-          placeholder="Whiskey"
           fetchUrl="/api/select/categories"
+          actionUrl="/inventory/category/add"
           name="categoryId"
+          grant="add_category"
           key={product?.categoryName}
           required={true}
           bind:value={categoryId}
@@ -119,7 +110,7 @@
       </div>
       <div>
         <Label for="size" class="mb-2">Size</Label>
-        <Input for="productUnitSizeInMilliliters" let:props required>
+        <Input let:props required>
           <input
             id="productUnitSizeInMilliliters"
             name="productUnitSizeInMilliliters"
@@ -132,7 +123,7 @@
       </div>
       <div>
         <Label for="abv" class="mb-2">Proof</Label>
-        <Input for="productProof" let:props required>
+        <Input let:props required>
           <input
             id="productProof"
             name="productProof"
@@ -140,7 +131,7 @@
             max="200"
             {...props}
             bind:value={productProof} />
-          <div slot="right" class="font-bold">%</div>
+          <!-- <div slot="right" class="font-bold">%</div> -->
         </Input>
       </div>
     </div>
@@ -152,6 +143,10 @@
         <div class="mt-4">
           <Label for="productSweetnessRating" class="mb-2">Sweetness</Label>
           <Range id="productSweetnessRating" name="productSweetnessRating" size="lg" bind:value={productSweetnessRating} min="0" max="10" step="0.1"/>
+          <!-- <Helper class="text-xs">
+            We’ll never share your details. Read our <a href="/" class="font-medium text-primary-600 hover:underline dark:text-primary-500"> Privacy Policy </a>
+            .
+          </Helper> -->
         </div>
         <div class="mt-4">
           <Label for="productDrynessRating" class="mb-2">Dryness</Label>
@@ -181,7 +176,7 @@
       <div class="mt-4">
           <Label for="textarea-id" class="mb-2">Description</Label>
           <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-          <Textarea name="productDescription" id="productDescription" rows="4" bind:value={productDescription}/>
+          <Textarea name="productDescription" id="productDescription" rows={4} bind:value={productDescription}/>
         </div>
     </div>
 
@@ -190,16 +185,16 @@
     <!-- submit -->
     <div class="md:flex md:flex-row">
       <div class="my-4 md:mr-4">
-        <FancyButton style="grow md:flex-none" type="submit">Save</FancyButton>
+        <Button type="submit" size="lg">Save</Button>
       </div>
-      {#if action === 'edit'}
+      {#if action === 'edit' && permissions.includes('delete_inventory')}
         <div class="my-4">
-          <FancyButton style="grow md:flex-none" type="button" color="orangeToRed" on:clicked={openModal}>Delete</FancyButton>
+          <Button type="button" size="lg" color="red" on:click={openModal}>Delete</Button>
         </div>
       {/if}
         {#if result.success || result.error}
           <div class="my-4 md:ml-4">
-            <div class="md:w-96 md:m-auto">
+            <div class="md:m-auto">
               <Alert border color="{result.success? 'green' : 'red'}">
                 <InfoCircleSolid slot="icon" class="w-5 h-5" />
                 {#if result.error}<span class="font-medium">{result.error?.message}</span>{:else}{result.success?.message}{/if}
