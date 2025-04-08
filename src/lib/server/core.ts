@@ -137,13 +137,13 @@ export async function getInventory(
 //   }
 // }
 
-export async function seedGallery(): Promise<QueryResult<Table.Recipe[]>> {
+export async function seedGallery(): Promise<QueryResult<View.BasicRecipe[]>> {
   try {
     // let dbResult = await db.table('availablerecipes').select('RecipeId').groupBy('RecipeId');
-    let dbResult = await db.table('recipe').whereIn('RecipeId', function() {
+    let dbResult = await db.table('basicrecipe').whereIn('RecipeId', function() {
       this.select('RecipeId').from('availablerecipes').groupBy('RecipeId');
     })
-    const data: Table.Recipe[] = marshalToType<Table.Recipe[]>(dbResult);
+    const data: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(dbResult);
     return { status: 'success', data }
   } catch (error: any) {
     console.error(error);

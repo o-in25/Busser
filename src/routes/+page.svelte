@@ -1,17 +1,24 @@
 <script lang="ts">
-	import { ButtonGroup, GradientButton, Heading, P, Popover, Span, type ImgType } from 'flowbite-svelte';
+	import { A, ButtonGroup, GradientButton, Heading, P, Popover, Span, type ImgType } from 'flowbite-svelte';
   import { Gallery, Button } from 'flowbite-svelte';
   import type { PageData } from './$types';
   import { page } from '$app/stores';
-  import { ArrowLeftToBracketOutline, ArrowRightToBracketOutline, MailBoxOutline, MailBoxSolid } from 'flowbite-svelte-icons';
+  import { ArrowLeftToBracketOutline, ArrowRightOutline, ArrowRightToBracketOutline, MailBoxOutline, MailBoxSolid } from 'flowbite-svelte-icons';
     import Excerpt from '$lib/components/Excerpt.svelte';
   export let data: PageData;	
   import placeholder from "$lib/assets/placeholder@2x.jpg";
+	import { getContext } from 'svelte';
 
-  let showDescription = false;
-  let currentDescription = "";
   const { recipes, spirits } = data;
-  const gallery = recipes?.map(item => ({ src: item.recipeImageUrl || placeholder, alt: item.recipeName})) || [] as ImgType[];
+  const gallery = recipes?.map(({ recipeImageUrl, recipeName, ...rest}) => ({ 
+    src: recipeImageUrl || placeholder, 
+    alt: recipeName,
+    data: { ...rest }
+  })) || [] as ImgType[];
+
+  const getData = (key: any, val: any) => (val?.data as any)?.[key]
+  const permissions: string[] = getContext('permissions');
+
 </script>
 
 {#if !$page.data.user}
@@ -47,22 +54,26 @@
 </div>
 <!-- add clickable gallery -->
 <Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3 mb-8" let:item>
-  <div class="relative group">
-    <img src={item.src} alt={item.alt} class="w-full h-auto rounded-lg" />
-    <div class="absolute inset-0 bg-black bg-opacity-60 flex justify-center items-center text-center text-white p-4 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-      <div>
-        <!-- Item Name in bold -->
-        <a class="font-bold text-lg" href="/home">{item.alt}</a>
-        
-        <!-- Item Description in light text -->
-        <p class="text-sm text-gray-300 mt-2">{item.alt}</p>
-        
-        <!-- Item Text in normal style -->
-        <p class="text-xs mt-2">{item.alt}</p>
+    <div class="relative group flex justify-center items-center">
+      <img src={item.src} alt={item.alt} class="h-full object-cover w-full rounded-lg" />
+      <div class="absolute inset-0 right-0 bg-black bg-opacity-60 flex justify-center items-center text-center text-white p-4 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="text-center">
+          <p class="font-bold text-lg">
+            {item.alt} <span class="mx-1 text-xl text-white-400">&bull;</span> {getData('recipeCategoryDescription', item)}
+          </p>
+          <!-- <p class="text-sm text-gray-300 mt-2">{getData('recipeCategoryDescription', item)}</p> -->
+          <p class="text-xs mt-2">{getData('recipeDescription', item)}</p>
+          <!-- TODO: eventually we will let all users go here -->
+           {#if permissions.includes('view_catalog')}
+            <div class="flex justify-center">
+              <A aClass="mx-autofont-medium hover:underline flex items-center py-2" href="/catalog/{getData('recipeId', item)}}">Open In Catalog<ArrowRightOutline class="ms-1 h-5 w-5"/>
+              </A>
+            </div>
+          {/if}
+        </div>
       </div>
     </div>
-  </div>
+
 </Gallery>
 
-<!-- <Excerpt/> -->
 
