@@ -1,14 +1,17 @@
 <script lang="ts">
-	import { ButtonGroup, GradientButton, Heading, P, Popover, Span } from 'flowbite-svelte';
+	import { ButtonGroup, GradientButton, Heading, P, Popover, Span, type ImgType } from 'flowbite-svelte';
   import { Gallery, Button } from 'flowbite-svelte';
   import type { PageData } from './$types';
   import { page } from '$app/stores';
   import { ArrowLeftToBracketOutline, ArrowRightToBracketOutline, MailBoxOutline, MailBoxSolid } from 'flowbite-svelte-icons';
     import Excerpt from '$lib/components/Excerpt.svelte';
   export let data: PageData;	
+  import placeholder from "$lib/assets/placeholder@2x.jpg";
 
-  const { gallery, spirits } = data.args;
-
+  let showDescription = false;
+  let currentDescription = "";
+  const { recipes, spirits } = data;
+  const gallery = recipes?.map(item => ({ src: item.recipeImageUrl || placeholder, alt: item.recipeName})) || [] as ImgType[];
 </script>
 
 {#if !$page.data.user}
@@ -43,6 +46,23 @@
   {/if}
 </div>
 <!-- add clickable gallery -->
-<Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3 mb-8" />
+<Gallery items={gallery} class="gap-4 grid-cols-2 md:grid-cols-3 mb-8" let:item>
+  <div class="relative group">
+    <img src={item.src} alt={item.alt} class="w-full h-auto rounded-lg" />
+    <div class="absolute inset-0 bg-black bg-opacity-60 flex justify-center items-center text-center text-white p-4 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div>
+        <!-- Item Name in bold -->
+        <a class="font-bold text-lg" href="/home">{item.alt}</a>
+        
+        <!-- Item Description in light text -->
+        <p class="text-sm text-gray-300 mt-2">{item.alt}</p>
+        
+        <!-- Item Text in normal style -->
+        <p class="text-xs mt-2">{item.alt}</p>
+      </div>
+    </div>
+  </div>
+</Gallery>
+
 <!-- <Excerpt/> -->
 

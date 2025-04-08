@@ -27,6 +27,7 @@ import { DbProvider } from "./db";
 import * as changeCase from "change-case";
 import { deleteSignedUrl, getSignedUrl } from "./storage";
 import { Logger } from "./logger";
+import Recipe from "$lib/components/Recipe.svelte";
 
 const db = new DbProvider("app_t");
 
@@ -116,23 +117,40 @@ export async function getInventory(
   }
 }
 
-export async function seedGallery(): Promise<GallerySeeding[]> {
+// export async function seedGallery(): Promise<GallerySeeding[]> {
+//   try {
+//     let images = await db
+//       .table<any>("recipe")
+//       .select("RecipeImageUrl", "RecipeName")
+//       .whereNotNull("RecipeImageUrl");
+//     images = images.map((item) =>
+//       Object.assign({}, { src: item.RecipeImageUrl, alt: item.RecipeName}),
+//     );
+//     images = marshal(images);
+//     images = images.filter(
+//       ({ src }) => src !== "https://i.imgur.com/aOQBTkN.png",
+//     ); // this pic sucks
+//     return images;
+//   } catch (error: any) {
+//     console.error(error);
+//     return [];
+//   }
+// }
+
+export async function seedGallery(): Promise<QueryResult<Table.Recipe[]>> {
   try {
-    let images = await db
-      .table<any>("recipe")
-      .select("RecipeImageUrl")
-      .whereNotNull("RecipeImageUrl");
-    images = images.map((item) =>
-      Object.assign({}, { src: item.RecipeImageUrl, href: "/inventory" }),
-    );
-    images = marshal(images);
-    images = images.filter(
-      ({ src }) => src !== "https://i.imgur.com/aOQBTkN.png",
-    ); // this pic sucks
-    return images;
+    // let dbResult = await db.table('availablerecipes').select('RecipeId').groupBy('RecipeId');
+    let dbResult = await db.table('recipe').whereIn('RecipeId', function() {
+      this.select('RecipeId').from('availablerecipes').groupBy('RecipeId');
+    })
+    const data: Table.Recipe[] = marshalToType<Table.Recipe[]>(dbResult);
+    return { status: 'success', data }
   } catch (error: any) {
     console.error(error);
-    return [];
+    return {
+      status: 'error',
+      error: 'Unable to get recipes.'
+    }
   }
 }
 

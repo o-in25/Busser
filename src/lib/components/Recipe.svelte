@@ -122,7 +122,7 @@
 			class="lg:grid lg:grid-cols-2 lg:gap-4 xl:gap-8 grid-rows-[auto_1fr] h-full">
 			<!-- image / col 1 -->
 			<div
-				class="flex justify-center lg:justify-start shrink-0 max-w-md lg:max-w-md mx-auto">
+				class="flex justify-center shrink-0 mx-auto">
 				<img
 					class="w-1/2 dark:hidden rounded-md"
 					src={recipe.recipeImageUrl || placeholderLight}
