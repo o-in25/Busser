@@ -100,8 +100,6 @@
     return spirits.some(item => categoryName.toLowerCase().includes(item))
   }
 
-  console.log(product)
-
 </script>
 
 <!-- "grid gap-6 mb-6 md:grid-cols-2 -->

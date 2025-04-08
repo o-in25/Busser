@@ -27,7 +27,7 @@ export const load = (async ({ locals }) => {
 export const actions = {
   add: async({ locals, request }) => {
 
-    if(!locals.user?.permissions.includes('add_cat!!egory')) {
+    if(!locals.user?.permissions.includes('add_inventory')) {
       return fail(StatusCodes.UNAUTHORIZED, {
         status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
         error: 'You do not have permission to access this resource.'

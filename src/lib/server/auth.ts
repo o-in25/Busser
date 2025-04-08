@@ -109,7 +109,7 @@ export async function resetPassword(
 	newPassword: string
 ): Promise<boolean> {
 	try {
-    const oldHashedPassword = await hashPassword(newPassword);
+    const oldHashedPassword = await hashPassword(oldPassword);
     const newHashedPassword = await hashPassword(newPassword);
 		const result: any = await db
 			.table('user')
