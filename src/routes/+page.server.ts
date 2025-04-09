@@ -1,10 +1,10 @@
-import { getBaseSpirits, seedGallery } from '$lib/server/core';
+import { getRecipeCategories, seedGallery } from '$lib/server/core';
 import { error } from '@sveltejs/kit';
 // import { createOcrWorker } from '$lib/server/ocr';
 import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 export const load = (async ({ request }) => {
-  const baseSpiritsQuery = await getBaseSpirits();
+  const baseSpiritsQuery = await getRecipeCategories();
   const gallerySeedQuery = await seedGallery();
 
 

@@ -74,7 +74,7 @@ const paginationData = {
   nextPage: 0,
 };
 
-export async function getCatalog(currentPage: number, perPage: number = 25, filter: Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep> | null = null) {
+export async function getCatalog(currentPage: number, perPage: number = 25, filter: Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep> | null = null): Promise<PaginationResult<View.BasicRecipe[]>>{
   try {
     let query = db.table('basicrecipe as r').select();
     if(filter?.productInStockQuantity) {
@@ -90,11 +90,18 @@ export async function getCatalog(currentPage: number, perPage: number = 25, filt
     }
 
     query = query.orderBy('recipeName');
-    let dbResult: any = await query.paginate({ perPage, currentPage, isLengthAware: true });
-    dbResult = marshalToType<View.BasicRecipe[]>(dbResult);
-    return dbResult;
+    const { data, pagination } = await query.paginate({ perPage, currentPage, isLengthAware: true });
+    const result: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(data);
+    return {
+      data: result,
+      pagination
+    }
   } catch (error: any) {
     console.error(error);
+    return {
+      data: [],
+      pagination: paginationData,
+    };
   }
 }
 
@@ -158,7 +165,7 @@ export async function seedGallery(): Promise<QueryResult<View.BasicRecipe[]>> {
   }
 }
 
-export async function getBaseSpirits(): Promise<QueryResult<View.BasicRecipeCategory[]>> {
+export async function getRecipeCategories(): Promise<QueryResult<View.BasicRecipeCategory[]>> {
   try {
     let dbResult = await db.table<View.BasicRecipeCategory>('basicrecipecategory').select();
     const data: View.BasicRecipeCategory[] = marshalToType<View.BasicRecipeCategory[]>(dbResult);

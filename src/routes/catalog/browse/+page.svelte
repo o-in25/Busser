@@ -30,10 +30,11 @@
 	import { getContext } from "svelte";
 	import { page } from "$app/stores";
 	import { goto } from "$app/navigation";
+  import { InfiniteLoader, LoaderState } from "svelte-infinite"
 
   export let data: PageData;
-  let recipes: BasicRecipe[] = data.recipes || [];
-  let baseSpirits: View.BasicRecipeCategory[] = data.baseSpirits || [];
+  let recipes: View.BasicRecipe[] = data.searchResult;
+  // let baseSpirits: View.BasicRecipeCategory[] = data.baseSpirits || [];
   const permissions: string[] = getContext('permissions');
   let openDropdown: boolean = false;
 
@@ -76,6 +77,61 @@
   };
 
   $: search = applyFilter(searchField, filterField);
+  let pageNumber = 1;
+
+  const loaderState = new LoaderState()
+  const LOAD_LIMIT = 6
+
+  const loadMore = async () => {
+    try {
+      pageNumber += 1
+      const limit = String(LOAD_LIMIT)
+      const skip = String(LOAD_LIMIT * (pageNumber - 1))
+
+      // If there are less results on the first page (page.server loaded data)
+      // than the limit, don't keep trying to fetch more. We're done.
+      if (search.length < LOAD_LIMIT) {
+        loaderState.complete()               // <--- using loaderState
+        return
+      }
+
+      const searchParams = new URLSearchParams({ limit, skip })
+
+      // // Fetch an endpoint that supports server-side pagination
+      // const dataResponse = await fetch(`/api/data?${searchParams}`)
+
+      // // Ideally, like most paginated endpoints, this should return the data
+      // // you've requested for your page, as well as the total amount of data
+      // // available to page through
+
+      // if (!dataResponse.ok) {
+      //   loaderState.error()                 // <--- using loaderState
+
+      //   // On errors, set the pageNumber back so we can retry
+      //   // that page's data on the next 'loadMore' attempt
+      //   pageNumber -= 1
+      //   return
+      // }
+      // const data = await dataResponse.json()
+
+      // // If we've successfully received data, push it to the reactive state variable
+      // if (data.items.length) {
+      //   allItems.push(...data.items)
+      // }
+
+      // If there are more (or equal) number of items loaded as are totally available
+      // from the API, don't keep trying to fetch more. We're done.
+      // if (allItems.length >= data.totalCount) {
+      //   loaderState.complete()               // <--- using loaderState
+      // } else {
+      //   loaderState.loaded()                 // <--- using loaderState
+      // }
+    } catch (error) {
+      console.error(error)
+      loaderState.error()                   // <--- using loaderState
+      pageNumber -= 1
+    }
+  }
 </script>
 
 <Breadcrumb name="Catalog" href="/catalog">
@@ -118,11 +174,15 @@
     {/if}
   </div >
 
+  <InfiniteLoader {loaderState} triggerLoad={loadMore}>
 
   <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-2">
     {#each search as recipe}
       <CatalogItem {recipe}/>
     {/each}
+
   </div>
+</InfiniteLoader>
+
 </div>
 <!-- <CatalogTable recipes={search}></CatalogTable> -->

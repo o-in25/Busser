@@ -1,4 +1,4 @@
-import { categorySelect, getBaseSpirits, getBasicRecipes, getCatalog, getSpirits } from '$lib/server/core';
+import { categorySelect, getRecipeCategories, getBasicRecipes, getCatalog, getSpirits } from '$lib/server/core';
 import type { BasicRecipe, QueryResult, SelectOption } from '$lib/types';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -19,28 +19,33 @@ export const load = (async () => {
   // }
 
   // return { recipes, baseSpirits }
-  const basicRecipesQuery = await getBasicRecipes();
-  const baseSpiritsQuery = await getBaseSpirits();
+  // const basicRecipesQuery = await getBasicRecipes();
+  const { data, pagination } = await getCatalog(1, 6)
 
-  const res = await getCatalog(1, 900, { productInStockQuantity: 1});
-  console.log(res)
+  // TODO: get this onmount in component
+  const queryResult = await getRecipeCategories();
 
-  if(!('data' in basicRecipesQuery) || !('data' in baseSpiritsQuery)) {
+  // // const res = await getCatalog(1, 6, { productInStockQuantity: 1});
+
+  if(!('data' in queryResult)) {
     return error(StatusCodes.INTERNAL_SERVER_ERROR, {
       reason: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
       code: StatusCodes.NOT_FOUND,
       message: 'Could not load Catalog. Please try again later.'
     }); 
   }
+  
 
-  // let recipes = [...(basicRecipesQuery.data || []), ...(basicRecipesQuery.data || [])]
-  // recipes = [...recipes, ...recipes];
-  // recipes = [...recipes, ...recipes];
-  // recipes = [...recipes, ...recipes];
+  // // let recipes = [...(basicRecipesQuery.data || []), ...(basicRecipesQuery.data || [])]
+  // // recipes = [...recipes, ...recipes];
+  // // recipes = [...recipes, ...recipes];
+  // // recipes = [...recipes, ...recipes];
 
   return {
-    recipes: basicRecipesQuery.data || [],
-    baseSpirits: baseSpiritsQuery.data || []
+    searchResult: data,
+    categories: queryResult.data || [],
+    pagination
+
   }
 
 }) satisfies PageServerLoad;
