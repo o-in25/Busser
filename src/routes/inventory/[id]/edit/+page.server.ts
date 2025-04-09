@@ -1,4 +1,4 @@
-import { addProductImage, editProductImage, findInventoryItem, updateInventory } from '$lib/server/core';
+import { findInventoryItem, updateInventory } from '$lib/server/core';
 import type { FormSubmitResult } from '$lib/types';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
