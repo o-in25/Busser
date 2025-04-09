@@ -27,7 +27,6 @@ import { DbProvider } from "./db";
 import * as changeCase from "change-case";
 import { deleteSignedUrl, getSignedUrl } from "./storage";
 import { Logger } from "./logger";
-import Recipe from "$lib/components/Recipe.svelte";
 
 const db = new DbProvider("app_t");
 
@@ -75,6 +74,30 @@ const paginationData = {
   nextPage: 0,
 };
 
+export async function getCatalog(currentPage: number, perPage: number = 25, filter: Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep> | null = null) {
+  try {
+    let query = db.table('basicrecipe as r').select();
+    if(filter?.productInStockQuantity) {
+      query = query.whereIn(
+        'r.RecipeId',
+        db.table('basicrecipestep as rs')
+          .select('rs.RecipeId')
+          .groupBy('rs.RecipeId')
+          .having(
+            db.query.raw('COUNT(rs.RecipeStepId) = COUNT(CASE WHEN rs.ProductInStockQuantity = ? THEN 1 END)', [filter.productInStockQuantity])
+          )
+      );
+    }
+
+    query = query.orderBy('recipeName');
+    let dbResult: any = await query.paginate({ perPage, currentPage, isLengthAware: true });
+    dbResult = marshalToType<View.BasicRecipe[]>(dbResult);
+    return dbResult;
+  } catch (error: any) {
+    console.error(error);
+  }
+}
+
 export async function getInventory(
   currentPage: number,
   perPage: number = 25,
@@ -94,6 +117,7 @@ export async function getInventory(
 
     let { data, pagination } = await dbResult
       .select()
+      .orderBy('productName')
       .paginate({ perPage, currentPage, isLengthAware: true });
     
     // let { data, pagination } = await db
@@ -559,42 +583,6 @@ export async function getBasicRecipe(
   }
 }
 
-export async function getRecipe(
-  recipeId: number,
-): Promise<
-  QueryResult<{ recipe: Table.Recipe; recipeSteps: Table.RecipeStep[] }>
-> {
-  try {
-    let recipe: Table.Recipe | undefined = undefined;
-    let recipeSteps: Table.RecipeStep[] | undefined = undefined;
-
-    await db.query.transaction(async (trx) => {
-      // let [dbResult] = await trx('basicrecipe').select().where({ recipeId });
-      // recipe = marshal<View.BasicRecipe>(dbResult, camelCase);
-      // dbResult = await trx('basicrecipestep').select().where({ recipeId });
-      // recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
-    });
-
-    if (!recipe || !recipeSteps) {
-      throw new Error("Could not get recipe details.");
-    }
-
-    return {
-      status: "success",
-      data: { recipe, recipeSteps },
-    };
-  } catch (error: any) {
-    console.error(error);
-    Logger.error(
-      error.sqlMessage || error.message,
-      error.sql || error.stackTrace,
-    );
-    return {
-      status: "error",
-      error: error?.code || "An unknown error occurred.",
-    };
-  }
-}
 
 export async function productSelect(): Promise<SelectOption[]> {
   try {

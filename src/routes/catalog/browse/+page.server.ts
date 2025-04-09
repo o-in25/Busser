@@ -1,4 +1,4 @@
-import { categorySelect, getBaseSpirits, getBasicRecipes, getSpirits } from '$lib/server/core';
+import { categorySelect, getBaseSpirits, getBasicRecipes, getCatalog, getSpirits } from '$lib/server/core';
 import type { BasicRecipe, QueryResult, SelectOption } from '$lib/types';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -22,6 +22,9 @@ export const load = (async () => {
   const basicRecipesQuery = await getBasicRecipes();
   const baseSpiritsQuery = await getBaseSpirits();
 
+  const res = await getCatalog(1, 900, { productInStockQuantity: 1});
+  console.log(res)
+
   if(!('data' in basicRecipesQuery) || !('data' in baseSpiritsQuery)) {
     return error(StatusCodes.INTERNAL_SERVER_ERROR, {
       reason: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
@@ -30,13 +33,13 @@ export const load = (async () => {
     }); 
   }
 
-  let recipes = [...(basicRecipesQuery.data || []), ...(basicRecipesQuery.data || [])]
-  recipes = [...recipes, ...recipes];
-  recipes = [...recipes, ...recipes];
-  recipes = [...recipes, ...recipes];
+  // let recipes = [...(basicRecipesQuery.data || []), ...(basicRecipesQuery.data || [])]
+  // recipes = [...recipes, ...recipes];
+  // recipes = [...recipes, ...recipes];
+  // recipes = [...recipes, ...recipes];
 
   return {
-    recipes,
+    recipes: basicRecipesQuery.data || [],
     baseSpirits: baseSpiritsQuery.data || []
   }
 
