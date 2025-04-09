@@ -49,7 +49,7 @@
       <!-- <Label for="categoryDescription" class="mb-2">Description</Label>
       <Prompt bind:value={category.categoryDescription} triggeredBy={category.categoryName}/>
       <Textarea id="categoryDescription" name="categoryDescription" rows={4} bind:value={category.categoryDescription}/> -->
-      <Prompt bind:value={category.categoryDescription} trigger={category.categoryName} id="categoryDescription" name="categoryDescription"/>
+      <Prompt bind:value={category.categoryDescription} trigger={category.categoryName} id="categoryDescription" name="categoryDescription" url="/api/generator/inventory"/>
 
     </div>
 

@@ -168,7 +168,7 @@
       {/if}
     </Search>
     {#if permissions.includes('add_inventory')}
-      <Button class="p-2.5! rounded-s-none" href="/inventory/add">
+      <Button class="p-2.5! rounded-s-none" href="/catalog/add">
         <PlusOutline class="w-5 h-5" />
       </Button>
     {/if}
