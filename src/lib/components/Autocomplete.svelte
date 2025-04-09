@@ -28,13 +28,13 @@
     });
     const selectOptions = await response.json();
     items = selectOptions;
-
   })
 
   let show = false;
   $: selectValue = key || '';
   $: search = items.filter(({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1);
   $: value = items.find(({ name }) => name.toLowerCase() === selectValue.toLocaleLowerCase())?.value || value || null;
+  $: disabled = items.length === 0;
 
   const showAutocomplete = () => show = true;
   // theres a race condition b/w onblur and onclick, so we timeout 
@@ -63,10 +63,10 @@
   {/if}
   <ButtonGroup divClass="flex">
     <Input type="text" placeholder="{placeholder}"
-      on:blur={hideAutocomplete}
       on:focus={showAutocomplete}
       bind:value={selectValue}
       bind:required={required}
+      bind:disabled={disabled}
     >
     </Input>
     {#if actionUrl && (!grant || grant && permissions.includes(grant))} 

@@ -8,6 +8,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     const { cookies, url } = event;
     const slug = url.pathname;
     const userToken = cookies.get("userToken");
+
     event.locals.user = await authenticate(userToken);
 
     if(!event.locals.user && !publicRoutes.includes(slug)) {

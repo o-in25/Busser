@@ -10,23 +10,30 @@
     Span,
     Textarea,
     Toggle,
+		Toolbar,
+		ToolbarButton,
+		Spinner,
+		Helper,
   } from "flowbite-svelte";
   import Autocomplete from "./Autocomplete.svelte";
   import type { ComponentAction, FormSubmitResult, Product } from "$lib/types";
   import FileUpload from "./FileUpload.svelte";
-  import { enhance } from "$app/forms";
-  import { InfoCircleSolid } from "flowbite-svelte-icons";
+  import { applyAction, enhance } from "$app/forms";
+  import { BrainOutline, ImageOutline, InfoCircleSolid, WandMagicSparklesOutline } from "flowbite-svelte-icons";
   import { page } from "$app/stores";
   import { notificationStore } from "../../stores";
   import { getContext } from "svelte";
+	import Prompt from "./Prompt.svelte";
+	import { goto } from "$app/navigation";
 
   export let action: ComponentAction;
-  export let result: FormSubmitResult = {};
   export let product: Product | null = null;
 
   const permissions: string[] = getContext('permissions');
 
+  console.log(product)
   let slug = $page.params.id;
+  let productName = product?.productName;
   let productPricePerUnit = product?.productPricePerUnit;
   let productUnitSizeInMilliliters = product?.productUnitSizeInMilliliters;
   let productProof = product?.productProof;
@@ -57,9 +64,8 @@
     } else {
       $notificationStore.error = { message: result.message || result.error }
     }
-
-    
   }
+
 
   const openModal = () => {
     modalOpen = true;
@@ -71,7 +77,21 @@
     class="relative"
     method="POST"
     action="{action === 'add'? '?/add' : '?/edit'}"
-    use:enhance
+    use:enhance={() => {
+      return async ({ result }) => {
+        if (result.type === "redirect") {
+          goto(result.location);
+        } else {
+          await applyAction(result);
+          if (result.type === "failure")
+            $notificationStore.error = {
+              message: result?.data?.error?.toString() || "",
+            };
+          if (result.type === "success")
+            $notificationStore.success = { message: "Inventory updated." };
+        }
+      };
+    }}
     enctype="multipart/form-data">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div>
@@ -81,7 +101,7 @@
           id="productName"
           name="productName"
           required
-          value={product?.productName} />
+          bind:value={productName} />
       </div>
       <div class="w-full">
         <Autocomplete
@@ -173,11 +193,7 @@
       </div>
     </div>
     <div class="mb-6">
-      <div class="mt-4">
-          <Label for="textarea-id" class="mb-2">Description</Label>
-          <!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
-          <Textarea name="productDescription" id="productDescription" rows={4} bind:value={productDescription}/>
-        </div>
+      <Prompt bind:value={productDescription} trigger={productName} id="productDescription" name="productDescription"/>
     </div>
 
     <input type="hidden" value={productDetailId}>
@@ -192,16 +208,6 @@
           <Button type="button" size="lg" color="red" on:click={openModal}>Delete</Button>
         </div>
       {/if}
-        {#if result.success || result.error}
-          <div class="my-4 md:ml-4">
-            <div class="md:m-auto">
-              <Alert border color="{result.success? 'green' : 'red'}">
-                <InfoCircleSolid slot="icon" class="w-5 h-5" />
-                {#if result.error}<span class="font-medium">{result.error?.message}</span>{:else}{result.success?.message}{/if}
-              </Alert>
-            </div>
-          </div>
-        {/if}
     </div>
   </form>
   <Modal title="Confirm Delete" bind:open={modalOpen} autoclose>

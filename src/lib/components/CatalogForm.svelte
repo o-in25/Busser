@@ -55,7 +55,7 @@
     recipeId: recipe.recipeId || 0,
     recipeStepId: 0,
     productId: 0,
-    recipeStepDescription: null,
+    recipeStepDescription: "",
     productName: "",
     categoryName: "",
     categoryDescription: null,

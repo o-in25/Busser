@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 const { OPENAI_API_KEY } = process.env;
 
-export class LlmClient<T> {
+export abstract class LlmClient<T> {
   private openai: OpenAI = new OpenAI({ apiKey: OPENAI_API_KEY });
   protected schema: ZodSchema<T>;
   // protected prompt: string;

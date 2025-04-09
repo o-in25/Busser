@@ -6,7 +6,8 @@ import jwt, {type SignOptions} from 'jsonwebtoken';
 import {promisify} from 'util';
 import { compare, hash } from 'bcrypt'
 
-const {JWT_SIGNING_KEY} = process.env;
+const { JWT_SIGNING_KEY } = process.env;
+const HASH_ROUNDS = 10;
 
 const db = new DbProvider('user_t');
 
@@ -36,7 +37,7 @@ const signUserToken = (payload: User): Promise<string> => {
 };
 
 export async function hashPassword(password: string) {
-  const hashedPassword = await hash(password, 10,);
+  const hashedPassword = await hash(password, HASH_ROUNDS);
   return hashedPassword;
 }
 
@@ -108,7 +109,7 @@ export async function resetPassword(
 	newPassword: string
 ): Promise<boolean> {
 	try {
-    const oldHashedPassword = await hashPassword(newPassword);
+    const oldHashedPassword = await hashPassword(oldPassword);
     const newHashedPassword = await hashPassword(newPassword);
 		const result: any = await db
 			.table('user')

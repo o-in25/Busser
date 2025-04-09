@@ -1,23 +1,38 @@
-import { addCategory, updateCategory } from '$lib/server/core';
+import { getCategory, updateCategory } from '$lib/server/core';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getReasonPhrase, StatusCodes } from 'http-status-codes';
-import type { FormSubmitResult } from '$lib/types';
+import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
-export const load = (async ({ locals }) => {
-  if(!locals.user?.permissions.includes('add_category')) {
-    error(StatusCodes.UNAUTHORIZED, {
+export const load = (async ({ locals, params }) => {
+  if(!locals.user?.permissions.includes('edit_category')) {
+    return error(StatusCodes.UNAUTHORIZED, {
       reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
       code: StatusCodes.UNAUTHORIZED,
       message: 'You do not have permission to access this resource.'
     });
   }
-  return {};
+
+  // return {};
+  const queryResult = await getCategory(Number(params.id));
+  if(queryResult.status === 'error') {
+    return error(StatusCodes.NOT_FOUND, {
+      reason: getReasonPhrase(StatusCodes.NOT_FOUND),
+      code: StatusCodes.NOT_FOUND,
+      message: queryResult.error
+    });
+  }
+
+  return {
+    category: queryResult.data
+  };
+
+
 }) satisfies PageServerLoad;
 
 export const actions = {
-  default: async ({ locals, request }) => {
-    if(!locals.user?.permissions.includes('add_category')) {
+  default: async ({ locals, request, params }) => {
+
+    if(!locals.user?.permissions.includes('edit_category')) {
       return fail(StatusCodes.UNAUTHORIZED, {
         status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
         error: 'You do not have permission to access this resource.'
@@ -28,6 +43,7 @@ export const actions = {
     const formData = await request.formData();
 
     const newData = await updateCategory({
+      categoryId: Number(params.id),
       categoryDescription: formData.get('categoryDescription')?.toString() || '',
       categoryName: formData.get('categoryName')?.toString() || ''
     })

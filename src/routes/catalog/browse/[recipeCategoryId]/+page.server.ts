@@ -1,14 +1,10 @@
 import { getBasicRecipes, getSpirit } from '$lib/server/core';
 import type { BasicRecipe } from '$lib/types';
-import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { CatalogGenerator } from '$lib/server/generators/catalog-generator';
 
 export const load = (async ({ params }) => {
   const spirit = await getSpirit(params.recipeCategoryId);
-  const generator = new CatalogGenerator();
   
-  let content = await generator.generateContent(spirit?.recipeCategoryDescription || '')
   let images: any = [];
   images = images.map(({ url }) => ({ src: url, alt: 'test' }));
   
@@ -17,5 +13,5 @@ export const load = (async ({ params }) => {
   if('data' in queryResult) {
     recipes = queryResult.data;
   }
-  return { spirit, recipes: recipes, images, content };
+  return { spirit, recipes: recipes, images };
 }) satisfies PageServerLoad;

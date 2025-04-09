@@ -5,13 +5,18 @@
     import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
     import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
     import Breadcrumb from '$lib/components/Breadcrumb.svelte';
-    
+	  import { page } from '$app/state';
+	import { getContext } from 'svelte';
     export let form: ActionData;
+    const permissions: string[] = getContext('roles');
+    console.log(permissions)
+    const { userId } = page.params;
 </script>
 
 
-<Breadcrumb name="Inventory" href="/inventory">
-  <BreadcrumbItem name="Add To Inventory"></BreadcrumbItem>
+<Breadcrumb name="Users" href="/settings/users">
+  <BreadcrumbItem name="Edit User" href="/settings/users/{userId}/edit"></BreadcrumbItem>
+  <BreadcrumbItem name="Reset Password"></BreadcrumbItem>
 </Breadcrumb>
 <div class="px-4 pb-4 mt-3 flex justify-left items-center">
   <div class="grow">

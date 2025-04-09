@@ -27,6 +27,7 @@ import { DbProvider } from "./db";
 import * as changeCase from "change-case";
 import { deleteSignedUrl, getSignedUrl } from "./storage";
 import { Logger } from "./logger";
+import Recipe from "$lib/components/Recipe.svelte";
 
 const db = new DbProvider("app_t");
 
@@ -116,23 +117,40 @@ export async function getInventory(
   }
 }
 
-export async function seedGallery(): Promise<GallerySeeding[]> {
+// export async function seedGallery(): Promise<GallerySeeding[]> {
+//   try {
+//     let images = await db
+//       .table<any>("recipe")
+//       .select("RecipeImageUrl", "RecipeName")
+//       .whereNotNull("RecipeImageUrl");
+//     images = images.map((item) =>
+//       Object.assign({}, { src: item.RecipeImageUrl, alt: item.RecipeName}),
+//     );
+//     images = marshal(images);
+//     images = images.filter(
+//       ({ src }) => src !== "https://i.imgur.com/aOQBTkN.png",
+//     ); // this pic sucks
+//     return images;
+//   } catch (error: any) {
+//     console.error(error);
+//     return [];
+//   }
+// }
+
+export async function seedGallery(): Promise<QueryResult<View.BasicRecipe[]>> {
   try {
-    let images = await db
-      .table<any>("recipe")
-      .select("RecipeImageUrl")
-      .whereNotNull("RecipeImageUrl");
-    images = images.map((item) =>
-      Object.assign({}, { src: item.RecipeImageUrl, href: "/inventory" }),
-    );
-    images = marshal(images);
-    images = images.filter(
-      ({ src }) => src !== "https://i.imgur.com/aOQBTkN.png",
-    ); // this pic sucks
-    return images;
+    // let dbResult = await db.table('availablerecipes').select('RecipeId').groupBy('RecipeId');
+    let dbResult = await db.table('basicrecipe').whereIn('RecipeId', function() {
+      this.select('RecipeId').from('availablerecipes').groupBy('RecipeId');
+    })
+    const data: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(dbResult);
+    return { status: 'success', data }
   } catch (error: any) {
     console.error(error);
-    return [];
+    return {
+      status: 'error',
+      error: 'Unable to get recipes.'
+    }
   }
 }
 
@@ -354,7 +372,7 @@ export async function editProductImage(
 export async function updateInventory(
   product: Product,
   image: File | null = null,
-): Promise<Product | null> {
+): Promise<QueryResult<Product>> {
   try {
     if (!product?.productId) throw Error("No inventory ID provided.");
 
@@ -421,10 +439,18 @@ export async function updateInventory(
       await trx.commit();
     });
 
-    return await findInventoryItem(values.ProductId);
+    const newItem = await findInventoryItem(values.ProductId);
+    if(!newItem) throw new Error('Inventory was succesfully updated, but the subquery returned no results.');
+    return {
+      status: 'success',
+      data: newItem
+    }
   } catch (error: any) {
     console.error(error);
-    return null;
+    return {
+      status: "error",
+      error: "Could not update inventory.",
+    };
   }
 }
 
@@ -1040,5 +1066,81 @@ export async function deleteCatalogItem(
       error: "Cannot save changes.",
     };
     return result;
+  }
+}
+
+
+export async function getCategory(categoryId: number): Promise<QueryResult<Table.Category>> {
+
+  try {
+
+    const dbResult: Table.Category | undefined = await db.table<Table.Category>('category').where({ categoryId }).first();
+    if(!dbResult) throw new Error("No category found for given ID.");
+    const category = marshalToType<Table.Category>(dbResult);
+    return {
+      status: "success",
+      data: category,
+    };
+  } catch (error: any) {
+    console.error(error);
+
+    Logger.error(
+      error.sqlMessage || error.message,
+      error.sql || error.stackTrace,
+    );
+    return {
+      status: "error",
+      error: error?.message || "An unknown error occurred.",
+    };
+  }
+}
+
+export async function updateCategory(category: Table.Category): Promise<QueryResult<Table.Category>> {
+  try {
+    // new category
+    let dbResult: any;
+    let key = category.categoryId;
+    const { categoryName, categoryDescription } = category;
+    if(!key) {
+      [dbResult] = await db.table<Table.Category>('category').insert({ categoryName, categoryDescription });
+      if(!dbResult) throw new Error('Could not create new category.')
+      key = dbResult;
+    } else {
+      dbResult = await db.table<Table.Category>('category')
+        .update({ categoryName, categoryDescription })
+        .where('categoryId', key);
+      if(dbResult < 1) {
+        if(!dbResult) throw new Error('Could not update category.')
+      }
+    }
+
+    dbResult = await db.table<Table.Category>('category').where('categoryId', key).select();
+    const newCategory = marshalToType<Table.Category>(dbResult);
+
+
+ 
+    return {
+      status: "success",
+      data: newCategory,
+    };
+    // if(!dbResult) {
+    //   throw new Error('Could not update category: no rows were returned.')
+    // }
+
+    // dbResult = await db.table<Table.Category>('category').where 
+
+  } catch(error: any) {
+    console.error(error);
+
+    Logger.error(
+      error.sqlMessage || error.message,
+      error.sql || error.stackTrace,
+    );
+
+    return {
+      status: "error",
+      error: error?.message || "An unknown error occurred.",
+    };
+
   }
 }
