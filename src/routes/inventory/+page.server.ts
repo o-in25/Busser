@@ -1,4 +1,4 @@
-import { getBaseSpirits, getInventory } from '$lib/server/core';
+import { getInventory } from '$lib/server/core';
 import type { Product } from '$lib/types';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';

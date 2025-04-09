@@ -154,19 +154,21 @@ export async function seedGallery(): Promise<QueryResult<View.BasicRecipe[]>> {
   }
 }
 
-export async function getBaseSpirits(): Promise<string[]> {
+export async function getBaseSpirits(): Promise<QueryResult<View.BasicRecipeCategory[]>> {
   try {
-    let result = await db
-      .table<any>("recipecategory")
-      .select("RecipeCategoryDescription");
-    result = marshal(result);
-    result = result.map(
-      ({ recipeCategoryDescription }) => recipeCategoryDescription,
-    );
-    return result;
+    let dbResult = await db.table<View.BasicRecipeCategory>('basicrecipecategory').select();
+    const data: View.BasicRecipeCategory[] = marshalToType<View.BasicRecipeCategory[]>(dbResult);
+    return { status: 'success', data }
   } catch (error: any) {
     console.error(error);
-    return [];
+    Logger.error(
+      error.sqlMessage || error.message,
+      error.sql || error.stackTrace,
+    );
+    return {
+      status: 'error',
+      error: error.sqlMessage || error.message
+    };
   }
 }
 

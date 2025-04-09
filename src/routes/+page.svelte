@@ -10,33 +10,8 @@
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 
-  const { recipes } = data;
-  const spirits = [
-    {
-      recipeCategoryId: 4,
-      recipeCategoryDescription: 'Whiskey'
-    },
-    {
-      recipeCategoryId: 5,
-      recipeCategoryDescription: 'Gin'
-    },
-    {
-      recipeCategoryId: 6,
-      recipeCategoryDescription: 'Vodka'
-    },
-    {
-      recipeCategoryId: 7,
-      recipeCategoryDescription: 'Tequila'
-    },
-    {
-      recipeCategoryId: 8,
-      recipeCategoryDescription: 'Rum'
-    },
-    {
-      recipeCategoryId: 9,
-      recipeCategoryDescription: 'Brandy'
-    },
-  ]
+  const { recipes, spirits } = data;
+
   const permissions: string[] = getContext('permissions');
 
   const gallery = recipes?.map(({ recipeImageUrl, recipeName, recipeCategoryDescription, recipeId, recipeCategoryId, recipeDescription}) => ({ 

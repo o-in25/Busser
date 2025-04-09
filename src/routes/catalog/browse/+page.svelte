@@ -1,6 +1,6 @@
 <script lang="ts">
   import Breadcrumb from "$lib/components/Breadcrumb.svelte";
-  import type { BasicRecipe } from "$lib/types";
+  import type { BasicRecipe, View } from "$lib/types";
   import {
     Avatar,
     Button,
@@ -11,11 +11,13 @@
     Heading,
     Input,
     Label,
+		Search,
   } from "flowbite-svelte";
   import type { PageData } from "./$types";
   import BreadcrumbItem from "$lib/components/BreadcrumbItem.svelte";
   import {
     ChevronDownOutline,
+    CloseCircleSolid,
     FilterOutline,
     PlusOutline,
     SearchOutline,
@@ -25,10 +27,16 @@
   import placeholderLight from  "$lib/assets/placeholder-alt-light.png";
   import placeholderDark from  "$lib/assets/placeholder-alt-dark.png";
     import CatalogItem from "$lib/components/CatalogItem.svelte";
+	import { getContext } from "svelte";
+	import { page } from "$app/stores";
+	import { goto } from "$app/navigation";
 
   export let data: PageData;
   let recipes: BasicRecipe[] = data.recipes || [];
-  let baseSpirits: string[] = data.baseSpirits || [];
+  let baseSpirits: View.BasicRecipeCategory[] = data.baseSpirits || [];
+  const permissions: string[] = getContext('permissions');
+  let openDropdown: boolean = false;
+
 
   let searchField = "";
   let filterField = "all";
@@ -60,6 +68,8 @@
     return filtered;
   };
 
+  let searchTerm = $page.url.searchParams.get('productName') || '';
+
   const handleDropdownOpen = (category: string) => {
     filterField = category;
     dropdownOpen = false;
@@ -75,57 +85,40 @@
   Browse Catalog
 </Heading>
 <div class="px-4 py-2 md:py-4">
-  <div class="flex justify-between">
-    <!-- search -->
-    <Label class="space-y-2 mb-6">
-      <Input
-        type="email"
-        size="md"
-        placeholder="Search catalog..."
-        bind:value={searchField}>
-        <SearchOutline slot="left" class="w-5 h-5" />
-      </Input>
-    </Label>
-
-    <!-- dropdown -->
-    <div>
-      <Button color="alternative">
-        <ChevronDownOutline class="w-6 h-6 " />
+  <div class="flex my-2">
+    <div class="relative">
+      <Button color="light" class="rounded-e-none whitespace-nowrap border border-e-0 border-primary-700">
+        <FilterOutline class="w-5 h-5"/>
+        <ChevronDownOutline class="w-5 h-5"/>
       </Button>
-
-      <!-- controls -->
-      <Dropdown
-        bind:open={dropdownOpen}
-        placement="bottom">
-        <DropdownItem href="/catalog/add">
-          <span class="flex"><PlusOutline class="me-2" />Add</span>
-        </DropdownItem>
-        <DropdownDivider />
-        <DropdownItem class="flex items-center justify-between">
-          <span class="flex"><FilterOutline class="me-2" />Sort...</span>
-        </DropdownItem>
-
-        <!-- filter -->
-        <Dropdown placement="bottom-start" open={false}>
-          <DropdownItem
-            on:click={() => handleDropdownOpen("all")}
-            class={filterField === "all" ? "bg-gray-100 dark:bg-gray-600" : ""}>
-            All
-          </DropdownItem>
-          <!-- TODO: get this from the db  -->
-          {#each baseSpirits as baseSpirit}
-            <DropdownItem
-              on:click={() => handleDropdownOpen(baseSpirit)}
-              class={filterField === baseSpirit
-                ? "bg-gray-100 dark:bg-gray-600"
-                : ""}>
-              {baseSpirit}
-            </DropdownItem>
-          {/each}
-        </Dropdown>
+      <Dropdown classContainer="w-40" bind:open={openDropdown}>
+        <div slot="header" class="px-4 py-2">
+          <span class="block text-sm text-gray-900 dark:text-white">Sort By...</span>
+        </div>
+        <DropdownItem href="/inventory" on:click={() => openDropdown = false}>All</DropdownItem>
+        <DropdownItem href="/inventory?productInStockQuantity=0" on:click={() => openDropdown = false}>Out of Stock</DropdownItem>
+        <DropdownItem href="/inventory?productInStockQuantity=1" on:click={() => openDropdown = false}>In Stock</DropdownItem>
       </Dropdown>
     </div>
-  </div>
+    
+    <Search size="md" class="flex gap-2 items-center py-2.5 {permissions.includes('edit_inventory')? 'rounded-none' : 'rounded-s-none'}" placeholder="Search..." bind:value={searchTerm}>
+      {#if searchTerm}
+      <button type="button" on:click={() => {
+        searchTerm = '';
+        goto('/inventory', { replaceState: true })
+      }} class="outline-hidden">
+        <CloseCircleSolid class="w-5 h-5 me-2" />
+      </button>
+      {/if}
+    </Search>
+    {#if permissions.includes('add_inventory')}
+      <Button class="p-2.5! rounded-s-none" href="/inventory/add">
+        <PlusOutline class="w-5 h-5" />
+      </Button>
+    {/if}
+  </div >
+
+
   <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-2">
     {#each search as recipe}
       <CatalogItem {recipe}/>

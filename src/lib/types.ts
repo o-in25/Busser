@@ -240,6 +240,13 @@ export namespace View {
     // TODO: do we need this?
     key?: string | number | null;
   }
+
+  export type BasicRecipeCategory = {
+    recipeCategoryId: number,
+    recipeCategoryDescriptionText: string | null,
+    recipeCategoryDescription: string | null,
+    recipeCategoryDescriptionImageUrl: string | null
+  }
 }
 
 

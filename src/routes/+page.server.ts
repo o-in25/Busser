@@ -4,19 +4,22 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 export const load = (async ({ request }) => {
-  const spirits = await getBaseSpirits();
-  const queryResult = await seedGallery();
-  if(queryResult.status === 'error') {
-    return error(StatusCodes.UNAUTHORIZED, {
-      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-      code: StatusCodes.UNAUTHORIZED,
-      message: queryResult.error
-    });
+  const baseSpiritsQuery = await getBaseSpirits();
+  const gallerySeedQuery = await seedGallery();
+
+
+  if(!('data' in baseSpiritsQuery) || !('data' in gallerySeedQuery)) {
+    return error(StatusCodes.INTERNAL_SERVER_ERROR, {
+      reason: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
+      code: StatusCodes.NOT_FOUND,
+      message: 'Could not load Gallery. Please try again later.'
+    }); 
   }
-  const recipes = queryResult.data;
+
+
   return {
-    spirits,
-    recipes
+    spirits: baseSpiritsQuery.data || [],
+    recipes: gallerySeedQuery.data || []
   }
 
 }) satisfies PageServerLoad;
