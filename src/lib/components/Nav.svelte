@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { User } from "$lib/types";
   import {
     Navbar,
     NavHamburger,
@@ -30,6 +29,7 @@
   import { goto, invalidateAll } from "$app/navigation";
   import Placeholder from "./Placeholder.svelte";
   import logo from "$lib/assets/logo-nav.png";
+	import type { User } from "$lib/types/auth";
 
   // props
   export let user: User | null;
@@ -93,7 +93,7 @@
       <DropdownItem href="/tools"><span class="flex"><RulerCombinedOutline class="me-2"/>Tools</span></DropdownItem>
       <DropdownDivider />
       <DropdownItem on:click={logout}>
-        {#if user}<span class="flex"><ArrowRightToBracketOutline class="me-2"/>Log out</span>{:else}<span class="flex"><ArrowLeftToBracketOutline class="me-2"/>Log out</span>{/if}
+        {#if user}<span class="flex"><ArrowRightToBracketOutline class="me-2"/>Sign out</span>{:else}<span class="flex"><ArrowLeftToBracketOutline class="me-2"/>Sign In</span>{/if}
       </DropdownItem>
     </Dropdown>
   {/if}
@@ -200,7 +200,7 @@
 
         <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
 
-        <SidebarItem label="Log Out" on:click={async () => await logout()}>
+        <SidebarItem label="Sign Out" on:click={async () => await logout()}>
           <svelte:fragment slot="icon">
             <ArrowRightToBracketOutline
               class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />

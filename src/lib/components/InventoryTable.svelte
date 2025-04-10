@@ -135,15 +135,15 @@
 	bind:this={form}>
   <div class="flex my-2">
     <div class="relative">
-      <Button color="light" class="rounded-e-none whitespace-nowrap border border-e-0 border-primary-700">
+      <Button color="light" class="rounded-e-none whitespace-nowrap border border-e-0 bg-gray-50 dark:bg-gray-700">
         <FilterOutline class="w-5 h-5"/>
         <ChevronDownOutline class="w-5 h-5"/>
       </Button>
-      <Dropdown classContainer="w-40" bind:open={openDropdown}>
+      <Dropdown classContainer="w-40 backdrop-blur-md bg-zinc-200/50 dark:bg-zinc-900/30 border border-zinc-300/30 dark:border-zinc-700/40 shadow-lg rounded-xl p-4" bind:open={openDropdown} activeUrl={"/inventory"}>
         <div slot="header" class="px-4 py-2">
           <span class="block text-sm text-gray-900 dark:text-white">Sort By...</span>
         </div>
-        <DropdownItem href="/inventory" on:click={() => openDropdown = false}>All</DropdownItem>
+        <DropdownItem href="/inventory" on:click={() => openDropdown = false} activeClass="w-full text-left px-4 py-2 rounded-lg transition-colors bg-primary-500/20 dark:bg-primary-500/30">All</DropdownItem>
         <DropdownItem href="/inventory?productInStockQuantity=0" on:click={() => openDropdown = false}>Out of Stock</DropdownItem>
         <DropdownItem href="/inventory?productInStockQuantity=1" on:click={() => openDropdown = false}>In Stock</DropdownItem>
       </Dropdown>

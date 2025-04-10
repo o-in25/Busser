@@ -58,7 +58,7 @@ const setFilterType = (type: any) => {
     <ButtonGroup class="space-x-px">
       <GradientButton color="purpleToPink" size="lg" href="/login">
         <ArrowLeftToBracketOutline/>
-        <Span class="pl-1 text-white">Log In</Span>
+        <Span class="pl-1 text-white">Sign In</Span>
       </GradientButton>
       <GradientButton id="btn-sign-up" color="pinkToOrange" size="lg" disabled>
         <MailBoxOutline/>
