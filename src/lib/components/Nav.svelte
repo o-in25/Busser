@@ -53,6 +53,7 @@
     duration: 200,
     easing: sineIn,
   };
+
 </script>
 
 <!-- desktop only -->
@@ -83,16 +84,16 @@
       </div>
     </div>
     <!-- dropdown -->
-    <Dropdown placement="bottom" triggeredBy="#avatar-menu">
+    <Dropdown placement="bottom" triggeredBy="#avatar-menu" classContainer="backdrop-blur-md bg-zinc-200/50 dark:bg-zinc-900/30 border border-zinc-300/30 dark:border-zinc-700/40 shadow-lg rounded-xl p-4">
       <DropdownHeader>
         <span class="block text-sm">{user?.username}</span>
         <span class="block truncate text-sm font-medium">
           {user.email}
       </DropdownHeader>
-      <DropdownItem href="/settings"><span class="flex"><CogOutline class="me-2" />Settings</span></DropdownItem>
-      <DropdownItem href="/tools"><span class="flex"><RulerCombinedOutline class="me-2"/>Tools</span></DropdownItem>
+      <DropdownItem href="/settings" class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 aria-selected:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30 dark:aria-selected:bg-primary-500/30"><span class="flex"><CogOutline class="me-2" />Settings</span></DropdownItem>
+      <DropdownItem href="/tools" class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 aria-selected:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30 dark:aria-selected:bg-primary-500/30"><span class="flex"><RulerCombinedOutline class="me-2"/>Tools</span></DropdownItem>
       <DropdownDivider />
-      <DropdownItem on:click={logout}>
+      <DropdownItem on:click={logout} class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 aria-selected:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30 dark:aria-selected:bg-primary-500/30">
         {#if user}<span class="flex"><ArrowRightToBracketOutline class="me-2"/>Sign out</span>{:else}<span class="flex"><ArrowLeftToBracketOutline class="me-2"/>Sign In</span>{/if}
       </DropdownItem>
     </Dropdown>

@@ -143,9 +143,9 @@
         <div slot="header" class="px-4 py-2">
           <span class="block text-sm text-gray-900 dark:text-white">Sort By...</span>
         </div>
-        <DropdownItem href="/inventory" on:click={() => openDropdown = false} activeClass="w-full text-left px-4 py-2 rounded-lg transition-colors bg-primary-500/20 dark:bg-primary-500/30">All</DropdownItem>
-        <DropdownItem href="/inventory?productInStockQuantity=0" on:click={() => openDropdown = false}>Out of Stock</DropdownItem>
-        <DropdownItem href="/inventory?productInStockQuantity=1" on:click={() => openDropdown = false}>In Stock</DropdownItem>
+        <DropdownItem href="/inventory" on:click={() => openDropdown = false} class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30" activeClass="bg-primary-500/20 dark:bg-primary-500/30">All</DropdownItem>
+        <DropdownItem href="/inventory?productInStockQuantity=0" on:click={() => openDropdown = false} class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30" activeClass="bg-primary-500/20 dark:bg-primary-500/30">Out of Stock</DropdownItem>
+        <DropdownItem href="/inventory?productInStockQuantity=1" on:click={() => openDropdown = false} class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30" activeClass="bg-primary-500/20 dark:bg-primary-500/30">In Stock</DropdownItem>
       </Dropdown>
     </div>
     
