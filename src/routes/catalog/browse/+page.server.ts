@@ -20,7 +20,7 @@ export const load = (async () => {
 
   // return { recipes, baseSpirits }
   // const basicRecipesQuery = await getBasicRecipes();
-  const { data, pagination } = await getCatalog(1, 6)
+  const { data, pagination } = await getCatalog(1, 90)
 
   // TODO: get this onmount in component
   const queryResult = await getRecipeCategories();
