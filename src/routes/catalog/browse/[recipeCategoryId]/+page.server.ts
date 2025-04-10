@@ -1,5 +1,5 @@
 import { getBasicRecipes, getSpirit } from '$lib/server/core';
-import type { BasicRecipe } from '$lib/types';
+import type { View } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ params }) => {
@@ -9,9 +9,9 @@ export const load = (async ({ params }) => {
   images = images.map(({ url }) => ({ src: url, alt: 'test' }));
   
   let queryResult = await getBasicRecipes(params.recipeCategoryId);
-  let recipes: BasicRecipe[] | undefined = [];
+  let recipes: View.BasicRecipe[] = [] as View.BasicRecipe[];
   if('data' in queryResult) {
-    recipes = queryResult.data;
+    recipes = queryResult.data as View.BasicRecipe[];
   }
-  return { spirit, recipes: recipes, images };
+  return { spirit, recipes, images };
 }) satisfies PageServerLoad;
