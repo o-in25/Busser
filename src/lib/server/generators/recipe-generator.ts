@@ -2,7 +2,7 @@ import { z } from "zod";
 import { LlmClient, type IGenerator } from "../ai";
 
 const schema = z.object({
-  history: z.string(),
+  description: z.string(),
 });
 
 export type RecipeGeneratorSchema = z.infer<typeof schema>;

@@ -165,7 +165,8 @@
 							{label: 'Strength', rating: recipe.recipeStrengthRating},
 							{label: 'Versatility', rating: recipe.recipeVersatilityRating},
 						]}
-						desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}" />
+						desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
+            desc2Class="ms-2 w-24 font-medium text-gray-900 dark:text-white me-2"/>
 				</div>
 
 				<!-- actions -->
@@ -223,7 +224,7 @@
 							size="sm"
 							divClass="!max-w-full" />
 					{:else}
-						<P>{content.history}</P>
+						<P>{content.description}</P>
 					{/if}
 				</div>
 			</AccordionItem>

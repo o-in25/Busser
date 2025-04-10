@@ -8,6 +8,7 @@
   export let id: string;
   export let name: string;
   export let rows: number = 4;
+  export let url: string;
 
   let showSpinner = false;
   let showHelperText = false;
@@ -16,7 +17,7 @@
     showSpinner = true;
     try {
       if(!trigger) throw new Error('No valid trigger present.')
-      const response = await fetch('/api/generator/inventory', {
+      const response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify({ trigger })
       });

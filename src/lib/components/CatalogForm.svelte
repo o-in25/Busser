@@ -29,6 +29,7 @@
   import { quintOut } from "svelte/easing";
   import { scale } from "svelte/transition";
   import { notificationStore } from "../../stores";
+	import Prompt from "./Prompt.svelte";
 
 
   // const ML_TO_OZ = 29.5735
@@ -201,12 +202,8 @@
 
       <!-- description -->
       <div class="mb-6">
-        <Label for="recipeDescription" class="mb-2">Description</Label>
-        <Textarea
-          name="recipeDescription"
-          id="recipeDescription"
-          rows={4}
-          bind:value={recipe.recipeDescription} />
+          <Prompt bind:value={recipe.recipeDescription} trigger={recipe.recipeName} id="recipeDescription" name="recipeDescription" url="/api/generator/inventory"/>
+
       </div>
 
       <!-- served -->

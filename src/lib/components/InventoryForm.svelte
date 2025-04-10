@@ -193,7 +193,7 @@
       </div>
     </div>
     <div class="mb-6">
-      <Prompt bind:value={productDescription} trigger={productName} id="productDescription" name="productDescription"/>
+      <Prompt bind:value={productDescription} trigger={productName} id="productDescription" name="productDescription" url="/api/generator/inventory"/>
     </div>
 
     <input type="hidden" value={productDetailId}>

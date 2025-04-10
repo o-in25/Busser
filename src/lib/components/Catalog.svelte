@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { BasicRecipe, Spirit} from "$lib/types";
+  import type { BasicRecipe, Spirit, View} from "$lib/types";
   import {
       Heading,
       P,
@@ -13,7 +13,7 @@
 
   // props
   export let spirit: Spirit;
-  export let recipes: BasicRecipe[] | [];
+  export let recipes: View.BasicRecipe[] | [];
 
   let content: CatalogGeneratorSchema
   const handleInput = () => {};

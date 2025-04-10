@@ -2,8 +2,8 @@
     import { Card, Avatar } from "flowbite-svelte";
   import placeholderLight from  "$lib/assets/placeholder-alt-light.png";
   import placeholderDark from  "$lib/assets/placeholder-alt-dark.png";
-    import type { BasicRecipe } from "$lib/types";
-  export let recipe: BasicRecipe;
+    import type { BasicRecipe, View } from "$lib/types";
+  export let recipe: View.BasicRecipe;
 </script>
       <Card
         size="xl"
