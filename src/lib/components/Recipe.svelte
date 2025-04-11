@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type {View} from '$lib/types';
+	import type { View } from '$lib/types';
 	import {
 		Button,
 		Checkbox,
@@ -10,24 +10,21 @@
 		Accordion,
 		AccordionItem,
 		Skeleton,
+		Label,
 	} from 'flowbite-svelte';
-	import {EditOutline, HeartOutline} from 'flowbite-svelte-icons';
+	import { EditOutline, HeartOutline } from 'flowbite-svelte-icons';
 	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
-	import {
-	calculateAbv,
-		calculateOverallScore,
-	} from '$lib/math';
-	import type {RecipeGeneratorSchema} from '$lib/server/generators/recipe-generator';
-	import {onMount} from 'svelte';
+	import { calculateAbv, calculateOverallScore } from '$lib/math';
+	import type { RecipeGeneratorSchema } from '$lib/server/generators/recipe-generator';
+	import { onMount } from 'svelte';
 
 	export let recipe: View.BasicRecipe;
 	export let recipeSteps: View.BasicRecipeStep[];
 	let content: RecipeGeneratorSchema;
 
-	let steps = recipeSteps.map(step => ({...step, checked: false}));
+	let steps = recipeSteps.map(step => ({ ...step, checked: false }));
 	// TODO: move this to shared component
-
 
 	const getScore = () => {
 		const ratingsMap = [
@@ -36,7 +33,11 @@
 				desc2: 'No Rating',
 				style: 'text-white dark:bg-gray-500 bg-gray-500',
 			},
-			{max: 1, desc2: 'Swill', style: 'text-white dark:bg-red-500 bg-red-500'},
+			{
+				max: 1,
+				desc2: 'Swill',
+				style: 'text-white dark:bg-red-500 bg-red-500',
+			},
 			{
 				max: 2,
 				desc2: 'Forgettable',
@@ -78,7 +79,6 @@
 				style: 'text-white dark:bg-blue-500 bg-blue-500',
 			},
 		];
-
 		// i hate these names
 		const score = calculateOverallScore(
 			recipe.recipeVersatilityRating,
@@ -86,11 +86,14 @@
 			recipe.recipeDrynessRating,
 			recipe.recipeStrengthRating
 		);
-		const {desc2, style} = ratingsMap.find(({max}) => score <= max) || {
+		const { desc2, style } = ratingsMap.find(({ max }) => score <= max) || {
 			desc2: 'Best in House',
 			style: 'text-white dark:bg-violet-500 bg-violet-500',
 		};
-		const desc3 = calculateAbv(recipeSteps, recipe.recipeTechniqueDescriptionId || 1);
+		const desc3 = calculateAbv(
+			recipeSteps,
+			recipe.recipeTechniqueDescriptionId || 1
+		);
 		const desc1 = score.toFixed(1);
 		return {
 			desc1,
@@ -100,134 +103,137 @@
 		};
 	};
 
-	const {desc1, desc2, desc3, style} = getScore();
+	const { desc1, desc2, desc3, style } = getScore();
 
-  // fetch generated content on load
+	// fetch generated content on load
 	onMount(async () => {
 		const result = await fetch(`/api/generator/recipe`, {
 			method: 'POST',
-			body: JSON.stringify({recipeName: recipe.recipeName}),
+			body: JSON.stringify({ recipeName: recipe.recipeName }),
 		});
 		const response = await result.json();
 		content = response;
 	});
 </script>
 
-<!-- <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased"> -->
 <section class="bg-white dark:bg-gray-900 antialiased">
-	<div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">
-		<!-- lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16 grid-rows-[auto_1fr] -->
-		<!-- grid -->
-		<div
-			class="lg:grid lg:grid-cols-2 lg:gap-4 xl:gap-8 grid-rows-[auto_1fr] h-full">
-			<!-- image / col 1 -->
-			<div
-				class="flex justify-center shrink-0 mx-auto">
+	<!-- grid -->
+	<div
+		class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-rows-[auto_1fr] md:gap-4 text-white"
+	>
+		<!-- col 1 -->
+		<div>
+			<div class="flex justify-center shrink-0 mx-auto">
 				<img
-					class="w-1/2 dark:hidden rounded-md"
+					class="dark:hidden rounded-md"
 					src={recipe.recipeImageUrl || placeholderLight}
-					alt="" />
+					alt=""
+				/>
 				<img
-					class="w-1/2 hidden dark:block rounded-md"
+					class="hidden dark:block rounded-md"
 					src={recipe.recipeImageUrl || placeholderDark}
-					alt="" />
+					alt=""
+				/>
 			</div>
-
-			<!-- col 2 -->
-			<div class="mt-6 sm:mt-8 lg:mt-0 row-span-2">
-				<!-- name / info -->
-				<Heading>
-					{recipe.recipeName}
-				</Heading>
-				<div class="mt-4 flex flex-wrap items-start gap-4 justify-between">
-					<Badge class="text-xl font-semibold">
-						{recipe.recipeCategoryDescription}
-					</Badge>
-				</div>
-
-				<!-- rating -->
-				<div class="mt-4">
-					<ScoreRating
-						headerLabel={{
-							desc1,
-							desc2,
-							desc3,
-							link: {
-								label: '',
-								url: '',
-							},
-						}}
-						ratings={[
-							{label: 'Sweetness', rating: recipe.recipeSweetnessRating},
-							{label: 'Dryness', rating: recipe.recipeDrynessRating},
-						]}
-						ratings2={[
-							{label: 'Strength', rating: recipe.recipeStrengthRating},
-							{label: 'Versatility', rating: recipe.recipeVersatilityRating},
-						]}
-						desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
-            desc2Class="ms-2 w-24 font-medium text-gray-900 dark:text-white me-2"/>
-				</div>
-
-				<!-- actions -->
-				<div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-					<Button
-						color="alternative"
-						href="/catalog/{recipe.recipeId}/edit">
-						<EditOutline />
-						<span class="ms-2">Edit</span>
-					</Button>
-					<Button color="primary">
-						<HeartOutline />
-						<span class="ms-2">Add to favorites</span>
-					</Button>
-				</div>
-
-				<!-- <P color="text-gray-500 dark:text-gray-400">
-					{recipe.recipeDescription}
-				</P> -->
-			</div>
-
-			<div class="mt-6 sm:mt-8 lg:mt-0"></div>
 		</div>
-		<Accordion flush>
-			<AccordionItem>
-				<span slot="header">Description</span>
-				<p class="my-8 text-gray-500 dark:text-gray-400">
-					{recipe.recipeDescription}
-				</p>
-			</AccordionItem>
-			<AccordionItem>
-				<span slot="header">Steps</span>
-				<ul
-					class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600">
-					{#each steps as recipeStep, step}
-						<li>
-							<Checkbox
-								class="p-3"
-								bind:checked={steps[step].checked}>
-								<span class={recipeStep.checked ? 'line-through' : ''}>
-									{recipeStep.recipeStepDescription}
-								</span>
-							</Checkbox>
-						</li>
-					{/each}
-				</ul>
-			</AccordionItem>
+		<!-- col 2 -->
+		<div class="lg:col-span-2 col-start-1 md:row-start-2 row-start-5">
+			<div class="my-4">
+        <Heading tag="h5" class="mb-4 block md:inline-block border-b-4 border-secondary-500 rounded-sm pb-1 md:!w-auto">Verdict</Heading>
 
-			<!-- history -->
-			<AccordionItem>
-				<span slot="header">History & Trivia</span>
-				<div class="my-8">
-					{#if !content}
-						<Skeleton
-							size="sm"
-							divClass="!max-w-full" />
-					{:else}
-						<P>{content.description}</P>
-					{/if}
-				</div>
-			</AccordionItem>
-		</Accordion>
+        <ScoreRating
+          headerLabel={{
+            desc1,
+            desc2,
+            desc3,
+            link: {
+              label: '',
+              url: '',
+            },
+          }}
+          ratings={[
+            { label: 'Sweetness', rating: recipe.recipeSweetnessRating },
+            { label: 'Dryness', rating: recipe.recipeDrynessRating },
+          ]}
+          ratings2={[
+            { label: 'Strength', rating: recipe.recipeStrengthRating },
+            { label: 'Versatility', rating: recipe.recipeVersatilityRating },
+          ]}
+          desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
+          desc2Class="ms-2 w-24 font-medium text-gray-900 dark:text-white me-2"
+        />
+      </div>
+		</div>
+		<!-- col 3 -->
+		<div class="col-span-2 md:col-span-1 lg:col-span-2 col-start-1 md:row-start-3 row-start-6">
+			<div class="my-4">
+        {#if !content}
+          <Skeleton
+            size="sm"
+            divClass="!max-w-full"
+          />
+        {:else}
+          <P>{content.description}</P>
+        {/if}
+      </div>
+		</div>
+		<!-- col 4 -->
+		<!-- col 5 -->
+
+		<div
+			class="col-start-1 md:col-start-2 md:row-start-1"
+		>
+			<div class="my-4">
+        <Heading>
+          {recipe.recipeName}
+        </Heading>
+        <div class="mt-4 flex flex-wrap items-start gap-4 justify-between">
+          <Badge class="text-xl font-semibold">
+            {recipe.recipeCategoryDescription}
+          </Badge>
+        </div>
+        <!-- actions -->
+        <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
+          <Button
+            color="alternative"
+            href="/catalog/{recipe.recipeId}/edit"
+          >
+            <EditOutline />
+            <span class="ms-2">Edit</span>
+          </Button>
+          <Button color="primary">
+            <HeartOutline />
+            <span class="ms-2">Add to favorites</span>
+          </Button>
+        </div>
+        <p class="my-4 text-gray-500 dark:text-gray-400">
+          {recipe.recipeDescription}
+        </p>
+      </div>
+		</div>
+		<!-- col 6 -->
+		<div
+			class="md:row-span-2 col-start-1 md:col-start-2 lg:col-start-3 row-start-4 md:row-start-2 lg:row-start-1"
+		>
+			<div class="my-4 ">
+        <Heading tag="h5" class="mb-4 block md:inline-block border-b-4 border-secondary-500 rounded-sm pb-1 md:!w-auto">Steps</Heading>
+        <ul
+          class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600"
+        >
+          {#each steps as recipeStep, step}
+            <li>
+              <Checkbox
+                class="p-3"
+                bind:checked={steps[step].checked}
+              >
+                <span class={recipeStep.checked ? 'line-through' : ''}>
+                  {recipeStep.recipeStepDescription}
+                </span>
+              </Checkbox>
+            </li>
+          {/each}
+        </ul>
+      </div>
+		</div>
 	</div>
 </section>
