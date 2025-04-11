@@ -89,6 +89,10 @@ export async function getCatalog(currentPage: number, perPage: number = 25, filt
       );
     }
 
+    if(filter?.recipeName) {
+      query = query.where("recipeName", "like", `%${filter.recipeName}%`);
+    }
+
     query = query.orderBy('recipeName');
     const { data, pagination } = await query.paginate({ perPage, currentPage, isLengthAware: true });
     const result: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(data);

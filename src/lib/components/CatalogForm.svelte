@@ -30,6 +30,7 @@
   import { scale } from "svelte/transition";
   import { notificationStore } from "../../stores";
 	import Prompt from "./Prompt.svelte";
+	import { convertFromMl, convertToMl } from "$lib/math";
 
 
   // const ML_TO_OZ = 29.5735
@@ -39,16 +40,6 @@
   export let preparationMethods: PreparationMethod[];
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
-
-  const units = {
-    'ml': { toMl: 1, fromMl: (ml) => ml },
-    'oz': { toMl: 30, fromMl: (ml: number) => ml / 30 },
-    'dash': { toMl: 0.92, fromMl: (ml: number) => ml / 0.92 },
-    'cube': { toMl: 2.5, fromMl: (ml: number) => ml / 2.5 },
-  };
-
-  const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
-  const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);
 
   // recipe model
   recipeSteps = recipeSteps.map((step) => ({ ...step, productIdQuantityInMilliliters: convertFromMl(step.productIdQuantityUnit, step.productIdQuantityInMilliliters), key: uuidv4() }));

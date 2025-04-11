@@ -51,8 +51,8 @@ console.log(permissions)
     Account
   </Heading>
 </div>
-<div class="flex justify-left items-center">
-  <List tag="dl" class="text-gray-900 dark:text-white divide-y divide-gray-200  dark:divide-gray-700">
+<div class="flex justify-left items-center overflow-x-auto w-full">
+  <List tag="dl" class="text-gray-900 dark:text-white divide-y divide-gray-200  dark:divide-gray-700 w-full">
     <div class="flex flex-col pb-3">
       <DescriptionList tag="dt" class="mb-1">Username</DescriptionList>
       <DescriptionList tag="dd">{data.user?.username}</DescriptionList>

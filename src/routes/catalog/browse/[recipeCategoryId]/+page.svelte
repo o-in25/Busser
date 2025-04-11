@@ -17,8 +17,8 @@
 
 <div class="px-4 py-2 md:py-4">
   <div class="space-y-4">
-    {#if data.spirit}
-     <Catalog spirit={data.spirit} recipes={data.recipes || []}/>
+    {#if data.spirit && data.recipes}
+     <Catalog spirit={data.spirit} recipes={data.recipes}/>
     {/if}
   </div>
 </div>

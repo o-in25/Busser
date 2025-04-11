@@ -16,6 +16,13 @@ export const dilutionByStirred = (abv: number) => -1.21 * Math.pow(abv, 2) + 1.2
 // Dilution of a shaken drink shaken with 120 grams of ¼-inch cubes for 10 seconds:
 export const dilutionByShaken = (abv: number) => 1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;
 
+const units = {
+  'ml': { toMl: 1, fromMl: (ml) => ml },
+  'oz': { toMl: 30, fromMl: (ml: number) => ml / 30 },
+  'dash': { toMl: 0.92, fromMl: (ml: number) => ml / 0.92 },
+  'cube': { toMl: 2.5, fromMl: (ml: number) => ml / 2.5 },
+};
+
 export const weightedMean = (arrValues: number[], arrWeights: number[]) => {
   const result = arrValues
     .map((value, i) => {
@@ -71,3 +78,7 @@ export const calculateAbv = (recipeSteps: { productIdQuantityInMilliliters: numb
   total = (Math.ceil(total * 100) / 100) * 100;
   return `${total.toFixed(0)}% abv`;
 };
+
+
+export const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
+export const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);

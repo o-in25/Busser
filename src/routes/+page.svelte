@@ -58,7 +58,7 @@ const setFilterType = (type: any) => {
     <ButtonGroup class="space-x-px">
       <GradientButton color="purpleToPink" size="lg" href="/login">
         <ArrowLeftToBracketOutline/>
-        <Span class="pl-1 text-white">Log In</Span>
+        <Span class="pl-1 text-white">Sign In</Span>
       </GradientButton>
       <GradientButton id="btn-sign-up" color="pinkToOrange" size="lg" disabled>
         <MailBoxOutline/>
@@ -85,14 +85,14 @@ const setFilterType = (type: any) => {
         <div class="absolute inset-0 right-0 bg-black bg-opacity-60 flex justify-center items-center text-center text-white p-4 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div class="text-center">
             <p class="font-bold text-lg">
-              {item.alt} <span class="mx-1 text-xl text-white-400">&bull;</span> {getData('recipeCategoryDescription', item)}
+              {item.alt}
             </p>
             <!-- <p class="text-sm text-gray-300 mt-2">{getData('recipeCategoryDescription', item)}</p> -->
-            <p class="text-xs mt-2">{getData('recipeDescription', item)}</p>
+            <p class="hidden md:block text-xs mt-2">{getData('recipeDescription', item)}</p>
             <!-- TODO: eventually we will let all users go here -->
              {#if permissions.includes('view_catalog')}
               <div class="flex justify-center">
-                <A aClass="mx-autofont-medium hover:underline flex items-center py-2" href="/catalog/{getData('recipeId', item)}}">Open in catalog<ArrowRightOutline class="ms-1 h-5 w-5"/>
+                <A aClass="mx-autofont-medium hover:underline flex items-center" href="/catalog/{getData('recipeId', item)}}">Open in catalog<ArrowRightOutline class="ms-1 h-5 w-5"/>
                 </A>
               </div>
             {/if}
