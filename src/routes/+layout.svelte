@@ -33,7 +33,7 @@
 <Nav {activeUrl} {user}></Nav>
 
 <!-- loading bar -->
-<ProgressBar class="text-purple-600" />
+<ProgressBar class="text-primary-600" />
 
 <!-- page -->
 <div class="container mx-auto p-4">
