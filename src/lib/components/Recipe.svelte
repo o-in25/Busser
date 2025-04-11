@@ -15,7 +15,7 @@
 	import { EditOutline, HeartOutline } from 'flowbite-svelte-icons';
 	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
-	import { calculateAbv, calculateOverallScore } from '$lib/math';
+	import { calculateAbv, calculateOverallScore, convertFromMl } from '$lib/math';
 	import type { RecipeGeneratorSchema } from '$lib/server/generators/recipe-generator';
 	import { onMount } from 'svelte';
 
@@ -139,7 +139,7 @@
 		<!-- col 2 -->
 		<div class="lg:col-span-2 col-start-1 md:row-start-2 row-start-5">
 			<div class="my-4">
-        <Heading tag="h5" class="mb-4 block md:inline-block border-b-4 border-secondary-500 rounded-sm pb-1 md:!w-auto">Verdict</Heading>
+        <Heading tag="h5" class="mb-4 block md:inline-block border-b-4 border-primary-500 rounded-sm pb-1 md:!w-auto">Verdict</Heading>
 
         <ScoreRating
           headerLabel={{
@@ -216,7 +216,7 @@
 			class="md:row-span-2 col-start-1 md:col-start-2 lg:col-start-3 row-start-4 md:row-start-2 lg:row-start-1"
 		>
 			<div class="my-4 ">
-        <Heading tag="h5" class="mb-4 block md:inline-block border-b-4 border-secondary-500 rounded-sm pb-1 md:!w-auto">Steps</Heading>
+        <Heading tag="h5" class="mb-4 block md:inline-block border-b-4 border-primary-500 rounded-sm pb-1 md:!w-auto">Steps</Heading>
         <ul
           class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600"
         >
@@ -227,7 +227,7 @@
                 bind:checked={steps[step].checked}
               >
                 <span class={recipeStep.checked ? 'line-through' : ''}>
-                  {recipeStep.recipeStepDescription}
+                  {`Add ${convertFromMl(recipeStep.productIdQuantityUnit, recipeStep.productIdQuantityInMilliliters)} ${recipeStep.productIdQuantityUnit} of ${recipeStep.categoryName}`}
                 </span>
               </Checkbox>
             </li>
