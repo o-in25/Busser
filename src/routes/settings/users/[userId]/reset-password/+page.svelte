@@ -9,7 +9,6 @@
 	import { getContext } from 'svelte';
     export let form: ActionData;
     const permissions: string[] = getContext('roles');
-    console.log(permissions)
     const { userId } = page.params;
 </script>
 

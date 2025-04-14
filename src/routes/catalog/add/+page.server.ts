@@ -5,13 +5,13 @@ import type { PageServerLoad } from './$types';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 export const load = (async ({ locals }) => {
-  if(!locals.user?.permissions.includes('add_catalog')) {
-    error(StatusCodes.UNAUTHORIZED, {
-      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-      code: StatusCodes.UNAUTHORIZED,
-      message: 'You do not have permission to access this resource.'
-    });
-  }
+  // if(!locals.user?.permissions.includes('add_catalog')) {
+  //   error(StatusCodes.UNAUTHORIZED, {
+  //     reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+  //     code: StatusCodes.UNAUTHORIZED,
+  //     message: 'You do not have permission to access this resource.'
+  //   });
+  // }
 
   // await info('test')
   const spirits = await getSpirits();
@@ -32,12 +32,12 @@ export const load = (async ({ locals }) => {
 
 export const actions = {
   default: async ({ request, locals }) => {
-    if(!locals.user?.permissions.includes('add_catalog')) {
-      fail(StatusCodes.UNAUTHORIZED, {
-        status: StatusCodes.UNAUTHORIZED,
-        error: 'You do not have permission to perform this action.'
-      });
-    }
+    // if(!locals.user?.permissions.includes('add_catalog')) {
+    //   fail(StatusCodes.UNAUTHORIZED, {
+    //     status: StatusCodes.UNAUTHORIZED,
+    //     error: 'You do not have permission to perform this action.'
+    //   });
+    // }
 
     let formData: any = Object.fromEntries(await request.formData());
     let { recipeImageUrl, recipeSteps, ...payload } = formData;

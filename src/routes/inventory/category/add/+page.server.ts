@@ -5,24 +5,24 @@ import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import type { FormSubmitResult } from '$lib/types';
 
 export const load = (async ({ locals }) => {
-  if(!locals.user?.permissions.includes('add_category')) {
-    error(StatusCodes.UNAUTHORIZED, {
-      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-      code: StatusCodes.UNAUTHORIZED,
-      message: 'You do not have permission to access this resource.'
-    });
-  }
+  // if(!locals.user?.permissions.includes('add_category')) {
+  //   error(StatusCodes.UNAUTHORIZED, {
+  //     reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+  //     code: StatusCodes.UNAUTHORIZED,
+  //     message: 'You do not have permission to access this resource.'
+  //   });
+  // }
   return {};
 }) satisfies PageServerLoad;
 
 export const actions = {
   default: async ({ locals, request }) => {
-    if(!locals.user?.permissions.includes('add_category')) {
-      return fail(StatusCodes.UNAUTHORIZED, {
-        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-        error: 'You do not have permission to access this resource.'
-      });
-    }
+    // if(!locals.user?.permissions.includes('add_category')) {
+    //   return fail(StatusCodes.UNAUTHORIZED, {
+    //     status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+    //     error: 'You do not have permission to access this resource.'
+    //   });
+    // }
     
 
     const formData = await request.formData();

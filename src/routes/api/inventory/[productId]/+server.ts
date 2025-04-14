@@ -11,13 +11,13 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
     message: 'Niw allowed'
   }
 
-  if(!locals.user?.permissions.includes('delete_inventory')) {
-    error(StatusCodes.UNAUTHORIZED, {
-      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-      code: StatusCodes.UNAUTHORIZED,
-      message: 'You do not have permission to perform this action.'
-    });
-  }
+  // if(!locals.user?.permissions.includes('delete_inventory')) {
+  //   error(StatusCodes.UNAUTHORIZED, {
+  //     reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+  //     code: StatusCodes.UNAUTHORIZED,
+  //     message: 'You do not have permission to perform this action.'
+  //   });
+  // }
 
 
   if(!params?.productId) {
