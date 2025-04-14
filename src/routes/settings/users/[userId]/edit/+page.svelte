@@ -21,6 +21,6 @@
         {form.error? form.error.message : form.success.message}
       </Alert>
       {/if}
-      <UserForm user={data?.args} action='edit'></UserForm>
+      <UserForm user={data.user} action='edit' roles={data.roles}></UserForm>
     </div>
   </div>

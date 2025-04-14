@@ -10,26 +10,26 @@ import { error, fail } from '@sveltejs/kit';
 // const upload = multer({ dest: tmpdir() });
 
 export const load = (async ({ locals }) => {
-  if(!locals.user?.permissions.includes('add_inventory')) {
-    error(StatusCodes.UNAUTHORIZED, {
-      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-      code: StatusCodes.UNAUTHORIZED,
-      message: 'You do not have permission to access this resource.'
-    });
-  }
-  return {};
+  // if(!locals.user?.permissions.includes('add_inventory')) {
+  //   error(StatusCodes.UNAUTHORIZED, {
+  //     reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+  //     code: StatusCodes.UNAUTHORIZED,
+  //     message: 'You do not have permission to access this resource.'
+  //   });
+  // }
+  // return {};
 }) satisfies PageServerLoad;
 
 
 export const actions = {
   add: async({ locals, request }) => {
 
-    if(!locals.user?.permissions.includes('add_inventory')) {
-      return fail(StatusCodes.UNAUTHORIZED, {
-        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-        error: 'You do not have permission to access this resource.'
-      });
-    }
+    // if(!locals.user?.permissions.includes('add_inventory')) {
+    //   return fail(StatusCodes.UNAUTHORIZED, {
+    //     status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+    //     error: 'You do not have permission to access this resource.'
+    //   });
+    // }
 
     let formData = Object.fromEntries(await request.formData());
     const { productImageUrl: file } = formData as { productImageUrl: File; };

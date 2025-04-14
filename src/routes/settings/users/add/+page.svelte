@@ -22,6 +22,6 @@
       {form.error? form.error.message : form.success.message}
     </Alert>
     {/if}
-    <UserForm action='add'></UserForm>
+    <UserForm action='add' roles={data.roles}></UserForm>
   </div>
 </div>

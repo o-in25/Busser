@@ -30,7 +30,7 @@ import { Logger } from "./logger";
 
 const db = new DbProvider("app_t");
 
-const marshal = <T>(obj: any, fn: Function = camelCase) => {
+export const marshal = <T>(obj: any, fn: Function = camelCase) => {
   if(Array.isArray(obj)) {
     return obj.map((v) => marshal<T>(v, fn));
   }
@@ -47,7 +47,7 @@ const marshal = <T>(obj: any, fn: Function = camelCase) => {
 };
 
 
-const marshalToType = <T>(obj: any, fn: Function = camelCase): T => {
+export const marshalToType = <T>(obj: any, fn: Function = camelCase): T => {
   if(!obj && typeof obj === 'object') return obj as T;
   if(Array.isArray(obj)) return obj.map((v) => marshal<T>(v)) as T;
   return Object.entries(obj).reduce(
@@ -59,9 +59,9 @@ const marshalToType = <T>(obj: any, fn: Function = camelCase): T => {
   );
 };
 
-const pascalCase = (str: string) => changeCase.pascalCase(str); // GoodDrinks
-const camelCase = (str: string) => changeCase.camelCase(str); // goodDrinks
-const titleCase = (str: string) => changeCase.capitalCase(str); // Good Drinks
+export const pascalCase = (str: string) => changeCase.pascalCase(str); // GoodDrinks
+export const camelCase = (str: string) => changeCase.camelCase(str); // goodDrinks
+export const titleCase = (str: string) => changeCase.capitalCase(str); // Good Drinks
 
 const paginationData = {
   total: 0,

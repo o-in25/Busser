@@ -1,9 +1,16 @@
 <script lang="ts">
-  import { Button, Input, Label } from 'flowbite-svelte';
-	import type { User } from '$lib/types';
+	import type { Role, User } from '$lib/types/auth';
+  import { Button, Input, Label, MultiSelect } from 'flowbite-svelte';
+	import Autocomplete from './Autocomplete.svelte';
+	import type { SelectOption } from '$lib/types';
+	import { getContext } from 'svelte';
 
   export let user: User | null = null;
   export let action: String
+  export let roles: SelectOption[];
+  // const userRoles: any[] = getContext('roles') || [];
+
+  let selected = user?.roles.map(({ roleId }) => roleId)
 </script>
 <form class="space-y-6" 
   method="POST" 
@@ -21,6 +28,12 @@
     <span>Email</span>
     <Input type="email" name="email" placeholder="name@company.com" required value={user?.email || ''}/>
   </Label>
+  <Label class="space-y-2">
+    <span>Role</span>
+    <input class="hidden" name="roles" id="roles" bind:value={selected}>
+    <MultiSelect items={roles} bind:value={selected}/>
+  </Label>
+
   {#if action === 'edit'}
     <div class="flex items-start">
       <a href="/settings/users/{user?.userId}/reset-password" class="text-sm text-primary-700 hover:underline dark:text-primary-500">Reset Password...</a>
