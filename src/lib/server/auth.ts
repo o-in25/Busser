@@ -5,6 +5,7 @@ import type {User} from '$lib/types/auth';
 import jwt, {type SignOptions} from 'jsonwebtoken';
 import {promisify} from 'util';
 import { compare, hash } from 'bcrypt'
+import { getUser } from './user';
 
 const { JWT_SIGNING_KEY } = process.env;
 const HASH_ROUNDS = 10;
@@ -73,26 +74,18 @@ export async function login(
       throw new Error('Incorrect password.');
     }
 
-    // get user (could be combined in first query)
-    const user = await db.table<User>('user').where({ userId }).select().first();
-    if(!user) {
-      throw new Error('Could not obtain user data.');
+    const queryResult = await getUser(userId);
+    if(queryResult.status === 'error') {
+      throw new Error(queryResult.error);
     }
 
-    // get grants
-    const { permissions, roles } = await db.table('userAccessControl').where({ userId }).select().first();
-    if(!permissions?.length || !roles.length) {
-      throw new Error('Could not obtain user grants.');
-    }
-
-    // set grants
-    user.permissions = permissions?.split(',');
-		user.roles = roles?.split(',');
-
-    // sign token
+    // update activity date
+    await db.table('user').update({ lastActivityDate: Logger.now() }).where({ userId });
+    const user = queryResult.data || {} as User;
     const userToken = await signUserToken(user);
-    return userToken;
 
+
+    return userToken;
 	} catch (error: any) {
     await Logger.error(error);
     if(username) {

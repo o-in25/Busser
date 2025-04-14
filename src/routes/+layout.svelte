@@ -26,6 +26,7 @@
 
   $: activeUrl = getActiveUrl($page.url.pathname);
   $: user = data.user;
+
   $: {
     setContext('permissions', user?.permissions.map(({ permissionName }) => permissionName) || []);
     setContext('roles', user?.roles.map(({ roleName }) => roleName) || []);

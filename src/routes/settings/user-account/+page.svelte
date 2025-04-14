@@ -2,21 +2,12 @@
   import type { PageData } from './$types';
   import { DescriptionList, Heading, List, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
   import { goto, invalidateAll } from '$app/navigation';
-  import FancyButton from '$lib/components/FancyButton.svelte';
+	import { getContext } from 'svelte';
   
   export let data: PageData;
 
-  async function logout() {
-    const response = await fetch("/logout", {
-      method: "POST",
-    });
-    if (response.ok) {
-      await invalidateAll();
-      await goto(`/`);
-    }
-  } 
 
-  const normalizePermissions = (permissions): any => {
+  const normalizePermissions = (permissions: any[] ): any => {
     const validGrants = ['view', 'add', 'edit', 'delete'];
 
     const result = {};
@@ -32,7 +23,8 @@
           view: false,
           add: false,
           edit: false,
-          delete: false
+          delete: false,
+          resource
         };
       }
 
@@ -42,8 +34,12 @@
     return result;
   }
 
-const permissions: Record<string, { view: boolean; add: boolean; edit: boolean; delete: boolean }>  = normalizePermissions(data.user?.permissions || []);
-console.log(permissions)
+
+const permissions: string[] = getContext('permissions') || [];
+const roles: string[] = getContext('roles') || [];
+
+const tableEntry: Record<string, { view: boolean; add: boolean; edit: boolean; delete: boolean, resource: string }>  = normalizePermissions(permissions);
+
 </script>
 
 <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -63,25 +59,27 @@ console.log(permissions)
     </div>
     <div class="flex flex-col pb-3">
       <DescriptionList tag="dt" class="mb-1">Roles</DescriptionList>
-      <DescriptionList tag="dd">{data.user?.roles}</DescriptionList>
+      <DescriptionList tag="dd">{roles.join(', ')}</DescriptionList>
     </div>
     <div class="flex flex-col pb-3">
       <DescriptionList tag="dt" class="mb-1">Permissions</DescriptionList>
       <DescriptionList tag="dd">
         <Table>
-          <TableHead>
-            <TableHeadCell>View</TableHeadCell>
-            <TableHeadCell>Add</TableHeadCell>
-            <TableHeadCell>Edit</TableHeadCell>
-            <TableHeadCell>Delete</TableHeadCell>
+          <TableHead class="text-center">
+            <TableHeadCell class="!text-left">Resource</TableHeadCell>
+            <TableHeadCell>Can View</TableHeadCell>
+            <TableHeadCell>Can Add</TableHeadCell>
+            <TableHeadCell>Can Edit</TableHeadCell>
+            <TableHeadCell>Can Delete</TableHeadCell>
           </TableHead>
           <TableBody tableBodyClass="divide-y">
-            {#each Object.entries(permissions) as [resource, grants]}
-            <TableBodyRow>
-              <TableBodyCell class="capitalize">{grants.view? resource : '--'}</TableBodyCell>
-              <TableBodyCell class="capitalize">{grants.add? resource : '--'}</TableBodyCell>
-              <TableBodyCell class="capitalize">{grants.edit? resource : '--'}</TableBodyCell>
-              <TableBodyCell class="capitalize">{grants.delete? resource : '--'}</TableBodyCell>
+            {#each Object.entries(tableEntry) as [_, grants]}
+            <TableBodyRow class="capitalize text-center">
+              <TableBodyCell class="!text-left">{grants.resource}</TableBodyCell>
+              <TableBodyCell>{grants.view? 'Yes' : 'No'}</TableBodyCell>
+              <TableBodyCell>{grants.add? 'Yes' : 'No'}</TableBodyCell>
+              <TableBodyCell>{grants.edit? 'Yes' : 'No'}</TableBodyCell>
+              <TableBodyCell>{grants.delete? 'Yes' : 'No'}</TableBodyCell>
             </TableBodyRow>
             {/each}
           </TableBody>
