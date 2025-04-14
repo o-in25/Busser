@@ -16,6 +16,7 @@
 
   // props
   export let users: User[];
+  export let currentUser: User | null;
 
   let target: string | undefined = undefined;
   let isOpened = false;
@@ -54,12 +55,13 @@
       <TableBodyRow>
         <TableBodyCell>{user.username}</TableBodyCell>
         <TableBodyCell>{user.email}</TableBodyCell>
-        <TableBodyCell>{(moment(user.lastActivityDate)).format('DD-MMM-YYYY HH:mm:ss')}</TableBodyCell>
+        <TableBodyCell>{user.lastActivityDate? (moment(user.lastActivityDate)).format('DD-MMM-YYYY HH:mm:ss') : 'Never'}</TableBodyCell>
         <TableBodyCell>
           <ButtonGroup size="sm" divClass="inline-flex rounded-lg shadow-sm float-right">
             <Button outline color="dark" href="/settings/users/{user.userId}/edit">
               <UserEditOutline class="w-4 h-4" />
             </Button>
+
             <Button outline color="dark" on:click={() => {
               isOpened = true;
               target = user.userId;

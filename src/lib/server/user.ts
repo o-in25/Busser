@@ -32,15 +32,15 @@ export async function addUser(username: string, email: string, password: string,
         username,
         email,
         password: hashedPassword
-      }).first()
+      }).first();
 
-      const user: Partial<User> = marshalToType<Partial<User>>(dbResult)
+      const user: Partial<User> = marshalToType<Partial<User>>(dbResult);
       if(!user.userId) throw new Error('Could not create user.');
-      
+
       const userRole: {
         userId: string,
-        roleId: string
-      }[] = roleIds.map(roleId => ({ userId: user.userId || '', roleId}));
+        roleId: string;
+      }[] = roleIds.map(roleId => ({ userId: user.userId || '', roleId }));
 
       dbResult = await trx('userRole').insert(userRole);
 
@@ -56,22 +56,59 @@ export async function addUser(username: string, email: string, password: string,
   }
 }
 
-export async function editUser(userId: string, user: User) {
+export async function editUser(userId: string, username: string, email: string, roleIds: string[]): Promise<QueryResult<User>> {
   try {
-    const result = await db
-      .table('user')
-      .where({ userId })
-      .update(user);
-    return result;
-  } catch(error) {
+    const user: User = await db.query.transaction(async (trx) => {
+      let dbResult: any = await db
+        .table('user')
+        .where({ userId })
+        .update({
+          username, email,
+        });
+      console.log('insert', dbResult);
+
+      dbResult = await db
+        .table('userRole')
+        .where({ userId })
+        .del()
+      
+      console.log('delete', dbResult);
+
+      let subquery: any[] = roleIds.map(roleId => ({
+        userId,
+        roleId
+      }));
+
+      dbResult = await db
+        .table('userRole')
+        .insert(subquery)
+        console.log('insert 2', dbResult);
+
+      const queryResult = await getUser(userId);
+      if(queryResult.status !== 'success') throw new Error(queryResult.error)
+      return queryResult.data as User;
+    });
+
+    return {
+      status: 'success',
+      data: user
+    }
+
+  } catch(error: any) {
     console.error(error);
-    return null;
+    return {
+      status: 'error',
+      error: error.message
+    };
   }
 }
 
-export async function deleteUser(userId: string) {
+export async function deleteUser(userId: string, currentUserId: string) {
   let response = {};
   try {
+    if(userId === currentUserId) {
+      throw new Error('Invalid user ID to delete.')
+    }
     const result = await db
       .table('user')
       .where({ userId })
@@ -103,7 +140,7 @@ export async function roleSelect(): Promise<SelectOption[]> {
       }),
     );
     return selectOptions;
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     return [];
   }
@@ -112,53 +149,53 @@ export async function roleSelect(): Promise<SelectOption[]> {
 export async function getUser(userId: string): Promise<QueryResult<User>> {
   try {
     const user: User = await db.query.transaction(async (trx) => {
-        let dbResult: any;
-        // get user
-        dbResult = await trx('user')
-          .select('userId', 'email', 'username', 'lastActivityDate')
-          .first()
-          .where({ userId });
-        
-        let user = marshalToType<User>(dbResult);
-        if(!user.userId) throw new Error('User not found.')
-        
-        // get role ids
-        dbResult = await trx("userRole")
-          .select('roleId')
-          .where({ userId });
+      let dbResult: any;
+      // get user
+      dbResult = await trx('user')
+        .select('userId', 'email', 'username', 'lastActivityDate')
+        .first()
+        .where({ userId });
 
-        let roleIds: any[] = marshal(dbResult);
-        roleIds = roleIds.map(({ roleId }) => (roleId));
+      let user = marshalToType<User>(dbResult);
+      if(!user.userId) throw new Error('User not found.');
 
-        // get roles from ids
-        dbResult = await trx('role')
-          .select()
-          .whereIn('roleId', roleIds);
-        const roles: Role[] = marshalToType<Role[]>(dbResult);
+      // get role ids
+      dbResult = await trx("userRole")
+        .select('roleId')
+        .where({ userId });
 
-        // get permissions ids
-        dbResult = await trx('rolePermission')
-          .select('permissionId')
-          .whereIn('roleId', roleIds);
-        let permissionIds: any[] = marshal(dbResult);
-        permissionIds = permissionIds.map(({ permissionId }) => (permissionId))
+      let roleIds: any[] = marshal(dbResult);
+      roleIds = roleIds.map(({ roleId }) => (roleId));
 
-        // get permissions from ids
-        dbResult = await trx('permission')
+      // get roles from ids
+      dbResult = await trx('role')
+        .select()
+        .whereIn('roleId', roleIds);
+      const roles: Role[] = marshalToType<Role[]>(dbResult);
+
+      // get permissions ids
+      dbResult = await trx('rolePermission')
+        .select('permissionId')
+        .whereIn('roleId', roleIds);
+      let permissionIds: any[] = marshal(dbResult);
+      permissionIds = permissionIds.map(({ permissionId }) => (permissionId));
+
+      // get permissions from ids
+      dbResult = await trx('permission')
         .select()
         .whereIn('permissionId', permissionIds);
-        const permissions: Permission[] = marshalToType<Permission[]>(dbResult);
-        
-        user = { ...user, roles, permissions };
-        return user;
+      const permissions: Permission[] = marshalToType<Permission[]>(dbResult);
+
+      user = { ...user, roles, permissions };
+      return user;
     });
 
     return {
       status: 'success',
       data: user
-    }
+    };
 
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     return {
       status: 'error',

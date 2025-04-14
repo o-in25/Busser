@@ -5,6 +5,7 @@ import { editUser, getUser, roleSelect } from "$lib/server/user";
 import type { User } from "$lib/types/auth";
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { date } from "zod";
+import { user } from "../../../../../stores";
 const db = new DbProvider('user_t');
 
 const load: PageServerLoad = async ({ params }) => {
@@ -46,19 +47,18 @@ const actions = {
     }
 
     const formData = await request.formData();
-    const username = formData.get('username');
-    const email = formData.get('email');    
-    const user = { username, email } as User
-    let rows = await editUser(userId, user);
+    const username = formData.get('username')?.toString() || ''
+    const email = formData.get('email')?.toString() || ''; 
+    const roles = formData.get('roles')?.toString() || '';
 
-    if(!rows) {
+    const queryResult = await editUser(userId, username, email, roles.split(','))
+    if('data' in queryResult) {
       return {
-         error: { message: 'Could not update user.' }
-      };
+        user: queryResult.data
+      }
     }
-    return {
-      success: { message: 'User has been updated.' }
-    };
+
+    console.error('error')
   },
 } satisfies Actions;
 

@@ -122,8 +122,6 @@
     use:enhance={({ formData }) => {
       disabled = true;
       let json = steps.map((step) => ({ ...step, productIdQuantityInMilliliters: convertToMl(step.productIdQuantityUnit, step.productIdQuantityInMilliliters)}));
-
-      console.log(json)
       formData.append("recipeSteps", JSON.stringify(json));
       return async ({ result }) => {
         if (result.type === "redirect") {

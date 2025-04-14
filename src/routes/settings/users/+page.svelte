@@ -12,4 +12,4 @@
       User Management
   </Heading>
 </div>
-<UserTable users={data?.args}></UserTable>
+<UserTable users={data?.args} currentUser={data?.user}></UserTable>

@@ -5,11 +5,13 @@ export const GET: RequestHandler = async () => {
   return new Response();
 };
 
-export const DELETE: RequestHandler = async ({ params }) => {
+export const DELETE: RequestHandler = async ({ params, locals }) => {
   const { id, slug } = params;
   switch(slug) {
     case 'delete':
-      let result: any = await deleteUser(id);
+
+    
+      let result: any = await deleteUser(id, locals.user?.userId || '');
       if(!result.error) {
         result = { ...result, success: 'User has been deleted. '}
       }
