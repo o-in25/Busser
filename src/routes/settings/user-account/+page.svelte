@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { DescriptionList, Heading, List, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-  import { goto, invalidateAll } from '$app/navigation';
-	import { getContext } from 'svelte';
+  import { getContext } from 'svelte';
   
   export let data: PageData;
 

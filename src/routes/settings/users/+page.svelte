@@ -2,8 +2,10 @@
     import { Heading } from 'flowbite-svelte';
     import type { PageData } from './$types';
     import UserTable from '$lib/components/UserTable.svelte';
+	import type { User } from '$lib/types/auth';
     
     export let data: PageData;
+    let currentUser = data?.user || {} as User;
   
 </script>
 
@@ -12,4 +14,4 @@
       User Management
   </Heading>
 </div>
-<UserTable users={data?.args} currentUser={data?.user}></UserTable>
+<UserTable users={data?.args} {currentUser}></UserTable>

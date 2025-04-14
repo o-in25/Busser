@@ -3,15 +3,13 @@
   import { Gallery, Button } from 'flowbite-svelte';
   import type { PageData } from './$types';
   import { page } from '$app/stores';
-  import { ArrowLeftToBracketOutline, ArrowRightOutline, ArrowRightToBracketOutline, ChevronRightOutline, MailBoxOutline, MailBoxSolid } from 'flowbite-svelte-icons';
-    import Excerpt from '$lib/components/Excerpt.svelte';
+  import { ArrowLeftToBracketOutline, ArrowRightOutline, MailBoxOutline } from 'flowbite-svelte-icons';
   export let data: PageData;	
   import placeholder from "$lib/assets/placeholder@2x.jpg";
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 
   const { recipes, spirits } = data;
-
   const permissions: string[] = getContext('permissions');
 
   const gallery = recipes?.map(({ recipeImageUrl, recipeName, recipeCategoryDescription, recipeId, recipeCategoryId, recipeDescription}) => ({ 
@@ -81,7 +79,7 @@ const setFilterType = (type: any) => {
 {#if !loading}
   <Gallery items={filter} class="gap-4 grid-cols-2 md:grid-cols-3 mb-8" let:item>
       <div class="relative group flex justify-center items-center" in:fade={{ duration: 500 }} out:fade={{ duration: 500 }}>
-        <img src={item.src} alt={item.alt} class="h-full object-cover w-full rounded-lg"/>
+        <img src={item.src} alt={item.alt} class="h-full object-cover w-full rounded-lg" loading="lazy"/>
         <div class="absolute inset-0 right-0 bg-black bg-opacity-60 flex justify-center items-center text-center text-white p-4 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div class="text-center">
             <p class="font-bold text-lg">
