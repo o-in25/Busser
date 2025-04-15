@@ -20,7 +20,9 @@
     }
   }
 </script>
-
+<svelte:head>
+    <title>{recipe.recipeName} - Busser</title> 
+</svelte:head>
 <Breadcrumb name="Catalog" href="/catalog">
   <BreadcrumbItem name="Browse Catalog" href="/catalog/browse"></BreadcrumbItem>
   <BreadcrumbItem name={recipe.recipeName}></BreadcrumbItem>

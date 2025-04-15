@@ -56,7 +56,8 @@ export async function addUser(username: string, email: string, password: string,
   }
 }
 
-export async function editUser(userId: string, username: string, email: string, roleIds: string[]): Promise<QueryResult<User>> {
+export async function editUser(userId: string, username: string, email: string, roleIds: string[] = []): Promise<QueryResult<User>> {
+  console.log(roleIds)
   try {
     const user: User = await db.query.transaction(async (trx) => {
       let dbResult: any = await db
@@ -66,7 +67,8 @@ export async function editUser(userId: string, username: string, email: string, 
           username, email,
         });
 
-      dbResult = await db
+      if(roleIds.length) {
+        dbResult = await db
         .table('userRole')
         .where({ userId })
         .del()
@@ -80,6 +82,7 @@ export async function editUser(userId: string, username: string, email: string, 
       dbResult = await db
         .table('userRole')
         .insert(subquery)
+      }
 
       const queryResult = await getUser(userId);
       if(queryResult.status !== 'success') throw new Error(queryResult.error)

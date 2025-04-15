@@ -5,7 +5,9 @@
     export let data: PageData;
 </script>
 
-
+<svelte:head>
+    <title>Tools - Busser</title> 
+</svelte:head>
 <div class="mt-5">
   <Heading tag="h2" class="mb-4 flex flex-row justify-between font-extrabold">
     Tools

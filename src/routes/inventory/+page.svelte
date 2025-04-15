@@ -12,6 +12,9 @@
   }
   
 </script>
+<svelte:head>
+    <title>Inventory - Busser</title> 
+</svelte:head>
 <div class="mt-5">
   <Heading tag="h2" class="mb-4 flex flex-row justify-between font-extrabold">
     Inventory

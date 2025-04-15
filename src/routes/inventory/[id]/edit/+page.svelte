@@ -9,7 +9,9 @@
 
 
 </script>
-
+<svelte:head>
+    <title>Edit {data.product.productName} - Busser</title> 
+</svelte:head>
 <Breadcrumb name="Inventory" href="/inventory">
   <BreadcrumbItem name="Edit Inventory"></BreadcrumbItem>
 </Breadcrumb>

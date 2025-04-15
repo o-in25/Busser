@@ -5,7 +5,9 @@ import type { PageData } from "./$types";
   import { UsersOutline, AdjustmentsVerticalSolid } from "flowbite-svelte-icons";
   export let data: PageData;
 </script>
-
+<svelte:head>
+    <title>User Management - Busser</title> 
+</svelte:head>
 <Tabs tabStyle="underline">
   <A href="/settings">
     <TabItem>
@@ -26,6 +28,6 @@ import type { PageData } from "./$types";
   </Heading>
   <div class="flex justify-left items-center">
     <!-- content -->
-    <UserTable users={data.users}></UserTable>
+    <UserTable users={data.users} currentUser={data.user}></UserTable>
   </div>
 </div>

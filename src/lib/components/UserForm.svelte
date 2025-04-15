@@ -12,6 +12,7 @@
 	export let action: String;
 	export let roles: SelectOption[];
 	// const userRoles: any[] = getContext('roles') || [];
+  const permissions: string[] = getContext('permissions');
 
 	let selected = user?.roles.map(({ roleId }) => roleId);
 </script>
@@ -60,17 +61,19 @@
 		/>
 	</Label>
 	<Label class="space-y-2">
-		<span>Role</span>
-		<input
-			class="hidden"
-			name="roles"
-			id="roles"
-			bind:value={selected}
-		/>
-		<MultiSelect
-			items={roles}
-			bind:value={selected}
-		/>
+    {#if permissions.includes('edit_admin')}
+      <span>Role</span>
+      <input
+        class="hidden"
+        name="roles"
+        id="roles"
+        bind:value={selected}
+      />
+      <MultiSelect
+        items={roles}
+        bind:value={selected}
+      />
+    {/if}
 	</Label>
 
 	{#if action === 'edit'}
@@ -103,7 +106,10 @@
 			/>
 		</Label>
 	{/if}
-	<Button type="submit">
-		{action === 'edit' ? 'Save Changes' : 'Add User'}
-	</Button>
+    <!-- submit -->
+    <div class="md:flex justify-end">
+      <div class="my-4 md:mr-4 order-2">
+        <Button class="w-full md:w-32" type="submit" size="xl">Save</Button>
+      </div>
+    </div>
 </form>

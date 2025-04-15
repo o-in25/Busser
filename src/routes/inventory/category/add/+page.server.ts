@@ -20,7 +20,7 @@ export const actions = {
     if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('add_category')) {
       return fail(StatusCodes.UNAUTHORIZED, {
         status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-        error: 'You do not have permission to access this resource.'
+        error: 'You do not have permission to perform this action.'
       });
     }
     

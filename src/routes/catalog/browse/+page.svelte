@@ -81,7 +81,9 @@
 //   // goto(url, {replaceState: true, invalidateAll: true});
 // }}
 </script>
-
+<svelte:head>
+    <title>Browse Catalog - Busser</title> 
+</svelte:head>
 <Breadcrumb
 	name="Catalog"
 	href="/catalog">

@@ -16,7 +16,7 @@
 
   // props
   export let users: User[];
-  export let currentUser: User;
+  export let currentUser: User | null;
 
   let target: string | undefined = undefined;
   let isOpened = false;
@@ -62,7 +62,7 @@
               <UserEditOutline class="w-4 h-4" />
             </Button>
 
-            {#if user.userId !== currentUser.userId}
+            {#if user.userId !== currentUser?.userId}
             <Button outline color="dark" on:click={() => {
               isOpened = true;
               target = user.userId;

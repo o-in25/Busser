@@ -7,7 +7,9 @@
     
     export let data: PageData;
 </script>
-
+<svelte:head>
+    <title>{data?.spirit?.recipeCategoryDescription} - Busser</title> 
+</svelte:head>
 <Breadcrumb name="Catalog" href="/catalog">
   <BreadcrumbItem name="{data?.spirit?.recipeCategoryDescription}"></BreadcrumbItem>
 </Breadcrumb>

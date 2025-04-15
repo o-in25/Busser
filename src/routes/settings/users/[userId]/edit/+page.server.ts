@@ -1,17 +1,25 @@
-import { error, type Actions } from "@sveltejs/kit";
+import { error, fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { DbProvider } from "$lib/server/db";
 import { editUser, getUser, roleSelect } from "$lib/server/user";
-import type { User } from "$lib/types/auth";
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
-import { date } from "zod";
-import { user } from "../../../../../stores";
 const db = new DbProvider('user_t');
 
-const load: PageServerLoad = async ({ params }) => {
+
+const load: PageServerLoad = async ({ params, locals }) => {
   const { userId } = params;
+  if(
+      (!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin')) &&
+      (userId?.length && userId !== locals.user?.userId)
+    ) {
+    return error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to access this resource.'
+    });
+  }
   if(!userId) {
-    error(StatusCodes.NOT_FOUND, {
+    return error(StatusCodes.NOT_FOUND, {
         reason: getReasonPhrase(StatusCodes.NOT_FOUND),
         code: StatusCodes.NOT_FOUND,
         message: 'User not found.'
@@ -36,29 +44,40 @@ const load: PageServerLoad = async ({ params }) => {
 
 
 const actions = {
-  default: async ({ request, params }) => {
+  default: async ({ request, params, locals }) => {
     const { userId } = params;
-    if(!userId) {
-      error(StatusCodes.NOT_FOUND, {
-        reason: getReasonPhrase(StatusCodes.NOT_FOUND),
-        code: StatusCodes.NOT_FOUND,
-        message: 'Could not find user.'
-      });
-    }
-
     const formData = await request.formData();
     const username = formData.get('username')?.toString() || ''
     const email = formData.get('email')?.toString() || ''; 
     const roles = formData.get('roles')?.toString() || '';
+    if(
+      (!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin')) &&
+      (userId?.length && userId !== locals.user?.userId)
+    ) {
+      return fail(StatusCodes.UNAUTHORIZED, {
+        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        error: 'You do not have permission to perform this action.'
+      });
+    }
 
-    const queryResult = await editUser(userId, username, email, roles.split(','))
+    if(!userId) {
+      return fail(StatusCodes.UNAUTHORIZED, {
+        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        error: 'User not found.'
+      });
+    }
+
+    let roleIds: string[] = [];
+    if(locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin')) {
+      roleIds = roles?.split(',') || [];
+    }
+
+    const queryResult = await editUser(userId, username, email, roleIds)
     if('data' in queryResult) {
       return {
         user: queryResult.data
       }
     }
-
-    console.error('error')
   },
 } satisfies Actions;
 

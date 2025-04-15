@@ -6,7 +6,9 @@
     import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
   
 </script>
-
+<svelte:head>
+    <title>New Inventory Item - Busser</title> 
+</svelte:head>
 <Breadcrumb name="Inventory" href="/inventory">
   <BreadcrumbItem name="Add To Inventory"></BreadcrumbItem>
 </Breadcrumb>

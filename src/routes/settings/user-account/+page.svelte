@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { DescriptionList, Heading, List, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+  import { A, DescriptionList, Heading, List, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+	import { ArrowRightOutline } from 'flowbite-svelte-icons';
   import { getContext } from 'svelte';
   
   export let data: PageData;
@@ -40,17 +41,26 @@ const roles: string[] = getContext('roles') || [];
 const tableEntry: Record<string, { view: boolean; add: boolean; edit: boolean; delete: boolean, resource: string }>  = normalizePermissions(permissions);
 
 </script>
-
-<div class="text-sm text-gray-500 dark:text-gray-400">
-  <Heading tag="h4" class="mb-4 flex flex-row justify-between font-extrabold">
-    Account
-  </Heading>
+<svelte:head>
+    <title>Account - Busser</title> 
+</svelte:head>
+<div class="flex items-center justify-between gap-4">
+  <div class="text-sm text-gray-500 dark:text-gray-400">
+    <Heading tag="h4" class="mb-4 flex flex-row justify-between font-extrabold">
+      Account
+    </Heading>
+  </div>
+  <A aClass="font-medium hover:underline flex items-center" href="/settings/users/{data.user?.userId}/edit">
+    Edit Account...
+    <ArrowRightOutline class="ms-1 h-5 w-5"/>
+  </A>
 </div>
 <div class="flex justify-left items-center overflow-x-auto w-full">
   <List tag="dl" class="text-gray-900 dark:text-white divide-y divide-gray-200  dark:divide-gray-700 w-full">
     <div class="flex flex-col pb-3">
       <DescriptionList tag="dt" class="mb-1">Username</DescriptionList>
       <DescriptionList tag="dd">{data.user?.username}</DescriptionList>
+      
     </div>
     <div class="flex flex-col pb-3">
       <DescriptionList tag="dt" class="mb-1">Email address</DescriptionList>

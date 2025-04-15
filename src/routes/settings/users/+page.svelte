@@ -8,7 +8,9 @@
     let currentUser = data?.user || {} as User;
   
 </script>
-
+<svelte:head>
+    <title>Users - Busser</title> 
+</svelte:head>
 <div class="text-sm text-gray-500 dark:text-gray-400">
   <Heading tag="h4" class="mb-4 flex flex-row justify-between font-extrabold">
       User Management

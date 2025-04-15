@@ -37,7 +37,9 @@ const setFilterType = (type: any) => {
   }
 }
 </script>
-
+<svelte:head>
+    <title>Home - Busser</title> 
+</svelte:head>
 {#if !$page.data.user}
   <Heading class="mb-4 pl-2 md:pl-0" tag="h1" customSize="text-3xl font-extrabold  md:text-5xl lg:text-6xl">
     <div class="text-center md:text-left">From Shelf To&nbsp;<Span gradient gradientClass="text-transparent bg-clip-text bg-gradient-to-r to-yellow-600 from-pink-400">Shaker</Span></div>

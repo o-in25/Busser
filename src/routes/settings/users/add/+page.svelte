@@ -10,7 +10,9 @@
     export let data: PageData;
 </script>
 
-
+<svelte:head>
+    <title>Add User - Busser</title> 
+</svelte:head>
 <Breadcrumb name="Users" href="/settings/users">
   <BreadcrumbItem name="Add User" href="/settings/user/add"></BreadcrumbItem>
 </Breadcrumb>

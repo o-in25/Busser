@@ -8,11 +8,14 @@
 	  import { page } from '$app/state';
 	import { getContext } from 'svelte';
     export let form: ActionData;
-    const permissions: string[] = getContext('roles');
+    export let data: PageData;
+    const permissions: string[] = getContext('permissions');
     const { userId } = page.params;
 </script>
 
-
+<svelte:head>
+    <title>Reset Password - Busser</title> 
+</svelte:head>
 <Breadcrumb name="Users" href="/settings/users">
   <BreadcrumbItem name="Edit User" href="/settings/users/{userId}/edit"></BreadcrumbItem>
   <BreadcrumbItem name="Reset Password"></BreadcrumbItem>
