@@ -11,10 +11,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       message: 'You do not have permission to access this resource.'
     });
   }
-}
+};
 
 export const actions = {
-  default: async({ request, params, locals}) => {
+  default: async ({ request, params, locals }) => {
     let { userId } = params;
     userId = userId || '';
     let formData: any = await request.formData();
@@ -22,37 +22,37 @@ export const actions = {
     formData = Array.from(formData.entries())
       .reduce((acc: any, [key, value]: any) => {
         acc[key] = value;
-        return acc; 
+        return acc;
       }, {});
 
-    const { 
-      oldPassword, 
-      newPassword, 
+    const {
+      oldPassword,
+      newPassword,
       passwordConfirm
     } = formData;
 
     if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin')) {
       return {
-        error: { message: "You do not have permission to perform this action"}
-      }
+        error: { message: "You do not have permission to perform this action" }
+      };
     }
 
     if(newPassword !== passwordConfirm) {
       return {
-        error: { message: "Password and password confirmation don't match."}
-      }
+        error: { message: "Password and password confirmation don't match." }
+      };
     }
 
     const changed = await resetPassword(userId, oldPassword, newPassword);
     if(!changed) {
       return {
         error: { message: "Old password isn't correct." }
-      }
+      };
     }
 
     return {
       success: { message: "Password has been updated." }
-    }
+    };
   }
 } satisfies Actions;
 

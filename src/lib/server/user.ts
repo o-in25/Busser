@@ -57,7 +57,7 @@ export async function addUser(username: string, email: string, password: string,
 }
 
 export async function editUser(userId: string, username: string, email: string, roleIds: string[] = []): Promise<QueryResult<User>> {
-  console.log(roleIds)
+  console.log(roleIds);
   try {
     const user: User = await db.query.transaction(async (trx) => {
       let dbResult: any = await db
@@ -69,30 +69,30 @@ export async function editUser(userId: string, username: string, email: string, 
 
       if(roleIds.length) {
         dbResult = await db
-        .table('userRole')
-        .where({ userId })
-        .del()
-      
+          .table('userRole')
+          .where({ userId })
+          .del();
 
-      let subquery: any[] = roleIds.map(roleId => ({
-        userId,
-        roleId
-      }));
 
-      dbResult = await db
-        .table('userRole')
-        .insert(subquery)
+        let subquery: any[] = roleIds.map(roleId => ({
+          userId,
+          roleId
+        }));
+
+        dbResult = await db
+          .table('userRole')
+          .insert(subquery);
       }
 
       const queryResult = await getUser(userId);
-      if(queryResult.status !== 'success') throw new Error(queryResult.error)
+      if(queryResult.status !== 'success') throw new Error(queryResult.error);
       return queryResult.data as User;
     });
 
     return {
       status: 'success',
       data: user
-    }
+    };
 
   } catch(error: any) {
     console.error(error);
@@ -107,7 +107,7 @@ export async function deleteUser(userId: string, currentUserId: string) {
   let response = {};
   try {
     if(userId === currentUserId) {
-      throw new Error('Invalid user ID to delete.')
+      throw new Error('Invalid user ID to delete.');
     }
     const result = await db
       .table('user')

@@ -1,33 +1,49 @@
 <script lang="ts">
-  import UserTable from "$lib/components/UserTable.svelte";
-import type { PageData } from "./$types";
-  import { Tabs, TabItem, Heading, A } from "flowbite-svelte";
-  import { UsersOutline, AdjustmentsVerticalSolid } from "flowbite-svelte-icons";
-  export let data: PageData;
+	import UserTable from '$lib/components/UserTable.svelte';
+	import type { PageData } from './$types';
+	import { Tabs, TabItem, Heading, A } from 'flowbite-svelte';
+	import {
+		UsersOutline,
+		AdjustmentsVerticalSolid,
+	} from 'flowbite-svelte-icons';
+	export let data: PageData;
 </script>
+
 <svelte:head>
-    <title>User Management - Busser</title> 
+	<title>User Management - Busser</title>
 </svelte:head>
 <Tabs tabStyle="underline">
-  <A href="/settings">
-    <TabItem>
-      <div slot="title" class="flex items-center gap-2">
-        <AdjustmentsVerticalSolid size="md" />General
-      </div>
-    </TabItem>
-  </A>
-  <TabItem open>
-    <div slot="title" class="flex items-center gap-2">
-      <UsersOutline size="md" />Users
-    </div>
-  </TabItem>
+	<A href="/settings">
+		<TabItem>
+			<div
+				slot="title"
+				class="flex items-center gap-2"
+			>
+				<AdjustmentsVerticalSolid size="md" />General
+			</div>
+		</TabItem>
+	</A>
+	<TabItem open>
+		<div
+			slot="title"
+			class="flex items-center gap-2"
+		>
+			<UsersOutline size="md" />Users
+		</div>
+	</TabItem>
 </Tabs>
 <div class="text-sm text-gray-500 dark:text-gray-400">
-  <Heading tag="h4" class="mb-4 flex flex-row justify-between font-extrabold">
-    User Management 
-  </Heading>
-  <div class="flex justify-left items-center">
-    <!-- content -->
-    <UserTable users={data.users} currentUser={data.user}></UserTable>
-  </div>
+	<Heading
+		tag="h4"
+		class="mb-4 flex flex-row justify-between font-extrabold"
+	>
+		User Management
+	</Heading>
+	<div class="flex justify-left items-center">
+		<!-- content -->
+		<UserTable
+			users={data.users}
+			currentUser={data.user}
+		></UserTable>
+	</div>
 </div>

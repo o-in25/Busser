@@ -12,7 +12,6 @@
 import type {
   BasicRecipe,
   Category,
-  GallerySeeding,
   PaginationResult,
   PreparationMethod,
   Product,
@@ -37,7 +36,7 @@ export const marshal = <T>(obj: any, fn: Function = camelCase) => {
 
   if(obj && typeof obj === 'object') {
     return Object.keys(obj).reduce((arr, key) => {
-      arr[fn(key)] = marshal<T>(obj[key], fn); 
+      arr[fn(key)] = marshal<T>(obj[key], fn);
       return arr;
     }, {} as Record<string, T>);
   }
@@ -74,7 +73,7 @@ const paginationData = {
   nextPage: 0,
 };
 
-export async function getCatalog(currentPage: number, perPage: number = 25, filter: Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep> | null = null): Promise<PaginationResult<View.BasicRecipe[]>>{
+export async function getCatalog(currentPage: number, perPage: number = 25, filter: Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep> | null = null): Promise<PaginationResult<View.BasicRecipe[]>> {
   try {
     let query = db.table('basicrecipe as r').select();
     if(filter?.productInStockQuantity) {
@@ -99,8 +98,8 @@ export async function getCatalog(currentPage: number, perPage: number = 25, filt
     return {
       data: result,
       pagination
-    }
-  } catch (error: any) {
+    };
+  } catch(error: any) {
     console.error(error);
     return {
       data: [],
@@ -122,7 +121,7 @@ export async function getInventory(
     }
 
     if(typeof filter?.productInStockQuantity !== 'undefined') {
-      console.log(filter.productInStockQuantity)
+      console.log(filter.productInStockQuantity);
       dbResult = dbResult.andWhere("productInStockQuantity", "=", filter.productInStockQuantity);
     }
 
@@ -130,7 +129,7 @@ export async function getInventory(
       .select()
       .orderBy('productName')
       .paginate({ perPage, currentPage, isLengthAware: true });
-    
+
     // let { data, pagination } = await db
     //   .table("inventory")
     //   .select()
@@ -143,7 +142,7 @@ export async function getInventory(
     const result: PaginationResult<Product[]> = { data: inventory, pagination };
 
     return result;
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     return {
       data: [],
@@ -155,17 +154,17 @@ export async function getInventory(
 export async function seedGallery(): Promise<QueryResult<View.BasicRecipe[]>> {
   try {
     // let dbResult = await db.table('availablerecipes').select('RecipeId').groupBy('RecipeId');
-    let dbResult = await db.table('basicrecipe').whereIn('RecipeId', function() {
+    let dbResult = await db.table('basicrecipe').whereIn('RecipeId', function () {
       this.select('RecipeId').from('availablerecipes').groupBy('RecipeId');
-    })
+    });
     const data: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(dbResult);
-    return { status: 'success', data }
-  } catch (error: any) {
+    return { status: 'success', data };
+  } catch(error: any) {
     console.error(error);
     return {
       status: 'error',
       error: 'Unable to get recipes.'
-    }
+    };
   }
 }
 
@@ -173,8 +172,8 @@ export async function getRecipeCategories(): Promise<QueryResult<View.BasicRecip
   try {
     let dbResult = await db.table<View.BasicRecipeCategory>('basicrecipecategory').select();
     const data: View.BasicRecipeCategory[] = marshalToType<View.BasicRecipeCategory[]>(dbResult);
-    return { status: 'success', data }
-  } catch (error: any) {
+    return { status: 'success', data };
+  } catch(error: any) {
     console.error(error);
     Logger.error(
       error.sqlMessage || error.message,
@@ -200,7 +199,7 @@ export async function categorySelect(): Promise<SelectOption[]> {
       }),
     );
     return selectOptions;
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     return [];
   }
@@ -225,7 +224,7 @@ export async function addToInventory(
       parentRowId = parentRow;
 
       const getProductImageUrl = async (image: File | null) => {
-        if (!image || image.size === 0 || image.name === "undefined")
+        if(!image || image.size === 0 || image.name === "undefined")
           return null;
         const signedUrl = await getSignedUrl(image);
         return signedUrl.length ? signedUrl : null;
@@ -250,12 +249,12 @@ export async function addToInventory(
       await trx.commit();
     });
 
-    if (!parentRowId || !childRowId) {
+    if(!parentRowId || !childRowId) {
       throw new Error("No rows have been inserted.");
     }
 
     const newRow = await findInventoryItem(parentRowId);
-    if (!newRow) {
+    if(!newRow) {
       throw new Error("Cannot find newly inserted item.");
     }
 
@@ -265,7 +264,7 @@ export async function addToInventory(
     };
     // const new
     // return await findInventoryItem(values.ProductId)
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     Logger.error(error.sqlMessage, error.sql);
     return {
@@ -285,13 +284,13 @@ export async function findInventoryItem(
       .where("ProductId", inventoryId)
       .select();
     let result: Product[] = marshal<Product[]>(data);
-    if (result.length === 0) {
+    if(result.length === 0) {
       throw Error("Product not found");
     }
 
     const [search] = result;
     return search;
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     return null;
   }
@@ -303,7 +302,7 @@ export async function updateInventory(
   image: File | null = null,
 ): Promise<QueryResult<Product>> {
   try {
-    if (!product?.productId) throw Error("No inventory ID provided.");
+    if(!product?.productId) throw Error("No inventory ID provided.");
 
     const productImageUrl = async (image) => {
       let oldImage: any = await db
@@ -316,7 +315,7 @@ export async function updateInventory(
 
       [oldImage] = marshal(oldImage, camelCase);
 
-      if (!oldImage?.productImageUrl) {
+      if(!oldImage?.productImageUrl) {
         oldImage = {
           productImageUrl: undefined,
         };
@@ -324,7 +323,7 @@ export async function updateInventory(
       // check here
       oldImage.productImageUrl = oldImage?.productImageUrl || null;
 
-      if (!image || image.size === 0 || image.name === "undefined") {
+      if(!image || image.size === 0 || image.name === "undefined") {
         return oldImage.productImageUrl;
       }
       const signedUrl = await getSignedUrl(image);
@@ -373,8 +372,8 @@ export async function updateInventory(
     return {
       status: 'success',
       data: newItem
-    }
-  } catch (error: any) {
+    };
+  } catch(error: any) {
     console.error(error);
     return {
       status: "error",
@@ -395,7 +394,7 @@ export async function deleteInventoryItem(
         .where("ProductId", productId)
         .first();
       childRow = marshal(childRow, camelCase);
-      if (childRow?.productImageUrl) {
+      if(childRow?.productImageUrl) {
         productImageUrl = childRow.productImageUrl;
       }
 
@@ -411,7 +410,7 @@ export async function deleteInventoryItem(
       await trx.commit();
     });
 
-    if (productImageUrl) {
+    if(productImageUrl) {
       await deleteSignedUrl(productImageUrl);
     }
     // const productDetail = await db
@@ -430,7 +429,7 @@ export async function deleteInventoryItem(
       status: "success",
       data: rowsDeleted || 0,
     } satisfies QueryResult<number>;
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     Logger.error(
       error.sqlMessage || error.message,
@@ -448,7 +447,7 @@ export async function getSpirits(): Promise<Array<Spirit>> {
     const dbResult = await db.table<Spirit>("spirits");
     const result = marshal<Spirit>(dbResult);
     return result;
-  } catch (error) {
+  } catch(error) {
     console.error(error);
     return [];
   }
@@ -460,9 +459,9 @@ export async function getSpirit(id: number | string): Promise<Spirit | null> {
       .table<Spirit>("spirits")
       .where("RecipeCategoryId", id);
     const [result] = marshal<Spirit>(dbResult);
-    if (!result) throw Error("Spirit not found.");
+    if(!result) throw Error("Spirit not found.");
     return result;
-  } catch (error) {
+  } catch(error) {
     console.error(error);
     return null;
   }
@@ -473,7 +472,7 @@ export async function getBasicRecipes(
 ): Promise<QueryResult<Array<BasicRecipe>>> {
   try {
     let query = db.table<BasicRecipe>("basicrecipe");
-    if (recipeCategoryId) {
+    if(recipeCategoryId) {
       query.where("recipeCategoryId", recipeCategoryId);
     }
     const dbResult = await query;
@@ -483,7 +482,7 @@ export async function getBasicRecipes(
       data,
     };
     return result;
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     Logger.error(
       error.sqlMessage || error.message,
@@ -509,7 +508,7 @@ export async function getPreparationMethods(): Promise<
     };
 
     return result;
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     Logger.error(
       error.sqlMessage || error.message,
@@ -542,7 +541,7 @@ export async function addCategory(
       status: "success",
       data: categoryId,
     };
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     Logger.error(
       error.sqlMessage || error.message,
@@ -559,7 +558,7 @@ export async function addCategory(
 export async function getBasicRecipe(
   recipeId: string,
 ): Promise<
-  QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] }>
+  QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[]; }>
 > {
   try {
     let recipe: View.BasicRecipe | undefined = undefined;
@@ -572,7 +571,7 @@ export async function getBasicRecipe(
       recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
     });
 
-    if (!recipe || !recipeSteps) {
+    if(!recipe || !recipeSteps) {
       throw Error("Could not get recipe details.");
     }
 
@@ -580,7 +579,7 @@ export async function getBasicRecipe(
       status: "success",
       data: { recipe, recipeSteps },
     };
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     Logger.error(
       error.sqlMessage || error.message,
@@ -606,7 +605,7 @@ export async function productSelect(): Promise<SelectOption[]> {
       }),
     );
     return selectOptions;
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
     return [];
   }
@@ -618,7 +617,7 @@ export async function updateCatalog(
   recipeSteps: QueryRequest.RecipeSteps[],
   file: File,
 ): Promise<
-  QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] }>
+  QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[]; }>
 > {
   // STEP 1: [NOT NEEDED] get signed file url
   // image url will be set via webhook not in form itself
@@ -633,10 +632,10 @@ export async function updateCatalog(
 
 
   const getRecipeImageUrl = async (image: File | null): Promise<string | null> => {
-    if (!image || image.size === 0 || image.name === "undefined") return null;
+    if(!image || image.size === 0 || image.name === "undefined") return null;
     const signedUrl = await getSignedUrl(image);
     return signedUrl.length ? signedUrl : null;
-  }
+  };
 
 
   // step 1 (originally)
@@ -660,7 +659,7 @@ export async function updateCatalog(
       };
 
       let dbResult;
-      
+
       let oldRecipe = await trx("recipe")
         // TODO: do we need RecipeCategoryId?
         .select("RecipeDescriptionId", "RecipeCategoryId")
@@ -669,7 +668,7 @@ export async function updateCatalog(
 
       oldRecipe = marshal(oldRecipe, camelCase);
 
-      if (!oldRecipe) {
+      if(!oldRecipe) {
         [dbResult] = await trx("recipedescription").insert({
           RecipeDescription: recipe.recipeDescription,
           RecipeDescriptionImageUrl: null, // TODO: add option for this on front end
@@ -679,8 +678,8 @@ export async function updateCatalog(
           RecipeVersatilityRating: recipe.recipeVersatilityRating,
         });
 
-        
-        if (!dbResult) throw new Error("Cannot create recipe description.");
+
+        if(!dbResult) throw new Error("Cannot create recipe description.");
         keys.recipeDescriptionId = dbResult;
 
         [dbResult] = await trx("recipe").insert({
@@ -690,7 +689,7 @@ export async function updateCatalog(
           RecipeImageUrl: recipeImageUrl /* <signed url> */,
         });
 
-        if (!dbResult) throw new Error("Cannot create recipe.");
+        if(!dbResult) throw new Error("Cannot create recipe.");
         keys.recipeId = dbResult;
         // oldRecipe = keys;
 
@@ -702,9 +701,9 @@ export async function updateCatalog(
       }
 
       // step 3
-      if (oldRecipe) {
+      if(oldRecipe) {
 
-        console.log(recipe)
+        console.log(recipe);
         dbResult = await trx("recipedescription")
           .where("RecipeDescriptionId", keys.recipeDescriptionId)
           .update({
@@ -716,7 +715,7 @@ export async function updateCatalog(
             RecipeVersatilityRating: recipe.recipeVersatilityRating,
           });
 
-        if (!dbResult) throw new Error("Recipe description not found.");
+        if(!dbResult) throw new Error("Recipe description not found.");
       }
 
       // step 4
@@ -729,7 +728,7 @@ export async function updateCatalog(
         .merge();
 
       // step 5
-      if (oldRecipe) {
+      if(oldRecipe) {
 
         // TODO: we should come up with a better fix for this
         // otherwise a user cant delete an image. until then
@@ -740,11 +739,11 @@ export async function updateCatalog(
           RecipeCategoryId: recipe.recipeCategoryId,
           RecipeDescriptionId: keys.recipeDescriptionId,
           RecipeName: recipe.recipeName,
-          
+
         };
 
         if(recipeImageUrl !== null) {
-          query = { ...query, recipeImageUrl }
+          query = { ...query, recipeImageUrl };
         }
 
 
@@ -815,7 +814,7 @@ export async function updateCatalog(
       status: "success",
       data: newRecipe,
     };
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error.message);
     Logger.error(
       error.sqlMessage || error.message,
@@ -852,14 +851,14 @@ export async function deleteCatalogItem(
         .where("RecipeDescriptionId", recipeDescriptionId)
         .del();
 
-      if(deletedRows < 1) throw new Error('Could not delete recipe because no rows were affected.')
+      if(deletedRows < 1) throw new Error('Could not delete recipe because no rows were affected.');
       // let dbResult2 = 1;
       // const [rowsDeleted] = marshal<Number>(dbResult2, camelCase);
       //   console.log(rowsDeleted)
 
       return {
         recipeImageUrl, deletedRows
-      }
+      };
     });
 
 
@@ -898,7 +897,7 @@ export async function getCategory(categoryId: number): Promise<QueryResult<Table
       status: "success",
       data: category,
     };
-  } catch (error: any) {
+  } catch(error: any) {
     console.error(error);
 
     Logger.error(
@@ -920,14 +919,14 @@ export async function updateCategory(category: Table.Category): Promise<QueryRes
     const { categoryName, categoryDescription } = category;
     if(!key) {
       [dbResult] = await db.table<Table.Category>('category').insert({ categoryName, categoryDescription });
-      if(!dbResult) throw new Error('Could not create new category.')
+      if(!dbResult) throw new Error('Could not create new category.');
       key = dbResult;
     } else {
       dbResult = await db.table<Table.Category>('category')
         .update({ categoryName, categoryDescription })
         .where('categoryId', key);
       if(dbResult < 1) {
-        if(!dbResult) throw new Error('Could not update category.')
+        if(!dbResult) throw new Error('Could not update category.');
       }
     }
 
@@ -935,7 +934,7 @@ export async function updateCategory(category: Table.Category): Promise<QueryRes
     const newCategory = marshalToType<Table.Category>(dbResult);
 
 
- 
+
     return {
       status: "success",
       data: newCategory,

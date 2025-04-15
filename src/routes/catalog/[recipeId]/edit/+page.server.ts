@@ -23,14 +23,14 @@ export const load = (async ({ params, locals }) => {
 
   let pageData: any = { args: { spirits } };
   if('data' in preparationMethods) {
-    pageData.args = { ...pageData.args, preparationMethods: preparationMethods.data }
+    pageData.args = { ...pageData.args, preparationMethods: preparationMethods.data };
   }
 
   if('data' in recipe) {
     pageData.args = {
-       ...pageData.args, 
-       recipe: recipe.data?.recipe,
-       recipeSteps: recipe.data?.recipeSteps
+      ...pageData.args,
+      recipe: recipe.data?.recipe,
+      recipeSteps: recipe.data?.recipeSteps
     };
   }
 
@@ -52,7 +52,7 @@ export const actions = {
   default: async ({ request, params, locals }) => {
 
     if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_catalog')) {
-      return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'You do not have permission to perform this action.'});
+      return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'You do not have permission to perform this action.' });
     }
 
 
@@ -69,12 +69,12 @@ export const actions = {
       productDrynessRating: Number(payload.productDrynessRating || '0'),
       productVersatilityRating: Number(payload.productVersatilityRating || '0'),
       productStrengthRating: Number(payload.productStrengthRating || '0')
-    }
+    };
 
     recipeSteps = JSON.parse(recipeSteps as string || '[]');
 
     const newData = await updateCatalog(recipe, recipeSteps, file);
-    if(newData.status === 'error') {  
+    if(newData.status === 'error') {
       return fail(StatusCodes.INTERNAL_SERVER_ERROR, newData);
 
     }

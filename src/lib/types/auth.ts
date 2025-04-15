@@ -6,7 +6,7 @@ import type { CookieSerializeOptions } from 'cookie';
 
 export type Session = {
   userId?: string;
-  opts: CookieSerializeOptions & {path: string};
+  opts: CookieSerializeOptions & { path: string; };
 };
 
 export type User = {
@@ -21,20 +21,20 @@ export type User = {
 
 export type Permission = {
   permissionId: string,
-  permissionName: string
-}
+  permissionName: string;
+};
 
 export type Role = {
   roleId: string,
-  roleName: string
-}
+  roleName: string;
+};
 
 export type UserRole = {
   userId: string,
-  roleId: string
-}
+  roleId: string;
+};
 
 export type RolePermission = {
   roleId: string,
-  permissionId: string
-}
+  permissionId: string;
+};

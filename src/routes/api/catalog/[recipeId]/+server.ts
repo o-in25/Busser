@@ -8,14 +8,14 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
   if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('delete_catalog')) {
     return json({
       error: 'You do not have permission to perform this action.'
-    })
+    });
   }
 
-  
+
   if(!recipeId || isNaN(Number(recipeId))) {
     return json({
       error: 'No catalog item found for ID.'
-    })
+    });
   }
 
   const result = await deleteCatalogItem(recipeId);

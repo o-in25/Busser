@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type { Role, User } from '$lib/types/auth';
+	import type { User } from '$lib/types/auth';
 	import { Button, Input, Label, MultiSelect } from 'flowbite-svelte';
-	import Autocomplete from './Autocomplete.svelte';
 	import type { SelectOption } from '$lib/types';
 	import { getContext } from 'svelte';
 	import { applyAction, enhance } from '$app/forms';
@@ -12,7 +11,7 @@
 	export let action: String;
 	export let roles: SelectOption[];
 	// const userRoles: any[] = getContext('roles') || [];
-  const permissions: string[] = getContext('permissions');
+	const permissions: string[] = getContext('permissions');
 
 	let selected = user?.roles.map(({ roleId }) => roleId);
 </script>
@@ -23,22 +22,22 @@
 	action={action === 'edit'
 		? `/settings/users/${user?.userId}/edit`
 		: '/settings/users/add'}
-    use:enhance={() => {
-      return async ({ result }) => {
-        console.log(result)
-        if (result.type === "redirect") {
-          goto(result.location);
-        } else {
-          await applyAction(result);
-          if (result.type === "failure")
-            $notificationStore.error = {
-              message: result?.data?.error?.toString() || "",
-            };
-          if (result.type === "success")
-            $notificationStore.success = { message: "User updated." };
-        }
-      };
-    }}
+	use:enhance={() => {
+		return async ({ result }) => {
+			console.log(result);
+			if (result.type === 'redirect') {
+				goto(result.location);
+			} else {
+				await applyAction(result);
+				if (result.type === 'failure')
+					$notificationStore.error = {
+						message: result?.data?.error?.toString() || '',
+					};
+				if (result.type === 'success')
+					$notificationStore.success = { message: 'User updated.' };
+			}
+		};
+	}}
 >
 	<Label class="space-y-2">
 		<span>Username</span>
@@ -61,19 +60,19 @@
 		/>
 	</Label>
 	<Label class="space-y-2">
-    {#if permissions.includes('edit_admin')}
-      <span>Role</span>
-      <input
-        class="hidden"
-        name="roles"
-        id="roles"
-        bind:value={selected}
-      />
-      <MultiSelect
-        items={roles}
-        bind:value={selected}
-      />
-    {/if}
+		{#if permissions.includes('edit_admin')}
+			<span>Role</span>
+			<input
+				class="hidden"
+				name="roles"
+				id="roles"
+				bind:value={selected}
+			/>
+			<MultiSelect
+				items={roles}
+				bind:value={selected}
+			/>
+		{/if}
 	</Label>
 
 	{#if action === 'edit'}
@@ -106,10 +105,16 @@
 			/>
 		</Label>
 	{/if}
-    <!-- submit -->
-    <div class="md:flex justify-end">
-      <div class="my-4 md:mr-4 order-2">
-        <Button class="w-full md:w-32" type="submit" size="xl">Save</Button>
-      </div>
-    </div>
+	<!-- submit -->
+	<div class="md:flex justify-end">
+		<div class="my-4 md:mr-4 order-2">
+			<Button
+				class="w-full md:w-32"
+				type="submit"
+				size="xl"
+			>
+				Save
+			</Button>
+		</div>
+	</div>
 </form>

@@ -9,9 +9,9 @@ const db = new DbProvider('user_t');
 const load: PageServerLoad = async ({ params, locals }) => {
   const { userId } = params;
   if(
-      (!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin')) &&
-      (userId?.length && userId !== locals.user?.userId)
-    ) {
+    (!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin')) &&
+    (userId?.length && userId !== locals.user?.userId)
+  ) {
     return error(StatusCodes.UNAUTHORIZED, {
       reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
       code: StatusCodes.UNAUTHORIZED,
@@ -20,9 +20,9 @@ const load: PageServerLoad = async ({ params, locals }) => {
   }
   if(!userId) {
     return error(StatusCodes.NOT_FOUND, {
-        reason: getReasonPhrase(StatusCodes.NOT_FOUND),
-        code: StatusCodes.NOT_FOUND,
-        message: 'User not found.'
+      reason: getReasonPhrase(StatusCodes.NOT_FOUND),
+      code: StatusCodes.NOT_FOUND,
+      message: 'User not found.'
     });
   }
 
@@ -31,7 +31,7 @@ const load: PageServerLoad = async ({ params, locals }) => {
   const queryResult = await getUser(userId);
   const roles = await roleSelect();
   if('data' in queryResult) {
-    return { user: queryResult.data, roles }
+    return { user: queryResult.data, roles };
   }
 
   return error(StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -40,15 +40,15 @@ const load: PageServerLoad = async ({ params, locals }) => {
     message: 'User not found.'
   });
 
-}
+};
 
 
 const actions = {
   default: async ({ request, params, locals }) => {
     const { userId } = params;
     const formData = await request.formData();
-    const username = formData.get('username')?.toString() || ''
-    const email = formData.get('email')?.toString() || ''; 
+    const username = formData.get('username')?.toString() || '';
+    const email = formData.get('email')?.toString() || '';
     const roles = formData.get('roles')?.toString() || '';
     if(
       (!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin')) &&
@@ -72,13 +72,13 @@ const actions = {
       roleIds = roles?.split(',') || [];
     }
 
-    const queryResult = await editUser(userId, username, email, roleIds)
+    const queryResult = await editUser(userId, username, email, roleIds);
     if('data' in queryResult) {
       return {
         user: queryResult.data
-      }
+      };
     }
   },
 } satisfies Actions;
 
-export { load, actions }
+export { load, actions };

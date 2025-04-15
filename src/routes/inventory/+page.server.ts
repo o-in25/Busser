@@ -1,29 +1,28 @@
 import { getInventory } from '$lib/server/core';
-import type { Product } from '$lib/types';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url }) => {
   // redirect to page 1
   if(!url.searchParams.size) {
-    throw redirect(307, url.pathname.concat('?', 'page=1'))
+    throw redirect(307, url.pathname.concat('?', 'page=1'));
   }
 
-  let page: string | number = url.searchParams.get('page') || '1'
+  let page: string | number = url.searchParams.get('page') || '1';
   page = Number(page);
 
   const productInStockQuantity = url.searchParams.get('productInStockQuantity');
   // productInStockQuantity = Number(productInStockQuantity);
 
-  const productName = url.searchParams.get('productName')
+  const productName = url.searchParams.get('productName');
 
   let filter = {};
   if(productName) {
-    filter = { productName }
+    filter = { productName };
   }
 
   if(productInStockQuantity) {
-    filter = { ...filter, productInStockQuantity }
+    filter = { ...filter, productInStockQuantity };
   }
 
   // if(!isNaN(productInStockQuantity)) {

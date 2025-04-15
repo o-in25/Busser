@@ -1,5 +1,4 @@
 import { findInventoryItem, updateInventory } from '$lib/server/core';
-import type { FormSubmitResult } from '$lib/types';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
@@ -77,4 +76,4 @@ export const actions = {
 
     return queryResult;
   }
-}
+};

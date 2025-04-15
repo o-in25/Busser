@@ -11,18 +11,18 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
     case 'delete':
       if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('admin_delete')) {
         const refresh = await getUsers() || [];
-        return json({error: 'You do not have permission to perform this action.', refresh});
+        return json({ error: 'You do not have permission to perform this action.', refresh });
       }
 
       if(id === locals.user.userId) {
         const refresh = await getUsers() || [];
-        return json({error: 'This user cannot be deleted.', refresh});
+        return json({ error: 'This user cannot be deleted.', refresh });
       }
 
 
       let result: any = await deleteUser(id, locals.user?.userId || '');
       if(!result.error) {
-        result = { ...result, success: 'User has been deleted. '}
+        result = { ...result, success: 'User has been deleted. ' };
       }
       return json(result);
     default:

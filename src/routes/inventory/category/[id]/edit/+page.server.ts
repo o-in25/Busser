@@ -38,7 +38,7 @@ export const actions = {
         error: 'You do not have permission to access this resource.'
       });
     }
-    
+
 
     const formData = await request.formData();
 
@@ -46,16 +46,16 @@ export const actions = {
       categoryId: Number(params.id),
       categoryDescription: formData.get('categoryDescription')?.toString() || '',
       categoryName: formData.get('categoryName')?.toString() || ''
-    })
+    });
 
     if(newData.status === 'error') {
       return fail(StatusCodes.INTERNAL_SERVER_ERROR, {
         status: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
         error: newData.error
-      })
+      });
     }
 
     return newData;
 
   }
-}
+};

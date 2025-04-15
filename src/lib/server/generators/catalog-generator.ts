@@ -21,7 +21,7 @@ export class CatalogGenerator extends LlmClient<CatalogGeneratorSchema> implemen
       The flavor profile could include information such as the sweetness, dryness, etc. 
       Also provide some ingredients (juices, liqueurs, etc) that pair well with 
       ${param} or popular ${param} cocktails as well some ingredients (juices, liqueurs, etc) 
-      that do not pair well with ${param}.`
+      that do not pair well with ${param}.`;
     const result = await super.invoke(prompt);
     return result;
   }

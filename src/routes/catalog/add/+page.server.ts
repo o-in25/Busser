@@ -1,5 +1,4 @@
 import { getPreparationMethods, getSpirits, productSelect, updateCatalog } from '$lib/server/core';
-import type { Table } from '$lib/types';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
@@ -19,7 +18,7 @@ export const load = (async ({ locals }) => {
   const products = await productSelect();
   const pageData: any = { args: { spirits, preparationMethods } };
   if('data' in preparationMethods) {
-    pageData.args = { ...pageData.args, preparationMethods: preparationMethods.data }
+    pageData.args = { ...pageData.args, preparationMethods: preparationMethods.data };
   }
 
   if('data' in products) {
@@ -47,11 +46,11 @@ export const actions = {
       ...payload,
       recipeCategoryId: Number(payload.recipeCategoryId) || -1,
       recipeTechniqueDescriptionId: Number(payload.recipeTechniqueDescriptionId) || -1,
-    }
+    };
 
     recipeSteps = JSON.parse(recipeSteps as string);
-    recipeSteps = recipeSteps.map(({ 
-      recipeStepId, 
+    recipeSteps = recipeSteps.map(({
+      recipeStepId,
       categoryDescription,
       categoryName,
       supplierName,
@@ -61,7 +60,7 @@ export const actions = {
       productPricePerUnit,
       productUnitSizeInMilliliters,
       productProof,
-      ...rest 
+      ...rest
     }) => rest);
 
     const newData = await updateCatalog(recipe, recipeSteps, file);

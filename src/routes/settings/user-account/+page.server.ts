@@ -7,7 +7,7 @@ export const load = (async ({ locals }) => {
   const userId = locals.user?.userId || '';
   const queryResult = await getUser(userId);
   if(queryResult.status === 'error') {
-    return error(StatusCodes.NOT_FOUND)
+    return error(StatusCodes.NOT_FOUND);
   }
 
   const user = queryResult.data;

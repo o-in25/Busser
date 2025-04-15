@@ -26,49 +26,49 @@ const units = {
 export const weightedMean = (arrValues: number[], arrWeights: number[]) => {
   const result = arrValues
     .map((value, i) => {
-      const weight = arrWeights[i]
-      const sum = value * weight
-      return [sum, weight]
+      const weight = arrWeights[i];
+      const sum = value * weight;
+      return [sum, weight];
     })
-    .reduce((p, c) => [p[0] + c[0], p[1] + c[1]], [0, 0])
+    .reduce((p, c) => [p[0] + c[0], p[1] + c[1]], [0, 0]);
 
-  return result[0] / result[1]
-}
+  return result[0] / result[1];
+};
 
 
-export const calculateOverallScore = (versatility: number, sweetness: number, dryness: number, strength: number) =>{
+export const calculateOverallScore = (versatility: number, sweetness: number, dryness: number, strength: number) => {
   if(![versatility, sweetness, dryness, strength].some(val => val > 0)) return 0;
 
   const weights = {
     versatility: 0.40,
     sweetnessDrynessRatio: 0.30,
     strength: 0.30
-  }
+  };
   let totalScore = (versatility * weights.versatility) +
-                   (((sweetness + dryness) / 2) * weights.sweetnessDrynessRatio) +
-                   (strength * weights.strength);
+    (((sweetness + dryness) / 2) * weights.sweetnessDrynessRatio) +
+    (strength * weights.strength);
   totalScore += ((sweetness > 7 && dryness > 7) ? -0.1 : 0) + ((sweetness > 7 && dryness > 7) ? -0.1 : 0) + ((strength > 7 && (versatility < 5 || ((sweetness + dryness) / 2) < 5)) ? -0.1 : 0);
   totalScore = Math.min(Math.max(totalScore, 0), 10);
 
   return totalScore;
-}
+};
 
-export const calculateAbv = (recipeSteps: { productIdQuantityInMilliliters: number, productProof: number}[], recipeTechniqueDescriptionId: number) => {
+export const calculateAbv = (recipeSteps: { productIdQuantityInMilliliters: number, productProof: number; }[], recipeTechniqueDescriptionId: number) => {
   // in ml
   let volume = recipeSteps.reduce(
-    (acc, {productIdQuantityInMilliliters}) =>
+    (acc, { productIdQuantityInMilliliters }) =>
       acc + productIdQuantityInMilliliters,
     0
   );
   let abv = recipeSteps.reduce(
-    (acc, {productProof, productIdQuantityInMilliliters}) => {
+    (acc, { productProof, productIdQuantityInMilliliters }) => {
       acc += (productProof / 2 / 100) * productIdQuantityInMilliliters;
       return acc;
     },
     0
   );
 
-  if (recipeTechniqueDescriptionId === 1) {
+  if(recipeTechniqueDescriptionId === 1) {
     volume += dilutionByStirred(abv / 100);
   } else {
     // TODO: we don't have a formula for dry shakes
