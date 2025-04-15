@@ -5,13 +5,13 @@ import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
 export const load = (async ({ locals, params }) => {
-  // if(!locals.user?.permissions.includes('edit_inventory')) {
-  //   error(StatusCodes.UNAUTHORIZED, {
-  //     reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-  //     code: StatusCodes.UNAUTHORIZED,
-  //     message: 'You do not have permission to access this resource.'
-  //   });
-  // }
+  if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_inventory')) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to access this resource.'
+    });
+  }
 
   const { id } = params;
   const product = await findInventoryItem(Number(id));
@@ -28,12 +28,12 @@ export const load = (async ({ locals, params }) => {
 export const actions = {
   edit: async ({ locals, request, params }) => {
 
-    // if(!locals.user?.permissions.includes('edit_inventory')) {
-    //   return fail(StatusCodes.UNAUTHORIZED, {
-    //     status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-    //     error: 'You do not have permission to access this resource.'
-    //   });
-    // }
+    if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_inventory')) {
+      return fail(StatusCodes.UNAUTHORIZED, {
+        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        error: 'You do not have permission to access this resource.'
+      });
+    }
 
     const productId = Number(params?.id || '');
     if(isNaN(productId)) {

@@ -65,14 +65,12 @@ export async function editUser(userId: string, username: string, email: string, 
         .update({
           username, email,
         });
-      console.log('insert', dbResult);
 
       dbResult = await db
         .table('userRole')
         .where({ userId })
         .del()
       
-      console.log('delete', dbResult);
 
       let subquery: any[] = roleIds.map(roleId => ({
         userId,
@@ -82,7 +80,6 @@ export async function editUser(userId: string, username: string, email: string, 
       dbResult = await db
         .table('userRole')
         .insert(subquery)
-        console.log('insert 2', dbResult);
 
       const queryResult = await getUser(userId);
       if(queryResult.status !== 'success') throw new Error(queryResult.error)

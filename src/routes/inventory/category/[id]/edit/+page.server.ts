@@ -4,13 +4,13 @@ import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
 export const load = (async ({ locals, params }) => {
-  // if(!locals.user?.permissions.includes('edit_category')) {
-  //   return error(StatusCodes.UNAUTHORIZED, {
-  //     reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-  //     code: StatusCodes.UNAUTHORIZED,
-  //     message: 'You do not have permission to access this resource.'
-  //   });
-  // }
+  if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_category')) {
+    return error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to access this resource.'
+    });
+  }
 
   // return {};
   const queryResult = await getCategory(Number(params.id));
@@ -32,12 +32,12 @@ export const load = (async ({ locals, params }) => {
 export const actions = {
   default: async ({ locals, request, params }) => {
 
-    // if(!locals.user?.permissions.includes('edit_category')) {
-    //   return fail(StatusCodes.UNAUTHORIZED, {
-    //     status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-    //     error: 'You do not have permission to access this resource.'
-    //   });
-    // }
+    if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_category')) {
+      return fail(StatusCodes.UNAUTHORIZED, {
+        status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+        error: 'You do not have permission to access this resource.'
+      });
+    }
     
 
     const formData = await request.formData();

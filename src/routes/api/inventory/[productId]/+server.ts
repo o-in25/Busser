@@ -5,19 +5,13 @@ import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 export const DELETE: RequestHandler = async ({ locals, params }) => {
 
-  const err: App.Error = {
-    reason: getReasonPhrase(400),
-    code: 400,
-    message: 'Niw allowed'
+  if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('delete_inventory')) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to perform this action.'
+    });
   }
-
-  // if(!locals.user?.permissions.includes('delete_inventory')) {
-  //   error(StatusCodes.UNAUTHORIZED, {
-  //     reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-  //     code: StatusCodes.UNAUTHORIZED,
-  //     message: 'You do not have permission to perform this action.'
-  //   });
-  // }
 
 
   if(!params?.productId) {

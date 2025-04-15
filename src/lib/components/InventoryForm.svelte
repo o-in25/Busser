@@ -31,7 +31,6 @@
 
   const permissions: string[] = getContext('permissions');
 
-  console.log(product)
   let slug = $page.params.id;
   let productName = product?.productName;
   let productPricePerUnit = product?.productPricePerUnit;

@@ -22,7 +22,6 @@
 	import {getContext} from 'svelte';
 	import {page} from '$app/stores';
 	import {goto} from '$app/navigation';
-	import {LoaderState} from 'svelte-infinite';
 	import { enhance } from '$app/forms';
 
 	export let data: PageData;
