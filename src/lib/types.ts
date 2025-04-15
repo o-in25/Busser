@@ -9,8 +9,8 @@ export type QueryResult<T = void> = {
 };
 
 export type Result<T> = {
-    data?: T,
-    error?: Error;
+  data?: T,
+  error?: Error;
 };
 
 
@@ -27,22 +27,22 @@ export type Product = {
   productImageUrl: string,
   categoryName: string,
   categoryDescription: string,
-  productDescription: string
-  productSweetnessRating: number
-  productDrynessRating: number
-  productVersatilityRating: number
-  productStrengthRating: number
+  productDescription: string;
+  productSweetnessRating: number;
+  productDrynessRating: number;
+  productVersatilityRating: number;
+  productStrengthRating: number;
 };
 
 export type Category = {
   categoryId: number,
   categoryName: string,
-  categoryDescription: string
-}
+  categoryDescription: string;
+};
 export type GallerySeeding = {
   src: string,
-  alt?: string
-}
+  alt?: string;
+};
 
 export type PaginationResult<T> = {
   data: T,
@@ -51,26 +51,26 @@ export type PaginationResult<T> = {
 
 export type PaginationData = {
   total: number,
-  lastPage: number, 
+  lastPage: number,
   prevPage: number,
   nextPage: number,
   currentPage: number,
   perPage: number,
   from: number,
   to: number,
-  pages?: Page[]
-}
+  pages?: Page[];
+};
 
 export type Page = {
   name: string,
   href: string,
-  active: boolean
-}
+  active: boolean;
+};
 
 export type SelectOption = {
   name: string,
-  value: string | number
-}
+  value: string | number;
+};
 
 export enum LogLevel {
   DEBUG = 1,
@@ -81,11 +81,11 @@ export enum LogLevel {
 }
 
 export type Log = {
-  logLevelId: LogLevel
+  logLevelId: LogLevel;
   logMessage: string,
   logDate: Date | string,
-  logStackTrace: string | null
-}
+  logStackTrace: string | null;
+};
 
 export type ComponentAction = 'add' | 'edit';
 
@@ -93,14 +93,14 @@ export type ProductDetail = {
   productDetailId?: number,
   productId: number,
   productImageUrl: string,
-  productImageUrlUploadId?: string
-}
+  productImageUrlUploadId?: string;
+};
 
 export type FormSubmitResult = {
   success?: Record<'message', string>;
-  error?: Record<'message', string>
-  args?: any
-}
+  error?: Record<'message', string>;
+  args?: any;
+};
 
 export type Notification = {
   success?: Record<'message', string> | null;
@@ -111,9 +111,9 @@ export type Spirit = {
   recipeCategoryId: number,
   recipeCategoryDescription: string,
   recipeCategoryDescriptionText: string,
-  recipeCategoryDescriptionImageUrl: string
+  recipeCategoryDescriptionImageUrl: string;
 
-}
+};
 
 export type BasicRecipe = {
   recipeId: number,
@@ -123,22 +123,22 @@ export type BasicRecipe = {
   recipeDescriptionImageUrl: string | null,
   recipeTechniqueDilutionPercentage: number,
   recipeTechniqueDescriptionText: string,
-  recipeCategoryDescription: string
-}
+  recipeCategoryDescription: string;
+};
 
 export type PreparationMethod = {
   recipeTechniqueDescriptionId: number,
-  recipeTechniqueDescriptionText: string, 
+  recipeTechniqueDescriptionText: string,
   recipeTechniqueDilutionPercentage: number;
-}
+};
 
 export type RecipeStep = {
   recipeStepId?: string,
   recipeId?: number,
   productId: number,
   productIdQuantityInMilliliters: number,
-  recipeStepDescription: string
-}
+  recipeStepDescription: string;
+};
 
 export namespace Table {
   export type Recipe = {
@@ -152,12 +152,12 @@ export namespace Table {
   export type RecipeDescription = {
     recipeDescriptionId?: number,
     recipeDescription: string | null,
-    recipeDescriptionImageUrl: string | null
+    recipeDescriptionImageUrl: string | null;
     recipeSweetnessRating: number,
-    recipeDrynessRating: number
-    recipeStrengthRating: number
-    recipeVersatilityRating: number
-  }
+    recipeDrynessRating: number;
+    recipeStrengthRating: number;
+    recipeVersatilityRating: number;
+  };
 
   export type RecipeStep = {
     recipeStepId?: number,
@@ -165,21 +165,21 @@ export namespace Table {
     productId: number,
     productIdQuantityInMilliliters: number,
     recipeStepDescription: string | null,
-    productIdQuantityUnit: string
-  }
+    productIdQuantityUnit: string;
+  };
 
   export type RecipeTechnique = {
     recipeTechniqueId?: number,
     recipeTechniqueDescriptionId: number,
     recipeId: number,
-    recipeTechniqueDilutionPercentage: number | null
-  }
+    recipeTechniqueDilutionPercentage: number | null;
+  };
 
   export type RecipeTechniqueDescription = {
     recipeTechniqueDescriptionId?: number,
     recipeTechniqueDescriptionText: string,
-    recipeTechniqueDilutionPercentage: number
-  }
+    recipeTechniqueDilutionPercentage: number;
+  };
 
   export type Category = {
     categoryId?: number,
@@ -194,7 +194,7 @@ export namespace Table {
   //   productIdQuantityInMilliliters, 
   //   recipeStepDescription
   // }
-  
+
 }
 
 export namespace View {
@@ -211,12 +211,12 @@ export namespace View {
     recipeTechniqueDilutionPercentage: number,
     recipeDescriptionImageUrl: string | null,
     recipeImageUrl: string | null,
-    recipeCategoryDescriptionImageUrl: string | null
+    recipeCategoryDescriptionImageUrl: string | null;
 
     recipeSweetnessRating: number,
-    recipeDrynessRating: number
-    recipeStrengthRating: number
-    recipeVersatilityRating: number
+    recipeDrynessRating: number;
+    recipeStrengthRating: number;
+    recipeVersatilityRating: number;
   };
 
   export type BasicRecipeStep = {
@@ -239,14 +239,14 @@ export namespace View {
 
     // TODO: do we need this?
     key?: string | number | null;
-  }
+  };
 
   export type BasicRecipeCategory = {
     recipeCategoryId: number,
     recipeCategoryDescriptionText: string | null,
     recipeCategoryDescription: string | null,
-    recipeCategoryDescriptionImageUrl: string | null
-  }
+    recipeCategoryDescriptionImageUrl: string | null;
+  };
 }
 
 
@@ -257,21 +257,21 @@ export namespace QueryRequest {
     recipeId?: number,
     recipeName: string,
     recipeCategoryId: number,
-    recipeDescription: string
-    recipeTechniqueDescriptionId: number
+    recipeDescription: string;
+    recipeTechniqueDescriptionId: number;
     recipeSweetnessRating: number,
-    recipeDrynessRating: number
-    recipeStrengthRating: number
-    recipeVersatilityRating: number
-  }
+    recipeDrynessRating: number;
+    recipeStrengthRating: number;
+    recipeVersatilityRating: number;
+  };
 
   export type RecipeSteps = {
     recipeStepId?: number,
     productId: number,
     productIdQuantityInMilliliters: number,
-    productIdQuantityUnit: string
-    recipeStepDescription: string
-  }
+    productIdQuantityUnit: string;
+    recipeStepDescription: string;
+  };
 
 }
 

@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
 export const load = (async ({ locals, params }) => {
-  if(!locals.user?.permissions.includes('edit_category')) {
+  if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_category')) {
     return error(StatusCodes.UNAUTHORIZED, {
       reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
       code: StatusCodes.UNAUTHORIZED,
@@ -32,13 +32,13 @@ export const load = (async ({ locals, params }) => {
 export const actions = {
   default: async ({ locals, request, params }) => {
 
-    if(!locals.user?.permissions.includes('edit_category')) {
+    if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_category')) {
       return fail(StatusCodes.UNAUTHORIZED, {
         status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
         error: 'You do not have permission to access this resource.'
       });
     }
-    
+
 
     const formData = await request.formData();
 
@@ -46,16 +46,16 @@ export const actions = {
       categoryId: Number(params.id),
       categoryDescription: formData.get('categoryDescription')?.toString() || '',
       categoryName: formData.get('categoryName')?.toString() || ''
-    })
+    });
 
     if(newData.status === 'error') {
       return fail(StatusCodes.INTERNAL_SERVER_ERROR, {
         status: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
         error: newData.error
-      })
+      });
     }
 
     return newData;
 
   }
-}
+};

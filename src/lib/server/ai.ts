@@ -13,21 +13,21 @@ export abstract class LlmClient<T> {
   }
 
   protected async invoke(prompt: string): Promise<T> {
-      const completion = await this.openai.beta.chat.completions.parse({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          },
-        ],
-        response_format: zodResponseFormat(this.schema, 'text')
-      });
-      
-      const structuredResult = completion.choices[0].message.parsed;
-      return structuredResult as T;
+    const completion = await this.openai.beta.chat.completions.parse({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        },
+      ],
+      response_format: zodResponseFormat(this.schema, 'text')
+    });
+
+    const structuredResult = completion.choices[0].message.parsed;
+    return structuredResult as T;
   }
-} 
+}
 
 export interface IGenerator<T> {
   generateContent(param: string): Promise<T>;

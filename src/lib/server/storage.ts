@@ -7,7 +7,7 @@ const { GOOGLE_SERVICE_KEY, BUCKET } = process.env;
 
 // const { GOOGLE_SERVICE_KEY, BUCKET } = env;
 const base64Encode = (str: string) => Buffer.from(str).toString('base64');
-const base64Decode = (str: string) => str? Buffer.from(str, 'base64').toString() : '{}'; 
+const base64Decode = (str: string) => str ? Buffer.from(str, 'base64').toString() : '{}';
 
 const { client_email, private_key } = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY || ''));
 const storage = new Storage({
@@ -34,8 +34,8 @@ export type Upload = {
 
 export type UploadResult = {
   status: 'success' | 'error',
-  message?: string
-}
+  message?: string;
+};
 
 
 export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> {
@@ -48,7 +48,7 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
     );
 
     if(!row?.name || !row?.bucket) {
-      throw Error('No upload record found for signed URL.')
+      throw Error('No upload record found for signed URL.');
     }
 
     await storage
@@ -56,30 +56,30 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
       .file(row.name)
       .delete();
 
-   const res = await db.table<Upload>('upload')
+    const res = await db.table<Upload>('upload')
       .where('name', row.name)
       .andWhere('bucket', row.bucket)
       .update('status', 'DELETED');
-    console.log(res)
+    console.log(res);
     return {
       status: 'success',
       message: `Signed URL ${signedUrl} successfully deleted.`
-    } satisfies UploadResult
+    } satisfies UploadResult;
   } catch(error: any) {
     console.error(error);
     Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
     return {
       status: 'error',
       message: `Could not delete signed URL ${signedUrl}. Check the logs for more details.`
-    } satisfies UploadResult
+    } satisfies UploadResult;
   }
 
 }
 
 export async function getSignedUrl(file: File, fileName: string = ''): Promise<string> {
   try {
-    const name = `${fileName || file.name}-${moment().format('MMDDYYYYSS')}`
-    const newFile = bucket.file(name)
+    const name = `${fileName || file.name}-${moment().format('MMDDYYYYSS')}`;
+    const newFile = bucket.file(name);
     const blob = await file.arrayBuffer();
     const data = Buffer.from(blob);
     await newFile.save(data, {

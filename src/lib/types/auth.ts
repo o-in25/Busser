@@ -6,7 +6,7 @@ import type { CookieSerializeOptions } from 'cookie';
 
 export type Session = {
   userId?: string;
-  opts: CookieSerializeOptions & {path: string};
+  opts: CookieSerializeOptions & { path: string; };
 };
 
 export type User = {
@@ -15,6 +15,26 @@ export type User = {
   email: string;
   lastActivityDate?: Date | string;
   // user control
-  roles: string[];
-  permissions: string[];
+  roles: Role[];
+  permissions: Permission[];
+};
+
+export type Permission = {
+  permissionId: string,
+  permissionName: string;
+};
+
+export type Role = {
+  roleId: string,
+  roleName: string;
+};
+
+export type UserRole = {
+  userId: string,
+  roleId: string;
+};
+
+export type RolePermission = {
+  roleId: string,
+  permissionId: string;
 };
