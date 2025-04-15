@@ -3,21 +3,18 @@ import type { RequestHandler } from './$types';
 import { deleteCatalogItem, deleteInventoryItem } from '$lib/server/core';
 import { StatusCodes } from 'http-status-codes';
 
-export const DELETE: RequestHandler = async ({ params }) => {
+export const DELETE: RequestHandler = async ({ params, locals }) => {
   let { recipeId } = params as any;
-
-  
-  if(!recipeId) {
+  if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('delete_catalog')) {
     return json({
-      error: { message: 'Catalog item item not found.'}
-    })
+      error: 'You do not have permission to perform this action.'
+    });
   }
-  recipeId = Number(recipeId);
 
 
-  if(isNaN(recipeId)) {
+  if(!recipeId || isNaN(Number(recipeId))) {
     return json({
-      error: { message: 'Invalid or malformed catalog ID.' }
+      error: 'No catalog item found for ID.'
     });
   }
 

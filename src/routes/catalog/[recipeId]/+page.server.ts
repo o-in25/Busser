@@ -1,6 +1,5 @@
 // import { generateImage } from '$lib/server/ai';
 import { getBasicRecipe } from '$lib/server/core';
-import { RecipeGenerator } from '$lib/server/generators/recipe-generator';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ request, params }) => {

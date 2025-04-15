@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ url }) => {
       console.log(response);
       return json(response);
     }
-    
+
     case '/api/select/products': {
       const response = await productSelect();
       return json(response);

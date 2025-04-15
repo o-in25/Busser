@@ -2,29 +2,26 @@ import { addToInventory } from '$lib/server/core';
 import type { Product, QueryResult } from '$lib/types';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import type { PageServerLoad } from './$types';
-import multer from 'multer';
 
-import { tmpdir } from 'os';
 import { error, fail } from '@sveltejs/kit';
 
 // const upload = multer({ dest: tmpdir() });
 
 export const load = (async ({ locals }) => {
-  if(!locals.user?.permissions.includes('add_inventory')) {
+  if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('add_inventory')) {
     error(StatusCodes.UNAUTHORIZED, {
       reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
       code: StatusCodes.UNAUTHORIZED,
       message: 'You do not have permission to access this resource.'
     });
   }
-  return {};
 }) satisfies PageServerLoad;
 
 
 export const actions = {
-  add: async({ locals, request }) => {
+  add: async ({ locals, request }) => {
 
-    if(!locals.user?.permissions.includes('add_inventory')) {
+    if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('add_inventory')) {
       return fail(StatusCodes.UNAUTHORIZED, {
         status: getReasonPhrase(StatusCodes.UNAUTHORIZED),
         error: 'You do not have permission to access this resource.'
@@ -52,7 +49,7 @@ export const actions = {
       productDrynessRating: parseFloat(formData.productDrynessRating.toString()),
       productVersatilityRating: parseFloat(formData.productVersatilityRating.toString()),
       productStrengthRating: parseFloat(formData.productStrengthRating.toString())
-    } satisfies Product, file)    
+    } satisfies Product, file);
 
 
     if(newItem.status === 'error') {

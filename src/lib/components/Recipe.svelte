@@ -7,20 +7,23 @@
 		P,
 		Badge,
 		ScoreRating,
-		Accordion,
-		AccordionItem,
 		Skeleton,
-		Label,
 	} from 'flowbite-svelte';
-	import { EditOutline, HeartOutline } from 'flowbite-svelte-icons';
+	import { EditOutline } from 'flowbite-svelte-icons';
 	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
-	import { calculateAbv, calculateOverallScore, convertFromMl } from '$lib/math';
+	import {
+		calculateAbv,
+		calculateOverallScore,
+		convertFromMl,
+	} from '$lib/math';
 	import type { RecipeGeneratorSchema } from '$lib/server/generators/recipe-generator';
-	import { onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 
 	export let recipe: View.BasicRecipe;
 	export let recipeSteps: View.BasicRecipeStep[];
+	const permissions: string[] = getContext('permissions') || [];
+
 	let content: RecipeGeneratorSchema;
 
 	let steps = recipeSteps.map(step => ({ ...step, checked: false }));
@@ -139,101 +142,113 @@
 		<!-- col 2 -->
 		<div class="lg:col-span-2 col-start-1 md:row-start-2 row-start-5">
 			<div class="my-4">
-        <Heading tag="h5" class="mb-4 block md:inline-block border-b-4 border-primary-500 rounded-sm pb-1 md:!w-auto">Verdict</Heading>
+				<Heading
+					tag="h5"
+					class="mb-4 block md:inline-block border-b-4 border-primary-500 rounded-sm pb-1 md:!w-auto"
+				>
+					Verdict
+				</Heading>
 
-        <ScoreRating
-          headerLabel={{
-            desc1,
-            desc2,
-            desc3,
-            link: {
-              label: '',
-              url: '',
-            },
-          }}
-          ratings={[
-            { label: 'Sweetness', rating: recipe.recipeSweetnessRating },
-            { label: 'Dryness', rating: recipe.recipeDrynessRating },
-          ]}
-          ratings2={[
-            { label: 'Strength', rating: recipe.recipeStrengthRating },
-            { label: 'Versatility', rating: recipe.recipeVersatilityRating },
-          ]}
-          desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
-          desc2Class="ms-2 w-24 font-medium text-gray-900 dark:text-white me-2"
-        />
-      </div>
+				<ScoreRating
+					headerLabel={{
+						desc1,
+						desc2,
+						desc3,
+						link: {
+							label: '',
+							url: '',
+						},
+					}}
+					ratings={[
+						{ label: 'Sweetness', rating: recipe.recipeSweetnessRating },
+						{ label: 'Dryness', rating: recipe.recipeDrynessRating },
+					]}
+					ratings2={[
+						{ label: 'Strength', rating: recipe.recipeStrengthRating },
+						{ label: 'Versatility', rating: recipe.recipeVersatilityRating },
+					]}
+					desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
+					desc2Class="ms-2 w-24 font-medium text-gray-900 dark:text-white me-2"
+				/>
+			</div>
 		</div>
 		<!-- col 3 -->
-		<div class="col-span-2 md:col-span-1 lg:col-span-2 col-start-1 md:row-start-3 row-start-6">
+		<div
+			class="col-span-2 md:col-span-1 lg:col-span-2 col-start-1 md:row-start-3 row-start-6"
+		>
 			<div class="my-4">
-        {#if !content}
-          <Skeleton
-            size="sm"
-            divClass="!max-w-full"
-          />
-        {:else}
-          <P>{content.description}</P>
-        {/if}
-      </div>
+				{#if !content}
+					<Skeleton
+						size="sm"
+						divClass="!max-w-full"
+					/>
+				{:else}
+					<P>{content.description}</P>
+				{/if}
+			</div>
 		</div>
 		<!-- col 4 -->
 		<!-- col 5 -->
 
-		<div
-			class="col-start-1 md:col-start-2 md:row-start-1"
-		>
+		<div class="col-start-1 md:col-start-2 md:row-start-1">
 			<div class="my-4">
-        <Heading>
-          {recipe.recipeName}
-        </Heading>
-        <div class="mt-4 flex flex-wrap items-start gap-4 justify-between">
-          <Badge class="text-xl font-semibold">
-            {recipe.recipeCategoryDescription}
-          </Badge>
-        </div>
-        <!-- actions -->
-        <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-          <Button
-            color="alternative"
-            href="/catalog/{recipe.recipeId}/edit"
-          >
-            <EditOutline />
-            <span class="ms-2">Edit</span>
-          </Button>
-          <Button color="primary">
+				<Heading>
+					{recipe.recipeName}
+				</Heading>
+				<div class="mt-4 flex flex-wrap items-start gap-4 justify-between">
+					<Badge class="text-xl font-semibold">
+						{recipe.recipeCategoryDescription}
+					</Badge>
+				</div>
+				<!-- actions -->
+				<div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
+					{#if permissions.includes('catalog_edit')}
+						<Button
+							color="alternative"
+							href="/catalog/{recipe.recipeId}/edit"
+						>
+							<EditOutline />
+							<span class="ms-2">Edit</span>
+						</Button>
+					{/if}
+					<!-- <Button color="primary" disabled>
             <HeartOutline />
             <span class="ms-2">Add to favorites</span>
-          </Button>
-        </div>
-        <p class="my-4 text-gray-500 dark:text-gray-400">
-          {recipe.recipeDescription}
-        </p>
-      </div>
+          </Button> -->
+				</div>
+				<p class="my-4 text-gray-500 dark:text-gray-400">
+					{recipe.recipeDescription}
+				</p>
+			</div>
 		</div>
 		<!-- col 6 -->
 		<div
 			class="md:row-span-2 col-start-1 md:col-start-2 lg:col-start-3 row-start-4 md:row-start-2 lg:row-start-1"
 		>
-			<div class="my-4 ">
-        <Heading tag="h5" class="mb-4 block md:inline-block border-b-4 border-primary-500 rounded-sm pb-1 md:!w-auto">Steps</Heading>
-        <ul
-          class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600"
-        >
-          {#each steps as recipeStep, step}
-            <li>
-              <Checkbox
-                class="p-3"
-                bind:checked={steps[step].checked}
-              >
-                <span class={recipeStep.checked ? 'line-through' : ''}>
-                  {`Add ${convertFromMl(recipeStep.productIdQuantityUnit, recipeStep.productIdQuantityInMilliliters)} ${recipeStep.productIdQuantityUnit} of ${recipeStep.categoryName}`}
-                </span>
-              </Checkbox>
-            </li>
-          {/each}
-        </ul>
-      </div>
+			<div class="my-4">
+				<Heading
+					tag="h5"
+					class="mb-4 block md:inline-block border-b-4 border-primary-500 rounded-sm pb-1 md:!w-auto"
+				>
+					Steps
+				</Heading>
+				<ul
+					class=" bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600 divide-y divide-gray-200 dark:divide-gray-600"
+				>
+					{#each steps as recipeStep, step}
+						<li>
+							<Checkbox
+								class="p-3"
+								bind:checked={steps[step].checked}
+							>
+								<span class={recipeStep.checked ? 'line-through' : ''}>
+									{`Add ${convertFromMl(recipeStep.productIdQuantityUnit, recipeStep.productIdQuantityInMilliliters)} ${recipeStep.productIdQuantityUnit} of ${recipeStep.categoryName}`}
+								</span>
+							</Checkbox>
+						</li>
+					{/each}
+				</ul>
+			</div>
 		</div>
 	</div>
 </section>

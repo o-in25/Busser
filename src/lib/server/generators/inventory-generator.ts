@@ -14,7 +14,7 @@ export class InventoryGenerator extends LlmClient<InventoryGeneratorSchema> impl
 
 
   async generateContent(param: string): Promise<InventoryGeneratorSchema> {
-    const prompt = `Provide me a brief product description of ${param}. `
+    const prompt = `Provide me a brief product description of ${param}. `;
     const result = await super.invoke(prompt);
     return result;
   }
