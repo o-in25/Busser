@@ -31,6 +31,7 @@
   import { notificationStore } from "../../stores";
 	import Prompt from "./Prompt.svelte";
 	import { convertFromMl, convertToMl } from "$lib/math";
+	import { getContext } from "svelte";
 
 
   // const ML_TO_OZ = 29.5735
@@ -40,6 +41,7 @@
   export let preparationMethods: PreparationMethod[];
   export let recipe: View.BasicRecipe = {} as View.BasicRecipe;
   export let recipeSteps: View.BasicRecipeStep[] = [];
+  const permissions: string[] = getContext('permissions') || [];
 
   // recipe model
   recipeSteps = recipeSteps.map((step) => ({ ...step, productIdQuantityInMilliliters: convertFromMl(step.productIdQuantityUnit, step.productIdQuantityInMilliliters), key: uuidv4() }));
@@ -285,27 +287,29 @@
       </div>
     </fieldset>
 
-    <!-- submit -->
-    <div class="md:flex md:flex-row-reverse">
+    <div class="md:flex justify-end">
+      <!-- submit -->
       <div class="my-4 md:mr-4">
-        {#if recipe.recipeId}
+        {#if recipe.recipeId && permissions.includes('delete_catalog')}
           <Button
             class="w-full md:w-32"
             type="button"
             size="xl"
             color="red"
+            outline
             on:click={() => modalOpen = true}>
             Delete
           </Button>
         {/if}
       </div>
       <!-- delete -->
-      <div class="my-4 md:mr-4">
+      <div class="my-4 md:mr-4 order-2">
         <Button class="w-full md:w-32" type="submit" size="xl" {disabled}>
           Save
         </Button>
-        </div>
       </div>
+            
+    </div>
   </form>
     {#if recipe.recipeId}
       <Modal title="Confirm Delete" bind:open={modalOpen} autoclose>

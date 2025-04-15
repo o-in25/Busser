@@ -198,15 +198,15 @@
     <input type="hidden" value={productDetailId}>
 
     <!-- submit -->
-    <div class="md:flex md:flex-row">
-      <div class="my-4 md:mr-4">
-        <Button type="submit" size="lg">Save</Button>
-      </div>
+    <div class="md:flex justify-end">
       {#if action === 'edit' && permissions.includes('delete_inventory')}
-        <div class="my-4">
-          <Button type="button" size="lg" color="red" on:click={openModal}>Delete</Button>
+        <div class="my-4 md:mr-4">
+          <Button class="w-full md:w-32" type="button" size="xl" color="red" on:click={openModal}>Delete</Button>
         </div>
       {/if}
+      <div class="my-4 md:mr-4 order-2">
+        <Button class="w-full md:w-32" type="submit" size="xl">Save</Button>
+      </div>
     </div>
   </form>
   <Modal title="Confirm Delete" bind:open={modalOpen} autoclose>

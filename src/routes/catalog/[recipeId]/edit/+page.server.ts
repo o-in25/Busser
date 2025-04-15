@@ -1,12 +1,20 @@
 // import { generateImage } from '$lib/server/ai';
 import { getPreparationMethods, getBasicRecipe, getSpirits, updateCatalog } from '$lib/server/core';
 import type { FormSubmitResult } from '$lib/types';
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { deleteSignedUrl } from '$lib/server/storage';
-import { StatusCodes } from 'http-status-codes';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-export const load = (async ({ params }) => {
+export const load = (async ({ params, locals }) => {
+  if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_catalog')) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'You do not have permission to access this resource.'
+    });
+  }
+
   const { recipeId } = params;
   const spirits = await getSpirits();
   const preparationMethods = await getPreparationMethods();
@@ -41,13 +49,17 @@ export const load = (async ({ params }) => {
 // if oz -> convert ml to oz
 
 export const actions = {
-  default: async ({ request, params }) => {
+  default: async ({ request, params, locals }) => {
+
+    if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_catalog')) {
+      return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'You do not have permission to perform this action.'});
+    }
+
+
     let formData: any = Object.fromEntries(await request.formData());
     let { recipeImageUrl, recipeSteps, ...payload } = formData;
     const { recipeImageUrl: file } = formData as { recipeImageUrl: File; };
 
-
-    console.log(payload)
     const recipe = {
       ...payload,
       recipeId: params.recipeId,
