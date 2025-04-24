@@ -325,6 +325,7 @@
 			{#if action === 'edit' && permissions.includes('delete_inventory')}
 				<div class="my-4 md:mr-4">
 					<Button
+            outline
 						class="w-full md:w-32"
 						type="button"
 						size="xl"

@@ -99,7 +99,7 @@
 	method="GET"
 	action="/catalog/browse"
 >
-	<div class="px-4 py-2 md:py-4">
+	<div class="md:px-4 py-2 md:py-4">
 		<div class="flex my-2">
 			<div class="relative">
 				<Button

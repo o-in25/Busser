@@ -104,7 +104,7 @@
 		></Input>
 		{#if actionUrl && (!grant || (grant && permissions.includes(grant)))}
 			<Button
-				color="purple"
+				color="primary"
 				href="/inventory/category/add"
 			>
 				<PlusOutline />

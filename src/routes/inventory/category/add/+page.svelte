@@ -25,6 +25,6 @@
 	New Inventory Category
 </Heading>
 
-<div class="px-4 py-2 md:py-4">
+<div class="md:px-4 py-2 md:py-4">
 	<CategoryForm />
 </div>

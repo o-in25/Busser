@@ -202,7 +202,7 @@
 				</div>
 				<!-- actions -->
 				<div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-					{#if permissions.includes('catalog_edit')}
+					{#if permissions.includes('edit_catalog')}
 						<Button
 							color="alternative"
 							href="/catalog/{recipe.recipeId}/edit"

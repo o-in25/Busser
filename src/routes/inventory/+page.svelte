@@ -23,10 +23,11 @@
 		Inventory
 	</Heading>
 </div>
-<div class="px-4 py-2 md:py-4">
+<div class="md:px-4 py-2 md:py-4">
 	<InventoryTable
 		products={result.data}
 		paginationData={result.pagination}
+    tableData={data.args.tableData}
 	></InventoryTable>
 </div>
 

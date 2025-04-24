@@ -20,8 +20,9 @@
 	} from 'flowbite-svelte-icons';
 	import { weightedMean } from '$lib/math';
 	import { getContext } from 'svelte';
-	export let product: Product;
 
+	export let product: Product;
+  export let isBaseSpirit: boolean;
 	let headerLabel = {
 		desc1: '8.7',
 		desc2: 'Excellent',
@@ -129,24 +130,6 @@
 	const setPopoverData = ({ categoryName, categoryDescription }) => {
 		popoverData = { categoryName, categoryDescription };
 	};
-
-	const isBaseSpirit = (categoryName: string) => {
-		// TODO: this should come from the row
-		// and not hardcoded here like a lazy asshole
-		let spirits = [
-			'gin',
-			'whiskey',
-			'tequila',
-			'rum',
-			'vodka',
-			'brandy',
-			'cognac',
-			'mezcal',
-		];
-
-		spirits = spirits.map(item => ` ${item}`);
-		return spirits.some(item => categoryName.toLowerCase().includes(item));
-	};
 </script>
 
 <!-- "grid gap-6 mb-6 md:grid-cols-2 -->
@@ -188,7 +171,7 @@
 							</Secondary>
 							<!-- tags -->
 							<div>
-								{#if isBaseSpirit(product.categoryName)}<Badge class="my-1">
+								{#if isBaseSpirit}<Badge class="my-1">
 										Base Spirit
 									</Badge>{/if}
 								{#if product.productInStockQuantity < 1}<Badge
@@ -212,7 +195,7 @@
 					</div>
 
 					<!-- score -->
-					{#if isBaseSpirit(product.categoryName)}
+					{#if isBaseSpirit}
 						<div class="py-4">
 							<ScoreRating
 								desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
@@ -263,7 +246,7 @@
 							</button>
 						</Secondary>
 					</Heading>
-					{#if isBaseSpirit(product.categoryName)}<Badge class="my-1">
+					{#if isBaseSpirit}<Badge class="my-1">
 							Base Spirit
 						</Badge>{/if}
 					{#if product.productInStockQuantity < 1}<Badge class="my-1">
@@ -274,7 +257,7 @@
 					>
 						{product.productDescription || product.categoryDescription}
 					</p>
-					{#if isBaseSpirit(product.categoryName)}
+					{#if isBaseSpirit}
 						<hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
 						<div class="px-2 md:pb-4">
 							<ScoreRating

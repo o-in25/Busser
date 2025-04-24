@@ -1,6 +1,6 @@
 <!-- TODO dispatch and handle in page file -->
 <script lang="ts">
-	import type { PaginationData, Product } from '$lib/types';
+	import type { PaginationData, Product, Spirit } from '$lib/types';
 	import {
 		Table,
 		TableBody,
@@ -19,6 +19,7 @@
 		DropdownItem,
 	} from 'flowbite-svelte';
 	import {
+	CheckOutline,
 		ChevronDownOutline,
 		ChevronLeftOutline,
 		ChevronRightOutline,
@@ -35,7 +36,7 @@
 
 	export let products: Product[];
 	export let paginationData: PaginationData;
-
+  export let tableData: Spirit[];
 	const permissions: string[] = getContext('permissions');
 
 	let openRow: number | null;
@@ -77,8 +78,8 @@
 	$: urlParams_$ = $page.url.searchParams;
 	let searchTerm = $page.url.searchParams.get('productName') || '';
 	let direction: 'asc' | 'desc' | null;
-
 	let form: HTMLFormElement;
+  const regex = new RegExp(`\\b(${tableData.map(({ recipeCategoryDescription }) => recipeCategoryDescription.toLowerCase()).join('|')})\\b`, 'i');
 	$: {
 		if (!activeUrl) {
 			const [first] = pages;
@@ -105,6 +106,8 @@
 		});
 		goto(`/${route}?${urlParams.toString()}`);
 	};
+
+	const isBaseSpirit = (categoryName: string) => regex.test(categoryName);
 </script>
 
 <form
@@ -231,7 +234,7 @@
 			>
 				Status
 			</TableHeadCell>
-			<TableHeadCell class="hidden sm:table-cell">Strength</TableHeadCell>
+			<TableHeadCell class="hidden sm:table-cell text-center">Base Spirit</TableHeadCell>
 		</TableHead>
 
 		<!-- body -->
@@ -270,18 +273,14 @@
 					<TableBodyCell
 						tdClass="hidden sm:table-cell sm:px-6 sm:py-4 sm:whitespace-nowrap"
 					>
-						{#if product.productProof < 1}
-							<!-- <Progressbar progress="{product.productProof / 2}" /> -->
-							<Badge
-								rounded
-								color="dark"
-								class="w-full h-auto"
-							>
-								N/A
-							</Badge>
-						{:else}
-							<Progressbar progress={product.productProof / 2} />
-						{/if}
+          {#if isBaseSpirit(product.categoryName)}
+          <div class="flex">
+            <Badge rounded large class="!p-1 !font-semibold !mx-auto">
+              <CheckOutline class="h-3 w-3 text-primary-800 dark:text-primary-400" />
+              <span class="sr-only">Icon description</span>
+            </Badge>
+          </div> 
+        {/if}
 					</TableBodyCell>
 				</TableBodyRow>
 
@@ -303,7 +302,7 @@
 								class="px-3 py-3"
 								transition:slide={{ duration: 300, axis: 'y' }}
 							>
-								<InventoryItem {product}></InventoryItem>
+								<InventoryItem {product} isBaseSpirit={isBaseSpirit(product.categoryName)}></InventoryItem>
 							</div>
 						</TableBodyCell>
 					</TableBodyRow>

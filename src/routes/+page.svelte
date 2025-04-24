@@ -62,6 +62,8 @@
 			// setTimeout(() => (loading = false), 350)
 		}
 	};
+
+  const hasAny = (sortBy: number) => gallery.filter((item: any) => item.data.recipeCategoryId === sortBy).length < 1;
 </script>
 
 <svelte:head>
@@ -145,6 +147,7 @@
 			size="sm"
 			outline={!(sortBy === spirit.recipeCategoryId)}
 			on:click={() => setFilterType(spirit.recipeCategoryId)}
+      disabled={hasAny(spirit.recipeCategoryId)}
 		>
 			{spirit.recipeCategoryDescription}
 		</Button>
