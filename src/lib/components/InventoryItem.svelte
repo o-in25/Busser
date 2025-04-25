@@ -26,7 +26,7 @@
 	let headerLabel = {
 		desc1: '8.7',
 		desc2: 'Excellent',
-		desc3: '',
+		desc3: product.productProof > 0? `${product.productProof} Proof` : '',
 		link: {
 			label: 'Read all reviews',
 			url: '/',
@@ -169,24 +169,11 @@
 									/>
 								</button>
 							</Secondary>
-							<!-- tags -->
-							<div>
-								{#if isBaseSpirit}<Badge class="my-1">
-										Base Spirit
-									</Badge>{/if}
-								{#if product.productInStockQuantity < 1}<Badge
-										class="my-1"
-										color="red"
-									>
-										Out of Stock
-									</Badge>{/if}
-								<!-- {#if product.productInStockQuantity < 1}<Badge class="my-1" color="red">{product.productPricePerUnit}</Badge>{/if} -->
-							</div>
 						</Heading>
 					</div>
 
 					<!-- desc -->
-					<div class="py-4">
+					<div class="xs:py-4 sm:py-2 md:py-2 lg:py-1">
 						<p
 							class="my-1 font-normal text-gray-700 dark:text-gray-400 leading-tight"
 						>
@@ -225,7 +212,7 @@
 			</Card>
 		</div>
 		<!-- mobile only -->
-		<div class="sm:hidden flex justify-center px-2 py-4 md:pb-4 w-full">
+		<div class="sm:hidden flex justify-center px-2 py-4 md:py-2 md:pb-4 w-full">
 			<Card
 				img={product.productImageUrl || placeholder}
 				size="md"
@@ -246,12 +233,14 @@
 							</button>
 						</Secondary>
 					</Heading>
-					{#if isBaseSpirit}<Badge class="my-1">
-							Base Spirit
-						</Badge>{/if}
-					{#if product.productInStockQuantity < 1}<Badge class="my-1">
-							Out of Stock
-						</Badge>{/if}
+					<div class="inline-block md:hidden">
+            {#if isBaseSpirit}
+              <Badge class="my-1" color="dark">Base Spirit</Badge>
+            {/if}
+            {#if product.productInStockQuantity < 1}
+              <Badge class="my-1">Out of Stock</Badge>
+            {/if}
+          </div>
 					<p
 						class="my-3 font-normal text-gray-700 dark:text-gray-400 leading-tight"
 					>
