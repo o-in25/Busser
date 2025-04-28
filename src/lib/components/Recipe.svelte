@@ -16,6 +16,7 @@
 		calculateAbv,
 		calculateOverallScore,
 		convertFromMl,
+		getUnits,
 	} from '$lib/math';
 	import type { RecipeGeneratorSchema } from '$lib/server/generators/recipe-generator';
 	import { getContext, onMount } from 'svelte';
@@ -107,6 +108,11 @@
 	};
 
 	const { desc1, desc2, desc3, style } = getScore();
+
+  const getStepDescription = (unit, quantity, category) => {
+    const units = getUnits();
+    return `Add ${convertFromMl(unit, quantity)} ${units[unit].i18n(quantity)} of ${category}`;
+  }
 
 	// fetch generated content on load
 	onMount(async () => {
@@ -242,7 +248,7 @@
 								bind:checked={steps[step].checked}
 							>
 								<span class={recipeStep.checked ? 'line-through' : ''}>
-									{`Add ${convertFromMl(recipeStep.productIdQuantityUnit, recipeStep.productIdQuantityInMilliliters)} ${recipeStep.productIdQuantityUnit} of ${recipeStep.categoryName}`}
+                  {getStepDescription(recipeStep.productIdQuantityUnit, recipeStep.productIdQuantityInMilliliters, recipeStep.categoryName)}
 								</span>
 							</Checkbox>
 						</li>

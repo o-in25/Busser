@@ -58,7 +58,7 @@
 	// };
 
 	let searchTerm = $page.url.searchParams.get('searchTerm') || '';
-
+  
 	const handleDropdownOpen = (category: string) => {
 		filterField = category;
 		dropdownOpen = false;
@@ -98,6 +98,18 @@
 <form
 	method="GET"
 	action="/catalog/browse"
+  on:submit|preventDefault={() => {
+
+		// let url = '/inventory';
+		// if (searchTerm !== '') {
+		// 	url = url.concat('?', `productName=${searchTerm}`);
+		// 	url = url.concat('&', `page=1`);
+		// } else {
+		// 	url = url.concat('?', `page=1`);
+		// }
+		// searchTerm = searchTerm;
+		// goto(url, { replaceState: true, invalidateAll: true });
+	}}
 >
 	<div class="md:px-4 py-2 md:py-4">
 		<div class="flex my-2">
@@ -112,7 +124,7 @@
 				<Dropdown
 					classContainer="w-40 backdrop-blur-md bg-zinc-200/50 dark:bg-zinc-900/30 border border-zinc-300/30 dark:border-zinc-700/40 shadow-lg rounded-xl p-4"
 					bind:open={openDropdown}
-					activeUrl={'/inventory'}
+					activeUrl={'/catalog/browse'}
 				>
 					<div
 						slot="header"
@@ -123,7 +135,7 @@
 						</span>
 					</div>
 					<DropdownItem
-						href="/inventory"
+						href="/catalog/browse"
 						on:click={() => (openDropdown = false)}
 						class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30"
 						activeClass="bg-primary-500/20 dark:bg-primary-500/30"
@@ -131,20 +143,12 @@
 						All
 					</DropdownItem>
 					<DropdownItem
-						href="/inventory?productInStockQuantity=0"
+						href="/catalog/browse?productInStockQuantity=1"
 						on:click={() => (openDropdown = false)}
 						class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30"
 						activeClass="bg-primary-500/20 dark:bg-primary-500/30"
 					>
-						Out of Stock
-					</DropdownItem>
-					<DropdownItem
-						href="/inventory?productInStockQuantity=1"
-						on:click={() => (openDropdown = false)}
-						class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30"
-						activeClass="bg-primary-500/20 dark:bg-primary-500/30"
-					>
-						In Stock
+						Available
 					</DropdownItem>
 				</Dropdown>
 			</div>

@@ -17,10 +17,10 @@ export const dilutionByStirred = (abv: number) => -1.21 * Math.pow(abv, 2) + 1.2
 export const dilutionByShaken = (abv: number) => 1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;
 
 const units = {
-  'ml': { toMl: 1, fromMl: (ml) => ml },
-  'oz': { toMl: 30, fromMl: (ml: number) => ml / 30 },
-  'dash': { toMl: 0.92, fromMl: (ml: number) => ml / 0.92 },
-  'cube': { toMl: 2.5, fromMl: (ml: number) => ml / 2.5 },
+  'ml': { toMl: 1, fromMl: (ml) => ml, i18n: (qty: number) => (qty === 1? 'ml' : 'ml') },
+  'oz': { toMl: 30, fromMl: (ml: number) => ml / 30, i18n: (qty: number) => (qty === 1? 'oz' : 'oz') },
+  'dash': { toMl: 0.92, fromMl: (ml: number) => Math.round( ml / 0.92), i18n: (qty: number) => (Math.round(qty) === 1? 'dash' : 'dashes')},
+  'cube': { toMl: 2.5, fromMl: (ml: number) => ml / 2.5, i18n: (qty: number) => (qty === 1? 'cube' : 'cubes')},
 };
 
 export const weightedMean = (arrValues: number[], arrWeights: number[]) => {
@@ -82,3 +82,4 @@ export const calculateAbv = (recipeSteps: { productIdQuantityInMilliliters: numb
 
 export const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
 export const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);
+export const getUnits = () => units;
