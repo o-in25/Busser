@@ -2,3 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+input[type="range"]::-webkit-slider-thumb {
+  background-color: #e5195f; /* primary-600 */
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  background-color: #c10f50; /* primary-700 */
+}
+
+input[type="range"]::-moz-range-thumb {
+  background-color: #e5195f; /* primary-600 */
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+  background-color: #c10f50; /* primary-700 */
+}

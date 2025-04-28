@@ -201,6 +201,7 @@
 					/>
 					<!-- <div slot="right" class="font-bold">%</div> -->
 				</Input>
+        
 			</div>
 		</div>
 		<div class="grid gap-6 mb-6 md:grid-cols-2">
@@ -218,7 +219,7 @@
 					>
 						Sweetness
 					</Label>
-					<Range
+					<!-- <Range
 						id="productSweetnessRating"
 						name="productSweetnessRating"
 						size="lg"
@@ -226,7 +227,9 @@
 						min="0"
 						max="10"
 						step="0.1"
-					/>
+					/> -->
+          <input bind:value={productSweetnessRating} type="range" id="productSweetnessRating" name="productSweetnessRating" min="0" max="10" step="0.1" class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg">
+
 					<!-- <Helper class="text-xs">
             We’ll never share your details. Read our <a href="/" class="font-medium text-primary-600 hover:underline dark:text-primary-500"> Privacy Policy </a>
             .
@@ -239,7 +242,7 @@
 					>
 						Dryness
 					</Label>
-					<Range
+					<!-- <Range
 						id="productDrynessRating"
 						name="productDrynessRating"
 						size="lg"
@@ -247,7 +250,8 @@
 						min="0"
 						max="10"
 						step="0.1"
-					/>
+					/> -->
+          <input bind:value={productDrynessRating} type="range" id="productDrynessRating" name="productDrynessRating" min="0" max="10" step="0.1" class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg">
 				</div>
 				<div class="mt-4">
 					<Label
@@ -256,7 +260,8 @@
 					>
 						Versatility
 					</Label>
-					<Range
+					<!-- <Range
+            class="custom-range"  
 						id="productVersatilityRating"
 						name="productVersatilityRating"
 						size="lg"
@@ -264,7 +269,9 @@
 						min="0"
 						max="10"
 						step="0.1"
-					/>
+					/> -->
+          <input bind:value={productVersatilityRating} type="range" id="productVersatilityRating" name="productVersatilityRating" min="0" max="10" step="0.1" class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg">
+
 				</div>
 				<div class="mt-4">
 					<Label
@@ -273,7 +280,7 @@
 					>
 						Strength
 					</Label>
-					<Range
+					<!-- <Range
 						id="productStrengthRating"
 						name="productStrengthRating"
 						size="lg"
@@ -281,7 +288,9 @@
 						min="0"
 						max="10"
 						step="0.1"
-					/>
+					/> -->
+          <input bind:value={productStrengthRating} type="range" id="productStrengthRating" name="productStrengthRating" min="0" max="10" step="0.1" class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg">
+
 				</div>
 				<div class="mt-4 float-right">
 					<input
@@ -374,3 +383,6 @@
 		</svelte:fragment>
 	</Modal>
 </div>
+<style>
+
+</style>

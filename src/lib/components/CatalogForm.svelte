@@ -236,19 +236,24 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="mt-4">
           <Label for="recipeSweetnessRating" class="mb-2">Sweetness</Label>
-          <Range id="recipeSweetnessRating" name="recipeSweetnessRating" size="lg" bind:value={recipe.recipeSweetnessRating} min="0" max="10" step="0.1"/>
+          <input bind:value={recipe.recipeSweetnessRating} type="range" id="recipeSweetnessRating" name="recipeSweetnessRating" min="0" max="10" step="0.1" class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg">
+
+          <!-- <Range id="recipeSweetnessRating" name="recipeSweetnessRating" size="lg" bind:value={recipe.recipeSweetnessRating} min="0" max="10" step="0.1"/> -->
         </div>
         <div class="mt-4">
           <Label for="recipeDrynessRating" class="mb-2">Dryness</Label>
-          <Range id="recipeDrynessRating" name="recipeDrynessRating" size="lg" bind:value={recipe.recipeDrynessRating} min="0" max="10" step="0.1" />
+          <input bind:value={recipe.recipeDrynessRating} type="range" id="recipeDrynessRating" name="recipeDrynessRating" min="0" max="10" step="0.1" class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg">
+          <!-- <Range id="recipeDrynessRating" name="recipeDrynessRating" size="lg" bind:value={recipe.recipeDrynessRating} min="0" max="10" step="0.1" /> -->
         </div>
         <div class="mt-4">
           <Label for="recipeVersatilityRating" class="mb-2">Versatility</Label>
-          <Range id="recipeVersatilityRating" name="recipeVersatilityRating" size="lg" bind:value={recipe.recipeVersatilityRating} min="0" max="10" step="0.1"/>
+          <input bind:value={recipe.recipeVersatilityRating} type="range" id="recipeVersatilityRating" name="recipeVersatilityRating" min="0" max="10" step="0.1" class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg">
+          <!-- <Range id="recipeVersatilityRating" name="recipeVersatilityRating" size="lg" bind:value={recipe.recipeVersatilityRating} min="0" max="10" step="0.1"/> -->
         </div>
         <div class="mt-4">
           <Label for="recipeStrengthRating" class="mb-2">Strength</Label>
-          <Range id="recipeStrengthRating" name="recipeStrengthRating" size="lg" bind:value={recipe.recipeStrengthRating} min="0" max="10" step="0.1" />
+          <input bind:value={recipe.recipeStrengthRating} type="range" id="recipeStrengthRating" name="recipeStrengthRating" min="0" max="10" step="0.1" class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg">
+          <!-- <Range id="recipeStrengthRating" name="recipeStrengthRating" size="lg" bind:value={recipe.recipeStrengthRating} min="0" max="10" step="0.1" /> -->
         </div>
       </div>
     </fieldset>
