@@ -444,7 +444,7 @@ export async function deleteInventoryItem(
 
 export async function getSpirits(): Promise<Array<Spirit>> {
   try {
-    const dbResult = await db.table<Spirit>("spirits");
+    const dbResult = await db.table<Spirit>("spirits").select().orderBy('recipeCategoryDescription');
     const result = marshal<Spirit>(dbResult);
     return result;
   } catch(error) {

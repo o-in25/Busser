@@ -42,8 +42,10 @@
 		({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1
 	);
 	$: value =
-		items.find(
-			({ name }) => name.toLowerCase() === selectValue.toLocaleLowerCase()
+  search.find(
+			({ name }) => {
+        return name.toLowerCase().trim() === selectValue.toLocaleLowerCase().trim()
+      }
 		)?.value ||
 		value ||
 		null;
