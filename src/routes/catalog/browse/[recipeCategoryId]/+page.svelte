@@ -15,6 +15,7 @@
 	name="Catalog"
 	href="/catalog"
 >
+<BreadcrumbItem name="Browse" href="/catalog/browse"/>
 	<BreadcrumbItem name={data?.spirit?.recipeCategoryDescription}
 	></BreadcrumbItem>
 </Breadcrumb>

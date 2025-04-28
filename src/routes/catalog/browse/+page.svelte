@@ -87,7 +87,7 @@
 	name="Catalog"
 	href="/catalog"
 >
-	<BreadcrumbItem name="Browse Catalog"></BreadcrumbItem>
+	<BreadcrumbItem name="Browse"></BreadcrumbItem>
 </Breadcrumb>
 <Heading
 	tag="h2"

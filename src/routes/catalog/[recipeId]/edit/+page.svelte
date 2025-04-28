@@ -20,15 +20,11 @@
 	name="Catalog"
 	href="/catalog"
 >
-	<BreadcrumbItem
-		name="Browse Catalog"
-		href="/catalog/browse"
-	></BreadcrumbItem>
-	<BreadcrumbItem
+	<BreadcrumbItem 
 		name={recipe.recipeName}
 		href="/catalog/{recipe.recipeId}"
 	></BreadcrumbItem>
-	<BreadcrumbItem name="Edit Catalog"></BreadcrumbItem>
+	<BreadcrumbItem name="Edit"></BreadcrumbItem>
 </Breadcrumb>
 <Heading
 	tag="h2"

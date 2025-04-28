@@ -16,11 +16,7 @@
 	name="Catalog"
 	href="/catalog"
 >
-	<BreadcrumbItem
-		name="Browse Catalog"
-		href="/catalog/browse"
-	></BreadcrumbItem>
-	<BreadcrumbItem name="Add To Catalog"></BreadcrumbItem>
+	<BreadcrumbItem name="Add"></BreadcrumbItem>
 </Breadcrumb>
 <Heading
 	tag="h2"

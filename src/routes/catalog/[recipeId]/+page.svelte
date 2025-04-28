@@ -27,10 +27,6 @@
 	name="Catalog"
 	href="/catalog"
 >
-	<BreadcrumbItem
-		name="Browse Catalog"
-		href="/catalog/browse"
-	></BreadcrumbItem>
 	<BreadcrumbItem name={recipe.recipeName}></BreadcrumbItem>
 </Breadcrumb>
 <!-- <Heading tag="h2" class="mb-4 font-extrabold flex flex-row justify-between">
