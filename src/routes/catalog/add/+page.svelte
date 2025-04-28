@@ -29,6 +29,5 @@
 	<CatalogForm
 		spirits={data.args.spirits}
 		preparationMethods={data.args.preparationMethods}
-		on:submit={data => console.log(data)}
 	/>
 </div>

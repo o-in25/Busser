@@ -23,7 +23,6 @@
 		});
 		const response = await result.json();
 		content = response;
-		console.log(content);
 	});
 </script>
 
