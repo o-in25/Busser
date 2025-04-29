@@ -60,7 +60,6 @@
 		/>
 	</Label>
 	<Label class="space-y-2">
-		{#if permissions.includes('edit_admin')}
 			<span>Role</span>
 			<input
 				class="hidden"
@@ -71,8 +70,8 @@
 			<MultiSelect
 				items={roles}
 				bind:value={selected}
+        disabled={!permissions.includes('edit_admin') }
 			/>
-		{/if}
 	</Label>
 
 	{#if action === 'edit'}

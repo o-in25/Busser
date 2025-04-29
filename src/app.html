@@ -6,6 +6,18 @@
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" /> %sveltekit.head%
+    <script>
+      if (localStorage.getItem('color-theme')) {
+        // explicit preference - overrides author's choice
+        localStorage.getItem('color-theme') === 'dark'
+          ? window.document.documentElement.classList.add('dark')
+          : window.document.documentElement.classList.remove('dark');
+      } else {
+        // browser preference - does not overrides
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+          window.document.documentElement.classList.add('dark');
+      }
+    </script>
 	</head>
 
 	<body data-sveltekit-preload-data="hover" class="bg-white dark:bg-gray-900 flex flex-col min-h-screen">

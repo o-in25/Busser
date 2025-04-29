@@ -146,6 +146,37 @@ export async function roleSelect(): Promise<SelectOption[]> {
   }
 }
 
+export async function getGrants(roleId: string = ''): Promise<QueryResult<Array<Role & Permission>>> {
+  try {
+    let query = db.query('user_t.rolePermission as rp')
+    .join('user_t.permission as p', 'rp.permissionId', 'p.permissionId')
+    .join('user_t.role as r', 'rp.roleId', 'r.roleId')
+    if(roleId) {
+      query = query.where('r.roleId', roleId)
+    }
+
+    const dbResult = await query.select(
+      'r.roleName',
+      'p.permissionName',
+      'rp.roleId',
+      'rp.permissionId'
+    );
+
+
+    const grants: Array<Role & Permission> = marshalToType<Array<Role & Permission>>(dbResult)
+    return {
+      status: 'success',
+      data: grants
+    };
+  } catch(error: any) {
+    console.error(error);
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
 export async function getUser(userId: string): Promise<QueryResult<User>> {
   try {
     const user: User = await db.query.transaction(async (trx) => {

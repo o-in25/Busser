@@ -3,6 +3,8 @@
 		UsersOutline,
 		AdjustmentsVerticalSolid,
 		UserSettingsOutline,
+		UsersGroupOutline,
+		MailBoxOutline,
 	} from 'flowbite-svelte-icons';
 	import { page } from '$app/stores';
 	import { getContext } from 'svelte';
@@ -27,7 +29,7 @@
 			class={activeUrl$ === '/settings' ? activeClass : defaultClass}
 		>
 			<div class="flex items-center gap-2">
-				<AdjustmentsVerticalSolid size="md" />General
+				<AdjustmentsVerticalSolid size="md" /><span class="hidden md:inline-block">General</span>
 			</div>
 		</a>
 	</li>
@@ -42,7 +44,7 @@
 			class={activeUrl$.includes('account') ? activeClass : defaultClass}
 		>
 			<div class="flex items-center gap-2">
-				<UserSettingsOutline size="md" />Account
+				<UserSettingsOutline size="md" /><span class="hidden md:inline-block">Account</span>
 			</div>
 		</a>
 	</li>
@@ -58,11 +60,45 @@
 				class={activeUrl$.includes('/users') ? activeClass : defaultClass}
 			>
 				<div class="flex items-center gap-2">
-					<UsersOutline size="md" />Users
+					<UsersOutline size="md" /><span class="hidden md:inline-block">Users</span>
 				</div>
 			</a>
 		</li>
 	{/if}
+  {#if permissions.includes('edit_admin')}
+  <li
+    class="group"
+    role="presentation"
+  >
+    <a
+      href="/settings/user-permissions"
+      type="button"
+      role="tab"
+      class={activeUrl$.includes('permissions') ? activeClass : defaultClass}
+    >
+      <div class="flex items-center gap-2">
+        <UsersGroupOutline size="md" /><span class="hidden md:inline-block">Grants & Roles</span>
+      </div>
+    </a>
+  </li>
+{/if}
+{#if permissions.includes('edit_admin')}
+<li
+  class="group"
+  role="presentation"
+>
+  <a
+    href="/settings/user-invitations"
+    type="button"
+    role="tab"
+    class={activeUrl$.includes('invitations') ? activeClass : defaultClass}
+  >
+    <div class="flex items-center gap-2">
+      <MailBoxOutline size="md" /><span class="hidden md:inline-block">Invites</span>
+    </div>
+  </a>
+</li>
+{/if}
 </ul>
 <div class="h-0.5 bg-gray-200 dark:bg-gray-700"></div>
 <div class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4">
