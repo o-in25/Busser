@@ -2,10 +2,18 @@
 	import {
 		Label,
 		CloseButton,
+		ButtonGroup,
+		Input,
+		InputAddon,
 	} from 'flowbite-svelte';
 	import placeholder from '$lib/assets/placeholder@2x.jpg';
 	import FancyImage from './FancyImage.svelte';
-	
+	import {
+		EyeOutline,
+		EyeSlashOutline,
+		UploadOutline,
+	} from 'flowbite-svelte-icons';
+
 	export let name = 'image';
 	export let signedUrl;
 	let files: FileList | undefined;
@@ -13,6 +21,11 @@
 
 	$: src = signedUrl?.length ? signedUrl : placeholder;
 	$: hasFiles = files && files.length > 0;
+	$: fileNames = files
+		? Array.from(files)
+				.map(file => file.name)
+				.join(', ')
+		: 'No files selected';
 
 	export let deleted = false;
 
@@ -40,16 +53,46 @@
 	};
 </script>
 
-<div>
-	<Label
-		for={name}
-		class="mb-2"
-	>
-		Image
-	</Label>
+<div class="relative">
+	<Label class="mb-2">Image</Label>
 	<div class="mb-4 flex">
-		<!-- <Fileupload id={name} {name} class="mb-2" accept="image/*" bind:files={files} title="test" />  -->
+		<div class="w-full">
+			<ButtonGroup class="w-full">
+				<InputAddon class="!px-0">
+					<label
+						for={name}
+						class="!px-3 h-full flex items-center justify-center"
+					>
+						<UploadOutline class="w-8 md:w-10 lg:w-12" />
+					</label>
+				</InputAddon>
+				<input
+					id={name}
+					{name}
+					type="file"
+					bind:files
+					bind:this={fileInputRef}
+					class="hidden"
+				/>
+				<Input
+					bind:value={fileNames}
+					disabled
+				/>
+				{#if hasFiles}
+					<div
+						class="bg-gray-300 dark:bg-gray-700 rounded-r-lg focus:rounded-none focus:rounded-r-lg"
+					>
+						<CloseButton
+							on:click={clearAll}
+							class="flex inset-y-0 items-right text-gray-500 dark:text-gray-400 end-0 p-2.5"
+						/>
+					</div>
+				{/if}
+			</ButtonGroup>
+		</div>
 
+		<!-- <Fileupload id={name} {name} class="mb-2" accept="image/*" bind:files={files} title="test" />  -->
+		<!-- 
 		<div class="relative w-full">
 			<input
 				id={name}
@@ -65,7 +108,7 @@
 					class="flex absolute inset-y-0 items-center text-gray-500 dark:text-gray-400 end-0 p-2.5"
 				/>
 			{/if}
-		</div>
+		</div> -->
 
 		<!-- {#if src !== placeholder}
       <Button class="ms-2 mb-2" color="alternative" on:click={clearAll}><TrashBinOutline/></Button>
@@ -74,7 +117,7 @@
 	<FancyImage
 		alt="Product Thumbnail"
 		{src}
-		divStyle="bg-gray-700 rounded-lg p-4"
+		divStyle="bg-gray-200 dark:bg-gray-700 rounded-lg p-4"
 		imgStyle="object-scale-down h-48 w-96 m-auto"
 	/>
 	<!-- <div class="bg-gray-700 rounded-lg p-4">

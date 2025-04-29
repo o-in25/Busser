@@ -15,6 +15,8 @@
 			home: '/',
 			catalog: '/catalog',
 			inventory: '/inventory',
+      tools: '/tools',
+      settings: '/settings'
 		};
 
 		const activeUrl = url.split('/').slice(1).shift() || 'home';

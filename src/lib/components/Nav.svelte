@@ -172,7 +172,7 @@
 		/>
 	</div>
 
-	<Sidebar>
+	<Sidebar {activeUrl}>
 		<SidebarWrapper
 			divClass="overflow-y-auto py-4 px-3 rounded dark:bg-gray-800"
 		>
