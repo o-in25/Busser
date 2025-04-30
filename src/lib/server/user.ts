@@ -177,6 +177,56 @@ export async function getGrants(roleId: string = ''): Promise<QueryResult<Array<
   }
 }
 
+export async function updateGrants(roleId: string, permissions: Permission[]): Promise<QueryResult<Array<Role & Permission>>> {
+  try {
+
+    await db.query.transaction(async (trx) => {
+      let newPermissions: Permission[] = permissions.filter(({ permissionId }) => !permissionId);
+      let oldPermissions: Permission[] = permissions.filter(({ permissionId }) => permissionId);
+      // insert any new permissions
+      if(newPermissions.length) {
+                await trx('permission')
+          .insert(newPermissions.map(({ permissionName }) => ({ permissionName })))
+          .onConflict('permissionName')
+          .ignore();
+
+        let dbResult: any = await trx('permission')
+          .select('permissionId', 'permissionName')
+          .whereIn('permissionName', newPermissions.map(({ permissionName }) =>  permissionName));
+        
+        const insertedPermissions: Permission[] = marshalToType<Permission[]>(dbResult);
+        newPermissions = insertedPermissions;
+      }
+
+      oldPermissions = [...oldPermissions, ...newPermissions];
+
+      const rolePermissions = oldPermissions.map(({ permissionId }) => ({
+        roleId, permissionId
+      }))
+
+      // console.log(rolePermissions)
+      await trx('rolePermission').where({ roleId }).del();
+      if(rolePermissions.length) {
+        await trx('rolePermission').insert(rolePermissions)
+      }
+
+
+    });
+
+    return {
+      status:'success',
+      data: []
+    }
+  } catch(error: any) {
+    console.error(error);
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+
 export async function getUser(userId: string): Promise<QueryResult<User>> {
   try {
     const user: User = await db.query.transaction(async (trx) => {
