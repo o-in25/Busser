@@ -204,13 +204,11 @@ export async function updateGrants(roleId: string, permissions: Permission[]): P
         roleId, permissionId
       }))
 
-      // console.log(rolePermissions)
       await trx('rolePermission').where({ roleId }).del();
       if(rolePermissions.length) {
         await trx('rolePermission').insert(rolePermissions)
       }
-
-
+      
     });
 
     return {

@@ -4,6 +4,8 @@
 	import { goto } from '$app/navigation';
 	import { ExclamationCircleOutline, MinusOutline, ThumbsUpSolid, TrashBinOutline } from 'flowbite-svelte-icons';
 	import { page } from '$app/state';
+	import { applyAction, enhance } from '$app/forms';
+	import { notificationStore } from '../../../stores';
 
     let { data }: { data: PageData } = $props();
     let selected = $state(page.url.searchParams.get('role') || '');
@@ -80,7 +82,22 @@
 </form>
 
 {#if selected}
-<form action="/settings/user-permissions?role={role?.value}" method="POST" onsubmit={handleSubmit}>
+<form action="/settings/user-permissions?role={role?.value}" method="POST" onsubmit={handleSubmit}
+use:enhance={() => {
+  return async ({ result }) => {
+    if (result.type === 'redirect') {
+      goto(result.location);
+    } else {
+      await applyAction(result);
+      if (result.type === 'failure')
+        $notificationStore.error = {
+          message: result?.data?.error?.toString() || '',
+        };
+      if (result.type === 'success')
+        $notificationStore.success = { message: 'Inventory updated.' };
+    }
+  };
+}}>
   <div class="grid gap-6 mb-6 md:grid-cols-2">
     {#each items as grant, index}
      <div class="flex">

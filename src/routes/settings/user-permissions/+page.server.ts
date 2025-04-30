@@ -1,6 +1,8 @@
 import { getGrants, roleSelect, updateGrants } from '$lib/server/user';
 import type { Permission, Role } from '$lib/types/auth';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { StatusCodes } from 'http-status-codes';
 
 export const load = (async ({ url }) => {
   const role = url.searchParams.get('role') || ''
@@ -21,8 +23,11 @@ export const load = (async ({ url }) => {
 
 export const actions = {
   default: async ({ request, params, url }) => {
-    let formData: any = await request.formData();
     const roleId = url.searchParams.get('role') || '';
+    if(roleId) {
+      return fail(StatusCodes.NOT_FOUND, { error: 'Role not found'})
+    }
+    let formData: any = await request.formData();
     const grants = JSON.parse(formData.get('formData'));
     const permissions = grants.map(({ permissionName, permissionId}) => ({
       permissionName, permissionId
