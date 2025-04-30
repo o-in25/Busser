@@ -1,9 +1,12 @@
 import { DbProvider } from './db';
 import { Logger } from './logger';
-import type { User } from '$lib/types/auth';
+import type { Invitation, User } from '$lib/types/auth';
 import jwt from 'jsonwebtoken';
 import { compare, hash } from 'bcrypt';
 import { getUser } from './user';
+import { generateSecureCode } from '$lib/math';
+import { marshalToType } from './core';
+import type { QueryResult } from '$lib/types';
 
 const { JWT_SIGNING_KEY } = process.env;
 const HASH_ROUNDS = 10;
@@ -115,5 +118,37 @@ export async function resetPassword(
   } catch(error: any) {
     console.error(error);
     return false;
+  }
+}
+
+export async function getInvitations(): Promise<QueryResult<Invitation[]>> {
+  try {
+    let dbResult = db.table('invitation').select();
+    const invitations: Invitation[] = marshalToType<Invitation[]>(dbResult);
+    return {
+      status: 'success',
+      data: invitations
+    }
+  } catch(error: any) {
+    console.error(error);
+    return {
+      status: 'error',
+      error
+    };
+  }
+}
+
+export async function createInvite() {
+  try {
+    await db.table('invitation').insert({
+      code: generateSecureCode(), 
+      createdAt: Logger.now(),
+      usedAt: null,
+      usedBy: null,
+      email: null,
+      expiresAt: null
+    })
+  } catch(error: any) {
+    console.log(error)
   }
 }

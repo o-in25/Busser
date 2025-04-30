@@ -1,4 +1,6 @@
 
+import crypto from 'crypto';
+
 // From Liquid Intelligence by Dave Arnold
 /*
   After lots of testing, I came up with an equation to estimate dilution from
@@ -83,3 +85,9 @@ export const calculateAbv = (recipeSteps: { productIdQuantityInMilliliters: numb
 export const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
 export const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);
 export const getUnits = () => units;
+
+export function generateSecureCode(length = 6) {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const bytes = crypto.randomBytes(length);
+  return Array.from(bytes, b => charset[b % charset.length]).join('');
+}

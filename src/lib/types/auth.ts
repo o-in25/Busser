@@ -38,3 +38,13 @@ export type RolePermission = {
   roleId: string,
   permissionId: string;
 };
+
+export type Invitation = {
+  id: number;   
+  code: string;          
+  createdAt: Date;      
+  usedAt: Date | null; 
+  usedBy: string | null; 
+  email: string;          
+  expiresAt: Date;   
+}

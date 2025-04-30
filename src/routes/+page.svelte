@@ -114,19 +114,19 @@
 				id="btn-sign-up"
 				color="pinkToOrange"
 				size="lg"
-				disabled
+				href="/signup"
 			>
 				<MailBoxOutline />
 				<Span class="pl-1 text-white">Sign Up</Span>
 			</GradientButton>
 		</ButtonGroup>
 	</div>
-	<Popover
+	<!-- <Popover
 		class=" text-sm font-light"
 		triggeredBy="#btn-sign-up"
 	>
 		Coming Soon!
-	</Popover>
+	</Popover> -->
 	<Hr />
 {/if}
 

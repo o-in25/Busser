@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Input, Label, Modal, Select } from 'flowbite-svelte';
+	import { Button, Heading, Input, Label, Modal, Select } from 'flowbite-svelte';
   import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
 	import { ExclamationCircleOutline, MinusOutline, ThumbsUpSolid, TrashBinOutline } from 'flowbite-svelte-icons';
@@ -71,6 +71,19 @@
       items = [...items.slice(0, index), ...items.slice(index + 1)];
     }
 </script>
+<svelte:head>
+	<title>Grants & Roles - Busser</title>
+</svelte:head>
+<div class="flex items-center justify-between gap-4">
+	<div class="text-sm text-gray-500 dark:text-gray-400">
+		<Heading
+			tag="h4"
+			class="mb-4 flex flex-row justify-between font-extrabold"
+		>
+			Grants & Roles
+		</Heading>
+	</div>
+</div>
 
 <form>
   <div class="mb-4">
