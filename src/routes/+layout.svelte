@@ -59,7 +59,7 @@
 </div>
 
 <!-- footer -->
-<div class="mt-auto text-center">
+<div class="mt-auto text-center"> 
 	<Footer
 		footerType="logo"
 		class="rounded-none"
