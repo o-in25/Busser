@@ -14,24 +14,23 @@
 		TableHead,
 		TableBodyRow,
 		ButtonGroup,
+		Helper,
 	} from 'flowbite-svelte';
 	import type { PageData } from './$types';
-	import { UserAddOutline } from 'flowbite-svelte-icons';
+	import { PlusOutline, TrashBinOutline, UserAddOutline } from 'flowbite-svelte-icons';
+	import moment from 'moment';
 
 	let { data }: { data: PageData } = $props();
 	let formModal = $state(false);
 	let selectedDate = $state(null);
 </script>
 
-<Button on:click={() => (formModal = true)}>Form modal</Button>
 <Table striped={true}>
 	<TableHead>
-		<TableHeadCell>Product name</TableHeadCell>
-		<TableHeadCell>Color</TableHeadCell>
-		<TableHeadCell>Category</TableHeadCell>
-    <TableHeadCell>
-      Code
-    </TableHeadCell>
+		<TableHeadCell>Invite Code</TableHeadCell>
+		<TableHeadCell>Created At</TableHeadCell>
+		<TableHeadCell>Used By</TableHeadCell>
+    <TableHeadCell>Expiration</TableHeadCell>
 		<TableHeadCell>
 			<ButtonGroup
 				size="sm"
@@ -40,27 +39,37 @@
 				<Button
 					outline
 					color="dark"
-					href="/settings/users/add"
+          onclick={() => (formModal = true)}
 				>
-					<UserAddOutline class="w-4 h-4" />
+					<PlusOutline class="w-4 h-4" />
 				</Button>
-			</ButtonGroup>		</TableHeadCell>
+			</ButtonGroup>
+		</TableHeadCell>
 	</TableHead>
 	<TableBody tableBodyClass="divide-y">
-		<TableBodyRow>
-			<TableBodyCell>Apple MacBook Pro 17"</TableBodyCell>
-			<TableBodyCell>Sliver</TableBodyCell>
-			<TableBodyCell>Laptop</TableBodyCell>
-			<TableBodyCell>$2999</TableBodyCell>
-			<TableBodyCell>
-				<a
-					href="/tables"
-					class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-				>
-					Edit
-				</a>
-			</TableBodyCell>
+    {#each data.invitations as invite}
+    <TableBodyRow>
+			<TableBodyCell>{invite.code}</TableBodyCell>
+			<TableBodyCell>{moment(invite.createdAt).format('YYYY-MM-DD HH:MM:ss')}</TableBodyCell>
+			<TableBodyCell>{invite.usedBy || 'N/A'}</TableBodyCell>
+      <TableBodyCell>{invite.expiresAt? moment(invite.usedAt).format('YYYY-MM-DD HH:MM:ss') : 'Never'}</TableBodyCell>
+
+      <TableBodyCell>
+        <ButtonGroup
+          size="sm"
+          divClass="inline-flex rounded-lg shadow-sm float-right"
+        >
+            <Button
+              outline
+              color="dark"
+
+            >
+              <TrashBinOutline class="w-4 h-4" />
+            </Button>
+        </ButtonGroup>
+      </TableBodyCell>
 		</TableBodyRow>
+    {/each}
 	</TableBody>
 </Table>
 <Modal
@@ -70,40 +79,44 @@
 	class="w-full"
 >
 	<form
-		class="h-[50dvh] flex flex-col justify-between space-y-6"
+		class="h-[60dvh] flex flex-col justify-between"
 		action="#"
 	>
-		<!-- <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Sign in to our platform</h3> -->
-		<div class="space-y-6">
+  <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create Invite</h3>
+  <div class="space-y-6">
+      <div class="grid grid-cols-3 gap-4">
 			<Label class="space-y-2">
 				<span>Code</span>
 				<Input
-					type="email"
-					name="email"
-					placeholder="name@company.com"
-					required
+					type="text"
+					name="code"
+          maxlength={6}
 				/>
+        <Helper class="text-xs">Leave blank to auto-generate a unique code.</Helper>
+
 			</Label>
+      <Label class="space-y-2 col-span-2">
+				<span>Expiration</span>
+				<Datepicker bind:value={selectedDate} />
+        <Helper class="text-xs">Optionally set an invitation expiry date.</Helper>
+			</Label>
+      </div>
 			<Label class="space-y-2">
 				<span>Email</span>
 				<Input
 					type="email"
 					name="email"
-					placeholder="name@company.com"
-					required
 				/>
+        <Helper class="text-xs">Optionally assign this invitation to a specific user's email.</Helper>
 			</Label>
-			<Label class="space-y-2">
-				<span>Expiration</span>
-				<Datepicker bind:value={selectedDate} />
-			</Label>
+	
 		</div>
 		<Button
 			type="submit"
 			class="mt-auto"
 			size="lg"
 		>
-			Login to your account
+			Create Invite
 		</Button>
 	</form>
 </Modal>

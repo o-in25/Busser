@@ -108,7 +108,7 @@
 				href="/login"
 			>
 				<ArrowLeftToBracketOutline />
-				<Span class="pl-1 text-white">Sign In</Span>
+				<Span class="pl-1 text-white">Log In</Span>
 			</GradientButton>
 			<GradientButton
 				id="btn-sign-up"

@@ -123,7 +123,7 @@ export async function resetPassword(
 
 export async function getInvitations(): Promise<QueryResult<Invitation[]>> {
   try {
-    let dbResult = db.table('invitation').select();
+    let dbResult = await db.table('invitation').select();
     const invitations: Invitation[] = marshalToType<Invitation[]>(dbResult);
     return {
       status: 'success',

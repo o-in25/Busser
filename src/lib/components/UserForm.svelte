@@ -1,6 +1,13 @@
 <script lang="ts">
 	import type { User } from '$lib/types/auth';
-	import { Button, Input, Label, MultiSelect } from 'flowbite-svelte';
+	import {
+		Button,
+		GradientButton,
+		Helper,
+		Input,
+		Label,
+		MultiSelect,
+	} from 'flowbite-svelte';
 	import type { SelectOption } from '$lib/types';
 	import { getContext } from 'svelte';
 	import { applyAction, enhance } from '$app/forms';
@@ -8,23 +15,26 @@
 	import { goto } from '$app/navigation';
 
 	export let user: User | null = null;
-	export let action: String;
-	export let roles: SelectOption[];
+	export let action: 'add' | 'edit' | 'register';
+	export let roles: SelectOption[] = [];
 	// const userRoles: any[] = getContext('roles') || [];
 	const permissions: string[] = getContext('permissions');
 
 	let selected = user?.roles.map(({ roleId }) => roleId);
+
+	const actions = {
+		edit: `/settings/users/${user?.userId}/edit`,
+		add: '/settings/users/add',
+		register: '/signup',
+	};
 </script>
 
 <form
 	class="space-y-6"
 	method="POST"
-	action={action === 'edit'
-		? `/settings/users/${user?.userId}/edit`
-		: '/settings/users/add'}
+	action={actions[action]}
 	use:enhance={() => {
 		return async ({ result }) => {
-			console.log(result);
 			if (result.type === 'redirect') {
 				goto(result.location);
 			} else {
@@ -44,7 +54,6 @@
 		<Input
 			type="text"
 			name="username"
-			placeholder="username"
 			required
 			value={user?.username || ''}
 		/>
@@ -54,12 +63,12 @@
 		<Input
 			type="email"
 			name="email"
-			placeholder="name@company.com"
 			required
 			value={user?.email || ''}
 		/>
 	</Label>
-	<Label class="space-y-2">
+	{#if action === 'edit' || action === 'add'}
+		<Label class="space-y-2">
 			<span>Role</span>
 			<input
 				class="hidden"
@@ -70,9 +79,10 @@
 			<MultiSelect
 				items={roles}
 				bind:value={selected}
-        disabled={!permissions.includes('edit_admin') }
+				disabled={!permissions.includes('edit_admin')}
 			/>
-	</Label>
+		</Label>
+	{/if}
 
 	{#if action === 'edit'}
 		<div class="flex items-start">
@@ -84,13 +94,12 @@
 			</a>
 		</div>
 	{/if}
-	{#if action === 'add'}
+	{#if action === 'add' || action === 'register'}
 		<Label class="space-y-2">
 			<span>Password</span>
 			<Input
 				type="password"
 				name="password"
-				placeholder="•••••"
 				required
 			/>
 		</Label>
@@ -99,21 +108,50 @@
 			<Input
 				type="password"
 				name="passwordConfirm"
-				placeholder="•••••"
 				required
 			/>
 		</Label>
+		{#if action === 'register'}
+			<fieldset>
+				<Label class="space-y-2">
+					<span>Invite Code</span>
+					<Input
+						type="text"
+						name="inviteCode"
+						required
+					/>
+					<Helper class="text-sm text-gray-400">Registration is invite only.</Helper>
+				</Label>
+			</fieldset>
+		{/if}
+	{/if}
+
+	{#if action === 'register'}
+		<GradientButton
+			color="pinkToOrange"
+			size="lg"
+			class="w-full hover:!bg-transparent"
+			type="submit"
+		>
+			Sign up
+		</GradientButton>
+	{:else}
+		<Button
+			class="w-full"
+			type="submit"
+			size="lg"
+		>
+			Save
+		</Button>
 	{/if}
 	<!-- submit -->
-	<div class="md:flex justify-end">
-		<div class="my-4 md:mr-4 order-2">
-			<Button
-				class="w-full md:w-32"
-				type="submit"
-				size="xl"
-			>
-				Save
-			</Button>
-		</div>
+
+	<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+		Already registered? <a
+			href="/login "
+			class="text-primary-700 hover:underline dark:text-primary-500"
+		>
+			Log in
+		</a>
 	</div>
 </form>
