@@ -1,7 +1,7 @@
 # Busser
 ![An app for home bar management](https://raw.githubusercontent.com/o-in25/Busser/main/src/lib/assets/logo.png "App logo")
 
-An app for home bar management, now hosted on Fly! https://busser.fly.dev/
+An app for home bar management.
 
 
 ### Setting Up Cloud SQL Auth Proxy
