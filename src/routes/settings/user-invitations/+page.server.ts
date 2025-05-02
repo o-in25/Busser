@@ -10,7 +10,6 @@ export const load = (async () => {
     if('data' in queryResult) {
       invitations = queryResult.data || [];
     }
-    console.log(invitations)
     return {
       invitations
     };

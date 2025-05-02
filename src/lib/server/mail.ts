@@ -11,10 +11,10 @@ export async function sendSimpleMessage() {
   });
   try {
     const data = await mg.messages.create("busserapp.com", {
-      from: "Busser <noreply@busserapp.com>",
-      to: [""],
-      subject: "",
-      text: "Congratulations, you just sent an email with Mailgun! You are truly awesome!",
+      from: "Mailgun Sandbox <postmaster@busserapp.com>",
+      to: ["Eoin Halligan <eoinhalligan3@gmail.com>"],
+      subject: "Hello Eoin Halligan",
+      text: "Congratulations Eoin Halligan, you just sent an email with Mailgun! You are truly awesome!",
     });
 
     console.log(data); // logs response data
