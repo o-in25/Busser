@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 import type { PageServerLoad } from './$types';
 
@@ -13,7 +13,29 @@ export const actions = {
 	default: async ({ request }) => {
     let formData: any = await request.formData();
     formData = Object.fromEntries(formData);
-    console.log(formData)
-    redirect(StatusCodes.TEMPORARY_REDIRECT, '/check-email')
+    return fail(StatusCodes.BAD_REQUEST, {
+      args: {
+        errors: {
+          username: {
+            hasError: true,
+            message: 'Username taken.'
+          },
+          email: {
+            hasError: true,
+            message: 'Invalid email.'
+          },
+          password: {
+            hasError: true,
+            message: 'Invalid password.'
+          },
+          passwordConfirm: {
+            hasError: true,
+            message: 'Invalid password confirm.'
+          }
+        }
+      }
+    } as any);
+
+      // redirect(StatusCodes.TEMPORARY_REDIRECT, '/check-email');
   }
 }

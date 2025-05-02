@@ -1,23 +1,27 @@
+const { MAILGUN_KEY } = process.env;
+
 import FormData from "form-data"; // form-data v4.0.1
 import Mailgun from "mailgun.js"; // mailgun.js v11.1.0
+import { Logger } from "./logger";
 
 export async function sendSimpleMessage() {
   const mailgun = new Mailgun(FormData);
   const mg = mailgun.client({
     username: "api",
-    key: "",
-    // When you have an EU-domain, you must specify the endpoint:
-    // url: "https://api.eu.mailgun.net"
+    key: MAILGUN_KEY || ''
   });
+
   try {
     const data = await mg.messages.create("busserapp.com", {
-      from: "Mailgun Sandbox <postmaster@busserapp.com>",
+      from: "Busser <noreply@busserapp.com>",
       to: ["Eoin Halligan <eoinhalligan3@gmail.com>"],
-      subject: "Hello Eoin Halligan",
-      text: "Congratulations Eoin Halligan, you just sent an email with Mailgun! You are truly awesome!",
+      subject: "Welcome to Busser!",
+      template: "User Registration",
+      "h:X-Mailgun-Variables": JSON.stringify({
+        username: "test",
+        expiry: Logger.now()
+      }),
     });
-
-    console.log(data); // logs response data
   } catch (error) {
     console.log(error); //logs any error
   }

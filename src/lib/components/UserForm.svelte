@@ -17,6 +17,7 @@
 	export let user: User | null = null;
 	export let action: 'add' | 'edit' | 'register';
 	export let roles: SelectOption[] = [];
+	export let suppressToast = false;
 	// const userRoles: any[] = getContext('roles') || [];
 	const permissions: string[] = getContext('permissions');
 
@@ -26,6 +27,25 @@
 		edit: `/settings/users/${user?.userId}/edit`,
 		add: '/settings/users/add',
 		register: '/signup',
+	};
+
+	export let errors = {
+		username: {
+			hasError: false,
+			message: '',
+		},
+		email: {
+			hasError: false,
+			message: '',
+		},
+		password: {
+			hasError: false,
+			message: '',
+		},
+		passwordConfirm: {
+			hasError: false,
+			message: '',
+		},
 	};
 </script>
 
@@ -39,33 +59,57 @@
 				goto(result.location);
 			} else {
 				await applyAction(result);
-				if (result.type === 'failure')
-					$notificationStore.error = {
-						message: result?.data?.error?.toString() || '',
-					};
-				if (result.type === 'success')
-					$notificationStore.success = { message: 'User updated.' };
+				if (!suppressToast) {
+					if (result.type === 'failure')
+						$notificationStore.error = {
+							message: result?.data?.error?.toString() || '',
+						};
+					if (result.type === 'success')
+						$notificationStore.success = { message: 'User updated.' };
+				}
 			}
 		};
 	}}
 >
-	<Label class="space-y-2">
+	<Label
+		class="space-y-2"
+		color={errors.username.hasError ? 'red' : 'gray'}
+	>
 		<span>Username</span>
 		<Input
 			type="text"
 			name="username"
-			required
+			color={errors.username.hasError ? 'red' : 'base'}
 			value={user?.username || ''}
 		/>
+		{#if errors.username.hasError}
+			<Helper
+				class="mt-2"
+				color="red"
+			>
+				<span class="font-medium">{errors.username.message}</span>
+			</Helper>
+		{/if}
 	</Label>
-	<Label class="space-y-2">
+	<Label
+		class="space-y-2"
+		color={errors.email.hasError ? 'red' : 'gray'}
+	>
 		<span>Email</span>
 		<Input
 			type="email"
 			name="email"
-			required
+			color={errors.email.hasError ? 'red' : 'base'}
 			value={user?.email || ''}
 		/>
+		{#if errors.email.hasError}
+			<Helper
+				class="mt-2"
+				color="red"
+			>
+				<span class="font-medium">{errors.email.message}</span>
+			</Helper>
+		{/if}
 	</Label>
 	{#if action === 'edit' || action === 'add'}
 		<Label class="space-y-2">
@@ -95,23 +139,45 @@
 		</div>
 	{/if}
 	{#if action === 'add' || action === 'register'}
-		<Label class="space-y-2">
+		<Label
+			class="space-y-2"
+			color={errors.password.hasError ? 'red' : 'gray'}
+		>
 			<span>Password</span>
 			<Input
 				type="password"
 				name="password"
-				required
+				color={errors.password.hasError ? 'red' : 'base'}
 			/>
+			{#if errors.password.hasError}
+				<Helper
+					class="mt-2"
+					color="red"
+				>
+					<span class="font-medium">{errors.password.message}</span>
+				</Helper>
+			{/if}
 		</Label>
-		<Label class="space-y-2">
+		<Label
+			class="space-y-2"
+			color={errors.passwordConfirm.hasError ? 'red' : 'gray'}
+		>
 			<span>Confirm Password</span>
 			<Input
 				type="password"
 				name="passwordConfirm"
-				required
+				color={errors.passwordConfirm.hasError ? 'red' : 'base'}
 			/>
+			{#if errors.passwordConfirm.hasError}
+				<Helper
+					class="mt-2"
+					color="red"
+				>
+					<span class="font-medium">{errors.passwordConfirm.message}</span>
+				</Helper>
+			{/if}
 		</Label>
-		{#if action === 'register'}
+		<!-- {#if action === 'register'}
 			<fieldset>
 				<Label class="space-y-2">
 					<span>Invite Code</span>
@@ -120,10 +186,10 @@
 						name="inviteCode"
 						required
 					/>
-					<Helper class="text-sm text-gray-400">Registration is invite only.</Helper>
+					<Helper class="text-sm text-gray-400">Registration is currently invite only.</Helper>
 				</Label>
 			</fieldset>
-		{/if}
+		{/if} -->
 	{/if}
 
 	{#if action === 'register'}

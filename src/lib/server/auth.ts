@@ -152,3 +152,11 @@ export async function createInvite() {
     console.log(error)
   }
 }
+
+export async function checkInviteCode(code: string) {
+  try {
+    
+  } catch(error: any) {
+    console.log(error)
+  }
+}

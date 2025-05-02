@@ -2,8 +2,9 @@
 	import { Card, Label, Checkbox, Button, Input } from 'flowbite-svelte';
     import type { PageData } from './$types';
 	import UserForm from '$lib/components/UserForm.svelte';
+	import type { FormSubmitResult } from '$lib/types';
 
-    let { data }: { data: PageData, form: FormData } = $props();
+    let { data, form}: { data: PageData, form: FormSubmitResult } = $props();
 </script>
 
 <!-- <div class="flex justify-center p-10">
@@ -31,5 +32,5 @@
 </svelte:head>
 <div class="flex flex-col space-y-6">
   <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign up</h3>
-  <UserForm user={null} action="register"/>
+  <UserForm user={null} action="register" suppressToast={true} errors={form?.args.errors}/>
 </div>
