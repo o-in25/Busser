@@ -21,11 +21,48 @@ export const actions = {
     const username = formData.get('username');
     const password = formData.get('password');
 
-    if(!username || !password) {
+    let errors = {
+      username: {
+        hasError: false,
+        message: '',
+      },
+      email: {
+        hasError: false,
+        message: '',
+      },
+      password: {
+        hasError: false,
+        message: '',
+      },
+      passwordConfirm: {
+        hasError: false,
+        message: '',
+      },
+    };
+
+
+    if(!username) {
+      errors = { ...errors, username: {
+        hasError: true,
+        message: 'Invalid username.'
+      }}
+    }
+
+    if(!password) {
+      errors = { ...errors, password: {
+        hasError: true,
+        message: 'Invalid password.'
+      }}
+    }
+
+
+    if(errors.username.hasError || errors.password.hasError) {
+
       return fail(StatusCodes.BAD_REQUEST, {
-        error: 'Invalid username or password.'
+        errors
       });
     }
+
 
     const queryResult: QueryResult<string | null> = await login(username, password);
 

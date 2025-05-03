@@ -18,10 +18,10 @@
 	export let password = '';
 	export let passwordConfirm = '';
 
-  export const clearSensitiveFields = () => {
-    password = '';
-    passwordConfirm = '';
-  }
+	export const clearSensitiveFields = () => {
+		password = '';
+		passwordConfirm = '';
+	};
 
 	// const userRoles: any[] = getContext('roles') || [];
 	const permissions: string[] = getContext('permissions');
@@ -46,7 +46,6 @@
 			message: '',
 		},
 	};
-
 </script>
 
 <!-- username -->
@@ -136,7 +135,7 @@
 			type="password"
 			name="password"
 			color={errors.password.hasError ? 'red' : 'base'}
-      bind:value={password}
+			bind:value={password}
 		/>
 		{#if errors.password.hasError}
 			<Helper
@@ -159,7 +158,7 @@
 				type="password"
 				name="passwordConfirm"
 				color={errors.passwordConfirm.hasError ? 'red' : 'base'}
-        bind:value={passwordConfirm}
+				bind:value={passwordConfirm}
 			/>
 			{#if errors.passwordConfirm.hasError}
 				<Helper
@@ -197,15 +196,15 @@
 		{action === 'register' ? 'Sign up' : 'Log in'}
 	</GradientButton>
 {:else}
-<div class="md:flex justify-end">
-  <Button
-    class="w-full md:w-32"
-    type="submit"
-    size="xl"
-  >
-    Save
-  </Button>
-</div>
+	<div class="md:flex justify-end">
+		<Button
+			class="w-full md:w-32"
+			type="submit"
+			size="xl"
+		>
+			Save
+		</Button>
+	</div>
 {/if}
 
 <!-- help -->
@@ -222,11 +221,11 @@
 
 {#if action === 'login'}
 	<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-		Need to sign up? <a
+		Not a member? <a
 			href="/signup "
 			class="text-primary-700 hover:underline dark:text-primary-500"
 		>
-			Log in
+			Sign up
 		</a>
 	</div>
 {/if}

@@ -78,12 +78,11 @@ export async function login(
       throw new Error('Incorrect password');
     }
 
+    // check if verified
     const isVerified = verified ===  1;
     if(!isVerified) {
       throw new Error('Email not verified');
     }
-
-    // check if verified
 
     const queryResult = await getUser(userId);
     if(queryResult.status === 'error') {

@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
 	import {
-		Card,
-		Label,
-		Input,
-		GradientButton,
 		Alert,
-		Helper,
 	} from 'flowbite-svelte';
 	import type { PageData, ActionData } from './$types';
 	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
@@ -14,13 +9,10 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-
-
 	let errors = {
 		username: '',
 		password: '',
 	};
-
 
 	function validate(username, password): boolean {
 		let hasError = false;
@@ -37,16 +29,14 @@
 		return hasError;
 	}
 
-  let formRef;
-
-
+	let formRef;
 </script>
 
 <svelte:head>
-	<title>Sign Up - Busser</title>
+	<title>Log In - Busser</title>
 </svelte:head>
 <div class="flex flex-col space-y-6">
-	<h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign up</h3>
+	<h3 class="text-xl font-medium text-gray-900 dark:text-white">Log in</h3>
 	{#if form?.error}
 		<Alert
 			border
@@ -63,20 +53,20 @@
 		class="space-y-6"
 		method="POST"
 		action="/login"
-    use:enhance={() => {
-      return async ({ result }) => {
-        console.log(result)
-        if(result.type === 'failure') {
-          formRef.clearSensitiveFields();
-        }
-        await applyAction(result);
-      }
-    }}
+		use:enhance={() => {
+			return async ({ result }) => {
+				if (result.type === 'failure') {
+					formRef.clearSensitiveFields();
+				}
+				await applyAction(result);
+			};
+		}}
 	>
 		<UserForm
-    bind:this={formRef} 
+			bind:this={formRef}
 			user={null}
 			action="login"
+      errors={form?.errors}
 		/>
 	</form>
 </div>
