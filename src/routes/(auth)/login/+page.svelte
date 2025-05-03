@@ -1,35 +1,11 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
-	import {
-		Alert,
-	} from 'flowbite-svelte';
-	import type { PageData, ActionData } from './$types';
+	import { Alert } from 'flowbite-svelte';
+	import type { ActionData } from './$types';
 	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
 	import UserForm from '$lib/components/UserForm.svelte';
-	export let data: PageData;
 	export let form: ActionData;
-
-	let errors = {
-		username: '',
-		password: '',
-	};
-
-	function validate(username, password): boolean {
-		let hasError = false;
-		if (!username.trim().length) {
-			hasError = true;
-			errors.username = 'Username is required';
-		}
-
-		if (!password.trim().length) {
-			hasError = true;
-			errors.password = 'Password is required';
-		}
-
-		return hasError;
-	}
-
-	let formRef;
+	let formRef: any;
 </script>
 
 <svelte:head>
@@ -66,7 +42,7 @@
 			bind:this={formRef}
 			user={null}
 			action="login"
-      errors={form?.errors}
+			errors={form?.errors}
 		/>
 	</form>
 </div>

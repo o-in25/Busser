@@ -42,17 +42,21 @@ export const actions = {
 
 
     if(!username) {
-      errors = { ...errors, username: {
-        hasError: true,
-        message: 'Invalid username.'
-      }}
+      errors = {
+        ...errors, username: {
+          hasError: true,
+          message: 'Invalid username.'
+        }
+      };
     }
 
     if(!password) {
-      errors = { ...errors, password: {
-        hasError: true,
-        message: 'Invalid password.'
-      }}
+      errors = {
+        ...errors, password: {
+          hasError: true,
+          message: 'Invalid password.'
+        }
+      };
     }
 
 

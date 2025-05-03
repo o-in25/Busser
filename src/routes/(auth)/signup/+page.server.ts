@@ -10,16 +10,42 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-	default: async ({ request }) => {
+  default: async ({ request }) => {
     let formData: any = await request.formData();
     formData = Object.fromEntries(formData);
-    return fail(StatusCodes.BAD_REQUEST, { 
+
+    let errors = {
+      username: {
+        hasError: false,
+        message: '',
+      },
+      email: {
+        hasError: false,
+        message: '',
+      },
+      password: {
+        hasError: true,
+        message: '',
+      },
+      passwordConfirm: {
+        hasError: false,
+        message: '',
+      },
+    };
+
+
+    return {
+      errors
+    };
+
+
+    return fail(StatusCodes.BAD_REQUEST, {
       error: {
         message: 'Username or password is incorrect.',
       },
-      args: { }
+      args: {}
 
-     });
+    });
     // return fail(StatusCodes.BAD_REQUEST, {
     //   args: {
     //     errors: {
@@ -43,6 +69,6 @@ export const actions = {
     //   }
     // } as any);
 
-      // redirect(StatusCodes.TEMPORARY_REDIRECT, '/check-email');
+    // redirect(StatusCodes.TEMPORARY_REDIRECT, '/check-email');
   }
-}
+};

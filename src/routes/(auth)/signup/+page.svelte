@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { Card, Label, Checkbox, Button, Input } from 'flowbite-svelte';
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import UserForm from '$lib/components/UserForm.svelte';
 	import type { FormSubmitResult } from '$lib/types';
 	import type { ActionResult } from '@sveltejs/kit';
+	import { enhance, applyAction } from '$app/forms';
 
-	let { data, form }: { data: PageData; form: ActionResult } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let formRef: any;
 </script>
 
 <!-- <div class="flex justify-center p-10">
@@ -33,8 +35,24 @@
 </svelte:head>
 <div class="flex flex-col space-y-6">
 	<h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign up</h3>
-	<UserForm
-		user={null}
-		action="register"
-	/>
+	<form
+		class="space-y-6"
+		method="POST"
+		action="/signup"
+		use:enhance={() => {
+			return async ({ result }) => {
+				if (result.type === 'failure') {
+					formRef.clearSensitiveFields();
+				}
+				await applyAction(result);
+			};
+		}}
+	>
+		<UserForm
+			bind:this={formRef}
+			user={null}
+			action="register"
+			errors={form?.errors}
+		/>
+	</form>
 </div>
