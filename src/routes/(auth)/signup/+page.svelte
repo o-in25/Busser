@@ -7,6 +7,9 @@
 	import { enhance, applyAction } from '$app/forms';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+  let errors = $derived(form?.errors);
+
 	let formRef: any;
 </script>
 
@@ -39,20 +42,14 @@
 		class="space-y-6"
 		method="POST"
 		action="/signup"
-		use:enhance={() => {
-			return async ({ result }) => {
-				if (result.type === 'failure') {
-					formRef.clearSensitiveFields();
-				}
-				await applyAction(result);
-			};
-		}}
+    use:enhance
 	>
+
 		<UserForm
 			bind:this={formRef}
 			user={null}
 			action="register"
-			errors={form?.errors}
+			errors={errors}
 		/>
 	</form>
 </div>

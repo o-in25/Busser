@@ -51,21 +51,21 @@
 <!-- username -->
 <Label
 	class="space-y-2"
-	color={errors.username.hasError ? 'red' : 'gray'}
+	color={errors?.username?.hasError ? 'red' : 'gray'}
 >
 	<span>Username</span>
 	<Input
 		type="text"
 		name="username"
-		color={errors.username.hasError ? 'red' : 'base'}
+		color={errors?.username?.hasError ? 'red' : 'base'}
 		value={user?.username || ''}
 	/>
-	{#if errors.username.hasError}
+	{#if errors?.username.hasError}
 		<Helper
 			class="mt-2"
 			color="red"
 		>
-			<span class="font-medium">{errors.username.message}</span>
+			<span class="font-medium">{errors?.username?.message}</span>
 		</Helper>
 	{/if}
 </Label>
@@ -74,21 +74,21 @@
 {#if action !== 'login'}
 	<Label
 		class="space-y-2"
-		color={errors.email.hasError ? 'red' : 'gray'}
+		color={errors?.email.hasError ? 'red' : 'gray'}
 	>
 		<span>Email</span>
 		<Input
 			type="email"
 			name="email"
-			color={errors.email.hasError ? 'red' : 'base'}
+			color={errors?.email.hasError ? 'red' : 'base'}
 			value={user?.email || ''}
 		/>
-		{#if errors.email.hasError}
+		{#if errors?.email.hasError}
 			<Helper
 				class="mt-2"
 				color="red"
 			>
-				<span class="font-medium">{errors.email.message}</span>
+				<span class="font-medium">{errors?.email.message}</span>
 			</Helper>
 		{/if}
 	</Label>
@@ -128,21 +128,21 @@
 	<!-- password -->
 	<Label
 		class="space-y-2"
-		color={errors.password.hasError ? 'red' : 'gray'}
+		color={errors?.password.hasError ? 'red' : 'gray'}
 	>
 		<span>Password</span>
 		<Input
 			type="password"
 			name="password"
-			color={errors.password.hasError ? 'red' : 'base'}
+			color={errors?.password.hasError ? 'red' : 'base'}
 			bind:value={password}
 		/>
-		{#if errors.password.hasError}
+		{#if errors?.password.hasError}
 			<Helper
 				class="mt-2"
 				color="red"
 			>
-				<span class="font-medium">{errors.password.message}</span>
+				<span class="font-medium">{errors?.password.message}</span>
 			</Helper>
 		{/if}
 	</Label>
@@ -151,21 +151,21 @@
 	{#if action !== 'login'}
 		<Label
 			class="space-y-2"
-			color={errors.passwordConfirm.hasError ? 'red' : 'gray'}
+			color={errors?.passwordConfirm.hasError ? 'red' : 'gray'}
 		>
 			<span>Confirm Password</span>
 			<Input
 				type="password"
 				name="passwordConfirm"
-				color={errors.passwordConfirm.hasError ? 'red' : 'base'}
+				color={errors?.passwordConfirm.hasError ? 'red' : 'base'}
 				bind:value={passwordConfirm}
 			/>
-			{#if errors.passwordConfirm.hasError}
+			{#if errors?.passwordConfirm.hasError}
 				<Helper
 					class="mt-2"
 					color="red"
 				>
-					<span class="font-medium">{errors.passwordConfirm.message}</span>
+					<span class="font-medium">{errors?.passwordConfirm.message}</span>
 				</Helper>
 			{/if}
 		</Label>

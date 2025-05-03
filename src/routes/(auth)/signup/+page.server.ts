@@ -14,7 +14,7 @@ export const actions = {
     let formData: any = await request.formData();
     formData = Object.fromEntries(formData);
 
-    let errors = {
+            let errors = {
       username: {
         hasError: false,
         message: '',
@@ -24,7 +24,7 @@ export const actions = {
         message: '',
       },
       password: {
-        hasError: true,
+        hasError: false,
         message: '',
       },
       passwordConfirm: {
@@ -33,19 +33,76 @@ export const actions = {
       },
     };
 
+    const validateForm = ({
+      username,
+      password,
+      passwordConfirm,
+      email
+    }) => {
 
-    return {
-      errors
-    };
+
+      if (!username?.trim()) {
+        errors.username = {
+          hasError: true,
+          message: 'Username is required.'
+        };
+      } 
+    
+      if (!password?.trim()) {
+        errors.password = {
+          hasError: true,
+          message: 'Password is required.'
+        };
+      }
+    
+      if (!passwordConfirm?.trim()) {
+        errors.passwordConfirm = {
+          hasError: true,
+          message: 'Password confirmation is required.'
+        };
+      }
+    
+      if (password !== passwordConfirm) {
+        errors.password = {
+          hasError: true,
+          message: 'Passwords do not match.'
+        };
+        errors.passwordConfirm = {
+          hasError: true,
+          message: 'Passwords do not match.'
+        };
+      }
+    
+      if (!email?.trim()) {
+        errors.email = {
+          hasError: true,
+          message: 'Email is required.'
+        };  
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          errors.email = {
+            hasError: true,
+            message: 'Email is not valid.'
+          };
+        }
+      }
+    
+      const valid = !Object.values(errors).some((field) => field.hasError);
+    
+      return { valid, errors };
+    }
 
 
-    return fail(StatusCodes.BAD_REQUEST, {
-      error: {
-        message: 'Username or password is incorrect.',
-      },
-      args: {}
+    const { valid, errors: formErrors } = validateForm(formData);
 
-    });
+    if(!valid) {
+
+      return fail(StatusCodes.BAD_REQUEST, {
+        errors: formErrors
+      });
+    }
+
     // return fail(StatusCodes.BAD_REQUEST, {
     //   args: {
     //     errors: {
