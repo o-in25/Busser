@@ -15,18 +15,22 @@ export const load = (async ({ locals }) => {
 
 
 export const actions = {
-	login: async ({ request, cookies, locals }) => {
+	default: async ({ request, cookies, locals }) => {
 		const formData: any = await request.formData();
 		const username = formData.get('username');
 		const password = formData.get('password');
 
 		if(!username || !password) {
-			return fail(StatusCodes.BAD_REQUEST, { err: true } as any);
+			return fail(StatusCodes.BAD_REQUEST, {
+        error: 'No dice'
+      });
 		}
 
 		const userToken = await login(username, password);
 		if(!userToken) {
-			return fail(StatusCodes.BAD_REQUEST, { err: true, username } as any);
+			return fail(StatusCodes.BAD_REQUEST, {
+        error: 'No dice'
+      });
 		}
 
 

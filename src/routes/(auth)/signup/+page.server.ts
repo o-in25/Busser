@@ -13,28 +13,35 @@ export const actions = {
 	default: async ({ request }) => {
     let formData: any = await request.formData();
     formData = Object.fromEntries(formData);
-    return fail(StatusCodes.BAD_REQUEST, {
-      args: {
-        errors: {
-          username: {
-            hasError: true,
-            message: 'Username taken.'
-          },
-          email: {
-            hasError: true,
-            message: 'Invalid email.'
-          },
-          password: {
-            hasError: true,
-            message: 'Invalid password.'
-          },
-          passwordConfirm: {
-            hasError: true,
-            message: 'Invalid password confirm.'
-          }
-        }
-      }
-    } as any);
+    return fail(StatusCodes.BAD_REQUEST, { 
+      error: {
+        message: 'Username or password is incorrect.',
+      },
+      args: { }
+
+     });
+    // return fail(StatusCodes.BAD_REQUEST, {
+    //   args: {
+    //     errors: {
+    //       username: {
+    //         hasError: true,
+    //         message: 'Username taken.'
+    //       },
+    //       email: {
+    //         hasError: true,
+    //         message: 'Invalid email.'
+    //       },
+    //       password: {
+    //         hasError: true,
+    //         message: 'Invalid password.'
+    //       },
+    //       passwordConfirm: {
+    //         hasError: true,
+    //         message: 'Invalid password confirm.'
+    //       }
+    //     }
+    //   }
+    // } as any);
 
       // redirect(StatusCodes.TEMPORARY_REDIRECT, '/check-email');
   }

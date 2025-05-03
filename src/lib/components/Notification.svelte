@@ -64,7 +64,7 @@
 		color="red"
 		transition={fly}
 		params={{ x: 200 }}
-		class="mb-4"
+    divClass="w-full max-w-xs p-4 text-gray-500 bg-primary-200 shadow-sm dark:text-gray-400 dark:bg-secondary-200 gap-3 rounded-lg"
 	>
 		<svelte:fragment slot="icon">
 			<CheckCircleSolid class="w-5 h-5" />

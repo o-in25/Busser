@@ -3,8 +3,9 @@
     import type { PageData } from './$types';
 	import UserForm from '$lib/components/UserForm.svelte';
 	import type { FormSubmitResult } from '$lib/types';
+	import type { ActionResult } from '@sveltejs/kit';
 
-    let { data, form}: { data: PageData, form: FormSubmitResult } = $props();
+    let { data, form}: { data: PageData, form: ActionResult } = $props();
 </script>
 
 <!-- <div class="flex justify-center p-10">
@@ -32,5 +33,5 @@
 </svelte:head>
 <div class="flex flex-col space-y-6">
   <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign up</h3>
-  <UserForm user={null} action="register" suppressToast={true} errors={form?.args.errors}/>
+  <UserForm user={null} action="register" suppressToast={true}/>
 </div>

@@ -15,7 +15,7 @@
 	import { goto } from '$app/navigation';
 
 	export let user: User | null = null;
-	export let action: 'add' | 'edit' | 'register';
+	export let action: 'add' | 'edit' | 'register' | 'login';
 	export let roles: SelectOption[] = [];
 	export let suppressToast = false;
 	// const userRoles: any[] = getContext('roles') || [];
@@ -27,6 +27,7 @@
 		edit: `/settings/users/${user?.userId}/edit`,
 		add: '/settings/users/add',
 		register: '/signup',
+    login: '/login'
 	};
 
 	export let errors = {
@@ -71,6 +72,8 @@
 		};
 	}}
 >
+
+  <!-- username -->
 	<Label
 		class="space-y-2"
 		color={errors.username.hasError ? 'red' : 'gray'}
@@ -91,6 +94,9 @@
 			</Helper>
 		{/if}
 	</Label>
+
+  <!-- email -->
+   {#if action !== 'login'}
 	<Label
 		class="space-y-2"
 		color={errors.email.hasError ? 'red' : 'gray'}
@@ -111,6 +117,9 @@
 			</Helper>
 		{/if}
 	</Label>
+  {/if}
+
+  <!-- role -->
 	{#if action === 'edit' || action === 'add'}
 		<Label class="space-y-2">
 			<span>Role</span>
@@ -128,6 +137,7 @@
 		</Label>
 	{/if}
 
+  <!-- password reset -->
 	{#if action === 'edit'}
 		<div class="flex items-start">
 			<a
@@ -138,7 +148,8 @@
 			</a>
 		</div>
 	{/if}
-	{#if action === 'add' || action === 'register'}
+	{#if action === 'add' || action === 'register' || action === 'login'}
+    <!-- password -->
 		<Label
 			class="space-y-2"
 			color={errors.password.hasError ? 'red' : 'gray'}
@@ -158,6 +169,9 @@
 				</Helper>
 			{/if}
 		</Label>
+
+    <!-- password confirm -->
+     {#if action !== 'login'}
 		<Label
 			class="space-y-2"
 			color={errors.passwordConfirm.hasError ? 'red' : 'gray'}
@@ -177,6 +191,7 @@
 				</Helper>
 			{/if}
 		</Label>
+    {/if}
 		<!-- {#if action === 'register'}
 			<fieldset>
 				<Label class="space-y-2">
@@ -192,14 +207,14 @@
 		{/if} -->
 	{/if}
 
-	{#if action === 'register'}
+	{#if action === 'register' || action === 'login'}
 		<GradientButton
 			color="pinkToOrange"
 			size="lg"
 			class="w-full hover:!bg-transparent"
 			type="submit"
 		>
-			Sign up
+			{action === 'register'? 'Sign up' : 'Log in'}
 		</GradientButton>
 	{:else}
 		<Button
@@ -212,12 +227,25 @@
 	{/if}
 	<!-- submit -->
 
+  {#if action === 'register'}
 	<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-		Already registered? <a
+		Already signed up? <a
 			href="/login "
 			class="text-primary-700 hover:underline dark:text-primary-500"
 		>
 			Log in
 		</a>
 	</div>
+  {/if}
+
+  {#if action === 'login'}
+	<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+		Need to sign up? <a
+			href="/signup "
+			class="text-primary-700 hover:underline dark:text-primary-500"
+		>
+			Log in
+		</a>
+	</div>
+  {/if}
 </form>

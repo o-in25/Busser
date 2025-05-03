@@ -17,6 +17,7 @@ export type User = {
   // user control
   roles: Role[];
   permissions: Permission[];
+  verified: number;
 };
 
 export type Permission = {
