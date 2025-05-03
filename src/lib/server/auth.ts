@@ -61,19 +61,29 @@ export async function authenticate(
 export async function login(
   username: string,
   password: string
-): Promise<string | null> {
+): Promise<QueryResult<string | null>> {
   try {
     // get user password
-    const { userId, password: hashedPassword } = await db.table('user').where({ username }).select('userId', 'password').first();
+    const { userId, verified, password: hashedPassword } = await db.table('user')
+    .where({ username })
+    .select('userId', 'password', 'verified').first();
     if(!userId || !password) {
-      throw new Error('User not found.');
+      // TODO: hash the password here anyways to prevent a timing attack
+      throw new Error('User not found');
     }
 
     // check password
     const isValid = await compare(password, hashedPassword);
     if(!isValid) {
-      throw new Error('Incorrect password.');
+      throw new Error('Incorrect password');
     }
+
+    const isVerified = verified ===  1;
+    if(!isVerified) {
+      throw new Error('Email not verified');
+    }
+
+    // check if verified
 
     const queryResult = await getUser(userId);
     if(queryResult.status === 'error') {
@@ -86,14 +96,30 @@ export async function login(
     const userToken = await signUserToken(user);
 
 
-    return userToken;
+    return {
+      status: 'success',
+      data: userToken
+    };
   } catch(error: any) {
-    await Logger.error(error);
+    await Logger.error(error.message);
     if(username) {
       await Logger.info(`User ${username} attempted to sign in.`);
     }
-    console.error(error);
-    return null;
+
+    const getFriendlyError = ({ message }): string => {
+      const messages = {
+        'User not found': 'Invalid username or password.',
+        'Incorrect password': 'Invalid username or password.',
+        'Email not verified': 'Your email address hasn’t been verified yet. Please check your inbox for the verification email and follow the instructions to activate your account.'
+      }
+
+      return messages[message] || 'An unknown error occurred.';
+    }
+
+    return {
+      status: 'error',
+      error: getFriendlyError(error)
+    };
   }
 }
 

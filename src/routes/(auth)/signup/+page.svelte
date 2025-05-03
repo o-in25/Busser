@@ -33,5 +33,5 @@
 </svelte:head>
 <div class="flex flex-col space-y-6">
   <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign up</h3>
-  <UserForm user={null} action="register" suppressToast={true}/>
+  <UserForm user={null} action="register"/>
 </div>
