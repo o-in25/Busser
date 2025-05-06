@@ -13,7 +13,7 @@ const HASH_ROUNDS = 10;
 
 const db = new DbProvider('user_t');
 
-const verifyUserToken = (token: string): Promise<User> => {
+export const verifyToken = async <T> (token: string): Promise<T> => {
   return new Promise((resolve, reject) => {
     if(!JWT_SIGNING_KEY) return reject(new Error('No JWT signing key found.'));
     jwt.verify(token, JWT_SIGNING_KEY || '', (err, decoded) => {
@@ -21,12 +21,12 @@ const verifyUserToken = (token: string): Promise<User> => {
         return reject(err);
       }
 
-      return resolve(decoded as User);
+      return resolve(decoded as T);
     });
   });
 };
 
-const signUserToken = (payload: User): Promise<string> => {
+export const signToken = async <T> (payload: T): Promise<string> => {
   return new Promise((resolve, reject) => {
     if(!JWT_SIGNING_KEY) return reject(new Error('No JWT signing key found.'));
     jwt.sign(JSON.parse(JSON.stringify(payload)), JWT_SIGNING_KEY, { algorithm: 'HS256' }, (err, token) => {
@@ -49,7 +49,7 @@ export async function authenticate(
 ): Promise<User | null> {
   try {
     if(!userToken) return null;
-    const user = (await verifyUserToken(userToken)) as User;
+    const user = (await verifyToken<User>(userToken)) as User;
     return user;
   } catch(error: any) {
     console.error(error);
@@ -92,7 +92,7 @@ export async function login(
     // update activity date
     await db.table('user').update({ lastActivityDate: Logger.now() }).where({ userId });
     const user = queryResult.data || {} as User;
-    const userToken = await signUserToken(user);
+    const userToken = await signToken<User>(user);
 
 
     return {

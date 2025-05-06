@@ -1,6 +1,7 @@
 import type { QueryResult, SelectOption } from "$lib/types";
-import type { Permission, Role, User } from "$lib/types/auth";
-import { hashPassword } from "./auth";
+import { type Permission, type RegistrationToken, type Role, type User, type UserRole } from "$lib/types/auth";
+import moment from "moment";
+import { hashPassword, signToken } from "./auth";
 import { marshal, marshalToType } from "./core";
 import { DbProvider } from "./db";
 
@@ -285,42 +286,78 @@ export async function getUser(userId: string): Promise<QueryResult<User>> {
 
 export async function registerUser(username: string, email: string, password: string): Promise<QueryResult<any>> {
 
-  // check if user name is taken
-  // set verified = true
-  // set role = VIEWER
-  // add user
-  // sign jwt
-  // send email
+  // step 1: check if user name is taken
+  // step 2: set verified = true
+  // step 3: set role = VIEWER
+  // step 4: add user
+  // step 5: add user role
+  // step 6: sign jwt
+  // step 7: send email
   try {
     await db.query.transaction(async (trx) => {
       // step 1
-      let dbResult: any = await trx('user').select('username').where({ username }).first();
+      let dbResult: any = await trx('user').select('username', 'email').where({ username }).first();
       dbResult = marshal(dbResult); 
+
+
       if(dbResult?.username) {
         throw new Error('Username already taken.');
       }
+
+      if(dbResult?.email) {
+        throw new Error('Email already taken.');
+      }
+
+      const hashedPassword = await hashPassword(password);
 
       // step 2
       let user: any = {
         username, 
         email, 
-        password,
+        password: hashedPassword,
         verified: false
       }
+      let rolePermission: UserRole = {
+        userId: "",
+        roleId: ""
+      };
 
       dbResult = await trx('user').insert(user);
-      
+      dbResult = await trx('user').select('userId').where({
+        username,
+        email,
+        password: hashedPassword
+      });
 
+      dbResult = marshal(dbResult); 
+      if(!dbResult?.userId) {
+        throw new Error('Could not create user.');
+      }
+
+      rolePermission.userId = dbResult.userId;
 
       // step 3
       dbResult = await trx('user').select('roleId').where('roleName', 'VIEWER').first();
+
       dbResult = marshal(dbResult); 
       if(!dbResult?.roleId) {
         throw new Error('Could not register user for default role.');
       }
 
+      rolePermission.roleId = dbResult.roleId;
+
+      // step 4 + 5
+      dbResult = await trx('userRole').insert(rolePermission);
 
 
+      // step 6
+      const token = await signToken<RegistrationToken>({
+        userId: rolePermission.userId,
+        iat: moment().unix(),
+        exp: moment().add(24, 'hours').unix()
+      });
+
+      
 
 
     });

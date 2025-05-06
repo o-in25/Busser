@@ -49,3 +49,9 @@ export type Invitation = {
   email: string;          
   expiresAt: Date;   
 }
+
+export type RegistrationToken = {
+  userId: string;
+  iat: number;
+  exp: number;
+}
