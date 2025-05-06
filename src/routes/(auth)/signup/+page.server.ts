@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 import type { PageServerLoad } from './$types';
+import { addUser } from '$lib/server/user';
 
 export const load = (async ({ locals }) => {
   // if(locals.user?.userId) {
@@ -14,7 +15,7 @@ export const actions = {
     let formData: any = await request.formData();
     formData = Object.fromEntries(formData);
 
-            let errors = {
+    let errors = {
       username: {
         hasError: false,
         message: '',
@@ -39,30 +40,28 @@ export const actions = {
       passwordConfirm,
       email
     }) => {
-
-
-      if (!username?.trim()) {
+      if(!username?.trim()) {
         errors.username = {
           hasError: true,
           message: 'Username is required.'
         };
-      } 
-    
-      if (!password?.trim()) {
+      }
+
+      if(!password?.trim()) {
         errors.password = {
           hasError: true,
           message: 'Password is required.'
         };
       }
-    
-      if (!passwordConfirm?.trim()) {
+
+      if(!passwordConfirm?.trim()) {
         errors.passwordConfirm = {
           hasError: true,
           message: 'Password confirmation is required.'
         };
       }
-    
-      if (password !== passwordConfirm) {
+
+      if(password !== passwordConfirm) {
         errors.password = {
           hasError: true,
           message: 'Passwords do not match.'
@@ -72,36 +71,35 @@ export const actions = {
           message: 'Passwords do not match.'
         };
       }
-    
-      if (!email?.trim()) {
+
+      if(!email?.trim()) {
         errors.email = {
           hasError: true,
           message: 'Email is required.'
-        };  
+        };
       } else {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if(!emailRegex.test(email)) {
           errors.email = {
             hasError: true,
             message: 'Email is not valid.'
           };
         }
       }
-    
-      const valid = !Object.values(errors).some((field) => field.hasError);
-    
-      return { valid, errors };
-    }
 
+      const valid = !Object.values(errors).some((field) => field.hasError);
+      return { valid, errors };
+    };
 
     const { valid, errors: formErrors } = validateForm(formData);
 
     if(!valid) {
-
       return fail(StatusCodes.BAD_REQUEST, {
         errors: formErrors
       });
     }
+
+//    await addUser(formData.username, formData.email. formData.password, ['VIEWER'], false)
 
     // return fail(StatusCodes.BAD_REQUEST, {
     //   args: {

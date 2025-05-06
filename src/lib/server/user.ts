@@ -282,3 +282,27 @@ export async function getUser(userId: string): Promise<QueryResult<User>> {
     };
   }
 }
+
+export async function registerUser(username: string, email: string, password: string): Promise<QueryResult<any>> {
+
+  // check if user name is taken
+  // set verified = true
+  // set role = VIEWER
+  // add user
+  // sign jwt
+  // send email
+  try {
+
+    
+
+    return {
+      status: 'success'
+    }
+  } catch(error: any) {
+    console.error(error);
+    return {
+      status: 'error',
+      error: error.message
+    }
+  }
+}
