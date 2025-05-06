@@ -292,8 +292,38 @@ export async function registerUser(username: string, email: string, password: st
   // sign jwt
   // send email
   try {
+    await db.query.transaction(async (trx) => {
+      // step 1
+      let dbResult: any = await trx('user').select('username').where({ username }).first();
+      dbResult = marshal(dbResult); 
+      if(dbResult?.username) {
+        throw new Error('Username already taken.');
+      }
 
-    
+      // step 2
+      let user: any = {
+        username, 
+        email, 
+        password,
+        verified: false
+      }
+
+      dbResult = await trx('user').insert(user);
+      
+
+
+      // step 3
+      dbResult = await trx('user').select('roleId').where('roleName', 'VIEWER').first();
+      dbResult = marshal(dbResult); 
+      if(!dbResult?.roleId) {
+        throw new Error('Could not register user for default role.');
+      }
+
+
+
+
+
+    });
 
     return {
       status: 'success'

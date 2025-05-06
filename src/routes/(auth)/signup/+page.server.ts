@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 import type { PageServerLoad } from './$types';
-import { addUser } from '$lib/server/user';
+import { addUser, registerUser } from '$lib/server/user';
 
 export const load = (async ({ locals }) => {
   // if(locals.user?.userId) {
@@ -95,9 +95,21 @@ export const actions = {
 
     if(!valid) {
       return fail(StatusCodes.BAD_REQUEST, {
-        errors: formErrors
+        errors: formErrors,
+        message: ''
       });
     }
+    
+    const queryResult = await registerUser(formData.username, '', '');
+    if('data' in queryResult) {
+
+    } else if('error' in queryResult) {
+      return fail(StatusCodes.BAD_REQUEST, {
+        errors: formErrors,
+        message: queryResult.error
+      })
+    }
+
 
 //    await addUser(formData.username, formData.email. formData.password, ['VIEWER'], false)
 

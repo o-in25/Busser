@@ -39,16 +39,18 @@
 </svelte:head>
 <div class="flex flex-col space-y-6">
 	<h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign up</h3>
-  <Alert
-    border
-    color="red"
-  >
-    <ExclamationCircleSolid
-      slot="icon"
-      class="w-5 h-5"
-    />
-    <!-- {form.error} -->Error
-  </Alert>
+  {#if form?.message}
+    <Alert
+      border
+      color="red"
+    >
+      <ExclamationCircleSolid
+        slot="icon"
+        class="w-5 h-5"
+      />
+      {form?.message}
+    </Alert>
+  {/if}
 	<form
 		class="space-y-6"
 		method="POST"
