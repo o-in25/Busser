@@ -15,7 +15,7 @@
 	<title>Check Email - Busser</title>
 </svelte:head>
 <div>
-	<CheckCircleOutline class="w-8 h-8 mb-3 text-gray-500 dark:text-gray-400" />
+	<CheckCircleOutline class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
 
 	<Heading
 		tag="h4"
@@ -25,8 +25,8 @@
 	</Heading>
 	<P class="mb-3 font-normal text-gray-500 dark:text-gray-400">
 		We’ve sent a verification link to <strong>
-			{email || 'your email address'}
+			{email || 'your email address'}.
 		</strong>
-		. Please click the link to complete your registration.
+		Please click the link to complete your registration.
 	</P>
 </div>

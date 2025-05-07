@@ -27,3 +27,11 @@ export async function sendSimpleMessage(to: string[], subject: string) {
     console.log(error); //logs any error
   }
 }
+
+export async function sendRegisterUserEmail(to: string[], token: string) {
+  try {
+
+  } catch(error: any) {
+
+  }
+}
