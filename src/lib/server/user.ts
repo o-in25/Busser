@@ -4,8 +4,10 @@ import moment from "moment";
 import { hashPassword, signToken } from "./auth";
 import { marshal, marshalToType } from "./core";
 import { DbProvider } from "./db";
+import { MailClient } from "./mail";
 
 const db = new DbProvider('user_t');
+const mailClient = new MailClient();
 
 export async function getUsers() {
   try {
@@ -294,6 +296,12 @@ export async function registerUser(username: string, email: string, password: st
   // step 6: sign jwt
   // step 7: send email
   try {
+
+
+
+    // TODO:
+    // return the new user from trx and 
+    // *then* sign the token
     await db.query.transaction(async (trx) => {
       // step 1
       let dbResult: any = await trx('user').select('username', 'email').where({ username }).first();
@@ -311,28 +319,31 @@ export async function registerUser(username: string, email: string, password: st
       const hashedPassword = await hashPassword(password);
 
       // step 2
-      let user: any = {
+      dbResult = await trx('user').insert({
         username, 
         email, 
         password: hashedPassword,
         verified: false
-      }
-      let rolePermission: UserRole = {
-        userId: "",
-        roleId: ""
-      };
+      });
 
-      dbResult = await trx('user').insert(user);
-      dbResult = await trx('user').select('userId').where({
+
+      let user: Partial<User>;
+
+      dbResult = await trx('user').select('userId', 'username').where({
         username,
         email,
         password: hashedPassword
       });
 
-      dbResult = marshal(dbResult); 
-      if(!dbResult?.userId) {
+      user = marshalToType<User>(dbResult); 
+      if(!user?.userId || !user.email || !user.username) {
         throw new Error('Could not create user.');
       }
+
+      let rolePermission: UserRole = {
+        userId: "",
+        roleId: ""
+      };
 
       rolePermission.userId = dbResult.userId;
 
@@ -357,10 +368,12 @@ export async function registerUser(username: string, email: string, password: st
         exp: moment().add(24, 'hours').unix()
       });
 
+      // step 7
 
-      
-
-      
+      await mailClient.sendUserRegistrationEmail([user.email], {
+        username: user.username,
+        token
+      });
 
     });
 

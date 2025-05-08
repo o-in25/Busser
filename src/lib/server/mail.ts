@@ -1,13 +1,12 @@
 const { MAILGUN_KEY } = process.env;
 
-import FormData from "form-data"; // form-data v4.0.1
-import Mailgun from "mailgun.js"; // mailgun.js v11.1.0
-import { Logger } from "./logger";
-import { user } from "../../stores";
+import FormData from "form-data";
+import Mailgun from "mailgun.js";
+
 
 export interface IUserRegistrationEmailParams {
   username: string,
-  token: string
+  token: string;
 };
 
 export interface IPasswordResetEmailParams {
@@ -18,8 +17,8 @@ export interface IPasswordResetEmailParams {
 export class MailClient {
 
   // TODO: move this to env var in case we want separate domains
-  private static domain: string = "busserapp.com"
-  private static from: string = "The Busser Team <noreply@busserapp.com>"
+  private static domain: string = "busserapp.com";
+  private static from: string = "The Busser Team <noreply@busserapp.com>";
   private static mailgun = new Mailgun(FormData);
   private static client = this.mailgun.client({
     username: "api",
@@ -40,13 +39,13 @@ export class MailClient {
         "h:X-Mailgun-Variables": JSON.stringify({ username, token }),
       });
 
-      console.log(messageResult)
-    } catch (error: any) {
+      console.log(messageResult);
+    } catch(error: any) {
       console.error(error.message);
     }
   }
 
-  public async sendPasswordResetEmail({}: IPasswordResetEmailParams) {
+  public async sendPasswordResetEmail({ }: IPasswordResetEmailParams) {
 
   }
 }
