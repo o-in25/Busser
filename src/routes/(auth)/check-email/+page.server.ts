@@ -1,12 +1,19 @@
 import { signToken } from '$lib/server/auth';
-import { sendRegisterUserEmail } from '$lib/server/mail';
+import { MailClient } from '$lib/server/mail';
 import type { PageServerLoad } from './$types';
+
+const mailClient = new MailClient();
 
 export const load = (async () => {
   const token = await signToken({
     name: 'test'
   })
-  await sendRegisterUserEmail(["eoinhalligan3@gmail.com"], "eoin", token)
+
+
+  await mailClient.sendUserRegistrationEmail(["eoinhalligan3@gmail.com"], {
+    username: 'eoin',
+    token
+  })
 
 
 }) satisfies PageServerLoad;
