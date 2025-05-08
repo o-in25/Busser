@@ -10,7 +10,7 @@ export interface IUserRegistrationEmailParams {
   token: string
 };
 
-export interface IPasswordResetEmailParams = {
+export interface IPasswordResetEmailParams {
 
 }
 
