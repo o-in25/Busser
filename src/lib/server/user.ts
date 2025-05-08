@@ -286,7 +286,7 @@ export async function getUser(userId: string): Promise<QueryResult<User>> {
   }
 }
 
-export async function registerUser(username: string, email: string, password: string): Promise<QueryResult<any>> {
+export async function registerUser(username: string, email: string, password: string): Promise<QueryResult<{ token: string, user: Partial<User> }>> {
 
   // step 1: check if user name is taken
   // step 2: set verified = true
@@ -296,13 +296,7 @@ export async function registerUser(username: string, email: string, password: st
   // step 6: sign jwt
   // step 7: send email
   try {
-
-
-
-    // TODO:
-    // return the new user from trx and 
-    // *then* sign the token
-    await db.query.transaction(async (trx) => {
+    const user: Partial<User> = await db.query.transaction(async (trx) => {
       // step 1
       let dbResult: any = await trx('user').select('username', 'email').where({ username }).first();
       dbResult = marshal(dbResult); 
@@ -323,20 +317,23 @@ export async function registerUser(username: string, email: string, password: st
         username, 
         email, 
         password: hashedPassword,
-        verified: false
+        verified: 0
       });
 
 
       let user: Partial<User>;
 
-      dbResult = await trx('user').select('userId', 'username').where({
-        username,
-        email,
-        password: hashedPassword
+      dbResult = await trx('user')
+        .select('userId', 'username', 'email')
+        .where({
+          username,
+          email,
+          password: hashedPassword
       });
 
       user = marshalToType<User>(dbResult); 
-      if(!user?.userId || !user.email || !user.username) {
+
+      if(!user.userId || !user.username || !user.email) {
         throw new Error('Could not create user.');
       }
 
@@ -360,26 +357,36 @@ export async function registerUser(username: string, email: string, password: st
       // step 4 + 5
       dbResult = await trx('userRole').insert(rolePermission);
 
+      return user;
+    });
 
-      // step 6
-      const token = await signToken<RegistrationToken>({
-        userId: rolePermission.userId,
-        iat: moment().unix(),
-        exp: moment().add(24, 'hours').unix()
-      });
+    if(!user.userId || !user.username || !user.email) {
+      throw new Error('User created, but cannot send registration token.');
+    }
 
-      // step 7
 
-      await mailClient.sendUserRegistrationEmail([user.email], {
-        username: user.username,
-        token
-      });
+    // step 6
+    const token = await signToken<RegistrationToken>({
+      userId: user.userId,
+      iat: moment().unix(),
+      exp: moment().add(24, 'hours').unix()
+    });
 
+    // step 7
+    await mailClient.sendUserRegistrationEmail([user.email], {
+      username: user.username,
+      token
     });
 
     return {
-      status: 'success'
+      status: 'success',
+      data: {
+        token,
+        user
+      }
     }
+
+
   } catch(error: any) {
     console.error(error);
     return {

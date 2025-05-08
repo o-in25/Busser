@@ -6,9 +6,9 @@
 		ArrowUpRightFromSquareOutline,
 		CheckCircleOutline,
 	} from 'flowbite-svelte-icons';
+	import { page } from '$app/state';
 
 	let { data }: { data: PageData } = $props();
-	let email = 'test@test.com';
 </script>
 
 <svelte:head>
@@ -25,7 +25,7 @@
 	</Heading>
 	<P class="mb-3 font-normal text-gray-500 dark:text-gray-400">
 		We’ve sent a verification link to <strong>
-			{email || 'your email address'}.
+			{data.registrationToken}
 		</strong>
 		Please click the link to complete your registration.
 	</P>

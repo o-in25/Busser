@@ -4,16 +4,23 @@ import type { PageServerLoad } from './$types';
 
 const mailClient = new MailClient();
 
-export const load = (async () => {
-  const token = await signToken({
-    name: 'test'
-  })
+export const load = (async ({ url }) => {
+  // const token = await signToken({
+  //   name: 'test'
+  // })
 
 
-  await mailClient.sendUserRegistrationEmail(["eoinhalligan3@gmail.com"], {
-    username: 'eoin',
-    token
-  })
+  // await mailClient.sendUserRegistrationEmail(["eoinhalligan3@gmail.com"], {
+  //   username: 'eoin',
+  //   token
+  // })
 
+
+  const email = url.searchParams.get('email');
+  const registrationToken = url.searchParams.get('registrationToken');
+
+  return {
+    email, registrationToken
+  }
 
 }) satisfies PageServerLoad;
