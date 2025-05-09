@@ -34,9 +34,9 @@
   </form>
 </Card>
 </div>   -->
-<svelte:head> 
+<!-- <svelte:head> 
 	<title>Sign Up - Busser</title>
-</svelte:head>
+</svelte:head> -->
 <div class="flex flex-col space-y-6">
 	<h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign up</h3>
   {#if form?.message}

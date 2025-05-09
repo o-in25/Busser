@@ -100,9 +100,9 @@ export const actions = {
       });
     }
     
-    const queryResult = await registerUser(formData.username, '', '');
+    const queryResult = await registerUser(formData.username, formData.email, formData.password);
     if('data' in queryResult) {
-
+      console.log(queryResult.data)
     } else if('error' in queryResult) {
       return fail(StatusCodes.BAD_REQUEST, {
         errors: formErrors,

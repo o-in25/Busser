@@ -329,10 +329,12 @@ export async function registerUser(username: string, email: string, password: st
           username,
           email,
           password: hashedPassword
-      });
+      }).first();
+      
+      user = marshalToType<Partial<User>>(dbResult); 
+      console.log(user);
 
-      user = marshalToType<User>(dbResult); 
-
+      console.log(username, password)
       if(!user.userId || !user.username || !user.email) {
         throw new Error('Could not create user.');
       }
@@ -345,7 +347,7 @@ export async function registerUser(username: string, email: string, password: st
       rolePermission.userId = dbResult.userId;
 
       // step 3
-      dbResult = await trx('user').select('roleId').where('roleName', 'VIEWER').first();
+      dbResult = await trx('role').select('roleId').where('roleName', 'VIEWER').first();
 
       dbResult = marshal(dbResult); 
       if(!dbResult?.roleId) {
