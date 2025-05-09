@@ -1,7 +1,7 @@
 import type { QueryResult, SelectOption } from "$lib/types";
 import { type Permission, type RegistrationToken, type Role, type User, type UserRole } from "$lib/types/auth";
 import moment from "moment";
-import { hashPassword, signToken } from "./auth";
+import { hashPassword, signToken, verifyToken } from "./auth";
 import { marshal, marshalToType } from "./core";
 import { DbProvider } from "./db";
 import { MailClient } from "./mail";
@@ -396,4 +396,42 @@ export async function registerUser(username: string, email: string, password: st
       error: error.message
     }
   }
+}
+
+export async function verifyUser(registrationToken: string): Promise<QueryResult> {
+  // read jwt 
+  // check expiration 
+  // set user to verified
+  try {
+    const { userId, iat, exp }: RegistrationToken = await verifyToken<RegistrationToken>(registrationToken);
+    const now = moment();
+
+    if(!userId || !iat || !exp) {
+      throw new Error('Token is invalid.')
+    }
+    if(now.isBefore(iat)) {
+      throw new Error('Invalid token issue date.')
+    }
+
+    if(now.isAfter(exp)) {
+      throw new Error('Token is expired.')
+    }
+
+    await db.table('user')
+    .update('verified', 1).where({
+      userId
+    });
+
+    return { status: 'success' }
+
+
+
+  } catch(error: any) {
+    console.error(error);
+    return {
+      status: 'error',
+      error: error.message
+    }
+  }
+
 }

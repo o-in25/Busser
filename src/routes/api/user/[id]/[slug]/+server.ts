@@ -9,7 +9,7 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
   const { id, slug } = params;
   switch(slug) {
     case 'delete':
-      if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('admin_delete')) {
+      if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('delete_admin')) {
         const refresh = await getUsers() || [];
         return json({ error: 'You do not have permission to perform this action.', refresh });
       }

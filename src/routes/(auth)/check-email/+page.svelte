@@ -24,9 +24,6 @@
 		Check your email
 	</Heading>
 	<P class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-		We’ve sent a verification link to <strong>
-			{data.registrationToken}
-		</strong>
-		Please click the link to complete your registration.
+    Thanks for signing up! We’ve sent a confirmation link to your inbox. Click the link in that email to verify your address and complete your registration.
 	</P>
 </div>
