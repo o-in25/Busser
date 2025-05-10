@@ -286,7 +286,7 @@ export async function getUser(userId: string): Promise<QueryResult<User>> {
   }
 }
 
-export async function registerUser(username: string, email: string, password: string): Promise<QueryResult<{ token: string, user: Partial<User> }>> {
+export async function registerUser(username: string, email: string, password: string): Promise<QueryResult> {
 
   // step 1: check if user name is taken
   // step 2: set verified = true
@@ -381,11 +381,7 @@ export async function registerUser(username: string, email: string, password: st
     });
 
     return {
-      status: 'success',
-      data: {
-        token,
-        user
-      }
+      status: 'success'
     }
 
 

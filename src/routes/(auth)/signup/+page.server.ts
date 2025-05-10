@@ -101,14 +101,30 @@ export const actions = {
     }
     
     const queryResult = await registerUser(formData.username, formData.email, formData.password);
-    if('data' in queryResult) {
-      console.log(queryResult.data)
-    } else if('error' in queryResult) {
+    if(queryResult.status === 'error') {
       return fail(StatusCodes.BAD_REQUEST, {
         errors: formErrors,
         message: queryResult.error
-      })
+      });
     }
+
+    const params = new URLSearchParams({
+      email: formData.email
+    });
+    
+    const url = `/check-email?${params.toString()}`;
+
+    return redirect(StatusCodes.TEMPORARY_REDIRECT, url);
+    // if('data' in queryResult && queryResult.data) {
+    //   const { token, user } = queryResult.data;
+
+
+    // } else if('error' in queryResult) {
+    //   return fail(StatusCodes.BAD_REQUEST, {
+    //     errors: formErrors,
+    //     message: queryResult.error
+    //   })
+    // }
 
 
 //    await addUser(formData.username, formData.email. formData.password, ['VIEWER'], false)
