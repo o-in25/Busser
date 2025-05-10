@@ -112,7 +112,7 @@ export const actions = {
       email: formData.email
     });
     
-    const url = `/check-email?${params.toString()}`;
+    const url = `/verify-email?${params.toString()}`;
 
     return redirect(StatusCodes.TEMPORARY_REDIRECT, url);
     // if('data' in queryResult && queryResult.data) {

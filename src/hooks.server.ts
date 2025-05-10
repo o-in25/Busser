@@ -2,7 +2,7 @@ import { authenticate } from '$lib/server/auth';
 import { redirect, type Handle } from "@sveltejs/kit";
 import { StatusCodes } from 'http-status-codes';
 
-const publicRoutes = ['/login', '/logout', '/signup', '/check-email', '/'];
+const publicRoutes = ['/login', '/logout', '/signup', '/verify-email', '/'];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
   const { cookies, url } = event;
