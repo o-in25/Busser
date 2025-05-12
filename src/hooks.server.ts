@@ -1,17 +1,27 @@
 import { authenticate } from '$lib/server/auth';
 import { redirect, type Handle } from "@sveltejs/kit";
 import { StatusCodes } from 'http-status-codes';
+import micromatch from 'micromatch';
 
-const publicRoutes = ['/login', '/logout', '/signup', '/verify-email', '/'];
+const publicRoutes = [
+  '/',
+  '/login',
+  '/logout',
+  '/signup',
+  '/verify-email/**'
+]
+
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
   const { cookies, url } = event;
   const slug = url.pathname;
   const userToken = cookies.get("userToken");
 
-  event.locals.user = await authenticate(userToken);
+  event.locals.user = await authenticate(userToken);  
 
-  if(!event.locals.user && !publicRoutes.includes(slug)) {
+  const isPublicRoute = micromatch.isMatch(slug, publicRoutes);
+
+  if(!event.locals.user && !isPublicRoute) {
     return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
   }
 
