@@ -113,7 +113,7 @@ export const actions = {
       });
     }
     
-    const queryResult = await registerUser(formData.username, formData.email, formData.password, '');
+    const queryResult = await registerUser(formData.username, formData.email, formData.password, formData.invitationCode);
     if(queryResult.status === 'error') {
       return fail(StatusCodes.BAD_REQUEST, {
         errors: formErrors,
@@ -124,47 +124,9 @@ export const actions = {
     const params = new URLSearchParams({
       email: formData.email
     });
-    
     const url = `/verify-email?${params.toString()}`;
 
     return redirect(StatusCodes.TEMPORARY_REDIRECT, url);
-    // if('data' in queryResult && queryResult.data) {
-    //   const { token, user } = queryResult.data;
 
-
-    // } else if('error' in queryResult) {
-    //   return fail(StatusCodes.BAD_REQUEST, {
-    //     errors: formErrors,
-    //     message: queryResult.error
-    //   })
-    // }
-
-
-//    await addUser(formData.username, formData.email. formData.password, ['VIEWER'], false)
-
-    // return fail(StatusCodes.BAD_REQUEST, {
-    //   args: {
-    //     errors: {
-    //       username: {
-    //         hasError: true,
-    //         message: 'Username taken.'
-    //       },
-    //       email: {
-    //         hasError: true,
-    //         message: 'Invalid email.'
-    //       },
-    //       password: {
-    //         hasError: true,
-    //         message: 'Invalid password.'
-    //       },
-    //       passwordConfirm: {
-    //         hasError: true,
-    //         message: 'Invalid password confirm.'
-    //       }
-    //     }
-    //   }
-    // } as any);
-
-    // redirect(StatusCodes.TEMPORARY_REDIRECT, '/check-email');
   }
 };

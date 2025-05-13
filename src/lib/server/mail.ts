@@ -36,7 +36,11 @@ export class MailClient {
         to,
         subject: "Welcome to Busser",
         template: "user registration",
-        "h:X-Mailgun-Variables": JSON.stringify({ username, token }),
+        "h:X-Mailgun-Variables": JSON.stringify({ 
+          url: 'http://localhost:5173',
+          username, 
+          token 
+        }),
       });
 
       console.log(messageResult);

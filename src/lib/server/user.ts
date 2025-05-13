@@ -60,7 +60,6 @@ export async function addUser(username: string, email: string, password: string,
 }
 
 export async function editUser(userId: string, username: string, email: string, roleIds: string[] = []): Promise<QueryResult<User>> {
-  console.log(roleIds);
   try {
     const user: User = await db.query.transaction(async (trx) => {
       let dbResult: any = await db
@@ -308,9 +307,12 @@ export async function registerUser(username: string, email: string, password: st
       let invitation: Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>;
 
       // step 0
-      let dbResult: any = await trx('user').select('invitationId', 'userId', 'issuedAt', 'expiresAt').where({ invitationCode }).first();
-      invitation = marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>>(dbResult); 
+      let dbResult: any = await trx('invitation').select('invitationId', 'userId', 'issuedAt', 'expiresAt').where({ invitationCode }).first();
+      if(!dbResult) {
+        throw new Error('Invalid invitation code.');
+      }
 
+      invitation = marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>>(dbResult); 
       if(!invitation.invitationId || invitation.userId !== null) {
         throw new Error('Invalid invitation code.');
       }
