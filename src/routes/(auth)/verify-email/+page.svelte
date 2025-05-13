@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Heading, P } from 'flowbite-svelte';
 	import { CheckCircleOutline } from 'flowbite-svelte-icons';
-    import type { PageData } from './$types';
+  import type { PageData } from './$types';
 
     let { data }: { data: PageData } = $props();
 </script>

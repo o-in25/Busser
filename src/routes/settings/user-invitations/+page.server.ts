@@ -1,5 +1,4 @@
 import { createInvite, getInvitations } from '$lib/server/auth';
-import { sendSimpleMessage } from '$lib/server/mail';
 import type { Invitation } from '$lib/types/auth';
 import type { PageServerLoad } from './$types';
 

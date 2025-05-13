@@ -1,5 +1,5 @@
 import type { QueryResult, SelectOption } from "$lib/types";
-import { type Permission, type RegistrationToken, type Role, type User, type UserRole } from "$lib/types/auth";
+import { type Invitation, type Permission, type RegistrationToken, type Role, type User, type UserRole } from "$lib/types/auth";
 import moment from "moment";
 import { hashPassword, signToken, verifyToken } from "./auth";
 import { marshal, marshalToType } from "./core";
@@ -286,19 +286,39 @@ export async function getUser(userId: string): Promise<QueryResult<User>> {
   }
 }
 
-export async function registerUser(username: string, email: string, password: string): Promise<QueryResult> {
-
+export async function registerUser(username: string, email: string, password: string, invitationCode: string): Promise<QueryResult> {
+  // step 0: verify invite code is ok
   // step 1: check if user name is taken
   // step 2: set verified = true
   // step 3: set role = VIEWER
   // step 4: add user
   // step 5: add user role
-  // step 6: sign jwt
-  // step 7: send email
+  // step 7: set invite
+  // step 8: sign jwt
+  // step 9: send email
   try {
-    const user: Partial<User> = await db.query.transaction(async (trx) => {
+    const { user, invitation }: { 
+      user: Pick<User, 'userId' | 'username' | 'email'>,
+      invitation: Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>
+    } = await db.query.transaction(async (trx) => {
+
+      // TODO: we may eventually need to set invite mode to off
+      // so we should make this an optional step
+      let user: Pick<User, 'userId' | 'username' | 'email'>;
+      let invitation: Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>;
+
+      // step 0
+      let dbResult: any = await trx('user').select('invitationId', 'userId', 'issuedAt', 'expiresAt').where({ invitationCode }).first();
+      invitation = marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>>(dbResult); 
+
+      if(!invitation.invitationId || invitation.userId !== null) {
+        throw new Error('Invalid invitation code.');
+      }
+
+      // invitation.invitationId = dbResult.invitationId;
+
       // step 1
-      let dbResult: any = await trx('user').select('username', 'email').where({ username }).first();
+      dbResult = await trx('user').select('username', 'email').where({ username }).first();
       dbResult = marshal(dbResult); 
 
 
@@ -320,9 +340,6 @@ export async function registerUser(username: string, email: string, password: st
         verified: 0
       });
 
-
-      let user: Partial<User>;
-
       dbResult = await trx('user')
         .select('userId', 'username', 'email')
         .where({
@@ -331,10 +348,8 @@ export async function registerUser(username: string, email: string, password: st
           password: hashedPassword
       }).first();
       
-      user = marshalToType<Partial<User>>(dbResult); 
-      console.log(user);
+      user = marshalToType<Pick<User, 'userId' | 'username' | 'email'>>(dbResult); 
 
-      console.log(username, password)
       if(!user.userId || !user.username || !user.email) {
         throw new Error('Could not create user.');
       }
@@ -359,21 +374,33 @@ export async function registerUser(username: string, email: string, password: st
       // step 4 + 5
       dbResult = await trx('userRole').insert(rolePermission);
 
-      return user;
+      dbResult = await trx('invitation').update({
+        userId: user.userId,
+        issuedAt: moment().format('YYYY-MM-DD HH:MM:ss'),
+        expiresAt: moment().add(24, 'hours').format('YYYY-MM-DD HH:MM:ss')
+        // lastSentAt: now()
+      }).where({ invitationId: invitation.invitationId});
+
+      dbResult = await trx('invitation')
+        .select('invitationId', 'userId', 'issuedAt', 'expiresAt')
+        .where({ invitationId: invitation.invitationId})
+        .first();
+
+      invitation = marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>>(dbResult); 
+
+      return {
+        user,
+        invitation
+      }
     });
-
-    if(!user.userId || !user.username || !user.email) {
-      throw new Error('User created, but cannot send registration token.');
-    }
-
-
+     
     // step 6
     const token = await signToken<RegistrationToken>({
-      userId: user.userId,
-      iat: moment().unix(),
-      exp: moment().add(24, 'hours').unix()
+      userId: invitation.userId,
+      iat: moment(invitation.issuedAt).unix(),
+      exp: moment(invitation.expiresAt).unix()
     });
-
+    
     // step 7
     await mailClient.sendUserRegistrationEmail([user.email], {
       username: user.username,

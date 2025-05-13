@@ -32,13 +32,18 @@ export const actions = {
         hasError: false,
         message: '',
       },
+      invitationCode: {
+        hasError: false,
+        message: '',
+      },
     };
 
     const validateForm = ({
       username,
       password,
       passwordConfirm,
-      email
+      email,
+      invitationCode
     }) => {
       if(!username?.trim()) {
         errors.username = {
@@ -87,6 +92,14 @@ export const actions = {
         }
       }
 
+      if(!invitationCode?.trim()) {
+        errors.invitationCode = {
+          hasError: true,
+          message: 'Invitation code is required.'
+        };
+      }
+
+
       const valid = !Object.values(errors).some((field) => field.hasError);
       return { valid, errors };
     };
@@ -100,7 +113,7 @@ export const actions = {
       });
     }
     
-    const queryResult = await registerUser(formData.username, formData.email, formData.password);
+    const queryResult = await registerUser(formData.username, formData.email, formData.password, '');
     if(queryResult.status === 'error') {
       return fail(StatusCodes.BAD_REQUEST, {
         errors: formErrors,

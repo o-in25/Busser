@@ -17,6 +17,7 @@
 
 	export let password = '';
 	export let passwordConfirm = '';
+	export let invitationCode = '';
 
 	export const clearSensitiveFields = () => {
 		password = '';
@@ -42,6 +43,10 @@
 			message: '',
 		},
 		passwordConfirm: {
+			hasError: false,
+			message: '',
+		},
+		invitationCode: {
 			hasError: false,
 			message: '',
 		},
@@ -170,19 +175,35 @@
 			{/if}
 		</Label>
 	{/if}
-	<!-- {#if action === 'register'}
-			<fieldset>
-				<Label class="space-y-2">
-					<span>Invite Code</span>
-					<Input
-						type="text"
-						name="inviteCode"
-						required
-					/>
-					<Helper class="text-sm text-gray-400">Registration is currently invite only.</Helper>
-				</Label>
-			</fieldset>
-		{/if} -->
+	{#if action === 'register'}
+		<fieldset>
+			<!-- invitation code -->
+			<Label
+				class="space-y-2"
+				color={errors?.invitationCode.hasError ? 'red' : 'gray'}
+			>
+				<span>Invite Code</span>
+				<Input
+					type="text"
+					name="invitationCode"
+					color={errors?.invitationCode.hasError ? 'red' : 'base'}
+					bind:value={invitationCode}
+				/>
+				{#if errors?.invitationCode.hasError}
+					<Helper
+						class="mt-2"
+						color="red"
+					>
+						<span class="font-medium">{errors?.invitationCode.message}</span>
+					</Helper>
+				{:else}
+					<Helper class="text-sm text-gray-400">
+						Registration is currently invite only.
+					</Helper>
+				{/if}
+			</Label>
+		</fieldset>
+	{/if}
 {/if}
 
 <!-- submit -->

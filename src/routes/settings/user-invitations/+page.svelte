@@ -28,9 +28,10 @@
 <Table striped={true}>
 	<TableHead>
 		<TableHeadCell>Invite Code</TableHeadCell>
-		<TableHeadCell>Created At</TableHeadCell>
-		<TableHeadCell>Used By</TableHeadCell>
-    <TableHeadCell>Expiration</TableHeadCell>
+    <TableHeadCell>Used By</TableHeadCell>
+		<TableHeadCell>Issued At</TableHeadCell>
+		<TableHeadCell>Expires At</TableHeadCell>
+    <TableHeadCell>Last Sent At</TableHeadCell>
 		<TableHeadCell>
 			<ButtonGroup
 				size="sm"
@@ -49,10 +50,11 @@
 	<TableBody tableBodyClass="divide-y">
     {#each data.invitations as invite}
     <TableBodyRow>
-			<TableBodyCell>{invite.code}</TableBodyCell>
-			<TableBodyCell>{moment(invite.createdAt).format('YYYY-MM-DD HH:MM:ss')}</TableBodyCell>
-			<TableBodyCell>{invite.usedBy || 'N/A'}</TableBodyCell>
-      <TableBodyCell>{invite.expiresAt? moment(invite.usedAt).format('YYYY-MM-DD HH:MM:ss') : 'Never'}</TableBodyCell>
+			<TableBodyCell>{invite.invitationCode}</TableBodyCell>
+      <TableBodyCell>{invite.userId || 'N/A'}</TableBodyCell>
+			<TableBodyCell>{moment(invite.issuedAt).format('YYYY-MM-DD HH:MM:ss')}</TableBodyCell>
+      <TableBodyCell>{invite.expiresAt? moment(invite.expiresAt).format('YYYY-MM-DD HH:MM:ss') : 'Never'}</TableBodyCell>
+      <TableBodyCell>{invite.lastSentAt? moment(invite.lastSentAt).format('YYYY-MM-DD HH:MM:ss') : 'Never'}</TableBodyCell>
 
       <TableBodyCell>
         <ButtonGroup

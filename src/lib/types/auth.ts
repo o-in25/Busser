@@ -41,13 +41,13 @@ export type RolePermission = {
 };
 
 export type Invitation = {
-  id: number;   
-  code: string;          
-  createdAt: Date;      
-  usedAt: Date | null; 
-  usedBy: string | null; 
-  email: string;          
-  expiresAt: Date;   
+  invitationId: number;   
+  userId: string;
+  invitationCode: string;
+  createdAt: Date;            
+  issuedAt: Date;          
+  expiresAt: Date;          
+  lastSentAt: Date;
 }
 
 export type RegistrationToken = {
