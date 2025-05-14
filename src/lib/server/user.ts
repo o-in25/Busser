@@ -442,17 +442,20 @@ export async function verifyUser(registrationToken: string): Promise<QueryResult
       throw new Error('Token is expired.')
     }
 
-    await db.table('user')
+
+
+    let dbResult: any = await db.table('user')
     .update('verified', 1).where({
       userId
     });
 
+    console.log(dbResult)
     return { status: 'success' }
 
 
 
   } catch(error: any) {
-    console.error(error);
+
     return {
       status: 'error',
       error: error.message
