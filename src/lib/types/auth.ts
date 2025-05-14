@@ -55,3 +55,9 @@ export type RegistrationToken = {
   iat: number;
   exp: number;
 }
+
+export type TokenResult<T> = {
+  valid: boolean;
+  expired: boolean;
+  payload?: T;
+};

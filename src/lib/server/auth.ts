@@ -1,6 +1,6 @@
 import { DbProvider } from './db';
 import { Logger } from './logger';
-import type { Invitation, User } from '$lib/types/auth';
+import type { Invitation, RegistrationToken, TokenResult, User } from '$lib/types/auth';
 import jwt from 'jsonwebtoken';
 import { compare, hash } from 'bcrypt';
 import { getUser } from './user';
@@ -185,3 +185,29 @@ export async function checkInviteCode(code: string) {
     console.log(error)
   }
 }
+
+export const verifyRegistrationToken = async (token: string): Promise<TokenResult<RegistrationToken>> => {
+  try {
+    const payload = await verifyToken<RegistrationToken>(token);
+    return {
+      valid: true,
+      expired: false,
+      payload,
+    };
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) {
+      // Signature is valid but token is expired
+      const decoded = jwt.decode(token);
+      return {
+        valid: false,
+        expired: true,
+        payload: decoded as RegistrationToken | undefined,
+      };
+    }
+
+    return {
+      valid: false,
+      expired: false,
+    };
+  }
+};

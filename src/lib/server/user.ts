@@ -1,7 +1,7 @@
 import type { QueryResult, SelectOption } from "$lib/types";
 import { type Invitation, type Permission, type RegistrationToken, type Role, type User, type UserRole } from "$lib/types/auth";
 import moment from "moment";
-import { hashPassword, signToken, verifyToken } from "./auth";
+import { hashPassword, signToken, verifyRegistrationToken, verifyToken } from "./auth";
 import { marshal, marshalToType } from "./core";
 import { DbProvider } from "./db";
 import { MailClient } from "./mail";
@@ -428,25 +428,21 @@ export async function verifyUser(registrationToken: string): Promise<QueryResult
   // check expiration 
   // set user to verified
   try {
-    const { userId, iat, exp }: RegistrationToken = await verifyToken<RegistrationToken>(registrationToken);
-    const now = moment();
+    // const { userId, iat, exp }: RegistrationToken = await verifyToken<RegistrationToken>(registrationToken);
 
-    if(!userId || !iat || !exp) {
+    const { valid, expired, payload } = await verifyRegistrationToken(registrationToken);
+
+    if(!valid || !payload?.userId) {
       throw new Error('Token is invalid.')
     }
-    if(now.isBefore(iat)) {
-      throw new Error('Invalid token issue date.')
-    }
 
-    if(now.isAfter(exp)) {
+    if(expired) {
       throw new Error('Token is expired.')
     }
 
-
-
     let dbResult: any = await db.table('user')
     .update('verified', 1).where({
-      userId
+      userId: ''//payload.userId
     });
 
     console.log(dbResult)
