@@ -5,10 +5,21 @@
 		CartSolid,
 		CheckCircleOutline,
 		CloseCircleOutline,
+		RedoOutline,
 	} from 'flowbite-svelte-icons';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+  async function resendEmail() {
+    const response = await fetch('/api/mail/user-registration', {
+      method: 'POST',
+      body: JSON.stringify('{}')
+    })
+
+    const result = await response.json();
+    console.log(result)
+  }
 </script>
 
 <div>
@@ -43,7 +54,8 @@
 			Your verification link may have expired or is invalid.
 		</P>
 	{/if}
-	<Button
+  {#if data.status === 'success'}
+  	<Button
 		class="mt-4"
 		href="/login"
     outline
@@ -51,4 +63,13 @@
 		Login
 		<ArrowRightOutline class="ms-2 h-5 w-5" />
 	</Button>
+  {:else}
+  	<Button
+		class="mt-4"
+    onclick={resendEmail}
+    outline
+	>
+		Resend Email
+	</Button>
+  {/if}
 </div>
