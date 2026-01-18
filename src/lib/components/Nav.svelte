@@ -1,39 +1,29 @@
 <script lang="ts">
-	import {
-		Navbar,
-		NavHamburger,
-		NavBrand,
-		Dropdown,
-		DropdownHeader,
-		DropdownItem,
-		DropdownDivider,
-		NavUl,
-		NavLi,
-		Drawer,
-		CloseButton,
-		Sidebar,
-		SidebarWrapper,
-		SidebarGroup,
-		SidebarItem,
-	} from 'flowbite-svelte';
-	import {
-		ArrowRightToBracketOutline,
-		ClipboardListOutline,
-		GridOutline,
-		HomeOutline,
-		CogOutline,
-		RulerCombinedOutline,
-		ArrowLeftToBracketOutline,
-	} from 'flowbite-svelte-icons';
-	import { sineIn } from 'svelte/easing';
 	import { goto, invalidateAll } from '$app/navigation';
-	import Placeholder from './Placeholder.svelte';
+	import { page } from '$app/stores';
 	import logo from '$lib/assets/logo-nav.png';
 	import type { User } from '$lib/types/auth';
+	import { Button } from '$lib/components/ui/button';
+	import { Separator } from '$lib/components/ui/separator';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Sheet from '$lib/components/ui/sheet';
+	import {
+		Menu,
+		Home,
+		ClipboardList,
+		LayoutGrid,
+		Settings,
+		Ruler,
+		LogIn,
+		LogOut,
+		X,
+	} from 'lucide-svelte';
+	import Placeholder from './Placeholder.svelte';
 
 	// props
-	export let user: User | null;
-	export let activeUrl: string;
+	let { user, activeUrl }: { user: User | null; activeUrl: string } = $props();
+
+	let sheetOpen = $state(false);
 
 	async function logout() {
 		const response = await fetch('/logout', {
@@ -42,221 +32,175 @@
 		if (response.ok) {
 			await invalidateAll();
 			await goto(`/`);
-			showDrawer = true;
+			sheetOpen = false;
 		}
 	}
 
-	$: showDrawer = true;
-	let transitionParams = {
-		x: -320,
-		duration: 200,
-		easing: sineIn,
-	};
+	function isActive(path: string): boolean {
+		if (path === '/') {
+			return activeUrl === '/';
+		}
+		return activeUrl.startsWith(path);
+	}
 </script>
 
-<!-- desktop only -->
-<!-- nav -->
-<Navbar
-	color="default"
-	class="mb-3"
->
-	{#if user}
-		<NavHamburger
-			classMenu="w-full md:flex md:w-auto md:order-1"
-			onClick={() => {
-				showDrawer = false;
-			}}
-		/>
-	{/if}
+<!-- Desktop Navigation -->
+<nav class="glass-nav sticky top-0 z-50 w-full px-4 py-3">
+	<div class="mx-auto flex max-w-7xl items-center justify-center md:justify-between relative">
+		<!-- Mobile Menu Button -->
+		{#if user}
+			<Sheet.Root bind:open={sheetOpen}>
+				<Sheet.Trigger class="absolute left-0 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 md:hidden">
+					<Menu class="h-6 w-6" />
+					<span class="sr-only">Open menu</span>
+				</Sheet.Trigger>
 
-	<!-- logo -->
-	<div class={!user ? 'm-auto' : ''}>
-		<NavBrand href="/">
-			<img
-				src={logo}
-				class="me-3 h-12"
-				alt="Flowbite Logo"
-			/>
-			<span
-				class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
-			></span>
-		</NavBrand>
-	</div>
-	{#if user}
-		<!-- avatar -->
-		<div class="flex items-center md:order-2 user-nav">
-			<div class="hidden md:block">
-				<Placeholder id="avatar-menu" />
-			</div>
-		</div>
-		<!-- dropdown -->
-		<Dropdown
-			placement="bottom"
-			triggeredBy="#avatar-menu"
-			classContainer="backdrop-blur-md bg-zinc-200/50 dark:bg-zinc-900/30 border border-zinc-300/30 dark:border-zinc-700/40 shadow-lg rounded-xl p-4"
-		>
-			<DropdownHeader>
-				<span class="block text-sm">{user?.username}</span>
-				<span class="block truncate text-sm font-medium">
-					{user.email}
-				</span>
-			</DropdownHeader>
-			<DropdownItem
-				href="/settings"
-				class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 aria-selected:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30 dark:aria-selected:bg-primary-500/30"
-			>
-				<span class="flex"><CogOutline class="me-2" />Settings</span>
-			</DropdownItem>
-			<DropdownItem
-				href="/tools"
-				class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 aria-selected:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30 dark:aria-selected:bg-primary-500/30"
-			>
-				<span class="flex"><RulerCombinedOutline class="me-2" />Tools</span>
-			</DropdownItem>
-			<DropdownDivider />
-			<DropdownItem
-				on:click={logout}
-				class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 aria-selected:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30 dark:aria-selected:bg-primary-500/30"
-			>
-				{#if user}<span class="flex">
-						<ArrowRightToBracketOutline class="me-2" />Sign out
-					</span>{:else}<span class="flex">
-						<ArrowLeftToBracketOutline class="me-2" />Sign In
-					</span>{/if}
-			</DropdownItem>
-		</Dropdown>
-	{/if}
+				<Sheet.Content side="left" class="w-80 glass-panel border-r-0">
+					<Sheet.Header class="text-left">
+						<!-- User Profile in Drawer -->
+						<div class="flex items-center gap-3 pb-4">
+							<Placeholder id="avatar-menu-mobile" />
+							<div>
+								<p class="text-lg font-medium text-foreground">
+									{user?.username}
+								</p>
+								<p class="text-sm text-muted-foreground">
+									{user?.email}
+								</p>
+							</div>
+						</div>
+					</Sheet.Header>
 
-	<!-- tabs -->
-	{#if user}
-		<NavUl
-			{activeUrl}
-			slideParams={{ delay: 250, duration: 500, easing: sineIn }}
-		>
-			<NavLi href="/">Home</NavLi>
-			<NavLi href="/inventory">Inventory</NavLi>
-			<NavLi href="/catalog">Catalog</NavLi>
-			<!-- <NavLi href="/tools">Tools</NavLi> -->
-		</NavUl>
-	{/if}
-</Navbar>
+					<Separator class="my-4" />
 
-<!-- mobile only -->
-<Drawer
-	transitionType="fly"
-	{transitionParams}
-	bind:hidden={showDrawer}
-	id="sidebar2"
->
-	<!-- user profile -->
-	<div class="flex items-center">
-		<div class="flex">
-			<div class="self-center">
-				<Placeholder id="avatar-menu-mobile" />
-			</div>
+					<!-- Navigation Links -->
+					<nav class="flex flex-col gap-2">
+						<a
+							href="/"
+							onclick={() => (sheetOpen = false)}
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/') ? 'bg-primary/10 text-foreground' : ''}"
+						>
+							<Home class="h-5 w-5" />
+							Home
+						</a>
 
-			<div class="ml-3">
-				<h5 class="text-lg font-medium text-gray-900 dark:text-white">
-					{user?.username}
-				</h5>
-				<span class="text-sm text-gray-500 dark:text-gray-400">
-					{user?.email}
-				</span>
-			</div>
-		</div>
+						<a
+							href="/inventory"
+							onclick={() => (sheetOpen = false)}
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/inventory') ? 'bg-primary/10 text-foreground' : ''}"
+						>
+							<ClipboardList class="h-5 w-5" />
+							Inventory
+						</a>
 
-		<!-- close -->
-		<CloseButton
-			on:click={() => (showDrawer = true)}
-			class="mb-4 dark:text-white"
-		/>
-	</div>
+						<a
+							href="/catalog"
+							onclick={() => (sheetOpen = false)}
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/catalog') ? 'bg-primary/10 text-foreground' : ''}"
+						>
+							<LayoutGrid class="h-5 w-5" />
+							Catalog
+						</a>
 
-	<Sidebar {activeUrl}>
-		<SidebarWrapper
-			divClass="overflow-y-auto py-4 px-3 rounded dark:bg-gray-800"
-		>
-			<SidebarGroup>
-				<SidebarItem
-					label="Home"
+						<Separator class="my-4" />
+
+						<a
+							href="/tools"
+							onclick={() => (sheetOpen = false)}
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/tools') ? 'bg-primary/10 text-foreground' : ''}"
+						>
+							<Ruler class="h-5 w-5" />
+							Tools
+						</a>
+
+						<a
+							href="/settings"
+							onclick={() => (sheetOpen = false)}
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/settings') ? 'bg-primary/10 text-foreground' : ''}"
+						>
+							<Settings class="h-5 w-5" />
+							Settings
+						</a>
+
+						<Separator class="my-4" />
+
+						<button
+							onclick={logout}
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground"
+						>
+							<LogOut class="h-5 w-5" />
+							Sign Out
+						</button>
+					</nav>
+				</Sheet.Content>
+			</Sheet.Root>
+		{/if}
+
+		<!-- Logo -->
+		<a href="/" class="md:mx-0">
+			<img src={logo} class="h-12" alt="Busser Logo" />
+		</a>
+
+		<!-- Desktop Navigation Links -->
+		{#if user}
+			<div class="hidden md:flex md:items-center md:gap-6">
+				<a
 					href="/"
-					on:click={() => (showDrawer = true)}
+					class="text-sm font-medium transition-colors hover:text-primary {isActive('/') ? 'text-primary' : 'text-muted-foreground'}"
 				>
-					<svelte:fragment slot="icon">
-						<HomeOutline
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					</svelte:fragment>
-				</SidebarItem>
-
-				<SidebarItem
-					label="Inventory"
+					Home
+				</a>
+				<a
 					href="/inventory"
-					on:click={() => (showDrawer = true)}
+					class="text-sm font-medium transition-colors hover:text-primary {isActive('/inventory') ? 'text-primary' : 'text-muted-foreground'}"
 				>
-					<svelte:fragment slot="icon">
-						<ClipboardListOutline
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					</svelte:fragment>
-				</SidebarItem>
-
-				<SidebarItem
-					label="Catalog"
+					Inventory
+				</a>
+				<a
 					href="/catalog"
-					on:click={() => (showDrawer = true)}
+					class="text-sm font-medium transition-colors hover:text-primary {isActive('/catalog') ? 'text-primary' : 'text-muted-foreground'}"
 				>
-					<svelte:fragment slot="icon">
-						<GridOutline
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					</svelte:fragment>
-				</SidebarItem>
+					Catalog
+				</a>
+			</div>
+		{/if}
 
-				<hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+		<!-- User Menu (Desktop) -->
+		{#if user}
+			<div class="hidden md:block">
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger>
+						<Placeholder id="avatar-menu" />
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
+						<DropdownMenu.Label>
+							<div class="flex flex-col space-y-1">
+								<p class="text-sm font-medium">{user?.username}</p>
+								<p class="text-xs text-muted-foreground">{user?.email}</p>
+							</div>
+						</DropdownMenu.Label>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item class="cursor-pointer" onclick={() => goto('/settings')}>
+							<Settings class="mr-2 h-4 w-4" />
+							Settings
+						</DropdownMenu.Item>
+						<DropdownMenu.Item class="cursor-pointer" onclick={() => goto('/tools')}>
+							<Ruler class="mr-2 h-4 w-4" />
+							Tools
+						</DropdownMenu.Item>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item onclick={logout} class="cursor-pointer">
+							<LogOut class="mr-2 h-4 w-4" />
+							Sign out
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+			</div>
+		{/if}
+	</div>
+</nav>
 
-				<SidebarItem
-					label="Tools"
-					href="/tools"
-					on:click={() => (showDrawer = true)}
-				>
-					<svelte:fragment slot="icon">
-						<RulerCombinedOutline
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					</svelte:fragment>
-				</SidebarItem>
-
-				<SidebarItem
-					label="Settings"
-					href="/settings"
-					on:click={() => (showDrawer = true)}
-				>
-					<svelte:fragment slot="icon">
-						<CogOutline
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					</svelte:fragment>
-				</SidebarItem>
-
-				<hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
-
-				<SidebarItem
-					label="Sign Out"
-					on:click={async () => await logout()}
-				>
-					<svelte:fragment slot="icon">
-						<ArrowRightToBracketOutline
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					</svelte:fragment>
-				</SidebarItem>
-			</SidebarGroup>
-		</SidebarWrapper>
-	</Sidebar>
-</Drawer>
-
-<style lang="scss">
+<style>
 	.user-nav {
 		width: 40px;
 	}

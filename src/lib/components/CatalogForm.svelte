@@ -1,20 +1,11 @@
 <script lang="ts">
-	import {
-		Input,
-		Label,
-		Radio,
-		Textarea,
-		Button,
-		Hr,
-		Heading,
-		Helper,
-		Modal,
-		Span,
-		P,
-		Range,
-		DropdownItem,
-		Dropdown,
-	} from 'flowbite-svelte';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { Textarea } from '$lib/components/ui/textarea';
+	import { Button } from '$lib/components/ui/button';
+	import { Separator } from '$lib/components/ui/separator';
+	import { Helper } from '$lib/components/ui/helper';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import type {
 		ComponentAction,
 		PreparationMethod,
@@ -24,23 +15,16 @@
 	import FileUpload from './FileUpload.svelte';
 	import CatalogFormItem from './CatalogFormItem.svelte';
 	import { v4 as uuidv4 } from 'uuid';
-	import {
-		DotsVerticalOutline,
-		PlusOutline,
-		ThumbsUpSolid,
-		TrashBinOutline,
-	} from 'flowbite-svelte-icons';
+	import { Plus, ThumbsUp, Trash2 } from 'lucide-svelte';
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { RadioButton, ButtonGroup } from 'flowbite-svelte';
 	import { quintOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
 	import { notificationStore } from '../../stores';
 	import Prompt from './Prompt.svelte';
 	import { convertFromMl, convertToMl } from '$lib/math';
 	import { getContext } from 'svelte';
-
-	// const ML_TO_OZ = 29.5735
+	import { cn } from '$lib/utils';
 
 	// props
 	export let spirits: Spirit[];
@@ -69,7 +53,7 @@
 		supplierName: '',
 		supplierDetails: null,
 		productIdQuantityInMilliliters: 0,
-		productIdQuantityUnit: 'ml', //  ONLY right here can we pull in a user preference for the default value
+		productIdQuantityUnit: 'ml',
 		productInStockQuantity: 0,
 		productPricePerUnit: 0,
 		productUnitSizeInMilliliters: 0,
@@ -90,10 +74,6 @@
 		}
 	};
 
-	// const getRecipeSteps = () => {
-	//   const recipeSteps = steps.map((step: View.BasicRecipeStep) => ({ ...step, productUnitSizeInMilliliters: convertToMl(step.productIdQuantityUnit, step.productUnitSizeInMilliliters)}))
-	// }
-
 	const deleteRecipe = async () => {
 		const response = await fetch(`/api/catalog/${recipe.recipeId}`, {
 			method: 'DELETE',
@@ -102,7 +82,6 @@
 		const result = await response.json();
 		if ('data' in result) {
 			$notificationStore.success = { message: 'Catalog item deleted.' };
-			// goto(`/inventory`);
 		} else {
 			$notificationStore.error = { message: result.error };
 		}
@@ -124,12 +103,11 @@
 	let modalOpen = false;
 </script>
 
-<div class="px-4 p-4 mt-3 bg-gray-50 rounded-lg dark:bg-gray-800">
+<div class="px-4 p-4 mt-3 glass-surface">
 	<form
 		class="relative"
 		method="POST"
 		enctype="multipart/form-data"
-		on:submit
 		use:enhance={({ formData }) => {
 			disabled = true;
 			let json = steps.map(step => ({
@@ -159,36 +137,14 @@
 		<fieldset>
 			<div class="flex items-center justify-between">
 				<legend class="mb-3">
-					<Heading tag="h6">Details</Heading>
+					<h6 class="text-lg font-semibold">Details</h6>
 				</legend>
-				<!-- <div>
-					<DotsVerticalOutline
-						class="dots-menu dark:text-white focus:outline-none focus:ring-0 focus:ring-transparent"
-					/>
-					<Dropdown
-						placement="left"
-						classContainer="w-40 backdrop-blur-md bg-zinc-200/50 dark:bg-zinc-900/30 border border-zinc-300/30 dark:border-zinc-700/40 shadow-lg rounded-xl p-4"
-						triggeredBy=".dots-menu"
-					>
-						<DropdownItem
-							on:click={() => (modalOpen = true)}
-							class="w-full text-left px-1 py-1 rounded-lg transition-colors hover:bg-primary-500/10 focus:bg-primary-500/20 dark:hover:bg-primary-500/20 dark:focus:bg-primary-500/30"
-						>
-							<div class="flex items-center justify-start">
-								<TrashBinOutline class="me-2" />Delete
-							</div>
-						</DropdownItem>
-					</Dropdown>
-				</div> -->
 			</div>
 
 			<!-- name -->
 			<div class="grid gap-6 grid-cols-1 mb-6">
 				<div>
-					<Label
-						for="productName"
-						class="mb-2"
-					>
+					<Label for="productName" class="mb-2">
 						Name
 					</Label>
 					<Input
@@ -203,25 +159,23 @@
 
 			<!-- category -->
 			<div class="mb-6">
-				<Label
-					for="recipeCategoryId"
-					class="mb-2"
-				>
+				<Label for="recipeCategoryId" class="mb-2">
 					Category
 				</Label>
 				<div
 					class="grid gap-6 w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6"
 				>
 					{#each spirits as spirit}
-						<Radio
-							name="recipeCategoryId"
-							custom
-							class="w-full"
-							value={spirit.recipeCategoryId}
-							bind:group={defaultSpiritChoice}
-						>
+						<label class="w-full cursor-pointer">
+							<input
+								type="radio"
+								name="recipeCategoryId"
+								value={spirit.recipeCategoryId}
+								bind:group={defaultSpiritChoice}
+								class="sr-only peer"
+							/>
 							<div
-								class="p-1 inline-flex justify-between items-center text-gray-500 bg-white rounded-lg border border-gray-200 cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-primary-500 peer-checked:border-primary-600 peer-checked:text-primary-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+								class="p-1 inline-flex justify-between items-center text-muted-foreground bg-background rounded-lg border border-input cursor-pointer peer-checked:border-primary peer-checked:text-primary hover:bg-accent transition-colors"
 							>
 								<div class="block">
 									<div class="h-auto max-w-16 md:max-w-20 rounded">
@@ -238,7 +192,7 @@
 									</div>
 								</div>
 							</div>
-						</Radio>
+						</label>
 					{/each}
 				</div>
 			</div>
@@ -256,35 +210,37 @@
 
 			<!-- served -->
 			<div class="mb-6">
-				<Label
-					for="recipeTechniqueDescriptionId"
-					class="mb-2"
-				>
+				<Label for="recipeTechniqueDescriptionId" class="mb-2">
 					Served
 				</Label>
-				<ButtonGroup
-					class="grid grid-flow-col justify-items-stretch rounded-sm shadow-sm"
-				>
-					{#each preparationMethods as prepMethod}
-						<RadioButton
-							size="md"
-							value={prepMethod.recipeTechniqueDescriptionId}
-							name="recipeTechniqueDescriptionId"
-							on:click={() =>
-								(prepMethodDilutionPct =
-									prepMethod.recipeTechniqueDilutionPercentage)}
-							bind:group={prepMethodChoice}
-						>
-							<span class="w-">
+				<div class="flex flex-wrap gap-1 rounded-md shadow-sm">
+					{#each preparationMethods as prepMethod, i}
+						<label class="flex-1">
+							<input
+								type="radio"
+								name="recipeTechniqueDescriptionId"
+								value={prepMethod.recipeTechniqueDescriptionId}
+								bind:group={prepMethodChoice}
+								class="sr-only peer"
+								onclick={() =>
+									(prepMethodDilutionPct =
+										prepMethod.recipeTechniqueDilutionPercentage)}
+							/>
+							<div
+								class={cn(
+									"w-full py-2 px-4 text-center text-sm font-medium border cursor-pointer transition-colors",
+									"peer-checked:bg-primary peer-checked:text-primary-foreground peer-checked:border-primary",
+									"hover:bg-accent",
+									i === 0 && "rounded-l-md",
+									i === preparationMethods.length - 1 && "rounded-r-md"
+								)}
+							>
 								{prepMethod.recipeTechniqueDescriptionText}
-							</span>
-						</RadioButton>
+							</div>
+						</label>
 					{/each}
-				</ButtonGroup>
-				<Helper
-					id="helper-checkbox-text"
-					class="ps-1 py-1"
-				>
+				</div>
+				<Helper class="ps-1 py-1">
 					Adds {prepMethodDilutionPct}% dilution by water.
 				</Helper>
 			</div>
@@ -293,25 +249,19 @@
 			<div class="mb-6">
 				<FileUpload
 					name="recipeImageUrl"
-					signedUrl={recipe.recipeImageUrl || null}
+					signedUrl={recipe.recipeImageUrl || undefined}
 				></FileUpload>
 			</div>
 		</fieldset>
 
 		<!-- rating -->
 		<fieldset>
-			<Label
-				for="productName"
-				class="mb-2"
-			>
+			<Label for="productName" class="mb-2">
 				Ratings
 			</Label>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div class="mt-4">
-					<Label
-						for="recipeSweetnessRating"
-						class="mb-2"
-					>
+					<Label for="recipeSweetnessRating" class="mb-2">
 						Sweetness
 					</Label>
 					<input
@@ -322,16 +272,11 @@
 						min="0"
 						max="10"
 						step="0.1"
-						class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg"
+						class="w-full bg-muted rounded-lg appearance-none cursor-pointer h-3"
 					/>
-
-					<!-- <Range id="recipeSweetnessRating" name="recipeSweetnessRating" size="lg" bind:value={recipe.recipeSweetnessRating} min="0" max="10" step="0.1"/> -->
 				</div>
 				<div class="mt-4">
-					<Label
-						for="recipeDrynessRating"
-						class="mb-2"
-					>
+					<Label for="recipeDrynessRating" class="mb-2">
 						Dryness
 					</Label>
 					<input
@@ -342,15 +287,11 @@
 						min="0"
 						max="10"
 						step="0.1"
-						class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg"
+						class="w-full bg-muted rounded-lg appearance-none cursor-pointer h-3"
 					/>
-					<!-- <Range id="recipeDrynessRating" name="recipeDrynessRating" size="lg" bind:value={recipe.recipeDrynessRating} min="0" max="10" step="0.1" /> -->
 				</div>
 				<div class="mt-4">
-					<Label
-						for="recipeVersatilityRating"
-						class="mb-2"
-					>
+					<Label for="recipeVersatilityRating" class="mb-2">
 						Versatility
 					</Label>
 					<input
@@ -361,15 +302,11 @@
 						min="0"
 						max="10"
 						step="0.1"
-						class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg"
+						class="w-full bg-muted rounded-lg appearance-none cursor-pointer h-3"
 					/>
-					<!-- <Range id="recipeVersatilityRating" name="recipeVersatilityRating" size="lg" bind:value={recipe.recipeVersatilityRating} min="0" max="10" step="0.1"/> -->
 				</div>
 				<div class="mt-4">
-					<Label
-						for="recipeStrengthRating"
-						class="mb-2"
-					>
+					<Label for="recipeStrengthRating" class="mb-2">
 						Strength
 					</Label>
 					<input
@@ -380,19 +317,18 @@
 						min="0"
 						max="10"
 						step="0.1"
-						class="w-full bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 h-3 range-lg"
+						class="w-full bg-muted rounded-lg appearance-none cursor-pointer h-3"
 					/>
-					<!-- <Range id="recipeStrengthRating" name="recipeStrengthRating" size="lg" bind:value={recipe.recipeStrengthRating} min="0" max="10" step="0.1" /> -->
 				</div>
 			</div>
 		</fieldset>
 
-		<Hr classHr="my-4" />
+		<Separator class="my-4" />
 
 		<!-- inner form -->
 		<fieldset class="px-1 md:py-2">
 			<legend class="mb-2">
-				<Heading tag="h6">Steps</Heading>
+				<h6 class="text-lg font-semibold">Steps</h6>
 			</legend>
 			{#each steps as step, stepNumber (step.key)}
 				<div
@@ -415,13 +351,11 @@
 
 			<div class="my-4 flex flex-row justify-center">
 				<Button
-					class="!p-2"
-					pill={true}
-					on:click={addStep}
-					color="primary"
-					outline
+					class="rounded-full"
+					onclick={addStep}
+					variant="outline"
 				>
-					<PlusOutline class="w-6 h-6" />
+					<Plus class="w-6 h-6" />
 					<span class="hidden lg:block pe-2">Add Another Step</span>
 				</Button>
 			</div>
@@ -434,10 +368,8 @@
 					<Button
 						class="w-full md:w-32"
 						type="button"
-						size="xl"
-						color="red"
-						outline
-						on:click={() => (modalOpen = true)}
+						variant="destructive"
+						onclick={() => (modalOpen = true)}
 					>
 						Delete
 					</Button>
@@ -448,7 +380,6 @@
 				<Button
 					class="w-full md:w-32"
 					type="submit"
-					size="xl"
 					{disabled}
 				>
 					Save
@@ -457,32 +388,31 @@
 		</div>
 	</form>
 	{#if recipe.recipeId}
-		<Modal
-			title="Confirm Delete"
-			bind:open={modalOpen}
-			autoclose
-		>
-			<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-				Delete&nbsp;<Span>{recipe?.recipeName}</Span>&nbsp;from catalog?
-				<P
-					color="text-red-700 dark:text-red-500"
-					weight="bold"
-				>
-					Once deleted, it can't be recovered.
-				</P>
-			</p>
-			<svelte:fragment slot="footer">
-				<Button
-					color="red"
-					on:click={async () => {
-						await deleteRecipe();
-					}}
-				>
-					Delete
-				</Button>
-				<Button color="alternative">Cancel</Button>
-			</svelte:fragment>
-		</Modal>
+		<Dialog.Root bind:open={modalOpen}>
+			<Dialog.Content>
+				<Dialog.Header>
+					<Dialog.Title>Confirm Delete</Dialog.Title>
+					<Dialog.Description>
+						Delete <span class="font-semibold">{recipe?.recipeName}</span> from catalog?
+						<p class="text-red-600 dark:text-red-400 font-bold mt-2">
+							Once deleted, it can't be recovered.
+						</p>
+					</Dialog.Description>
+				</Dialog.Header>
+				<Dialog.Footer>
+					<Button
+						variant="destructive"
+						onclick={async () => {
+							await deleteRecipe();
+							modalOpen = false;
+						}}
+					>
+						Delete
+					</Button>
+					<Button variant="outline" onclick={() => (modalOpen = false)}>Cancel</Button>
+				</Dialog.Footer>
+			</Dialog.Content>
+		</Dialog.Root>
 	{/if}
 </div>
 

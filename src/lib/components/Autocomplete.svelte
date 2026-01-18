@@ -1,32 +1,23 @@
 <script lang="ts">
-	import {
-		Label,
-		Listgroup,
-		ListgroupItem,
-		Input,
-		ButtonGroup,
-		Button,
-	} from 'flowbite-svelte';
-	import { PlusOutline } from 'flowbite-svelte-icons';
+	import { Label } from '$lib/components/ui/label';
+	import { Input } from '$lib/components/ui/input';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { Plus } from 'lucide-svelte';
+	import { cn } from '$lib/utils';
 	import { getContext, onMount } from 'svelte';
 
-	export let label;
-	export let value;
-	export let fetchUrl;
+	export let label: string;
+	export let value: string | null;
+	export let fetchUrl: string;
 	export let placeholder = '';
 	export let name = '';
-	export let key;
+	export let key: string | undefined;
 	export let required = false;
 	export let actionUrl = '';
 	export let grant = '';
 	const permissions: string[] = getContext('permissions');
 
-	let items: any = [
-		// { name: 'Profile', mycustomfield: 'data1', current: true },
-		// { name: 'Settings', mycustomfield: 'data2' },
-		// { name: 'Messages', mycustomfield: 'data3' },
-		// { name: 'Download', mycustomfield: 'data4', disabled: true, attrs: {type: 'submit'} }
-	];
+	let items: any[] = [];
 
 	onMount(async () => {
 		let response = await fetch(fetchUrl, {
@@ -42,17 +33,14 @@
 		({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1
 	);
 	$: value =
-  search.find(
-			({ name }) => {
-        return name.toLowerCase().trim() === selectValue.toLocaleLowerCase().trim()
-      }
-		)?.value ||
+		search.find(({ name }) => {
+			return name.toLowerCase().trim() === selectValue.toLocaleLowerCase().trim();
+		})?.value ||
 		value ||
 		null;
 	$: disabled = items.length === 0;
 
 	const showAutocomplete = () => (show = true);
-	// theres a race condition b/w onblur and onclick, so we timeout
 	const hideAutocomplete = () =>
 		setTimeout(() => {
 			if (!search.length) {
@@ -61,8 +49,8 @@
 			show = false;
 		}, 100);
 
-	const handleClick = ({ target }) => {
-		selectValue = target.innerText;
+	const handleClick = (itemName: string) => {
+		selectValue = itemName;
 		show = false;
 	};
 </script>
@@ -70,62 +58,47 @@
 <div class="w-full">
 	<slot></slot>
 	{#if name}
-		<Label
-			for={name}
-			class="mb-2"
-		>
-			{label}
-		</Label>
-		<input
-			id={name}
-			{name}
-			class="hidden"
-			bind:value
-		/>
+		<Label for={name} class="mb-2">{label}</Label>
+		<input id={name} {name} class="hidden" bind:value />
 	{:else}
-		<Label
-			for="autoselect"
-			class="mb-2"
-		>
-			{label}
-		</Label>
-		<input
-			id="autoselect"
-			class="hidden"
-			bind:value
-		/>
+		<Label for="autoselect" class="mb-2">{label}</Label>
+		<input id="autoselect" class="hidden" bind:value />
 	{/if}
-	<ButtonGroup divClass="flex">
+	<div class="flex">
 		<Input
 			type="text"
 			{placeholder}
-			on:focus={showAutocomplete}
+			onfocus={showAutocomplete}
+			onblur={hideAutocomplete}
 			bind:value={selectValue}
-			bind:required
-			bind:disabled
-		></Input>
+			{required}
+			{disabled}
+			class={actionUrl && (!grant || (grant && permissions.includes(grant))) ? 'rounded-r-none' : ''}
+		/>
 		{#if actionUrl && (!grant || (grant && permissions.includes(grant)))}
-			<Button
-				color="primary"
-				href="/inventory/category/add"
-			>
-				<PlusOutline />
-			</Button>
+			<a class={cn(buttonVariants(), "rounded-l-none")} href="/inventory/category/add">
+				<Plus class="h-4 w-4" />
+			</a>
 		{/if}
-	</ButtonGroup>
+	</div>
 	{#if show}
 		<div class="relative">
-			<Listgroup
-				active
-				class="absolute w-full max-h-44 overflow-y-auto z-20"
+			<div
+				class="absolute w-full max-h-44 overflow-y-auto z-20 mt-1 rounded-md border bg-popover text-popover-foreground shadow-md"
 			>
-				{#each search as button}
-					<ListgroupItem on:click={handleClick}>{button.name}</ListgroupItem>
+				{#each search as item}
+					<button
+						type="button"
+						class="w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
+						onmousedown={() => handleClick(item.name)}
+					>
+						{item.name}
+					</button>
 				{/each}
 				{#if !search.length}
-					<ListgroupItem disabled>No Results</ListgroupItem>
+					<div class="px-3 py-2 text-sm text-muted-foreground">No Results</div>
 				{/if}
-			</Listgroup>
+			</div>
 		</div>
 	{/if}
 </div>

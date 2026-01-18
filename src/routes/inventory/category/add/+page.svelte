@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
-	import { Heading } from 'flowbite-svelte';
 	import CategoryForm from '$lib/components/CategoryForm.svelte';
 </script>
 
@@ -18,12 +17,9 @@
 	></BreadcrumbItem>
 	<BreadcrumbItem name="Add Category"></BreadcrumbItem>
 </Breadcrumb>
-<Heading
-	tag="h2"
-	class="mb-4 flex font-extrabold flex-row justify-between"
->
+<h2 class="text-3xl mb-4 flex font-extrabold flex-row justify-between">
 	New Inventory Category
-</Heading>
+</h2>
 
 <div class="md:px-4 py-2 md:py-4">
 	<CategoryForm />

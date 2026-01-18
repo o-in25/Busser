@@ -1,75 +1,55 @@
 <script lang="ts">
-	import { Button, Heading, P } from 'flowbite-svelte';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { cn } from '$lib/utils';
 	import {
-		ArrowRightOutline,
-		CartSolid,
-		CheckCircleOutline,
-		CloseCircleOutline,
-		RedoOutline,
-	} from 'flowbite-svelte-icons';
+		ArrowRight,
+		CheckCircle2,
+		XCircle,
+	} from 'lucide-svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-  async function resendEmail() {
-    const response = await fetch('/api/mail/user-registration', {
-      method: 'POST',
-      body: JSON.stringify('{}')
-    })
-
-    const result = await response.json();
-    console.log(result)
-  }
+	async function resendEmail() {
+		await fetch('/api/mail/user-registration', {
+			method: 'POST',
+			body: JSON.stringify('{}')
+		});
+	}
 </script>
 
 <div>
 	{#if data.status === 'success'}
-		<CheckCircleOutline
-			class="w-8 h-8 mb-3 text-green-500 dark:text-green-400"
-		/>
+		<CheckCircle2 class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
 	{:else}
-		<CloseCircleOutline class="w-8 h-8 mb-3 text-red-500 dark:text-red-400" />
+		<XCircle class="w-8 h-8 mb-3 text-red-500 dark:text-red-400" />
 	{/if}
 	{#if data.status === 'success'}
-		<Heading
-			tag="h4"
-			class="text-xl font-semibold mb-2"
-		>
+		<h4 class="text-xl font-semibold mb-2">
 			Your account has been verified!
-		</Heading>
+		</h4>
 	{:else}
-		<Heading
-			tag="h4"
-			class="text-xl font-semibold mb-2"
-		>
+		<h4 class="text-xl font-semibold mb-2">
 			Verification failed
-		</Heading>
+		</h4>
 	{/if}
 	{#if data.status === 'success'}
-		<P class="mb-3 font-normal text-gray-500 dark:text-gray-400">
+		<p class="mb-3 font-normal text-muted-foreground">
 			Thanks for confirming your email. Your account is now active.
-		</P>
+		</p>
 	{:else}
-		<P class="mb-3 font-normal text-gray-500 dark:text-gray-400">
+		<p class="mb-3 font-normal text-muted-foreground">
 			Your verification link may have expired or is invalid.
-		</P>
+		</p>
 	{/if}
-  {#if data.status === 'success'}
-  	<Button
-		class="mt-4"
-		href="/login"
-    outline
-	>
-		Login
-		<ArrowRightOutline class="ms-2 h-5 w-5" />
-	</Button>
-  {:else}
-  	<Button
-		class="mt-4"
-    onclick={resendEmail}
-    outline
-	>
-		Resend Email
-	</Button>
-  {/if}
+	{#if data.status === 'success'}
+		<a class={cn(buttonVariants({ variant: "outline" }), "mt-4")} href="/login">
+			Login
+			<ArrowRight class="ms-2 h-5 w-5" />
+		</a>
+	{:else}
+		<Button class="mt-4" variant="outline" onclick={resendEmail}>
+			Resend Email
+		</Button>
+	{/if}
 </div>

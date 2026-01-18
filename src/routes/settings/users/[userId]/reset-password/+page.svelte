@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Alert } from 'flowbite-svelte';
-	import { InfoCircleSolid } from 'flowbite-svelte-icons';
+	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { Info } from 'lucide-svelte';
 	import type { ActionData, PageData } from './$types';
 	import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
@@ -30,15 +30,13 @@
 	<div class="grow">
 		{#if form?.error || form?.success}
 			<Alert
-				border
-				color={form.error ? 'red' : 'green'}
-				class="mb-4"
+				variant={form.error ? 'destructive' : 'default'}
+				class="mb-4 {form.error ? '' : 'border-green-500 text-green-700 dark:text-green-400'}"
 			>
-				<InfoCircleSolid
-					slot="icon"
-					class="w-5 h-5"
-				/>
-				{form.error ? form.error.message : form.success.message}
+				<Info class="w-5 h-5" />
+				<AlertDescription>
+					{form.error ? form.error.message : form.success.message}
+				</AlertDescription>
 			</Alert>
 		{/if}
 		<ResetPasswordForm></ResetPasswordForm>

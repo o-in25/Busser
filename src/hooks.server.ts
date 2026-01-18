@@ -15,9 +15,15 @@ const publicRoutes = [
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
   const { cookies, url } = event;
   const slug = url.pathname;
+
+  // Ignore Chrome DevTools requests
+  if (slug.startsWith('/.well-known/')) {
+    return new Response(null, { status: 404 });
+  }
+
   const userToken = cookies.get("userToken");
 
-  event.locals.user = await authenticate(userToken);  
+  event.locals.user = await authenticate(userToken);
 
   const isPublicRoute = micromatch.isMatch(slug, publicRoutes);
 

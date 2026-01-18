@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Heading } from 'flowbite-svelte';
 	import type { PageData } from './$types';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
@@ -19,12 +18,9 @@
 	<BreadcrumbItem name={data?.spirit?.recipeCategoryDescription}
 	></BreadcrumbItem>
 </Breadcrumb>
-<Heading
-	tag="h2"
-	class="mb-4 flex flex-row justify-between font-extrabold"
->
+<h2 class="text-3xl mb-4 flex flex-row justify-between font-extrabold">
 	{data?.spirit?.recipeCategoryDescription}
-</Heading>
+</h2>
 
 <div class="md:px-4 py-2 md:py-4">
 	<div class="space-y-4">

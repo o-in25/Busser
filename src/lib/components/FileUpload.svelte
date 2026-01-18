@@ -1,21 +1,13 @@
 <script lang="ts">
-	import {
-		Label,
-		CloseButton,
-		ButtonGroup,
-		Input,
-		InputAddon,
-	} from 'flowbite-svelte';
+	import { Label } from '$lib/components/ui/label';
+	import { Input } from '$lib/components/ui/input';
+	import { Button } from '$lib/components/ui/button';
+	import { Upload, X } from 'lucide-svelte';
 	import placeholder from '$lib/assets/placeholder@2x.jpg';
 	import FancyImage from './FancyImage.svelte';
-	import {
-		EyeOutline,
-		EyeSlashOutline,
-		UploadOutline,
-	} from 'flowbite-svelte-icons';
 
 	export let name = 'image';
-	export let signedUrl;
+	export let signedUrl: string | undefined;
 	let files: FileList | undefined;
 	let fileInputRef: HTMLInputElement | undefined;
 
@@ -23,7 +15,7 @@
 	$: hasFiles = files && files.length > 0;
 	$: fileNames = files
 		? Array.from(files)
-				.map(file => file.name)
+				.map((file) => file.name)
 				.join(', ')
 		: 'No files selected';
 
@@ -35,9 +27,6 @@
 			const reader = new FileReader();
 			reader.onload = ({ target }) => {
 				signedUrl = target?.result?.toString() || '';
-				if (signedUrl.length) {
-				}
-				// console.log(signedUrl, target?.result?.toString())
 			};
 			reader.readAsDataURL(file);
 		}
@@ -57,15 +46,13 @@
 	<Label class="mb-2">Image</Label>
 	<div class="mb-4 flex">
 		<div class="w-full">
-			<ButtonGroup class="w-full">
-				<InputAddon class="!px-0">
-					<label
-						for={name}
-						class="!px-3 h-full flex items-center justify-center"
-					>
-						<UploadOutline class="w-8 md:w-10 lg:w-12" />
-					</label>
-				</InputAddon>
+			<div class="flex group">
+				<label
+					for={name}
+					class="flex items-center justify-center px-4 border border-r-0 border-input/50 rounded-l-lg bg-white/50 dark:bg-zinc-800/40 backdrop-blur-sm hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer transition-all duration-200 group-focus-within:border-primary/50 group-focus-within:bg-primary/5"
+				>
+					<Upload class="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+				</label>
 				<input
 					id={name}
 					{name}
@@ -74,53 +61,26 @@
 					bind:this={fileInputRef}
 					class="hidden"
 				/>
-				<Input
-					bind:value={fileNames}
-					disabled
-				/>
+				<Input value={fileNames} disabled class="rounded-l-none border-l-0 {hasFiles ? 'rounded-r-none' : ''}" />
 				{#if hasFiles}
-					<div
-						class="bg-gray-300 dark:bg-gray-700 rounded-r-lg focus:rounded-none focus:rounded-r-lg"
+					<Button
+						variant="ghost"
+						size="icon"
+						onclick={clearAll}
+						class="rounded-l-none border border-l-0 border-input/50 hover:bg-destructive/10 hover:text-destructive transition-colors"
 					>
-						<CloseButton
-							on:click={clearAll}
-							class="flex inset-y-0 items-right text-gray-500 dark:text-gray-400 end-0 p-2.5"
-						/>
-					</div>
+						<X class="w-4 h-4" />
+					</Button>
 				{/if}
-			</ButtonGroup>
+			</div>
 		</div>
-
-		<!-- <Fileupload id={name} {name} class="mb-2" accept="image/*" bind:files={files} title="test" />  -->
-		<!-- 
-		<div class="relative w-full">
-			<input
-				id={name}
-				{name}
-				type="file"
-				bind:files
-				bind:this={fileInputRef}
-				class="block w-full disabled:cursor-not-allowed disabled:opacity-50 rtl:text-right focus:border-primary-500 focus:ring-primary-500 dark:focus:border-primary-500 dark:focus:ring-primary-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:placeholder-gray-400 border-gray-300 dark:border-gray-600 text-sm rounded-lg border !p-0 dark:text-gray-400"
-			/>
-			{#if hasFiles}
-				<CloseButton
-					on:click={clearAll}
-					class="flex absolute inset-y-0 items-center text-gray-500 dark:text-gray-400 end-0 p-2.5"
-				/>
-			{/if}
-		</div> -->
-
-		<!-- {#if src !== placeholder}
-      <Button class="ms-2 mb-2" color="alternative" on:click={clearAll}><TrashBinOutline/></Button>
-    {/if} -->
 	</div>
-	<FancyImage
-		alt="Product Thumbnail"
-		{src}
-		divStyle="bg-gray-200 dark:bg-gray-700 rounded-lg p-4"
-		imgStyle="object-scale-down h-48 w-96 m-auto"
-	/>
-	<!-- <div class="bg-gray-700 rounded-lg p-4">
-    <img src="{signedUrl || placeholder}" class="object-scale-down h-48 w-96 m-auto" alt="Product Thumbnail"/>
-  </div> -->
+	<div class="glass-surface p-4 overflow-hidden">
+		<FancyImage
+			alt="Product Thumbnail"
+			{src}
+			divStyle="rounded-lg"
+			imgStyle="object-scale-down h-48 w-96 m-auto rounded-md"
+		/>
+	</div>
 </div>

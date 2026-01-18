@@ -1,4 +1,4 @@
-const { MAILGUN_KEY } = process.env;
+const { MAILGUN_KEY, APP_URL } = process.env;
 
 import FormData from "form-data";
 import Mailgun from "mailgun.js";
@@ -16,9 +16,9 @@ export interface IPasswordResetEmailParams {
 
 export class MailClient {
 
-  // TODO: move this to env var in case we want separate domains
   private static domain: string = "busserapp.com";
   private static from: string = "The Busser Team <noreply@busserapp.com>";
+  private static baseUrl: string = APP_URL || 'https://busser.fly.dev';
   private static mailgun = new Mailgun(FormData);
   private static client = this.mailgun.client({
     username: "api",
@@ -31,21 +31,19 @@ export class MailClient {
 
   public async sendUserRegistrationEmail(to: string[], { username, token }: IUserRegistrationEmailParams) {
     try {
-      const messageResult = await MailClient.client.messages.create(MailClient.domain, {
+      await MailClient.client.messages.create(MailClient.domain, {
         from: MailClient.from,
         to,
         subject: "Welcome to Busser",
         template: "user registration",
-        "h:X-Mailgun-Variables": JSON.stringify({ 
-          url: 'http://localhost:5173',
-          username, 
-          token 
+        "h:X-Mailgun-Variables": JSON.stringify({
+          url: MailClient.baseUrl,
+          username,
+          token
         }),
       });
-
-      console.log(messageResult);
     } catch(error: any) {
-      console.error(error.message);
+      console.error('Failed to send registration email:', error.message);
     }
   }
 

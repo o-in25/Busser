@@ -1,18 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import {
-		A,
-		DescriptionList,
-		Heading,
-		List,
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell,
-	} from 'flowbite-svelte';
-	import { ArrowRightOutline } from 'flowbite-svelte-icons';
+	import * as Table from '$lib/components/ui/table';
+	import { ArrowRight } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	export let data: PageData;
@@ -63,85 +52,69 @@
 	<title>Account - Busser</title>
 </svelte:head>
 <div class="flex items-center justify-between gap-4">
-	<div class="text-sm text-gray-500 dark:text-gray-400">
-		<Heading
-			tag="h4"
-			class="mb-4 flex flex-row justify-between font-extrabold"
-		>
+	<div class="text-sm text-muted-foreground">
+		<h4 class="text-xl font-extrabold mb-4 flex flex-row justify-between">
 			Account
-		</Heading>
+		</h4>
 	</div>
-	<A
-		aClass="font-medium hover:underline flex items-center"
+	<a
+		class="font-medium hover:underline flex items-center"
 		href="/settings/users/{data.user?.userId}/edit"
 	>
 		Edit Account...
-		<ArrowRightOutline class="ms-1 h-5 w-5" />
-	</A>
+		<ArrowRight class="ms-1 h-5 w-5" />
+	</a>
 </div>
 <div class="flex justify-left items-center overflow-x-auto w-full">
-	<List
-		tag="dl"
-		class="text-gray-900 dark:text-white divide-y divide-gray-200  dark:divide-gray-700 w-full"
-	>
+	<dl class="text-foreground divide-y divide-border w-full">
 		<div class="flex flex-col pb-3">
-			<DescriptionList
-				tag="dt"
-				class="mb-1"
-			>
+			<dt class="mb-1 text-muted-foreground">
 				Username
-			</DescriptionList>
-			<DescriptionList tag="dd">{data.user?.username}</DescriptionList>
+			</dt>
+			<dd>{data.user?.username}</dd>
 		</div>
 		<div class="flex flex-col pb-3">
-			<DescriptionList
-				tag="dt"
-				class="mb-1"
-			>
+			<dt class="mb-1 text-muted-foreground">
 				Email address
-			</DescriptionList>
-			<DescriptionList tag="dd">{data.user?.email}</DescriptionList>
+			</dt>
+			<dd>{data.user?.email}</dd>
 		</div>
 		<div class="flex flex-col pb-3">
-			<DescriptionList
-				tag="dt"
-				class="mb-1"
-			>
+			<dt class="mb-1 text-muted-foreground">
 				Roles
-			</DescriptionList>
-			<DescriptionList tag="dd">{roles.join(', ')}</DescriptionList>
+			</dt>
+			<dd>{roles.join(', ')}</dd>
 		</div>
 		<div class="flex flex-col pb-3">
-			<DescriptionList
-				tag="dt"
-				class="mb-1"
-			>
+			<dt class="mb-1 text-muted-foreground">
 				Permissions
-			</DescriptionList>
-			<DescriptionList tag="dd">
-				<Table>
-					<TableHead class="text-center">
-						<TableHeadCell class="!text-left">Resource</TableHeadCell>
-						<TableHeadCell>Can View</TableHeadCell>
-						<TableHeadCell>Can Add</TableHeadCell>
-						<TableHeadCell>Can Edit</TableHeadCell>
-						<TableHeadCell>Can Delete</TableHeadCell>
-					</TableHead>
-					<TableBody tableBodyClass="divide-y">
+			</dt>
+			<dd>
+				<Table.Root>
+					<Table.Header>
+						<Table.Row class="text-center">
+							<Table.Head class="!text-left">Resource</Table.Head>
+							<Table.Head>Can View</Table.Head>
+							<Table.Head>Can Add</Table.Head>
+							<Table.Head>Can Edit</Table.Head>
+							<Table.Head>Can Delete</Table.Head>
+						</Table.Row>
+					</Table.Header>
+					<Table.Body>
 						{#each Object.entries(tableEntry) as [_, grants]}
-							<TableBodyRow class="capitalize text-center">
-								<TableBodyCell class="!text-left">
+							<Table.Row class="capitalize text-center">
+								<Table.Cell class="!text-left">
 									{grants.resource}
-								</TableBodyCell>
-								<TableBodyCell>{grants.view ? 'Yes' : 'No'}</TableBodyCell>
-								<TableBodyCell>{grants.add ? 'Yes' : 'No'}</TableBodyCell>
-								<TableBodyCell>{grants.edit ? 'Yes' : 'No'}</TableBodyCell>
-								<TableBodyCell>{grants.delete ? 'Yes' : 'No'}</TableBodyCell>
-							</TableBodyRow>
+								</Table.Cell>
+								<Table.Cell>{grants.view ? 'Yes' : 'No'}</Table.Cell>
+								<Table.Cell>{grants.add ? 'Yes' : 'No'}</Table.Cell>
+								<Table.Cell>{grants.edit ? 'Yes' : 'No'}</Table.Cell>
+								<Table.Cell>{grants.delete ? 'Yes' : 'No'}</Table.Cell>
+							</Table.Row>
 						{/each}
-					</TableBody>
-				</Table>
-			</DescriptionList>
+					</Table.Body>
+				</Table.Root>
+			</dd>
 		</div>
-	</List>
+	</dl>
 </div>

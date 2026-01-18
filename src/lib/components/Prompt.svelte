@@ -1,12 +1,9 @@
 <script lang="ts">
-	import {
-		Label,
-		ToolbarButton,
-		Spinner,
-		Textarea,
-		Helper,
-	} from 'flowbite-svelte';
-	import { BrainOutline } from 'flowbite-svelte-icons';
+	import { Label } from '$lib/components/ui/label';
+	import { Textarea } from '$lib/components/ui/textarea';
+	import { Button } from '$lib/components/ui/button';
+	import { Helper } from '$lib/components/ui/helper';
+	import { Brain, Loader2 } from 'lucide-svelte';
 
 	export let value = '';
 	export let label = 'Description';
@@ -27,8 +24,10 @@
 				method: 'POST',
 				body: JSON.stringify({ trigger }),
 			});
-			const { description } = await response.json();
-			if (!description) throw new Error('Invalid response generated.');
+			const res = await response.json();
+      console.log(res);
+      const description = res.description;
+			if (!res.description) throw new Error('Invalid response generated.');
 
 			value = description;
 		} catch (error: any) {
@@ -40,43 +39,35 @@
 	};
 </script>
 
-<Label
-	for="textarea-id"
-	class="mb-2"
->
-	{label}
-</Label>
-<div class="mt-4">
-	<div
-		class="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700"
-	>
-		<ToolbarButton
-			color="dark"
-			class="text-gray-500 dark:text-gray-400"
-			on:click={generateText}
+<Label for="textarea-id" class="mb-2">{label}</Label>
+<div class="mt-3">
+	<div class="flex items-start gap-3 p-3 rounded-xl bg-white/50 dark:bg-zinc-800/40 backdrop-blur-sm border border-input/50">
+		<Button
+			variant="outline"
+			size="icon"
+			class="shrink-0 mt-1"
+			onclick={generateText}
+			disabled={showSpinner}
 		>
 			{#if showSpinner}
-				<Spinner class="w-6 h-6" />
+				<Loader2 class="w-5 h-5 animate-spin" />
 			{:else}
-				<BrainOutline class="w-6 h-6" />
+				<Brain class="w-5 h-5" />
 				<span class="sr-only">Generate text</span>
 			{/if}
-		</ToolbarButton>
+		</Button>
 		<Textarea
 			{id}
 			{name}
 			{rows}
-			class="mx-4 bg-white dark:bg-gray-800"
+			class="flex-1 !bg-transparent !border-0 !shadow-none focus-visible:!ring-0 focus-visible:!ring-offset-0"
 			bind:value
 			disabled={showSpinner}
+			placeholder="Enter a description or click the brain icon to generate one..."
 		/>
-		<!-- <Textarea id="textarea-id" rows="4" name="message" class="h-36"/> -->
 	</div>
 	{#if showHelperText}
-		<Helper
-			class="mt-2"
-			color="red"
-		>
+		<Helper color="red" class="mt-2">
 			Could not generate text from prompt.
 		</Helper>
 	{/if}

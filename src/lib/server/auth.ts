@@ -174,15 +174,15 @@ export async function createInvite() {
       expiresAt: null
     })
   } catch(error: any) {
-    console.log(error)
+    console.error('Failed to generate invite code:', error.message);
   }
 }
 
 export async function checkInviteCode(code: string) {
   try {
-    
+
   } catch(error: any) {
-    console.log(error)
+    console.error('Failed to check invite code:', error.message);
   }
 }
 

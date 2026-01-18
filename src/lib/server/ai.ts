@@ -23,7 +23,6 @@ export abstract class LlmClient<T> {
       ],
       response_format: zodResponseFormat(this.schema, 'text')
     });
-
     const structuredResult = completion.choices[0].message.parsed;
     return structuredResult as T;
   }

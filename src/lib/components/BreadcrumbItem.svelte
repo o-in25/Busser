@@ -1,23 +1,23 @@
 <script>
-	import { AngleRightOutline } from 'flowbite-svelte-icons';
+	import { ChevronRight } from 'lucide-svelte';
 	export let name;
 	export let href = '';
 </script>
 
 <li class="inline-flex items-center">
-	<div class="text-gray-500 dark:text-gray-400">
-		<AngleRightOutline />
+	<div class="text-muted-foreground">
+		<ChevronRight class="w-4 h-4" />
 	</div>
 	{#if href}
 		<a
 			{href}
-			class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
+			class="ms-1 text-sm font-medium text-muted-foreground hover:text-primary md:ms-2"
 		>
 			{name}
 		</a>
 	{:else}
 		<span
-			class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400"
+			class="ms-1 text-sm font-medium text-muted-foreground md:ms-2"
 		>
 			{name}
 		</span>

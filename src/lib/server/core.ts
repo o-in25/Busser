@@ -34,6 +34,11 @@ export const marshal = <T>(obj: any, fn: Function = camelCase) => {
     return obj.map((v) => marshal<T>(v, fn));
   }
 
+  // Handle Date objects and other special types - return as-is
+  if(obj instanceof Date) {
+    return obj as T;
+  }
+
   if(obj && typeof obj === 'object') {
     return Object.keys(obj).reduce((arr, key) => {
       arr[fn(key)] = marshal<T>(obj[key], fn);
@@ -121,7 +126,6 @@ export async function getInventory(
     }
 
     if(typeof filter?.productInStockQuantity !== 'undefined') {
-      console.log(filter.productInStockQuantity);
       dbResult = dbResult.andWhere("productInStockQuantity", "=", filter.productInStockQuantity);
     }
 
@@ -702,8 +706,6 @@ export async function updateCatalog(
 
       // step 3
       if(oldRecipe) {
-
-        console.log(recipe);
         dbResult = await trx("recipedescription")
           .where("RecipeDescriptionId", keys.recipeDescriptionId)
           .update({

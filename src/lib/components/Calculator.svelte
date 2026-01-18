@@ -1,5 +1,7 @@
 <script>
-	import { Label, Button, Select, Heading, Input } from 'flowbite-svelte';
+	import { Label } from '$lib/components/ui/label';
+	import { Input } from '$lib/components/ui/input';
+	import { Button } from '$lib/components/ui/button';
 
 	let selections = [
 		{
@@ -50,23 +52,23 @@
 			enabled: true,
 		},
 		initialWgt: {
-			value: 0.0,
+			value: '0',
 			enabled: true,
 		},
 		citricAcidWgt: {
-			value: 0.0,
+			value: '0.00',
 			enabled: true,
 		},
 		malicAcidWgt: {
-			value: 0.0,
+			value: '0.00',
 			enabled: true,
 		},
 		msgWgt: {
-			value: 0.0,
+			value: '0.00',
 			enabled: false,
 		},
 		waterWgt: {
-			value: 0.0,
+			value: '0.00',
 			enabled: true,
 		},
 	};
@@ -74,189 +76,107 @@
 	const calculate = () => {
 		const { weights } =
 			selections.find(({ value }) => value === fields.juiceType.value) || {};
+		const initialValue = parseFloat(fields.initialWgt.value) || 0;
 		weights?.forEach(({ key, weight }, i) => {
 			fields[key].enabled = weight === 0;
-			let value = fields.initialWgt.value * weight;
+			let value = initialValue * weight;
 			value = i === weights.length - 1 ? value / 250 : value;
 			fields[key].value = value.toFixed(2);
 		});
 	};
 </script>
 
-<Heading
-	tag="h6"
-	class="mb-4"
->
-	Super Juice Calculator
-</Heading>
+<h6 class="text-lg font-bold mb-4">Super Juice Calculator</h6>
 <form>
 	<div class="flex gap-4 mb-6">
 		<div class="flex-1">
-			<Label
-				for="input-addon"
-				class="mb-2"
-			>
-				Peel Weight
-			</Label>
-			<Input
-				id="input-addon"
-				type="number"
-				let:props
-				required
-			>
-				<input
+			<Label for="input-addon" class="mb-2">Peel Weight</Label>
+			<div class="relative">
+				<Input
 					id="input-addon"
 					type="number"
-					placeholder=""
-					{...props}
 					bind:value={fields.initialWgt.value}
+					class="pr-16"
 				/>
-				<div
-					slot="right"
-					class="font-bold"
-				>
+				<span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">
 					grams
-				</div>
-			</Input>
+				</span>
+			</div>
 		</div>
 		<div>
-			<Label>
-				Juice
-				<Select
-					class="mt-2"
-					items={selections}
-					bind:value={fields.juiceType.value}
-					on:change={calculate}
-				/>
-			</Label>
+			<Label class="mb-2">Juice</Label>
+			<select
+				class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+				bind:value={fields.juiceType.value}
+				onchange={calculate}
+			>
+				{#each selections as item}
+					<option value={item.value}>{item.name}</option>
+				{/each}
+			</select>
 		</div>
 	</div>
 
-	<!-- citric acid -->
 	<div class="grid gap-4 mb-6 md:grid-cols-2">
+		<!-- citric acid -->
 		<div>
-			<Label
-				for="productName"
-				class="mb-2"
-			>
-				Citric Acid
-			</Label>
-			<Input
-				let:props
-				required
-			>
-				<input
-					id="productUnitSizeInMilliliters"
-					name="productUnitSizeInMilliliters"
-					type=""
-					placeholder=""
-					readonly
-					{...props}
-					bind:value={fields.citricAcidWgt.value}
-				/>
-				<div
-					slot="right"
-					class="font-bold"
-				>
+			<Label class="mb-2">Citric Acid</Label>
+			<div class="relative">
+				<Input type="text" readonly value={fields.citricAcidWgt.value} class="pr-16" />
+				<span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">
 					grams
-				</div>
-			</Input>
+				</span>
+			</div>
 		</div>
 
 		<!-- malic acid -->
 		<div>
-			<Label
-				for="productName"
-				class="mb-2"
-			>
-				Malic Acid
-			</Label>
-			<Input
-				let:props
-				bind:disabled={fields.malicAcidWgt.enabled}
-				required
-			>
-				<input
-					id="productUnitSizeInMilliliters"
-					name="productUnitSizeInMilliliters"
-					type=""
-					placeholder=""
+			<Label class="mb-2">Malic Acid</Label>
+			<div class="relative">
+				<Input
+					type="text"
 					readonly
-					{...props}
-					bind:value={fields.malicAcidWgt.value}
+					disabled={fields.malicAcidWgt.enabled}
+					value={fields.malicAcidWgt.value}
+					class="pr-16"
 				/>
-				<div
-					slot="right"
-					class="font-bold"
-				>
+				<span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">
 					grams
-				</div>
-			</Input>
+				</span>
+			</div>
 		</div>
 
 		<!-- msg -->
 		<div>
-			<Label
-				for="productName"
-				class="mb-2"
-			>
-				MSG
-			</Label>
-			<Input
-				let:props
-				bind:disabled={fields.msgWgt.enabled}
-			>
-				<input
-					id="productUnitSizeInMilliliters"
-					name="productUnitSizeInMilliliters"
-					type=""
-					placeholder=""
+			<Label class="mb-2">MSG</Label>
+			<div class="relative">
+				<Input
+					type="text"
 					readonly
-					{...props}
-					bind:value={fields.msgWgt.value}
+					disabled={fields.msgWgt.enabled}
+					value={fields.msgWgt.value}
+					class="pr-16"
 				/>
-				<div
-					slot="right"
-					class="font-bold"
-				>
+				<span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">
 					grams
-				</div>
-			</Input>
+				</span>
+			</div>
 		</div>
 
 		<!-- water -->
 		<div>
-			<Label
-				for="productName"
-				class="mb-2"
-			>
-				Water
-			</Label>
-			<Input
-				let:props
-				required
-			>
-				<input
-					id="productUnitSizeInMilliliters"
-					name="productUnitSizeInMilliliters"
-					type=""
-					placeholder=""
-					readonly
-					{...props}
-					bind:value={fields.waterWgt.value}
-				/>
-				<div
-					slot="right"
-					class="font-bold"
-				>
+			<Label class="mb-2">Water</Label>
+			<div class="relative">
+				<Input type="text" readonly value={fields.waterWgt.value} class="pr-16" />
+				<span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">
 					cups
-				</div>
-			</Input>
+				</span>
+			</div>
 		</div>
 
 		<div class="mt-4 flex">
 			<div class="flex-grow">
-				<Button on:click={calculate}>Calculate</Button>
+				<Button onclick={calculate}>Calculate</Button>
 			</div>
 		</div>
 	</div>

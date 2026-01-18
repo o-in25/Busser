@@ -1,13 +1,9 @@
 <script lang="ts">
 	import type { User } from '$lib/types/auth';
-	import {
-		Button,
-		GradientButton,
-		Helper,
-		Input,
-		Label,
-		MultiSelect,
-	} from 'flowbite-svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { Helper } from '$lib/components/ui/helper';
 	import type { SelectOption } from '$lib/types';
 	import { getContext } from 'svelte';
 
@@ -24,10 +20,9 @@
 		passwordConfirm = '';
 	};
 
-	// const userRoles: any[] = getContext('roles') || [];
 	const permissions: string[] = getContext('permissions');
 
-	let selected = user?.roles.map(({ roleId }) => roleId);
+	let selected = user?.roles.map(({ roleId }) => roleId) || [];
 
 	export let errors = {
 		username: {
@@ -51,70 +46,77 @@
 			message: '',
 		},
 	};
+
+	function toggleRole(roleId: string) {
+		if (selected.includes(roleId)) {
+			selected = selected.filter((id) => id !== roleId);
+		} else {
+			selected = [...selected, roleId];
+		}
+	}
 </script>
 
 <!-- username -->
-<Label
-	class="space-y-2"
-	color={errors?.username?.hasError ? 'red' : 'gray'}
->
-	<span>Username</span>
+<div class="space-y-2">
+	<Label for="username" class={errors?.username?.hasError ? 'text-destructive' : ''}>
+		Username
+	</Label>
 	<Input
 		type="text"
+		id="username"
 		name="username"
-		color={errors?.username?.hasError ? 'red' : 'base'}
+		class={errors?.username?.hasError ? 'border-destructive' : ''}
 		value={user?.username || ''}
 	/>
 	{#if errors?.username.hasError}
-		<Helper
-			class="mt-2"
-			color="red"
-		>
-			<span class="font-medium">{errors?.username?.message}</span>
+		<Helper color="red">
+			{errors?.username?.message}
 		</Helper>
 	{/if}
-</Label>
+</div>
 
 <!-- email -->
 {#if action !== 'login'}
-	<Label
-		class="space-y-2"
-		color={errors?.email.hasError ? 'red' : 'gray'}
-	>
-		<span>Email</span>
+	<div class="space-y-2">
+		<Label for="email" class={errors?.email?.hasError ? 'text-destructive' : ''}>
+			Email
+		</Label>
 		<Input
 			type="email"
+			id="email"
 			name="email"
-			color={errors?.email.hasError ? 'red' : 'base'}
+			class={errors?.email?.hasError ? 'border-destructive' : ''}
 			value={user?.email || ''}
 		/>
 		{#if errors?.email.hasError}
-			<Helper
-				class="mt-2"
-				color="red"
-			>
-				<span class="font-medium">{errors?.email.message}</span>
+			<Helper color="red">
+				{errors?.email.message}
 			</Helper>
 		{/if}
-	</Label>
+	</div>
 {/if}
 
 <!-- role -->
 {#if action === 'edit' || action === 'add'}
-	<Label class="space-y-2">
-		<span>Role</span>
-		<input
-			class="hidden"
-			name="roles"
-			id="roles"
-			bind:value={selected}
-		/>
-		<MultiSelect
-			items={roles}
-			bind:value={selected}
-			disabled={!permissions.includes('edit_admin')}
-		/>
-	</Label>
+	<div class="space-y-2">
+		<Label>Role</Label>
+		<input class="hidden" name="roles" id="roles" bind:value={selected} />
+		<div class="flex flex-wrap gap-2">
+			{#each roles as role}
+				<button
+					type="button"
+					onclick={() => toggleRole(String(role.value))}
+					disabled={!permissions.includes('edit_admin')}
+					class="px-3 py-1.5 text-sm rounded-full border transition-colors
+						{selected.includes(String(role.value))
+						? 'bg-primary text-primary-foreground border-primary'
+						: 'bg-background border-input hover:bg-accent'}"
+				>
+					{role.name}
+				</button>
+			{/each}
+		</div>
+	</div>
 {/if}
 
 <!-- password reset -->
@@ -122,7 +124,7 @@
 	<div class="flex items-start">
 		<a
 			href="/settings/users/{user?.userId}/reset-password"
-			class="text-sm text-primary-700 hover:underline dark:text-primary-500"
+			class="text-sm text-primary hover:underline"
 		>
 			Reset Password...
 		</a>
@@ -131,98 +133,91 @@
 
 {#if action === 'add' || action === 'register' || action === 'login'}
 	<!-- password -->
-	<Label
-		class="space-y-2"
-		color={errors?.password.hasError ? 'red' : 'gray'}
-	>
-		<span>Password</span>
+	<div class="space-y-2">
+		<Label for="password" class={errors?.password?.hasError ? 'text-destructive' : ''}>
+			Password
+		</Label>
 		<Input
 			type="password"
+			id="password"
 			name="password"
-			color={errors?.password.hasError ? 'red' : 'base'}
+			class={errors?.password?.hasError ? 'border-destructive' : ''}
 			bind:value={password}
 		/>
 		{#if errors?.password.hasError}
-			<Helper
-				class="mt-2"
-				color="red"
-			>
-				<span class="font-medium">{errors?.password.message}</span>
+			<Helper color="red">
+				{errors?.password.message}
 			</Helper>
 		{/if}
-	</Label>
+	</div>
 
 	<!-- password confirm -->
 	{#if action !== 'login'}
-		<Label
-			class="space-y-2"
-			color={errors?.passwordConfirm.hasError ? 'red' : 'gray'}
-		>
-			<span>Confirm Password</span>
+		<div class="space-y-2">
+			<Label
+				for="passwordConfirm"
+				class={errors?.passwordConfirm?.hasError ? 'text-destructive' : ''}
+			>
+				Confirm Password
+			</Label>
 			<Input
 				type="password"
+				id="passwordConfirm"
 				name="passwordConfirm"
-				color={errors?.passwordConfirm.hasError ? 'red' : 'base'}
+				class={errors?.passwordConfirm?.hasError ? 'border-destructive' : ''}
 				bind:value={passwordConfirm}
 			/>
 			{#if errors?.passwordConfirm.hasError}
-				<Helper
-					class="mt-2"
-					color="red"
-				>
-					<span class="font-medium">{errors?.passwordConfirm.message}</span>
+				<Helper color="red">
+					{errors?.passwordConfirm.message}
 				</Helper>
 			{/if}
-		</Label>
+		</div>
 	{/if}
+
 	{#if action === 'register'}
 		<fieldset>
 			<!-- invitation code -->
-			<Label
-				class="space-y-2"
-				color={errors?.invitationCode.hasError ? 'red' : 'gray'}
-			>
-				<span>Invite Code</span>
+			<div class="space-y-2">
+				<Label
+					for="invitationCode"
+					class={errors?.invitationCode?.hasError ? 'text-destructive' : ''}
+				>
+					Invite Code
+				</Label>
 				<Input
 					type="text"
+					id="invitationCode"
 					name="invitationCode"
-					color={errors?.invitationCode.hasError ? 'red' : 'base'}
+					class={errors?.invitationCode?.hasError ? 'border-destructive' : ''}
 					bind:value={invitationCode}
 				/>
 				{#if errors?.invitationCode.hasError}
-					<Helper
-						class="mt-2"
-						color="red"
-					>
-						<span class="font-medium">{errors?.invitationCode.message}</span>
+					<Helper color="red">
+						{errors?.invitationCode.message}
 					</Helper>
 				{:else}
-					<Helper class="text-sm text-gray-400">
+					<Helper>
 						Registration is currently invite only.
 					</Helper>
 				{/if}
-			</Label>
+			</div>
 		</fieldset>
 	{/if}
 {/if}
 
 <!-- submit -->
 {#if action === 'register' || action === 'login'}
-	<GradientButton
-		color="pinkToOrange"
-		size="lg"
-		class="w-full hover:!bg-transparent"
+	<Button
 		type="submit"
+		size="lg"
+		class="w-full bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500"
 	>
 		{action === 'register' ? 'Sign up' : 'Log in'}
-	</GradientButton>
+	</Button>
 {:else}
 	<div class="md:flex justify-end">
-		<Button
-			class="w-full md:w-32"
-			type="submit"
-			size="xl"
-		>
+		<Button class="w-full md:w-32" type="submit" size="lg">
 			Save
 		</Button>
 	</div>
@@ -230,22 +225,16 @@
 
 <!-- help -->
 {#if action === 'register'}
-	<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-		Already signed up? <a
-			href="/login "
-			class="text-primary-700 hover:underline dark:text-primary-500"
-		>
+	<div class="text-sm font-medium text-muted-foreground">
+		Already signed up? <a href="/login" class="text-primary hover:underline">
 			Log in
 		</a>
 	</div>
 {/if}
 
 {#if action === 'login'}
-	<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-		Not a member? <a
-			href="/signup "
-			class="text-primary-700 hover:underline dark:text-primary-500"
-		>
+	<div class="text-sm font-medium text-muted-foreground">
+		Not a member? <a href="/signup" class="text-primary hover:underline">
 			Sign up
 		</a>
 	</div>
