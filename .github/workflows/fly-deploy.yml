@@ -1,27 +1,18 @@
-# See https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
 name: Fly Deploy
-
 on:
   push:
     branches:
       - main
 
-# Required so GitHub can create/update deployments
-permissions:
-  contents: read
-  deployments: write
-
 jobs:
   deploy:
     name: Deploy app
     runs-on: ubuntu-latest
-    concurrency: deploy-group
-
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Create a GitHub deployment record
+      #  GitHub deployment step
       - name: Create GitHub deployment
         id: deployment
         uses: chrnorm/deployment-action@v2
@@ -30,42 +21,19 @@ jobs:
           environment: Production
           description: Fly.io deployment
 
-      # Install flyctl
-      - name: Setup Fly.io CLI
-        uses: superfly/flyctl-actions/setup-flyctl@master
-
-      # Deploy to Fly
-      - name: Deploy to Fly.io
-        run: |
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: |
           flyctl deploy --remote-only --no-cache \
-            --build-arg DB_HOSTNAME=${{ secrets.DB_HOSTNAME }} \
-            --build-arg DB_USER=${{ secrets.DB_USER }} \
-            --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            --build-arg DB_PORT=${{ secrets.DB_PORT }} \
-            --build-arg BUCKET=${{ secrets.BUCKET }} \
-            --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-            --build-arg GOOGLE_SERVICE_KEY=${{ secrets.GOOGLE_SERVICE_KEY }} \
-            --build-arg JWT_SIGNING_KEY=${{ secrets.JWT_SIGNING_KEY }} \
-            --build-arg MAILGUN_KEY=${{ secrets.MAILGUN_KEY }} \
-            --build-arg INSTANCE_CONNECTION_NAME=${{ secrets.INSTANCE_CONNECTION_NAME }} \
-            --build-arg APP_URL=${{ secrets.APP_URL }}
+            --build-arg DB_HOSTNAME=${{secrets.DB_HOSTNAME}} \
+            --build-arg DB_USER=${{secrets.DB_USER}} \
+            --build-arg DB_PASSWORD=${{secrets.DB_PASSWORD}} \
+            --build-arg DB_PORT=${{secrets.DB_PORT}} \
+            --build-arg BUCKET=${{secrets.BUCKET}} \
+            --build-arg OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}} \
+            --build-arg GOOGLE_SERVICE_KEY=${{secrets.GOOGLE_SERVICE_KEY}} \
+            --build-arg JWT_SIGNING_KEY=${{secrets.JWT_SIGNING_KEY}} \
+            --build-arg MAILGUN_KEY=${{secrets.MAILGUN_KEY}} \
+            --build-arg INSTANCE_CONNECTION_NAME=${{secrets.INSTANCE_CONNECTION_NAME}} \
+            --build-arg APP_URL=${{secrets.APP_URL}}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      # Mark deployment successful
-      - name: Mark deployment successful
-        if: success()
-        uses: chrnorm/deployment-status@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
-          state: success
-
-      # Mark deployment failed
-      - name: Mark deployment failed
-        if: failure()
-        uses: chrnorm/deployment-status@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
-          state: failure
