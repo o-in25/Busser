@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { Textarea } from '$lib/components/ui/textarea';
 	import { cn } from '$lib/utils';
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import { page } from '$app/stores';
 	import {
 		LogIn,
@@ -23,14 +27,25 @@
 		CheckCircle2,
 		AlertCircle,
 		Camera,
+		Send,
+		Loader2,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import placeholder from '$lib/assets/placeholder@2x.jpg';
 	import logo from '$lib/assets/logo.png';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	// Invitation request modal state
+	let requestModalOpen = $state(false);
+	let isSubmitting = $state(false);
+	let requestSuccess = $state(false);
+
+	// Form error state - cast to handle the union type properly
+	let requestInviteForm = $derived(form?.requestInvite as { error?: string; email?: string; message?: string } | undefined);
 
 	const { recipes, spirits, dashboardData, landingData } = data;
 	const permissions: string[] = getContext('permissions') || [];
@@ -243,13 +258,121 @@
 				</div>
 			</div>
 
-			<!-- Invitation notice -->
-			<p class="text-muted-foreground text-sm mt-6">
-				Busser is currently invitation-only while we're in early development.
-				We plan to open registration to everyone soon.
-			</p>
+			<!-- Invitation notice with request option -->
+			<div class="mt-6 space-y-2">
+				<p class="text-muted-foreground text-sm">
+					Busser is currently invitation-only while we're in early development.
+				</p>
+				<button
+					type="button"
+					onclick={() => requestModalOpen = true}
+					class="text-sm text-primary hover:underline"
+				>
+					Don't have an invite? Request one here.
+				</button>
+			</div>
 		</div>
 	</section>
+
+	<!-- Request Invite Modal -->
+	<Dialog.Root bind:open={requestModalOpen}>
+		<Dialog.Content class="sm:max-w-md">
+			<Dialog.Header>
+				<Dialog.Title>Request an Invitation</Dialog.Title>
+				<Dialog.Description>
+					Enter your email and we'll notify an admin to review your request.
+				</Dialog.Description>
+			</Dialog.Header>
+
+			{#if requestSuccess}
+				<!-- Success State -->
+				<div class="py-6 text-center">
+					<div class="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+						<CheckCircle2 class="h-8 w-8 text-green-500" />
+					</div>
+					<h3 class="text-lg font-semibold mb-2">Request Submitted!</h3>
+					<p class="text-muted-foreground text-sm mb-4">
+						We'll review your request and get back to you soon.
+					</p>
+					<Button onclick={() => { requestModalOpen = false; requestSuccess = false; }}>
+						Got it
+					</Button>
+				</div>
+			{:else}
+				<!-- Request Form -->
+				<form
+					method="POST"
+					action="?/requestInvite"
+					class="space-y-4"
+	use:enhance={() => {
+						isSubmitting = true;
+						return async ({ result, update }) => {
+							isSubmitting = false;
+							if (result.type === 'success') {
+								requestSuccess = true;
+							}
+							await update();
+						};
+					}}
+				>
+					<div class="space-y-2">
+						<Label for="request-email">Email address</Label>
+						<Input
+							type="email"
+							id="request-email"
+							name="email"
+							placeholder="you@example.com"
+							value={requestInviteForm?.email || ''}
+							required
+						/>
+					</div>
+
+					<div class="space-y-2">
+						<Label for="request-message">
+							Why do you want to join? <span class="text-muted-foreground font-normal">(optional)</span>
+						</Label>
+						<Textarea
+							id="request-message"
+							name="message"
+							placeholder="I'm a home bartender looking to organize my bar..."
+							rows={3}
+							value={requestInviteForm?.message || ''}
+						/>
+					</div>
+
+					{#if requestInviteForm?.error}
+						<div class="text-sm text-destructive bg-destructive/10 rounded-md p-3">
+							{requestInviteForm.error}
+						</div>
+					{/if}
+
+					<Dialog.Footer class="flex-col sm:flex-row gap-2">
+						<Button
+							type="button"
+							variant="outline"
+							onclick={() => requestModalOpen = false}
+							class="w-full sm:w-auto"
+						>
+							Cancel
+						</Button>
+						<Button
+							type="submit"
+							class="w-full sm:w-auto"
+							disabled={isSubmitting}
+						>
+							{#if isSubmitting}
+								<Loader2 class="h-4 w-4 mr-2 animate-spin" />
+								Submitting...
+							{:else}
+								<Send class="h-4 w-4 mr-2" />
+								Submit Request
+							{/if}
+						</Button>
+					</Dialog.Footer>
+				</form>
+			{/if}
+		</Dialog.Content>
+	</Dialog.Root>
 
 {:else}
 	<!-- ==================== AUTHENTICATED DASHBOARD ==================== -->
