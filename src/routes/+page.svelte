@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
 	import { cn } from '$lib/utils';
 	import type { PageData } from './$types';
@@ -8,44 +10,58 @@
 		LogIn,
 		ArrowRight,
 		Mail,
-		Loader2,
+		GlassWater,
+		FlaskConical,
+		Package,
+		Sparkles,
+		BookOpen,
+		Plus,
+		Shuffle,
+		TrendingUp,
+		ShoppingCart,
+		ChevronRight,
+		CheckCircle2,
+		AlertCircle,
+		Camera,
 	} from 'lucide-svelte';
-	export let data: PageData;
-	import placeholder from '$lib/assets/placeholder@2x.jpg';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
+	import { goto } from '$app/navigation';
+	import placeholder from '$lib/assets/placeholder@2x.jpg';
+	import logo from '$lib/assets/logo.png';
 
-	const { recipes, spirits } = data;
-	const permissions: string[] = getContext('permissions');
+	let { data }: { data: PageData } = $props();
 
-	const gallery =
-		recipes?.map(
-			({
-				recipeImageUrl,
-				recipeName,
-				recipeCategoryDescription,
-				recipeId,
-				recipeCategoryId,
-				recipeDescription,
-			}) => ({
-				src: recipeImageUrl || placeholder,
-				alt: recipeName,
-				data: {
-					recipeCategoryDescription,
-					recipeId,
-					recipeCategoryId,
-					recipeDescription,
-				},
-			})
-		) || [];
+	const { recipes, spirits, dashboardData, landingData } = data;
+	const permissions: string[] = getContext('permissions') || [];
 
-	let loading = false;
-	const getData = (key: any, val: any) => (val?.data as any)?.[key];
-	let sortBy: string | number = 'all';
-	$: filter =
+	// Gallery setup for authenticated users
+	const gallery = recipes?.map(({
+		recipeImageUrl,
+		recipeName,
+		recipeCategoryDescription,
+		recipeId,
+		recipeCategoryId,
+		recipeDescription,
+	}) => ({
+		src: recipeImageUrl || placeholder,
+		alt: recipeName,
+		hasImage: !!recipeImageUrl,
+		data: {
+			recipeCategoryDescription,
+			recipeId,
+			recipeCategoryId,
+			recipeDescription,
+		},
+	})) || [];
+
+	// Filter state for gallery
+	let sortBy: string | number = $state('all');
+	let filter = $derived(
 		sortBy === 'all'
 			? gallery
-			: gallery.filter((item: any) => item.data.recipeCategoryId === sortBy);
+			: gallery.filter((item: any) => item.data.recipeCategoryId === sortBy)
+	);
 
 	const setFilterType = (type: any) => {
 		if (type !== sortBy) {
@@ -53,120 +69,508 @@
 		}
 	};
 
-	const hasAny = (sortBy: number) => gallery.filter((item: any) => item.data.recipeCategoryId === sortBy).length < 1;
+	const hasAny = (spiritId: number) =>
+		gallery.filter((item: any) => item.data.recipeCategoryId === spiritId).length < 1;
+
+	// Surprise me - pick random available recipe
+	function surpriseMe() {
+		if (gallery.length === 0) return;
+		const randomRecipe = gallery[Math.floor(Math.random() * gallery.length)];
+		goto(`/catalog/${randomRecipe.data.recipeId}`);
+	}
+
+	// Features for landing page
+	const features = [
+		{
+			icon: Package,
+			title: 'Track Inventory',
+			description: 'Keep track of what bottles and ingredients you have on hand.',
+			comingSoon: false,
+		},
+		{
+			icon: FlaskConical,
+			title: 'Smart Catalog',
+			description: 'See which cocktails you can make based on your current inventory.',
+			comingSoon: false,
+		},
+		{
+			icon: Camera,
+			title: 'Bottle Scanner',
+			description: 'Take a photo of a bottle to quickly add it to your inventory.',
+			comingSoon: true,
+		},
+		{
+			icon: Sparkles,
+			title: 'AI Substitutions',
+			description: 'Get suggestions for ingredient swaps when you\'re missing something.',
+			comingSoon: true,
+		},
+	];
+
 </script>
 
 <svelte:head>
 	<title>Home - Busser</title>
 </svelte:head>
-{#if !$page.data.user}
-	<h1 class="mb-4 pl-2 md:pl-0 text-3xl font-extrabold md:text-5xl lg:text-6xl">
-		<div class="text-center md:text-left">
-			From Shelf To&nbsp;<span class="text-transparent bg-clip-text bg-gradient-to-r to-yellow-600 from-pink-400">
-				Shaker
-			</span>
-		</div>
-	</h1>
-	<p class="px-2 mb-4 text-center md:text-left text-muted-foreground">
-		Busser finds recipes that match your on-hand ingredients, no guesswork
-		needed.
-	</p>
-{:else}
-	<div class="mt-5 mb-4">
-		<h2 class="flex flex-row justify-between text-3xl font-extrabold">
-			Ready-to-Make Recipes
-		</h2>
-	</div>
-{/if}
 
 {#if !$page.data.user}
-	<div class="flex justify-center md:justify-start my-8">
-		<div class="flex space-x-px">
-			<a
-				class={cn(buttonVariants({ size: "lg" }), "bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-r-none")}
-				href="/login"
-			>
-				<LogIn class="w-4 h-4" />
-				<span class="pl-1">Log In</span>
-			</a>
-			<a
-				id="btn-sign-up"
-				class={cn(buttonVariants({ size: "lg" }), "bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-l-none")}
-				href="/signup"
-			>
-				<Mail class="w-4 h-4" />
-				<span class="pl-1">Sign Up</span>
-			</a>
-		</div>
-	</div>
-	<Separator class="my-8"/>
-{/if}
+	<!-- ==================== UNAUTHENTICATED LANDING PAGE ==================== -->
 
-<div
-	class="flex items-center justify-center pb-4 md:pb-8 flex-wrap gap-3 mb-3 mx-auto"
->
-	<Button
-		variant={sortBy === 'all' ? 'default' : 'outline'}
-		class="rounded-full"
-		size="sm"
-		onclick={() => setFilterType('all')}
-	>
-		All
-	</Button>
-	{#each spirits as spirit}
-		<Button
-			variant={sortBy === spirit.recipeCategoryId ? 'default' : 'outline'}
-			class="rounded-full"
-			size="sm"
-			onclick={() => setFilterType(spirit.recipeCategoryId)}
-			disabled={hasAny(spirit.recipeCategoryId)}
-		>
-			{spirit.recipeCategoryDescription}
-		</Button>
-	{/each}
-</div>
+	<!-- Hero Section -->
+	<section class="relative overflow-hidden py-12 md:py-20 rounded-2xl mt-4">
+		<!-- Background gradient -->
+		<div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-orange-500/10 -z-10 rounded-2xl"></div>
+		<div class="absolute inset-0 bg-grid-pattern opacity-5 -z-10"></div>
 
-{#if !loading}
-	<div class="grid gap-4 grid-cols-2 md:grid-cols-3 mb-8">
-		{#each filter as item}
-			<div
-				class="relative group flex justify-center items-center"
-				in:fade={{ duration: 500 }}
-				out:fade={{ duration: 500 }}
-			>
-				<img
-					src={item.src}
-					alt={item.alt}
-					class="h-full object-cover w-full rounded-lg"
-					loading="lazy"
-				/>
-				<div
-					class="absolute inset-0 right-0 bg-black bg-opacity-60 flex justify-center items-center text-center text-white p-4 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+		<div class="max-w-4xl mx-auto text-center px-4">
+			<!-- Logo -->
+			<img src={logo} alt="Busser" class="h-40 md:h-52 lg:h-60 mx-auto mb-8" />
+
+			<!-- Headline -->
+			<h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
+				From Shelf To
+				<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500">
+					Shaker
+				</span>
+			</h1>
+
+			<!-- Subheadline -->
+			<p class="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+				Busser finds recipes that match your on-hand ingredients, no guesswork needed.
+			</p>
+
+			<!-- CTAs -->
+			<div class="flex flex-col sm:flex-row justify-center gap-4">
+				<a
+					class={cn(buttonVariants({ size: "lg" }), "bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white border-0 text-lg px-8")}
+					href="/signup"
 				>
-					<div class="text-center">
-						<p class="font-bold text-lg">
-							{item.alt}
-						</p>
-						<p class="hidden md:block text-xs mt-2">
-							{getData('recipeDescription', item)}
-						</p>
-						{#if permissions.includes('view_catalog')}
-							<div class="flex justify-center">
-								<a
-									class="mx-auto font-medium hover:underline flex items-center"
-									href="/catalog/{getData('recipeId', item)}"
-								>
-									Open in catalog<ArrowRight class="ms-1 h-5 w-5" />
-								</a>
-							</div>
+					<Mail class="w-5 h-5 mr-2" />
+					Sign Up
+				</a>
+				<a
+					class={cn(buttonVariants({ variant: "outline", size: "lg" }), "text-lg px-8")}
+					href="/login"
+				>
+					<LogIn class="w-5 h-5 mr-2" />
+					Log In
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- Features Section -->
+	<section class="py-16 px-4">
+		<div class="max-w-6xl mx-auto">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl md:text-4xl font-bold mb-4">Features</h2>
+				<p class="text-muted-foreground text-lg max-w-2xl mx-auto">
+					Tools to help you manage your home bar.
+				</p>
+			</div>
+
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+				{#each features as feature}
+					<Card.Root class="text-center p-6 hover:shadow-lg transition-shadow relative">
+						{#if feature.comingSoon}
+							<Badge variant="secondary" class="absolute top-3 right-3 text-xs">
+								Coming Soon
+							</Badge>
 						{/if}
-					</div>
+						<div class="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-4">
+							<feature.icon class="h-7 w-7 text-purple-500" />
+						</div>
+						<h3 class="font-bold text-lg mb-2">{feature.title}</h3>
+						<p class="text-muted-foreground text-sm">{feature.description}</p>
+					</Card.Root>
+				{/each}
+			</div>
+		</div>
+	</section>
+
+	<!-- Preview Gallery Section -->
+	{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
+		<section class="py-16 px-4">
+			<div class="max-w-6xl mx-auto">
+				<div class="text-center mb-12">
+					<h2 class="text-3xl md:text-4xl font-bold mb-4">Sample Recipes</h2>
+					<p class="text-muted-foreground text-lg">
+						A few cocktails from the catalog
+					</p>
+				</div>
+
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+					{#each landingData.featuredRecipes as recipe}
+						<Card.Root class="overflow-hidden group">
+							<div class="relative aspect-square">
+								<img
+									src={recipe.recipeImageUrl}
+									alt={recipe.recipeName}
+									class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+								/>
+								<div class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+								<div class="absolute bottom-0 left-0 right-0 p-4">
+									<p class="font-bold text-foreground">{recipe.recipeName}</p>
+									<p class="text-xs text-muted-foreground">{recipe.recipeCategoryDescription}</p>
+								</div>
+							</div>
+						</Card.Root>
+					{/each}
 				</div>
 			</div>
-		{/each}
-	</div>
+		</section>
+	{/if}
+
+	<!-- Final CTA Section -->
+	<section class="py-16 px-4">
+		<div class="max-w-3xl mx-auto text-center">
+			<div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-8 md:p-12">
+				<div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+				<div class="relative">
+					<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+						Get Started
+					</h2>
+					<p class="text-white/80 text-lg mb-8">
+						Create an account to start tracking your bar.
+					</p>
+					<a
+						href="/signup"
+						class={cn(buttonVariants({ size: "lg" }), "bg-white text-purple-600 hover:bg-white/90 text-lg px-8")}
+					>
+						Sign Up
+						<ArrowRight class="ml-2 h-5 w-5" />
+					</a>
+				</div>
+			</div>
+
+			<!-- Invitation notice -->
+			<p class="text-muted-foreground text-sm mt-6">
+				Busser is currently invitation-only while we're in early development.
+				We plan to open registration to everyone soon.
+			</p>
+		</div>
+	</section>
+
 {:else}
-	<div class="my-8 text-center">
-		<Loader2 class="h-8 w-8 animate-spin mx-auto" />
-	</div>
+	<!-- ==================== AUTHENTICATED DASHBOARD ==================== -->
+
+	{#if dashboardData}
+		<!-- Welcome Header -->
+		<section class="mb-8 mt-4">
+			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+				<div>
+					<h1 class="text-3xl md:text-4xl font-bold mb-2">
+						Welcome back, {dashboardData.userName}!
+					</h1>
+					<p class="text-muted-foreground">
+						Here's what's happening with your home bar today.
+					</p>
+				</div>
+
+				<!-- Quick Stats Cards -->
+				<div class="flex gap-3">
+					<Card.Root class="px-4 py-3">
+						<div class="flex items-center gap-3">
+							<div class="p-2 rounded-full bg-green-500/10">
+								<CheckCircle2 class="h-5 w-5 text-green-500" />
+							</div>
+							<div>
+								<p class="text-2xl font-bold">{dashboardData.availableCount}</p>
+								<p class="text-xs text-muted-foreground">Ready to Make</p>
+							</div>
+						</div>
+					</Card.Root>
+					<Card.Root class="px-4 py-3">
+						<div class="flex items-center gap-3">
+							<div class="p-2 rounded-full bg-primary/10">
+								<Package class="h-5 w-5 text-primary" />
+							</div>
+							<div>
+								<p class="text-2xl font-bold">{dashboardData.inventoryCount}</p>
+								<p class="text-xs text-muted-foreground">In Inventory</p>
+							</div>
+						</div>
+					</Card.Root>
+				</div>
+			</div>
+		</section>
+
+		<!-- Quick Actions -->
+		<section class="mb-8">
+			<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+				{#if permissions.includes('add_inventory')}
+					<a href="/inventory/add" class="block">
+						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+							<div class="flex items-center gap-3">
+								<div class="p-2 rounded-lg bg-primary/10">
+									<Plus class="h-5 w-5 text-primary" />
+								</div>
+								<div>
+									<p class="font-medium">Add Ingredient</p>
+									<p class="text-xs text-muted-foreground">Update inventory</p>
+								</div>
+							</div>
+						</Card.Root>
+					</a>
+				{/if}
+
+				{#if permissions.includes('view_catalog')}
+					<a href="/catalog/browse" class="block">
+						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+							<div class="flex items-center gap-3">
+								<div class="p-2 rounded-lg bg-primary/10">
+									<BookOpen class="h-5 w-5 text-primary" />
+								</div>
+								<div>
+									<p class="font-medium">Browse Catalog</p>
+									<p class="text-xs text-muted-foreground">{dashboardData.totalRecipes} recipes</p>
+								</div>
+							</div>
+						</Card.Root>
+					</a>
+				{/if}
+
+				{#if gallery.length > 0}
+					<button onclick={surpriseMe} class="block text-left w-full">
+						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+							<div class="flex items-center gap-3">
+								<div class="p-2 rounded-lg bg-amber-500/10">
+									<Shuffle class="h-5 w-5 text-amber-500" />
+								</div>
+								<div>
+									<p class="font-medium">Surprise Me!</p>
+									<p class="text-xs text-muted-foreground">Random cocktail</p>
+								</div>
+							</div>
+						</Card.Root>
+					</button>
+				{/if}
+
+				{#if permissions.includes('view_inventory')}
+					<a href="/inventory" class="block">
+						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+							<div class="flex items-center gap-3">
+								<div class="p-2 rounded-lg bg-primary/10">
+									<Package class="h-5 w-5 text-primary" />
+								</div>
+								<div>
+									<p class="font-medium">View Inventory</p>
+									<p class="text-xs text-muted-foreground">{dashboardData.inventoryCount} items</p>
+								</div>
+							</div>
+						</Card.Root>
+					</a>
+				{/if}
+			</div>
+		</section>
+
+		<!-- Ready to Make Section -->
+		<section class="mb-8">
+			<div class="flex items-center justify-between mb-4">
+				<div>
+					<h2 class="text-2xl font-bold flex items-center gap-2">
+						<CheckCircle2 class="h-6 w-6 text-green-500" />
+						Ready to Make
+					</h2>
+					<p class="text-sm text-muted-foreground">
+						Cocktails you can make right now with your inventory
+					</p>
+				</div>
+				{#if permissions.includes('view_catalog')}
+					<a href="/catalog/browse?available=true" class="text-sm text-primary hover:underline flex items-center">
+						View all
+						<ChevronRight class="h-4 w-4" />
+					</a>
+				{/if}
+			</div>
+
+			<!-- Spirit Filter Chips -->
+			<div class="flex flex-wrap gap-2 mb-4">
+				<Button
+					variant={sortBy === 'all' ? 'default' : 'outline'}
+					class="rounded-full"
+					size="sm"
+					onclick={() => setFilterType('all')}
+				>
+					All ({gallery.length})
+				</Button>
+				{#each spirits as spirit}
+					{@const count = gallery.filter(g => g.data.recipeCategoryId === spirit.recipeCategoryId).length}
+					{#if count > 0}
+						<Button
+							variant={sortBy === spirit.recipeCategoryId ? 'default' : 'outline'}
+							class="rounded-full"
+							size="sm"
+							onclick={() => setFilterType(spirit.recipeCategoryId)}
+						>
+							{spirit.recipeCategoryDescription} ({count})
+						</Button>
+					{/if}
+				{/each}
+			</div>
+
+			{#if gallery.length === 0}
+				<!-- Empty State -->
+				<Card.Root class="border-dashed">
+					<Card.Content class="flex flex-col items-center justify-center py-12 text-center">
+						<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+							<GlassWater class="h-8 w-8 text-muted-foreground/50" />
+						</div>
+						<h3 class="text-lg font-semibold mb-2">No Cocktails Available Yet</h3>
+						<p class="text-muted-foreground mb-4 max-w-md">
+							Add more ingredients to your inventory to unlock cocktail recipes you can make.
+						</p>
+						{#if permissions.includes('add_inventory')}
+							<a href="/inventory/add" class={buttonVariants()}>
+								<Plus class="h-4 w-4 mr-2" />
+								Add Ingredients
+							</a>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+			{:else}
+				<!-- Recipe Grid -->
+				<div class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+					{#each filter.slice(0, 8) as item (item.data.recipeId)}
+						<a
+							href="/catalog/{item.data.recipeId}"
+							class="block group"
+							in:fade={{ duration: 200 }}
+						>
+							<Card.Root class="overflow-hidden hover:shadow-lg transition-all">
+								<div class="relative aspect-square">
+									<img
+										src={item.src}
+										alt={item.alt}
+										class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+										loading="lazy"
+									/>
+									<div class="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+									<Badge variant="secondary" class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm">
+										{item.data.recipeCategoryDescription}
+									</Badge>
+								</div>
+								<Card.Content class="p-3">
+									<p class="font-bold truncate group-hover:text-primary transition-colors">
+										{item.alt}
+									</p>
+									<p class="text-xs text-muted-foreground line-clamp-1">
+										{item.data.recipeDescription || 'A delicious cocktail'}
+									</p>
+								</Card.Content>
+							</Card.Root>
+						</a>
+					{/each}
+				</div>
+
+				{#if filter.length > 8}
+					<div class="text-center mt-4">
+						<a href="/catalog/browse?available=true" class={buttonVariants({ variant: "outline" })}>
+							View All {filter.length} Available Recipes
+							<ArrowRight class="ml-2 h-4 w-4" />
+						</a>
+					</div>
+				{/if}
+			{/if}
+		</section>
+
+		<!-- Almost There Section -->
+		{#if dashboardData.almostThereRecipes && dashboardData.almostThereRecipes.length > 0}
+			<section class="mb-8">
+				<div class="flex items-center justify-between mb-4">
+					<div>
+						<h2 class="text-2xl font-bold flex items-center gap-2">
+							<AlertCircle class="h-6 w-6 text-amber-500" />
+							Almost There
+						</h2>
+						<p class="text-sm text-muted-foreground">
+							Just one ingredient away from these cocktails
+						</p>
+					</div>
+				</div>
+
+				<div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+					{#each dashboardData.almostThereRecipes.slice(0, 6) as recipe}
+						<Card.Root class="overflow-hidden hover:shadow-md transition-shadow">
+							<div class="flex items-center gap-4 p-4">
+								<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-muted">
+									{#if recipe.recipeImageUrl}
+										<img
+											src={recipe.recipeImageUrl}
+											alt={recipe.recipeName}
+											class="w-full h-full object-cover"
+										/>
+									{:else}
+										<div class="w-full h-full flex items-center justify-center">
+											<GlassWater class="h-6 w-6 text-muted-foreground" />
+										</div>
+									{/if}
+								</div>
+								<div class="flex-1 min-w-0">
+									<p class="font-bold truncate">{recipe.recipeName}</p>
+									<p class="text-xs text-muted-foreground">{recipe.recipeCategoryDescription}</p>
+									{#if recipe.missingIngredient}
+										<Badge variant="outline" class="mt-1 text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+											<ShoppingCart class="h-3 w-3 mr-1" />
+											Need: {recipe.missingIngredient}
+										</Badge>
+									{/if}
+								</div>
+								<a
+									href="/catalog/{recipe.recipeId}"
+									class={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+								>
+									<ChevronRight class="h-5 w-5" />
+								</a>
+							</div>
+						</Card.Root>
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		<!-- Top Spirit Section -->
+		{#if dashboardData.topSpirit && dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId] > 0}
+			<section class="mb-8">
+				<Card.Root class="overflow-hidden">
+					<div class="flex flex-col md:flex-row">
+						<div class="relative w-full md:w-48 h-32 md:h-auto shrink-0">
+							<img
+								src={dashboardData.topSpirit.recipeCategoryDescriptionImageUrl}
+								alt={dashboardData.topSpirit.recipeCategoryDescription}
+								class="w-full h-full object-cover"
+							/>
+							<div class="absolute inset-0 bg-gradient-to-r from-transparent to-background md:bg-gradient-to-t md:from-transparent md:to-background"></div>
+						</div>
+						<Card.Content class="flex-1 flex flex-col justify-center p-6">
+							<Badge variant="secondary" class="w-fit mb-2">
+								<TrendingUp class="h-3 w-3 mr-1" />
+								Your Top Spirit
+							</Badge>
+							<h3 class="text-xl font-bold mb-1">
+								{dashboardData.topSpirit.recipeCategoryDescription}
+							</h3>
+							<p class="text-muted-foreground text-sm mb-3">
+								You can make {dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId]} cocktails with your {dashboardData.topSpirit.recipeCategoryDescription.toLowerCase()} collection.
+							</p>
+							<a
+								href="/catalog/browse/{dashboardData.topSpirit.recipeCategoryId}"
+								class={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-fit")}
+							>
+								Explore {dashboardData.topSpirit.recipeCategoryDescription} Cocktails
+								<ArrowRight class="ml-2 h-4 w-4" />
+							</a>
+						</Card.Content>
+					</div>
+				</Card.Root>
+			</section>
+		{/if}
+	{/if}
 {/if}
+
+<style>
+	.bg-grid-pattern {
+		background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+		background-size: 24px 24px;
+	}
+</style>
