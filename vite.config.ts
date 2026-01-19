@@ -6,5 +6,10 @@ export default defineConfig({
 	ssr: {
 		noExternal: ['svelte-sonner'],
 		external: ['form-data', 'mailgun.js']
+	},
+	build: {
+		rollupOptions: {
+			external: ['form-data', 'mailgun.js']
+		}
 	}
 });
