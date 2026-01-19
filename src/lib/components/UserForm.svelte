@@ -1,120 +1,248 @@
 <script lang="ts">
 	import type { User } from '$lib/types/auth';
-	import { Button, Input, Label, MultiSelect } from 'flowbite-svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { Helper } from '$lib/components/ui/helper';
 	import type { SelectOption } from '$lib/types';
 	import { getContext } from 'svelte';
-	import { applyAction, enhance } from '$app/forms';
-	import { notificationStore } from '../../stores';
-	import { goto } from '$app/navigation';
 
 	export let user: User | null = null;
-	export let action: String;
-	export let roles: SelectOption[];
-	// const userRoles: any[] = getContext('roles') || [];
+	export let action: 'add' | 'edit' | 'register' | 'login';
+	export let roles: SelectOption[] = [];
+
+	export let password = '';
+	export let passwordConfirm = '';
+	export let invitationCode = '';
+
+	export const clearSensitiveFields = () => {
+		password = '';
+		passwordConfirm = '';
+	};
+
 	const permissions: string[] = getContext('permissions');
 
-	let selected = user?.roles.map(({ roleId }) => roleId);
+	let selected = user?.roles.map(({ roleId }) => roleId) || [];
+
+	export let errors = {
+		username: {
+			hasError: false,
+			message: '',
+		},
+		email: {
+			hasError: false,
+			message: '',
+		},
+		password: {
+			hasError: false,
+			message: '',
+		},
+		passwordConfirm: {
+			hasError: false,
+			message: '',
+		},
+		invitationCode: {
+			hasError: false,
+			message: '',
+		},
+	};
+
+	function toggleRole(roleId: string) {
+		if (selected.includes(roleId)) {
+			selected = selected.filter((id) => id !== roleId);
+		} else {
+			selected = [...selected, roleId];
+		}
+	}
 </script>
 
-<form
-	class="space-y-6"
-	method="POST"
-	action={action === 'edit'
-		? `/settings/users/${user?.userId}/edit`
-		: '/settings/users/add'}
-	use:enhance={() => {
-		return async ({ result }) => {
-			console.log(result);
-			if (result.type === 'redirect') {
-				goto(result.location);
-			} else {
-				await applyAction(result);
-				if (result.type === 'failure')
-					$notificationStore.error = {
-						message: result?.data?.error?.toString() || '',
-					};
-				if (result.type === 'success')
-					$notificationStore.success = { message: 'User updated.' };
-			}
-		};
-	}}
->
-	<Label class="space-y-2">
-		<span>Username</span>
-		<Input
-			type="text"
-			name="username"
-			placeholder="username"
-			required
-			value={user?.username || ''}
-		/>
+<!-- username -->
+<div class="space-y-2">
+	<Label for="username" class={errors?.username?.hasError ? 'text-destructive' : ''}>
+		Username
 	</Label>
-	<Label class="space-y-2">
-		<span>Email</span>
+	<Input
+		type="text"
+		id="username"
+		name="username"
+		class={errors?.username?.hasError ? 'border-destructive' : ''}
+		value={user?.username || ''}
+	/>
+	{#if errors?.username.hasError}
+		<Helper color="red">
+			{errors?.username?.message}
+		</Helper>
+	{/if}
+</div>
+
+<!-- email -->
+{#if action !== 'login'}
+	<div class="space-y-2">
+		<Label for="email" class={errors?.email?.hasError ? 'text-destructive' : ''}>
+			Email
+		</Label>
 		<Input
 			type="email"
+			id="email"
 			name="email"
-			placeholder="name@company.com"
-			required
+			class={errors?.email?.hasError ? 'border-destructive' : ''}
 			value={user?.email || ''}
 		/>
-	</Label>
-	<Label class="space-y-2">
-		{#if permissions.includes('edit_admin')}
-			<span>Role</span>
-			<input
-				class="hidden"
-				name="roles"
-				id="roles"
-				bind:value={selected}
-			/>
-			<MultiSelect
-				items={roles}
-				bind:value={selected}
-			/>
+		{#if errors?.email.hasError}
+			<Helper color="red">
+				{errors?.email.message}
+			</Helper>
 		{/if}
-	</Label>
+	</div>
+{/if}
 
-	{#if action === 'edit'}
-		<div class="flex items-start">
-			<a
-				href="/settings/users/{user?.userId}/reset-password"
-				class="text-sm text-primary-700 hover:underline dark:text-primary-500"
-			>
-				Reset Password...
-			</a>
-		</div>
-	{/if}
-	{#if action === 'add'}
-		<Label class="space-y-2">
-			<span>Password</span>
-			<Input
-				type="password"
-				name="password"
-				placeholder="•••••"
-				required
-			/>
-		</Label>
-		<Label class="space-y-2">
-			<span>Confirm Password</span>
-			<Input
-				type="password"
-				name="passwordConfirm"
-				placeholder="•••••"
-				required
-			/>
-		</Label>
-	{/if}
-	<!-- submit -->
-	<div class="md:flex justify-end">
-		<div class="my-4 md:mr-4 order-2">
-			<Button
-				class="w-full md:w-32"
-				type="submit"
-				size="xl"
-			>
-				Save
-			</Button>
+<!-- role -->
+{#if action === 'edit' || action === 'add'}
+	<div class="space-y-2">
+		<Label>Role</Label>
+		<input class="hidden" name="roles" id="roles" bind:value={selected} />
+		<div class="flex flex-wrap gap-2">
+			{#each roles as role}
+				<button
+					type="button"
+					onclick={() => toggleRole(String(role.value))}
+					disabled={!permissions.includes('edit_admin')}
+					class="px-3 py-1.5 text-sm rounded-full border transition-colors
+						{selected.includes(String(role.value))
+						? 'bg-primary text-primary-foreground border-primary'
+						: 'bg-background border-input hover:bg-accent'}"
+				>
+					{role.name}
+				</button>
+			{/each}
 		</div>
 	</div>
-</form>
+{/if}
+
+<!-- password reset -->
+{#if action === 'edit'}
+	<div class="flex items-start">
+		<a
+			href="/settings/users/{user?.userId}/reset-password"
+			class="text-sm text-primary hover:underline"
+		>
+			Reset Password...
+		</a>
+	</div>
+{/if}
+
+{#if action === 'add' || action === 'register' || action === 'login'}
+	<!-- password -->
+	<div class="space-y-2">
+		<Label for="password" class={errors?.password?.hasError ? 'text-destructive' : ''}>
+			Password
+		</Label>
+		<Input
+			type="password"
+			id="password"
+			name="password"
+			class={errors?.password?.hasError ? 'border-destructive' : ''}
+			bind:value={password}
+		/>
+		{#if errors?.password.hasError}
+			<Helper color="red">
+				{errors?.password.message}
+			</Helper>
+		{/if}
+		{#if action === 'login'}
+			<div class="text-left">
+				<a href="/forgot-password" class="text-sm text-muted-foreground hover:text-foreground hover:underline underline-offset-4">
+					Forgot your password?
+				</a>
+			</div>
+		{/if}
+	</div>
+
+	<!-- password confirm -->
+	{#if action !== 'login'}
+		<div class="space-y-2">
+			<Label
+				for="passwordConfirm"
+				class={errors?.passwordConfirm?.hasError ? 'text-destructive' : ''}
+			>
+				Confirm Password
+			</Label>
+			<Input
+				type="password"
+				id="passwordConfirm"
+				name="passwordConfirm"
+				class={errors?.passwordConfirm?.hasError ? 'border-destructive' : ''}
+				bind:value={passwordConfirm}
+			/>
+			{#if errors?.passwordConfirm.hasError}
+				<Helper color="red">
+					{errors?.passwordConfirm.message}
+				</Helper>
+			{/if}
+		</div>
+	{/if}
+
+	{#if action === 'register'}
+		<fieldset>
+			<!-- invitation code -->
+			<div class="space-y-2">
+				<Label
+					for="invitationCode"
+					class={errors?.invitationCode?.hasError ? 'text-destructive' : ''}
+				>
+					Invite Code
+				</Label>
+				<Input
+					type="text"
+					id="invitationCode"
+					name="invitationCode"
+					class={errors?.invitationCode?.hasError ? 'border-destructive' : ''}
+					bind:value={invitationCode}
+				/>
+				{#if errors?.invitationCode.hasError}
+					<Helper color="red">
+						{errors?.invitationCode.message}
+					</Helper>
+				{:else}
+					<Helper>
+						Registration is currently invite only.
+					</Helper>
+				{/if}
+			</div>
+		</fieldset>
+	{/if}
+{/if}
+
+<!-- submit -->
+{#if action === 'register' || action === 'login'}
+	<Button
+		type="submit"
+		size="lg"
+		class="w-full bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500"
+	>
+		{action === 'register' ? 'Sign up' : 'Log in'}
+	</Button>
+{:else}
+	<div class="md:flex justify-end">
+		<Button class="w-full md:w-32" type="submit" size="lg">
+			Save
+		</Button>
+	</div>
+{/if}
+
+<!-- help -->
+{#if action === 'register'}
+	<div class="text-sm font-medium text-muted-foreground">
+		Already signed up? <a href="/login" class="text-primary hover:underline">
+			Log in
+		</a>
+	</div>
+{/if}
+
+{#if action === 'login'}
+	<div class="text-sm font-medium text-muted-foreground">
+		Not a member? <a href="/signup" class="text-primary hover:underline">
+			Sign up
+		</a>
+	</div>
+{/if}

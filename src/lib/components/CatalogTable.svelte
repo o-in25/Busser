@@ -1,64 +1,45 @@
 <script lang="ts">
 	import type { BasicRecipe } from '$lib/types';
-	import {
-		Card,
-		Listgroup,
-		ListgroupItem,
-		Avatar,
-		Alert,
-	} from 'flowbite-svelte';
-	export let recipes: BasicRecipe[];
+	import * as Card from '$lib/components/ui/card';
+	import { Avatar, AvatarImage, AvatarFallback } from '$lib/components/ui/avatar';
+	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { Info } from 'lucide-svelte';
 	import placeholder from '$lib/assets/placeholder@2x.jpg';
-	import { InfoCircleSolid } from 'flowbite-svelte-icons';
+
+	export let recipes: BasicRecipe[];
 </script>
 
-<Card
-	padding="xl"
-	size="xl"
-	class="mx-auto"
->
-	<!-- search -->
-
-	<Listgroup class="border-0 dark:!bg-transparent">
+<Card.Root class="mx-auto glass-card p-6">
+	<div class="divide-y divide-border">
 		{#each recipes as recipe}
-			<ListgroupItem
-				active
+			<a
 				href="/catalog/{recipe.recipeId}"
+				class="flex items-center space-x-4 rtl:space-x-reverse py-3 px-2 rounded-lg hover:bg-primary/5 transition-colors"
 			>
-				<div class="flex items-center space-x-4 rtl:space-x-reverse">
-					<Avatar
-						src={recipe.recipeImageUrl || placeholder || ''}
-						alt={recipe.recipeDescription || ''}
-						class="flex-shrink-1"
-					/>
-					<div class="flex-1 min-w-0">
-						<p
-							class="text-sm font-medium text-gray-900 truncate dark:text-white block"
-						>
-							{recipe.recipeName}
-							<span
-								class="block text-sm font-light text-gray-500 dark:text-gray-400"
-							>
-								{recipe.recipeCategoryDescription}
-							</span>
-						</p>
-						<p class="text-sm text-gray-500 truncate dark:text-gray-400">
-							{recipe.recipeDescription}
-						</p>
-					</div>
-					<!-- <Rating id="example-3" total={5} rating={3.4}>
-            <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">3.4 out of 5</p>
-          </Rating> -->
+				<Avatar class="h-12 w-12 flex-shrink-0">
+					<AvatarImage src={recipe.recipeImageUrl || placeholder || ''} alt={recipe.recipeDescription || ''} />
+					<AvatarFallback>{recipe.recipeName?.charAt(0) || 'R'}</AvatarFallback>
+				</Avatar>
+				<div class="flex-1 min-w-0">
+					<p class="text-sm font-medium text-foreground truncate">
+						{recipe.recipeName}
+						<span class="block text-sm font-light text-muted-foreground">
+							{recipe.recipeCategoryDescription}
+						</span>
+					</p>
+					<p class="text-sm text-muted-foreground truncate">
+						{recipe.recipeDescription}
+					</p>
 				</div>
-			</ListgroupItem>
+			</a>
 		{/each}
 		{#if !recipes.length}
-			<div class="flex flex-col items-center space-x-4">
-				<Alert color="dark">
-					<InfoCircleSolid slot="icon" />
-					No Results
+			<div class="flex flex-col items-center py-4">
+				<Alert>
+					<Info class="h-4 w-4" />
+					<AlertDescription>No Results</AlertDescription>
 				</Alert>
 			</div>
 		{/if}
-	</Listgroup>
-</Card>
+	</div>
+</Card.Root>

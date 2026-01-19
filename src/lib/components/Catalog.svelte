@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Spirit, View } from '$lib/types';
-	import { Heading, P, Skeleton } from 'flowbite-svelte';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import CatalogItem from './CatalogItem.svelte';
 	import FancyImage from './FancyImage.svelte';
 	import IconList from './IconList.svelte';
@@ -23,22 +23,15 @@
 		});
 		const response = await result.json();
 		content = response;
-		console.log(content);
 	});
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 	<!-- col 1 -->
 	<div>
-		<!-- <Heading tag="h4" class="mb-2">
-      {spirit.recipeCategoryDescription}
-    </Heading> -->
-		<P
-			color="text-gray-500 dark:text-gray-400"
-			class="mb-6"
-		>
+		<p class="text-muted-foreground mb-6">
 			{spirit.recipeCategoryDescriptionText}
-		</P>
+		</p>
 
 		<div class="flex flex-row flex-nowrap justify-center">
 			{#if content}
@@ -58,11 +51,10 @@
 					/>
 				</div>
 			{:else}
-				<div class="flex-1">
-					<Skeleton
-						size="sm"
-						divClass="!max-w-full"
-					/>
+				<div class="flex-1 space-y-2">
+					<Skeleton class="h-4 w-full" />
+					<Skeleton class="h-4 w-3/4" />
+					<Skeleton class="h-4 w-1/2" />
 				</div>
 			{/if}
 		</div>
@@ -79,30 +71,24 @@
 
 <div class="mb-6">
 	{#if content}
-		<Heading
-			tag="h6"
-			customSize="text-md font-semibold"
-			class="text-md font-semibold text-gray-900 dark:text-white"
-		>
+		<h6 class="text-md font-semibold mb-2">
 			History
-		</Heading>
-		<P color="text-gray-500 dark:text-gray-400">
+		</h6>
+		<p class="text-muted-foreground">
 			{content.history}
-		</P>
+		</p>
 	{:else}
-		<Skeleton
-			size="sm"
-			divClass="!max-w-full"
-		/>
+		<div class="space-y-2">
+			<Skeleton class="h-4 w-full" />
+			<Skeleton class="h-4 w-full" />
+			<Skeleton class="h-4 w-3/4" />
+		</div>
 	{/if}
 </div>
 
-<Heading
-	tag="h5"
-	class="mb-2"
->
+<h5 class="text-xl font-bold mb-2">
 	Cocktails With {spirit.recipeCategoryDescription}
-</Heading>
+</h5>
 
 <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-2">
 	{#each recipes as recipe}

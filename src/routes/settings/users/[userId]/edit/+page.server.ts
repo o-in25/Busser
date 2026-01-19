@@ -31,7 +31,7 @@ const load: PageServerLoad = async ({ params, locals }) => {
   const queryResult = await getUser(userId);
   const roles = await roleSelect();
   if('data' in queryResult) {
-    return { user: queryResult.data, roles };
+    return { user: queryResult.data, roles, currentUser: locals.user?.userId };
   }
 
   return error(StatusCodes.INTERNAL_SERVER_ERROR, {

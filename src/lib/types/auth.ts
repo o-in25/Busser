@@ -17,6 +17,7 @@ export type User = {
   // user control
   roles: Role[];
   permissions: Permission[];
+  verified: number;
 };
 
 export type Permission = {
@@ -37,4 +38,35 @@ export type UserRole = {
 export type RolePermission = {
   roleId: string,
   permissionId: string;
+};
+
+export type Invitation = {
+  invitationId: number;
+  userId: string | null;
+  invitationCode: string;
+  email: string | null;
+  createdAt: Date;
+  issuedAt: Date | null;
+  expiresAt: Date | null;
+  lastSentAt: Date | null;
+}
+
+export type RegistrationToken = {
+  userId: string;
+  iat: number;
+  exp: number;
+}
+
+export type PasswordResetToken = {
+  userId: string;
+  email: string;
+  type: 'password-reset';
+  iat: number;
+  exp: number;
+}
+
+export type TokenResult<T> = {
+  valid: boolean;
+  expired: boolean;
+  payload?: T;
 };

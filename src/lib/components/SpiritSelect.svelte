@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Spirit } from '$lib/types';
-	import { Label, Radio } from 'flowbite-svelte';
+	import { Label } from '$lib/components/ui/label';
 	import { onMount } from 'svelte';
 
 	export let selected: string | number = 4;
@@ -14,25 +14,23 @@
 	});
 </script>
 
-<Label
-	for="recipeCategoryId"
-	class="mb-2"
->
+<Label for="recipeCategoryId" class="mb-2">
 	Category
 </Label>
 <div
 	class="grid gap-6 w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6"
 >
 	{#each spirits as spirit}
-		<Radio
-			name="recipeCategoryId"
-			custom
-			class="w-full"
-			value={spirit.recipeCategoryId}
-			bind:group={selected}
-		>
+		<label class="w-full cursor-pointer">
+			<input
+				type="radio"
+				name="recipeCategoryId"
+				value={spirit.recipeCategoryId}
+				bind:group={selected}
+				class="sr-only peer"
+			/>
 			<div
-				class="inline-flex justify-between items-center text-gray-500 bg-white rounded-lg border border-gray-200 cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-primary-500 peer-checked:border-primary-600 peer-checked:text-primary-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+				class="inline-flex justify-between items-center text-muted-foreground bg-background rounded-lg border border-input cursor-pointer peer-checked:border-primary peer-checked:text-primary hover:bg-accent transition-colors"
 			>
 				<div class="block">
 					<div class="h-auto max-w-16 md:max-w-20 rounded">
@@ -49,6 +47,6 @@
 					</div>
 				</div>
 			</div>
-		</Radio>
+		</label>
 	{/each}
 </div>

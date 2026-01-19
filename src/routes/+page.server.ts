@@ -11,7 +11,7 @@ export const load = (async ({ }) => {
   if(!('data' in baseSpiritsQuery) || !('data' in gallerySeedQuery)) {
     return error(StatusCodes.INTERNAL_SERVER_ERROR, {
       reason: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
-      code: StatusCodes.NOT_FOUND,
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
       message: 'Could not load Gallery. Please try again later.'
     });
   }

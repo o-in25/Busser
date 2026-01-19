@@ -1,36 +1,18 @@
 <script lang="ts">
 	import type { Product } from '$lib/types';
 	import placeholder from '$lib/assets/placeholder@2x.jpg';
-
-	import {
-		ImagePlaceholder,
-		A,
-		Heading,
-		ScoreRating,
-		Badge,
-		Card,
-		Secondary,
-		Popover,
-		Button,
-	} from 'flowbite-svelte';
-	import {
-		ArrowRightOutline,
-		EditOutline,
-		InfoCircleSolid,
-	} from 'flowbite-svelte-icons';
+	import * as Card from '$lib/components/ui/card';
+	import * as Popover from '$lib/components/ui/popover';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { cn } from '$lib/utils';
+	import { Separator } from '$lib/components/ui/separator';
+	import { ArrowRight, Pencil, Info } from 'lucide-svelte';
 	import { weightedMean } from '$lib/math';
 	import { getContext } from 'svelte';
-	export let product: Product;
 
-	let headerLabel = {
-		desc1: '8.7',
-		desc2: 'Excellent',
-		desc3: '',
-		link: {
-			label: 'Read all reviews',
-			url: '/',
-		},
-	};
+	export let product: Product;
+	export let isBaseSpirit: boolean;
 
 	const permissions: string[] = getContext('permissions');
 
@@ -50,65 +32,23 @@
 		];
 
 		const ratingsMap = [
-			{
-				max: 0,
-				desc2: 'No Rating',
-				style: 'text-white dark:bg-gray-500 bg-gray-500',
-			},
-			{
-				max: 1,
-				desc2: 'Swill',
-				style: 'text-white dark:bg-red-500 bg-red-500',
-			},
-			{
-				max: 2,
-				desc2: 'Forgettable',
-				style: 'text-white dark:bg-red-500 bg-red-500',
-			},
-			{
-				max: 3,
-				desc2: 'Bottom Shelf',
-				style: 'text-white dark:bg-red-500 bg-red-500',
-			},
-			{
-				max: 4,
-				desc2: 'Decent',
-				style: 'text-white dark:bg-yellow-500 bg-yellow-500',
-			},
-			{
-				max: 5,
-				desc2: 'Standard Pour',
-				style: 'text-white dark:bg-yellow-500 bg-yellow-500',
-			},
-			{
-				max: 6,
-				desc2: 'Good Stuff',
-				style: 'text-white dark:bg-green-500 bg-green-500',
-			},
-			{
-				max: 7,
-				desc2: 'Top Shelf',
-				style: 'text-white dark:bg-green-500 bg-green-500',
-			},
-			{
-				max: 8,
-				desc2: "Connoisseur's Choice",
-				style: 'text-white dark:bg-green-500 bg-green-500',
-			},
-			{
-				max: 9,
-				desc2: "Bartender's Favorite",
-				style: 'text-white dark:bg-blue-500 bg-blue-500',
-			},
+			{ max: 0, desc2: 'No Rating', style: 'bg-gray-500' },
+			{ max: 1, desc2: 'Swill', style: 'bg-red-500' },
+			{ max: 2, desc2: 'Forgettable', style: 'bg-red-500' },
+			{ max: 3, desc2: 'Bottom Shelf', style: 'bg-red-500' },
+			{ max: 4, desc2: 'Decent', style: 'bg-yellow-500' },
+			{ max: 5, desc2: 'Standard Pour', style: 'bg-yellow-500' },
+			{ max: 6, desc2: 'Good Stuff', style: 'bg-green-500' },
+			{ max: 7, desc2: 'Top Shelf', style: 'bg-green-500' },
+			{ max: 8, desc2: "Connoisseur's Choice", style: 'bg-green-500' },
+			{ max: 9, desc2: "Bartender's Favorite", style: 'bg-blue-500' },
 		];
 
-		let vec: number[] | number = ratings
-			.concat(ratings2)
-			.map(({ rating }) => rating);
+		let vec: number[] | number = ratings.concat(ratings2).map(({ rating }) => rating);
 		vec = weightedMean(vec, [6.5, 3.5, 0.95, 11.5]);
 		const { desc2, style } = ratingsMap.find(({ max }) => vec <= max) || {
 			desc2: 'Best in House',
-			style: 'text-white dark:bg-violet-500 bg-violet-500',
+			style: 'bg-violet-500',
 		};
 		return {
 			ratings,
@@ -120,208 +60,153 @@
 	};
 
 	const { ratings, ratings2, desc1, desc2, style } = generateRatings();
-
-	let popoverData = {
-		categoryName: '',
-		categoryDescription: '',
-	};
-
-	const setPopoverData = ({ categoryName, categoryDescription }) => {
-		popoverData = { categoryName, categoryDescription };
-	};
-
-	const isBaseSpirit = (categoryName: string) => {
-		// TODO: this should come from the row
-		// and not hardcoded here like a lazy asshole
-		let spirits = [
-			'gin',
-			'whiskey',
-			'tequila',
-			'rum',
-			'vodka',
-			'brandy',
-			'cognac',
-			'mezcal',
-		];
-
-		spirits = spirits.map(item => ` ${item}`);
-		return spirits.some(item => categoryName.toLowerCase().includes(item));
-	};
 </script>
 
-<!-- "grid gap-6 mb-6 md:grid-cols-2 -->
 {#if product}
 	<div class="space-y-2 text-wrap w-full">
 		<!-- desktop only -->
-		<div
-			class="hidden sm:py-4 md:py-6 sm:flex sm:flex-auto sm:justify-center grow"
-		>
-			<!-- svelte-ignore a11y-missing-attribute -->
-			<img
-				class="hidden"
-				src={product.productImageUrl}
-				on:error={imageLoadError}
-			/>
-			<Card
-				img={productImage}
-				horizontal
-				size="xl"
-				class="!w-full shadow-2xl"
-				padding="sm"
-				imgClass=""
-				on:error={imageLoadError}
-			>
-				<div class="card-content">
+		<div class="hidden sm:py-4 md:py-6 sm:flex sm:flex-auto sm:justify-center grow">
+			<img class="hidden" src={product.productImageUrl} onerror={imageLoadError} alt="" />
+			<Card.Root class="!w-full glass-card flex flex-row overflow-hidden">
+				<img
+					src={productImage}
+					alt={product.productName}
+					class="w-48 h-auto object-cover"
+					onerror={imageLoadError}
+				/>
+				<div class="card-content p-6 flex-1">
 					<!-- heading -->
 					<div>
-						<Heading tag="h5">
+						<h5 class="text-xl font-bold tracking-tight text-foreground">
 							{product.productName}
-							<Secondary class="block">
-								<button
-									class="flex items-center"
-									id="popover-image"
-								>
-									{product.categoryName}&nbsp;<InfoCircleSolid
-										class="w-5 h-5"
-									/>
-								</button>
-							</Secondary>
-							<!-- tags -->
-							<div>
-								{#if isBaseSpirit(product.categoryName)}<Badge class="my-1">
-										Base Spirit
-									</Badge>{/if}
-								{#if product.productInStockQuantity < 1}<Badge
-										class="my-1"
-										color="red"
+						</h5>
+						<Popover.Root>
+							<Popover.Trigger class="flex items-center text-muted-foreground hover:text-foreground">
+								{product.categoryName}
+								<Info class="w-4 h-4 ml-1" />
+							</Popover.Trigger>
+							<Popover.Content class="w-80">
+								<div class="space-y-2">
+									<h4 class="font-medium">{product.categoryName}</h4>
+									<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
+									<a
+										href="/inventory/category/{product.categoryId}/edit"
+										class="inline-flex items-center text-sm font-medium text-primary hover:underline"
 									>
-										Out of Stock
-									</Badge>{/if}
-								<!-- {#if product.productInStockQuantity < 1}<Badge class="my-1" color="red">{product.productPricePerUnit}</Badge>{/if} -->
-							</div>
-						</Heading>
+										Edit <ArrowRight class="ml-1 h-4 w-4" />
+									</a>
+								</div>
+							</Popover.Content>
+						</Popover.Root>
 					</div>
 
 					<!-- desc -->
-					<div class="py-4">
-						<p
-							class="my-1 font-normal text-gray-700 dark:text-gray-400 leading-tight"
-						>
+					<div class="py-2">
+						<p class="font-normal text-muted-foreground leading-tight">
 							{product.productDescription || product.categoryDescription}
 						</p>
 					</div>
 
 					<!-- score -->
-					{#if isBaseSpirit(product.categoryName)}
+					{#if isBaseSpirit}
 						<div class="py-4">
-							<ScoreRating
-								desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
-								linkClass="hidden"
-								headerLabel={{ ...headerLabel, desc1, desc2 }}
-								{ratings}
-								{ratings2}
-							/>
+							<div class="flex items-center gap-4">
+								<span class="w-10 text-sm font-semibold inline-flex items-center justify-center p-1.5 rounded text-white {style}">
+									{desc1}
+								</span>
+								<span class="text-sm font-medium">{desc2}</span>
+								{#if product.productProof > 0}
+									<span class="text-sm text-muted-foreground">{product.productProof} Proof</span>
+								{/if}
+							</div>
+							<div class="mt-4 grid grid-cols-2 gap-4">
+								{#each [...ratings, ...ratings2] as r}
+									<div class="flex justify-between text-sm">
+										<span class="text-muted-foreground">{r.label}</span>
+										<span class="font-medium">{r.rating.toFixed(1)}</span>
+									</div>
+								{/each}
+							</div>
 						</div>
 					{/if}
-					<div class="sm:gap-4 sm:items-center sm:flex">
+
+					<div class="sm:gap-4 sm:items-center sm:flex mt-4">
 						{#if permissions.includes('edit_inventory')}
-							<Button
-								color="alternative"
-								href="/inventory/{product.productId}/edit"
-							>
-								<EditOutline />
-								<span class="ms-2">Edit</span>
-							</Button>
+							<a class={cn(buttonVariants({ variant: "outline" }))} href="/inventory/{product.productId}/edit">
+								<Pencil class="w-4 h-4 mr-2" />
+								Edit
+							</a>
 						{/if}
-						<!-- <Button color="primary">
-              <HeartOutline />
-              <span class="ms-2">Add to favorites</span>
-            </Button> -->
 					</div>
 				</div>
-			</Card>
+			</Card.Root>
 		</div>
+
 		<!-- mobile only -->
-		<div class="sm:hidden flex justify-center px-2 py-4 md:pb-4 w-full">
-			<Card
-				img={product.productImageUrl || placeholder}
-				size="md"
-				padding="sm"
-				class="shadow-2xl"
-			>
-				<div class="card-content">
-					<Heading tag="h5">
+		<div class="sm:hidden flex justify-center px-2 py-4 md:py-2 md:pb-4 w-full">
+			<Card.Root class="glass-card w-full">
+				<img
+					src={product.productImageUrl || placeholder}
+					alt={product.productName}
+					class="w-full h-48 object-cover rounded-t-lg"
+				/>
+				<Card.Content class="p-4">
+					<h5 class="text-xl font-bold tracking-tight text-foreground">
 						{product.productName}
-						<Secondary class="flex items-center">
-							<span class="">{product.categoryName}</span>
-							<button
-								id="popover-image"
-								on:click|preventDefault={() => setPopoverData(product)}
-							>
-								<InfoCircleSolid class="w-5 h-5 ms-1.5" />
-								<span class="sr-only">Show information</span>
-							</button>
-						</Secondary>
-					</Heading>
-					{#if isBaseSpirit(product.categoryName)}<Badge class="my-1">
-							Base Spirit
-						</Badge>{/if}
-					{#if product.productInStockQuantity < 1}<Badge class="my-1">
-							Out of Stock
-						</Badge>{/if}
-					<p
-						class="my-3 font-normal text-gray-700 dark:text-gray-400 leading-tight"
-					>
+					</h5>
+					<div class="flex items-center text-muted-foreground">
+						<span>{product.categoryName}</span>
+					</div>
+					<div class="flex gap-2 my-2">
+						{#if isBaseSpirit}
+							<Badge variant="secondary">Base Spirit</Badge>
+						{/if}
+						{#if product.productInStockQuantity < 1}
+							<Badge variant="destructive">Out of Stock</Badge>
+						{/if}
+					</div>
+					<p class="my-3 font-normal text-muted-foreground leading-tight">
 						{product.productDescription || product.categoryDescription}
 					</p>
-					{#if isBaseSpirit(product.categoryName)}
-						<hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
-						<div class="px-2 md:pb-4">
-							<ScoreRating
-								desc1Class="w-8 text-sm font-semibold inline-flex items-center p-1.5 rounded {style}"
-								linkClass="hidden"
-								headerLabel={{ ...headerLabel, desc1, desc2 }}
-								{ratings}
-								{ratings2}
-							/>
+
+					{#if isBaseSpirit}
+						<Separator class="my-4" />
+						<div class="px-2">
+							<div class="flex items-center gap-4 mb-4">
+								<span class="w-10 text-sm font-semibold inline-flex items-center justify-center p-1.5 rounded text-white {style}">
+									{desc1}
+								</span>
+								<span class="text-sm font-medium">{desc2}</span>
+							</div>
+							<div class="grid grid-cols-2 gap-2">
+								{#each [...ratings, ...ratings2] as r}
+									<div class="flex justify-between text-sm">
+										<span class="text-muted-foreground">{r.label}</span>
+										<span class="font-medium">{r.rating.toFixed(1)}</span>
+									</div>
+								{/each}
+							</div>
 						</div>
-						<hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+						<Separator class="my-4" />
 					{/if}
-					<div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-						<Button
-							color="alternative"
-							href="/inventory/{product.productId}/edit"
-						>
-							<EditOutline />
-							<span class="ms-2">Edit</span>
-						</Button>
+
+					<div class="mt-4">
+						<a class={cn(buttonVariants({ variant: "outline" }), "w-full")} href="/inventory/{product.productId}/edit">
+							<Pencil class="w-4 h-4 mr-2" />
+							Edit
+						</a>
 					</div>
-				</div>
-			</Card>
+				</Card.Content>
+			</Card.Root>
 		</div>
 	</div>
 {:else}
-	<ImagePlaceholder />
+	<div class="flex items-center justify-center h-48 bg-muted rounded-lg">
+		<span class="text-muted-foreground">No product data</span>
+	</div>
 {/if}
 
-<Popover
-	triggeredBy="#popover-image"
-	class="!w-1/2 !max-w-2/3 text-sm font-light text-gray-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
-	placement="top-start"
-	title={product.categoryName}
->
-	<div class="space-y-2">
-		<p>{product.categoryDescription}</p>
-		<A
-			aClass="font-medium hover:underline flex items-center py-2"
-			href="/inventory/category/{product.categoryId}/edit"
-		>
-			Edit<ArrowRightOutline class="ms-1 h-5 w-5" />
-		</A>
-	</div>
-</Popover>
-
-<style lang="scss">
+<style>
 	@media (min-width: 768px) {
 		.card-content {
 			width: 440px;

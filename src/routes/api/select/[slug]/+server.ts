@@ -14,7 +14,6 @@ export const GET: RequestHandler = async ({ url }) => {
     // TODO: this may need to be replaced
     case '/api/select/spirits': {
       const response = await getSpirits();
-      console.log(response);
       return json(response);
     }
 

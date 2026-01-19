@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Heading } from 'flowbite-svelte';
 	import type { PageData } from './$types';
 	import type { PaginationResult, Product } from '$lib/types';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
@@ -16,17 +15,15 @@
 	<title>Inventory - Busser</title>
 </svelte:head>
 <div class="mt-5">
-	<Heading
-		tag="h2"
-		class="mb-4 flex flex-row justify-between font-extrabold"
-	>
+	<h2 class="text-3xl mb-4 flex flex-row justify-between font-extrabold">
 		Inventory
-	</Heading>
+	</h2>
 </div>
-<div class="px-4 py-2 md:py-4">
+<div class="md:px-4 py-2 md:py-4">
 	<InventoryTable
 		products={result.data}
 		paginationData={result.pagination}
+    tableData={data.args.tableData}
 	></InventoryTable>
 </div>
 

@@ -27,17 +27,13 @@
 	name="Catalog"
 	href="/catalog"
 >
-	<BreadcrumbItem
-		name="Browse Catalog"
-		href="/catalog/browse"
-	></BreadcrumbItem>
 	<BreadcrumbItem name={recipe.recipeName}></BreadcrumbItem>
 </Breadcrumb>
 <!-- <Heading tag="h2" class="mb-4 font-extrabold flex flex-row justify-between">
   {recipe.recipeName}
 </Heading> -->
 
-<div class="px-4 py-2 md:py-4">
+<div class="md:px-4 py-2 md:py-4">
 	{#if 'data' in result}
 		<Recipe
 			{recipe}

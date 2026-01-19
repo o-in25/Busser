@@ -1,10 +1,13 @@
 import type { QueryResult, SelectOption } from "$lib/types";
-import type { Permission, Role, User } from "$lib/types/auth";
-import { hashPassword } from "./auth";
+import { type Invitation, type PasswordResetToken, type Permission, type RegistrationToken, type Role, type User, type UserRole } from "$lib/types/auth";
+import moment from "moment";
+import { hashPassword, signToken, verifyRegistrationToken, verifyToken } from "./auth";
 import { marshal, marshalToType } from "./core";
 import { DbProvider } from "./db";
+import { MailClient } from "./mail";
 
 const db = new DbProvider('user_t');
+const mailClient = new MailClient();
 
 export async function getUsers() {
   try {
@@ -57,7 +60,6 @@ export async function addUser(username: string, email: string, password: string,
 }
 
 export async function editUser(userId: string, username: string, email: string, roleIds: string[] = []): Promise<QueryResult<User>> {
-  console.log(roleIds);
   try {
     const user: User = await db.query.transaction(async (trx) => {
       let dbResult: any = await db
@@ -146,6 +148,85 @@ export async function roleSelect(): Promise<SelectOption[]> {
   }
 }
 
+export async function getGrants(roleId: string = ''): Promise<QueryResult<Array<Role & Permission>>> {
+  try {
+    let query = db.query('user_t.rolePermission as rp')
+    .join('user_t.permission as p', 'rp.permissionId', 'p.permissionId')
+    .join('user_t.role as r', 'rp.roleId', 'r.roleId')
+    if(roleId) {
+      query = query.where('r.roleId', roleId)
+    }
+
+    const dbResult = await query.select(
+      'r.roleName',
+      'p.permissionName',
+      'rp.roleId',
+      'rp.permissionId'
+    );
+
+
+    const grants: Array<Role & Permission> = marshalToType<Array<Role & Permission>>(dbResult)
+    return {
+      status: 'success',
+      data: grants
+    };
+  } catch(error: any) {
+    console.error(error);
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+export async function updateGrants(roleId: string, permissions: Permission[]): Promise<QueryResult<Array<Role & Permission>>> {
+  try {
+
+    await db.query.transaction(async (trx) => {
+      let newPermissions: Permission[] = permissions.filter(({ permissionId }) => !permissionId);
+      let oldPermissions: Permission[] = permissions.filter(({ permissionId }) => permissionId);
+      // insert any new permissions
+      if(newPermissions.length) {
+                await trx('permission')
+          .insert(newPermissions.map(({ permissionName }) => ({ permissionName })))
+          .onConflict('permissionName')
+          .ignore();
+
+        let dbResult: any = await trx('permission')
+          .select('permissionId', 'permissionName')
+          .whereIn('permissionName', newPermissions.map(({ permissionName }) =>  permissionName));
+        
+        const insertedPermissions: Permission[] = marshalToType<Permission[]>(dbResult);
+        newPermissions = insertedPermissions;
+      }
+
+      oldPermissions = [...oldPermissions, ...newPermissions];
+
+      const rolePermissions = oldPermissions.map(({ permissionId }) => ({
+        roleId, permissionId
+      }))
+
+      await trx('rolePermission').where({ roleId }).del();
+      if(rolePermissions.length) {
+        await trx('rolePermission').insert(rolePermissions)
+      }
+      
+    });
+
+    return {
+      status:'success',
+      data: []
+    }
+  } catch(error: any) {
+    console.error(error);
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+
 export async function getUser(userId: string): Promise<QueryResult<User>> {
   try {
     const user: User = await db.query.transaction(async (trx) => {
@@ -200,6 +281,342 @@ export async function getUser(userId: string): Promise<QueryResult<User>> {
     return {
       status: 'error',
       error: error.message
+    };
+  }
+}
+
+export async function registerUser(username: string, email: string, password: string, invitationCode: string): Promise<QueryResult> {
+  // step 0: verify invite code is ok
+  // step 1: check if user name is taken
+  // step 2: set verified = true
+  // step 3: set role = VIEWER
+  // step 4: add user
+  // step 5: add user role
+  // step 7: set invite
+  // step 8: sign jwt
+  // step 9: send email
+  try {
+    const { user }: {
+      user: Pick<User, 'userId' | 'username' | 'email'>
+    } = await db.query.transaction(async (trx) => {
+
+      // TODO: we may eventually need to set invite mode to off
+      // so we should make this an optional step
+      let user: Pick<User, 'userId' | 'username' | 'email'>;
+      let invitation: Pick<Invitation, 'invitationId' | 'userId' | 'email' | 'expiresAt'>;
+
+      // step 0 - validate invitation code
+      let dbResult: any = await trx('invitation').select('invitationId', 'userId', 'email', 'expiresAt').where({ invitationCode }).first();
+      if(!dbResult) {
+        throw new Error('Invalid invitation code.');
+      }
+
+      invitation = marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'email' | 'expiresAt'>>(dbResult);
+      if(!invitation.invitationId || invitation.userId !== null) {
+        throw new Error('Invitation code has already been used.');
+      }
+
+      // Check if invitation has expired
+      if(invitation.expiresAt && moment().isAfter(moment(invitation.expiresAt))) {
+        throw new Error('Invitation code has expired.');
+      }
+
+      // Check if invitation email matches signup email (if specified)
+      if(invitation.email && invitation.email.toLowerCase() !== email.toLowerCase()) {
+        throw new Error('Email does not match the invitation.');
+      }
+
+      // step 1 - check if username is taken
+      dbResult = await trx('user').select('username').where({ username }).first();
+      if(dbResult) {
+        throw new Error('Username already taken.');
+      }
+
+      // check if email is taken
+      dbResult = await trx('user').select('email').where({ email }).first();
+      if(dbResult) {
+        throw new Error('Email already taken.');
+      }
+
+      const hashedPassword = await hashPassword(password);
+
+      // step 2
+      dbResult = await trx('user').insert({
+        username, 
+        email, 
+        password: hashedPassword,
+        verified: 0
+      });
+
+      dbResult = await trx('user')
+        .select('userId', 'username', 'email')
+        .where({
+          username,
+          email,
+          password: hashedPassword
+      }).first();
+      
+      user = marshalToType<Pick<User, 'userId' | 'username' | 'email'>>(dbResult); 
+
+      if(!user.userId || !user.username || !user.email) {
+        throw new Error('Could not create user.');
+      }
+
+      let rolePermission: UserRole = {
+        userId: "",
+        roleId: ""
+      };
+
+      rolePermission.userId = dbResult.userId;
+
+      // step 3
+      dbResult = await trx('role').select('roleId').where('roleName', 'VIEWER').first();
+
+      dbResult = marshal(dbResult); 
+      if(!dbResult?.roleId) {
+        throw new Error('Could not register user for default role.');
+      }
+
+      rolePermission.roleId = dbResult.roleId;
+
+      // step 4 + 5
+      dbResult = await trx('userRole').insert(rolePermission);
+
+      // Mark invitation as used by this user
+      await trx('invitation').update({
+        userId: user.userId
+      }).where({ invitationId: invitation.invitationId });
+
+      return { user };
+    });
+
+    // step 6 - create registration token with 24-hour expiration
+    const now = moment();
+    const tokenExpiration = moment().add(24, 'hours');
+
+    const token = await signToken<RegistrationToken>({
+      userId: user.userId,
+      iat: now.unix(),
+      exp: tokenExpiration.unix()
+    });
+    
+    // step 7
+    await mailClient.sendUserRegistrationEmail([user.email], {
+      username: user.username,
+      token
+    });
+
+    return {
+      status: 'success'
+    }
+
+
+  } catch(error: any) {
+    console.error(error);
+
+    // Convert database errors to friendly messages
+    const getFriendlyError = (message: string): string => {
+      if (message.includes('ER_DUP_ENTRY') && message.includes('email')) {
+        return 'This email address is already registered.';
+      }
+      if (message.includes('ER_DUP_ENTRY') && message.includes('username')) {
+        return 'This username is already taken.';
+      }
+      if (message.includes('ER_DUP_ENTRY')) {
+        return 'An account with these details already exists.';
+      }
+      // Return the original message if it's already friendly (from our explicit throws)
+      const friendlyMessages = [
+        'Invalid invitation code.',
+        'Invitation code has already been used.',
+        'Invitation code has expired.',
+        'Email does not match the invitation.',
+        'Username already taken.',
+        'Email already taken.',
+        'Could not create user.',
+        'Could not register user for default role.'
+      ];
+      if (friendlyMessages.includes(message)) {
+        return message;
+      }
+      return 'An error occurred during registration. Please try again.';
+    };
+
+    return {
+      status: 'error',
+      error: getFriendlyError(error.message)
+    }
+  }
+}
+
+export async function verifyUser(registrationToken: string): Promise<QueryResult> {
+  // read jwt 
+  // check expiration 
+  // set user to verified
+  try {
+    // const { userId, iat, exp }: RegistrationToken = await verifyToken<RegistrationToken>(registrationToken);
+
+    const { valid, expired, payload } = await verifyRegistrationToken(registrationToken);
+
+    if(!valid || !payload?.userId) {
+      throw new Error('Token is invalid.')
+    }
+
+    if(expired) {
+      throw new Error('Token is expired.')
+    }
+
+    await db.table('user')
+      .update('verified', 1)
+      .where({ userId: payload.userId });
+
+    return { status: 'success' }
+
+
+
+  } catch(error: any) {
+
+    return {
+      status: 'error',
+      error: error.message
+    }
+  }
+
+}
+
+export async function resendVerificationEmail(userId: string): Promise<QueryResult> {
+  try {
+    // Get user info
+    const dbResult = await db.table('user')
+      .select('userId', 'username', 'email', 'verified')
+      .where({ userId })
+      .first();
+
+    if(!dbResult) {
+      throw new Error('User not found.');
+    }
+
+    const user = marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+
+    if(user.verified === 1) {
+      throw new Error('User is already verified.');
+    }
+
+    // Create new registration token with 24-hour expiration
+    const now = moment();
+    const tokenExpiration = moment().add(24, 'hours');
+
+    const token = await signToken<RegistrationToken>({
+      userId: user.userId,
+      iat: now.unix(),
+      exp: tokenExpiration.unix()
+    });
+
+    // Send verification email
+    await mailClient.sendUserRegistrationEmail([user.email], {
+      username: user.username,
+      token
+    });
+
+    return {
+      status: 'success'
+    };
+
+  } catch(error: any) {
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+export async function resendVerificationEmailByEmail(email: string): Promise<QueryResult> {
+  try {
+    // Get user info by email
+    const dbResult = await db.table('user')
+      .select('userId', 'username', 'email', 'verified')
+      .where({ email })
+      .first();
+
+    if(!dbResult) {
+      throw new Error('No account found with this email address.');
+    }
+
+    const user = marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+
+    if(user.verified === 1) {
+      throw new Error('This account is already verified. You can log in.');
+    }
+
+    // Create new registration token with 24-hour expiration
+    const now = moment();
+    const tokenExpiration = moment().add(24, 'hours');
+
+    const token = await signToken<RegistrationToken>({
+      userId: user.userId,
+      iat: now.unix(),
+      exp: tokenExpiration.unix()
+    });
+
+    // Send verification email
+    await mailClient.sendUserRegistrationEmail([user.email], {
+      username: user.username,
+      token
+    });
+
+    return {
+      status: 'success'
+    };
+
+  } catch(error: any) {
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+export async function requestPasswordReset(email: string): Promise<QueryResult> {
+  try {
+    // Get user info by email
+    const dbResult = await db.table('user')
+      .select('userId', 'username', 'email', 'verified')
+      .where({ email })
+      .first();
+
+    if (!dbResult) {
+      // Don't reveal if email exists or not for security
+      // Just return success either way
+      return { status: 'success' };
+    }
+
+    const user = marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+
+    // Create password reset token with 1-hour expiration
+    const now = moment();
+    const tokenExpiration = moment().add(1, 'hour');
+
+    const token = await signToken<PasswordResetToken>({
+      userId: user.userId,
+      email: user.email,
+      type: 'password-reset',
+      iat: now.unix(),
+      exp: tokenExpiration.unix()
+    });
+
+    // Send password reset email
+    await mailClient.sendPasswordResetEmail([user.email], {
+      username: user.username,
+      token
+    });
+
+    return { status: 'success' };
+
+  } catch (error: any) {
+    console.error('Password reset request error:', error);
+    return {
+      status: 'error',
+      error: 'Failed to process password reset request. Please try again.'
     };
   }
 }

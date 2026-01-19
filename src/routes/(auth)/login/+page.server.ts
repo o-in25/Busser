@@ -1,36 +1,111 @@
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { login } from '$lib/server/auth';
-import { StatusCodes } from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes';
 import { dev } from '$app/environment';
+import type { QueryResult } from '$lib/types';
+
+
+export const load = (async ({ locals, url }) => {
+  if(locals.user?.userId) {
+    return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
+  }
+  return {
+    passwordReset: url.searchParams.get('passwordReset') === 'true'
+  };
+}) satisfies PageServerLoad;
+
+
 
 export const actions = {
-	login: async ({ request, cookies }) => {
-		const formData: any = await request.formData();
-		const username = formData.get('username');
-		const password = formData.get('password');
+  default: async ({ request, cookies, locals }) => {
+    const formData: any = await request.formData();
+    const username = formData.get('username');
+    const password = formData.get('password');
 
-		if(!username || !password) {
-			return fail(StatusCodes.BAD_REQUEST, { err: true } as any);
-		}
+    let errors = {
+      username: {
+        hasError: false,
+        message: '',
+      },
+      email: {
+        hasError: false,
+        message: '',
+      },
+      password: {
+        hasError: false,
+        message: '',
+      },
+      passwordConfirm: {
+        hasError: false,
+        message: '',
+      },
+    };
 
-		const userToken = await login(username, password);
-		if(!userToken) {
-			return fail(StatusCodes.BAD_REQUEST, { err: true, username } as any);
-		}
+
+    if(!username) {
+      errors = {
+        ...errors, username: {
+          hasError: true,
+          message: 'Invalid username.'
+        }
+      };
+    }
+
+    if(!password) {
+      errors = {
+        ...errors, password: {
+          hasError: true,
+          message: 'Invalid password.'
+        }
+      };
+    }
 
 
-    // TODO: include the permission 
-    // info by signing it to a jwt and
-    // decoding in in auth.js
-		cookies.set('userToken', userToken, {
-			path: '/',
-			httpOnly: true,
-			sameSite: 'strict',
-			secure: !dev,
-			maxAge: 60 * 60 * 24 * 7 
-		});
-		
-		redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
-	},
+    if(errors.username.hasError || errors.password.hasError) {
+
+      return fail(StatusCodes.BAD_REQUEST, {
+        errors
+      });
+    }
+
+
+    const queryResult = await login(username, password);
+
+    // Check if user needs verification
+    if('needsVerification' in queryResult && queryResult.needsVerification) {
+      return fail(StatusCodes.BAD_REQUEST, {
+        error: 'error' in queryResult ? queryResult.error : 'Email verification required.',
+        needsVerification: true,
+        email: queryResult.email
+      });
+    }
+
+    if('data' in queryResult && queryResult.data?.length) {
+
+      // TODO: include the permission
+      // info by signing it to a jwt and
+      // decoding in in auth.js
+      const userToken: string = queryResult.data;
+
+      cookies.set('userToken', userToken, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: !dev,
+        maxAge: 60 * 60 * 24 * 7
+      });
+
+      return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
+    }
+
+
+    if('error' in queryResult) {
+      return fail(StatusCodes.BAD_REQUEST, {
+        error: queryResult.error
+      });
+    }
+
+
+  },
 } satisfies Actions;

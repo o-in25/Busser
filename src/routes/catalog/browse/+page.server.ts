@@ -5,11 +5,14 @@ import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 export const load = (async ({ url }) => {
 
-  console.log(url.searchParams);
-
   const query: any = {};
+
   if(url.searchParams.get('searchTerm')) {
     query.recipeName = url.searchParams.get('searchTerm');
+  }
+
+  if(url.searchParams.get('productInStockQuantity')) {
+    query.productInStockQuantity = url.searchParams.get('productInStockQuantity');
   }
 
   const { data, pagination } = await getCatalog(1, 90, query);
@@ -25,8 +28,6 @@ export const load = (async ({ url }) => {
     });
   }
 
-  console.log(data);
-
   return {
     searchResult: data,
     categories: queryResult.data || [],
@@ -39,7 +40,6 @@ export const load = (async ({ url }) => {
 export const actions = {
   default: async ({ request }) => {
     const formData = await request.formData();
-    console.log(formData);
     return {
       success: { message: 'User has been created.' }
     };
