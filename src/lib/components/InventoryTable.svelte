@@ -21,6 +21,7 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import InventoryItem from './InventoryItem.svelte';
@@ -226,15 +227,20 @@
 					</Table.Row>
 
 					<!-- opened -->
-					{#if openRow === row}
-						<Table.Row>
-							<Table.Cell colspan={6} class="p-0 bg-white/40 dark:bg-zinc-800/40 backdrop-blur-sm">
-								<div class="px-4 py-4" transition:slide={{ duration: 300, axis: 'y' }}>
-									<InventoryItem {product} isBaseSpirit={isBaseSpirit(product.categoryName)} />
+					<Table.Row class="!border-b-0">
+						<Table.Cell colspan={6} class="!p-0 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-xl">
+							<div
+								class="grid transition-all duration-300 ease-out"
+								style="grid-template-rows: {openRow === row ? '1fr' : '0fr'};"
+							>
+								<div class="overflow-hidden">
+									<div class="px-4 py-4">
+										<InventoryItem {product} isBaseSpirit={isBaseSpirit(product.categoryName)} />
+									</div>
 								</div>
-							</Table.Cell>
-						</Table.Row>
-					{/if}
+							</div>
+						</Table.Cell>
+					</Table.Row>
 				{/each}
 			</Table.Body>
 		</Table.Root>

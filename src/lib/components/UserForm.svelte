@@ -149,6 +149,13 @@
 				{errors?.password.message}
 			</Helper>
 		{/if}
+		{#if action === 'login'}
+			<div class="text-left">
+				<a href="/forgot-password" class="text-sm text-muted-foreground hover:text-foreground hover:underline underline-offset-4">
+					Forgot your password?
+				</a>
+			</div>
+		{/if}
 	</div>
 
 	<!-- password confirm -->

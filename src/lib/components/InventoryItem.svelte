@@ -67,7 +67,7 @@
 		<!-- desktop only -->
 		<div class="hidden sm:py-4 md:py-6 sm:flex sm:flex-auto sm:justify-center grow">
 			<img class="hidden" src={product.productImageUrl} onerror={imageLoadError} alt="" />
-			<Card.Root class="!w-full shadow-2xl flex flex-row overflow-hidden">
+			<Card.Root class="!w-full glass-card flex flex-row overflow-hidden">
 				<img
 					src={productImage}
 					alt={product.productName}
@@ -144,7 +144,7 @@
 
 		<!-- mobile only -->
 		<div class="sm:hidden flex justify-center px-2 py-4 md:py-2 md:pb-4 w-full">
-			<Card.Root class="shadow-2xl w-full">
+			<Card.Root class="glass-card w-full">
 				<img
 					src={product.productImageUrl || placeholder}
 					alt={product.productName}

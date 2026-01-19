@@ -41,17 +41,26 @@ export type RolePermission = {
 };
 
 export type Invitation = {
-  invitationId: number;   
-  userId: string;
+  invitationId: number;
+  userId: string | null;
   invitationCode: string;
-  createdAt: Date;            
-  issuedAt: Date;          
-  expiresAt: Date;          
-  lastSentAt: Date;
+  email: string | null;
+  createdAt: Date;
+  issuedAt: Date | null;
+  expiresAt: Date | null;
+  lastSentAt: Date | null;
 }
 
 export type RegistrationToken = {
   userId: string;
+  iat: number;
+  exp: number;
+}
+
+export type PasswordResetToken = {
+  userId: string;
+  email: string;
+  type: 'password-reset';
   iat: number;
   exp: number;
 }

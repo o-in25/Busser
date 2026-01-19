@@ -8,7 +8,10 @@ const publicRoutes = [
   '/login',
   '/logout',
   '/signup',
-  '/verify-email/**'
+  '/verify-email/**',
+  '/forgot-password',
+  '/reset-password/**',
+  '/api/mail/user-registration'
 ]
 
 

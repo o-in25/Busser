@@ -99,7 +99,7 @@
 			</a>
 		</div>
 	</div>
-	<Separator />
+	<Separator class="my-8"/>
 {/if}
 
 <div

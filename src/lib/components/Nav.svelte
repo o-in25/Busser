@@ -23,6 +23,8 @@
 	// props
 	let { user, activeUrl }: { user: User | null; activeUrl: string } = $props();
 
+	// Check if navbar has content (nav links, user menu, etc.)
+	let hasNavContent = $derived(!!user);
 	let sheetOpen = $state(false);
 
 	async function logout() {
@@ -37,6 +39,7 @@
 	}
 
 	function isActive(path: string): boolean {
+		if (!activeUrl) return false;
 		if (path === '/') {
 			return activeUrl === '/';
 		}
@@ -46,7 +49,7 @@
 
 <!-- Desktop Navigation -->
 <nav class="glass-nav sticky top-0 z-50 w-full px-4 py-3">
-	<div class="mx-auto flex max-w-7xl items-center justify-center md:justify-between relative">
+	<div class="mx-auto flex max-w-7xl items-center {hasNavContent ? 'justify-center md:justify-between' : 'justify-center'} relative">
 		<!-- Mobile Menu Button -->
 		{#if user}
 			<Sheet.Root bind:open={sheetOpen}>

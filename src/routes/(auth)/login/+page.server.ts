@@ -6,11 +6,13 @@ import { dev } from '$app/environment';
 import type { QueryResult } from '$lib/types';
 
 
-export const load = (async ({ locals }) => {
+export const load = (async ({ locals, url }) => {
   if(locals.user?.userId) {
     return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
   }
-  return {};
+  return {
+    passwordReset: url.searchParams.get('passwordReset') === 'true'
+  };
 }) satisfies PageServerLoad;
 
 
@@ -68,11 +70,20 @@ export const actions = {
     }
 
 
-    const queryResult: QueryResult<string | null> = await login(username, password);
+    const queryResult = await login(username, password);
+
+    // Check if user needs verification
+    if('needsVerification' in queryResult && queryResult.needsVerification) {
+      return fail(StatusCodes.BAD_REQUEST, {
+        error: 'error' in queryResult ? queryResult.error : 'Email verification required.',
+        needsVerification: true,
+        email: queryResult.email
+      });
+    }
 
     if('data' in queryResult && queryResult.data?.length) {
 
-      // TODO: include the permission 
+      // TODO: include the permission
       // info by signing it to a jwt and
       // decoding in in auth.js
       const userToken: string = queryResult.data;

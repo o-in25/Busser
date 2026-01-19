@@ -1,5 +1,5 @@
 import type { QueryResult, SelectOption } from "$lib/types";
-import { type Invitation, type Permission, type RegistrationToken, type Role, type User, type UserRole } from "$lib/types/auth";
+import { type Invitation, type PasswordResetToken, type Permission, type RegistrationToken, type Role, type User, type UserRole } from "$lib/types/auth";
 import moment from "moment";
 import { hashPassword, signToken, verifyRegistrationToken, verifyToken } from "./auth";
 import { marshal, marshalToType } from "./core";
@@ -296,39 +296,45 @@ export async function registerUser(username: string, email: string, password: st
   // step 8: sign jwt
   // step 9: send email
   try {
-    const { user, invitation }: { 
-      user: Pick<User, 'userId' | 'username' | 'email'>,
-      invitation: Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>
+    const { user }: {
+      user: Pick<User, 'userId' | 'username' | 'email'>
     } = await db.query.transaction(async (trx) => {
 
       // TODO: we may eventually need to set invite mode to off
       // so we should make this an optional step
       let user: Pick<User, 'userId' | 'username' | 'email'>;
-      let invitation: Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>;
+      let invitation: Pick<Invitation, 'invitationId' | 'userId' | 'email' | 'expiresAt'>;
 
-      // step 0
-      let dbResult: any = await trx('invitation').select('invitationId', 'userId', 'issuedAt', 'expiresAt').where({ invitationCode }).first();
+      // step 0 - validate invitation code
+      let dbResult: any = await trx('invitation').select('invitationId', 'userId', 'email', 'expiresAt').where({ invitationCode }).first();
       if(!dbResult) {
         throw new Error('Invalid invitation code.');
       }
 
-      invitation = marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>>(dbResult); 
+      invitation = marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'email' | 'expiresAt'>>(dbResult);
       if(!invitation.invitationId || invitation.userId !== null) {
-        throw new Error('Invalid invitation code.');
+        throw new Error('Invitation code has already been used.');
       }
 
-      // invitation.invitationId = dbResult.invitationId;
+      // Check if invitation has expired
+      if(invitation.expiresAt && moment().isAfter(moment(invitation.expiresAt))) {
+        throw new Error('Invitation code has expired.');
+      }
 
-      // step 1
-      dbResult = await trx('user').select('username', 'email').where({ username }).first();
-      dbResult = marshal(dbResult); 
+      // Check if invitation email matches signup email (if specified)
+      if(invitation.email && invitation.email.toLowerCase() !== email.toLowerCase()) {
+        throw new Error('Email does not match the invitation.');
+      }
 
-
-      if(dbResult?.username) {
+      // step 1 - check if username is taken
+      dbResult = await trx('user').select('username').where({ username }).first();
+      if(dbResult) {
         throw new Error('Username already taken.');
       }
 
-      if(dbResult?.email) {
+      // check if email is taken
+      dbResult = await trx('user').select('email').where({ email }).first();
+      if(dbResult) {
         throw new Error('Email already taken.');
       }
 
@@ -376,31 +382,22 @@ export async function registerUser(username: string, email: string, password: st
       // step 4 + 5
       dbResult = await trx('userRole').insert(rolePermission);
 
-      dbResult = await trx('invitation').update({
-        userId: user.userId,
-        issuedAt: moment().format('YYYY-MM-DD HH:MM:ss'),
-        expiresAt: moment().add(24, 'hours').format('YYYY-MM-DD HH:MM:ss')
-        // lastSentAt: now()
-      }).where({ invitationId: invitation.invitationId});
+      // Mark invitation as used by this user
+      await trx('invitation').update({
+        userId: user.userId
+      }).where({ invitationId: invitation.invitationId });
 
-      dbResult = await trx('invitation')
-        .select('invitationId', 'userId', 'issuedAt', 'expiresAt')
-        .where({ invitationId: invitation.invitationId})
-        .first();
-
-      invitation = marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'issuedAt' | 'expiresAt'>>(dbResult); 
-
-      return {
-        user,
-        invitation
-      }
+      return { user };
     });
-     
-    // step 6
+
+    // step 6 - create registration token with 24-hour expiration
+    const now = moment();
+    const tokenExpiration = moment().add(24, 'hours');
+
     const token = await signToken<RegistrationToken>({
-      userId: invitation.userId,
-      iat: moment(invitation.issuedAt).unix(),
-      exp: moment(invitation.expiresAt).unix()
+      userId: user.userId,
+      iat: now.unix(),
+      exp: tokenExpiration.unix()
     });
     
     // step 7
@@ -416,9 +413,38 @@ export async function registerUser(username: string, email: string, password: st
 
   } catch(error: any) {
     console.error(error);
+
+    // Convert database errors to friendly messages
+    const getFriendlyError = (message: string): string => {
+      if (message.includes('ER_DUP_ENTRY') && message.includes('email')) {
+        return 'This email address is already registered.';
+      }
+      if (message.includes('ER_DUP_ENTRY') && message.includes('username')) {
+        return 'This username is already taken.';
+      }
+      if (message.includes('ER_DUP_ENTRY')) {
+        return 'An account with these details already exists.';
+      }
+      // Return the original message if it's already friendly (from our explicit throws)
+      const friendlyMessages = [
+        'Invalid invitation code.',
+        'Invitation code has already been used.',
+        'Invitation code has expired.',
+        'Email does not match the invitation.',
+        'Username already taken.',
+        'Email already taken.',
+        'Could not create user.',
+        'Could not register user for default role.'
+      ];
+      if (friendlyMessages.includes(message)) {
+        return message;
+      }
+      return 'An error occurred during registration. Please try again.';
+    };
+
     return {
       status: 'error',
-      error: error.message
+      error: getFriendlyError(error.message)
     }
   }
 }
@@ -441,9 +467,8 @@ export async function verifyUser(registrationToken: string): Promise<QueryResult
     }
 
     await db.table('user')
-    .update('verified', 1).where({
-      userId: ''//payload.userId
-    });
+      .update('verified', 1)
+      .where({ userId: payload.userId });
 
     return { status: 'success' }
 
@@ -457,4 +482,141 @@ export async function verifyUser(registrationToken: string): Promise<QueryResult
     }
   }
 
+}
+
+export async function resendVerificationEmail(userId: string): Promise<QueryResult> {
+  try {
+    // Get user info
+    const dbResult = await db.table('user')
+      .select('userId', 'username', 'email', 'verified')
+      .where({ userId })
+      .first();
+
+    if(!dbResult) {
+      throw new Error('User not found.');
+    }
+
+    const user = marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+
+    if(user.verified === 1) {
+      throw new Error('User is already verified.');
+    }
+
+    // Create new registration token with 24-hour expiration
+    const now = moment();
+    const tokenExpiration = moment().add(24, 'hours');
+
+    const token = await signToken<RegistrationToken>({
+      userId: user.userId,
+      iat: now.unix(),
+      exp: tokenExpiration.unix()
+    });
+
+    // Send verification email
+    await mailClient.sendUserRegistrationEmail([user.email], {
+      username: user.username,
+      token
+    });
+
+    return {
+      status: 'success'
+    };
+
+  } catch(error: any) {
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+export async function resendVerificationEmailByEmail(email: string): Promise<QueryResult> {
+  try {
+    // Get user info by email
+    const dbResult = await db.table('user')
+      .select('userId', 'username', 'email', 'verified')
+      .where({ email })
+      .first();
+
+    if(!dbResult) {
+      throw new Error('No account found with this email address.');
+    }
+
+    const user = marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+
+    if(user.verified === 1) {
+      throw new Error('This account is already verified. You can log in.');
+    }
+
+    // Create new registration token with 24-hour expiration
+    const now = moment();
+    const tokenExpiration = moment().add(24, 'hours');
+
+    const token = await signToken<RegistrationToken>({
+      userId: user.userId,
+      iat: now.unix(),
+      exp: tokenExpiration.unix()
+    });
+
+    // Send verification email
+    await mailClient.sendUserRegistrationEmail([user.email], {
+      username: user.username,
+      token
+    });
+
+    return {
+      status: 'success'
+    };
+
+  } catch(error: any) {
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+export async function requestPasswordReset(email: string): Promise<QueryResult> {
+  try {
+    // Get user info by email
+    const dbResult = await db.table('user')
+      .select('userId', 'username', 'email', 'verified')
+      .where({ email })
+      .first();
+
+    if (!dbResult) {
+      // Don't reveal if email exists or not for security
+      // Just return success either way
+      return { status: 'success' };
+    }
+
+    const user = marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+
+    // Create password reset token with 1-hour expiration
+    const now = moment();
+    const tokenExpiration = moment().add(1, 'hour');
+
+    const token = await signToken<PasswordResetToken>({
+      userId: user.userId,
+      email: user.email,
+      type: 'password-reset',
+      iat: now.unix(),
+      exp: tokenExpiration.unix()
+    });
+
+    // Send password reset email
+    await mailClient.sendPasswordResetEmail([user.email], {
+      username: user.username,
+      token
+    });
+
+    return { status: 'success' };
+
+  } catch (error: any) {
+    console.error('Password reset request error:', error);
+    return {
+      status: 'error',
+      error: 'Failed to process password reset request. Please try again.'
+    };
+  }
 }
