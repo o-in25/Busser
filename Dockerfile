@@ -50,8 +50,8 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
-COPY package-lock.json package.json pnpm-lock.yaml startup.sh ./
-RUN pnpm install --prod=false
+COPY package.json package-lock.json* pnpm-lock.yaml* startup.sh ./
+RUN pnpm install --prod=false --no-frozen-lockfile
 
 # Copy application code
 COPY . .
