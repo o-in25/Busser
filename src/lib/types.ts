@@ -252,6 +252,27 @@ export namespace View {
 
 // TODO: change this to use the view
 // we have way too many overlapping types
+export type InventoryStats = {
+  total: number;
+  inStock: number;
+  outOfStock: number;
+  lowStock: number;
+  categoryBreakdown: CategoryCount[];
+};
+
+export type CategoryCount = {
+  categoryId: number;
+  categoryName: string;
+  count: number;
+};
+
+export type InventoryFilters = {
+  search: string;
+  categoryId: string;
+  stockFilter: string;
+  page: number;
+};
+
 export namespace QueryRequest {
   export type Recipe = {
     recipeId?: number,

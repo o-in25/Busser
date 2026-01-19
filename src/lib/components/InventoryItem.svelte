@@ -1,25 +1,88 @@
 <script lang="ts">
 	import type { Product } from '$lib/types';
 	import placeholder from '$lib/assets/placeholder@2x.jpg';
-	import * as Card from '$lib/components/ui/card';
 	import * as Popover from '$lib/components/ui/popover';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { Switch } from '$lib/components/ui/switch';
+	import { Label } from '$lib/components/ui/label';
 	import { cn } from '$lib/utils';
-	import { Separator } from '$lib/components/ui/separator';
-	import { ArrowRight, Pencil, Info } from 'lucide-svelte';
+	import {
+		ArrowRight,
+		Pencil,
+		Info,
+		FlaskConical,
+		DollarSign,
+		Beaker,
+		Flame,
+		Calculator,
+		CheckCircle2,
+		XCircle,
+		AlertTriangle,
+		Candy,
+		Wind,
+		Sparkles,
+	} from 'lucide-svelte';
 	import { weightedMean } from '$lib/math';
 	import { getContext } from 'svelte';
 
-	export let product: Product;
-	export let isBaseSpirit: boolean;
+	let {
+		product,
+		isBaseSpirit,
+		recipeCount = 0,
+		onStockChange = null
+	}: {
+		product: Product;
+		isBaseSpirit: boolean;
+		recipeCount?: number;
+		onStockChange?: ((productId: number, inStock: boolean) => void) | null;
+	} = $props();
 
 	const permissions: string[] = getContext('permissions');
 
-	// fallback if image cant load
-	let productImage = product?.productImageUrl || placeholder;
+	// Fallback if image can't load
+	let productImage = $state(product?.productImageUrl || placeholder);
 	const imageLoadError = () => (productImage = placeholder);
 
+	// Calculated fields
+	const pricePerOunce = $derived.by(() => {
+		const price = product.productPricePerUnit;
+		const size = product.productUnitSizeInMilliliters;
+		if (!price || !size || size === 0) return null;
+		return (price / (size / 29.5735)).toFixed(2);
+	});
+
+	const abvPercent = $derived.by(() => {
+		const proof = product.productProof;
+		if (!proof) return null;
+		return (proof / 2).toFixed(1);
+	});
+
+	// Stock status
+	const stockStatus = $derived.by(() => {
+		if (product.productInStockQuantity === 0) {
+			return { label: 'Out of Stock', variant: 'destructive' as const, icon: XCircle, color: 'text-red-500', bgColor: 'bg-red-500/10' };
+		}
+		if (product.productInStockQuantity === 1) {
+			return { label: 'Low Stock', variant: 'secondary' as const, icon: AlertTriangle, color: 'text-yellow-500', bgColor: 'bg-yellow-500/10' };
+		}
+		return { label: 'In Stock', variant: 'default' as const, icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-500/10' };
+	});
+
+	const StockIcon = $derived(stockStatus.icon);
+
+	// Flavor profile data
+	const flavorProfile = $derived([
+		{ label: 'Sweetness', value: product.productSweetnessRating || 0, icon: Candy, color: 'bg-pink-500' },
+		{ label: 'Dryness', value: product.productDrynessRating || 0, icon: Wind, color: 'bg-amber-500' },
+		{ label: 'Versatility', value: product.productVersatilityRating || 0, icon: Sparkles, color: 'bg-purple-500' },
+		{ label: 'Strength', value: product.productStrengthRating || 0, icon: Flame, color: 'bg-orange-500' },
+	]);
+
+	// Check if flavor profile has any data
+	const hasFlavorProfile = $derived(flavorProfile.some(f => f.value > 0));
+
+	// Overall rating calculation
 	const generateRatings = () => {
 		const ratings = [
 			{ label: 'Dryness', rating: product.productDrynessRating || 0.0 },
@@ -51,177 +114,187 @@
 			style: 'bg-violet-500',
 		};
 		return {
-			ratings,
-			ratings2,
-			desc1: vec.toFixed(1),
-			desc2,
+			score: vec.toFixed(1),
+			label: desc2,
 			style,
 		};
 	};
 
-	const { ratings, ratings2, desc1, desc2, style } = generateRatings();
+	const overallRating = generateRatings();
+
+	// Handle stock toggle
+	function handleStockToggle(checked: boolean) {
+		if (onStockChange && product.productId) {
+			onStockChange(product.productId, checked);
+		}
+	}
 </script>
 
 {#if product}
-	<div class="space-y-2 text-wrap w-full">
-		<!-- desktop only -->
-		<div class="hidden sm:py-4 md:py-6 sm:flex sm:flex-auto sm:justify-center grow">
+	<div class="space-y-6">
+		<!-- Hero Image -->
+		<div class="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-muted">
 			<img class="hidden" src={product.productImageUrl} onerror={imageLoadError} alt="" />
-			<Card.Root class="!w-full glass-card flex flex-row overflow-hidden">
-				<img
-					src={productImage}
-					alt={product.productName}
-					class="w-48 h-auto object-cover"
-					onerror={imageLoadError}
-				/>
-				<div class="card-content p-6 flex-1">
-					<!-- heading -->
-					<div>
-						<h5 class="text-xl font-bold tracking-tight text-foreground">
-							{product.productName}
-						</h5>
-						<Popover.Root>
-							<Popover.Trigger class="flex items-center text-muted-foreground hover:text-foreground">
-								{product.categoryName}
-								<Info class="w-4 h-4 ml-1" />
-							</Popover.Trigger>
-							<Popover.Content class="w-80">
-								<div class="space-y-2">
-									<h4 class="font-medium">{product.categoryName}</h4>
-									<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
-									<a
-										href="/inventory/category/{product.categoryId}/edit"
-										class="inline-flex items-center text-sm font-medium text-primary hover:underline"
-									>
-										Edit <ArrowRight class="ml-1 h-4 w-4" />
-									</a>
-								</div>
-							</Popover.Content>
-						</Popover.Root>
-					</div>
-
-					<!-- desc -->
-					<div class="py-2">
-						<p class="font-normal text-muted-foreground leading-tight">
-							{product.productDescription || product.categoryDescription}
-						</p>
-					</div>
-
-					<!-- score -->
-					{#if isBaseSpirit}
-						<div class="py-4">
-							<div class="flex items-center gap-4">
-								<span class="w-10 text-sm font-semibold inline-flex items-center justify-center p-1.5 rounded text-white {style}">
-									{desc1}
-								</span>
-								<span class="text-sm font-medium">{desc2}</span>
-								{#if product.productProof > 0}
-									<span class="text-sm text-muted-foreground">{product.productProof} Proof</span>
-								{/if}
-							</div>
-							<div class="mt-4 grid grid-cols-2 gap-4">
-								{#each [...ratings, ...ratings2] as r}
-									<div class="flex justify-between text-sm">
-										<span class="text-muted-foreground">{r.label}</span>
-										<span class="font-medium">{r.rating.toFixed(1)}</span>
-									</div>
-								{/each}
-							</div>
-						</div>
-					{/if}
-
-					<div class="sm:gap-4 sm:items-center sm:flex mt-4">
-						{#if permissions.includes('edit_inventory')}
-							<a class={cn(buttonVariants({ variant: "outline" }))} href="/inventory/{product.productId}/edit">
-								<Pencil class="w-4 h-4 mr-2" />
-								Edit
-							</a>
-						{/if}
-					</div>
+			<img
+				src={productImage}
+				alt={product.productName}
+				class="w-full h-full object-cover"
+				onerror={imageLoadError}
+			/>
+			{#if isBaseSpirit && hasFlavorProfile}
+				<div class="absolute bottom-3 right-3">
+					<span class="text-sm font-bold px-3 py-1.5 rounded-lg text-white shadow-lg {overallRating.style}">
+						{overallRating.score} · {overallRating.label}
+					</span>
 				</div>
-			</Card.Root>
+			{/if}
 		</div>
 
-		<!-- mobile only -->
-		<div class="sm:hidden flex justify-center px-2 py-4 md:py-2 md:pb-4 w-full">
-			<Card.Root class="glass-card w-full">
-				<img
-					src={product.productImageUrl || placeholder}
-					alt={product.productName}
-					class="w-full h-48 object-cover rounded-t-lg"
-				/>
-				<Card.Content class="p-4">
-					<h5 class="text-xl font-bold tracking-tight text-foreground">
-						{product.productName}
-					</h5>
-					<div class="flex items-center text-muted-foreground">
-						<span>{product.categoryName}</span>
-					</div>
-					<div class="flex gap-2 my-2">
-						{#if isBaseSpirit}
-							<Badge variant="secondary">Base Spirit</Badge>
-						{/if}
-						{#if product.productInStockQuantity < 1}
-							<Badge variant="destructive">Out of Stock</Badge>
-						{/if}
-					</div>
-					<p class="my-3 font-normal text-muted-foreground leading-tight">
-						{product.productDescription || product.categoryDescription}
-					</p>
-
-					{#if isBaseSpirit}
-						<Separator class="my-4" />
-						<div class="px-2">
-							<div class="flex items-center gap-4 mb-4">
-								<span class="w-10 text-sm font-semibold inline-flex items-center justify-center p-1.5 rounded text-white {style}">
-									{desc1}
-								</span>
-								<span class="text-sm font-medium">{desc2}</span>
-							</div>
-							<div class="grid grid-cols-2 gap-2">
-								{#each [...ratings, ...ratings2] as r}
-									<div class="flex justify-between text-sm">
-										<span class="text-muted-foreground">{r.label}</span>
-										<span class="font-medium">{r.rating.toFixed(1)}</span>
-									</div>
-								{/each}
-							</div>
+		<!-- Header -->
+		<div>
+			<h2 class="text-2xl font-bold text-foreground mb-2">
+				{product.productName}
+			</h2>
+			<div class="flex items-center gap-2 flex-wrap">
+				<Popover.Root>
+					<Popover.Trigger class="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+						{product.categoryName}
+						<Info class="w-3.5 h-3.5 ml-1" />
+					</Popover.Trigger>
+					<Popover.Content class="w-72">
+						<div class="space-y-2">
+							<h4 class="font-medium">{product.categoryName}</h4>
+							<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
+							<a
+								href="/inventory/category/{product.categoryId}/edit"
+								class="inline-flex items-center text-sm font-medium text-primary hover:underline"
+							>
+								Edit Category <ArrowRight class="ml-1 h-3 w-3" />
+							</a>
 						</div>
-						<Separator class="my-4" />
-					{/if}
+					</Popover.Content>
+				</Popover.Root>
+				{#if isBaseSpirit}
+					<Badge variant="secondary" class="text-xs">Base Spirit</Badge>
+				{/if}
+			</div>
+		</div>
 
-					<div class="mt-4">
-						<a class={cn(buttonVariants({ variant: "outline" }), "w-full")} href="/inventory/{product.productId}/edit">
-							<Pencil class="w-4 h-4 mr-2" />
-							Edit
-						</a>
+		<!-- Status Badges -->
+		<div class="flex items-center gap-2 flex-wrap">
+			<Badge variant={stockStatus.variant} class="gap-1.5 {stockStatus.bgColor}">
+				<StockIcon class="h-3.5 w-3.5 {stockStatus.color}" />
+				{stockStatus.label}
+			</Badge>
+			{#if recipeCount > 0}
+				<Badge variant="outline" class="gap-1.5">
+					<FlaskConical class="h-3.5 w-3.5" />
+					Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}
+				</Badge>
+			{/if}
+		</div>
+
+		<!-- Quick Stats Grid -->
+		<div class="grid grid-cols-2 gap-3">
+			{#if product.productPricePerUnit}
+				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+					<DollarSign class="h-5 w-5 text-green-500 shrink-0" />
+					<div>
+						<p class="text-xs text-muted-foreground">Price</p>
+						<p class="font-semibold">${product.productPricePerUnit.toFixed(2)}</p>
 					</div>
-				</Card.Content>
-			</Card.Root>
+				</div>
+			{/if}
+			{#if product.productUnitSizeInMilliliters}
+				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+					<Beaker class="h-5 w-5 text-blue-500 shrink-0" />
+					<div>
+						<p class="text-xs text-muted-foreground">Size</p>
+						<p class="font-semibold">{product.productUnitSizeInMilliliters}mL</p>
+					</div>
+				</div>
+			{/if}
+			{#if product.productProof}
+				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+					<Flame class="h-5 w-5 text-orange-500 shrink-0" />
+					<div>
+						<p class="text-xs text-muted-foreground">Proof / ABV</p>
+						<p class="font-semibold">{product.productProof}° {#if abvPercent}<span class="text-muted-foreground font-normal">({abvPercent}%)</span>{/if}</p>
+					</div>
+				</div>
+			{/if}
+			{#if pricePerOunce}
+				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+					<Calculator class="h-5 w-5 text-purple-500 shrink-0" />
+					<div>
+						<p class="text-xs text-muted-foreground">Price/oz</p>
+						<p class="font-semibold">${pricePerOunce}</p>
+					</div>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Flavor Profile -->
+		{#if hasFlavorProfile}
+			<div class="space-y-3">
+				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Flavor Profile</h3>
+				<div class="space-y-2">
+					{#each flavorProfile as flavor}
+						{#if flavor.value > 0}
+							{@const FlavorIcon = flavor.icon}
+							<div class="flex items-center gap-3">
+								<FlavorIcon class="h-4 w-4 text-muted-foreground shrink-0" />
+								<span class="text-sm w-20 shrink-0">{flavor.label}</span>
+								<div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+									<div
+										class="h-full {flavor.color} transition-all"
+										style="width: {(flavor.value / 10) * 100}%"
+									></div>
+								</div>
+								<span class="text-sm font-medium w-8 text-right">{flavor.value.toFixed(1)}</span>
+							</div>
+						{/if}
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Description -->
+		{#if product.productDescription}
+			<div class="space-y-2">
+				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Description</h3>
+				<p class="text-sm text-muted-foreground leading-relaxed">
+					{product.productDescription}
+				</p>
+			</div>
+		{/if}
+
+		<!-- Actions -->
+		<div class="flex items-center justify-between pt-4 border-t">
+			{#if permissions.includes('edit_inventory') && onStockChange}
+				<div class="flex items-center gap-3">
+					<Switch
+						id="stock-toggle-{product.productId}"
+						checked={product.productInStockQuantity > 0}
+						onCheckedChange={handleStockToggle}
+					/>
+					<Label for="stock-toggle-{product.productId}" class="text-sm cursor-pointer">
+						In Stock
+					</Label>
+				</div>
+			{:else}
+				<div></div>
+			{/if}
+			{#if permissions.includes('edit_inventory')}
+				<a class={cn(buttonVariants({ variant: "default" }))} href="/inventory/{product.productId}/edit">
+					<Pencil class="w-4 h-4 mr-2" />
+					Edit Product
+				</a>
+			{/if}
 		</div>
 	</div>
 {:else}
-	<div class="flex items-center justify-center h-48 bg-muted rounded-lg">
+	<div class="flex items-center justify-center h-32 bg-muted rounded-lg">
 		<span class="text-muted-foreground">No product data</span>
 	</div>
 {/if}
-
-<style>
-	@media (min-width: 768px) {
-		.card-content {
-			width: 440px;
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.card-content {
-			width: 685px;
-		}
-	}
-
-	@media (min-width: 1280px) {
-		.card-content {
-			width: 900px;
-		}
-	}
-</style>

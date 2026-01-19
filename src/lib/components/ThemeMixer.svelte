@@ -2,6 +2,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { Label } from '$lib/components/ui/label';
 	import { themeStore } from '../../stores';
+	import { Sun, Moon } from 'lucide-svelte';
 
 	let currentTheme = '';
 	themeStore.subscribe(value => (currentTheme = value));
@@ -15,10 +16,11 @@
 	};
 </script>
 
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-3">
+	<Sun class="h-4 w-4 text-amber-500" />
 	<Switch
 		checked={currentTheme === 'dark'}
-		onchange={toggleTheme}
+		onCheckedChange={toggleTheme}
 	/>
-	<Label>Dark Mode</Label>
+	<Moon class="h-4 w-4 text-blue-400" />
 </div>

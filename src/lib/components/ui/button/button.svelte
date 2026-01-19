@@ -7,7 +7,7 @@
       variant: {
         default: "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:from-primary/90 hover:to-primary/70",
         destructive: "bg-gradient-to-r from-destructive to-destructive/80 text-destructive-foreground shadow-md shadow-destructive/25 hover:shadow-lg hover:shadow-destructive/30",
-        outline: "border border-input/50 bg-white/50 dark:bg-zinc-800/40 backdrop-blur-sm hover:bg-white/70 dark:hover:bg-zinc-800/60 hover:border-primary/50 hover:text-primary",
+        outline: "border border-input/50 bg-white/80 dark:bg-zinc-800/60 hover:bg-white dark:hover:bg-zinc-800/80 hover:border-primary/50 hover:text-primary",
         secondary: "bg-secondary/80 text-secondary-foreground shadow-sm hover:bg-secondary/70",
         ghost: "hover:bg-accent/50 hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",

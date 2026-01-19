@@ -12,6 +12,8 @@
 import type {
   BasicRecipe,
   Category,
+  CategoryCount,
+  InventoryStats,
   PaginationResult,
   PreparationMethod,
   Product,
@@ -116,7 +118,7 @@ export async function getCatalog(currentPage: number, perPage: number = 25, filt
 export async function getInventory(
   currentPage: number,
   perPage: number = 25,
-  filter: Partial<Product> | null = null
+  filter: Partial<Product> & { stockFilter?: string } | null = null
 ): Promise<PaginationResult<Product[]>> {
   try {
 
@@ -125,7 +127,20 @@ export async function getInventory(
       dbResult = dbResult.where("productName", "like", `%${filter.productName}%`);
     }
 
-    if(typeof filter?.productInStockQuantity !== 'undefined') {
+    if(filter?.categoryId) {
+      dbResult = dbResult.andWhere("categoryId", "=", filter.categoryId);
+    }
+
+    // Handle stockFilter parameter (all, in-stock, out-of-stock, low-stock)
+    if(filter?.stockFilter) {
+      if(filter.stockFilter === 'out-of-stock') {
+        dbResult = dbResult.andWhere("productInStockQuantity", "=", 0);
+      } else if(filter.stockFilter === 'low-stock') {
+        dbResult = dbResult.andWhere("productInStockQuantity", "=", 1);
+      } else if(filter.stockFilter === 'in-stock') {
+        dbResult = dbResult.andWhere("productInStockQuantity", ">", 1);
+      }
+    } else if(typeof filter?.productInStockQuantity !== 'undefined') {
       dbResult = dbResult.andWhere("productInStockQuantity", "=", filter.productInStockQuantity);
     }
 
@@ -984,7 +999,7 @@ export async function updateCategory(category: Table.Category): Promise<QueryRes
     //   throw new Error('Could not update category: no rows were returned.')
     // }
 
-    // dbResult = await db.table<Table.Category>('category').where 
+    // dbResult = await db.table<Table.Category>('category').where
 
   } catch(error: any) {
     console.error(error);
@@ -999,5 +1014,91 @@ export async function updateCategory(category: Table.Category): Promise<QueryRes
       error: error?.message || "An unknown error occurred.",
     };
 
+  }
+}
+
+export async function getInventoryStats(): Promise<InventoryStats> {
+  try {
+    // Get aggregate counts
+    const statsResult = await db.table('inventory')
+      .select(
+        db.query.raw('COUNT(*) as total'),
+        db.query.raw('SUM(CASE WHEN productInStockQuantity > 1 THEN 1 ELSE 0 END) as inStock'),
+        db.query.raw('SUM(CASE WHEN productInStockQuantity = 0 THEN 1 ELSE 0 END) as outOfStock'),
+        db.query.raw('SUM(CASE WHEN productInStockQuantity = 1 THEN 1 ELSE 0 END) as lowStock')
+      );
+
+    const stats = (statsResult[0] as unknown) as { total: number; inStock: number; outOfStock: number; lowStock: number } | undefined;
+
+    // Get category breakdown
+    const categoryBreakdown = await db.table('inventory')
+      .select('CategoryId', 'CategoryName')
+      .count('* as count')
+      .groupBy('CategoryId', 'CategoryName')
+      .orderBy('CategoryName');
+
+    const breakdown: CategoryCount[] = (categoryBreakdown as any[]).map((row) => ({
+      categoryId: row.CategoryId,
+      categoryName: row.CategoryName,
+      count: Number(row.count),
+    }));
+
+    return {
+      total: Number(stats?.total) || 0,
+      inStock: Number(stats?.inStock) || 0,
+      outOfStock: Number(stats?.outOfStock) || 0,
+      lowStock: Number(stats?.lowStock) || 0,
+      categoryBreakdown: breakdown,
+    };
+  } catch(error: any) {
+    console.error('Failed to get inventory stats:', error);
+    return {
+      total: 0,
+      inStock: 0,
+      outOfStock: 0,
+      lowStock: 0,
+      categoryBreakdown: [],
+    };
+  }
+}
+
+export async function getRecipeUsageByProduct(productIds: number[]): Promise<Map<number, number>> {
+  try {
+    if(productIds.length === 0) return new Map();
+
+    const result = await db.table('basicrecipestep')
+      .select('ProductId')
+      .count('* as recipeCount')
+      .whereIn('ProductId', productIds)
+      .groupBy('ProductId');
+
+    const usageMap = new Map<number, number>();
+    result.forEach((row: any) => {
+      usageMap.set(row.ProductId, Number(row.recipeCount));
+    });
+
+    return usageMap;
+  } catch(error: any) {
+    console.error('Failed to get recipe usage:', error);
+    return new Map();
+  }
+}
+
+export async function getProductCategories(): Promise<CategoryCount[]> {
+  try {
+    const result = await db.table('inventory')
+      .select('CategoryId', 'CategoryName')
+      .count('* as count')
+      .groupBy('CategoryId', 'CategoryName')
+      .orderBy('CategoryName');
+
+    return (result as any[]).map((row) => ({
+      categoryId: row.CategoryId,
+      categoryName: row.CategoryName,
+      count: Number(row.count),
+    }));
+  } catch(error: any) {
+    console.error('Failed to get product categories:', error);
+    return [];
   }
 }

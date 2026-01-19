@@ -132,7 +132,7 @@
 	<!-- ==================== UNAUTHENTICATED LANDING PAGE ==================== -->
 
 	<!-- Hero Section -->
-	<section class="relative overflow-hidden py-12 md:py-20 rounded-2xl mt-4">
+	<section class="relative overflow-hidden py-12 md:py-18 rounded-2xl mt-4">
 		<!-- Background gradient -->
 		<div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-orange-500/10 -z-10 rounded-2xl"></div>
 		<div class="absolute inset-0 bg-grid-pattern opacity-5 -z-10"></div>
