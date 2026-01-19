@@ -1,8 +1,16 @@
 import { getCatalog, getRecipeCategories, seedGallery, getInventory, getSpirits, getAlmostThereRecipes } from '$lib/server/core';
-import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { createInvitationRequest } from '$lib/server/auth';
+import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
+import { error, fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import type { View } from '$lib/types';
+
+// Rate limit config: 3 requests per hour per IP
+const INVITE_REQUEST_RATE_LIMIT = {
+  maxRequests: 3,
+  windowMs: 60 * 60 * 1000 // 1 hour
+};
 
 export const load = (async ({ locals }) => {
   const user = locals.user;
@@ -118,3 +126,68 @@ export const load = (async ({ locals }) => {
     landingData,
   };
 }) satisfies PageServerLoad;
+
+export const actions: Actions = {
+  requestInvite: async ({ request }) => {
+    // Rate limit check
+    const clientIp = getClientIp(request);
+    const rateLimitKey = `invite-request:${clientIp}`;
+    const rateLimit = checkRateLimit(rateLimitKey, INVITE_REQUEST_RATE_LIMIT);
+
+    if (!rateLimit.allowed) {
+      const minutesRemaining = Math.ceil((rateLimit.retryAfterMs || 0) / 60000);
+      // return fail(429, {
+      //   requestInvite: {
+      //     error: `Too many requests. Please try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''}.`,
+      //     email: '',
+      //     message: ''
+      //   }
+      // });
+    }
+
+    const formData = await request.formData();
+    const email = formData.get('email') as string | null;
+    const message = formData.get('message') as string | null;
+
+    if (!email || !email.trim()) {
+      return fail(400, {
+        requestInvite: {
+          error: 'Please enter your email address.',
+          email: '',
+          message: message || ''
+        }
+      });
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return fail(400, {
+        requestInvite: {
+          error: 'Please enter a valid email address.',
+          email,
+          message: message || ''
+        }
+      });
+    }
+
+    const result = await createInvitationRequest(email, message);
+
+    if (result.status === 'error') {
+      return fail(400, {
+        requestInvite: {
+          error: result.error,
+          email,
+          message: message || ''
+        }
+      });
+    }
+
+    return {
+      requestInvite: {
+        success: true,
+        message: 'Your request has been submitted! We\'ll review it and get back to you soon.'
+      }
+    };
+  }
+};

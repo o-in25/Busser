@@ -1,6 +1,6 @@
 import { DbProvider } from './db';
 import { Logger } from './logger';
-import type { Invitation, PasswordResetToken, RegistrationToken, TokenResult, User } from '$lib/types/auth';
+import type { Invitation, InvitationRequest, PasswordResetToken, RegistrationToken, TokenResult, User } from '$lib/types/auth';
 import jwt from 'jsonwebtoken';
 import { compare, hash } from 'bcrypt';
 import { getUser } from './user';
@@ -326,6 +326,167 @@ export async function resetPasswordWithToken(
 
     return { status: 'success' };
   } catch (error: any) {
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+// Invitation Request Functions
+
+export async function createInvitationRequest(
+  email: string,
+  message?: string | null
+): Promise<QueryResult> {
+  try {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check if there's already a pending request for this email
+    const existingRequest = await db.table('invitationRequest')
+      .where({ email: normalizedEmail, status: 'pending' })
+      .first();
+
+    if (existingRequest) {
+      return {
+        status: 'error',
+        error: 'You have already requested an invitation. Please wait for an admin to review your request.'
+      };
+    }
+
+    // Check if this email already has an invitation
+    const existingInvitation = await db.table('invitation')
+      .where({ email: normalizedEmail })
+      .whereNull('userId') // Not yet used
+      .first();
+
+    if (existingInvitation) {
+      return {
+        status: 'error',
+        error: 'An invitation has already been created for this email. Please check your inbox.'
+      };
+    }
+
+    // Check if this email is already registered
+    const existingUser = await db.table('user')
+      .where({ email: normalizedEmail })
+      .first();
+
+    if (existingUser) {
+      return {
+        status: 'error',
+        error: 'This email is already registered. Please try logging in instead.'
+      };
+    }
+
+    await db.table('invitationRequest').insert({
+      email: normalizedEmail,
+      message: message?.trim() || null,
+      status: 'pending',
+      createdAt: Logger.now(),
+      resolvedAt: null,
+      resolvedBy: null
+    });
+
+    return {
+      status: 'success'
+    };
+  } catch (error: any) {
+    console.error('Failed to create invitation request:', error.message);
+    return {
+      status: 'error',
+      error: 'Failed to submit your request. Please try again.'
+    };
+  }
+}
+
+export async function getInvitationRequests(
+  status?: 'pending' | 'fulfilled' | 'rejected'
+): Promise<QueryResult<InvitationRequest[]>> {
+  try {
+    let query = db.table('invitationRequest').orderBy('createdAt', 'desc');
+
+    if (status) {
+      query = query.where({ status });
+    }
+
+    const dbResult = await query.select();
+    const requests = marshalToType<InvitationRequest[]>(dbResult);
+
+    return {
+      status: 'success',
+      data: requests
+    };
+  } catch (error: any) {
+    console.error('Failed to get invitation requests:', error.message);
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+export async function getPendingInvitationRequestCount(): Promise<number> {
+  try {
+    const result = await db.table('invitationRequest')
+      .where({ status: 'pending' })
+      .count('invitationRequestId as count')
+      .first() as { count: number } | undefined;
+
+    return Number(result?.count || 0);
+  } catch (error: any) {
+    console.error('Failed to get pending request count:', error.message);
+    return 0;
+  }
+}
+
+export async function fulfillInvitationRequest(
+  invitationRequestId: number,
+  resolvedBy: string
+): Promise<QueryResult> {
+  try {
+    const result = await db.table('invitationRequest')
+      .where({ invitationRequestId })
+      .update({
+        status: 'fulfilled',
+        resolvedAt: Logger.now(),
+        resolvedBy
+      });
+
+    if (result === 0) {
+      throw new Error('Invitation request not found.');
+    }
+
+    return { status: 'success' };
+  } catch (error: any) {
+    console.error('Failed to fulfill invitation request:', error.message);
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+export async function rejectInvitationRequest(
+  invitationRequestId: number,
+  resolvedBy: string
+): Promise<QueryResult> {
+  try {
+    const result = await db.table('invitationRequest')
+      .where({ invitationRequestId })
+      .update({
+        status: 'rejected',
+        resolvedAt: Logger.now(),
+        resolvedBy
+      });
+
+    if (result === 0) {
+      throw new Error('Invitation request not found.');
+    }
+
+    return { status: 'success' };
+  } catch (error: any) {
+    console.error('Failed to reject invitation request:', error.message);
     return {
       status: 'error',
       error: error.message

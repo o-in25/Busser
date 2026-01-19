@@ -51,6 +51,16 @@ export type Invitation = {
   lastSentAt: Date | null;
 }
 
+export type InvitationRequest = {
+  invitationRequestId: number;
+  email: string;
+  message: string | null;
+  status: 'pending' | 'fulfilled' | 'rejected';
+  createdAt: Date;
+  resolvedAt: Date | null;
+  resolvedBy: string | null;
+}
+
 export type RegistrationToken = {
   userId: string;
   iat: number;
