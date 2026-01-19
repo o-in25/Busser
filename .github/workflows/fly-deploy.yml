@@ -27,7 +27,7 @@ jobs:
         uses: chrnorm/deployment-action@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          environment: production
+          environment: Production
           description: Fly.io deployment
 
       # Install flyctl
