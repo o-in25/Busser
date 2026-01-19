@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [sveltekit()],
 	ssr: {
-		noExternal: ['svelte-sonner']
+		noExternal: ['svelte-sonner'],
+		external: ['form-data', 'mailgun.js']
 	}
 });
