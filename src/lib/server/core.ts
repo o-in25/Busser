@@ -172,6 +172,45 @@ export async function seedGallery(): Promise<QueryResult<View.BasicRecipe[]>> {
   }
 }
 
+// Get recipes where user is missing only 1 ingredient
+export async function getAlmostThereRecipes(): Promise<Array<View.BasicRecipe & { missingIngredient: string | null }>> {
+  try {
+    // Find recipes where exactly 1 ingredient is out of stock
+    const result = await db.table('basicrecipe as r')
+      .select('r.*')
+      .whereIn('r.RecipeId', function() {
+        this.select('rs.RecipeId')
+          .from('basicrecipestep as rs')
+          .groupBy('rs.RecipeId')
+          .havingRaw('SUM(CASE WHEN rs.ProductInStockQuantity = 0 THEN 1 ELSE 0 END) = 1')
+          .havingRaw('COUNT(rs.RecipeStepId) > 1');
+      })
+      .limit(6);
+
+    const recipes: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(result);
+
+    // Get missing ingredient for each recipe
+    const recipesWithMissing = await Promise.all(
+      recipes.map(async (recipe) => {
+        const missing = await db.table('basicrecipestep')
+          .select('ProductName')
+          .where('RecipeId', recipe.recipeId)
+          .where('ProductInStockQuantity', 0)
+          .first();
+        return {
+          ...recipe,
+          missingIngredient: missing?.ProductName || null
+        };
+      })
+    );
+
+    return recipesWithMissing;
+  } catch (e) {
+    console.error('Failed to get almost-there recipes:', e);
+    return [];
+  }
+}
+
 export async function getRecipeCategories(): Promise<QueryResult<View.BasicRecipeCategory[]>> {
   try {
     let dbResult = await db.table<View.BasicRecipeCategory>('basicrecipecategory').select();

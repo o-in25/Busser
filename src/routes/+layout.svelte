@@ -35,8 +35,10 @@
 	}
 </script>
 
-<!-- top nav -->
-<Nav {activeUrl} {user} />
+<!-- top nav (only show when logged in) -->
+{#if user}
+	<Nav {activeUrl} {user} />
+{/if}
 
 <!-- loading bar -->
 <ProgressBar color="#ec4899" zIndex={50} />
