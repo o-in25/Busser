@@ -7,9 +7,7 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		adapter: adapter({
-			external: ['form-data', 'mailgun.js']
-		})
+		adapter: adapter()
 	}
 };
 
