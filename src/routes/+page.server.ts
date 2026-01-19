@@ -136,13 +136,13 @@ export const actions: Actions = {
 
     if (!rateLimit.allowed) {
       const minutesRemaining = Math.ceil((rateLimit.retryAfterMs || 0) / 60000);
-      // return fail(429, {
-      //   requestInvite: {
-      //     error: `Too many requests. Please try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''}.`,
-      //     email: '',
-      //     message: ''
-      //   }
-      // });
+      return fail(429, {
+        requestInvite: {
+          error: `Too many requests. Please try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''}.`,
+          email: '',
+          message: ''
+        }
+      });
     }
 
     const formData = await request.formData();
