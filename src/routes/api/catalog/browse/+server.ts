@@ -1,11 +1,10 @@
+import { json } from '@sveltejs/kit';
 import { getCatalog, getSpirits } from '$lib/server/core';
-import type { PageServerLoad } from './$types';
+import type { RequestHandler } from './$types';
 
-const PER_PAGE = 24;
-
-export const load = (async ({ url }) => {
-  // Parse URL parameters
+export const GET: RequestHandler = async ({ url }) => {
   const page = parseInt(url.searchParams.get('page') || '1');
+  const perPage = parseInt(url.searchParams.get('perPage') || '24');
   const searchTerm = url.searchParams.get('search') || '';
   const spiritId = url.searchParams.get('spirit') || '';
   const availableOnly = url.searchParams.get('available') === 'true';
@@ -23,15 +22,18 @@ export const load = (async ({ url }) => {
   }
 
   // Get catalog with pagination
-  let { data, pagination } = await getCatalog(page, PER_PAGE, filter);
+  let { data, pagination } = await getCatalog(page, perPage, filter);
 
-  // Get all spirits for filter chips
-  const spirits = await getSpirits();
-
-  // Filter by spirit category if specified
+  // Filter by spirit category (client-side for now since getCatalog doesn't support it)
   if (spiritId) {
     const spiritIdNum = parseInt(spiritId);
     data = data.filter(recipe => recipe.recipeCategoryId === spiritIdNum);
+    // Adjust pagination for filtered results
+    pagination = {
+      ...pagination,
+      total: data.length,
+      lastPage: 1,
+    };
   }
 
   // Apply sorting
@@ -43,6 +45,7 @@ export const load = (async ({ url }) => {
       data.sort((a, b) => b.recipeName.localeCompare(a.recipeName));
       break;
     case 'newest':
+      // Assuming higher recipeId = newer (common pattern)
       data.sort((a, b) => b.recipeId - a.recipeId);
       break;
     case 'oldest':
@@ -50,21 +53,14 @@ export const load = (async ({ url }) => {
       break;
   }
 
-  // Get total count (unfiltered) for stats
-  const totalCatalog = await getCatalog(1, 1);
-  const totalRecipes = totalCatalog.pagination.total;
-
-  return {
+  return json({
     recipes: data,
-    spirits,
     pagination,
-    totalRecipes,
     filters: {
       search: searchTerm,
       spirit: spiritId,
       available: availableOnly,
       sort,
-      page,
     }
-  };
-}) satisfies PageServerLoad;
+  });
+};
