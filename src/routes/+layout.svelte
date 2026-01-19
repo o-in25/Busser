@@ -39,7 +39,7 @@
 <Nav {activeUrl} {user} />
 
 <!-- loading bar -->
-<ProgressBar class="text-primary-600" />
+<ProgressBar color="#ec4899" zIndex={50} />
 
 <!-- page -->
 <div class="container mx-auto p-4">

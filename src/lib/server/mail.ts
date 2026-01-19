@@ -19,7 +19,7 @@ export class MailClient {
 
   private static domain: string = "busserapp.com";
   private static from: string = "The Busser Team <noreply@busserapp.com>";
-  private static baseUrl: string = 'http://localhost:5173'//APP_URL || 'https://busserapp.com';
+  private static baseUrl: string = APP_URL || 'https://busserapp.com';
   private static mailgun = new Mailgun(FormData);
   private static client = this.mailgun.client({
     username: "api",
