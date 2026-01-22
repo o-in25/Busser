@@ -1,71 +1,19 @@
+// authentication types
 import type { CookieSerializeOptions } from 'cookie';
 
-// export namespace Auth {
-
-// }
+// re-export user types for backwards compatibility
+export * from './user';
 
 export type Session = {
   userId?: string;
-  opts: CookieSerializeOptions & { path: string; };
+  opts: CookieSerializeOptions & { path: string };
 };
-
-export type User = {
-  userId: string;
-  username: string;
-  email: string;
-  lastActivityDate?: Date | string;
-  // user control
-  roles: Role[];
-  permissions: Permission[];
-  verified: number;
-};
-
-export type Permission = {
-  permissionId: string,
-  permissionName: string;
-};
-
-export type Role = {
-  roleId: string,
-  roleName: string;
-};
-
-export type UserRole = {
-  userId: string,
-  roleId: string;
-};
-
-export type RolePermission = {
-  roleId: string,
-  permissionId: string;
-};
-
-export type Invitation = {
-  invitationId: number;
-  userId: string | null;
-  invitationCode: string;
-  email: string | null;
-  createdAt: Date;
-  issuedAt: Date | null;
-  expiresAt: Date | null;
-  lastSentAt: Date | null;
-}
-
-export type InvitationRequest = {
-  invitationRequestId: number;
-  email: string;
-  message: string | null;
-  status: 'pending' | 'fulfilled' | 'rejected';
-  createdAt: Date;
-  resolvedAt: Date | null;
-  resolvedBy: string | null;
-}
 
 export type RegistrationToken = {
   userId: string;
   iat: number;
   exp: number;
-}
+};
 
 export type PasswordResetToken = {
   userId: string;
@@ -73,7 +21,7 @@ export type PasswordResetToken = {
   type: 'password-reset';
   iat: number;
   exp: number;
-}
+};
 
 export type TokenResult<T> = {
   valid: boolean;

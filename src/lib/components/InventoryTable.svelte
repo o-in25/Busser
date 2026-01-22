@@ -52,7 +52,7 @@
 	$: urlParams_$ = $page.url.searchParams;
 
 	const regex = new RegExp(
-		`\\b(${tableData.map(({ recipeCategoryDescription }) => recipeCategoryDescription.toLowerCase()).join('|')})\\b`,
+		`\\b(${tableData.map(({ recipeCategoryDescription }) => recipeCategoryDescription?.toLowerCase() ?? '').filter(Boolean).join('|')})\\b`,
 		'i'
 	);
 
