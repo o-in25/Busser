@@ -19,7 +19,7 @@ const storage = new Storage({
 
 const bucket = storage.bucket(BUCKET || '');
 
-const db = new DbProvider('user_t');
+const db = new DbProvider('user_d');
 
 export type Upload = {
   uploadId?: string;

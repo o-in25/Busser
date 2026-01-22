@@ -7,7 +7,7 @@ import { UserRepository } from './repositories/user.repository';
 import { WorkspaceRepository } from './repositories/workspace.repository';
 
 // singleton instances
-const db = new DbProvider('user_t');
+const db = new DbProvider('user_d');
 const authRepo = new AuthRepository(db);
 const userRepo = new UserRepository(db, authRepo);
 const workspaceRepo = new WorkspaceRepository(db);

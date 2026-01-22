@@ -176,9 +176,9 @@ export class UserRepository extends BaseRepository {
   async getGrants(roleId: string = ''): Promise<QueryResult<Array<Role & Permission>>> {
     try {
       let query = this.db
-        .query('user_t.rolePermission as rp')
-        .join('user_t.permission as p', 'rp.permissionId', 'p.permissionId')
-        .join('user_t.role as r', 'rp.roleId', 'r.roleId');
+        .query('user_d.rolePermission as rp')
+        .join('user_d.permission as p', 'rp.permissionId', 'p.permissionId')
+        .join('user_d.role as r', 'rp.roleId', 'r.roleId');
 
       if (roleId) {
         query = query.where('r.roleId', roleId);

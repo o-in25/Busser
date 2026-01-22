@@ -4,7 +4,7 @@ import moment from "moment";
 import { DbProvider } from "./db";
 
 export class Logger {
-  private static db = new DbProvider('user_t');
+  private static db = new DbProvider('user_d');
 
   static async info(message: string): Promise<void> {
     try {

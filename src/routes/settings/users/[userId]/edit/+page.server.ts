@@ -3,7 +3,7 @@ import type { PageServerLoad } from "./$types";
 import { DbProvider } from "$lib/server/db";
 import { editUser, getUser, roleSelect } from "$lib/server/user";
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
-const db = new DbProvider('user_t');
+const db = new DbProvider('user_d');
 
 
 const load: PageServerLoad = async ({ params, locals }) => {

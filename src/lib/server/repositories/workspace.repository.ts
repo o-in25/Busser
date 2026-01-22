@@ -42,8 +42,8 @@ export class WorkspaceRepository extends BaseRepository {
   async getUserWorkspaces(userId: string): Promise<QueryResult<WorkspaceWithRole[]>> {
     try {
       const dbResult = await this.db
-        .query('user_t.workspace as w')
-        .join('user_t.workspaceUser as wu', 'w.workspaceId', 'wu.workspaceId')
+        .query('user_d.workspace as w')
+        .join('user_d.workspaceUser as wu', 'w.workspaceId', 'wu.workspaceId')
         .where('wu.userId', userId)
         .select(
           'w.workspaceId',

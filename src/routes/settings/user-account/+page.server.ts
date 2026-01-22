@@ -1,4 +1,5 @@
 import { getUser } from '$lib/server/user';
+import { getUserWorkspaces } from '$lib/server/auth';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { StatusCodes } from 'http-status-codes';
@@ -11,5 +12,10 @@ export const load = (async ({ locals }) => {
   }
 
   const user = queryResult.data;
-  return user;
+
+  // load user's workspaces
+  const workspacesResult = await getUserWorkspaces(userId);
+  const workspaces = workspacesResult.status === 'success' ? workspacesResult.data || [] : [];
+
+  return { user, workspaces };
 }) satisfies PageServerLoad;

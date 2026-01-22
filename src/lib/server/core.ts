@@ -15,7 +15,7 @@ export {
 } from './repositories/base.repository';
 
 // singleton instances
-const db = new DbProvider('app_t');
+const db = new DbProvider('app_d');
 const inventoryRepo = new InventoryRepository(db);
 const catalogRepo = new CatalogRepository(db);
 
