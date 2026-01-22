@@ -28,15 +28,16 @@ export class InventoryRepository extends BaseRepository {
   }
 
   async findAll(
+    workspaceId: string,
     currentPage: number,
     perPage: number = 25,
     filter: Partial<Product> & { stockFilter?: string } | null = null
   ): Promise<PaginationResult<Product[]>> {
     try {
-      let query = this.db.table('inventory');
+      let query = this.db.table('inventory').where('workspaceId', workspaceId);
 
       if (filter?.productName) {
-        query = query.where('productName', 'like', `%${filter.productName}%`);
+        query = query.andWhere('productName', 'like', `%${filter.productName}%`);
       }
 
       if (filter?.categoryId) {
@@ -70,11 +71,12 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async findById(productId: number): Promise<Product | null> {
+  async findById(workspaceId: string, productId: number): Promise<Product | null> {
     try {
       let data = await this.db
         .table<Product>('inventory')
         .where('ProductId', productId)
+        .where('workspaceId', workspaceId)
         .select();
 
       let result: Product[] = marshal<Product[]>(data);
@@ -89,13 +91,14 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async create(product: Product, image: File | null = null): Promise<QueryResult<Product>> {
+  async create(workspaceId: string, product: Product, image: File | null = null): Promise<QueryResult<Product>> {
     try {
       let parentRowId: number | undefined;
       let childRowId: number | undefined;
 
       await this.db.query.transaction(async (trx) => {
         const [parentRow] = await trx('product').insert({
+          workspaceId,
           CategoryId: product.categoryId,
           SupplierId: product.supplierId,
           ProductName: product.productName,
@@ -109,6 +112,7 @@ export class InventoryRepository extends BaseRepository {
         const productImageUrl = await this.getImageUrl(image);
         const [childRow] = await trx('productdetail')
           .insert({
+            workspaceId,
             ProductId: parentRowId,
             ProductImageUrl: productImageUrl,
             ProductDescription: product.productDescription,
@@ -128,7 +132,7 @@ export class InventoryRepository extends BaseRepository {
         throw new Error('No rows have been inserted.');
       }
 
-      const newRow = await this.findById(parentRowId);
+      const newRow = await this.findById(workspaceId, parentRowId);
       if (!newRow) {
         throw new Error('Cannot find newly inserted item.');
       }
@@ -141,9 +145,13 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async update(product: Product, image: File | null = null): Promise<QueryResult<Product>> {
+  async update(workspaceId: string, product: Product, image: File | null = null): Promise<QueryResult<Product>> {
     try {
       if (!product?.productId) throw Error('No inventory ID provided.');
+
+      // verify product belongs to workspace
+      const existing = await this.findById(workspaceId, product.productId);
+      if (!existing) throw Error('Product not found in this workspace.');
 
       const signedUrl = await this.getExistingOrNewImageUrl(product.productId, image);
       product = { ...product, productImageUrl: signedUrl, supplierId: 1 };
@@ -152,6 +160,7 @@ export class InventoryRepository extends BaseRepository {
       await this.db.query.transaction(async (trx) => {
         await trx('product')
           .insert({
+            workspaceId,
             ProductId: values.ProductId,
             CategoryId: values.CategoryId,
             SupplierId: values.SupplierId,
@@ -166,6 +175,7 @@ export class InventoryRepository extends BaseRepository {
 
         await trx('productdetail')
           .insert({
+            workspaceId,
             ProductId: values.ProductId,
             ProductImageUrl: values.ProductImageUrl,
             ProductDescription: values.ProductDescription,
@@ -180,7 +190,7 @@ export class InventoryRepository extends BaseRepository {
         await trx.commit();
       });
 
-      const newItem = await this.findById(values.ProductId);
+      const newItem = await this.findById(workspaceId, values.ProductId);
       if (!newItem) {
         throw new Error('Inventory was successfully updated, but the subquery returned no results.');
       }
@@ -192,7 +202,7 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async delete(productId: number): Promise<QueryResult<number>> {
+  async delete(workspaceId: string, productId: number): Promise<QueryResult<number>> {
     try {
       let productImageUrl: string | undefined;
       let rowsDeleted: number | undefined;
@@ -201,6 +211,7 @@ export class InventoryRepository extends BaseRepository {
         let childRow = await trx('productdetail')
           .select('ProductImageUrl')
           .where('ProductId', productId)
+          .where('workspaceId', workspaceId)
           .first();
 
         childRow = marshal(childRow, camelCase);
@@ -211,6 +222,7 @@ export class InventoryRepository extends BaseRepository {
         const rows = await this.db
           .table<Product>('product')
           .where('ProductId', productId)
+          .where('workspaceId', workspaceId)
           .del();
 
         rowsDeleted = rows;
@@ -229,10 +241,11 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async getStats(): Promise<InventoryStats> {
+  async getStats(workspaceId: string): Promise<InventoryStats> {
     try {
       const statsResult = await this.db
         .table('inventory')
+        .where('workspaceId', workspaceId)
         .select(
           this.db.query.raw('COUNT(*) as total'),
           this.db.query.raw('SUM(CASE WHEN productInStockQuantity > 1 THEN 1 ELSE 0 END) as inStock'),
@@ -241,7 +254,7 @@ export class InventoryRepository extends BaseRepository {
         );
 
       const stats = (statsResult[0] as unknown) as { total: number; inStock: number; outOfStock: number; lowStock: number } | undefined;
-      const breakdown = await this.getCategoryBreakdown();
+      const breakdown = await this.getCategoryBreakdown(workspaceId);
 
       return {
         total: Number(stats?.total) || 0,
@@ -256,10 +269,11 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async getCategoryBreakdown(): Promise<CategoryCount[]> {
+  async getCategoryBreakdown(workspaceId: string): Promise<CategoryCount[]> {
     try {
       const result = await this.db
         .table('inventory')
+        .where('workspaceId', workspaceId)
         .select('CategoryId', 'CategoryName')
         .count('* as count')
         .groupBy('CategoryId', 'CategoryName')
@@ -276,13 +290,14 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async getRecipeUsage(productIds: number[]): Promise<Map<number, number>> {
+  async getRecipeUsage(workspaceId: string, productIds: number[]): Promise<Map<number, number>> {
     try {
       if (productIds.length === 0) return new Map();
 
       const result = await this.db
         .table('basicrecipestep')
         .select('ProductId')
+        .where('workspaceId', workspaceId)
         .count('* as recipeCount')
         .whereIn('ProductId', productIds)
         .groupBy('ProductId');
@@ -300,9 +315,9 @@ export class InventoryRepository extends BaseRepository {
   }
 
   // select options for dropdowns
-  async getProductOptions(): Promise<SelectOption[]> {
+  async getProductOptions(workspaceId: string): Promise<SelectOption[]> {
     try {
-      let result = await this.db.table('product').select('ProductId', 'ProductName');
+      let result = await this.db.table('product').where('workspaceId', workspaceId).select('ProductId', 'ProductName');
       let products: Product[] = marshal<Product[]>(result);
       return products.map(({ productId, productName }) => ({
         name: productName,
@@ -314,9 +329,9 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async getCategoryOptions(): Promise<SelectOption[]> {
+  async getCategoryOptions(workspaceId: string): Promise<SelectOption[]> {
     try {
-      let result = await this.db.table('category').select('CategoryId', 'CategoryName');
+      let result = await this.db.table('category').where('workspaceId', workspaceId).select('CategoryId', 'CategoryName');
       let categories: Category[] = marshal<Category[]>(result);
       return categories.map(({ categoryId, categoryName }) => ({
         name: categoryName,
@@ -329,11 +344,12 @@ export class InventoryRepository extends BaseRepository {
   }
 
   // category CRUD
-  async findCategoryById(categoryId: number): Promise<QueryResult<Table.Category>> {
+  async findCategoryById(workspaceId: string, categoryId: number): Promise<QueryResult<Table.Category>> {
     try {
       const dbResult = await this.db
-        .table<Table.Category>('category')
-        .where({ categoryId })
+        .table('category')
+        .where('categoryId', categoryId)
+        .where('workspaceId', workspaceId)
         .first();
 
       if (!dbResult) throw new Error('No category found for given ID.');
@@ -346,15 +362,13 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async createCategory(categoryName: string, categoryDescription: string | null): Promise<QueryResult<number>> {
+  async createCategory(workspaceId: string, categoryName: string, categoryDescription: string | null): Promise<QueryResult<number>> {
     try {
-      let newCategory: any = {
-        categoryName: titleCase(categoryName.trim()),
-        categoryDescription,
-      };
-      newCategory = marshal(newCategory, pascalCase);
-
-      const [categoryId] = await this.db.table<Table.Category>('category').insert(newCategory);
+      const [categoryId] = await this.db.table('category').insert({
+        workspaceId,
+        CategoryName: titleCase(categoryName.trim()),
+        CategoryDescription: categoryDescription,
+      });
       return { status: 'success', data: categoryId };
     } catch (error: any) {
       console.error(error);
@@ -363,27 +377,39 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
-  async updateCategory(category: Table.Category): Promise<QueryResult<Table.Category>> {
+  async updateCategory(workspaceId: string, category: Table.Category): Promise<QueryResult<Table.Category>> {
     try {
       let dbResult: any;
       let key = category.categoryId;
       const { categoryName, categoryDescription } = category;
 
       if (!key) {
-        [dbResult] = await this.db.table<Table.Category>('category').insert({ categoryName, categoryDescription });
+        [dbResult] = await this.db.table('category').insert({
+          workspaceId,
+          CategoryName: categoryName,
+          CategoryDescription: categoryDescription,
+        });
         if (!dbResult) throw new Error('Could not create new category.');
         key = dbResult;
       } else {
+        // verify category belongs to workspace
+        const existing = await this.findCategoryById(workspaceId, key);
+        if (existing.status === 'error') throw new Error('Category not found in this workspace.');
+
         dbResult = await this.db
-          .table<Table.Category>('category')
-          .update({ categoryName, categoryDescription })
-          .where('categoryId', key);
+          .table('category')
+          .update({ CategoryName: categoryName, CategoryDescription: categoryDescription })
+          .where('categoryId', key)
+          .where('workspaceId', workspaceId);
         if (dbResult < 1) {
           throw new Error('Could not update category.');
         }
       }
 
-      dbResult = await this.db.table<Table.Category>('category').where('categoryId', key).select();
+      dbResult = await this.db.table('category')
+        .where('categoryId', key)
+        .where('workspaceId', workspaceId)
+        .select();
       const newCategory = marshalToType<Table.Category>(dbResult);
 
       return { status: 'success', data: newCategory };

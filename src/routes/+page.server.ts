@@ -6,6 +6,9 @@ import type { Actions, PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import type { View } from '$lib/types';
 
+// Default workspace for global/shared catalog data
+const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
+
 // Rate limit config: 3 requests per hour per IP
 const INVITE_REQUEST_RATE_LIMIT = {
   maxRequests: 3,
@@ -16,10 +19,10 @@ export const load = (async ({ locals }) => {
   const user = locals.user;
 
   // Get spirits for filter chips
-  const baseSpiritsQuery = await getRecipeCategories();
+  const baseSpiritsQuery = await getRecipeCategories(GLOBAL_WORKSPACE_ID);
 
   // Get available recipes (ready to make)
-  const gallerySeedQuery = await seedGallery();
+  const gallerySeedQuery = await seedGallery(GLOBAL_WORKSPACE_ID);
 
   if (!('data' in baseSpiritsQuery) || !('data' in gallerySeedQuery)) {
     return error(StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -46,15 +49,15 @@ export const load = (async ({ locals }) => {
 
   if (user) {
     // Get inventory count
-    const inventoryResult = await getInventory(1, 1);
+    const inventoryResult = await getInventory(GLOBAL_WORKSPACE_ID, 1, 1);
     const inventoryCount = inventoryResult.pagination.total;
 
     // Get total catalog count
-    const catalogResult = await getCatalog(1, 1);
+    const catalogResult = await getCatalog(GLOBAL_WORKSPACE_ID, 1, 1);
     const totalRecipes = catalogResult.pagination.total;
 
     // Get "almost there" recipes
-    const almostThereRecipes = await getAlmostThereRecipes();
+    const almostThereRecipes = await getAlmostThereRecipes(GLOBAL_WORKSPACE_ID);
 
     // Get all spirits with images for the dashboard
     const allSpirits = await getSpirits();
@@ -102,14 +105,14 @@ export const load = (async ({ locals }) => {
 
   if (!user) {
     // Get total catalog count for stats
-    const catalogResult = await getCatalog(1, 1);
+    const catalogResult = await getCatalog(GLOBAL_WORKSPACE_ID, 1, 1);
     const totalRecipes = catalogResult.pagination.total;
 
     // Get spirits for stats
     const allSpirits = await getSpirits();
 
     // Get featured recipes (ones with images)
-    const featuredResult = await getCatalog(1, 6);
+    const featuredResult = await getCatalog(GLOBAL_WORKSPACE_ID, 1, 6);
     const featuredRecipes = featuredResult.data.filter(r => r.recipeImageUrl).slice(0, 4);
 
     landingData = {

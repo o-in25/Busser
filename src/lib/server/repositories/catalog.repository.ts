@@ -26,12 +26,13 @@ export class CatalogRepository extends BaseRepository {
   }
 
   async findAll(
+    workspaceId: string,
     currentPage: number,
     perPage: number = 25,
     filter: Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep> | null = null
   ): Promise<PaginationResult<View.BasicRecipe[]>> {
     try {
-      let query = this.db.table('basicrecipe as r').select();
+      let query = this.db.table('basicrecipe as r').select().where('r.workspaceId', workspaceId);
 
       if (filter?.productInStockQuantity) {
         query = query.whereIn(
@@ -39,6 +40,7 @@ export class CatalogRepository extends BaseRepository {
           this.db
             .table('basicrecipestep as rs')
             .select('rs.RecipeId')
+            .where('rs.workspaceId', workspaceId)
             .groupBy('rs.RecipeId')
             .having(
               this.db.query.raw(
@@ -64,15 +66,16 @@ export class CatalogRepository extends BaseRepository {
     }
   }
 
-  async findById(recipeId: string): Promise<QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] }>> {
+  async findById(workspaceId: string, recipeId: string): Promise<QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] }>> {
     try {
       let recipe: View.BasicRecipe | undefined;
       let recipeSteps: View.BasicRecipeStep[] | undefined;
 
       await this.db.query.transaction(async (trx) => {
-        let [dbResult] = await trx('basicrecipe').select().where({ recipeId });
+        let [dbResult] = await trx('basicrecipe').select().where({ recipeId, workspaceId });
         recipe = marshal<View.BasicRecipe>(dbResult, camelCase);
-        dbResult = await trx('basicrecipestep').select().where({ recipeId });
+        if (!recipe) throw Error('Recipe not found in this workspace.');
+        dbResult = await trx('basicrecipestep').select().where({ recipeId, workspaceId });
         recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
       });
 
@@ -88,10 +91,10 @@ export class CatalogRepository extends BaseRepository {
     }
   }
 
-  async getAvailableRecipes(): Promise<QueryResult<View.BasicRecipe[]>> {
+  async getAvailableRecipes(workspaceId: string): Promise<QueryResult<View.BasicRecipe[]>> {
     try {
-      let dbResult = await this.db.table('basicrecipe').whereIn('RecipeId', function () {
-        this.select('RecipeId').from('availablerecipes').groupBy('RecipeId');
+      let dbResult = await this.db.table('basicrecipe').where('WorkspaceId', workspaceId).whereIn('RecipeId', function () {
+        this.select('RecipeId').from('availablerecipes').where('WorkspaceId', workspaceId).groupBy('RecipeId');
       });
       const data: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(dbResult);
       return { status: 'success', data };
@@ -101,20 +104,22 @@ export class CatalogRepository extends BaseRepository {
     }
   }
 
-  async getAlmostThereRecipes(): Promise<Array<View.BasicRecipe & { missingIngredient: string | null }>> {
+  async getAlmostThereRecipes(workspaceId: string): Promise<Array<View.BasicRecipe & { missingIngredient: string | null }>> {
     try {
       const result = await this.db
         .table('basicrecipe as r')
         .select('r.*')
+        .where('r.workspaceId', workspaceId)
         .whereIn('r.RecipeId', function () {
           this.select('rs.RecipeId')
             .from('basicrecipestep as rs')
+            // .where('rs.workspaceId', workspaceId)
             .groupBy('rs.RecipeId')
             .havingRaw('SUM(CASE WHEN rs.ProductInStockQuantity = 0 THEN 1 ELSE 0 END) = 1')
             .havingRaw('COUNT(rs.RecipeStepId) > 1');
         })
         .limit(6);
-
+        console.log('uasd')
       const recipes: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(result);
 
       const recipesWithMissing = await Promise.all(
@@ -123,6 +128,7 @@ export class CatalogRepository extends BaseRepository {
             .table('basicrecipestep')
             .select('ProductName')
             .where('RecipeId', recipe.recipeId)
+            .where('WorkspaceId', workspaceId)
             .where('ProductInStockQuantity', 0)
             .first();
           return { ...recipe, missingIngredient: missing?.ProductName || null };
@@ -136,9 +142,9 @@ export class CatalogRepository extends BaseRepository {
     }
   }
 
-  async getRecipesByCategory(recipeCategoryId: number | string | null = null): Promise<QueryResult<BasicRecipe[]>> {
+  async getRecipesByCategory(workspaceId: string, recipeCategoryId: number | string | null = null): Promise<QueryResult<BasicRecipe[]>> {
     try {
-      let query = this.db.table<BasicRecipe>('basicrecipe');
+      let query = this.db.table<BasicRecipe>('basicrecipe').where('workspaceId', workspaceId);
       if (recipeCategoryId) {
         query.where('recipeCategoryId', recipeCategoryId);
       }
@@ -152,7 +158,7 @@ export class CatalogRepository extends BaseRepository {
     }
   }
 
-  async getCategories(): Promise<QueryResult<View.BasicRecipeCategory[]>> {
+  async getCategories(workspaceId: string): Promise<QueryResult<View.BasicRecipeCategory[]>> {
     try {
       let dbResult = await this.db.table<View.BasicRecipeCategory>('basicrecipecategory').select();
       const data: View.BasicRecipeCategory[] = marshalToType<View.BasicRecipeCategory[]>(dbResult);
@@ -199,6 +205,7 @@ export class CatalogRepository extends BaseRepository {
   }
 
   async save(
+    workspaceId: string,
     recipe: QueryRequest.Recipe,
     recipeSteps: QueryRequest.RecipeSteps[],
     file: File
@@ -222,6 +229,7 @@ export class CatalogRepository extends BaseRepository {
         let oldRecipe = await trx('recipe')
           .select('RecipeDescriptionId', 'RecipeCategoryId')
           .where('RecipeId', recipe.recipeId || -1)
+          .where('workspaceId', workspaceId)
           .first();
 
         oldRecipe = marshal(oldRecipe, camelCase);
@@ -229,6 +237,7 @@ export class CatalogRepository extends BaseRepository {
         // create new recipe
         if (!oldRecipe) {
           [dbResult] = await trx('recipedescription').insert({
+            workspaceId,
             RecipeDescription: recipe.recipeDescription,
             RecipeDescriptionImageUrl: null,
             RecipeSweetnessRating: recipe.recipeSweetnessRating,
@@ -241,6 +250,7 @@ export class CatalogRepository extends BaseRepository {
           keys.recipeDescriptionId = dbResult;
 
           [dbResult] = await trx('recipe').insert({
+            workspaceId,
             RecipeCategoryId: recipe.recipeCategoryId,
             RecipeDescriptionId: keys.recipeDescriptionId,
             RecipeName: recipe.recipeName,
@@ -302,6 +312,7 @@ export class CatalogRepository extends BaseRepository {
         // insert new steps
         let steps: Table.RecipeStep[] = recipeSteps.map(
           ({ productId, productIdQuantityInMilliliters, productIdQuantityUnit, recipeStepDescription }) => ({
+            workspaceId,
             recipeId: keys.recipeId || 0,
             productId,
             productIdQuantityInMilliliters,
@@ -313,10 +324,10 @@ export class CatalogRepository extends BaseRepository {
         dbResult = await trx('recipestep').insert(steps).onConflict('RecipeId').merge();
 
         // fetch updated data
-        dbResult = await trx('basicrecipe').select().where({ recipeId: keys.recipeId }).first();
+        dbResult = await trx('basicrecipe').select().where({ recipeId: keys.recipeId, workspaceId }).first();
         newRecipe.recipe = marshalToType<View.BasicRecipe>(dbResult, camelCase);
 
-        dbResult = await trx('basicrecipestep').select().where({ recipeId: keys.recipeId });
+        dbResult = await trx('basicrecipestep').select().where({ recipeId: keys.recipeId, workspaceId });
         newRecipe.recipeSteps = marshalToType<View.BasicRecipeStep[]>(dbResult, camelCase);
       });
 
@@ -328,20 +339,22 @@ export class CatalogRepository extends BaseRepository {
     }
   }
 
-  async delete(recipeId: number): Promise<QueryResult<number>> {
+  async delete(workspaceId: string, recipeId: number): Promise<QueryResult<number>> {
     try {
       const { deletedRows, recipeImageUrl } = await this.db.query.transaction(async (trx) => {
         const dbResult = await trx('recipe')
           .select('RecipeDescriptionId', 'RecipeImageUrl')
-          .where('RecipeId', recipeId);
+          .where('RecipeId', recipeId)
+          .where('workspaceId', workspaceId);
 
         const [parentRow] = marshal<any[]>(dbResult, camelCase);
-        if (!parentRow) throw new Error('Recipe not found.');
+        if (!parentRow) throw new Error('Recipe not found in this workspace.');
 
         const { recipeDescriptionId, recipeImageUrl } = parentRow;
 
         const deletedRows = await trx('recipedescription')
           .where('RecipeDescriptionId', recipeDescriptionId)
+          .where('workspaceId', workspaceId)
           .del();
 
         if (deletedRows < 1) throw new Error('Could not delete recipe because no rows were affected.');

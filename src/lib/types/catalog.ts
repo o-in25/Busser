@@ -186,6 +186,7 @@ export namespace View {
     recipeDrynessRating: number;
     recipeStrengthRating: number;
     recipeVersatilityRating: number;
+    workspaceId: string;
   };
 
   export type BasicRecipeStep = {

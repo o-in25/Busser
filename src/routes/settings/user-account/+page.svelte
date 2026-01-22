@@ -19,36 +19,10 @@
 		Building2,
 		Users,
 		Crown,
-		Circle,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { toast } from 'svelte-sonner';
 
 	export let data: PageData;
-
-  console.log(data);
-	// workspace selection - default to first workspace
-	let selectedWorkspaceId: string | null = null;
-	let initialized = false;
-	$: hasMultipleWorkspaces = (data.workspaces?.length ?? 0) > 1;
-	$: if (!initialized && data.workspaces?.length) {
-		selectedWorkspaceId = data.workspaces[0].workspaceId;
-		initialized = true;
-	}
-
-	const selectWorkspace = async (workspaceId: string, workspaceName: string) => {
-		if (!hasMultipleWorkspaces) return;
-		if (selectedWorkspaceId === workspaceId) return;
-
-		selectedWorkspaceId = workspaceId;
-		toast.success(`Switched to ${workspaceName}`);
-
-		// small delay for toast to be visible before navigation
-		setTimeout(() => {
-			goto(`/${workspaceId}/catalog`);
-		}, 500);
-	};
 
 	const normalizePermissions = (permissions: string[]): Record<string, PermissionGrants> => {
 		const validGrants = ['view', 'add', 'edit', 'delete'];
@@ -260,45 +234,18 @@
 				Workspaces
 			</Card.Title>
 			<Card.Description>
-				{#if hasMultipleWorkspaces}
-					Select a workspace to switch to
-				{:else}
-					Your active workspace
-				{/if}
+				Collections you have access to
 			</Card.Description>
 		</Card.Header>
 		<Card.Content>
 			{#if data.workspaces && data.workspaces.length > 0}
 				<div class="space-y-3">
 					{#each data.workspaces as workspace}
-						{@const isSelected = selectedWorkspaceId === workspace.workspaceId}
-						{@const isDisabled = !hasMultipleWorkspaces}
-						<button
-							type="button"
-							disabled={isDisabled}
-							on:click={() => selectWorkspace(workspace.workspaceId, workspace.workspaceName)}
-							class={cn(
-								"w-full flex items-center justify-between p-4 rounded-lg transition-colors text-left",
-								isSelected
-									? "bg-primary/10 ring-2 ring-primary"
-									: "bg-muted/30",
-								hasMultipleWorkspaces && !isSelected && "hover:bg-muted/50 cursor-pointer",
-								isDisabled && "cursor-default"
-							)}
+						<a
+							href="/{workspace.workspaceId}/catalog"
+							class="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors group"
 						>
 							<div class="flex items-center gap-3">
-								<!-- Radio indicator -->
-								<div class={cn(
-									"w-5 h-5 rounded-full border-2 flex items-center justify-center",
-									isSelected
-										? "border-primary bg-primary"
-										: "border-muted-foreground/30",
-									isDisabled && !isSelected && "opacity-50"
-								)}>
-									{#if isSelected}
-										<Circle class="h-2 w-2 fill-primary-foreground text-primary-foreground" />
-									{/if}
-								</div>
 								<div class="p-2 rounded-lg {workspace.workspaceType === 'personal' ? 'bg-blue-500/10' : 'bg-purple-500/10'}">
 									{#if workspace.workspaceType === 'personal'}
 										<User class="h-4 w-4 text-blue-500" />
@@ -311,13 +258,16 @@
 									<div class="text-sm text-muted-foreground capitalize">{workspace.workspaceType}</div>
 								</div>
 							</div>
-							<Badge variant="secondary" class="capitalize">
-								{#if workspace.workspaceRole === 'owner'}
-									<Crown class="h-3 w-3 mr-1" />
-								{/if}
-								{workspace.workspaceRole}
-							</Badge>
-						</button>
+							<div class="flex items-center gap-2">
+								<Badge variant="secondary" class="capitalize">
+									{#if workspace.workspaceRole === 'owner'}
+										<Crown class="h-3 w-3 mr-1" />
+									{/if}
+									{workspace.workspaceRole}
+								</Badge>
+								<ArrowRight class="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+							</div>
+						</a>
 					{/each}
 				</div>
 			{:else}
