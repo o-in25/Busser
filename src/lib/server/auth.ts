@@ -4,14 +4,16 @@
 import { DbProvider } from './db';
 import { AuthRepository } from './repositories/auth.repository';
 import { UserRepository } from './repositories/user.repository';
+import { WorkspaceRepository } from './repositories/workspace.repository';
 
 // singleton instances
 const db = new DbProvider('user_t');
 const authRepo = new AuthRepository(db);
 const userRepo = new UserRepository(db, authRepo);
+const workspaceRepo = new WorkspaceRepository(db);
 
 // export repositories for direct access
-export { authRepo, userRepo };
+export { authRepo, userRepo, workspaceRepo };
 
 // auth functions (delegate to repository)
 export const verifyToken = authRepo.verifyToken.bind(authRepo);
@@ -39,3 +41,9 @@ export const getInvitationRequests = userRepo.getInvitationRequests.bind(userRep
 export const getPendingInvitationRequestCount = userRepo.getPendingInvitationRequestCount.bind(userRepo);
 export const fulfillInvitationRequest = userRepo.fulfillInvitationRequest.bind(userRepo);
 export const rejectInvitationRequest = userRepo.rejectInvitationRequest.bind(userRepo);
+
+// workspace functions (delegate to workspace repository)
+export const hasWorkspaceAccess = workspaceRepo.hasWorkspaceAccess.bind(workspaceRepo);
+export const getUserWorkspaces = workspaceRepo.getUserWorkspaces.bind(workspaceRepo);
+export const getWorkspace = workspaceRepo.getWorkspace.bind(workspaceRepo);
+export const createWorkspace = workspaceRepo.createWorkspace.bind(workspaceRepo);
