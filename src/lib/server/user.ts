@@ -24,3 +24,7 @@ export const verifyUser = userRepo.verify.bind(userRepo);
 export const resendVerificationEmail = userRepo.resendVerificationEmail.bind(userRepo);
 export const resendVerificationEmailByEmail = userRepo.resendVerificationEmailByEmail.bind(userRepo);
 export const requestPasswordReset = userRepo.requestPasswordReset.bind(userRepo);
+
+// preferred workspace (delegate to repository)
+export const getPreferredWorkspaceId = userRepo.getPreferredWorkspaceId.bind(userRepo);
+export const setPreferredWorkspaceId = userRepo.setPreferredWorkspaceId.bind(userRepo);

@@ -588,6 +588,43 @@ export class UserRepository extends BaseRepository {
     }
   }
 
+  // Preferred workspace management
+  async getPreferredWorkspaceId(userId: string): Promise<string | null> {
+    try {
+      const dbResult = await this.db
+        .table('user')
+        .select('preferredWorkspaceId')
+        .where({ userId })
+        .first();
+
+      if (!dbResult) return null;
+
+      const result = marshalToType<{ preferredWorkspaceId: string | null }>(dbResult);
+      return result.preferredWorkspaceId;
+    } catch (error: any) {
+      console.error('Error getting preferred workspace:', error.message);
+      return null;
+    }
+  }
+
+  async setPreferredWorkspaceId(userId: string, workspaceId: string | null): Promise<QueryResult> {
+    try {
+      const rowsUpdated = await this.db
+        .table('user')
+        .where({ userId })
+        .update({ preferredWorkspaceId: workspaceId });
+
+      if (rowsUpdated === 0) {
+        return { status: 'error', error: 'User not found.' };
+      }
+
+      return { status: 'success' };
+    } catch (error: any) {
+      console.error('Error setting preferred workspace:', error.message);
+      return { status: 'error', error: 'Failed to set preferred workspace.' };
+    }
+  }
+
   async requestPasswordReset(email: string): Promise<QueryResult> {
     try {
       const dbResult = await this.db

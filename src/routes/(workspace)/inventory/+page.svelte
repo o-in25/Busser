@@ -33,6 +33,9 @@
 
 	const permissions: string[] = getContext('permissions') || [];
 
+	// Base path for inventory routes
+	const basePath = '/inventory';
+
 	// Local state (Svelte 5 runes)
 	let viewMode = $state<'grid' | 'list' | 'table'>('table');
 	let searchInput = $state(data.filters?.search || '');
@@ -106,7 +109,7 @@
 		if (category && category !== 'all') params.set('categoryId', String(category));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
 
-		return `/inventory?${params.toString()}`;
+		return `${basePath}?${params.toString()}`;
 	}
 
 	// Apply filters (navigate with new params)
@@ -152,7 +155,7 @@
 		searchInput = '';
 		selectedCategory = 'all';
 		stockFilter = 'all';
-		goto('/inventory?page=1');
+		goto(`${basePath}?page=1`);
 	}
 
 	// Stock filter options
@@ -167,7 +170,7 @@
 	function navigatePage(pageNum: number) {
 		const params = new URLSearchParams($page.url.searchParams);
 		params.set('page', String(pageNum));
-		goto(`/inventory?${params.toString()}`);
+		goto(`${basePath}?${params.toString()}`);
 	}
 
 	// Generate page links
@@ -307,7 +310,7 @@
 
 		<!-- Add Product Button -->
 		{#if permissions.includes('add_inventory')}
-			<a href="/inventory/add" class={cn(buttonVariants(), "shrink-0")}>
+			<a href="{basePath}/add" class={cn(buttonVariants(), "shrink-0")}>
 				<Plus class="h-4 w-4 sm:mr-2" />
 				<span class="hidden sm:inline">Add Product</span>
 			</a>
@@ -357,7 +360,7 @@
 					</Button>
 				{/if}
 				{#if permissions.includes('add_inventory')}
-					<a href="/inventory/add" class={buttonVariants()}>
+					<a href="{basePath}/add" class={buttonVariants()}>
 						<Plus class="h-4 w-4 mr-2" />
 						Add Product
 					</a>
@@ -370,7 +373,6 @@
 	<InventoryTable
 		products={data.data}
 		paginationData={data.pagination}
-		tableData={data.tableData}
 		recipeUsage={data.recipeUsage}
 		onRowClick={handleCardClick}
 	/>
@@ -463,6 +465,5 @@
 	bind:open={drawerOpen}
 	product={selectedProduct}
 	recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
-	tableData={data.tableData}
 	onStockChange={handleStockChange}
 />

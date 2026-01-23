@@ -1,9 +1,9 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { getWorkspace } from '$lib/server/auth';
 import type { LayoutServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
-export const load: LayoutServerLoad = async ({ locals, params }) => {
+export const load: LayoutServerLoad = async ({ locals }) => {
   if (!locals.user) {
     error(StatusCodes.UNAUTHORIZED, {
       reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
@@ -12,7 +12,13 @@ export const load: LayoutServerLoad = async ({ locals, params }) => {
     });
   }
 
-  const { workspaceId } = params;
+  // Get workspace from locals (set by hooks)
+  const workspaceId = locals.activeWorkspaceId;
+
+  if (!workspaceId) {
+    // Should be handled by hooks, but just in case
+    redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace-selector');
+  }
 
   const result = await getWorkspace(locals.user.userId, workspaceId);
 

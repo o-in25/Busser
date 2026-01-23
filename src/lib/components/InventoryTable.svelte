@@ -18,7 +18,7 @@
 
 	export let products: Product[];
 	export let paginationData: PaginationData;
-	export let tableData: Spirit[];
+	export let tableData: Spirit[] = [];
 	export let recipeUsage: Record<number, number> = {};
 	export let onRowClick: ((product: Product) => void) | null = null;
 

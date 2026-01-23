@@ -1,15 +1,13 @@
-import {
-  getInventory,
-  getSpirits,
-  getInventoryStats,
-  getRecipeUsageByProduct,
-  getProductCategories
-} from '$lib/server/core';
+import { inventoryRepo } from '$lib/server/core';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { StatusCodes } from 'http-status-codes';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, parent }) => {
+  // get workspace from parent layout
+  const { workspace } = await parent();
+  const workspaceId = workspace.workspaceId;
+
   // redirect to page 1
   if(!url.searchParams.size) {
     throw redirect(StatusCodes.TEMPORARY_REDIRECT, url.pathname.concat('?', 'page=1'));
@@ -35,18 +33,17 @@ export const load: PageServerLoad = async ({ url }) => {
   }
 
   // Fetch all data in parallel
-  const [inventoryResult, tableData, stats, categories] = await Promise.all([
-    getInventory(page, 20, Object.keys(filter).length > 0 ? filter : null),
-    getSpirits(),
-    getInventoryStats(),
-    getProductCategories()
+  const [inventoryResult, stats, categories] = await Promise.all([
+    inventoryRepo.findAll(workspaceId, page, 20, Object.keys(filter).length > 0 ? filter : null),
+    inventoryRepo.getStats(workspaceId),
+    inventoryRepo.getCategoryBreakdown(workspaceId)
   ]);
 
   const { data, pagination } = inventoryResult;
 
   // Get recipe usage for the current page's products
   const productIds = data.map(p => p.productId).filter((id): id is number => id !== null);
-  const recipeUsageMap = await getRecipeUsageByProduct(productIds);
+  const recipeUsageMap = await inventoryRepo.getRecipeUsage(workspaceId, productIds);
 
   // Convert Map to plain object for serialization
   const recipeUsage: Record<number, number> = {};
@@ -66,7 +63,6 @@ export const load: PageServerLoad = async ({ url }) => {
   return {
     data,
     pagination,
-    tableData,
     stats,
     categories,
     recipeUsage,

@@ -10,6 +10,9 @@
 
 	export let data: LayoutData;
 
+	// Auth routes where we don't show the navbar
+	const authRoutes = ['/login', '/logout', '/signup', '/verify-email', '/forgot-password', '/reset-password', '/workspace-selector'];
+
 	const getActiveUrl = (url: string) => {
 		const routes: Record<string, string> = {
 			home: '/',
@@ -23,8 +26,13 @@
 		return routes[activeUrl];
 	};
 
+	const isAuthRoute = (pathname: string) => {
+		return authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
+	};
+
 	$: activeUrl = getActiveUrl($page.url.pathname);
 	$: user = data.user;
+	$: showNav = user && !isAuthRoute($page.url.pathname);
 
 	$: {
 		setContext(
@@ -35,8 +43,8 @@
 	}
 </script>
 
-<!-- top nav (only show when logged in) -->
-{#if user}
+<!-- top nav (only show when logged in and not on auth routes) -->
+{#if showNav}
 	<Nav {activeUrl} {user} />
 {/if}
 

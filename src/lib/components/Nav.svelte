@@ -30,6 +30,7 @@
 	async function logout() {
 		const response = await fetch('/logout', {
 			method: 'POST',
+			body: new FormData(),
 		});
 		if (response.ok) {
 			await invalidateAll();
