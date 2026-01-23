@@ -1,4 +1,4 @@
-import { getCatalog, getRecipeCategories, seedGallery, getInventory, getSpirits, getAlmostThereRecipes } from '$lib/server/core';
+import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { createInvitationRequest } from '$lib/server/auth';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import { error, fail } from '@sveltejs/kit';
@@ -6,7 +6,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import type { View } from '$lib/types';
 
-// Default workspace for global/shared catalog data
+// Global workspace for unauthenticated landing page showcase
 const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
 // Rate limit config: 3 requests per hour per IP
@@ -17,12 +17,14 @@ const INVITE_REQUEST_RATE_LIMIT = {
 
 export const load = (async ({ locals }) => {
   const user = locals.user;
+  // Use user's active workspace for authenticated users, global for landing page
+  const workspaceId = user && locals.activeWorkspaceId ? locals.activeWorkspaceId : GLOBAL_WORKSPACE_ID;
 
   // Get spirits for filter chips
-  const baseSpiritsQuery = await getRecipeCategories(GLOBAL_WORKSPACE_ID);
+  const baseSpiritsQuery = await catalogRepo.getCategories(workspaceId);
 
   // Get available recipes (ready to make)
-  const gallerySeedQuery = await seedGallery(GLOBAL_WORKSPACE_ID);
+  const gallerySeedQuery = await catalogRepo.getAvailableRecipes(workspaceId);
 
   if (!('data' in baseSpiritsQuery) || !('data' in gallerySeedQuery)) {
     return error(StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -41,26 +43,26 @@ export const load = (async ({ locals }) => {
     totalRecipes: number;
     availableCount: number;
     almostThereRecipes: Array<View.BasicRecipe & { missingIngredient: string | null }>;
-    allSpirits: Awaited<ReturnType<typeof getSpirits>>;
+    allSpirits: Awaited<ReturnType<typeof catalogRepo.getSpirits>>;
     spiritCounts: Record<number, number>;
-    topSpirit: Awaited<ReturnType<typeof getSpirits>>[0] | null;
+    topSpirit: Awaited<ReturnType<typeof catalogRepo.getSpirits>>[0] | null;
     userName: string;
   } | null = null;
 
-  if (user) {
+  if (user && locals.activeWorkspaceId) {
     // Get inventory count
-    const inventoryResult = await getInventory(GLOBAL_WORKSPACE_ID, 1, 1);
+    const inventoryResult = await inventoryRepo.findAll(workspaceId, 1, 1);
     const inventoryCount = inventoryResult.pagination.total;
 
     // Get total catalog count
-    const catalogResult = await getCatalog(GLOBAL_WORKSPACE_ID, 1, 1);
+    const catalogResult = await catalogRepo.findAll(workspaceId, 1, 1);
     const totalRecipes = catalogResult.pagination.total;
 
     // Get "almost there" recipes
-    const almostThereRecipes = await getAlmostThereRecipes(GLOBAL_WORKSPACE_ID);
+    const almostThereRecipes = await catalogRepo.getAlmostThereRecipes(workspaceId);
 
     // Get all spirits with images for the dashboard
-    const allSpirits = await getSpirits();
+    const allSpirits = await catalogRepo.getSpirits();
 
     // Calculate recipes per spirit for the available recipes
     const spiritCounts: Record<number, number> = {};
@@ -104,15 +106,15 @@ export const load = (async ({ locals }) => {
   } | null = null;
 
   if (!user) {
-    // Get total catalog count for stats
-    const catalogResult = await getCatalog(GLOBAL_WORKSPACE_ID, 1, 1);
+    // Get total catalog count for stats (use global workspace for landing page)
+    const catalogResult = await catalogRepo.findAll(GLOBAL_WORKSPACE_ID, 1, 1);
     const totalRecipes = catalogResult.pagination.total;
 
     // Get spirits for stats
-    const allSpirits = await getSpirits();
+    const allSpirits = await catalogRepo.getSpirits();
 
     // Get featured recipes (ones with images)
-    const featuredResult = await getCatalog(GLOBAL_WORKSPACE_ID, 1, 6);
+    const featuredResult = await catalogRepo.findAll(GLOBAL_WORKSPACE_ID, 1, 6);
     const featuredRecipes = featuredResult.data.filter(r => r.recipeImageUrl).slice(0, 4);
 
     landingData = {

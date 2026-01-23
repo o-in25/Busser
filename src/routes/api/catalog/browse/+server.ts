@@ -1,8 +1,18 @@
-import { json } from '@sveltejs/kit';
-import { getCatalog, getSpirits } from '$lib/server/core';
+import { json, error } from '@sveltejs/kit';
+import { catalogRepo } from '$lib/server/core';
 import type { RequestHandler } from './$types';
+import { StatusCodes } from 'http-status-codes';
 
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ url, locals }) => {
+  const workspaceId = locals.activeWorkspaceId;
+  if (!workspaceId) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: 'Unauthorized',
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'Workspace context required'
+    });
+  }
+
   const page = parseInt(url.searchParams.get('page') || '1');
   const perPage = parseInt(url.searchParams.get('perPage') || '24');
   const searchTerm = url.searchParams.get('search') || '';
@@ -22,7 +32,7 @@ export const GET: RequestHandler = async ({ url }) => {
   }
 
   // Get catalog with pagination
-  let { data, pagination } = await getCatalog(page, perPage, filter);
+  let { data, pagination } = await catalogRepo.findAll(workspaceId, page, perPage, filter);
 
   // Filter by spirit category (client-side for now since getCatalog doesn't support it)
   if (spiritId) {

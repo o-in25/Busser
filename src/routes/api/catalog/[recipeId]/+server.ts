@@ -1,24 +1,31 @@
-import { fail, json } from '@sveltejs/kit';
+import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { deleteCatalogItem, deleteInventoryItem } from '$lib/server/core';
+import { catalogRepo } from '$lib/server/core';
 import { StatusCodes } from 'http-status-codes';
 
 export const DELETE: RequestHandler = async ({ params, locals }) => {
-  let { recipeId } = params as any;
-  if(!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('delete_catalog')) {
+  const workspaceId = locals.activeWorkspaceId;
+  if (!workspaceId) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: 'Unauthorized',
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'Workspace context required'
+    });
+  }
+
+  if (!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('delete_catalog')) {
     return json({
       error: 'You do not have permission to perform this action.'
     });
   }
 
-
-  if(!recipeId || isNaN(Number(recipeId))) {
+  const { recipeId } = params;
+  if (!recipeId || isNaN(Number(recipeId))) {
     return json({
       error: 'No catalog item found for ID.'
     });
   }
 
-  const result = await deleteCatalogItem(recipeId);
+  const result = await catalogRepo.delete(workspaceId, Number(recipeId));
   return json(result);
-
 };

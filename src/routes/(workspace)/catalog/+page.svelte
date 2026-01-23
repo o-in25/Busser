@@ -18,7 +18,6 @@
 		Star,
 	} from 'lucide-svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import { getContext } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -33,16 +32,13 @@
 
 	const permissions: string[] = getContext('permissions') || [];
 
-	// Get workspaceId from URL params
-	const workspaceId = $derived($page.params.workspaceId);
-
 	// Search state
 	let searchQuery = $state('');
 
 	function handleSearch(e: Event) {
 		e.preventDefault();
 		if (searchQuery.trim()) {
-			goto(`/${workspaceId}/catalog/browse?search=${encodeURIComponent(searchQuery.trim())}`);
+			goto(`/catalog/browse?search=${encodeURIComponent(searchQuery.trim())}`);
 		}
 	}
 
@@ -148,7 +144,7 @@
 		</h2>
 		<a
 			class="text-sm font-medium hover:underline flex items-center text-muted-foreground hover:text-foreground transition-colors"
-			href="/{workspaceId}/catalog/browse"
+			href="/catalog/browse"
 		>
 			View all cocktails
 			<ArrowRight class="ms-1 h-4 w-4" />
@@ -158,7 +154,7 @@
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 		{#each spirits as spirit}
 			{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
-			<a href="/{workspaceId}/catalog/browse/{spirit.recipeCategoryId}" class="block group">
+			<a href="/catalog/browse/{spirit.recipeCategoryId}" class="block group">
 				<Card.Root class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300">
 					<!-- Background image -->
 					<div class="absolute inset-0">
@@ -226,7 +222,7 @@
 					{featuredCocktail.recipeCategoryDescription}
 				</p>
 				<a
-					href="/{workspaceId}/catalog/{featuredCocktail.recipeId}"
+					href="/catalog/{featuredCocktail.recipeId}"
 					class={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full")}
 				>
 					View Recipe
@@ -253,7 +249,7 @@
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 					{#each recentCocktails.slice(0, 4) as cocktail}
 						<a
-							href="/{workspaceId}/catalog/{cocktail.recipeId}"
+							href="/catalog/{cocktail.recipeId}"
 							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
 						>
 							<div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
@@ -318,7 +314,7 @@
 				<p class="text-muted-foreground text-sm mb-4 max-w-xs">
 					Create a new cocktail recipe from your inventory ingredients.
 				</p>
-				<a href="/{workspaceId}/catalog/add" class={buttonVariants()}>
+				<a href="/catalog/add" class={buttonVariants()}>
 					<Plus class="h-4 w-4 mr-2" />
 					Add Recipe
 				</a>
@@ -332,7 +328,7 @@
 				<p class="text-muted-foreground text-sm mb-4 max-w-xs">
 					Explore our curated collection of cocktail recipes.
 				</p>
-				<a href="/{workspaceId}/catalog/browse" class={buttonVariants({ variant: "outline" })}>
+				<a href="/catalog/browse" class={buttonVariants({ variant: "outline" })}>
 					Browse All
 					<ArrowRight class="h-4 w-4 ml-2" />
 				</a>
