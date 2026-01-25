@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Instagram, Facebook, Twitter, Github } from "lucide-svelte";
-  import logo from '$lib/assets/logo-nav.png'
+  import logo from '$lib/assets/logo.png'
   </script>
 
 <footer class="mt-auto glass-nav border-t border-b-0 rounded-none">
@@ -10,7 +10,7 @@
       <!-- Logo -->
       <div class="flex-shrink-0">
         <a href="/" class="hover:opacity-80 transition-opacity">
-          <img src={logo} alt="Busser" class="h-12 lg:h-16" />
+          <img src={logo} alt="Busser" class="h-32" />
         </a>
       </div>
 

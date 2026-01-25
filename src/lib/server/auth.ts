@@ -5,9 +5,10 @@ import { DbProvider } from './db';
 import { AuthRepository } from './repositories/auth.repository';
 import { UserRepository } from './repositories/user.repository';
 import { WorkspaceRepository } from './repositories/workspace.repository';
+const { USER_TABLE } = process.env;
 
 // singleton instances
-const db = new DbProvider('user_d');
+const db = new DbProvider(USER_TABLE || '');
 const authRepo = new AuthRepository(db);
 const userRepo = new UserRepository(db, authRepo);
 const workspaceRepo = new WorkspaceRepository(db);

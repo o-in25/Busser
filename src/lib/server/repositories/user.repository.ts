@@ -18,6 +18,7 @@ import { generateSecureCode } from '$lib/math';
 import moment from 'moment';
 import { BaseRepository, marshal, marshalToType } from './base.repository';
 import { AuthRepository } from './auth.repository';
+const { USER_TABLE } = process.env;
 
 export class UserRepository extends BaseRepository {
   private mailClient: MailClient;

@@ -4,6 +4,7 @@
 import { DbProvider } from './db';
 import { InventoryRepository } from './repositories/inventory.repository';
 import { CatalogRepository } from './repositories/catalog.repository';
+const { CORE_TABLE } = process.env;
 
 // re-export utilities from base
 export {
@@ -15,7 +16,7 @@ export {
 } from './repositories/base.repository';
 
 // singleton instances
-const db = new DbProvider('app_d');
+const db = new DbProvider(CORE_TABLE || '');
 const inventoryRepo = new InventoryRepository(db);
 const catalogRepo = new CatalogRepository(db);
 
