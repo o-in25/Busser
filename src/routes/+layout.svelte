@@ -7,6 +7,8 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { setContext } from 'svelte';
+	import logo from '$lib/assets/logo.png';
+    import Footer from '$lib/components/Footer.svelte';
 
 	export let data: LayoutData;
 
@@ -61,11 +63,4 @@
 <Toaster position="bottom-right" richColors />
 
 <!-- footer -->
-<footer class="mt-auto glass-nav border-t border-b-0 rounded-none">
-	<div class="w-full mx-auto max-w-screen-xl p-4 flex items-center justify-center">
-		<hr class="my-6 border-zinc-200/30 sm:mx-auto dark:border-zinc-700/30 lg:my-8 hidden" />
-		<span class="text-sm text-muted-foreground">
-			&copy; {new Date().getFullYear()} Busser. All rights reserved.
-		</span>
-	</div>
-</footer>
+<Footer/>

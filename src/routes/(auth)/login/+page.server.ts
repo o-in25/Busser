@@ -4,7 +4,7 @@ import { login, verifyToken, getUserWorkspaces, hasWorkspaceAccess } from '$lib/
 import { getPreferredWorkspaceId } from '$lib/server/user';
 import { StatusCodes } from 'http-status-codes';
 import { dev } from '$app/environment';
-import type { QueryResult } from '$lib/types';
+import type { QueryResult, User } from '$lib/types';
 
 
 export const load = (async ({ locals, url }) => {
@@ -98,7 +98,7 @@ export const actions = {
       });
 
       // Check if user needs to select a workspace
-      const decoded = await verifyToken(userToken);
+      const decoded = await verifyToken<User>(userToken);
       if (decoded && decoded.userId) {
         const userId = decoded.userId;
 
