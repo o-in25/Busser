@@ -9,11 +9,18 @@ jobs:
   deploy:
     name: Deploy app
     runs-on: ubuntu-latest
-    concurrency: deploy-group    # optional: ensure only one action runs at a time
+    concurrency: deploy-group
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for tags
+
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: |
+
+      - name: Deploy to Fly.io
+        run: |
           flyctl deploy --remote-only --no-cache \
             --build-arg DB_HOSTNAME=${{secrets.DB_HOSTNAME}} \
             --build-arg DB_USER=${{secrets.DB_USER}} \
@@ -28,3 +35,27 @@ jobs:
             --build-arg APP_URL=${{secrets.APP_URL}}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Bump version and create tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: v
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          body: |
+            ## Changes
+            ${{ steps.tag_version.outputs.changelog }}
+
+            ## Deployment
+            - Deployed to: https://busserapp.com
+            - Commit: ${{ github.sha }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
