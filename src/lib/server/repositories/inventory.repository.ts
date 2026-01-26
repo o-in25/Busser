@@ -420,6 +420,78 @@ export class InventoryRepository extends BaseRepository {
     }
   }
 
+  async findAllCategories(
+    workspaceId: string,
+    currentPage: number = 1,
+    perPage: number = 10,
+    search: string | null = null
+  ): Promise<PaginationResult<(Category & { productCount: number })[]>> {
+    try {
+      let query = this.db
+        .table('category')
+        .where('category.workspaceId', workspaceId)
+        .leftJoin('product', function() {
+          this.on('category.CategoryId', '=', 'product.CategoryId')
+            .andOn('category.workspaceId', '=', 'product.workspaceId');
+        })
+        .select(
+          'category.CategoryId',
+          'category.CategoryName',
+          'category.CategoryDescription',
+          this.db.query.raw('COUNT(product.ProductId) as productCount')
+        )
+        .groupBy('category.CategoryId', 'category.CategoryName', 'category.CategoryDescription')
+        .orderBy('category.CategoryName');
+
+      if (search) {
+        query = query.andWhere('category.CategoryName', 'like', `%${search}%`);
+      }
+
+      const { data, pagination } = await query.paginate({ perPage, currentPage, isLengthAware: true });
+
+      const categories = (data as any[]).map((row) => ({
+        categoryId: row.CategoryId,
+        categoryName: row.CategoryName,
+        categoryDescription: row.CategoryDescription,
+        productCount: Number(row.productCount),
+      }));
+
+      return { data: categories, pagination };
+    } catch (error: any) {
+      console.error('Failed to get all categories:', error);
+      return { data: [], pagination: emptyPagination };
+    }
+  }
+
+  async deleteCategory(workspaceId: string, categoryId: number): Promise<QueryResult<number>> {
+    try {
+      // Check if category has products
+      const productCountResult = await this.db
+        .table('product')
+        .where('CategoryId', categoryId)
+        .where('workspaceId', workspaceId)
+        .count('* as count')
+        .first() as { count: number } | undefined;
+
+      const productCount = Number(productCountResult?.count) || 0;
+      if (productCount > 0) {
+        return { status: 'error', error: `Cannot delete category with ${productCount} product(s). Move or delete the products first.` };
+      }
+
+      const rowsDeleted = await this.db
+        .table('category')
+        .where('CategoryId', categoryId)
+        .where('workspaceId', workspaceId)
+        .del();
+
+      return { status: 'success', data: rowsDeleted };
+    } catch (error: any) {
+      console.error(error);
+      Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+      return { status: 'error', error: 'Could not delete category.' };
+    }
+  }
+
   // private helpers
   private async getImageUrl(image: File | null): Promise<string | null> {
     if (!image || image.size === 0 || image.name === 'undefined') return null;

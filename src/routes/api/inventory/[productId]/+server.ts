@@ -1,11 +1,12 @@
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { inventoryRepo } from '$lib/server/core';
+import { canModifyWorkspace } from '$lib/server/auth';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 export const DELETE: RequestHandler = async ({ locals, params }) => {
   const workspaceId = locals.activeWorkspaceId;
-  if (!workspaceId) {
+  if (!workspaceId || !locals.user) {
     error(StatusCodes.UNAUTHORIZED, {
       reason: 'Unauthorized',
       code: StatusCodes.UNAUTHORIZED,
@@ -13,11 +14,12 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
     });
   }
 
-  if (!locals.user?.permissions.map(({ permissionName }) => permissionName).includes('delete_inventory')) {
-    error(StatusCodes.UNAUTHORIZED, {
-      reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
-      code: StatusCodes.UNAUTHORIZED,
-      message: 'You do not have permission to perform this action.'
+  const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+  if (!canModify) {
+    error(StatusCodes.FORBIDDEN, {
+      reason: getReasonPhrase(StatusCodes.FORBIDDEN),
+      code: StatusCodes.FORBIDDEN,
+      message: 'You need editor or owner access to delete inventory items.'
     });
   }
 

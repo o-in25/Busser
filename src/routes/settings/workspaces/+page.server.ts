@@ -1,8 +1,10 @@
 import {
-  getAllWorkspaces,
+  getUserWorkspaces,
   createWorkspace,
   updateWorkspace,
-  deleteWorkspace
+  deleteWorkspace,
+  isWorkspaceOwner,
+  hasGlobalPermission
 } from '$lib/server/auth';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -11,18 +13,18 @@ import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-  // require edit_admin permission
-  if (!locals.user?.permissions.find(({ permissionName }) => permissionName === 'edit_admin')) {
+  if (!locals.user) {
     error(StatusCodes.UNAUTHORIZED, {
       reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
       code: StatusCodes.UNAUTHORIZED,
-      message: 'You do not have permission to access this resource.'
+      message: 'Authentication required.'
     });
   }
 
-  const result = await getAllWorkspaces();
+  // fetch only workspaces the user belongs to
+  const result = await getUserWorkspaces(locals.user.userId);
 
-  // Get current workspace ID from locals (set by hooks) or fall back to query param
+  // get current workspace ID from locals (set by hooks) or fall back to query param
   const currentWorkspaceId = locals.activeWorkspaceId || url.searchParams.get('from') || null;
 
   if (result.status === 'error') {
@@ -34,10 +36,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 export const actions: Actions = {
   create: async ({ locals, request }) => {
-    // require edit_admin permission
-    if (!locals.user?.permissions.find(({ permissionName }) => permissionName === 'edit_admin')) {
+    if (!locals.user) {
       return fail(StatusCodes.UNAUTHORIZED, {
-        error: 'You do not have permission to perform this action.'
+        error: 'Authentication required.'
       });
     }
 
@@ -69,10 +70,9 @@ export const actions: Actions = {
   },
 
   update: async ({ locals, request, url }) => {
-    // require edit_admin permission
-    if (!locals.user?.permissions.find(({ permissionName }) => permissionName === 'edit_admin')) {
+    if (!locals.user) {
       return fail(StatusCodes.UNAUTHORIZED, {
-        error: 'You do not have permission to perform this action.'
+        error: 'Authentication required.'
       });
     }
 
@@ -102,6 +102,14 @@ export const actions: Actions = {
       });
     }
 
+    // only workspace owners can update workspace settings
+    const isOwner = await isWorkspaceOwner(locals.user.userId, workspaceId);
+    if (!isOwner) {
+      return fail(StatusCodes.FORBIDDEN, {
+        error: 'Only workspace owners can modify workspace settings.'
+      });
+    }
+
     if (!workspaceName) {
       return fail(StatusCodes.BAD_REQUEST, {
         error: 'Workspace name is required.'
@@ -126,10 +134,9 @@ export const actions: Actions = {
   },
 
   delete: async ({ locals, request, url }) => {
-    // require edit_admin permission
-    if (!locals.user?.permissions.find(({ permissionName }) => permissionName === 'edit_admin')) {
+    if (!locals.user) {
       return fail(StatusCodes.UNAUTHORIZED, {
-        error: 'You do not have permission to perform this action.'
+        error: 'Authentication required.'
       });
     }
 
@@ -154,6 +161,14 @@ export const actions: Actions = {
     if (currentWorkspaceId && workspaceId === currentWorkspaceId) {
       return fail(StatusCodes.FORBIDDEN, {
         error: 'You cannot delete the workspace you are currently in.'
+      });
+    }
+
+    // only workspace owners can delete workspaces
+    const isOwner = await isWorkspaceOwner(locals.user.userId, workspaceId);
+    if (!isOwner) {
+      return fail(StatusCodes.FORBIDDEN, {
+        error: 'Only workspace owners can delete workspaces.'
       });
     }
 

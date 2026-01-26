@@ -37,7 +37,9 @@
 		recipeSteps: View.BasicRecipeStep[];
 	} = $props();
 
-	const permissions: string[] = getContext('permissions') || [];
+	// get workspace role for permission checks
+	const workspace = getContext<{ workspaceRole?: string }>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	// AI-generated content
 	let content: RecipeGeneratorSchema | null = $state(null);
@@ -169,7 +171,7 @@
 				</div>
 
 				<!-- Edit button -->
-				{#if permissions.includes('edit_catalog')}
+				{#if canModify}
 					<a
 						class={cn(buttonVariants({ variant: "default" }), "shrink-0 pointer-events-auto")}
 						href="/catalog/{recipe.recipeId}/edit"

@@ -30,7 +30,6 @@
 		Send,
 		Loader2,
 	} from 'lucide-svelte';
-	import { getContext } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
@@ -48,7 +47,10 @@
 	let requestInviteForm = $derived(form?.requestInvite as { error?: string; email?: string; message?: string } | undefined);
 
 	const { recipes, spirits, dashboardData, landingData } = data;
-	const permissions: string[] = getContext('permissions') || [];
+
+	// workspace role determines resource access (viewer can only read)
+	const workspaceRole = dashboardData?.workspaceRole;
+	const canModify = workspaceRole === 'owner' || workspaceRole === 'editor';
 
 	// Gallery setup for authenticated users
 	const gallery = recipes?.map(({
@@ -421,7 +423,7 @@
 		<!-- Quick Actions -->
 		<section class="mb-8">
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-				{#if permissions.includes('add_inventory')}
+				{#if canModify}
 					<a href="/inventory/add" class="block">
 						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
 							<div class="flex items-center gap-3">
@@ -437,21 +439,19 @@
 					</a>
 				{/if}
 
-				{#if permissions.includes('view_catalog')}
-					<a href="/catalog/browse" class="block">
-						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
-							<div class="flex items-center gap-3">
-								<div class="p-2 rounded-lg bg-primary/10">
-									<BookOpen class="h-5 w-5 text-primary" />
-								</div>
-								<div>
-									<p class="font-medium">Browse Catalog</p>
-									<p class="text-xs text-muted-foreground">{dashboardData.totalRecipes} recipes</p>
-								</div>
+				<a href="/catalog/browse" class="block">
+					<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+						<div class="flex items-center gap-3">
+							<div class="p-2 rounded-lg bg-primary/10">
+								<BookOpen class="h-5 w-5 text-primary" />
 							</div>
-						</Card.Root>
-					</a>
-				{/if}
+							<div>
+								<p class="font-medium">Browse Catalog</p>
+								<p class="text-xs text-muted-foreground">{dashboardData.totalRecipes} recipes</p>
+							</div>
+						</div>
+					</Card.Root>
+				</a>
 
 				{#if gallery.length > 0}
 					<button onclick={surpriseMe} class="block text-left w-full">
@@ -469,21 +469,19 @@
 					</button>
 				{/if}
 
-				{#if permissions.includes('view_inventory')}
-					<a href="/inventory" class="block">
-						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
-							<div class="flex items-center gap-3">
-								<div class="p-2 rounded-lg bg-primary/10">
-									<Package class="h-5 w-5 text-primary" />
-								</div>
-								<div>
-									<p class="font-medium">View Inventory</p>
-									<p class="text-xs text-muted-foreground">{dashboardData.inventoryCount} items</p>
-								</div>
+				<a href="/inventory" class="block">
+					<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+						<div class="flex items-center gap-3">
+							<div class="p-2 rounded-lg bg-primary/10">
+								<Package class="h-5 w-5 text-primary" />
 							</div>
-						</Card.Root>
-					</a>
-				{/if}
+							<div>
+								<p class="font-medium">View Inventory</p>
+								<p class="text-xs text-muted-foreground">{dashboardData.inventoryCount} items</p>
+							</div>
+						</div>
+					</Card.Root>
+				</a>
 			</div>
 		</section>
 
@@ -499,12 +497,10 @@
 						Cocktails you can make right now with your inventory
 					</p>
 				</div>
-				{#if permissions.includes('view_catalog')}
-					<a href="/catalog/browse?available=true" class="text-sm text-primary hover:underline flex items-center">
-						View all
-						<ChevronRight class="h-4 w-4" />
-					</a>
-				{/if}
+				<a href="/catalog/browse?available=true" class="text-sm text-primary hover:underline flex items-center">
+					View all
+					<ChevronRight class="h-4 w-4" />
+				</a>
 			</div>
 
 			<!-- Spirit Filter Chips -->
@@ -543,7 +539,7 @@
 						<p class="text-muted-foreground mb-4 max-w-md">
 							Add more ingredients to your inventory to unlock cocktail recipes you can make.
 						</p>
-						{#if permissions.includes('add_inventory')}
+						{#if canModify}
 							<a href="/inventory/add" class={buttonVariants()}>
 								<Plus class="h-4 w-4 mr-2" />
 								Add Ingredients
@@ -560,12 +556,12 @@
 							class="block group"
 							in:fade={{ duration: 200 }}
 						>
-							<Card.Root class="overflow-hidden hover:shadow-lg transition-all">
+							<Card.Root class="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105">
 								<div class="relative aspect-square">
 									<img
 										src={item.src}
 										alt={item.alt}
-										class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+										class="h-full w-full object-cover"
 										loading="lazy"
 									/>
 									<div class="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>

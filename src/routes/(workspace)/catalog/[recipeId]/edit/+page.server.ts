@@ -1,12 +1,22 @@
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
+import { canModifyWorkspace } from '$lib/server/auth';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
-export const load: PageServerLoad = async ({ params, parent }) => {
+export const load: PageServerLoad = async ({ params, parent, locals }) => {
   const { workspace } = await parent();
   const workspaceId = workspace.workspaceId;
   const { recipeId } = params;
+
+  // viewers cannot access edit page
+  if (!locals.user) {
+    redirect(StatusCodes.SEE_OTHER, '/login');
+  }
+  const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+  if (!canModify) {
+    redirect(StatusCodes.SEE_OTHER, `/catalog/${recipeId}`);
+  }
 
   if (!recipeId || isNaN(Number(recipeId))) {
     error(StatusCodes.BAD_REQUEST, {
@@ -47,8 +57,13 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 export const actions: Actions = {
   default: async ({ request, params, locals }) => {
     const workspaceId = locals.activeWorkspaceId;
-    if (!workspaceId) {
+    if (!workspaceId || !locals.user) {
       return fail(StatusCodes.UNAUTHORIZED, { error: 'Workspace context required.' });
+    }
+
+    const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+    if (!canModify) {
+      return fail(StatusCodes.FORBIDDEN, { error: 'You need editor or owner access to edit recipes.' });
     }
     const { recipeId } = params;
 

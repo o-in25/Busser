@@ -38,7 +38,9 @@
 		onStockChange?: ((productId: number, inStock: boolean) => void) | null;
 	} = $props();
 
-	const permissions: string[] = getContext('permissions');
+	// get workspace role for permission checks
+	const workspace = getContext<{ workspaceRole?: string }>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	// Fallback if image can't load
 	let productImage = $state(product?.productImageUrl || placeholder);
@@ -161,7 +163,13 @@
 						{product.categoryName}
 						<Info class="w-3.5 h-3.5 ml-1" />
 					</Popover.Trigger>
-					<Popover.Content class="w-72">
+					<Popover.Content
+					class="w-72"
+					side="bottom"
+					align="start"
+					avoidCollisions={true}
+					collisionPadding={16}
+				>
 						<div class="space-y-2">
 							<h4 class="font-medium">{product.categoryName}</h4>
 							<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
@@ -271,7 +279,7 @@
 
 		<!-- Actions -->
 		<div class="flex items-center justify-between pt-4 border-t">
-			{#if permissions.includes('edit_inventory') && onStockChange}
+			{#if canModify && onStockChange}
 				<div class="flex items-center gap-3">
 					<Switch
 						id="stock-toggle-{product.productId}"
@@ -285,7 +293,7 @@
 			{:else}
 				<div></div>
 			{/if}
-			{#if permissions.includes('edit_inventory')}
+			{#if canModify}
 				<a class={cn(buttonVariants({ variant: "default" }))} href="/inventory/{product.productId}/edit">
 					<Pencil class="w-4 h-4 mr-2" />
 					Edit Product

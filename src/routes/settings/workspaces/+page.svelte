@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import type { Workspace } from '$lib/types';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import * as Card from '$lib/components/ui/card';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
@@ -18,7 +18,8 @@
 		Users,
 		User,
 		Globe,
-		Lock
+		Lock,
+		UserCog
 	} from 'lucide-svelte';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -31,7 +32,7 @@
 	let createDialogOpen = $state(false);
 	let editDialogOpen = $state(false);
 	let deleteDialogOpen = $state(false);
-	let selectedWorkspace = $state<Workspace | null>(null);
+	let selectedWorkspace = $state<WorkspaceWithRole | null>(null);
 
 	// Form state
 	let newWorkspaceName = $state('');
@@ -46,22 +47,27 @@
 	const currentWorkspaceId = $derived(data?.currentWorkspaceId || null);
 
 	// Check if workspace is the global workspace
-	function isGlobalWorkspace(workspace: Workspace): boolean {
+	function isGlobalWorkspace(workspace: WorkspaceWithRole): boolean {
 		return workspace.workspaceId === GLOBAL_WORKSPACE_ID;
 	}
 
 	// Check if workspace is the current workspace
-	function isCurrentWorkspace(workspace: Workspace): boolean {
+	function isCurrentWorkspace(workspace: WorkspaceWithRole): boolean {
 		return currentWorkspaceId !== null && workspace.workspaceId === currentWorkspaceId;
 	}
 
 	// Check if workspace is protected (cannot edit or delete)
-	function isProtected(workspace: Workspace): boolean {
+	function isProtected(workspace: WorkspaceWithRole): boolean {
 		return isGlobalWorkspace(workspace) || isCurrentWorkspace(workspace);
 	}
 
+	// Check if user is owner of workspace
+	function isOwner(workspace: WorkspaceWithRole): boolean {
+		return workspace.workspaceRole === 'owner';
+	}
+
 	// Open edit dialog
-	function openEditDialog(workspace: Workspace) {
+	function openEditDialog(workspace: WorkspaceWithRole) {
 		selectedWorkspace = workspace;
 		editWorkspaceName = workspace.workspaceName;
 		editWorkspaceType = workspace.workspaceType;
@@ -69,7 +75,7 @@
 	}
 
 	// Open delete dialog
-	function openDeleteDialog(workspace: Workspace) {
+	function openDeleteDialog(workspace: WorkspaceWithRole) {
 		selectedWorkspace = workspace;
 		deleteDialogOpen = true;
 	}
@@ -149,6 +155,7 @@
 						<Table.Row class="hover:bg-transparent">
 							<Table.Head class="pl-6">Name</Table.Head>
 							<Table.Head>Type</Table.Head>
+							<Table.Head>Role</Table.Head>
 							<Table.Head class="hidden md:table-cell">ID</Table.Head>
 							<Table.Head class="hidden sm:table-cell">Created</Table.Head>
 							<Table.Head class="text-right pr-6">Actions</Table.Head>
@@ -185,6 +192,11 @@
 										{workspace.workspaceType.charAt(0).toUpperCase() + workspace.workspaceType.slice(1)}
 									</Badge>
 								</Table.Cell>
+								<Table.Cell>
+									<Badge variant={workspace.workspaceRole === 'owner' ? 'default' : workspace.workspaceRole === 'editor' ? 'secondary' : 'outline'}>
+										{workspace.workspaceRole.charAt(0).toUpperCase() + workspace.workspaceRole.slice(1)}
+									</Badge>
+								</Table.Cell>
 								<Table.Cell class="hidden md:table-cell font-mono text-xs text-muted-foreground">
 									{workspace.workspaceId}
 								</Table.Cell>
@@ -193,6 +205,17 @@
 								</Table.Cell>
 								<Table.Cell class="text-right pr-6">
 									<div class="flex items-center justify-end gap-2">
+										<!-- Members button (only for owners) -->
+										{#if isOwner(workspace)}
+											<a
+												href="/settings/workspaces/{workspace.workspaceId}/members"
+												class="inline-flex items-center justify-center h-8 w-8 rounded-md border bg-blue-500/20 border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
+												title="Manage members"
+											>
+												<UserCog class="h-4 w-4" />
+												<span class="sr-only">Manage members</span>
+											</a>
+										{/if}
 										{#if isProtected(workspace)}
 											<!-- Protected workspace: show disabled styled buttons -->
 											<Button
@@ -219,8 +242,8 @@
 												<Lock class="h-4 w-4" />
 												<span class="sr-only">Protected</span>
 											</Button>
-										{:else}
-											<!-- Editable workspace: show edit and delete buttons -->
+										{:else if isOwner(workspace)}
+											<!-- Editable workspace: show edit and delete buttons (only for owners) -->
 											<Button
 												variant="outline"
 												size="icon"

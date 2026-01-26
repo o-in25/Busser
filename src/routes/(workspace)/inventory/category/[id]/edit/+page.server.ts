@@ -1,12 +1,22 @@
 import { inventoryRepo } from '$lib/server/core';
+import { canModifyWorkspace } from '$lib/server/auth';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
-export const load: PageServerLoad = async ({ params, parent }) => {
+export const load: PageServerLoad = async ({ params, parent, locals }) => {
   const { workspace } = await parent();
   const workspaceId = workspace.workspaceId;
   const { id } = params;
+
+  // viewers cannot access edit page
+  if (!locals.user) {
+    redirect(StatusCodes.SEE_OTHER, '/login');
+  }
+  const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+  if (!canModify) {
+    redirect(StatusCodes.SEE_OTHER, '/inventory/category');
+  }
 
   if (!id || isNaN(Number(id))) {
     error(StatusCodes.BAD_REQUEST, {
@@ -34,8 +44,13 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 export const actions: Actions = {
   default: async ({ request, params, locals }) => {
     const workspaceId = locals.activeWorkspaceId;
-    if (!workspaceId) {
+    if (!workspaceId || !locals.user) {
       return fail(StatusCodes.UNAUTHORIZED, { error: 'Workspace context required.' });
+    }
+
+    const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+    if (!canModify) {
+      return fail(StatusCodes.FORBIDDEN, { error: 'You need editor or owner access to edit categories.' });
     }
     const { id } = params;
 
@@ -60,6 +75,6 @@ export const actions: Actions = {
       return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: result.error });
     }
 
-    redirect(StatusCodes.SEE_OTHER, '/inventory');
+    redirect(StatusCodes.SEE_OTHER, '/inventory/category');
   }
 };
