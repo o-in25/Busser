@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
-	import logo from '$lib/assets/logo-nav.png';
+	import logo from '$lib/assets/logo-nav.png'
 	import type { User } from '$lib/types/auth';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
@@ -30,6 +30,7 @@
 	async function logout() {
 		const response = await fetch('/logout', {
 			method: 'POST',
+			body: new FormData(),
 		});
 		if (response.ok) {
 			await invalidateAll();

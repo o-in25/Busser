@@ -1,27 +1,34 @@
-import { json } from '@sveltejs/kit';
+import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { categorySelect, getSpirits, productSelect } from '$lib/server/core';
+import { inventoryRepo, catalogRepo } from '$lib/server/core';
+import { StatusCodes } from 'http-status-codes';
 
+export const GET: RequestHandler = async ({ url, locals }) => {
+  const workspaceId = locals.activeWorkspaceId;
+  if (!workspaceId) {
+    error(StatusCodes.UNAUTHORIZED, {
+      reason: 'Unauthorized',
+      code: StatusCodes.UNAUTHORIZED,
+      message: 'Workspace context required'
+    });
+  }
 
-export const GET: RequestHandler = async ({ url }) => {
-  switch(url.pathname) {
+  switch (url.pathname) {
     case '/api/select/categories': {
-      const response = await categorySelect();
+      const response = await inventoryRepo.getCategoryOptions(workspaceId);
       return json(response);
     }
 
-
-    // TODO: this may need to be replaced
+    // Spirits are global reference data, not workspace-specific
     case '/api/select/spirits': {
-      const response = await getSpirits();
+      const response = await catalogRepo.getSpirits();
       return json(response);
     }
 
     case '/api/select/products': {
-      const response = await productSelect();
+      const response = await inventoryRepo.getProductOptions(workspaceId);
       return json(response);
     }
-
 
     default:
       return json({ message: 'Route not found!' });

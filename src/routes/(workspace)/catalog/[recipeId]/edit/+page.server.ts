@@ -1,0 +1,99 @@
+import { catalogRepo, inventoryRepo } from '$lib/server/core';
+import { error, fail, redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+import { StatusCodes, getReasonPhrase } from 'http-status-codes';
+
+export const load: PageServerLoad = async ({ params, parent }) => {
+  const { workspace } = await parent();
+  const workspaceId = workspace.workspaceId;
+  const { recipeId } = params;
+
+  if (!recipeId || isNaN(Number(recipeId))) {
+    error(StatusCodes.BAD_REQUEST, {
+      reason: getReasonPhrase(StatusCodes.BAD_REQUEST),
+      code: StatusCodes.BAD_REQUEST,
+      message: 'Invalid recipe ID.'
+    });
+  }
+
+  const [recipeResult, spirits, preparationMethodsResult, productOptions] = await Promise.all([
+    catalogRepo.findById(workspaceId, recipeId),
+    catalogRepo.getSpirits(),
+    catalogRepo.getPreparationMethods(),
+    inventoryRepo.getProductOptions(workspaceId)
+  ]);
+
+  if (recipeResult.status === 'error' || !recipeResult.data) {
+    error(StatusCodes.NOT_FOUND, {
+      reason: getReasonPhrase(StatusCodes.NOT_FOUND),
+      code: StatusCodes.NOT_FOUND,
+      message: 'Recipe not found.'
+    });
+  }
+
+  const preparationMethods = preparationMethodsResult.status === 'success' && preparationMethodsResult.data
+    ? preparationMethodsResult.data
+    : [];
+
+  return {
+    recipe: recipeResult.data.recipe,
+    recipeSteps: recipeResult.data.recipeSteps,
+    spirits,
+    preparationMethods,
+    productOptions
+  };
+};
+
+export const actions: Actions = {
+  default: async ({ request, params, locals }) => {
+    const workspaceId = locals.activeWorkspaceId;
+    if (!workspaceId) {
+      return fail(StatusCodes.UNAUTHORIZED, { error: 'Workspace context required.' });
+    }
+    const { recipeId } = params;
+
+    const formData = await request.formData();
+
+    const recipeName = formData.get('recipeName') as string;
+    const recipeCategoryId = Number(formData.get('recipeCategoryId'));
+    const recipeDescription = formData.get('recipeDescription') as string || '';
+    const recipeTechniqueDescriptionId = Number(formData.get('recipeTechniqueDescriptionId') || 1);
+    const recipeSweetnessRating = Number(formData.get('recipeSweetnessRating') || 5);
+    const recipeDrynessRating = Number(formData.get('recipeDrynessRating') || 5);
+    const recipeStrengthRating = Number(formData.get('recipeStrengthRating') || 5);
+    const recipeVersatilityRating = Number(formData.get('recipeVersatilityRating') || 5);
+    const recipeStepsJson = formData.get('recipeSteps') as string;
+    const recipeImageFile = formData.get('recipeImageUrl') as File;
+
+    if (!recipeName) {
+      return fail(StatusCodes.BAD_REQUEST, { error: 'Recipe name is required.' });
+    }
+
+    let recipeSteps = [];
+    try {
+      recipeSteps = JSON.parse(recipeStepsJson || '[]');
+    } catch {
+      return fail(StatusCodes.BAD_REQUEST, { error: 'Invalid recipe steps format.' });
+    }
+
+    const recipe = {
+      recipeId: Number(recipeId),
+      recipeName,
+      recipeCategoryId,
+      recipeDescription,
+      recipeTechniqueDescriptionId,
+      recipeSweetnessRating,
+      recipeDrynessRating,
+      recipeStrengthRating,
+      recipeVersatilityRating,
+    };
+
+    const result = await catalogRepo.save(workspaceId, recipe, recipeSteps, recipeImageFile);
+
+    if (result.status === 'error') {
+      return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: result.error });
+    }
+
+    redirect(StatusCodes.SEE_OTHER, `/catalog/${recipeId}`);
+  }
+};

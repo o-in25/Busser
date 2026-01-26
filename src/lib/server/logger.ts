@@ -2,9 +2,10 @@ import { LogLevel, type Log } from "$lib/types";
 import moment from "moment";
 
 import { DbProvider } from "./db";
+const { USER_TABLE } = process.env;
 
 export class Logger {
-  private static db = new DbProvider('user_t');
+  private static db = new DbProvider(USER_TABLE || '');
 
   static async info(message: string): Promise<void> {
     try {

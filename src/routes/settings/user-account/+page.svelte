@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -16,10 +16,24 @@
 		X,
 		ArrowRight,
 		KeyRound,
+		Building2,
+		Users,
+		Crown,
+		Globe,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
+	import { enhance } from '$app/forms';
 
-	export let data: PageData;
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	// Track selected workspace for the form
+	let selectedWorkspaceId = $state(data.preferredWorkspaceId || '');
+	let isSubmitting = $state(false);
+
+	// Update selected when data changes
+	$effect(() => {
+		selectedWorkspaceId = data.preferredWorkspaceId || '';
+	});
 
 	const normalizePermissions = (permissions: string[]): Record<string, PermissionGrants> => {
 		const validGrants = ['view', 'add', 'edit', 'delete'];
@@ -130,7 +144,7 @@
 				</div>
 
 				<!-- Roles -->
-				<div class="space-y-2 sm:col-span-2">
+				<div class="space-y-2">
 					<div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
 						<KeyRound class="h-4 w-4" />
 						Assigned Roles
@@ -147,6 +161,39 @@
 							<span class="text-muted-foreground text-sm">No roles assigned</span>
 						{/if}
 					</div>
+				</div>
+
+				<!-- Current Workspace -->
+				<div class="space-y-2">
+					<div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+						<Building2 class="h-4 w-4" />
+						Current Workspace
+					</div>
+					{#if data.currentWorkspace}
+						<div class="flex items-center gap-3">
+							<div class="p-2 rounded-lg {data.currentWorkspace.workspaceId === 'ws-global-catalog' ? 'bg-blue-500/10' : data.currentWorkspace.workspaceType === 'personal' ? 'bg-purple-500/10' : 'bg-green-500/10'}">
+								{#if data.currentWorkspace.workspaceId === 'ws-global-catalog'}
+									<Globe class="h-4 w-4 text-blue-500" />
+								{:else if data.currentWorkspace.workspaceType === 'personal'}
+									<User class="h-4 w-4 text-purple-500" />
+								{:else}
+									<Users class="h-4 w-4 text-green-500" />
+								{/if}
+							</div>
+							<div>
+								<p class="text-lg font-semibold">{data.currentWorkspace.workspaceName}</p>
+								<p class="text-sm text-muted-foreground capitalize">{data.currentWorkspace.workspaceType} workspace</p>
+							</div>
+							<Badge variant="secondary" class="ml-auto capitalize">
+								{#if data.currentWorkspace.workspaceRole === 'owner'}
+									<Crown class="h-3 w-3 mr-1" />
+								{/if}
+								{data.currentWorkspace.workspaceRole}
+							</Badge>
+						</div>
+					{:else}
+						<p class="text-muted-foreground text-sm">No workspace currently selected</p>
+					{/if}
 				</div>
 			</div>
 		</Card.Content>
@@ -217,6 +264,119 @@
 					<h3 class="font-semibold mb-1">No Permissions</h3>
 					<p class="text-sm text-muted-foreground">
 						You don't have any specific permissions assigned.
+					</p>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Workspaces Card -->
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="flex items-center gap-2">
+				<Building2 class="h-5 w-5" />
+				Default Workspace
+			</Card.Title>
+			<Card.Description>
+				Select your preferred workspace. This will be automatically selected when you log in.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			{#if data.workspaces && data.workspaces.length > 0}
+				<form
+					method="POST"
+					action="?/setPreferredWorkspace"
+					use:enhance={() => {
+						isSubmitting = true;
+						return async ({ update }) => {
+							isSubmitting = false;
+							await update();
+						};
+					}}
+				>
+					<div class="space-y-2 mb-4">
+						{#each data.workspaces as workspace (workspace.workspaceId)}
+							<button
+								type="button"
+								onclick={() => selectedWorkspaceId = workspace.workspaceId}
+								class="w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all {selectedWorkspaceId === workspace.workspaceId
+									? 'border-primary bg-primary/5'
+									: 'border-transparent bg-muted/30 hover:bg-muted/50'}"
+							>
+								<div class="flex items-center gap-3">
+									<div class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
+										? 'bg-blue-500/10'
+										: workspace.workspaceType === 'personal'
+											? 'bg-purple-500/10'
+											: 'bg-green-500/10'}">
+										{#if workspace.workspaceId === 'ws-global-catalog'}
+											<Globe class="h-4 w-4 text-blue-500" />
+										{:else if workspace.workspaceType === 'personal'}
+											<User class="h-4 w-4 text-purple-500" />
+										{:else}
+											<Users class="h-4 w-4 text-green-500" />
+										{/if}
+									</div>
+									<div class="text-left">
+										<div class="font-medium flex items-center gap-2">
+											{workspace.workspaceName}
+											{#if workspace.workspaceId === 'ws-global-catalog'}
+												<Badge variant="outline" class="text-xs">Global</Badge>
+											{/if}
+										</div>
+										<div class="text-sm text-muted-foreground capitalize">
+											{workspace.workspaceType} workspace
+										</div>
+									</div>
+								</div>
+								<div class="flex items-center gap-2">
+									<Badge variant="secondary" class="capitalize">
+										{#if workspace.workspaceRole === 'owner'}
+											<Crown class="h-3 w-3 mr-1" />
+										{/if}
+										{workspace.workspaceRole}
+									</Badge>
+									{#if selectedWorkspaceId === workspace.workspaceId}
+										<div class="w-2 h-2 rounded-full bg-primary"></div>
+									{/if}
+								</div>
+							</button>
+						{/each}
+					</div>
+
+					<input type="hidden" name="workspaceId" value={selectedWorkspaceId} />
+
+					<div class="flex items-center justify-between">
+						{#if form?.success}
+							<p class="text-sm text-green-600 flex items-center gap-1">
+								<Check class="h-4 w-4" />
+								Preference saved
+							</p>
+						{:else if form?.error}
+							<p class="text-sm text-destructive">{form.error}</p>
+						{:else}
+							<div></div>
+						{/if}
+						<Button
+							type="submit"
+							disabled={!selectedWorkspaceId || selectedWorkspaceId === data.preferredWorkspaceId || isSubmitting}
+						>
+							{#if isSubmitting}
+								Saving...
+							{:else}
+								Save Preference
+							{/if}
+						</Button>
+					</div>
+				</form>
+			{:else}
+				<div class="text-center py-8">
+					<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+						<Building2 class="h-8 w-8 text-muted-foreground/50" />
+					</div>
+					<h3 class="font-semibold mb-1">No Workspaces</h3>
+					<p class="text-sm text-muted-foreground">
+						You don't belong to any workspaces yet.
 					</p>
 				</div>
 			{/if}
