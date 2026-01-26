@@ -35,7 +35,9 @@
 
 	let { action, product = null }: { action: ComponentAction; product?: Product | null } = $props();
 
-	const permissions: string[] = getContext('permissions');
+	// get workspace role for permission checks
+	const workspace = getContext<{ workspaceRole?: string }>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	let slug = $page.params.id;
 	let productName = $state(product?.productName ?? '');
@@ -555,7 +557,7 @@
 
 		<!-- Submit buttons (desktop only - mobile uses wizard buttons) -->
 		<div class="hidden md:flex justify-end mt-6">
-			{#if action === 'edit' && permissions.includes('delete_inventory')}
+			{#if action === 'edit' && canModify}
 				<div class="my-4 mr-4">
 					<Button
 						variant="outline"

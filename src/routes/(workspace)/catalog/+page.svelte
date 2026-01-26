@@ -19,6 +19,7 @@
 	} from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
 	const {
@@ -30,7 +31,8 @@
 		popularSpirit,
 	} = data.args;
 
-	const permissions: string[] = getContext('permissions') || [];
+	const workspace = getContext<WorkspaceWithRole>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	// Search state
 	let searchQuery = $state('');
@@ -304,7 +306,7 @@
 	</Card.Root>
 
 	<!-- Add Recipe CTA -->
-	{#if permissions.includes('add_catalog')}
+	{#if canModify}
 		<Card.Root class="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
 			<Card.Content class="flex flex-col items-center justify-center h-full py-8 text-center">
 				<div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">

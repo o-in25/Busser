@@ -16,7 +16,7 @@
 <svelte:head>
 	<title>Edit User - Busser</title>
 </svelte:head>
-{#if permissions.includes('admin_edit')}
+{#if permissions.includes('edit_admin')}
 	<Breadcrumb
 		name="Users"
 		href="/settings/users"

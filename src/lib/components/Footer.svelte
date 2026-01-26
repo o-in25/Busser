@@ -38,7 +38,7 @@
         <div class="min-w-[120px]">
           <h3 class="text-sm font-semibold text-heading uppercase mb-3">Contribute</h3>
           <ul class="text-sm text-muted-foreground space-y-2">
-            <li><a href="https://github.com" class="hover:text-foreground transition-colors">GitHub</a></li>
+            <li><a href="https://github.com/o-in25/Busser" class="hover:text-foreground transition-colors">GitHub</a></li>
           </ul>
         </div>
       </div>
@@ -60,9 +60,9 @@
         <a href="https://twitter.com" class="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter">
           <Twitter class="w-5 h-5" />
         </a>
-        <a href="https://github.com" class="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
+        <!-- <a href="https://github.com/o-in25/Busser" class="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
           <Github class="w-5 h-5" />
-        </a>
+        </a> -->
       </div>
     </div>
   </div>

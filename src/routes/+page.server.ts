@@ -1,5 +1,5 @@
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
-import { createInvitationRequest } from '$lib/server/auth';
+import { createInvitationRequest, hasWorkspaceAccess } from '$lib/server/auth';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -47,9 +47,13 @@ export const load = (async ({ locals }) => {
     spiritCounts: Record<number, number>;
     topSpirit: Awaited<ReturnType<typeof catalogRepo.getSpirits>>[0] | null;
     userName: string;
+    workspaceRole: string | null;
   } | null = null;
 
   if (user && locals.activeWorkspaceId) {
+    // Get user's role in this workspace
+    const workspaceRole = await hasWorkspaceAccess(user.userId, workspaceId);
+
     // Get inventory count
     const inventoryResult = await inventoryRepo.findAll(workspaceId, 1, 1);
     const inventoryCount = inventoryResult.pagination.total;
@@ -95,6 +99,7 @@ export const load = (async ({ locals }) => {
       spiritCounts,
       topSpirit,
       userName,
+      workspaceRole,
     };
   }
 

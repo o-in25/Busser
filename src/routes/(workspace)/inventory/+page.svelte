@@ -23,15 +23,18 @@
 		Tags,
 		ChevronLeft,
 		ChevronRight,
+		Settings2,
 	} from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { getContext, onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
 
-	const permissions: string[] = getContext('permissions') || [];
+	const workspace = getContext<WorkspaceWithRole>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	// Base path for inventory routes
 	const basePath = '/inventory';
@@ -254,6 +257,14 @@
 				{#each data.categories as category}
 					<Select.Item value={String(category.categoryId)} label="{category.categoryName} ({category.count})" />
 				{/each}
+				<Select.Separator />
+				<a
+					href="{basePath}/category"
+					class="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
+				>
+					<Settings2 class="h-4 w-4" />
+					Manage Categories
+				</a>
 			</Select.Content>
 		</Select.Root>
 
@@ -309,7 +320,7 @@
 		</div>
 
 		<!-- Add Product Button -->
-		{#if permissions.includes('add_inventory')}
+		{#if canModify}
 			<a href="{basePath}/add" class={cn(buttonVariants(), "shrink-0")}>
 				<Plus class="h-4 w-4 sm:mr-2" />
 				<span class="hidden sm:inline">Add Product</span>
@@ -359,7 +370,7 @@
 						Clear Filters
 					</Button>
 				{/if}
-				{#if permissions.includes('add_inventory')}
+				{#if canModify}
 					<a href="{basePath}/add" class={buttonVariants()}>
 						<Plus class="h-4 w-4 mr-2" />
 						Add Product

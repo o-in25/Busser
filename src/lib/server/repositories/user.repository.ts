@@ -633,6 +633,89 @@ export class UserRepository extends BaseRepository {
     }
   }
 
+  // get users in workspaces where the given user is an owner
+  async getUsersInOwnedWorkspaces(userId: string): Promise<User[]> {
+    try {
+      // get workspace ids where user is owner
+      const ownedWorkspaces = await this.db
+        .table('workspaceUser')
+        .select('workspaceId')
+        .where({ userId, workspaceRole: 'owner' });
+
+      const workspaceIds = ownedWorkspaces.map((w: any) => w.workspaceId || w.workspace_id);
+
+      if (workspaceIds.length === 0) return [];
+
+      // get distinct user ids in those workspaces
+      const userIdsResult = await this.db
+        .table('workspaceUser')
+        .distinct('userId')
+        .whereIn('workspaceId', workspaceIds);
+
+      const userIds = userIdsResult.map((u: any) => u.userId || u.user_id);
+
+      if (userIds.length === 0) return [];
+
+      // fetch all users with their roles and permissions
+      const users: User[] = [];
+      for (const uid of userIds) {
+        const result = await this.findById(uid);
+        if (result.status === 'success' && result.data) {
+          users.push(result.data);
+        }
+      }
+
+      return users;
+    } catch (error: any) {
+      console.error('Error getting users in owned workspaces:', error.message);
+      return [];
+    }
+  }
+
+  // get users that can be invited to workspaces by the given user
+  async getInvitableUsers(userId: string, hasEditAdmin: boolean): Promise<User[]> {
+    try {
+      // admins can invite anyone
+      if (hasEditAdmin) {
+        return this.findAll();
+      }
+
+      // regular users can only invite users they share a workspace with
+      const userWorkspaces = await this.db
+        .table('workspaceUser')
+        .select('workspaceId')
+        .where({ userId });
+
+      const workspaceIds = userWorkspaces.map((w: any) => w.workspaceId || w.workspace_id);
+
+      if (workspaceIds.length === 0) return [];
+
+      // get distinct user ids in those workspaces (excluding self)
+      const userIdsResult = await this.db
+        .table('workspaceUser')
+        .distinct('userId')
+        .whereIn('workspaceId', workspaceIds)
+        .whereNot('userId', userId);
+
+      const userIds = userIdsResult.map((u: any) => u.userId || u.user_id);
+
+      if (userIds.length === 0) return [];
+
+      const users: User[] = [];
+      for (const uid of userIds) {
+        const result = await this.findById(uid);
+        if (result.status === 'success' && result.data) {
+          users.push(result.data);
+        }
+      }
+
+      return users;
+    } catch (error: any) {
+      console.error('Error getting invitable users:', error.message);
+      return [];
+    }
+  }
+
   async requestPasswordReset(email: string): Promise<QueryResult> {
     try {
       const dbResult = await this.db

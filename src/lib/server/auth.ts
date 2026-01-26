@@ -55,3 +55,32 @@ export const getWorkspaceMembers = workspaceRepo.getWorkspaceMembers.bind(worksp
 export const addWorkspaceMember = workspaceRepo.addWorkspaceMember.bind(workspaceRepo);
 export const removeWorkspaceMember = workspaceRepo.removeWorkspaceMember.bind(workspaceRepo);
 export const updateWorkspaceMemberRole = workspaceRepo.updateWorkspaceMemberRole.bind(workspaceRepo);
+
+// re-export workspace role type
+export type { WorkspaceRole } from './repositories/workspace.repository';
+
+// check if user can modify resources in a workspace (requires editor or owner)
+export async function canModifyWorkspace(
+  userId: string,
+  workspaceId: string
+): Promise<boolean> {
+  const role = await hasWorkspaceAccess(userId, workspaceId);
+  return role === 'owner' || role === 'editor';
+}
+
+// check if user is workspace owner
+export async function isWorkspaceOwner(
+  userId: string,
+  workspaceId: string
+): Promise<boolean> {
+  const role = await hasWorkspaceAccess(userId, workspaceId);
+  return role === 'owner';
+}
+
+// check if user has a global permission
+export function hasGlobalPermission(
+  user: { permissions?: Array<{ permissionName: string }> } | undefined,
+  permission: string
+): boolean {
+  return user?.permissions?.some(p => p.permissionName === permission) ?? false;
+}

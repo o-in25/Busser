@@ -12,6 +12,8 @@ export const getUser = userRepo.findById.bind(userRepo);
 export const addUser = userRepo.create.bind(userRepo);
 export const editUser = userRepo.update.bind(userRepo);
 export const deleteUser = userRepo.delete.bind(userRepo);
+export const getUsersInOwnedWorkspaces = userRepo.getUsersInOwnedWorkspaces.bind(userRepo);
+export const getInvitableUsers = userRepo.getInvitableUsers.bind(userRepo);
 
 // role management (delegate to repository)
 export const roleSelect = userRepo.getRoleOptions.bind(userRepo);

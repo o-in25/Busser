@@ -8,12 +8,8 @@
 		User,
 		Mail,
 		Shield,
-		Eye,
-		Plus,
 		Pencil,
-		Trash2,
 		Check,
-		X,
 		ArrowRight,
 		KeyRound,
 		Building2,
@@ -35,60 +31,39 @@
 		selectedWorkspaceId = data.preferredWorkspaceId || '';
 	});
 
-	const normalizePermissions = (permissions: string[]): Record<string, PermissionGrants> => {
-		const validGrants = ['view', 'add', 'edit', 'delete'];
-
-		const result: Record<string, PermissionGrants> = {};
-
-		permissions.forEach(perm => {
-			const [grant, ...resourceParts] = perm.split('_');
-			const resource = resourceParts.join('_');
-
-			if (!validGrants.includes(grant)) return;
-
-			if (!result[resource]) {
-				result[resource] = {
-					view: false,
-					add: false,
-					edit: false,
-					delete: false,
-					resource,
-				};
-			}
-
-			result[resource][grant as keyof Omit<PermissionGrants, 'resource'>] = true;
-		});
-
-		return result;
-	};
-
-	type PermissionGrants = {
-		view: boolean;
-		add: boolean;
-		edit: boolean;
-		delete: boolean;
-		resource: string;
-	};
-
 	const permissions: string[] = getContext('permissions') || [];
 	const roles: string[] = getContext('roles') || [];
 
-	const tableEntry = normalizePermissions(permissions);
+	// filter to only admin-related permissions (system-level access)
+	const adminPermissions = permissions.filter(p => p.includes('admin'));
 
-	// Format resource name for display
-	const formatResource = (resource: string) => {
-		return resource
-			.split('_')
-			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-			.join(' ');
+	// workspace role descriptions
+	const roleDescriptions: Record<string, { label: string; description: string; color: string; bg: string }> = {
+		owner: {
+			label: 'Owner',
+			description: 'Full access. Can manage members, settings, and all content.',
+			color: 'text-amber-500',
+			bg: 'bg-amber-500/10'
+		},
+		editor: {
+			label: 'Editor',
+			description: 'Can create, edit, and delete recipes and inventory.',
+			color: 'text-blue-500',
+			bg: 'bg-blue-500/10'
+		},
+		viewer: {
+			label: 'Viewer',
+			description: 'Read-only access. Can view but not modify content.',
+			color: 'text-emerald-500',
+			bg: 'bg-emerald-500/10'
+		}
 	};
 
-	// Permission config with colors and icons
-	const permissionConfig = {
-		view: { icon: Eye, color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: 'View' },
-		add: { icon: Plus, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Add' },
-		edit: { icon: Pencil, color: 'text-amber-500', bg: 'bg-amber-500/10', label: 'Edit' },
-		delete: { icon: Trash2, color: 'text-red-500', bg: 'bg-red-500/10', label: 'Delete' },
+	// admin permission descriptions
+	const adminPermissionDescriptions: Record<string, string> = {
+		'view_admin': 'View admin settings and user list',
+		'edit_admin': 'Manage users and workspace settings',
+		'delete_admin': 'Delete users from the system'
 	};
 </script>
 
@@ -199,59 +174,30 @@
 		</Card.Content>
 	</Card.Root>
 
-	<!-- Permissions Card -->
+	<!-- System Access Card (Admin Permissions) -->
 	<Card.Root>
 		<Card.Header>
 			<Card.Title class="flex items-center gap-2">
 				<Shield class="h-5 w-5" />
-				Permissions
+				System Access
 			</Card.Title>
 			<Card.Description>
-				Your access rights across different resources
+				Your administrative permissions for system-level features
 			</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			{#if Object.keys(tableEntry).length > 0}
-				<!-- Permission Legend -->
-				<div class="flex flex-wrap gap-4 mb-6 pb-4 border-b">
-					{#each Object.entries(permissionConfig) as [key, config]}
-						{@const Icon = config.icon}
-						<div class="flex items-center gap-1.5 text-sm">
-							<div class="p-1 rounded {config.bg}">
-								<Icon class="h-3.5 w-3.5 {config.color}" />
-							</div>
-							<span class="text-muted-foreground">{config.label}</span>
-						</div>
-					{/each}
-				</div>
-
-				<!-- Permissions Grid -->
+			{#if adminPermissions.length > 0}
 				<div class="space-y-3">
-					{#each Object.entries(tableEntry) as [_, grants]}
-						<div class="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-							<div class="font-medium">
-								{formatResource(grants.resource)}
+					{#each adminPermissions as permission}
+						<div class="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
+							<div class="p-2 rounded-lg bg-primary/10">
+								<Shield class="h-4 w-4 text-primary" />
 							</div>
-							<div class="flex items-center gap-2">
-								{#each Object.entries(permissionConfig) as [key, config]}
-									{@const Icon = config.icon}
-									{@const hasPermission = grants[key as keyof typeof grants]}
-									{#if hasPermission}
-										<div
-											class="p-2 rounded-lg {config.bg}"
-											title="{config.label} access"
-										>
-											<Icon class="h-4 w-4 {config.color}" />
-										</div>
-									{:else}
-										<div
-											class="p-2 rounded-lg bg-muted/50 opacity-30"
-											title="No {config.label.toLowerCase()} access"
-										>
-											<Icon class="h-4 w-4 text-muted-foreground" />
-										</div>
-									{/if}
-								{/each}
+							<div>
+								<p class="font-medium">{permission.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</p>
+								<p class="text-sm text-muted-foreground">
+									{adminPermissionDescriptions[permission] || 'System administrative access'}
+								</p>
 							</div>
 						</div>
 					{/each}
@@ -261,20 +207,106 @@
 					<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
 						<Shield class="h-8 w-8 text-muted-foreground/50" />
 					</div>
-					<h3 class="font-semibold mb-1">No Permissions</h3>
+					<h3 class="font-semibold mb-1">Standard User</h3>
 					<p class="text-sm text-muted-foreground">
-						You don't have any specific permissions assigned.
+						You have standard user access. Your permissions for recipes and inventory are determined by your role in each workspace.
 					</p>
 				</div>
 			{/if}
 		</Card.Content>
 	</Card.Root>
 
-	<!-- Workspaces Card -->
+	<!-- Workspace Access Card -->
 	<Card.Root>
 		<Card.Header>
 			<Card.Title class="flex items-center gap-2">
 				<Building2 class="h-5 w-5" />
+				Workspace Access
+			</Card.Title>
+			<Card.Description>
+				Your access level in each workspace determines what you can do with recipes and inventory
+			</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			{#if data.workspaces && data.workspaces.length > 0}
+				<div class="space-y-3 mb-6">
+					{#each data.workspaces as workspace (workspace.workspaceId)}
+						{@const roleInfo = roleDescriptions[workspace.workspaceRole]}
+						<div class="p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+							<div class="flex items-center justify-between mb-2">
+								<div class="flex items-center gap-3">
+									<div class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
+										? 'bg-blue-500/10'
+										: workspace.workspaceType === 'personal'
+											? 'bg-purple-500/10'
+											: 'bg-green-500/10'}">
+										{#if workspace.workspaceId === 'ws-global-catalog'}
+											<Globe class="h-4 w-4 text-blue-500" />
+										{:else if workspace.workspaceType === 'personal'}
+											<User class="h-4 w-4 text-purple-500" />
+										{:else}
+											<Users class="h-4 w-4 text-green-500" />
+										{/if}
+									</div>
+									<div>
+										<div class="font-medium flex items-center gap-2">
+											{workspace.workspaceName}
+											{#if workspace.workspaceId === 'ws-global-catalog'}
+												<Badge variant="outline" class="text-xs">Global</Badge>
+											{/if}
+										</div>
+									</div>
+								</div>
+								<Badge class="{roleInfo.bg} {roleInfo.color} border-0">
+									{#if workspace.workspaceRole === 'owner'}
+										<Crown class="h-3 w-3 mr-1" />
+									{/if}
+									{roleInfo.label}
+								</Badge>
+							</div>
+							<p class="text-sm text-muted-foreground ml-11">
+								{roleInfo.description}
+							</p>
+						</div>
+					{/each}
+				</div>
+
+				<!-- Role Legend -->
+				<div class="p-4 rounded-lg border border-dashed mb-6">
+					<h4 class="text-sm font-medium mb-3">Role Permissions</h4>
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+						{#each Object.entries(roleDescriptions) as [role, info]}
+							<div class="flex items-start gap-2">
+								<Badge class="{info.bg} {info.color} border-0 shrink-0">
+									{#if role === 'owner'}
+										<Crown class="h-3 w-3 mr-1" />
+									{/if}
+									{info.label}
+								</Badge>
+								<span class="text-muted-foreground text-xs">{info.description}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{:else}
+				<div class="text-center py-8">
+					<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+						<Building2 class="h-8 w-8 text-muted-foreground/50" />
+					</div>
+					<h3 class="font-semibold mb-1">No Workspaces</h3>
+					<p class="text-sm text-muted-foreground">
+						You don't belong to any workspaces yet.
+					</p>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Default Workspace Card -->
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="flex items-center gap-2">
+				<ArrowRight class="h-5 w-5" />
 				Default Workspace
 			</Card.Title>
 			<Card.Description>
@@ -330,12 +362,6 @@
 									</div>
 								</div>
 								<div class="flex items-center gap-2">
-									<Badge variant="secondary" class="capitalize">
-										{#if workspace.workspaceRole === 'owner'}
-											<Crown class="h-3 w-3 mr-1" />
-										{/if}
-										{workspace.workspaceRole}
-									</Badge>
 									{#if selectedWorkspaceId === workspace.workspaceId}
 										<div class="w-2 h-2 rounded-full bg-primary"></div>
 									{/if}

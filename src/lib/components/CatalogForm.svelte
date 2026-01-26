@@ -43,7 +43,9 @@
 		recipeSteps?: View.BasicRecipeStep[];
 	} = $props();
 
-	const permissions: string[] = getContext('permissions') || [];
+	// get workspace role for permission checks
+	const workspace = getContext<{ workspaceRole?: string }>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	// Determine if this is add mode (for draft functionality)
 	const isAddMode = !recipe.recipeId;
@@ -507,7 +509,7 @@
 
 			<!-- Action buttons (desktop only) -->
 			<div class="flex justify-end gap-3">
-				{#if recipe.recipeId && permissions.includes('delete_catalog')}
+				{#if recipe.recipeId && canModify}
 					<Button
 						type="button"
 						variant="destructive"

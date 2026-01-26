@@ -1,12 +1,22 @@
 import { inventoryRepo } from '$lib/server/core';
+import { canModifyWorkspace } from '$lib/server/auth';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import type { Product } from '$lib/types';
 import { StatusCodes } from 'http-status-codes';
 
-export const load: PageServerLoad = async ({ parent }) => {
+export const load: PageServerLoad = async ({ parent, locals }) => {
   const { workspace } = await parent();
   const workspaceId = workspace.workspaceId;
+
+  // viewers cannot access add page
+  if (!locals.user) {
+    redirect(StatusCodes.SEE_OTHER, '/login');
+  }
+  const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+  if (!canModify) {
+    redirect(StatusCodes.SEE_OTHER, '/inventory');
+  }
 
   const categories = await inventoryRepo.getCategoryOptions(workspaceId);
 
@@ -18,8 +28,13 @@ export const load: PageServerLoad = async ({ parent }) => {
 export const actions: Actions = {
   add: async ({ request, locals }) => {
     const workspaceId = locals.activeWorkspaceId;
-    if (!workspaceId) {
+    if (!workspaceId || !locals.user) {
       return fail(StatusCodes.UNAUTHORIZED, { error: 'Workspace context required.' });
+    }
+
+    const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+    if (!canModify) {
+      return fail(StatusCodes.FORBIDDEN, { error: 'You need editor or owner access to add inventory items.' });
     }
 
     const formData = await request.formData();
