@@ -177,16 +177,23 @@ export class UserRepository extends BaseRepository {
   async getGrants(roleId: string = ''): Promise<QueryResult<Array<Role & Permission>>> {
     try {
       let query = this.db
-        .query('user_d.rolePermission as rp')
-        .join('user_d.permission as p', 'rp.permissionId', 'p.permissionId')
-        .join('user_d.role as r', 'rp.roleId', 'r.roleId');
+        .table('rolePermission as rp')
+        .join('permission as p', 'rp.permissionId', 'p.permissionId')
+        .join('role as r', 'rp.roleId', 'r.roleId');
 
       if (roleId) {
         query = query.where('r.roleId', roleId);
       }
 
-      const dbResult = await query.select('r.roleName', 'p.permissionName', 'rp.roleId', 'rp.permissionId');
-      const grants: Array<Role & Permission> = marshalToType<Array<Role & Permission>>(dbResult);
+      const dbResult = await query.select(
+        'r.roleName',
+        'p.permissionName',
+        'rp.roleId',
+        'rp.permissionId'
+      );
+
+      const grants: Array<Role & Permission> =
+        marshalToType<Array<Role & Permission>>(dbResult);
 
       return { status: 'success', data: grants };
     } catch (error: any) {

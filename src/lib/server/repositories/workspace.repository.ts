@@ -42,8 +42,8 @@ export class WorkspaceRepository extends BaseRepository {
   async getUserWorkspaces(userId: string): Promise<QueryResult<WorkspaceWithRole[]>> {
     try {
       const dbResult = await this.db
-        .query('user_d.workspace as w')
-        .join('user_d.workspaceUser as wu', 'w.workspaceId', 'wu.workspaceId')
+        .table('workspace as w')
+        .join('workspaceUser as wu', 'w.workspaceId', 'wu.workspaceId')
         .where('wu.userId', userId)
         .select(
           'w.workspaceId',
@@ -55,7 +55,8 @@ export class WorkspaceRepository extends BaseRepository {
         )
         .orderBy('w.workspaceName', 'asc');
 
-      const workspaces = marshalToType<WorkspaceWithRole[]>(dbResult);
+      const workspaces =
+        marshalToType<WorkspaceWithRole[]>(dbResult);
 
       return { status: 'success', data: workspaces };
     } catch (error: any) {
@@ -254,11 +255,13 @@ export class WorkspaceRepository extends BaseRepository {
   }
 
   // get workspace members
-  async getWorkspaceMembers(workspaceId: string): Promise<QueryResult<Array<WorkspaceUser & { username: string; email: string }>>> {
+  async getWorkspaceMembers(
+    workspaceId: string
+  ): Promise<QueryResult<Array<WorkspaceUser & { username: string; email: string }>>> {
     try {
       const dbResult = await this.db
-        .query('user_d.workspaceUser as wu')
-        .join('user_d.user as u', 'wu.userId', 'u.userId')
+        .table('workspaceUser as wu')
+        .join('user as u', 'wu.userId', 'u.userId')
         .where('wu.workspaceId', workspaceId)
         .select(
           'wu.workspaceId',
@@ -271,7 +274,8 @@ export class WorkspaceRepository extends BaseRepository {
         .orderBy('wu.workspaceRole', 'asc')
         .orderBy('u.username', 'asc');
 
-      const members = marshalToType<Array<WorkspaceUser & { username: string; email: string }>>(dbResult);
+      const members =
+        marshalToType<Array<WorkspaceUser & { username: string; email: string }>>(dbResult);
 
       return { status: 'success', data: members };
     } catch (error: any) {
