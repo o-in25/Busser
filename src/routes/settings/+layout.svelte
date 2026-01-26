@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Users, SlidersHorizontal, UserCog, UsersRound, Mail } from 'lucide-svelte';
+	import { Users, SlidersHorizontal, UserCog, UsersRound, Mail, Building2 } from 'lucide-svelte';
 	import { page } from '$app/stores';
 	import { getContext } from 'svelte';
 
@@ -75,6 +75,20 @@
 			>
 				<div class="flex items-center gap-2">
 					<Mail class="h-5 w-5" /><span class="hidden md:inline-block">Invites</span>
+				</div>
+			</a>
+		</li>
+	{/if}
+	{#if permissions.includes('edit_admin')}
+		<li class="group" role="presentation">
+			<a
+				href="/settings/workspaces"
+				type="button"
+				role="tab"
+				class={activeUrl$.includes('workspaces') ? activeClass : defaultClass}
+			>
+				<div class="flex items-center gap-2">
+					<Building2 class="h-5 w-5" /><span class="hidden md:inline-block">Workspaces</span>
 				</div>
 			</a>
 		</li>

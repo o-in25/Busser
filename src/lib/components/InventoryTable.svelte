@@ -18,7 +18,7 @@
 
 	export let products: Product[];
 	export let paginationData: PaginationData;
-	export let tableData: Spirit[];
+	export let tableData: Spirit[] = [];
 	export let recipeUsage: Record<number, number> = {};
 	export let onRowClick: ((product: Product) => void) | null = null;
 
@@ -52,7 +52,7 @@
 	$: urlParams_$ = $page.url.searchParams;
 
 	const regex = new RegExp(
-		`\\b(${tableData.map(({ recipeCategoryDescription }) => recipeCategoryDescription.toLowerCase()).join('|')})\\b`,
+		`\\b(${tableData.map(({ recipeCategoryDescription }) => recipeCategoryDescription?.toLowerCase() ?? '').filter(Boolean).join('|')})\\b`,
 		'i'
 	);
 

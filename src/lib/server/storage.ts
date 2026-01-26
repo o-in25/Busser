@@ -8,6 +8,7 @@ const { GOOGLE_SERVICE_KEY, BUCKET } = process.env;
 // const { GOOGLE_SERVICE_KEY, BUCKET } = env;
 const base64Encode = (str: string) => Buffer.from(str).toString('base64');
 const base64Decode = (str: string) => str ? Buffer.from(str, 'base64').toString() : '{}';
+const { USER_TABLE } = process.env;
 
 const { client_email, private_key } = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY || ''));
 const storage = new Storage({
@@ -19,7 +20,7 @@ const storage = new Storage({
 
 const bucket = storage.bucket(BUCKET || '');
 
-const db = new DbProvider('user_t');
+const db = new DbProvider(USER_TABLE || '');
 
 export type Upload = {
   uploadId?: string;

@@ -1,9 +1,10 @@
 import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
-import { login } from '$lib/server/auth';
+import { login, verifyToken, getUserWorkspaces, hasWorkspaceAccess } from '$lib/server/auth';
+import { getPreferredWorkspaceId } from '$lib/server/user';
 import { StatusCodes } from 'http-status-codes';
 import { dev } from '$app/environment';
-import type { QueryResult } from '$lib/types';
+import type { QueryResult, User } from '$lib/types';
 
 
 export const load = (async ({ locals, url }) => {
@@ -96,6 +97,50 @@ export const actions = {
         maxAge: 60 * 60 * 24 * 7
       });
 
+      // Check if user needs to select a workspace
+      const decoded = await verifyToken<User>(userToken);
+      if (decoded && decoded.userId) {
+        const userId = decoded.userId;
+
+        // Check for preferred workspace
+        const preferredWorkspaceId = await getPreferredWorkspaceId(userId);
+        if (preferredWorkspaceId) {
+          const role = await hasWorkspaceAccess(userId, preferredWorkspaceId);
+          if (role) {
+            // User has a valid preferred workspace - set cookie and go home
+            cookies.set('activeWorkspaceId', preferredWorkspaceId, {
+              path: '/',
+              httpOnly: true,
+              sameSite: 'lax',
+              secure: !dev,
+              maxAge: 60 * 60 * 24 * 365
+            });
+            return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
+          }
+        }
+
+        // Check if user has exactly one workspace (auto-select)
+        const workspacesResult = await getUserWorkspaces(userId);
+        if (workspacesResult.status === 'success' && workspacesResult.data) {
+          if (workspacesResult.data.length === 1) {
+            // Auto-select single workspace
+            const workspace = workspacesResult.data[0];
+            cookies.set('activeWorkspaceId', workspace.workspaceId, {
+              path: '/',
+              httpOnly: true,
+              sameSite: 'lax',
+              secure: !dev,
+              maxAge: 60 * 60 * 24 * 365
+            });
+            return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
+          } else if (workspacesResult.data.length > 1) {
+            // User has multiple workspaces - need to select
+            return redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace-selector');
+          }
+        }
+      }
+
+      // Default: go home
       return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
     }
 

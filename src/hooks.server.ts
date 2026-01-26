@@ -1,4 +1,5 @@
-import { authenticate } from '$lib/server/auth';
+import { authenticate, getUserWorkspaces, hasWorkspaceAccess } from '$lib/server/auth';
+import { getPreferredWorkspaceId } from '$lib/server/user';
 import { redirect, type Handle } from "@sveltejs/kit";
 import { StatusCodes } from 'http-status-codes';
 import micromatch from 'micromatch';
@@ -11,9 +12,23 @@ const publicRoutes = [
   '/verify-email/**',
   '/forgot-password',
   '/reset-password/**',
+  '/workspace-selector',
   '/api/mail/user-registration'
-]
+];
 
+// Routes that don't require workspace selection (for authenticated users)
+const workspaceExemptRoutes = [
+  '/',
+  '/login',
+  '/logout',
+  '/signup',
+  '/verify-email/**',
+  '/forgot-password',
+  '/reset-password/**',
+  '/workspace-selector',
+  '/settings/**',
+  '/api/**'
+];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
   const { cookies, url } = event;
@@ -34,10 +49,61 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
   }
 
+  // If user is authenticated, resolve active workspace
+  if (event.locals.user) {
+    const activeWorkspaceId = await resolveActiveWorkspace(event.locals.user.userId, cookies);
+    event.locals.activeWorkspaceId = activeWorkspaceId;
+
+    // If no workspace selected and trying to access a route that requires workspace, redirect to selector
+    const isWorkspaceExempt = micromatch.isMatch(slug, workspaceExemptRoutes);
+    if (!activeWorkspaceId && !isWorkspaceExempt) {
+      return redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace-selector');
+    }
+  }
+
   const response = await resolve(event);
   return response;
-
 };
+
+/**
+ * Resolve the active workspace for a user
+ * Priority: Cookie -> DB preference -> null (needs selection)
+ */
+async function resolveActiveWorkspace(
+  userId: string,
+  cookies: { get: (name: string) => string | undefined }
+): Promise<string | null> {
+  // 1. Check cookie first
+  const cookieWorkspaceId = cookies.get('activeWorkspaceId');
+
+  if (cookieWorkspaceId) {
+    // Verify user still has access to this workspace
+    const role = await hasWorkspaceAccess(userId, cookieWorkspaceId);
+    if (role) {
+      return cookieWorkspaceId;
+    }
+    // Cookie is stale - workspace no longer accessible
+  }
+
+  // 2. Check DB preference
+  const preferredWorkspaceId = await getPreferredWorkspaceId(userId);
+  if (preferredWorkspaceId) {
+    const role = await hasWorkspaceAccess(userId, preferredWorkspaceId);
+    if (role) {
+      return preferredWorkspaceId;
+    }
+    // Preferred workspace no longer accessible - will need to select a new one
+  }
+
+  // 3. Check if user has exactly one workspace (auto-select)
+  const workspacesResult = await getUserWorkspaces(userId);
+  if (workspacesResult.status === 'success' && workspacesResult.data?.length === 1) {
+    return workspacesResult.data[0].workspaceId;
+  }
+
+  // 4. User needs to select a workspace
+  return null;
+}
 
 // // ANATOMY OF HOOK
 // export const handle = async ({ event, resolve }) => {

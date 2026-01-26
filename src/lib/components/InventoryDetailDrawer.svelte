@@ -22,7 +22,7 @@
 	const isBaseSpirit = $derived.by(() => {
 		if (!product || !tableData.length) return false;
 		const regex = new RegExp(
-			`\\b(${tableData.map(({ recipeCategoryDescription }) => recipeCategoryDescription.toLowerCase()).join('|')})\\b`,
+			`\\b(${tableData.map(({ recipeCategoryDescription }) => recipeCategoryDescription?.toLowerCase() ?? '').filter(Boolean).join('|')})\\b`,
 			'i'
 		);
 		return regex.test(product.categoryName);

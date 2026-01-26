@@ -674,7 +674,7 @@
 								{dashboardData.topSpirit.recipeCategoryDescription}
 							</h3>
 							<p class="text-muted-foreground text-sm mb-3">
-								You can make {dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId]} cocktails with your {dashboardData.topSpirit.recipeCategoryDescription.toLowerCase()} collection.
+								You can make {dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId]} cocktails with your {dashboardData.topSpirit.recipeCategoryDescription?.toLowerCase() ?? ''} collection.
 							</p>
 							<a
 								href="/catalog/browse/{dashboardData.topSpirit.recipeCategoryId}"

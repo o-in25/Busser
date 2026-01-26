@@ -7,8 +7,13 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { setContext } from 'svelte';
+	import logo from '$lib/assets/logo.png';
+    import Footer from '$lib/components/Footer.svelte';
 
 	export let data: LayoutData;
+
+	// Auth routes where we don't show the navbar
+	const authRoutes = ['/login', '/logout', '/signup', '/verify-email', '/forgot-password', '/reset-password', '/workspace-selector'];
 
 	const getActiveUrl = (url: string) => {
 		const routes: Record<string, string> = {
@@ -23,8 +28,13 @@
 		return routes[activeUrl];
 	};
 
+	const isAuthRoute = (pathname: string) => {
+		return authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
+	};
+
 	$: activeUrl = getActiveUrl($page.url.pathname);
 	$: user = data.user;
+	$: showNav = user && !isAuthRoute($page.url.pathname);
 
 	$: {
 		setContext(
@@ -35,8 +45,8 @@
 	}
 </script>
 
-<!-- top nav (only show when logged in) -->
-{#if user}
+<!-- top nav (only show when logged in and not on auth routes) -->
+{#if showNav}
 	<Nav {activeUrl} {user} />
 {/if}
 
@@ -53,11 +63,4 @@
 <Toaster position="bottom-right" richColors />
 
 <!-- footer -->
-<footer class="mt-auto glass-nav border-t border-b-0 rounded-none">
-	<div class="w-full mx-auto max-w-screen-xl p-4 flex items-center justify-center">
-		<hr class="my-6 border-zinc-200/30 sm:mx-auto dark:border-zinc-700/30 lg:my-8 hidden" />
-		<span class="text-sm text-muted-foreground">
-			&copy; {new Date().getFullYear()} Busser. All rights reserved.
-		</span>
-	</div>
-</footer>
+<Footer/>

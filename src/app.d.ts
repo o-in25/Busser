@@ -12,6 +12,7 @@ declare global {
 		}
 		interface Locals {
 			user: User | null;
+			activeWorkspaceId: string | null;
 		}
 
 		// interface PageData {
