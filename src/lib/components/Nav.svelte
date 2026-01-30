@@ -7,8 +7,6 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
-
-	import Placeholder from './Placeholder.svelte';
 	// props
 	let {
 		user,
