@@ -1,21 +1,23 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
-	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Checkbox } from '$lib/components/ui/checkbox';
-	import { Label } from '$lib/components/ui/label';
 	import {
-		Building2,
-		Users,
-		User,
-		Globe,
-		Crown,
-		ArrowRight,
 		AlertCircle,
-		LogOut
+		ArrowRight,
+		Building2,
+		Crown,
+		Globe,
+		LogOut,
+		User,
+		Users,
 	} from 'lucide-svelte';
+
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Label } from '$lib/components/ui/label';
+
+	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -55,14 +57,14 @@
 <!-- Header -->
 <div class="text-center mb-6">
 	<h1 class="text-xl font-bold">Select a Workspace</h1>
-	<p class="text-muted-foreground text-sm mt-1">
-		Choose which workspace you'd like to work in
-	</p>
+	<p class="text-muted-foreground text-sm mt-1">Choose which workspace you'd like to work in</p>
 </div>
 
 <!-- Error Message -->
 {#if form?.error}
-	<div class="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm mb-4 flex items-center gap-2">
+	<div
+		class="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm mb-4 flex items-center gap-2"
+	>
 		<AlertCircle class="h-4 w-4 flex-shrink-0" />
 		{form.error}
 	</div>
@@ -86,16 +88,19 @@
 			<button
 				type="button"
 				onclick={() => selectWorkspace(workspace.workspaceId)}
-				class="w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all {selectedWorkspaceId === workspace.workspaceId
+				class="w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all {selectedWorkspaceId ===
+				workspace.workspaceId
 					? 'border-primary bg-primary/5'
 					: 'border-transparent bg-muted/30 hover:bg-muted/50'}"
 			>
 				<div class="flex items-center gap-3">
-					<div class="p-2 rounded-lg {isGlobalWorkspace(workspace.workspaceId)
-						? 'bg-blue-500/10'
-						: workspace.workspaceType === 'personal'
-							? 'bg-purple-500/10'
-							: 'bg-green-500/10'}">
+					<div
+						class="p-2 rounded-lg {isGlobalWorkspace(workspace.workspaceId)
+							? 'bg-blue-500/10'
+							: workspace.workspaceType === 'personal'
+								? 'bg-purple-500/10'
+								: 'bg-green-500/10'}"
+					>
 						{#if isGlobalWorkspace(workspace.workspaceId)}
 							<Globe class="h-4 w-4 text-blue-500" />
 						{:else if workspace.workspaceType === 'personal'}
@@ -136,7 +141,7 @@
 		<Checkbox
 			id="setAsDefault"
 			checked={setAsDefault}
-			onCheckedChange={(checked) => setAsDefault = checked === true}
+			onCheckedChange={(checked) => (setAsDefault = checked === true)}
 		/>
 		<Label for="setAsDefault" class="text-sm text-muted-foreground cursor-pointer">
 			Remember as my default workspace
@@ -157,11 +162,7 @@
 	>
 		<input type="hidden" name="workspaceId" value={selectedWorkspaceId || ''} />
 		<input type="hidden" name="setAsDefault" value={setAsDefault ? 'true' : 'false'} />
-		<Button
-			type="submit"
-			class="w-full"
-			disabled={!selectedWorkspaceId || isSubmitting}
-		>
+		<Button type="submit" class="w-full" disabled={!selectedWorkspaceId || isSubmitting}>
 			{#if isSubmitting}
 				Entering workspace...
 			{:else}

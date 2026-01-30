@@ -1,4 +1,3 @@
-
 import crypto from 'crypto';
 
 // From Liquid Intelligence by Dave Arnold
@@ -19,75 +18,93 @@ export const dilutionByStirred = (abv: number) => -1.21 * Math.pow(abv, 2) + 1.2
 export const dilutionByShaken = (abv: number) => 1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;
 
 const units = {
-  'ml': { toMl: 1, fromMl: (ml) => ml, i18n: (qty: number) => (qty === 1? 'ml' : 'ml') },
-  'oz': { toMl: 30, fromMl: (ml: number) => ml / 30, i18n: (qty: number) => (qty === 1? 'oz' : 'oz') },
-  'dash': { toMl: 0.92, fromMl: (ml: number) => Math.round( ml / 0.92), i18n: (qty: number) => (Math.round(qty) === 1? 'dash' : 'dashes')},
-  'cube': { toMl: 2.5, fromMl: (ml: number) => ml / 2.5, i18n: (qty: number) => (qty === 1? 'cube' : 'cubes')},
+	ml: { toMl: 1, fromMl: (ml) => ml, i18n: (qty: number) => (qty === 1 ? 'ml' : 'ml') },
+	oz: {
+		toMl: 30,
+		fromMl: (ml: number) => ml / 30,
+		i18n: (qty: number) => (qty === 1 ? 'oz' : 'oz'),
+	},
+	dash: {
+		toMl: 0.92,
+		fromMl: (ml: number) => Math.round(ml / 0.92),
+		i18n: (qty: number) => (Math.round(qty) === 1 ? 'dash' : 'dashes'),
+	},
+	cube: {
+		toMl: 2.5,
+		fromMl: (ml: number) => ml / 2.5,
+		i18n: (qty: number) => (qty === 1 ? 'cube' : 'cubes'),
+	},
 };
 
 export const weightedMean = (arrValues: number[], arrWeights: number[]) => {
-  const result = arrValues
-    .map((value, i) => {
-      const weight = arrWeights[i];
-      const sum = value * weight;
-      return [sum, weight];
-    })
-    .reduce((p, c) => [p[0] + c[0], p[1] + c[1]], [0, 0]);
+	const result = arrValues
+		.map((value, i) => {
+			const weight = arrWeights[i];
+			const sum = value * weight;
+			return [sum, weight];
+		})
+		.reduce((p, c) => [p[0] + c[0], p[1] + c[1]], [0, 0]);
 
-  return result[0] / result[1];
+	return result[0] / result[1];
 };
 
+export const calculateOverallScore = (
+	versatility: number,
+	sweetness: number,
+	dryness: number,
+	strength: number
+) => {
+	if (![versatility, sweetness, dryness, strength].some((val) => val > 0)) return 0;
 
-export const calculateOverallScore = (versatility: number, sweetness: number, dryness: number, strength: number) => {
-  if(![versatility, sweetness, dryness, strength].some(val => val > 0)) return 0;
+	const weights = {
+		versatility: 0.4,
+		sweetnessDrynessRatio: 0.3,
+		strength: 0.3,
+	};
+	let totalScore =
+		versatility * weights.versatility +
+		((sweetness + dryness) / 2) * weights.sweetnessDrynessRatio +
+		strength * weights.strength;
+	totalScore +=
+		(sweetness > 7 && dryness > 7 ? -0.1 : 0) +
+		(sweetness > 7 && dryness > 7 ? -0.1 : 0) +
+		(strength > 7 && (versatility < 5 || (sweetness + dryness) / 2 < 5) ? -0.1 : 0);
+	totalScore = Math.min(Math.max(totalScore, 0), 10);
 
-  const weights = {
-    versatility: 0.40,
-    sweetnessDrynessRatio: 0.30,
-    strength: 0.30
-  };
-  let totalScore = (versatility * weights.versatility) +
-    (((sweetness + dryness) / 2) * weights.sweetnessDrynessRatio) +
-    (strength * weights.strength);
-  totalScore += ((sweetness > 7 && dryness > 7) ? -0.1 : 0) + ((sweetness > 7 && dryness > 7) ? -0.1 : 0) + ((strength > 7 && (versatility < 5 || ((sweetness + dryness) / 2) < 5)) ? -0.1 : 0);
-  totalScore = Math.min(Math.max(totalScore, 0), 10);
-
-  return totalScore;
+	return totalScore;
 };
 
-export const calculateAbv = (recipeSteps: { productIdQuantityInMilliliters: number, productProof: number; }[], recipeTechniqueDescriptionId: number) => {
-  // in ml
-  let volume = recipeSteps.reduce(
-    (acc, { productIdQuantityInMilliliters }) =>
-      acc + productIdQuantityInMilliliters,
-    0
-  );
-  let abv = recipeSteps.reduce(
-    (acc, { productProof, productIdQuantityInMilliliters }) => {
-      acc += (productProof / 2 / 100) * productIdQuantityInMilliliters;
-      return acc;
-    },
-    0
-  );
+export const calculateAbv = (
+	recipeSteps: { productIdQuantityInMilliliters: number; productProof: number }[],
+	recipeTechniqueDescriptionId: number
+) => {
+	// in ml
+	let volume = recipeSteps.reduce(
+		(acc, { productIdQuantityInMilliliters }) => acc + productIdQuantityInMilliliters,
+		0
+	);
+	let abv = recipeSteps.reduce((acc, { productProof, productIdQuantityInMilliliters }) => {
+		acc += (productProof / 2 / 100) * productIdQuantityInMilliliters;
+		return acc;
+	}, 0);
 
-  if(recipeTechniqueDescriptionId === 1) {
-    volume += dilutionByStirred(abv / 100);
-  } else {
-    // TODO: we don't have a formula for dry shakes
-    volume += dilutionByShaken(abv / 100);
-  }
-  let total = abv / volume;
-  total = (Math.ceil(total * 100) / 100) * 100;
-  return `${total.toFixed(0)}% abv`;
+	if (recipeTechniqueDescriptionId === 1) {
+		volume += dilutionByStirred(abv / 100);
+	} else {
+		// TODO: we don't have a formula for dry shakes
+		volume += dilutionByShaken(abv / 100);
+	}
+	let total = abv / volume;
+	total = (Math.ceil(total * 100) / 100) * 100;
+	return `${total.toFixed(0)}% abv`;
 };
-
 
 export const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
 export const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);
 export const getUnits = () => units;
 
 export function generateSecureCode(length = 6) {
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const bytes = crypto.randomBytes(length);
-  return Array.from(bytes, b => charset[b % charset.length]).join('');
+	const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	const bytes = crypto.randomBytes(length);
+	return Array.from(bytes, (b) => charset[b % charset.length]).join('');
 }

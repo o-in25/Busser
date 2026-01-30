@@ -9,16 +9,11 @@
 		<ChevronRight class="w-4 h-4" />
 	</div>
 	{#if href}
-		<a
-			{href}
-			class="ms-1 text-sm font-medium text-muted-foreground hover:text-primary md:ms-2"
-		>
+		<a {href} class="ms-1 text-sm font-medium text-muted-foreground hover:text-primary md:ms-2">
 			{name}
 		</a>
 	{:else}
-		<span
-			class="ms-1 text-sm font-medium text-muted-foreground md:ms-2"
-		>
+		<span class="ms-1 text-sm font-medium text-muted-foreground md:ms-2">
 			{name}
 		</span>
 	{/if}

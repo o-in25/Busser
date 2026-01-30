@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { Moon, Sun } from 'lucide-svelte';
+
 	import { Switch } from '$lib/components/ui/switch';
-	import { Label } from '$lib/components/ui/label';
+
 	import { themeStore } from '../../stores';
-	import { Sun, Moon } from 'lucide-svelte';
 
 	let currentTheme = '';
-	themeStore.subscribe(value => (currentTheme = value));
+	themeStore.subscribe((value) => (currentTheme = value));
 
 	const toggleTheme = (checked: boolean) => {
 		const isDark = checked;
@@ -18,9 +19,6 @@
 
 <div class="flex items-center gap-3">
 	<Sun class="h-4 w-4 text-amber-500" />
-	<Switch
-		checked={currentTheme === 'dark'}
-		onCheckedChange={toggleTheme}
-	/>
+	<Switch checked={currentTheme === 'dark'} onCheckedChange={toggleTheme} />
 	<Moon class="h-4 w-4 text-blue-400" />
 </div>

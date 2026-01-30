@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { CategoryCount } from '$lib/types';
-	import { Badge } from '$lib/components/ui/badge';
 	import { X } from 'lucide-svelte';
+
+	import { Badge } from '$lib/components/ui/badge';
+	import type { CategoryCount } from '$lib/types';
 
 	let {
 		search,
@@ -11,7 +12,7 @@
 		onClearSearch,
 		onClearCategory,
 		onClearStockFilter,
-		onClearAll
+		onClearAll,
 	}: {
 		search: string;
 		categoryId: string;
@@ -27,14 +28,14 @@
 
 	const categoryName = $derived(
 		categoryId
-			? categories.find(c => String(c.categoryId) === categoryId)?.categoryName || categoryId
+			? categories.find((c) => String(c.categoryId) === categoryId)?.categoryName || categoryId
 			: ''
 	);
 
 	const stockFilterLabels: Record<string, string> = {
 		'in-stock': 'In Stock',
 		'out-of-stock': 'Out of Stock',
-		'low-stock': 'Low Stock'
+		'low-stock': 'Low Stock',
 	};
 </script>
 

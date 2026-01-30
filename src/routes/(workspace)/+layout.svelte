@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { LayoutData } from './$types';
 	import { setContext } from 'svelte';
+
+	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
 

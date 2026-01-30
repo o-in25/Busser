@@ -1,19 +1,29 @@
 <script lang="ts">
 	import '../app.css';
-	import type { LayoutData } from './$types';
-	import { page } from '$app/stores';
+
 	import { ProgressBar } from '@prgm/sveltekit-progress-bar';
-	import Notification from '$lib/components/Notification.svelte';
-	import Nav from '$lib/components/Nav.svelte';
-	import { Toaster } from '$lib/components/ui/sonner';
 	import { setContext } from 'svelte';
-	import logo from '$lib/assets/logo.png';
-    import Footer from '$lib/components/Footer.svelte';
+
+	import { page } from '$app/stores';
+	import Footer from '$lib/components/Footer.svelte';
+	import Nav from '$lib/components/Nav.svelte';
+	import Notification from '$lib/components/Notification.svelte';
+	import { Toaster } from '$lib/components/ui/sonner';
+
+	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
 
 	// Auth routes where we don't show the navbar
-	const authRoutes = ['/login', '/logout', '/signup', '/verify-email', '/forgot-password', '/reset-password', '/workspace-selector'];
+	const authRoutes = [
+		'/login',
+		'/logout',
+		'/signup',
+		'/verify-email',
+		'/forgot-password',
+		'/reset-password',
+		'/workspace-selector',
+	];
 
 	const getActiveUrl = (url: string) => {
 		const routes: Record<string, string> = {
@@ -21,7 +31,7 @@
 			catalog: '/catalog',
 			inventory: '/inventory',
 			tools: '/tools',
-			settings: '/settings'
+			settings: '/settings',
 		};
 
 		const activeUrl = url.split('/').slice(1).shift() || 'home';
@@ -29,7 +39,7 @@
 	};
 
 	const isAuthRoute = (pathname: string) => {
-		return authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
+		return authRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
 	};
 
 	$: activeUrl = getActiveUrl($page.url.pathname);
@@ -37,10 +47,7 @@
 	$: showNav = user && !isAuthRoute($page.url.pathname);
 
 	$: {
-		setContext(
-			'permissions',
-			user?.permissions.map(({ permissionName }) => permissionName) || []
-		);
+		setContext('permissions', user?.permissions.map(({ permissionName }) => permissionName) || []);
 		setContext('roles', user?.roles.map(({ roleName }) => roleName) || []);
 	}
 </script>
@@ -63,4 +70,4 @@
 <Toaster position="bottom-right" richColors />
 
 <!-- footer -->
-<Footer/>
+<Footer />

@@ -1,10 +1,11 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
+	import { FlaskConical, GlassWater, Martini } from 'lucide-svelte';
+
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
+	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
+	import { Badge } from '$lib/components/ui/badge';
+	import * as Card from '$lib/components/ui/card';
 	import type { View } from '$lib/types';
-	import { GlassWater, Martini, FlaskConical, CheckCircle2 } from 'lucide-svelte';
 
 	let {
 		recipe,
@@ -16,9 +17,9 @@
 
 	// Technique icon mapping
 	const techniqueIcons: Record<string, typeof Martini> = {
-		'Stirred': Martini,
-		'Shaken': GlassWater,
-		'Built': FlaskConical,
+		Stirred: Martini,
+		Shaken: GlassWater,
+		Built: FlaskConical,
 	};
 	const TechniqueIcon = techniqueIcons[recipe.recipeTechniqueDescriptionText || ''] || GlassWater;
 </script>
@@ -36,14 +37,18 @@
 						class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
 					/>
 				{:else}
-					<div class="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center dark:hidden">
+					<div
+						class="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center dark:hidden"
+					>
 						<img
 							src={placeholderLight}
 							alt={recipe.recipeName}
 							class="w-20 h-20 object-contain opacity-40"
 						/>
 					</div>
-					<div class="w-full h-full bg-gradient-to-br from-muted to-muted/50 items-center justify-center hidden dark:flex">
+					<div
+						class="w-full h-full bg-gradient-to-br from-muted to-muted/50 items-center justify-center hidden dark:flex"
+					>
 						<img
 							src={placeholderDark}
 							alt={recipe.recipeName}
@@ -52,7 +57,9 @@
 					</div>
 				{/if}
 				<!-- Gradient overlay on hover -->
-				<div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<div
+					class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+				></div>
 
 				<!-- Spirit category badge -->
 				<Badge variant="secondary" class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm">

@@ -1,3 +1,3 @@
-import Calendar from "./calendar.svelte";
+import Calendar from './calendar.svelte';
 
 export { Calendar };

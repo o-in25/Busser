@@ -5,6 +5,6 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	ssr: {
 		noExternal: ['svelte-sonner'],
-		external: ['form-data', 'mailgun.js']
-	}
+		external: ['form-data', 'mailgun.js'],
+	},
 });

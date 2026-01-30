@@ -1,68 +1,70 @@
-import { getUser, getPreferredWorkspaceId, setPreferredWorkspaceId } from '$lib/server/user';
-import { getUserWorkspaces } from '$lib/server/auth';
 import { error, fail } from '@sveltejs/kit';
-import type { PageServerLoad, Actions } from './$types';
 import { StatusCodes } from 'http-status-codes';
 
-export const load = (async ({ locals, url, cookies }) => {
-  const userId = locals.user?.userId || '';
-  const queryResult = await getUser(userId);
-  if(queryResult.status === 'error') {
-    return error(StatusCodes.NOT_FOUND);
-  }
+import { getUserWorkspaces } from '$lib/server/auth';
+import { getPreferredWorkspaceId, getUser, setPreferredWorkspaceId } from '$lib/server/user';
 
-  const user = queryResult.data;
+import type { Actions, PageServerLoad } from './$types';
 
-  // load user's workspaces
-  const workspacesResult = await getUserWorkspaces(userId);
-  const workspaces = workspacesResult.status === 'success' ? workspacesResult.data || [] : [];
+export const load = (async ({ locals, url }) => {
+	const userId = locals.user?.userId || '';
+	const queryResult = await getUser(userId);
+	if (queryResult.status === 'error') {
+		return error(StatusCodes.NOT_FOUND);
+	}
 
-  // get current workspace ID from locals (set by hooks) or fall back to query param
-  const currentWorkspaceId = locals.activeWorkspaceId || url.searchParams.get('from') || null;
-  const currentWorkspace = currentWorkspaceId
-    ? workspaces.find(w => w.workspaceId === currentWorkspaceId) || null
-    : null;
+	const user = queryResult.data;
 
-  // get preferred workspace ID from DB
-  const preferredWorkspaceId = await getPreferredWorkspaceId(userId);
+	// load user's workspaces
+	const workspacesResult = await getUserWorkspaces(userId);
+	const workspaces = workspacesResult.status === 'success' ? workspacesResult.data || [] : [];
 
-  return { user, workspaces, currentWorkspace, preferredWorkspaceId };
+	// get current workspace ID from locals (set by hooks) or fall back to query param
+	const currentWorkspaceId = locals.activeWorkspaceId || url.searchParams.get('from') || null;
+	const currentWorkspace = currentWorkspaceId
+		? workspaces.find((w) => w.workspaceId === currentWorkspaceId) || null
+		: null;
+
+	// get preferred workspace ID from DB
+	const preferredWorkspaceId = await getPreferredWorkspaceId(userId);
+
+	return { user, workspaces, currentWorkspace, preferredWorkspaceId };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-  setPreferredWorkspace: async ({ locals, request, cookies }) => {
-    if (!locals.user) {
-      return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authenticated' });
-    }
+	setPreferredWorkspace: async ({ locals, request, cookies }) => {
+		if (!locals.user) {
+			return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authenticated' });
+		}
 
-    const formData = await request.formData();
-    const workspaceId = formData.get('workspaceId')?.toString();
+		const formData = await request.formData();
+		const workspaceId = formData.get('workspaceId')?.toString();
 
-    if (!workspaceId) {
-      return fail(StatusCodes.BAD_REQUEST, { error: 'Workspace ID is required' });
-    }
+		if (!workspaceId) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Workspace ID is required' });
+		}
 
-    // Verify user has access to this workspace
-    const workspacesResult = await getUserWorkspaces(locals.user.userId);
-    const workspaces = workspacesResult.status === 'success' ? workspacesResult.data || [] : [];
-    const selectedWorkspace = workspaces.find(w => w.workspaceId === workspaceId);
+		// Verify user has access to this workspace
+		const workspacesResult = await getUserWorkspaces(locals.user.userId);
+		const workspaces = workspacesResult.status === 'success' ? workspacesResult.data || [] : [];
+		const selectedWorkspace = workspaces.find((w) => w.workspaceId === workspaceId);
 
-    if (!selectedWorkspace) {
-      return fail(StatusCodes.FORBIDDEN, { error: 'You do not have access to this workspace' });
-    }
+		if (!selectedWorkspace) {
+			return fail(StatusCodes.FORBIDDEN, { error: 'You do not have access to this workspace' });
+		}
 
-    // Set preferred workspace in DB
-    await setPreferredWorkspaceId(locals.user.userId, workspaceId);
+		// Set preferred workspace in DB
+		await setPreferredWorkspaceId(locals.user.userId, workspaceId);
 
-    // Also update the cookie
-    cookies.set('activeWorkspaceId', workspaceId, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 365 // 1 year
-    });
+		// Also update the cookie
+		cookies.set('activeWorkspaceId', workspaceId, {
+			path: '/',
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: process.env.NODE_ENV === 'production',
+			maxAge: 60 * 60 * 24 * 365, // 1 year
+		});
 
-    return { success: true };
-  }
+		return { success: true };
+	},
 };

@@ -1,12 +1,9 @@
 <script lang="ts">
+	import { ArrowRight, CheckCircle2, Loader2, XCircle } from 'lucide-svelte';
+
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
-	import {
-		ArrowRight,
-		CheckCircle2,
-		XCircle,
-		Loader2,
-	} from 'lucide-svelte';
+
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -14,7 +11,7 @@
 	let resendStatus = $state<'idle' | 'success' | 'error'>('idle');
 
 	async function resendEmail() {
-		if(!data.userId) return;
+		if (!data.userId) return;
 
 		isResending = true;
 		resendStatus = 'idle';
@@ -23,12 +20,12 @@
 			const response = await fetch('/api/mail/user-registration', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ userId: data.userId })
+				body: JSON.stringify({ userId: data.userId }),
 			});
 
-			if(response.ok) {
+			if (response.ok) {
 				resendStatus = 'success';
 			} else {
 				resendStatus = 'error';
@@ -48,13 +45,9 @@
 		<XCircle class="w-8 h-8 mb-3 text-red-500 dark:text-red-400" />
 	{/if}
 	{#if data.status === 'success'}
-		<h4 class="text-xl font-semibold mb-2">
-			Your account has been verified!
-		</h4>
+		<h4 class="text-xl font-semibold mb-2">Your account has been verified!</h4>
 	{:else}
-		<h4 class="text-xl font-semibold mb-2">
-			Verification failed
-		</h4>
+		<h4 class="text-xl font-semibold mb-2">Verification failed</h4>
 	{/if}
 	{#if data.status === 'success'}
 		<p class="mb-3 font-normal text-muted-foreground">
@@ -66,7 +59,7 @@
 		</p>
 	{/if}
 	{#if data.status === 'success'}
-		<a class={cn(buttonVariants({ variant: "outline" }), "mt-4")} href="/login">
+		<a class={cn(buttonVariants({ variant: 'outline' }), 'mt-4')} href="/login">
 			Login
 			<ArrowRight class="ms-2 h-5 w-5" />
 		</a>
@@ -75,7 +68,12 @@
 			Verification email sent! Please check your inbox.
 		</p>
 	{:else}
-		<Button class="mt-4" variant="outline" onclick={resendEmail} disabled={isResending || !data.userId}>
+		<Button
+			class="mt-4"
+			variant="outline"
+			onclick={resendEmail}
+			disabled={isResending || !data.userId}
+		>
 			{#if isResending}
 				<Loader2 class="me-2 h-4 w-4 animate-spin" />
 				Sending...

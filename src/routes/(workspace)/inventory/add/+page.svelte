@@ -1,11 +1,9 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import InventoryForm from '$lib/components/InventoryForm.svelte';
 	import { ArrowLeft } from 'lucide-svelte';
+
+	import InventoryForm from '$lib/components/InventoryForm.svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
-
-	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -15,7 +13,7 @@
 <div class="container mx-auto max-w-4xl">
 	<!-- Header -->
 	<div class="flex items-center gap-4 mb-6 mt-4">
-		<a href="/inventory" class={cn(buttonVariants({ variant: "ghost", size: "icon" }))}>
+		<a href="/inventory" class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
 			<ArrowLeft class="h-5 w-5" />
 		</a>
 		<div>

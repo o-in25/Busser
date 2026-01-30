@@ -1,11 +1,12 @@
 <script lang="ts">
-	import type { ActionData, PageData } from './$types';
-	import UserForm from '$lib/components/UserForm.svelte';
+	import { applyAction, enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
-	import { enhance, applyAction } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import UserForm from '$lib/components/UserForm.svelte';
+
 	import { notificationStore } from '../../../../stores';
+	import type { ActionData, PageData } from './$types';
 
 	export let form: ActionData;
 	export let data: PageData;
@@ -14,14 +15,8 @@
 <svelte:head>
 	<title>Add User - Busser</title>
 </svelte:head>
-<Breadcrumb
-	name="Users"
-	href="/settings/users"
->
-	<BreadcrumbItem
-		name="Add User"
-		href="/settings/user/add"
-	></BreadcrumbItem>
+<Breadcrumb name="Users" href="/settings/users">
+	<BreadcrumbItem name="Add User" href="/settings/user/add"></BreadcrumbItem>
 </Breadcrumb>
 <div class="px-4 pb-4 mt-3 flex justify-left items-center">
 	<div class="grow">
@@ -45,10 +40,7 @@
 				};
 			}}
 		>
-			<UserForm
-				action="add"
-				roles={data.roles}
-			></UserForm>
+			<UserForm action="add" roles={data.roles}></UserForm>
 		</form>
 	</div>
 </div>

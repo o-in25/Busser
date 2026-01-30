@@ -1,16 +1,17 @@
 <script lang="ts">
-	import type { Product } from '$lib/types';
-	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
+	import { AlertTriangle, CheckCircle2, FlaskConical, XCircle } from 'lucide-svelte';
+
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
-	import { FlaskConical, CheckCircle2, XCircle, AlertTriangle } from 'lucide-svelte';
+	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
+	import { Badge } from '$lib/components/ui/badge';
+	import * as Card from '$lib/components/ui/card';
+	import type { Product } from '$lib/types';
 
 	let {
 		product,
 		viewMode = 'grid',
 		recipeCount = 0,
-		onClick = null
+		onClick = null,
 	}: {
 		product: Product;
 		viewMode?: 'grid' | 'list';
@@ -28,12 +29,27 @@
 	// Stock status helpers
 	const stockStatus = $derived.by(() => {
 		if (product.productInStockQuantity === 0) {
-			return { label: 'Out of Stock', variant: 'destructive' as const, icon: XCircle, color: 'text-red-500' };
+			return {
+				label: 'Out of Stock',
+				variant: 'destructive' as const,
+				icon: XCircle,
+				color: 'text-red-500',
+			};
 		}
 		if (product.productInStockQuantity === 1) {
-			return { label: 'Low Stock', variant: 'secondary' as const, icon: AlertTriangle, color: 'text-yellow-500' };
+			return {
+				label: 'Low Stock',
+				variant: 'secondary' as const,
+				icon: AlertTriangle,
+				color: 'text-yellow-500',
+			};
 		}
-		return { label: 'In Stock', variant: 'default' as const, icon: CheckCircle2, color: 'text-green-500' };
+		return {
+			label: 'In Stock',
+			variant: 'default' as const,
+			icon: CheckCircle2,
+			color: 'text-green-500',
+		};
 	});
 
 	const StockIcon = $derived(stockStatus.icon);
@@ -52,14 +68,18 @@
 						class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
 					/>
 				{:else}
-					<div class="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center dark:hidden">
+					<div
+						class="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center dark:hidden"
+					>
 						<img
 							src={placeholderLight}
 							alt={product.productName}
 							class="w-20 h-20 object-contain opacity-40"
 						/>
 					</div>
-					<div class="w-full h-full bg-gradient-to-br from-muted to-muted/50 items-center justify-center hidden dark:flex">
+					<div
+						class="w-full h-full bg-gradient-to-br from-muted to-muted/50 items-center justify-center hidden dark:flex"
+					>
 						<img
 							src={placeholderDark}
 							alt={product.productName}
@@ -68,7 +88,9 @@
 					</div>
 				{/if}
 				<!-- Gradient overlay on hover -->
-				<div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+				<div
+					class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+				></div>
 
 				<!-- Category badge -->
 				<Badge variant="secondary" class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm">

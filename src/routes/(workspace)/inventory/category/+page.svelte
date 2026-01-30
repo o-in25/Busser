@@ -1,16 +1,28 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import * as Card from '$lib/components/ui/card';
-	import * as Table from '$lib/components/ui/table';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { cn } from '$lib/utils';
-	import { ArrowLeft, Plus, Pencil, Trash2, Tags, Search, X, ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import {
+		ArrowLeft,
+		ChevronLeft,
+		ChevronRight,
+		Pencil,
+		Plus,
+		Search,
+		Tags,
+		Trash2,
+		X,
+	} from 'lucide-svelte';
+	import { getContext } from 'svelte';
+
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { Input } from '$lib/components/ui/input';
+	import * as Table from '$lib/components/ui/table';
+	import { cn } from '$lib/utils';
+
 	import { notificationStore } from '../../../../stores';
-	import { getContext } from 'svelte';
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
@@ -91,7 +103,7 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between gap-4 mb-6 mt-4">
 		<div class="flex items-center gap-4">
-			<a href="/inventory" class={cn(buttonVariants({ variant: "ghost", size: "icon" }))}>
+			<a href="/inventory" class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
 				<ArrowLeft class="h-5 w-5" />
 			</a>
 			<div>
@@ -162,9 +174,7 @@
 				</p>
 				<div class="flex gap-3">
 					{#if data.filters?.search}
-						<Button variant="outline" onclick={clearSearch}>
-							Clear Search
-						</Button>
+						<Button variant="outline" onclick={clearSearch}>Clear Search</Button>
 					{/if}
 					{#if canModify}
 						<a href="/inventory/category/add" class={buttonVariants()}>
@@ -194,7 +204,9 @@
 								{category.categoryDescription || '—'}
 							</Table.Cell>
 							<Table.Cell class="text-center">
-								<span class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium">
+								<span
+									class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium"
+								>
 									{category.productCount}
 								</span>
 							</Table.Cell>
@@ -203,7 +215,7 @@
 									{#if canModify}
 										<a
 											href="/inventory/category/{category.categoryId}/edit"
-											class={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+											class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
 											title="Edit category"
 										>
 											<Pencil class="h-4 w-4" />
@@ -233,9 +245,13 @@
 			<div class="flex flex-col items-center justify-center gap-2 py-6">
 				<div class="text-sm text-muted-foreground">
 					Page <span class="font-semibold">{data.pagination.currentPage}</span>
-					of <span class="font-semibold">{Math.ceil(data.pagination.total / data.pagination.perPage)}</span>
+					of
+					<span class="font-semibold"
+						>{Math.ceil(data.pagination.total / data.pagination.perPage)}</span
+					>
 					&middot;
-					<span class="font-semibold">{data.pagination.total}</span> {data.pagination.total === 1 ? 'category' : 'categories'} total
+					<span class="font-semibold">{data.pagination.total}</span>
+					{data.pagination.total === 1 ? 'category' : 'categories'} total
 				</div>
 				<nav class="flex items-center gap-1">
 					<Button
@@ -269,7 +285,8 @@
 			</div>
 		{:else}
 			<p class="text-sm text-muted-foreground mt-4">
-				{data.pagination.total} {data.pagination.total === 1 ? 'category' : 'categories'} total
+				{data.pagination.total}
+				{data.pagination.total === 1 ? 'category' : 'categories'} total
 			</p>
 		{/if}
 	{/if}
@@ -285,9 +302,7 @@
 			</Dialog.Description>
 		</Dialog.Header>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={closeDeleteDialog} disabled={isDeleting}>
-				Cancel
-			</Button>
+			<Button variant="outline" onclick={closeDeleteDialog} disabled={isDeleting}>Cancel</Button>
 			<form
 				method="POST"
 				action="?/delete"
@@ -300,7 +315,9 @@
 							$notificationStore.success = { message: 'Category deleted successfully.' };
 							await invalidateAll();
 						} else if (result.type === 'failure') {
-							$notificationStore.error = { message: result.data?.error?.toString() || 'Failed to delete category.' };
+							$notificationStore.error = {
+								message: result.data?.error?.toString() || 'Failed to delete category.',
+							};
 						}
 					};
 				}}

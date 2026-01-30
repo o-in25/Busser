@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { Minus } from 'lucide-svelte';
+
 	import * as Card from '$lib/components/ui/card';
+	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { Input } from '$lib/components/ui/input';
-	import Autocomplete from './Autocomplete.svelte';
-	import { Minus } from 'lucide-svelte';
 	import type { View } from '$lib/types';
+
+	import Autocomplete from './Autocomplete.svelte';
 
 	// props
 	export let step: View.BasicRecipeStep;
@@ -44,16 +46,15 @@
 		</div>
 
 		<div class="mb-6">
-			<Label for="recipeStepDescription" class="mb-2">
-				Amount
-			</Label>
+			<Label for="recipeStepDescription" class="mb-2">Amount</Label>
 			<div class="flex">
 				<Input
 					name="productIdQuantityInMilliliters"
 					type="number"
 					class="rounded-r-none"
 					value={String(step.productIdQuantityInMilliliters)}
-					oninput={(e) => step.productIdQuantityInMilliliters = parseFloat(e.currentTarget.value) || 0}
+					oninput={(e) =>
+						(step.productIdQuantityInMilliliters = parseFloat(e.currentTarget.value) || 0)}
 					step="0.25"
 				/>
 				<select
@@ -69,13 +70,8 @@
 		</div>
 		<!-- description -->
 		<div class="mb-6">
-			<Label for="recipeStepDescription" class="mb-2">
-				Description
-			</Label>
-			<Textarea
-				rows={4}
-				bind:value={step.recipeStepDescription}
-			/>
+			<Label for="recipeStepDescription" class="mb-2">Description</Label>
+			<Textarea rows={4} bind:value={step.recipeStepDescription} />
 		</div>
 	</Card.Content>
 </Card.Root>

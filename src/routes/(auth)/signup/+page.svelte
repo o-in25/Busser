@@ -1,13 +1,13 @@
 <script lang="ts">
-	import * as Alert from '$lib/components/ui/alert';
-	import type { ActionData, PageData } from './$types';
-	import UserForm from '$lib/components/UserForm.svelte';
-	import type { FormSubmitResult } from '$lib/types';
-	import type { ActionResult } from '@sveltejs/kit';
-	import { enhance, applyAction } from '$app/forms';
 	import { AlertCircle } from 'lucide-svelte';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	import { enhance } from '$app/forms';
+	import * as Alert from '$lib/components/ui/alert';
+	import UserForm from '$lib/components/UserForm.svelte';
+
+	import type { ActionData } from './$types';
+
+	let { form }: { form: ActionData } = $props();
 
 	let errors = $derived(form?.errors);
 
@@ -23,17 +23,7 @@
 			<Alert.Description>{form?.message}</Alert.Description>
 		</Alert.Root>
 	{/if}
-	<form
-		class="space-y-6"
-		method="POST"
-		action="/signup"
-		use:enhance
-	>
-		<UserForm
-			bind:this={formRef}
-			user={null}
-			action="register"
-			errors={errors}
-		/>
+	<form class="space-y-6" method="POST" action="/signup" use:enhance>
+		<UserForm bind:this={formRef} user={null} action="register" {errors} />
 	</form>
 </div>

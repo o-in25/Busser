@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { LayoutData } from './$types';
-	import * as Card from '$lib/components/ui/card';
-	import logo from '$lib/assets/logo.png';
 
-	let { data, children }: { data: LayoutData; children: Snippet } = $props();
+	import logo from '$lib/assets/logo.png';
+	import * as Card from '$lib/components/ui/card';
+
+	let { children }: { children: Snippet } = $props();
 </script>
 
 <div class="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-4 pb-6 md:pb-10">

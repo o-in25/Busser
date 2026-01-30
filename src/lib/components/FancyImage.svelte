@@ -1,5 +1,4 @@
 <script lang="ts">
-	
 	export let src: string;
 	export let alt: string;
 	export let divStyle: string =
@@ -25,9 +24,5 @@
 </script>
 
 <div class={divStyle}>
-	<img
-		class={imgStyle}
-		{src}
-		{alt}
-	/>
+	<img class={imgStyle} {src} {alt} />
 </div>

@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
-	import { buttonVariants } from '$lib/components/ui/button';
 	import { Plus } from 'lucide-svelte';
-	import { cn } from '$lib/utils';
 	import { getContext, onMount } from 'svelte';
+
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { cn } from '$lib/utils';
 
 	export let label: string;
 	export let value: string | null;
@@ -73,10 +74,12 @@
 			bind:value={selectValue}
 			{required}
 			{disabled}
-			class={actionUrl && (!grant || (grant && permissions.includes(grant))) ? 'rounded-r-none' : ''}
+			class={actionUrl && (!grant || (grant && permissions.includes(grant)))
+				? 'rounded-r-none'
+				: ''}
 		/>
 		{#if actionUrl && (!grant || (grant && permissions.includes(grant)))}
-			<a class={cn(buttonVariants(), "rounded-l-none")} href="/inventory/category/add">
+			<a class={cn(buttonVariants(), 'rounded-l-none')} href="/inventory/category/add">
 				<Plus class="h-4 w-4" />
 			</a>
 		{/if}

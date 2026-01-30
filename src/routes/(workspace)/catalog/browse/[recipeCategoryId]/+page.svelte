@@ -1,18 +1,15 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import { cn } from '$lib/utils';
-	import {
-		ArrowLeft,
-		LayoutGrid,
-		List,
-		FlaskConical,
-	} from 'lucide-svelte';
-	import { browser } from '$app/environment';
+	import { ArrowLeft, FlaskConical, LayoutGrid, List } from 'lucide-svelte';
 	import { onMount } from 'svelte';
+
+	import { browser } from '$app/environment';
+	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
+	import { Badge } from '$lib/components/ui/badge';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { cn } from '$lib/utils';
+
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
@@ -50,7 +47,9 @@
 					alt={data.spirit.recipeCategoryDescription}
 					class="w-full h-full object-cover"
 				/>
-				<div class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40"></div>
+				<div
+					class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40"
+				></div>
 			</div>
 		{:else}
 			<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5"></div>
@@ -58,7 +57,10 @@
 
 		<!-- Content -->
 		<div class="relative px-6 py-12">
-			<a href="/catalog/browse" class={cn(buttonVariants({ variant: "ghost", size: "sm" }), "mb-4 gap-2")}>
+			<a
+				href="/catalog/browse"
+				class={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'mb-4 gap-2')}
+			>
 				<ArrowLeft class="h-4 w-4" />
 				All Recipes
 			</a>
@@ -74,7 +76,8 @@
 			{/if}
 
 			<Badge variant="secondary" class="text-sm">
-				{data.recipes.length} {data.recipes.length === 1 ? 'recipe' : 'recipes'}
+				{data.recipes.length}
+				{data.recipes.length === 1 ? 'recipe' : 'recipes'}
 			</Badge>
 		</div>
 	</div>
@@ -84,7 +87,7 @@
 		{#each data.spirits as spirit}
 			<a href="/catalog/browse/{spirit.recipeCategoryId}">
 				<Badge
-					variant={spirit.recipeCategoryId === data.spirit.recipeCategoryId ? "default" : "outline"}
+					variant={spirit.recipeCategoryId === data.spirit.recipeCategoryId ? 'default' : 'outline'}
 					class="cursor-pointer hover:bg-accent transition-colors"
 				>
 					{spirit.recipeCategoryDescription}
@@ -96,15 +99,16 @@
 	<!-- Toolbar -->
 	<div class="flex justify-between items-center mb-6">
 		<p class="text-sm text-muted-foreground">
-			Showing {data.recipes.length} {data.recipes.length === 1 ? 'recipe' : 'recipes'}
+			Showing {data.recipes.length}
+			{data.recipes.length === 1 ? 'recipe' : 'recipes'}
 		</p>
 
 		<!-- View Toggle -->
 		<div class="flex items-center border rounded-md overflow-hidden">
 			<button
 				class={cn(
-					"p-2 transition-colors",
-					viewMode === 'grid' ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+					'p-2 transition-colors',
+					viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('grid')}
 				aria-label="Grid view"
@@ -113,8 +117,8 @@
 			</button>
 			<button
 				class={cn(
-					"p-2 transition-colors",
-					viewMode === 'list' ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+					'p-2 transition-colors',
+					viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('list')}
 				aria-label="List view"
@@ -131,21 +135,24 @@
 				<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
 					<FlaskConical class="h-10 w-10 text-muted-foreground/50" />
 				</div>
-				<h3 class="text-xl font-semibold mb-2">No {data.spirit.recipeCategoryDescription || 'Spirit'} Recipes</h3>
+				<h3 class="text-xl font-semibold mb-2">
+					No {data.spirit.recipeCategoryDescription || 'Spirit'} Recipes
+				</h3>
 				<p class="text-muted-foreground mb-6 max-w-md">
-					You haven't added any {(data.spirit.recipeCategoryDescription || 'spirit').toLowerCase()} cocktails yet.
+					You haven't added any {(data.spirit.recipeCategoryDescription || 'spirit').toLowerCase()} cocktails
+					yet.
 				</p>
-				<a href="/catalog/add" class={buttonVariants()}>
-					Add Recipe
-				</a>
+				<a href="/catalog/add" class={buttonVariants()}> Add Recipe </a>
 			</Card.Content>
 		</Card.Root>
 	{:else}
-		<div class={cn(
-			viewMode === 'grid'
-				? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-				: "flex flex-col gap-3"
-		)}>
+		<div
+			class={cn(
+				viewMode === 'grid'
+					? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+					: 'flex flex-col gap-3'
+			)}
+		>
 			{#each data.recipes as recipe (recipe.recipeId)}
 				<CatalogBrowseCard {recipe} {viewMode} />
 			{/each}

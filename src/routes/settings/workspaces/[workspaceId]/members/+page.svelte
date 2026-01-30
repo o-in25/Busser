@@ -1,23 +1,16 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
+	import { ArrowLeft, Crown, Eye, Pencil, Shield, Trash2, UserPlus, Users } from 'lucide-svelte';
+
+	import { enhance } from '$app/forms';
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
-	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Table from '$lib/components/ui/table';
-	import {
-		Users,
-		UserPlus,
-		Trash2,
-		Crown,
-		Pencil,
-		Eye,
-		ArrowLeft,
-		Shield
-	} from 'lucide-svelte';
-	import { enhance } from '$app/forms';
+
+	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -35,19 +28,19 @@
 	const roleLabels: Record<string, string> = {
 		owner: 'Owner',
 		editor: 'Editor',
-		viewer: 'Viewer'
+		viewer: 'Viewer',
 	};
 
 	const roleIcons: Record<string, typeof Crown> = {
 		owner: Crown,
 		editor: Pencil,
-		viewer: Eye
+		viewer: Eye,
 	};
 
 	const roleVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
 		owner: 'default',
 		editor: 'secondary',
-		viewer: 'outline'
+		viewer: 'outline',
 	};
 
 	// open remove confirmation dialog
@@ -69,7 +62,7 @@
 		return d.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
-			day: 'numeric'
+			day: 'numeric',
 		});
 	}
 </script>
@@ -98,7 +91,7 @@
 				Manage access to <span class="font-medium">{data.workspace.workspaceName}</span>
 			</p>
 		</div>
-		<Button onclick={() => addDialogOpen = true} disabled={data.availableUsers.length === 0}>
+		<Button onclick={() => (addDialogOpen = true)} disabled={data.availableUsers.length === 0}>
 			<UserPlus class="h-4 w-4 mr-2" />
 			Add Member
 		</Button>
@@ -189,9 +182,13 @@
 												onValueChange={(v) => {
 													if (v && v !== member.workspaceRole) {
 														// submit form when role changes
-														const form = document.getElementById(`role-form-${member.userId}`) as HTMLFormElement;
+														const form = document.getElementById(
+															`role-form-${member.userId}`
+														) as HTMLFormElement;
 														if (form) {
-															const input = form.querySelector('input[name="role"]') as HTMLInputElement;
+															const input = form.querySelector(
+																'input[name="role"]'
+															) as HTMLInputElement;
 															if (input) input.value = v;
 															form.requestSubmit();
 														}
@@ -273,9 +270,7 @@
 				<div class="flex flex-col items-center justify-center py-12 text-center">
 					<Users class="h-12 w-12 text-muted-foreground/50 mb-4" />
 					<h3 class="text-lg font-medium">No members</h3>
-					<p class="text-sm text-muted-foreground mt-1">
-						Add members to share this workspace.
-					</p>
+					<p class="text-sm text-muted-foreground mt-1">Add members to share this workspace.</p>
 				</div>
 			{/if}
 		</Card.Content>
@@ -302,18 +297,14 @@
 						<Pencil class="h-3 w-3" />
 						Editor
 					</Badge>
-					<p class="text-muted-foreground">
-						Can create, edit, and delete recipes and inventory.
-					</p>
+					<p class="text-muted-foreground">Can create, edit, and delete recipes and inventory.</p>
 				</div>
 				<div class="flex items-start gap-3">
 					<Badge variant="outline" class="gap-1 shrink-0">
 						<Eye class="h-3 w-3" />
 						Viewer
 					</Badge>
-					<p class="text-muted-foreground">
-						Read-only access. Can view but not modify content.
-					</p>
+					<p class="text-muted-foreground">Read-only access. Can view but not modify content.</p>
 				</div>
 			</div>
 		</Card.Content>
@@ -325,9 +316,7 @@
 	<Dialog.Content class="sm:max-w-[425px]">
 		<Dialog.Header>
 			<Dialog.Title>Add Member</Dialog.Title>
-			<Dialog.Description>
-				Add a user to this workspace and assign their role.
-			</Dialog.Description>
+			<Dialog.Description>Add a user to this workspace and assign their role.</Dialog.Description>
 		</Dialog.Header>
 		<form
 			method="POST"
@@ -349,7 +338,7 @@
 						type="single"
 						name="userId"
 						value={newMemberUserId}
-						onValueChange={(v) => newMemberUserId = v ?? ''}
+						onValueChange={(v) => (newMemberUserId = v ?? '')}
 					>
 						<Select.Trigger>
 							<Select.Value placeholder="Select a user" />
@@ -378,7 +367,8 @@
 						type="single"
 						name="role"
 						value={newMemberRole}
-						onValueChange={(v) => newMemberRole = (v as 'owner' | 'editor' | 'viewer') ?? 'viewer'}
+						onValueChange={(v) =>
+							(newMemberRole = (v as 'owner' | 'editor' | 'viewer') ?? 'viewer')}
 					>
 						<Select.Trigger>
 							<Select.Value placeholder="Select role" />
@@ -408,7 +398,7 @@
 				</div>
 			</div>
 			<Dialog.Footer>
-				<Button type="button" variant="outline" onclick={() => addDialogOpen = false}>
+				<Button type="button" variant="outline" onclick={() => (addDialogOpen = false)}>
 					Cancel
 				</Button>
 				<Button type="submit" disabled={!newMemberUserId}>Add Member</Button>
@@ -423,11 +413,12 @@
 		<Dialog.Header>
 			<Dialog.Title>Remove Member</Dialog.Title>
 			<Dialog.Description>
-				Are you sure you want to remove <span class="font-medium">{selectedUsername}</span> from this workspace? They will lose access to all workspace content.
+				Are you sure you want to remove <span class="font-medium">{selectedUsername}</span> from this
+				workspace? They will lose access to all workspace content.
 			</Dialog.Description>
 		</Dialog.Header>
 		<Dialog.Footer>
-			<Button type="button" variant="outline" onclick={() => removeDialogOpen = false}>
+			<Button type="button" variant="outline" onclick={() => (removeDialogOpen = false)}>
 				Cancel
 			</Button>
 			<form
@@ -446,9 +437,7 @@
 				class="inline"
 			>
 				<input type="hidden" name="userId" value={selectedUserId || ''} />
-				<Button type="submit" variant="destructive">
-					Remove
-				</Button>
+				<Button type="submit" variant="destructive">Remove</Button>
 			</form>
 		</Dialog.Footer>
 	</Dialog.Content>

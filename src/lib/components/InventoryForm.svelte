@@ -1,37 +1,39 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
+	import {
+		Calculator,
+		Candy,
+		DollarSign,
+		FileText,
+		Flame,
+		Package,
+		Palette,
+		Percent,
+		Sparkles,
+		Wind,
+	} from 'lucide-svelte';
+	import { getContext } from 'svelte';
+
+	import { applyAction, enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
-	import { Switch } from '$lib/components/ui/switch';
-	import * as Card from '$lib/components/ui/card';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { QuickSelect } from '$lib/components/ui/quick-select';
 	import { CalculatedBadge } from '$lib/components/ui/calculated-badge';
-	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
+	import * as Card from '$lib/components/ui/card';
 	import { CollapsibleSection } from '$lib/components/ui/collapsible';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { QuickSelect } from '$lib/components/ui/quick-select';
+	import { Switch } from '$lib/components/ui/switch';
+	import type { ComponentAction, Product } from '$lib/types';
+
+	import { notificationStore } from '../../stores';
+	import Autocomplete from './Autocomplete.svelte';
+	import FileUpload from './FileUpload.svelte';
 	import FormDraftManager from './FormDraftManager.svelte';
 	import InventoryFormWizard from './InventoryFormWizard.svelte';
-	import Autocomplete from './Autocomplete.svelte';
-	import type { ComponentAction, Product } from '$lib/types';
-	import FileUpload from './FileUpload.svelte';
-	import { applyAction, enhance } from '$app/forms';
-	import { page } from '$app/stores';
-	import { notificationStore } from '../../stores';
-	import { getContext } from 'svelte';
 	import Prompt from './Prompt.svelte';
-	import { goto } from '$app/navigation';
-	import {
-		Package,
-		DollarSign,
-		Palette,
-		FileText,
-		Candy,
-		Wind,
-		Sparkles,
-		Flame,
-		Calculator,
-		Percent
-	} from 'lucide-svelte';
 
 	let { action, product = null }: { action: ComponentAction; product?: Product | null } = $props();
 
@@ -41,10 +43,20 @@
 
 	let slug = $page.params.id;
 	let productName = $state(product?.productName ?? '');
-	let productPricePerUnit = $state(product?.productPricePerUnit !== undefined ? String(product.productPricePerUnit) : '');
-	let productUnitSizeInMilliliters = $state(product?.productUnitSizeInMilliliters !== undefined ? String(product.productUnitSizeInMilliliters) : '');
-	let productProof = $state(product?.productProof !== undefined ? String(product.productProof) : '');
-	let categoryId = $state<string | null>(product?.categoryId !== undefined ? String(product.categoryId) : null);
+	let productPricePerUnit = $state(
+		product?.productPricePerUnit !== undefined ? String(product.productPricePerUnit) : ''
+	);
+	let productUnitSizeInMilliliters = $state(
+		product?.productUnitSizeInMilliliters !== undefined
+			? String(product.productUnitSizeInMilliliters)
+			: ''
+	);
+	let productProof = $state(
+		product?.productProof !== undefined ? String(product.productProof) : ''
+	);
+	let categoryId = $state<string | null>(
+		product?.categoryId !== undefined ? String(product.categoryId) : null
+	);
 	let productImageUrl = $state(product?.productImageUrl);
 	let productInStockQuantity = $state(product?.productInStockQuantity ?? 0);
 	let productSweetnessRating = $state(product?.productSweetnessRating ?? 0.0);
@@ -78,14 +90,14 @@
 		{ label: '200mL', value: '200' },
 		{ label: '375mL', value: '375' },
 		{ label: '750mL', value: '750' },
-		{ label: '1000mL', value: '1000' }
+		{ label: '1000mL', value: '1000' },
 	];
 
 	const proofOptions = [
 		{ label: '80', value: '80' },
 		{ label: '86', value: '86' },
 		{ label: '90', value: '90' },
-		{ label: '100', value: '100' }
+		{ label: '100', value: '100' },
 	];
 
 	// Wizard steps configuration
@@ -93,7 +105,7 @@
 		{ title: 'Basic Info', icon: Package },
 		{ title: 'Purchase Details', icon: DollarSign },
 		{ title: 'Flavor Profile', icon: Palette },
-		{ title: 'Description', icon: FileText }
+		{ title: 'Description', icon: FileText },
 	];
 
 	// Draft data for autosave
@@ -108,7 +120,7 @@
 		productDrynessRating,
 		productStrengthRating,
 		productVersatilityRating,
-		productDescription
+		productDescription,
 	});
 
 	function handleDraftRestore(data: Record<string, unknown>) {
@@ -179,10 +191,7 @@
 		enctype="multipart/form-data"
 	>
 		<!-- Mobile Wizard View -->
-		<InventoryFormWizard
-			steps={wizardSteps}
-			bind:currentStep={currentWizardStep}
-		>
+		<InventoryFormWizard steps={wizardSteps} bind:currentStep={currentWizardStep}>
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Basic Info Step -->
@@ -219,7 +228,10 @@
 						<div>
 							<Label for="productPricePerUnit-mobile" class="mb-2">Price</Label>
 							<div class="relative">
-								<span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">$</span>
+								<span
+									class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
+									>$</span
+								>
 								<Input
 									type="number"
 									id="productPricePerUnit-mobile"
@@ -227,7 +239,7 @@
 									required
 									class="pl-7"
 									value={productPricePerUnit}
-									oninput={(e) => productPricePerUnit = e.currentTarget.value}
+									oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
 								/>
 							</div>
 						</div>
@@ -245,42 +257,32 @@
 									required
 									class="pr-10"
 									value={productUnitSizeInMilliliters}
-									oninput={(e) => productUnitSizeInMilliliters = e.currentTarget.value}
+									oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
 								/>
-								<span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">mL</span>
+								<span
+									class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
+									>mL</span
+								>
 							</div>
 						</div>
 						<div>
 							<Label for="productProof-mobile" class="mb-2">Proof</Label>
-							<QuickSelect
-								options={proofOptions}
-								bind:value={productProof}
-								class="mb-2"
-							/>
+							<QuickSelect options={proofOptions} bind:value={productProof} class="mb-2" />
 							<Input
 								type="number"
 								id="productProof-mobile"
 								max="200"
 								required
 								value={productProof}
-								oninput={(e) => productProof = e.currentTarget.value}
+								oninput={(e) => (productProof = e.currentTarget.value)}
 							/>
 						</div>
 						<div class="flex flex-wrap gap-2 pt-2">
 							{#if pricePerOunce()}
-								<CalculatedBadge
-									label="Price/oz"
-									value={'$' + pricePerOunce()}
-									icon={Calculator}
-								/>
+								<CalculatedBadge label="Price/oz" value={'$' + pricePerOunce()} icon={Calculator} />
 							{/if}
 							{#if abvPercent()}
-								<CalculatedBadge
-									label="ABV"
-									value={abvPercent() ?? ''}
-									unit="%"
-									icon={Percent}
-								/>
+								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
 							{/if}
 						</div>
 						<div class="flex items-center justify-end gap-3 pt-2">
@@ -395,7 +397,10 @@
 						<div>
 							<Label for="productPricePerUnit" class="mb-2">Price</Label>
 							<div class="relative">
-								<span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">$</span>
+								<span
+									class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
+									>$</span
+								>
 								<Input
 									type="number"
 									id="productPricePerUnit"
@@ -404,7 +409,7 @@
 									required
 									class="pl-7"
 									value={productPricePerUnit}
-									oninput={(e) => productPricePerUnit = e.currentTarget.value}
+									oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
 								/>
 							</div>
 						</div>
@@ -423,18 +428,17 @@
 									required
 									class="pr-10"
 									value={productUnitSizeInMilliliters}
-									oninput={(e) => productUnitSizeInMilliliters = e.currentTarget.value}
+									oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
 								/>
-								<span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">mL</span>
+								<span
+									class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
+									>mL</span
+								>
 							</div>
 						</div>
 						<div>
 							<Label for="productProof" class="mb-2">Proof</Label>
-							<QuickSelect
-								options={proofOptions}
-								bind:value={productProof}
-								class="mb-2"
-							/>
+							<QuickSelect options={proofOptions} bind:value={productProof} class="mb-2" />
 							<Input
 								type="number"
 								id="productProof"
@@ -442,7 +446,7 @@
 								max="200"
 								required
 								value={productProof}
-								oninput={(e) => productProof = e.currentTarget.value}
+								oninput={(e) => (productProof = e.currentTarget.value)}
 							/>
 						</div>
 					</div>
@@ -451,19 +455,10 @@
 					<div class="flex flex-wrap items-center justify-between mt-6 pt-4 border-t">
 						<div class="flex flex-wrap gap-3">
 							{#if pricePerOunce()}
-								<CalculatedBadge
-									label="Price/oz"
-									value={'$' + pricePerOunce()}
-									icon={Calculator}
-								/>
+								<CalculatedBadge label="Price/oz" value={'$' + pricePerOunce()} icon={Calculator} />
 							{/if}
 							{#if abvPercent()}
-								<CalculatedBadge
-									label="ABV"
-									value={abvPercent() ?? ''}
-									unit="%"
-									icon={Percent}
-								/>
+								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
 							{/if}
 						</div>
 						<div class="flex items-center gap-3">
@@ -486,11 +481,7 @@
 			</Card.Root>
 
 			<!-- Flavor Profile Card (Collapsible) -->
-			<CollapsibleSection
-				title="Flavor Profile"
-				icon={Palette}
-				open={action === 'edit'}
-			>
+			<CollapsibleSection title="Flavor Profile" icon={Palette} open={action === 'edit'}>
 				<div class="grid gap-6 md:grid-cols-2">
 					<FlavorSlider
 						bind:value={productSweetnessRating}
@@ -524,11 +515,7 @@
 			</CollapsibleSection>
 
 			<!-- Description Card (Collapsible) -->
-			<CollapsibleSection
-				title="Description"
-				icon={FileText}
-				open={action === 'edit'}
-			>
+			<CollapsibleSection title="Description" icon={FileText} open={action === 'edit'}>
 				<Prompt
 					bind:value={productDescription}
 					trigger={productName}
@@ -543,7 +530,11 @@
 		<div class="hidden">
 			<input type="hidden" name="productName" value={productName} />
 			<input type="hidden" name="productPricePerUnit" value={productPricePerUnit} />
-			<input type="hidden" name="productUnitSizeInMilliliters" value={productUnitSizeInMilliliters} />
+			<input
+				type="hidden"
+				name="productUnitSizeInMilliliters"
+				value={productUnitSizeInMilliliters}
+			/>
 			<input type="hidden" name="productProof" value={productProof} />
 			<input type="hidden" name="categoryId" value={categoryId ?? ''} />
 			<input type="hidden" name="productInStockQuantity" value={productInStockQuantity} />
@@ -571,9 +562,7 @@
 				</div>
 			{/if}
 			<div class="my-4 order-2">
-				<Button class="w-full md:w-32" type="submit" size="lg">
-					Save
-				</Button>
+				<Button class="w-full md:w-32" type="submit" size="lg">Save</Button>
 			</div>
 		</div>
 	</form>
@@ -584,15 +573,11 @@
 				<Dialog.Title>Confirm Delete</Dialog.Title>
 				<Dialog.Description>
 					Delete <span class="font-semibold">{product?.productName}</span> from inventory?
-					<p class="text-destructive font-bold mt-2">
-						Once deleted, it can't be recovered.
-					</p>
+					<p class="text-destructive font-bold mt-2">Once deleted, it can't be recovered.</p>
 				</Dialog.Description>
 			</Dialog.Header>
 			<Dialog.Footer>
-				<Button variant="outline" onclick={() => (modalOpen = false)}>
-					Cancel
-				</Button>
+				<Button variant="outline" onclick={() => (modalOpen = false)}>Cancel</Button>
 				<Button
 					variant="destructive"
 					onclick={async () => {

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { CheckCircle2, XCircle, Bell } from 'lucide-svelte';
-	import { notificationStore } from '../../stores';
+	import { Bell, CheckCircle2, XCircle } from 'lucide-svelte';
 	import { fly } from 'svelte/transition';
+
+	import { notificationStore } from '../../stores';
 
 	let message: string | undefined;
 	let showNotification = false;
@@ -38,21 +39,19 @@
 </script>
 
 {#if showNotification}
-	<div
-		class="fixed top-4 right-4 z-50"
-		transition:fly={{ x: 200, duration: 300 }}
-	>
+	<div class="fixed top-4 right-4 z-50" transition:fly={{ x: 200, duration: 300 }}>
 		<div
 			class="w-full max-w-xs p-4 backdrop-blur-xl bg-white/80 dark:bg-zinc-900/70 border border-white/30 dark:border-zinc-700/40 shadow-2xl rounded-xl text-gray-500 dark:text-gray-400 flex items-start gap-3"
 			role="alert"
 		>
-			<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg {
-				color === 'green'
+			<div
+				class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg {color ===
+				'green'
 					? 'text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200'
 					: color === 'red'
 						? 'text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200'
-						: 'text-primary-500 bg-primary-100 dark:bg-primary-800 dark:text-primary-200'
-			}">
+						: 'text-primary-500 bg-primary-100 dark:bg-primary-800 dark:text-primary-200'}"
+			>
 				{#if color === 'green'}
 					<CheckCircle2 class="w-5 h-5" />
 				{:else if color === 'red'}

@@ -1,20 +1,22 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
+	import { Tags } from 'lucide-svelte';
+	import { getContext } from 'svelte';
+
+	import { applyAction, enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 	import type { ComponentAction, Table } from '$lib/types';
-	import { applyAction, enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+
 	import { notificationStore } from '../../stores';
-	import { getContext } from 'svelte';
 	import Prompt from './Prompt.svelte';
-	import { Tags } from 'lucide-svelte';
 
 	let {
 		action = 'add',
-		category = {} as Table.Category
+		category = {} as Table.Category,
 	}: {
 		action?: ComponentAction;
 		category?: Table.Category;
@@ -71,7 +73,7 @@
 					}
 					if (result.type === 'success') {
 						$notificationStore.success = {
-							message: action === 'add' ? 'Category created.' : 'Category updated.'
+							message: action === 'add' ? 'Category created.' : 'Category updated.',
 						};
 					}
 				}
@@ -114,16 +116,12 @@
 		<!-- Action buttons -->
 		<div class="flex justify-end gap-3">
 			{#if action === 'edit' && canModify}
-				<Button
-					type="button"
-					variant="destructive"
-					onclick={() => (modalOpen = true)}
-				>
+				<Button type="button" variant="destructive" onclick={() => (modalOpen = true)}>
 					Delete
 				</Button>
 			{/if}
 			<Button type="submit" disabled={isSubmitting}>
-				{isSubmitting ? 'Saving...' : (action === 'add' ? 'Create Category' : 'Save Changes')}
+				{isSubmitting ? 'Saving...' : action === 'add' ? 'Create Category' : 'Save Changes'}
 			</Button>
 		</div>
 	</form>
@@ -136,15 +134,11 @@
 					<Dialog.Title>Confirm Delete</Dialog.Title>
 					<Dialog.Description>
 						Delete <span class="font-semibold">{category.categoryName}</span>?
-						<p class="text-destructive font-bold mt-2">
-							This action cannot be undone.
-						</p>
+						<p class="text-destructive font-bold mt-2">This action cannot be undone.</p>
 					</Dialog.Description>
 				</Dialog.Header>
 				<Dialog.Footer>
-					<Button variant="outline" onclick={() => (modalOpen = false)}>
-						Cancel
-					</Button>
+					<Button variant="outline" onclick={() => (modalOpen = false)}>Cancel</Button>
 					<Button
 						variant="destructive"
 						onclick={async () => {

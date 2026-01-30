@@ -2,17 +2,17 @@
 // new code should import from repositories directly
 
 import { DbProvider } from './db';
-import { InventoryRepository } from './repositories/inventory.repository';
 import { CatalogRepository } from './repositories/catalog.repository';
+import { InventoryRepository } from './repositories/inventory.repository';
 const { CORE_TABLE } = process.env;
 
 // re-export utilities from base
 export {
-  marshal,
-  marshalToType,
-  pascalCase,
-  camelCase,
-  titleCase,
+	camelCase,
+	marshal,
+	marshalToType,
+	pascalCase,
+	titleCase,
 } from './repositories/base.repository';
 
 // singleton instances
@@ -21,7 +21,7 @@ const inventoryRepo = new InventoryRepository(db);
 const catalogRepo = new CatalogRepository(db);
 
 // export repositories for direct access
-export { inventoryRepo, catalogRepo };
+export { catalogRepo, inventoryRepo };
 
 // inventory functions (delegate to repository)
 export const getInventory = inventoryRepo.findAll.bind(inventoryRepo);

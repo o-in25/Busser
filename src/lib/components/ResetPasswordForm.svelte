@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 </script>
 
 <form class="space-y-6" method="POST">

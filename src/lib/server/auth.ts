@@ -28,7 +28,7 @@ export const resetPassword = authRepo.resetPassword.bind(authRepo);
 
 // login needs getUser, so we wrap it
 export async function login(username: string, password: string) {
-  return authRepo.login(username, password, userRepo.findById.bind(userRepo));
+	return authRepo.login(username, password, userRepo.findById.bind(userRepo));
 }
 
 // invitation functions (delegate to user repository)
@@ -39,7 +39,8 @@ export const deleteInvitation = userRepo.deleteInvitation.bind(userRepo);
 // invitation request functions (delegate to user repository)
 export const createInvitationRequest = userRepo.createInvitationRequest.bind(userRepo);
 export const getInvitationRequests = userRepo.getInvitationRequests.bind(userRepo);
-export const getPendingInvitationRequestCount = userRepo.getPendingInvitationRequestCount.bind(userRepo);
+export const getPendingInvitationRequestCount =
+	userRepo.getPendingInvitationRequestCount.bind(userRepo);
 export const fulfillInvitationRequest = userRepo.fulfillInvitationRequest.bind(userRepo);
 export const rejectInvitationRequest = userRepo.rejectInvitationRequest.bind(userRepo);
 
@@ -54,33 +55,28 @@ export const deleteWorkspace = workspaceRepo.deleteWorkspace.bind(workspaceRepo)
 export const getWorkspaceMembers = workspaceRepo.getWorkspaceMembers.bind(workspaceRepo);
 export const addWorkspaceMember = workspaceRepo.addWorkspaceMember.bind(workspaceRepo);
 export const removeWorkspaceMember = workspaceRepo.removeWorkspaceMember.bind(workspaceRepo);
-export const updateWorkspaceMemberRole = workspaceRepo.updateWorkspaceMemberRole.bind(workspaceRepo);
+export const updateWorkspaceMemberRole =
+	workspaceRepo.updateWorkspaceMemberRole.bind(workspaceRepo);
 
 // re-export workspace role type
 export type { WorkspaceRole } from './repositories/workspace.repository';
 
 // check if user can modify resources in a workspace (requires editor or owner)
-export async function canModifyWorkspace(
-  userId: string,
-  workspaceId: string
-): Promise<boolean> {
-  const role = await hasWorkspaceAccess(userId, workspaceId);
-  return role === 'owner' || role === 'editor';
+export async function canModifyWorkspace(userId: string, workspaceId: string): Promise<boolean> {
+	const role = await hasWorkspaceAccess(userId, workspaceId);
+	return role === 'owner' || role === 'editor';
 }
 
 // check if user is workspace owner
-export async function isWorkspaceOwner(
-  userId: string,
-  workspaceId: string
-): Promise<boolean> {
-  const role = await hasWorkspaceAccess(userId, workspaceId);
-  return role === 'owner';
+export async function isWorkspaceOwner(userId: string, workspaceId: string): Promise<boolean> {
+	const role = await hasWorkspaceAccess(userId, workspaceId);
+	return role === 'owner';
 }
 
 // check if user has a global permission
 export function hasGlobalPermission(
-  user: { permissions?: Array<{ permissionName: string }> } | undefined,
-  permission: string
+	user: { permissions?: Array<{ permissionName: string }> } | undefined,
+	permission: string
 ): boolean {
-  return user?.permissions?.some(p => p.permissionName === permission) ?? false;
+	return user?.permissions?.some((p) => p.permissionName === permission) ?? false;
 }

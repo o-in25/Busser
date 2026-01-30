@@ -1,14 +1,11 @@
 <script lang="ts">
-  import { Popover as PopoverPrimitive } from "bits-ui";
+	import { Popover as PopoverPrimitive } from 'bits-ui';
 
-  let {
-    children,
-    ...restProps
-  }: PopoverPrimitive.TriggerProps = $props();
+	let { children, ...restProps }: PopoverPrimitive.TriggerProps = $props();
 </script>
 
 <PopoverPrimitive.Trigger {...restProps}>
-  {#if children}
-    {@render children()}
-  {/if}
+	{#if children}
+		{@render children()}
+	{/if}
 </PopoverPrimitive.Trigger>

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { LayoutData } from './$types';
-	import * as Card from '$lib/components/ui/card';
+
 	import logo from '$lib/assets/logo.png';
+	import * as Card from '$lib/components/ui/card';
+
+	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 </script>

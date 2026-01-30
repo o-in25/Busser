@@ -1,24 +1,26 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
-	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { cn } from '$lib/utils';
 	import {
-		User,
-		Mail,
-		Shield,
-		Pencil,
-		Check,
 		ArrowRight,
-		KeyRound,
 		Building2,
-		Users,
+		Check,
 		Crown,
 		Globe,
+		KeyRound,
+		Mail,
+		Pencil,
+		Shield,
+		User,
+		Users,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
+
 	import { enhance } from '$app/forms';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { cn } from '$lib/utils';
+
+	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -35,35 +37,38 @@
 	const roles: string[] = getContext('roles') || [];
 
 	// filter to only admin-related permissions (system-level access)
-	const adminPermissions = permissions.filter(p => p.includes('admin'));
+	const adminPermissions = permissions.filter((p) => p.includes('admin'));
 
 	// workspace role descriptions
-	const roleDescriptions: Record<string, { label: string; description: string; color: string; bg: string }> = {
+	const roleDescriptions: Record<
+		string,
+		{ label: string; description: string; color: string; bg: string }
+	> = {
 		owner: {
 			label: 'Owner',
 			description: 'Full access. Can manage members, settings, and all content.',
 			color: 'text-amber-500',
-			bg: 'bg-amber-500/10'
+			bg: 'bg-amber-500/10',
 		},
 		editor: {
 			label: 'Editor',
 			description: 'Can create, edit, and delete recipes and inventory.',
 			color: 'text-blue-500',
-			bg: 'bg-blue-500/10'
+			bg: 'bg-blue-500/10',
 		},
 		viewer: {
 			label: 'Viewer',
 			description: 'Read-only access. Can view but not modify content.',
 			color: 'text-emerald-500',
-			bg: 'bg-emerald-500/10'
-		}
+			bg: 'bg-emerald-500/10',
+		},
 	};
 
 	// admin permission descriptions
 	const adminPermissionDescriptions: Record<string, string> = {
-		'view_admin': 'View admin settings and user list',
-		'edit_admin': 'Manage users and workspace settings',
-		'delete_admin': 'Delete users from the system'
+		view_admin: 'View admin settings and user list',
+		edit_admin: 'Manage users and workspace settings',
+		delete_admin: 'Delete users from the system',
 	};
 </script>
 
@@ -76,12 +81,10 @@
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-2xl font-bold">Account Settings</h1>
-			<p class="text-sm text-muted-foreground mt-1">
-				View your account details and permissions
-			</p>
+			<p class="text-sm text-muted-foreground mt-1">View your account details and permissions</p>
 		</div>
 		<a
-			class={cn(buttonVariants({ variant: "default" }))}
+			class={cn(buttonVariants({ variant: 'default' }))}
 			href="/settings/users/{data.user?.userId}/edit"
 		>
 			<Pencil class="h-4 w-4 mr-2" />
@@ -146,7 +149,13 @@
 					</div>
 					{#if data.currentWorkspace}
 						<div class="flex items-center gap-3">
-							<div class="p-2 rounded-lg {data.currentWorkspace.workspaceId === 'ws-global-catalog' ? 'bg-blue-500/10' : data.currentWorkspace.workspaceType === 'personal' ? 'bg-purple-500/10' : 'bg-green-500/10'}">
+							<div
+								class="p-2 rounded-lg {data.currentWorkspace.workspaceId === 'ws-global-catalog'
+									? 'bg-blue-500/10'
+									: data.currentWorkspace.workspaceType === 'personal'
+										? 'bg-purple-500/10'
+										: 'bg-green-500/10'}"
+							>
 								{#if data.currentWorkspace.workspaceId === 'ws-global-catalog'}
 									<Globe class="h-4 w-4 text-blue-500" />
 								{:else if data.currentWorkspace.workspaceType === 'personal'}
@@ -157,7 +166,9 @@
 							</div>
 							<div>
 								<p class="text-lg font-semibold">{data.currentWorkspace.workspaceName}</p>
-								<p class="text-sm text-muted-foreground capitalize">{data.currentWorkspace.workspaceType} workspace</p>
+								<p class="text-sm text-muted-foreground capitalize">
+									{data.currentWorkspace.workspaceType} workspace
+								</p>
 							</div>
 							<Badge variant="secondary" class="ml-auto capitalize">
 								{#if data.currentWorkspace.workspaceRole === 'owner'}
@@ -181,9 +192,7 @@
 				<Shield class="h-5 w-5" />
 				System Access
 			</Card.Title>
-			<Card.Description>
-				Your administrative permissions for system-level features
-			</Card.Description>
+			<Card.Description>Your administrative permissions for system-level features</Card.Description>
 		</Card.Header>
 		<Card.Content>
 			{#if adminPermissions.length > 0}
@@ -194,7 +203,9 @@
 								<Shield class="h-4 w-4 text-primary" />
 							</div>
 							<div>
-								<p class="font-medium">{permission.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</p>
+								<p class="font-medium">
+									{permission.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+								</p>
 								<p class="text-sm text-muted-foreground">
 									{adminPermissionDescriptions[permission] || 'System administrative access'}
 								</p>
@@ -204,12 +215,15 @@
 				</div>
 			{:else}
 				<div class="text-center py-8">
-					<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+					<div
+						class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
+					>
 						<Shield class="h-8 w-8 text-muted-foreground/50" />
 					</div>
 					<h3 class="font-semibold mb-1">Standard User</h3>
 					<p class="text-sm text-muted-foreground">
-						You have standard user access. Your permissions for recipes and inventory are determined by your role in each workspace.
+						You have standard user access. Your permissions for recipes and inventory are determined
+						by your role in each workspace.
 					</p>
 				</div>
 			{/if}
@@ -235,11 +249,13 @@
 						<div class="p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
 							<div class="flex items-center justify-between mb-2">
 								<div class="flex items-center gap-3">
-									<div class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
-										? 'bg-blue-500/10'
-										: workspace.workspaceType === 'personal'
-											? 'bg-purple-500/10'
-											: 'bg-green-500/10'}">
+									<div
+										class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
+											? 'bg-blue-500/10'
+											: workspace.workspaceType === 'personal'
+												? 'bg-purple-500/10'
+												: 'bg-green-500/10'}"
+									>
 										{#if workspace.workspaceId === 'ws-global-catalog'}
 											<Globe class="h-4 w-4 text-blue-500" />
 										{:else if workspace.workspaceType === 'personal'}
@@ -290,13 +306,13 @@
 				</div>
 			{:else}
 				<div class="text-center py-8">
-					<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+					<div
+						class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
+					>
 						<Building2 class="h-8 w-8 text-muted-foreground/50" />
 					</div>
 					<h3 class="font-semibold mb-1">No Workspaces</h3>
-					<p class="text-sm text-muted-foreground">
-						You don't belong to any workspaces yet.
-					</p>
+					<p class="text-sm text-muted-foreground">You don't belong to any workspaces yet.</p>
 				</div>
 			{/if}
 		</Card.Content>
@@ -330,17 +346,20 @@
 						{#each data.workspaces as workspace (workspace.workspaceId)}
 							<button
 								type="button"
-								onclick={() => selectedWorkspaceId = workspace.workspaceId}
-								class="w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all {selectedWorkspaceId === workspace.workspaceId
+								onclick={() => (selectedWorkspaceId = workspace.workspaceId)}
+								class="w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all {selectedWorkspaceId ===
+								workspace.workspaceId
 									? 'border-primary bg-primary/5'
 									: 'border-transparent bg-muted/30 hover:bg-muted/50'}"
 							>
 								<div class="flex items-center gap-3">
-									<div class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
-										? 'bg-blue-500/10'
-										: workspace.workspaceType === 'personal'
-											? 'bg-purple-500/10'
-											: 'bg-green-500/10'}">
+									<div
+										class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
+											? 'bg-blue-500/10'
+											: workspace.workspaceType === 'personal'
+												? 'bg-purple-500/10'
+												: 'bg-green-500/10'}"
+									>
 										{#if workspace.workspaceId === 'ws-global-catalog'}
 											<Globe class="h-4 w-4 text-blue-500" />
 										{:else if workspace.workspaceType === 'personal'}
@@ -385,7 +404,9 @@
 						{/if}
 						<Button
 							type="submit"
-							disabled={!selectedWorkspaceId || selectedWorkspaceId === data.preferredWorkspaceId || isSubmitting}
+							disabled={!selectedWorkspaceId ||
+								selectedWorkspaceId === data.preferredWorkspaceId ||
+								isSubmitting}
 						>
 							{#if isSubmitting}
 								Saving...
@@ -397,13 +418,13 @@
 				</form>
 			{:else}
 				<div class="text-center py-8">
-					<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+					<div
+						class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
+					>
 						<Building2 class="h-8 w-8 text-muted-foreground/50" />
 					</div>
 					<h3 class="font-semibold mb-1">No Workspaces</h3>
-					<p class="text-sm text-muted-foreground">
-						You don't belong to any workspaces yet.
-					</p>
+					<p class="text-sm text-muted-foreground">You don't belong to any workspaces yet.</p>
 				</div>
 			{/if}
 		</Card.Content>

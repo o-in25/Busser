@@ -1,36 +1,37 @@
 <script lang="ts">
-	import type { Product } from '$lib/types';
+	import {
+		AlertTriangle,
+		ArrowRight,
+		Beaker,
+		Calculator,
+		Candy,
+		CheckCircle2,
+		DollarSign,
+		Flame,
+		FlaskConical,
+		Info,
+		Pencil,
+		Sparkles,
+		Wind,
+		XCircle,
+	} from 'lucide-svelte';
+	import { getContext } from 'svelte';
+
 	import placeholder from '$lib/assets/placeholder@2x.jpg';
-	import * as Popover from '$lib/components/ui/popover';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
-	import { Switch } from '$lib/components/ui/switch';
 	import { Label } from '$lib/components/ui/label';
-	import { cn } from '$lib/utils';
-	import {
-		ArrowRight,
-		Pencil,
-		Info,
-		FlaskConical,
-		DollarSign,
-		Beaker,
-		Flame,
-		Calculator,
-		CheckCircle2,
-		XCircle,
-		AlertTriangle,
-		Candy,
-		Wind,
-		Sparkles,
-	} from 'lucide-svelte';
+	import * as Popover from '$lib/components/ui/popover';
+	import { Switch } from '$lib/components/ui/switch';
 	import { weightedMean } from '$lib/math';
-	import { getContext } from 'svelte';
+	import type { Product } from '$lib/types';
+	import { cn } from '$lib/utils';
 
 	let {
 		product,
 		isBaseSpirit,
 		recipeCount = 0,
-		onStockChange = null
+		onStockChange = null,
 	}: {
 		product: Product;
 		isBaseSpirit: boolean;
@@ -63,26 +64,64 @@
 	// Stock status
 	const stockStatus = $derived.by(() => {
 		if (product.productInStockQuantity === 0) {
-			return { label: 'Out of Stock', variant: 'destructive' as const, icon: XCircle, color: 'text-red-500', bgColor: 'bg-red-500/10' };
+			return {
+				label: 'Out of Stock',
+				variant: 'destructive' as const,
+				icon: XCircle,
+				color: 'text-red-500',
+				bgColor: 'bg-red-500/10',
+			};
 		}
 		if (product.productInStockQuantity === 1) {
-			return { label: 'Low Stock', variant: 'secondary' as const, icon: AlertTriangle, color: 'text-yellow-500', bgColor: 'bg-yellow-500/10' };
+			return {
+				label: 'Low Stock',
+				variant: 'secondary' as const,
+				icon: AlertTriangle,
+				color: 'text-yellow-500',
+				bgColor: 'bg-yellow-500/10',
+			};
 		}
-		return { label: 'In Stock', variant: 'default' as const, icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-500/10' };
+		return {
+			label: 'In Stock',
+			variant: 'default' as const,
+			icon: CheckCircle2,
+			color: 'text-green-500',
+			bgColor: 'bg-green-500/10',
+		};
 	});
 
 	const StockIcon = $derived(stockStatus.icon);
 
 	// Flavor profile data
 	const flavorProfile = $derived([
-		{ label: 'Sweetness', value: product.productSweetnessRating || 0, icon: Candy, color: 'bg-pink-500' },
-		{ label: 'Dryness', value: product.productDrynessRating || 0, icon: Wind, color: 'bg-amber-500' },
-		{ label: 'Versatility', value: product.productVersatilityRating || 0, icon: Sparkles, color: 'bg-purple-500' },
-		{ label: 'Strength', value: product.productStrengthRating || 0, icon: Flame, color: 'bg-orange-500' },
+		{
+			label: 'Sweetness',
+			value: product.productSweetnessRating || 0,
+			icon: Candy,
+			color: 'bg-pink-500',
+		},
+		{
+			label: 'Dryness',
+			value: product.productDrynessRating || 0,
+			icon: Wind,
+			color: 'bg-amber-500',
+		},
+		{
+			label: 'Versatility',
+			value: product.productVersatilityRating || 0,
+			icon: Sparkles,
+			color: 'bg-purple-500',
+		},
+		{
+			label: 'Strength',
+			value: product.productStrengthRating || 0,
+			icon: Flame,
+			color: 'bg-orange-500',
+		},
 	]);
 
 	// Check if flavor profile has any data
-	const hasFlavorProfile = $derived(flavorProfile.some(f => f.value > 0));
+	const hasFlavorProfile = $derived(flavorProfile.some((f) => f.value > 0));
 
 	// Overall rating calculation
 	const generateRatings = () => {
@@ -145,7 +184,9 @@
 			/>
 			{#if isBaseSpirit && hasFlavorProfile}
 				<div class="absolute bottom-3 right-3">
-					<span class="text-sm font-bold px-3 py-1.5 rounded-lg text-white shadow-lg {overallRating.style}">
+					<span
+						class="text-sm font-bold px-3 py-1.5 rounded-lg text-white shadow-lg {overallRating.style}"
+					>
 						{overallRating.score} · {overallRating.label}
 					</span>
 				</div>
@@ -159,17 +200,19 @@
 			</h2>
 			<div class="flex items-center gap-2 flex-wrap">
 				<Popover.Root>
-					<Popover.Trigger class="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+					<Popover.Trigger
+						class="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+					>
 						{product.categoryName}
 						<Info class="w-3.5 h-3.5 ml-1" />
 					</Popover.Trigger>
 					<Popover.Content
-					class="w-72"
-					side="bottom"
-					align="start"
-					avoidCollisions={true}
-					collisionPadding={16}
-				>
+						class="w-72"
+						side="bottom"
+						align="start"
+						avoidCollisions={true}
+						collisionPadding={16}
+					>
 						<div class="space-y-2">
 							<h4 class="font-medium">{product.categoryName}</h4>
 							<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
@@ -227,7 +270,11 @@
 					<Flame class="h-5 w-5 text-orange-500 shrink-0" />
 					<div>
 						<p class="text-xs text-muted-foreground">Proof / ABV</p>
-						<p class="font-semibold">{product.productProof}° {#if abvPercent}<span class="text-muted-foreground font-normal">({abvPercent}%)</span>{/if}</p>
+						<p class="font-semibold">
+							{product.productProof}° {#if abvPercent}<span
+									class="text-muted-foreground font-normal">({abvPercent}%)</span
+								>{/if}
+						</p>
 					</div>
 				</div>
 			{/if}
@@ -245,7 +292,9 @@
 		<!-- Flavor Profile -->
 		{#if hasFlavorProfile}
 			<div class="space-y-3">
-				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Flavor Profile</h3>
+				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+					Flavor Profile
+				</h3>
 				<div class="space-y-2">
 					{#each flavorProfile as flavor}
 						{#if flavor.value > 0}
@@ -270,7 +319,9 @@
 		<!-- Description -->
 		{#if product.productDescription}
 			<div class="space-y-2">
-				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Description</h3>
+				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+					Description
+				</h3>
 				<p class="text-sm text-muted-foreground leading-relaxed">
 					{product.productDescription}
 				</p>
@@ -294,7 +345,10 @@
 				<div></div>
 			{/if}
 			{#if canModify}
-				<a class={cn(buttonVariants({ variant: "default" }))} href="/inventory/{product.productId}/edit">
+				<a
+					class={cn(buttonVariants({ variant: 'default' }))}
+					href="/inventory/{product.productId}/edit"
+				>
 					<Pencil class="w-4 h-4 mr-2" />
 					Edit Product
 				</a>

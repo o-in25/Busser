@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { Spirit } from '$lib/types';
-	import { Label } from '$lib/components/ui/label';
 	import { onMount } from 'svelte';
+
+	import { Label } from '$lib/components/ui/label';
+	import type { Spirit } from '$lib/types';
 
 	export let selected: string | number = 4;
 
@@ -14,9 +15,7 @@
 	});
 </script>
 
-<Label for="recipeCategoryId" class="mb-2">
-	Category
-</Label>
+<Label for="recipeCategoryId" class="mb-2">Category</Label>
 <div
 	class="grid gap-6 w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6"
 >

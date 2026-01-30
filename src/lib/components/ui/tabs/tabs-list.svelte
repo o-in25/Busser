@@ -1,22 +1,19 @@
 <script lang="ts">
-  import { Tabs as TabsPrimitive } from "bits-ui";
-  import { cn } from "$lib/utils";
+	import { Tabs as TabsPrimitive } from 'bits-ui';
 
-  let {
-    class: className,
-    children,
-    ...restProps
-  }: TabsPrimitive.ListProps = $props();
+	import { cn } from '$lib/utils';
+
+	let { class: className, children, ...restProps }: TabsPrimitive.ListProps = $props();
 </script>
 
 <TabsPrimitive.List
-  class={cn(
-    "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
-    className
-  )}
-  {...restProps}
+	class={cn(
+		'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+		className
+	)}
+	{...restProps}
 >
-  {#if children}
-    {@render children()}
-  {/if}
+	{#if children}
+		{@render children()}
+	{/if}
 </TabsPrimitive.List>

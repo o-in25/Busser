@@ -1,18 +1,20 @@
 <script lang="ts">
-	import type { Spirit, View } from '$lib/types';
+	import { onMount } from 'svelte';
+
 	import { Skeleton } from '$lib/components/ui/skeleton';
+	import type { CatalogGeneratorSchema } from '$lib/server/generators/catalog-generator';
+	import type { Spirit, View } from '$lib/types';
+
 	import CatalogItem from './CatalogItem.svelte';
 	import FancyImage from './FancyImage.svelte';
 	import IconList from './IconList.svelte';
-	import type { CatalogGeneratorSchema } from '$lib/server/generators/catalog-generator';
-	import { onMount } from 'svelte';
 
 	// props
 	export let spirit: Spirit;
 	export let recipes: View.BasicRecipe[] | [];
 
 	let content: CatalogGeneratorSchema;
-	const handleInput = () => {};
+
 	// fetch generated content on load
 	onMount(async () => {
 		const result = await fetch(`/api/generator/catalog`, {
@@ -36,19 +38,11 @@
 		<div class="flex flex-row flex-nowrap justify-center">
 			{#if content}
 				<div class="flex-1">
-					<IconList
-						type="success"
-						list={content.goodWith}
-						heading="Good With"
-					/>
+					<IconList type="success" list={content.goodWith} heading="Good With" />
 				</div>
 
 				<div class="flex-1">
-					<IconList
-						type="error"
-						list={content.avoidWith}
-						heading="Avoid With"
-					/>
+					<IconList type="error" list={content.avoidWith} heading="Avoid With" />
 				</div>
 			{:else}
 				<div class="flex-1 space-y-2">
@@ -71,9 +65,7 @@
 
 <div class="mb-6">
 	{#if content}
-		<h6 class="text-md font-semibold mb-2">
-			History
-		</h6>
+		<h6 class="text-md font-semibold mb-2">History</h6>
 		<p class="text-muted-foreground">
 			{content.history}
 		</p>
