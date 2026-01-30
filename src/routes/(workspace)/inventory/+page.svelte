@@ -6,6 +6,7 @@
 		List,
 		Package,
 		Plus,
+		RefreshCw,
 		Search,
 		Settings2,
 		TableIcon,
@@ -15,7 +16,7 @@
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
@@ -32,6 +33,7 @@
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
+	import { notificationStore } from '../../../stores';
 
 	let { data }: { data: PageData } = $props();
 
@@ -50,6 +52,16 @@
 	// Drawer state
 	let drawerOpen = $state(false);
 	let selectedProduct = $state<Product | null>(null);
+
+	// Refresh state
+	let isRefreshing = $state(false);
+
+	// Handle refresh
+	async function handleRefresh() {
+		isRefreshing = true;
+		await invalidateAll();
+		isRefreshing = false;
+	}
 
 	// Handle card click to open drawer
 	function handleCardClick(product: Product) {
@@ -75,8 +87,13 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ inStock }),
 			});
+			drawerOpen = false;
+			$notificationStore.success = { message: 'Inventory updated.' };
+			await invalidateAll();
 		} catch (error) {
 			console.error('Failed to update stock:', error);
+			$notificationStore.error = { message: 'Failed to update inventory.' };
+
 			// Revert on error
 			if (productIndex !== -1) {
 				data.data[productIndex].productInStockQuantity = inStock ? 0 : 1;
@@ -288,10 +305,10 @@
 		</Select.Root>
 
 		<!-- View Toggle -->
-		<div class="flex items-center border rounded-md overflow-hidden">
+		<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
 			<button
 				class={cn(
-					'p-2 transition-colors',
+					'h-10 w-10 flex items-center justify-center transition-colors',
 					viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('table')}
@@ -301,7 +318,7 @@
 			</button>
 			<button
 				class={cn(
-					'p-2 transition-colors',
+					'h-10 w-10 flex items-center justify-center transition-colors',
 					viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('grid')}
@@ -311,7 +328,7 @@
 			</button>
 			<button
 				class={cn(
-					'p-2 transition-colors',
+					'h-10 w-10 flex items-center justify-center transition-colors',
 					viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('list')}
@@ -320,6 +337,17 @@
 				<List class="h-4 w-4" />
 			</button>
 		</div>
+
+		<!-- Refresh Button -->
+		<Button
+			variant="outline"
+			size="icon"
+			onclick={handleRefresh}
+			disabled={isRefreshing}
+			aria-label="Refresh inventory"
+		>
+			<RefreshCw class={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
+		</Button>
 
 		<!-- Add Product Button -->
 		{#if canModify}

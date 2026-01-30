@@ -9,9 +9,12 @@
 	import type { User } from '$lib/types/auth';
 
 	import Placeholder from './Placeholder.svelte';
-
 	// props
-	let { user, activeUrl }: { user: User | null; activeUrl: string } = $props();
+	let {
+		user,
+		activeUrl,
+		avatarDataUri,
+	}: { user: User | null; activeUrl: string; avatarDataUri: string } = $props();
 
 	// Check if navbar has content (nav links, user menu, etc.)
 	let hasNavContent = $derived(!!user);
@@ -59,7 +62,7 @@
 					<Sheet.Header class="text-left">
 						<!-- User Profile in Drawer -->
 						<div class="flex items-center gap-3 pb-4">
-							<Placeholder id="avatar-menu-mobile" />
+							<img src={avatarDataUri} alt="User Avatar" class="w-10 h-10 rounded-full" />
 							<div>
 								<p class="text-lg font-medium text-foreground">
 									{user?.username}
@@ -196,7 +199,7 @@
 			<div class="hidden md:block">
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
-						<Placeholder id="avatar-menu" />
+						<img src={avatarDataUri} alt="User Avatar" class="w-10 h-10 rounded-full" />
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
 						<DropdownMenu.Label>

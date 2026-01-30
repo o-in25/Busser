@@ -63,36 +63,36 @@
 	</div>
 
 	<!-- Content -->
-	<div class="flex-1 min-w-0">
-		<div
-			class={cn(
-				'flex items-baseline gap-2 flex-wrap transition-all',
-				checked && 'line-through opacity-60'
-			)}
-		>
-			<span class="font-semibold text-foreground">
-				{displayQuantity}
-				{unitLabel}
-			</span>
-			<span class="text-muted-foreground">of</span>
-			<span class="font-medium text-foreground">{categoryName}</span>
-		</div>
-
-		{#if productName && productName !== categoryName}
-			<p class={cn('text-sm text-muted-foreground mt-0.5', checked && 'line-through opacity-60')}>
-				{productName}
-			</p>
+	<div class="flex-1 min-w-0 space-y-1">
+		<!-- Top line -->
+		{#if checked}
+			<s class="text-foreground font-semibold">
+				{displayQuantity}{unitLabel} <span class="text-muted-foreground">of</span>
+				{categoryName}
+			</s>
+		{:else}
+			<div class="text-foreground font-semibold">
+				{displayQuantity}{unitLabel} <span class="text-muted-foreground">of</span>
+				{categoryName}
+			</div>
 		{/if}
 
+		<!-- Product name -->
+		{#if productName && productName !== categoryName}
+			{#if checked}
+				<s class="text-sm text-muted-foreground mt-0.5 block">{productName}</s>
+			{:else}
+				<p class="text-sm text-muted-foreground mt-0.5">{productName}</p>
+			{/if}
+		{/if}
+
+		<!-- Description -->
 		{#if description}
-			<p
-				class={cn(
-					'text-xs text-muted-foreground/70 mt-1 italic',
-					checked && 'line-through opacity-60'
-				)}
-			>
-				{description}
-			</p>
+			{#if checked}
+				<s class="text-xs text-muted-foreground/70 italic mt-1 block">{description}</s>
+			{:else}
+				<p class="text-xs text-muted-foreground/70 italic mt-1">{description}</p>
+			{/if}
 		{/if}
 	</div>
 </button>

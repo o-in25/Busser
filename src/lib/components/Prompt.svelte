@@ -1,21 +1,31 @@
 <script lang="ts">
-	import { Brain, Loader2 } from 'lucide-svelte';
+	import { Sparkle, Loader } from 'lucide-svelte';
 
 	import { Button } from '$lib/components/ui/button';
 	import { Helper } from '$lib/components/ui/helper';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 
-	export let value = '';
-	export let label = 'Description';
-	export let trigger: string | undefined;
-	export let id: string;
-	export let name: string;
-	export let rows: number = 4;
-	export let url: string;
+	let {
+		value = $bindable(''),
+		label = 'Description',
+		trigger,
+		id,
+		name,
+		rows = 4,
+		url,
+	}: {
+		value?: string;
+		label?: string;
+		trigger?: string;
+		id: string;
+		name: string;
+		rows?: number;
+		url: string;
+	} = $props();
 
-	let showSpinner = false;
-	let showHelperText = false;
+	let showSpinner = $state(false);
+	let showHelperText = $state(false);
 
 	const generateText = async () => {
 		showSpinner = true;
@@ -53,9 +63,9 @@
 			disabled={showSpinner}
 		>
 			{#if showSpinner}
-				<Loader2 class="w-5 h-5 animate-spin" />
+				<Loader class="w-5 h-5 animate-spin" />
 			{:else}
-				<Brain class="w-5 h-5" />
+				<Sparkle class="w-5 h-5" />
 				<span class="sr-only">Generate text</span>
 			{/if}
 		</Button>

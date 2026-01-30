@@ -5,6 +5,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { QuickSelect } from '$lib/components/ui/quick-select';
+	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import type { View } from '$lib/types';
 	import { cn } from '$lib/utils';
@@ -60,15 +61,20 @@
 	const maxDescription = 200;
 </script>
 
-<Card.Root class={cn('relative group', className)} {...restProps}>
-	<!-- Drag handle visual (decorative) -->
+<Card.Root
+	class={cn('relative group flex', className)}
+	{...restProps}
+>
+	<!-- Drag handle - always visible -->
 	<div
-		class="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-30 transition-opacity cursor-grab"
+		class="flex-shrink-0 w-10 flex items-center justify-center border-r border-border/50 cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
 	>
 		<GripVertical class="h-5 w-5 text-muted-foreground" />
 	</div>
 
-	<Card.Header class="pb-3">
+	<!-- Card content wrapper -->
+	<div class="flex-1 min-w-0">
+		<Card.Header class="pb-3">
 		<div class="flex items-center justify-between">
 			<Card.Title class="flex items-center gap-2 text-base">
 				<span
@@ -122,15 +128,20 @@
 					step="0.25"
 					min="0"
 				/>
-				<select
-					name="productIdQuantityUnit"
-					class="w-24 py-2.5 px-3 text-sm font-medium bg-muted border border-input rounded-md hover:bg-accent focus:ring-2 focus:outline-none focus:ring-ring"
-					bind:value={step.productIdQuantityUnit}
+				<Select.Root
+					type="single"
+					value={step.productIdQuantityUnit}
+					onValueChange={(v) => (step.productIdQuantityUnit = v ?? 'oz')}
 				>
-					{#each ['oz', 'ml', 'dash', 'cube'] as unit}
-						<option value={unit}>{unit}</option>
-					{/each}
-				</select>
+					<Select.Trigger class="w-24">
+						<Select.Value placeholder="oz" />
+					</Select.Trigger>
+					<Select.Content>
+						{#each ['oz', 'ml', 'dash', 'cube'] as unit}
+							<Select.Item value={unit} label={unit} />
+						{/each}
+					</Select.Content>
+				</Select.Root>
 			</div>
 
 			<!-- Quick select for oz amounts -->
@@ -162,4 +173,5 @@
 			/>
 		</div>
 	</Card.Content>
+	</div>
 </Card.Root>

@@ -10,8 +10,9 @@
 		Sparkles,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
-	import { quintOut } from 'svelte/easing';
-	import { scale } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
+	import { cubicOut } from 'svelte/easing';
+	import { dndzone } from 'svelte-dnd-action';
 	import { v4 as uuidv4 } from 'uuid';
 
 	import { applyAction, enhance } from '$app/forms';
@@ -40,7 +41,7 @@
 	let {
 		spirits,
 		preparationMethods,
-		recipe = $bindable({} as View.BasicRecipe),
+		recipe: initialRecipe = {} as View.BasicRecipe,
 		recipeSteps: initialRecipeSteps = [],
 	}: {
 		spirits: Spirit[];
@@ -48,6 +49,9 @@
 		recipe?: View.BasicRecipe;
 		recipeSteps?: View.BasicRecipeStep[];
 	} = $props();
+
+	// Make recipe deeply reactive for two-way binding on properties
+	let recipe = $state(initialRecipe);
 
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
@@ -64,11 +68,11 @@
 				step.productIdQuantityUnit,
 				step.productIdQuantityInMilliliters
 			),
-			key: uuidv4(),
+			id: uuidv4(),
 		}))
 	);
 
-	const createStep = (): View.BasicRecipeStep & { key: string } => ({
+	const createStep = (): View.BasicRecipeStep & { id: string } => ({
 		recipeId: recipe.recipeId || 0,
 		recipeStepId: 0,
 		productId: 0,
@@ -84,10 +88,10 @@
 		productPricePerUnit: 0,
 		productUnitSizeInMilliliters: 0,
 		productProof: 0,
-		key: uuidv4(),
+		id: uuidv4(),
 	});
 
-	let steps: (View.BasicRecipeStep & { key: string })[] = $state([]);
+	let steps: (View.BasicRecipeStep & { id: string })[] = $state([]);
 	$effect.pre(() => {
 		if (processedSteps.length && steps.length === 0) {
 			steps = [...processedSteps];
@@ -107,6 +111,57 @@
 			steps = newSteps;
 		}
 	};
+
+	// Drag and drop config for svelte-dnd-action
+	const flipDurationMs = 300;
+	const dropTargetStyle = {}; // Remove default yellow outline
+	const centreDraggedOnCursor = false; // Keep element relative to click position
+
+	// Transform the dragged element - subtle but visible, locked to Y-axis only
+	function transformDraggedElement(
+		el: HTMLElement | undefined,
+		_data: unknown,
+		_index: number | undefined
+	) {
+		if (!el) return;
+
+		// Capture original dimensions before any transforms
+		const originalWidth = el.offsetWidth;
+
+		// Find the dndzone container to lock horizontal position
+		const container = el.parentElement;
+		if (!container) return;
+
+		const containerRect = container.getBoundingClientRect();
+		const lockX = containerRect.left;
+
+		// Style the element - scale down for visual feedback
+		el.style.opacity = '0.85';
+		el.style.transform = 'scale(0.95)';
+		el.style.transformOrigin = 'center center';
+		el.style.boxShadow = '0 8px 24px -4px rgba(0, 0, 0, 0.25)';
+		el.style.outline = 'none';
+		el.style.cursor = 'grabbing';
+		el.style.pointerEvents = 'none';
+		el.style.width = `${originalWidth}px`;
+
+		// Continuously enforce horizontal position (lock X-axis movement)
+		const enforcePosition = () => {
+			if (el.isConnected) {
+				el.style.left = `${lockX}px`;
+				requestAnimationFrame(enforcePosition);
+			}
+		};
+		requestAnimationFrame(enforcePosition);
+	}
+
+	function handleDndConsider(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
+		steps = e.detail.items;
+	}
+
+	function handleDndFinalize(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
+		steps = e.detail.items;
+	}
 
 	const deleteRecipe = async () => {
 		const response = await fetch(`/api/catalog/${recipe.recipeId}`, {
@@ -177,7 +232,7 @@
 		if (data.recipeDrynessRating) drynessRating = data.recipeDrynessRating as number;
 		if (data.recipeVersatilityRating) versatilityRating = data.recipeVersatilityRating as number;
 		if (data.recipeStrengthRating) strengthRating = data.recipeStrengthRating as number;
-		if (data.steps) steps = data.steps as (View.BasicRecipeStep & { key: string })[];
+		if (data.steps) steps = data.steps as (View.BasicRecipeStep & { id: string })[];
 	}
 </script>
 
@@ -212,6 +267,7 @@
 					if (isAddMode && draftManager) {
 						draftManager.clearDraft();
 					}
+					$notificationStore.success = { message: 'Catalog updated.' };
 					goto(result.location);
 				} else {
 					await applyAction(result);
@@ -272,7 +328,7 @@
 								trigger={recipe.recipeName}
 								id="recipeDescription"
 								name="recipeDescription"
-								url="/api/generator/catalog"
+								url="/api/generator/recipe"
 							/>
 						</div>
 						<div>
@@ -321,24 +377,31 @@
 					<!-- Step 5: Ingredients -->
 					<div class="space-y-4">
 						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
-						{#each steps as step, stepNumber (step.key)}
-							<div
-								transition:scale={{
-									duration: 250,
-									delay: 0,
-									opacity: 0.5,
-									start: 0,
-									easing: quintOut,
-								}}
-							>
-								<RecipeStepCard
-									bind:step={steps[stepNumber]}
-									{stepNumber}
-									onremove={removeStep}
-									canRemove={steps.length > 1}
-								/>
-							</div>
-						{/each}
+
+						<div
+							use:dndzone={{
+								items: steps,
+								flipDurationMs,
+								dropTargetStyle,
+								transformDraggedElement,
+								centreDraggedOnCursor,
+							}}
+							onconsider={handleDndConsider}
+							onfinalize={handleDndFinalize}
+							class="space-y-4"
+						>
+							{#each steps as step, stepNumber (step.id)}
+								<div animate:flip={{ duration: flipDurationMs, easing: cubicOut }}>
+									<RecipeStepCard
+										bind:step={steps[stepNumber]}
+										{stepNumber}
+										onremove={removeStep}
+										canRemove={steps.length > 1}
+									/>
+								</div>
+							{/each}
+						</div>
+
 						<Button type="button" variant="outline" class="w-full" onclick={addStep}>
 							<Plus class="w-4 h-4 mr-2" />
 							Add Ingredient
@@ -465,24 +528,29 @@
 					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 
 					<!-- Recipe steps -->
-					{#each steps as step, stepNumber (step.key)}
-						<div
-							transition:scale={{
-								duration: 250,
-								delay: 0,
-								opacity: 0.5,
-								start: 0,
-								easing: quintOut,
-							}}
-						>
-							<RecipeStepCard
-								bind:step={steps[stepNumber]}
-								{stepNumber}
-								onremove={removeStep}
-								canRemove={steps.length > 1}
-							/>
-						</div>
-					{/each}
+					<div
+						use:dndzone={{
+							items: steps,
+							flipDurationMs,
+							dropTargetStyle,
+							transformDraggedElement,
+							centreDraggedOnCursor,
+						}}
+						onconsider={handleDndConsider}
+						onfinalize={handleDndFinalize}
+						class="space-y-4"
+					>
+						{#each steps as step, stepNumber (step.id)}
+							<div animate:flip={{ duration: flipDurationMs, easing: cubicOut }}>
+								<RecipeStepCard
+									bind:step={steps[stepNumber]}
+									{stepNumber}
+									onremove={removeStep}
+									canRemove={steps.length > 1}
+								/>
+							</div>
+						{/each}
+					</div>
 
 					<!-- Add step button -->
 					<div class="flex justify-center pt-2">
@@ -533,3 +601,12 @@
 		</Dialog.Root>
 	{/if}
 </div>
+
+<style>
+	/* Style the original item's placeholder while dragging */
+	:global([data-is-dnd-shadow-item-hint]) {
+		opacity: 0.5 !important;
+		border: 2px dashed hsl(var(--primary) / 0.5) !important;
+		border-radius: var(--radius) !important;
+	}
+</style>

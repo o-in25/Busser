@@ -3,8 +3,8 @@
 		Calculator,
 		Candy,
 		DollarSign,
-		FileText,
 		Flame,
+		Image,
 		Package,
 		Palette,
 		Percent,
@@ -97,6 +97,13 @@
 		return (proof / 2).toFixed(1);
 	});
 
+	let pricePerMl = $derived(() => {
+		const price = parseFloat(productPricePerUnit);
+		const size = parseFloat(productUnitSizeInMilliliters);
+		if (isNaN(price) || isNaN(size) || size === 0) return null;
+		return (price / size).toFixed(3);
+	});
+
 	// Quick select options
 	const sizeOptions = [
 		{ label: '50mL', value: '50' },
@@ -118,7 +125,7 @@
 		{ title: 'Basic Info', icon: Package },
 		{ title: 'Purchase Details', icon: DollarSign },
 		{ title: 'Flavor Profile', icon: Palette },
-		{ title: 'Description', icon: FileText },
+		{ title: 'Description & Image', icon: Image },
 	];
 
 	// Draft data for autosave
@@ -187,6 +194,7 @@
 			return async ({ result }) => {
 				if (result.type === 'redirect') {
 					draftManager?.clearDraft();
+					$notificationStore.success = { message: 'Inventory updated.' };
 					goto(result.location);
 				} else {
 					await applyAction(result);
@@ -231,9 +239,6 @@
 								bind:value={categoryId}
 							/>
 						</div>
-						<div>
-							<FileUpload name="productImageUrl" signedUrl={productImageUrl} />
-						</div>
 					</div>
 				{:else if step === 1}
 					<!-- Purchase Details Step -->
@@ -258,11 +263,6 @@
 						</div>
 						<div>
 							<Label for="productUnitSizeInMilliliters-mobile" class="mb-2">Size</Label>
-							<QuickSelect
-								options={sizeOptions}
-								bind:value={productUnitSizeInMilliliters}
-								class="mb-2"
-							/>
 							<div class="relative">
 								<Input
 									type="number"
@@ -277,10 +277,14 @@
 									>mL</span
 								>
 							</div>
+							<QuickSelect
+								options={sizeOptions}
+								bind:value={productUnitSizeInMilliliters}
+								class="mt-2"
+							/>
 						</div>
 						<div>
 							<Label for="productProof-mobile" class="mb-2">Proof</Label>
-							<QuickSelect options={proofOptions} bind:value={productProof} class="mb-2" />
 							<Input
 								type="number"
 								id="productProof-mobile"
@@ -289,10 +293,14 @@
 								value={productProof}
 								oninput={(e) => (productProof = e.currentTarget.value)}
 							/>
+							<QuickSelect options={proofOptions} bind:value={productProof} class="mt-2" />
 						</div>
 						<div class="flex flex-wrap gap-2 pt-2">
 							{#if pricePerOunce()}
 								<CalculatedBadge label="Price/oz" value={'$' + pricePerOunce()} icon={Calculator} />
+							{/if}
+							{#if pricePerMl()}
+								<CalculatedBadge label="Price/mL" value={'$' + pricePerMl()} icon={Calculator} />
 							{/if}
 							{#if abvPercent()}
 								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
@@ -343,7 +351,7 @@
 					</div>
 				{:else if step === 3}
 					<!-- Description Step -->
-					<div>
+					<div class="space-y-6">
 						<Prompt
 							bind:value={productDescription}
 							trigger={productName}
@@ -351,6 +359,7 @@
 							name="productDescription-mobile"
 							url="/api/generator/inventory"
 						/>
+						<FileUpload name="productImageUrl" signedUrl={productImageUrl} />
 					</div>
 				{/if}
 			{/snippet}
@@ -391,9 +400,6 @@
 							/>
 						</div>
 					</div>
-					<div class="max-w-md">
-						<FileUpload name="productImageUrl" signedUrl={productImageUrl} />
-					</div>
 				</Card.Content>
 			</Card.Root>
 
@@ -428,11 +434,6 @@
 						</div>
 						<div>
 							<Label for="productUnitSizeInMilliliters" class="mb-2">Size</Label>
-							<QuickSelect
-								options={sizeOptions}
-								bind:value={productUnitSizeInMilliliters}
-								class="mb-2"
-							/>
 							<div class="relative">
 								<Input
 									type="number"
@@ -448,10 +449,14 @@
 									>mL</span
 								>
 							</div>
+							<QuickSelect
+								options={sizeOptions}
+								bind:value={productUnitSizeInMilliliters}
+								class="mt-2"
+							/>
 						</div>
 						<div>
 							<Label for="productProof" class="mb-2">Proof</Label>
-							<QuickSelect options={proofOptions} bind:value={productProof} class="mb-2" />
 							<Input
 								type="number"
 								id="productProof"
@@ -461,6 +466,7 @@
 								value={productProof}
 								oninput={(e) => (productProof = e.currentTarget.value)}
 							/>
+							<QuickSelect options={proofOptions} bind:value={productProof} class="mt-2" />
 						</div>
 					</div>
 
@@ -469,6 +475,9 @@
 						<div class="flex flex-wrap gap-3">
 							{#if pricePerOunce()}
 								<CalculatedBadge label="Price/oz" value={'$' + pricePerOunce()} icon={Calculator} />
+							{/if}
+							{#if pricePerMl()}
+								<CalculatedBadge label="Price/mL" value={'$' + pricePerMl()} icon={Calculator} />
 							{/if}
 							{#if abvPercent()}
 								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
@@ -527,15 +536,18 @@
 				</div>
 			</CollapsibleSection>
 
-			<!-- Description Card (Collapsible) -->
-			<CollapsibleSection title="Description" icon={FileText} open={action === 'edit'}>
-				<Prompt
-					bind:value={productDescription}
-					trigger={productName}
-					id="productDescription"
-					name="productDescription"
-					url="/api/generator/inventory"
-				/>
+			<!-- Description & Image (Collapsible) -->
+			<CollapsibleSection title="Description & Image" icon={Image} open={action === 'edit'}>
+				<div class="space-y-6">
+					<Prompt
+						bind:value={productDescription}
+						trigger={productName}
+						id="productDescription"
+						name="productDescription"
+						url="/api/generator/inventory"
+					/>
+					<FileUpload name="productImageUrl" signedUrl={productImageUrl} />
+				</div>
 			</CollapsibleSection>
 		</div>
 
