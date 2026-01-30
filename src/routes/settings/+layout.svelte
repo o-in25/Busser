@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Users, SlidersHorizontal, UserCog, UsersRound, Mail, Building2 } from 'lucide-svelte';
-	import { page } from '$app/stores';
+	import { Building2, Mail, SlidersHorizontal, UserCog, Users, UsersRound } from 'lucide-svelte';
 	import { getContext } from 'svelte';
+
+	import { page } from '$app/stores';
 
 	$: activeUrl$ = $page.url.pathname;
 	const permissions: string[] = getContext('permissions') || [];

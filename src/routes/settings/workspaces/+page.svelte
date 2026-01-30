@@ -1,28 +1,28 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
-	import * as Card from '$lib/components/ui/card';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import {
+		Building2,
+		Globe,
+		Lock,
+		Pencil,
+		Plus,
+		Trash2,
+		User,
+		UserCog,
+		Users,
+	} from 'lucide-svelte';
+
+	import { enhance } from '$app/forms';
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
-	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Table from '$lib/components/ui/table';
-	import { cn } from '$lib/utils';
-	import {
-		Building2,
-		Plus,
-		Pencil,
-		Trash2,
-		Users,
-		User,
-		Globe,
-		Lock,
-		UserCog
-	} from 'lucide-svelte';
-	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+
+	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -92,7 +92,7 @@
 		return d.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
-			day: 'numeric'
+			day: 'numeric',
 		});
 	}
 </script>
@@ -110,7 +110,7 @@
 				Create and manage workspaces for organizing content
 			</p>
 		</div>
-		<Button onclick={() => createDialogOpen = true}>
+		<Button onclick={() => (createDialogOpen = true)}>
 			<Plus class="h-4 w-4 mr-2" />
 			Create Workspace
 		</Button>
@@ -183,18 +183,29 @@
 									</div>
 								</Table.Cell>
 								<Table.Cell>
-									<Badge variant={workspace.workspaceType === 'personal' ? 'secondary' : 'default'} class="gap-1">
+									<Badge
+										variant={workspace.workspaceType === 'personal' ? 'secondary' : 'default'}
+										class="gap-1"
+									>
 										{#if workspace.workspaceType === 'personal'}
 											<User class="h-3 w-3" />
 										{:else}
 											<Users class="h-3 w-3" />
 										{/if}
-										{workspace.workspaceType.charAt(0).toUpperCase() + workspace.workspaceType.slice(1)}
+										{workspace.workspaceType.charAt(0).toUpperCase() +
+											workspace.workspaceType.slice(1)}
 									</Badge>
 								</Table.Cell>
 								<Table.Cell>
-									<Badge variant={workspace.workspaceRole === 'owner' ? 'default' : workspace.workspaceRole === 'editor' ? 'secondary' : 'outline'}>
-										{workspace.workspaceRole.charAt(0).toUpperCase() + workspace.workspaceRole.slice(1)}
+									<Badge
+										variant={workspace.workspaceRole === 'owner'
+											? 'default'
+											: workspace.workspaceRole === 'editor'
+												? 'secondary'
+												: 'outline'}
+									>
+										{workspace.workspaceRole.charAt(0).toUpperCase() +
+											workspace.workspaceRole.slice(1)}
 									</Badge>
 								</Table.Cell>
 								<Table.Cell class="hidden md:table-cell font-mono text-xs text-muted-foreground">
@@ -224,8 +235,8 @@
 												disabled
 												class="h-8 w-8 opacity-40"
 												title={isGlobalWorkspace(workspace)
-													? "Cannot modify the global workspace"
-													: "Cannot modify the workspace you are currently in"}
+													? 'Cannot modify the global workspace'
+													: 'Cannot modify the workspace you are currently in'}
 											>
 												<Lock class="h-4 w-4" />
 												<span class="sr-only">Protected</span>
@@ -236,8 +247,8 @@
 												disabled
 												class="h-8 w-8 opacity-40"
 												title={isGlobalWorkspace(workspace)
-													? "Cannot delete the global workspace"
-													: "Cannot delete the workspace you are currently in"}
+													? 'Cannot delete the global workspace'
+													: 'Cannot delete the workspace you are currently in'}
 											>
 												<Lock class="h-4 w-4" />
 												<span class="sr-only">Protected</span>
@@ -323,7 +334,7 @@
 						type="single"
 						name="workspaceType"
 						value={newWorkspaceType}
-						onValueChange={(v) => newWorkspaceType = v as 'personal' | 'shared'}
+						onValueChange={(v) => (newWorkspaceType = v as 'personal' | 'shared')}
 					>
 						<Select.Trigger>
 							<Select.Value placeholder="Select type" />
@@ -347,7 +358,7 @@
 				</div>
 			</div>
 			<Dialog.Footer>
-				<Button type="button" variant="outline" onclick={() => createDialogOpen = false}>
+				<Button type="button" variant="outline" onclick={() => (createDialogOpen = false)}>
 					Cancel
 				</Button>
 				<Button type="submit">Create</Button>
@@ -361,9 +372,7 @@
 	<Dialog.Content class="sm:max-w-[425px]">
 		<Dialog.Header>
 			<Dialog.Title>Edit Workspace</Dialog.Title>
-			<Dialog.Description>
-				Update the workspace name and type.
-			</Dialog.Description>
+			<Dialog.Description>Update the workspace name and type.</Dialog.Description>
 		</Dialog.Header>
 		<form
 			method="POST"
@@ -395,7 +404,7 @@
 						type="single"
 						name="workspaceType"
 						value={editWorkspaceType}
-						onValueChange={(v) => editWorkspaceType = v as 'personal' | 'shared'}
+						onValueChange={(v) => (editWorkspaceType = v as 'personal' | 'shared')}
 						disabled={selectedWorkspace ? isGlobalWorkspace(selectedWorkspace) : false}
 					>
 						<Select.Trigger>
@@ -425,7 +434,7 @@
 				</div>
 			</div>
 			<Dialog.Footer>
-				<Button type="button" variant="outline" onclick={() => editDialogOpen = false}>
+				<Button type="button" variant="outline" onclick={() => (editDialogOpen = false)}>
 					Cancel
 				</Button>
 				<Button type="submit">Save Changes</Button>
@@ -440,11 +449,12 @@
 		<Dialog.Header>
 			<Dialog.Title>Delete Workspace</Dialog.Title>
 			<Dialog.Description>
-				Are you sure you want to delete "{selectedWorkspace?.workspaceName}"? This action cannot be undone and will remove all workspace associations.
+				Are you sure you want to delete "{selectedWorkspace?.workspaceName}"? This action cannot be
+				undone and will remove all workspace associations.
 			</Dialog.Description>
 		</Dialog.Header>
 		<Dialog.Footer>
-			<Button type="button" variant="outline" onclick={() => deleteDialogOpen = false}>
+			<Button type="button" variant="outline" onclick={() => (deleteDialogOpen = false)}>
 				Cancel
 			</Button>
 			<form
@@ -462,9 +472,7 @@
 				class="inline"
 			>
 				<input type="hidden" name="workspaceId" value={selectedWorkspace?.workspaceId || ''} />
-				<Button type="submit" variant="destructive">
-					Delete
-				</Button>
+				<Button type="submit" variant="destructive">Delete</Button>
 			</form>
 		</Dialog.Footer>
 	</Dialog.Content>

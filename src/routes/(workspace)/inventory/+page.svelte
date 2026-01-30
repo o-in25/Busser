@@ -1,35 +1,37 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import type { Product } from '$lib/types';
-	import InventoryTable from '$lib/components/InventoryTable.svelte';
-	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
-	import InventoryCard from '$lib/components/InventoryCard.svelte';
-	import InventoryDetailDrawer from '$lib/components/InventoryDetailDrawer.svelte';
-	import StockAlerts from '$lib/components/StockAlerts.svelte';
-	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select';
-	import * as Card from '$lib/components/ui/card';
-	import { cn } from '$lib/utils';
 	import {
-		Search,
-		Plus,
-		X,
-		LayoutGrid,
-		List,
-		TableIcon,
-		Package,
-		Tags,
 		ChevronLeft,
 		ChevronRight,
+		LayoutGrid,
+		List,
+		Package,
+		Plus,
+		Search,
 		Settings2,
+		TableIcon,
+		Tags,
+		X,
 	} from 'lucide-svelte';
+	import { getContext, onMount } from 'svelte';
+
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { getContext, onMount } from 'svelte';
-	import { browser } from '$app/environment';
+	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
+	import InventoryCard from '$lib/components/InventoryCard.svelte';
+	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
+	import InventoryDetailDrawer from '$lib/components/InventoryDetailDrawer.svelte';
+	import InventoryTable from '$lib/components/InventoryTable.svelte';
+	import StockAlerts from '$lib/components/StockAlerts.svelte';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { Input } from '$lib/components/ui/input';
+	import * as Select from '$lib/components/ui/select';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import type { Product } from '$lib/types';
+	import { cn } from '$lib/utils';
+
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
@@ -58,7 +60,7 @@
 	// Handle stock change from drawer
 	async function handleStockChange(productId: number, inStock: boolean) {
 		// Optimistically update local data
-		const productIndex = data.data.findIndex(p => p.productId === productId);
+		const productIndex = data.data.findIndex((p) => p.productId === productId);
 		if (productIndex !== -1) {
 			data.data[productIndex].productInStockQuantity = inStock ? 1 : 0;
 		}
@@ -71,7 +73,7 @@
 			await fetch(`/api/inventory/${productId}/stock`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ inStock })
+				body: JSON.stringify({ inStock }),
 			});
 		} catch (error) {
 			console.error('Failed to update stock:', error);
@@ -189,8 +191,8 @@
 	// Check if any filters are active
 	const hasActiveFilters = $derived(
 		!!searchInput ||
-		(selectedCategory && selectedCategory !== 'all') ||
-		(stockFilter && stockFilter !== 'all')
+			(selectedCategory && selectedCategory !== 'all') ||
+			(stockFilter && stockFilter !== 'all')
 	);
 
 	// Update local state when page data changes (for SSR navigation)
@@ -209,10 +211,7 @@
 <InventoryDashboard stats={data.stats} />
 
 <!-- Stock Alerts -->
-<StockAlerts
-	outOfStockItems={data.outOfStockItems}
-	lowStockItems={data.lowStockItems}
-/>
+<StockAlerts outOfStockItems={data.outOfStockItems} lowStockItems={data.lowStockItems} />
 
 <!-- Toolbar -->
 <div class="flex flex-col sm:flex-row gap-3 mb-6">
@@ -255,7 +254,10 @@
 					<Select.Separator />
 				{/if}
 				{#each data.categories as category}
-					<Select.Item value={String(category.categoryId)} label="{category.categoryName} ({category.count})" />
+					<Select.Item
+						value={String(category.categoryId)}
+						label="{category.categoryName} ({category.count})"
+					/>
 				{/each}
 				<Select.Separator />
 				<a
@@ -289,8 +291,8 @@
 		<div class="flex items-center border rounded-md overflow-hidden">
 			<button
 				class={cn(
-					"p-2 transition-colors",
-					viewMode === 'table' ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+					'p-2 transition-colors',
+					viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('table')}
 				aria-label="Table view"
@@ -299,8 +301,8 @@
 			</button>
 			<button
 				class={cn(
-					"p-2 transition-colors",
-					viewMode === 'grid' ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+					'p-2 transition-colors',
+					viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('grid')}
 				aria-label="Grid view"
@@ -309,8 +311,8 @@
 			</button>
 			<button
 				class={cn(
-					"p-2 transition-colors",
-					viewMode === 'list' ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+					'p-2 transition-colors',
+					viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('list')}
 				aria-label="List view"
@@ -321,7 +323,7 @@
 
 		<!-- Add Product Button -->
 		{#if canModify}
-			<a href="{basePath}/add" class={cn(buttonVariants(), "shrink-0")}>
+			<a href="{basePath}/add" class={cn(buttonVariants(), 'shrink-0')}>
 				<Plus class="h-4 w-4 sm:mr-2" />
 				<span class="hidden sm:inline">Add Product</span>
 			</a>
@@ -366,9 +368,7 @@
 			</p>
 			<div class="flex gap-3">
 				{#if hasActiveFilters}
-					<Button variant="outline" onclick={clearAllFilters}>
-						Clear Filters
-					</Button>
+					<Button variant="outline" onclick={clearAllFilters}>Clear Filters</Button>
 				{/if}
 				{#if canModify}
 					<a href="{basePath}/add" class={buttonVariants()}>
@@ -389,11 +389,13 @@
 	/>
 {:else}
 	<!-- Grid/List View -->
-	<div class={cn(
-		viewMode === 'grid'
-			? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-			: "flex flex-col gap-3"
-	)}>
+	<div
+		class={cn(
+			viewMode === 'grid'
+				? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+				: 'flex flex-col gap-3'
+		)}
+	>
 		{#each data.data as product (product.productId)}
 			<InventoryCard
 				{product}

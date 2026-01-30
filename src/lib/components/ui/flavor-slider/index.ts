@@ -1,3 +1,3 @@
-import Root from "./flavor-slider.svelte";
+import Root from './flavor-slider.svelte';
 
-export { Root, Root as FlavorSlider };
+export { Root as FlavorSlider, Root };

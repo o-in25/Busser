@@ -1,26 +1,18 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import { AlertCircle, KeyRound, Plus, Save, Shield, Trash2, Users } from 'lucide-svelte';
+
+	import { applyAction, enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
+	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
-	import type { PageData } from './$types';
-	import { goto } from '$app/navigation';
-	import {
-		AlertCircle,
-		Trash2,
-		Shield,
-		Plus,
-		Save,
-		KeyRound,
-		Users,
-		X,
-	} from 'lucide-svelte';
-	import { page } from '$app/state';
-	import { applyAction, enhance } from '$app/forms';
+
 	import { notificationStore } from '../../../stores';
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	let selected = $state(page.url.searchParams.get('role') || '');
@@ -32,15 +24,15 @@
 		open: false,
 		data: {
 			text: '',
-			index: 0
-		}
+			index: 0,
+		},
 	});
 
 	let addItem = () => ({
 		permissionId: '',
 		permissionName: '',
 		roleId: '',
-		roleName: ''
+		roleName: '',
 	});
 
 	let items = $state([...data.grants]);
@@ -63,10 +55,13 @@
 	function handleAddPermission() {
 		if (newPermissionInput.trim() === '') return;
 
-		items = [...items, {
-			...addItem(),
-			permissionName: newPermissionInput.trim()
-		}];
+		items = [
+			...items,
+			{
+				...addItem(),
+				permissionName: newPermissionInput.trim(),
+			},
+		];
 		newPermissionInput = '';
 	}
 
@@ -78,7 +73,9 @@
 	}
 
 	function handleSubmit() {
-		formDataInput.value = JSON.stringify(items.filter(({ permissionName }) => permissionName.trim() !== ''));
+		formDataInput.value = JSON.stringify(
+			items.filter(({ permissionName }) => permissionName.trim() !== '')
+		);
 	}
 
 	function handleDelete(index: number) {
@@ -87,7 +84,7 @@
 	}
 
 	// Count of permissions
-	const permissionCount = $derived(items.filter(i => i.permissionName.trim() !== '').length);
+	const permissionCount = $derived(items.filter((i) => i.permissionName.trim() !== '').length);
 </script>
 
 <svelte:head>
@@ -98,9 +95,7 @@
 	<!-- Header -->
 	<div>
 		<h1 class="text-2xl font-bold">Grants & Roles</h1>
-		<p class="text-sm text-muted-foreground mt-1">
-			Manage permissions assigned to each role
-		</p>
+		<p class="text-sm text-muted-foreground mt-1">Manage permissions assigned to each role</p>
 	</div>
 
 	<!-- Role Selection Card -->
@@ -110,16 +105,10 @@
 				<Users class="h-5 w-5" />
 				Select Role
 			</Card.Title>
-			<Card.Description>
-				Choose a role to view and manage its permissions
-			</Card.Description>
+			<Card.Description>Choose a role to view and manage its permissions</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<Select.Root
-				type="single"
-				value={selected}
-				onValueChange={handleSelectChange}
-			>
+			<Select.Root type="single" value={selected} onValueChange={handleSelectChange}>
 				<Select.Trigger class="w-full sm:w-[300px]" id="role-select">
 					<Shield class="h-4 w-4 mr-2" />
 					<Select.Value placeholder="Select a role...">
@@ -206,7 +195,9 @@
 						<div class="space-y-2 mb-6">
 							{#each items as grant, index}
 								{#if grant.permissionName.trim() !== ''}
-									<div class="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors group">
+									<div
+										class="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors group"
+									>
 										<div class="flex items-center gap-3">
 											<div class="p-2 rounded-lg bg-primary/10">
 												<KeyRound class="h-4 w-4 text-primary" />
@@ -220,9 +211,7 @@
 														ID: {grant.permissionId}
 													</p>
 												{:else}
-													<p class="text-xs text-amber-500">
-														New (unsaved)
-													</p>
+													<p class="text-xs text-amber-500">New (unsaved)</p>
 												{/if}
 											</div>
 										</div>
@@ -234,7 +223,7 @@
 											onclick={() =>
 												setModalState(true, {
 													text: grant.permissionName,
-													index
+													index,
 												})}
 										>
 											<Trash2 class="h-4 w-4" />
@@ -245,7 +234,9 @@
 						</div>
 					{:else}
 						<div class="text-center py-8 mb-6">
-							<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+							<div
+								class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
+							>
 								<KeyRound class="h-8 w-8 text-muted-foreground/50" />
 							</div>
 							<h3 class="font-semibold mb-1">No Permissions</h3>
@@ -257,7 +248,13 @@
 
 					<!-- Save Button -->
 					<div class="flex justify-end pt-4 border-t">
-						<input type="hidden" class="hidden" name="formData" id="formData" bind:this={formDataInput} />
+						<input
+							type="hidden"
+							class="hidden"
+							name="formData"
+							id="formData"
+							bind:this={formDataInput}
+						/>
 						<Button type="submit" class="min-w-[120px]">
 							<Save class="h-4 w-4 mr-2" />
 							Save Changes
@@ -301,9 +298,7 @@
 			</div>
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => (modalState.open = false)}>
-				Cancel
-			</Button>
+			<Button variant="outline" onclick={() => (modalState.open = false)}>Cancel</Button>
 			<Button variant="destructive" onclick={() => handleDelete(modalState.data.index)}>
 				<Trash2 class="h-4 w-4 mr-2" />
 				Delete

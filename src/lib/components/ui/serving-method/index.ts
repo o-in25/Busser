@@ -1,3 +1,3 @@
-import Root from "./serving-method.svelte";
+import Root from './serving-method.svelte';
 
 export { Root, Root as ServingMethodToggle };

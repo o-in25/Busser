@@ -1,11 +1,12 @@
 <script lang="ts">
-	import type { User } from '$lib/types/auth';
+	import { getContext } from 'svelte';
+
 	import { Button } from '$lib/components/ui/button';
+	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { Helper } from '$lib/components/ui/helper';
 	import type { SelectOption } from '$lib/types';
-	import { getContext } from 'svelte';
+	import type { User } from '$lib/types/auth';
 
 	export let user: User | null = null;
 	export let action: 'add' | 'edit' | 'register' | 'login';
@@ -78,9 +79,7 @@
 <!-- email -->
 {#if action !== 'login'}
 	<div class="space-y-2">
-		<Label for="email" class={errors?.email?.hasError ? 'text-destructive' : ''}>
-			Email
-		</Label>
+		<Label for="email" class={errors?.email?.hasError ? 'text-destructive' : ''}>Email</Label>
 		<Input
 			type="email"
 			id="email"
@@ -151,7 +150,10 @@
 		{/if}
 		{#if action === 'login'}
 			<div class="text-left">
-				<a href="/forgot-password" class="text-sm text-muted-foreground hover:text-foreground hover:underline underline-offset-4">
+				<a
+					href="/forgot-password"
+					class="text-sm text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
+				>
 					Forgot your password?
 				</a>
 			</div>
@@ -204,9 +206,7 @@
 						{errors?.invitationCode.message}
 					</Helper>
 				{:else}
-					<Helper>
-						Registration is currently invite only.
-					</Helper>
+					<Helper>Registration is currently invite only.</Helper>
 				{/if}
 			</div>
 		</fieldset>
@@ -224,25 +224,19 @@
 	</Button>
 {:else}
 	<div class="md:flex justify-end">
-		<Button class="w-full md:w-32" type="submit" size="lg">
-			Save
-		</Button>
+		<Button class="w-full md:w-32" type="submit" size="lg">Save</Button>
 	</div>
 {/if}
 
 <!-- help -->
 {#if action === 'register'}
 	<div class="text-sm font-medium text-muted-foreground">
-		Already signed up? <a href="/login" class="text-primary hover:underline">
-			Log in
-		</a>
+		Already signed up? <a href="/login" class="text-primary hover:underline"> Log in </a>
 	</div>
 {/if}
 
 {#if action === 'login'}
 	<div class="text-sm font-medium text-muted-foreground">
-		Not a member? <a href="/signup" class="text-primary hover:underline">
-			Sign up
-		</a>
+		Not a member? <a href="/signup" class="text-primary hover:underline"> Sign up </a>
 	</div>
 {/if}

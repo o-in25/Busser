@@ -1,23 +1,14 @@
 <script lang="ts">
-	import {
-		Info,
-		UserPlus,
-		Pencil,
-		Trash2,
-		User,
-		Mail,
-		Clock,
-		AlertCircle,
-		CheckCircle2,
-	} from 'lucide-svelte';
-	import * as Table from '$lib/components/ui/table';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
-	import { cn } from '$lib/utils';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { AlertCircle, CheckCircle2, Mail, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
 	import moment from 'moment';
+
+	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import * as Table from '$lib/components/ui/table';
 	import type { User as UserType } from '$lib/types/auth';
+	import { cn } from '$lib/utils';
 
 	// props
 	export let users: UserType[];
@@ -39,7 +30,7 @@
 	const getInitials = (username: string) => {
 		return username
 			.split(' ')
-			.map(n => n[0])
+			.map((n) => n[0])
 			.join('')
 			.toUpperCase()
 			.slice(0, 2);
@@ -89,7 +80,9 @@
 						<Table.Cell class="pl-6">
 							<div class="flex items-center gap-3">
 								<!-- Avatar -->
-								<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+								<div
+									class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
+								>
 									<span class="text-sm font-semibold text-primary">
 										{getInitials(user.username)}
 									</span>
@@ -128,7 +121,10 @@
 						<Table.Cell class="text-right pr-6">
 							<div class="flex items-center justify-end gap-2">
 								<a
-									class={cn(buttonVariants({ variant: "outline", size: "icon" }), "h-8 w-8 bg-violet-500/20 border-violet-500/50 text-violet-400 hover:bg-violet-500 hover:text-white")}
+									class={cn(
+										buttonVariants({ variant: 'outline', size: 'icon' }),
+										'h-8 w-8 bg-violet-500/20 border-violet-500/50 text-violet-400 hover:bg-violet-500 hover:text-white'
+									)}
 									href="/settings/users/{user.userId}/edit"
 									title="Edit user"
 								>
@@ -163,10 +159,8 @@
 			<User class="h-8 w-8 text-muted-foreground/50" />
 		</div>
 		<h3 class="font-semibold mb-1">No Users</h3>
-		<p class="text-sm text-muted-foreground mb-4">
-			There are no users in the system yet.
-		</p>
-		<a class={cn(buttonVariants({ variant: "default" }))} href="/settings/users/add">
+		<p class="text-sm text-muted-foreground mb-4">There are no users in the system yet.</p>
+		<a class={cn(buttonVariants({ variant: 'default' }))} href="/settings/users/add">
 			<UserPlus class="h-4 w-4 mr-2" />
 			Add First User
 		</a>
@@ -188,7 +182,9 @@
 		<div class="py-4">
 			{#if targetUser}
 				<div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-					<div class="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+					<div
+						class="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0"
+					>
 						<span class="text-sm font-semibold text-destructive">
 							{getInitials(targetUser.username)}
 						</span>
@@ -201,9 +197,7 @@
 			{/if}
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => (target = undefined)}>
-				Cancel
-			</Button>
+			<Button variant="outline" onclick={() => (target = undefined)}>Cancel</Button>
 			<Button
 				variant="destructive"
 				onclick={async () => {

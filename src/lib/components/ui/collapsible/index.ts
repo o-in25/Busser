@@ -1,3 +1,3 @@
-import Root from "./collapsible.svelte";
+import Root from './collapsible.svelte';
 
-export { Root, Root as Collapsible, Root as CollapsibleSection };
+export { Root as Collapsible, Root as CollapsibleSection, Root };

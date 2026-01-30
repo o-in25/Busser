@@ -1,23 +1,13 @@
 <script lang="ts">
+	import { ClipboardList, Home, LayoutGrid, LogOut, Menu, Ruler, Settings } from 'lucide-svelte';
+
 	import { goto, invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
-	import logo from '$lib/assets/logo-nav.png'
-	import type { User } from '$lib/types/auth';
-	import { Button } from '$lib/components/ui/button';
-	import { Separator } from '$lib/components/ui/separator';
+	import logo from '$lib/assets/logo-nav.png';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { Separator } from '$lib/components/ui/separator';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import {
-		Menu,
-		Home,
-		ClipboardList,
-		LayoutGrid,
-		Settings,
-		Ruler,
-		LogIn,
-		LogOut,
-		X,
-	} from 'lucide-svelte';
+	import type { User } from '$lib/types/auth';
+
 	import Placeholder from './Placeholder.svelte';
 
 	// props
@@ -50,11 +40,17 @@
 
 <!-- Desktop Navigation -->
 <nav class="glass-nav sticky top-0 z-50 w-full px-4 py-3">
-	<div class="mx-auto flex max-w-7xl items-center {hasNavContent ? 'justify-center md:justify-between' : 'justify-center'} relative">
+	<div
+		class="mx-auto flex max-w-7xl items-center {hasNavContent
+			? 'justify-center md:justify-between'
+			: 'justify-center'} relative"
+	>
 		<!-- Mobile Menu Button -->
 		{#if user}
 			<Sheet.Root bind:open={sheetOpen}>
-				<Sheet.Trigger class="absolute left-0 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 md:hidden">
+				<Sheet.Trigger
+					class="absolute left-0 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 md:hidden"
+				>
 					<Menu class="h-6 w-6" />
 					<span class="sr-only">Open menu</span>
 				</Sheet.Trigger>
@@ -82,7 +78,11 @@
 						<a
 							href="/"
 							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/') ? 'bg-primary/10 text-foreground' : ''}"
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
+								'/'
+							)
+								? 'bg-primary/10 text-foreground'
+								: ''}"
 						>
 							<Home class="h-5 w-5" />
 							Home
@@ -91,7 +91,11 @@
 						<a
 							href="/inventory"
 							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/inventory') ? 'bg-primary/10 text-foreground' : ''}"
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
+								'/inventory'
+							)
+								? 'bg-primary/10 text-foreground'
+								: ''}"
 						>
 							<ClipboardList class="h-5 w-5" />
 							Inventory
@@ -100,7 +104,11 @@
 						<a
 							href="/catalog"
 							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/catalog') ? 'bg-primary/10 text-foreground' : ''}"
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
+								'/catalog'
+							)
+								? 'bg-primary/10 text-foreground'
+								: ''}"
 						>
 							<LayoutGrid class="h-5 w-5" />
 							Catalog
@@ -111,7 +119,11 @@
 						<a
 							href="/tools"
 							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/tools') ? 'bg-primary/10 text-foreground' : ''}"
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
+								'/tools'
+							)
+								? 'bg-primary/10 text-foreground'
+								: ''}"
 						>
 							<Ruler class="h-5 w-5" />
 							Tools
@@ -120,7 +132,11 @@
 						<a
 							href="/settings"
 							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive('/settings') ? 'bg-primary/10 text-foreground' : ''}"
+							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
+								'/settings'
+							)
+								? 'bg-primary/10 text-foreground'
+								: ''}"
 						>
 							<Settings class="h-5 w-5" />
 							Settings
@@ -150,19 +166,25 @@
 			<div class="hidden md:flex md:items-center md:gap-6">
 				<a
 					href="/"
-					class="text-sm font-medium transition-colors hover:text-primary {isActive('/') ? 'text-primary' : 'text-muted-foreground'}"
+					class="text-sm font-medium transition-colors hover:text-primary {isActive('/')
+						? 'text-primary'
+						: 'text-muted-foreground'}"
 				>
 					Home
 				</a>
 				<a
 					href="/inventory"
-					class="text-sm font-medium transition-colors hover:text-primary {isActive('/inventory') ? 'text-primary' : 'text-muted-foreground'}"
+					class="text-sm font-medium transition-colors hover:text-primary {isActive('/inventory')
+						? 'text-primary'
+						: 'text-muted-foreground'}"
 				>
 					Inventory
 				</a>
 				<a
 					href="/catalog"
-					class="text-sm font-medium transition-colors hover:text-primary {isActive('/catalog') ? 'text-primary' : 'text-muted-foreground'}"
+					class="text-sm font-medium transition-colors hover:text-primary {isActive('/catalog')
+						? 'text-primary'
+						: 'text-muted-foreground'}"
 				>
 					Catalog
 				</a>

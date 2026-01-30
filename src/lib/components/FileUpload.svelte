@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
 	import { Upload, X } from 'lucide-svelte';
+
 	import placeholder from '$lib/assets/placeholder@2x.jpg';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+
 	import FancyImage from './FancyImage.svelte';
 
 	export let name = 'image';
@@ -51,17 +53,16 @@
 					for={name}
 					class="flex items-center justify-center px-4 border border-r-0 border-input/50 rounded-l-lg bg-white/50 dark:bg-zinc-800/40 backdrop-blur-sm hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer transition-all duration-200 group-focus-within:border-primary/50 group-focus-within:bg-primary/5"
 				>
-					<Upload class="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+					<Upload
+						class="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors"
+					/>
 				</label>
-				<input
-					id={name}
-					{name}
-					type="file"
-					bind:files
-					bind:this={fileInputRef}
-					class="hidden"
+				<input id={name} {name} type="file" bind:files bind:this={fileInputRef} class="hidden" />
+				<Input
+					value={fileNames}
+					disabled
+					class="rounded-l-none border-l-0 {hasFiles ? 'rounded-r-none' : ''}"
 				/>
-				<Input value={fileNames} disabled class="rounded-l-none border-l-0 {hasFiles ? 'rounded-r-none' : ''}" />
 				{#if hasFiles}
 					<Button
 						variant="ghost"

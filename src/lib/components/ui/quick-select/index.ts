@@ -1,3 +1,3 @@
-import Root from "./quick-select.svelte";
+import Root from './quick-select.svelte';
 
-export { Root, Root as QuickSelect };
+export { Root as QuickSelect, Root };

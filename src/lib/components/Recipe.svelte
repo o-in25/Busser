@@ -1,32 +1,33 @@
 <script lang="ts">
-	import type { View } from '$lib/types';
-	import { buttonVariants } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Skeleton } from '$lib/components/ui/skeleton';
-	import { CollapsibleSection } from '$lib/components/ui/collapsible';
-	import RecipeIngredientStep from './RecipeIngredientStep.svelte';
-	import RecipeVerdictCard from './RecipeVerdictCard.svelte';
-	import { cn } from '$lib/utils';
 	import {
-		Pencil,
-		GlassWater,
-		Martini,
-		FlaskConical,
-		Clock,
-		Percent,
 		BookOpen,
 		ChefHat,
 		Expand,
+		FlaskConical,
+		GlassWater,
+		Martini,
+		Pencil,
+		Percent,
 		X,
 	} from 'lucide-svelte';
-	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
+	import { getContext, onMount } from 'svelte';
+	import { cubicOut } from 'svelte/easing';
+	import { fade, scale } from 'svelte/transition';
+
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
+	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
+	import { Badge } from '$lib/components/ui/badge';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { CollapsibleSection } from '$lib/components/ui/collapsible';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { calculateAbv } from '$lib/math';
 	import type { RecipeGeneratorSchema } from '$lib/server/generators/recipe-generator';
-	import { getContext, onMount } from 'svelte';
-	import { fade, scale } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import type { View } from '$lib/types';
+	import { cn } from '$lib/utils';
+
+	import RecipeIngredientStep from './RecipeIngredientStep.svelte';
+	import RecipeVerdictCard from './RecipeVerdictCard.svelte';
 
 	// Props using $props()
 	let {
@@ -46,7 +47,7 @@
 	let contentLoading = $state(true);
 
 	// Steps with checked state
-	let steps = $state(initialRecipeSteps.map(step => ({ ...step, checked: false })));
+	let steps = $state(initialRecipeSteps.map((step) => ({ ...step, checked: false })));
 
 	// Lightbox state
 	let lightboxOpen = $state(false);
@@ -54,21 +55,20 @@
 	// Calculate derived values
 	let abv = $derived(calculateAbv(initialRecipeSteps, recipe.recipeTechniqueDescriptionId || 1));
 	let ingredientCount = $derived(initialRecipeSteps.length);
-	let completedSteps = $derived(steps.filter(s => s.checked).length);
+	let completedSteps = $derived(steps.filter((s) => s.checked).length);
 	let allStepsCompleted = $derived(completedSteps === steps.length && steps.length > 0);
 
 	// Get the actual image URL
-	let imageUrl = $derived(recipe.recipeImageUrl || null);
 	let lightImageUrl = $derived(recipe.recipeImageUrl || placeholderLight);
 	let darkImageUrl = $derived(recipe.recipeImageUrl || placeholderDark);
 
 	// Serving method icon mapping
 	const servingMethodIcons: Record<string, typeof Martini> = {
-		"Stirred": Martini,
-		"Shaken": GlassWater,
-		"Built": FlaskConical,
+		Stirred: Martini,
+		Shaken: GlassWater,
+		Built: FlaskConical,
 	};
-	const ServingIcon = servingMethodIcons[recipe.recipeTechniqueDescriptionText || ""] || GlassWater;
+	const ServingIcon = servingMethodIcons[recipe.recipeTechniqueDescriptionText || ''] || GlassWater;
 
 	// Fetch AI-generated content
 	onMount(async () => {
@@ -131,10 +131,14 @@
 				alt={recipe.recipeName}
 			/>
 			<!-- Gradient overlay -->
-			<div class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
+			<div
+				class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"
+			></div>
 
 			<!-- Expand indicator -->
-			<div class="absolute top-4 right-4 p-2 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+			<div
+				class="absolute top-4 right-4 p-2 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+			>
 				<Expand class="w-5 h-5 text-foreground" />
 			</div>
 		</button>
@@ -173,7 +177,7 @@
 				<!-- Edit button -->
 				{#if canModify}
 					<a
-						class={cn(buttonVariants({ variant: "default" }), "shrink-0 pointer-events-auto")}
+						class={cn(buttonVariants({ variant: 'default' }), 'shrink-0 pointer-events-auto')}
 						href="/catalog/{recipe.recipeId}/edit"
 					>
 						<Pencil class="w-4 h-4 mr-2" />
@@ -217,12 +221,7 @@
 				class="relative max-w-[90vw] max-h-[85vh] cursor-zoom-out"
 				transition:scale={{ duration: 300, easing: cubicOut, start: 0.9 }}
 			>
-				<button
-					type="button"
-					onclick={closeLightbox}
-					class="block"
-					aria-label="Close lightbox"
-				>
+				<button type="button" onclick={closeLightbox} class="block" aria-label="Close lightbox">
 					<img
 						class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl dark:hidden"
 						src={lightImageUrl}
@@ -271,10 +270,7 @@
 							Ingredients
 						</Card.Title>
 						{#if steps.length > 0}
-							<Badge
-								variant={allStepsCompleted ? "default" : "secondary"}
-								class="transition-all"
-							>
+							<Badge variant={allStepsCompleted ? 'default' : 'secondary'} class="transition-all">
 								{completedSteps} / {steps.length}
 							</Badge>
 						{/if}
@@ -313,11 +309,7 @@
 			</Card.Root>
 
 			<!-- About/History Section -->
-			<CollapsibleSection
-				title="About This Cocktail"
-				icon={BookOpen}
-				open={true}
-			>
+			<CollapsibleSection title="About This Cocktail" icon={BookOpen} open={true}>
 				{#if contentLoading}
 					<div class="space-y-3">
 						<Skeleton class="h-4 w-full" />

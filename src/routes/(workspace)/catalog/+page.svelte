@@ -1,35 +1,31 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import type { PageData } from './$types';
-	import { cn } from '$lib/utils';
 	import {
 		ArrowRight,
-		Search,
-		Plus,
-		Sparkles,
 		BookOpen,
+		FlaskConical,
 		GlassWater,
 		Lightbulb,
-		TrendingUp,
-		FlaskConical,
+		Plus,
+		Search,
+		Sparkles,
 		Star,
+		TrendingUp,
 	} from 'lucide-svelte';
-	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
+
+	import { goto } from '$app/navigation';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { Input } from '$lib/components/ui/input';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { cn } from '$lib/utils';
+
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	const {
-		spirits,
-		spiritCounts,
-		recentCocktails,
-		featuredCocktail,
-		totalRecipes,
-		popularSpirit,
-	} = data.args;
+	const { spirits, spiritCounts, recentCocktails, featuredCocktail, totalRecipes, popularSpirit } =
+		data.args;
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
@@ -47,29 +43,29 @@
 	// Bartender tips - rotating educational content
 	const bartenderTips = [
 		{
-			title: "The Fundamental Law of Cocktails",
-			tip: "There is no chilling without dilution, and there is no dilution without chilling. The two are inextricably linked.",
-			source: "Dave Arnold"
+			title: 'The Fundamental Law of Cocktails',
+			tip: 'There is no chilling without dilution, and there is no dilution without chilling. The two are inextricably linked.',
+			source: 'Dave Arnold',
 		},
 		{
-			title: "Perfect Stirring",
-			tip: "Stir drinks for about 30 seconds with good ice. Stirred drinks should be silky and slightly less diluted than shaken ones.",
-			source: "Classic Technique"
+			title: 'Perfect Stirring',
+			tip: 'Stir drinks for about 30 seconds with good ice. Stirred drinks should be silky and slightly less diluted than shaken ones.',
+			source: 'Classic Technique',
 		},
 		{
-			title: "The Shake Test",
-			tip: "Shake until the outside of your shaker is frosted and almost painfully cold to hold - usually 10-15 seconds.",
-			source: "Classic Technique"
+			title: 'The Shake Test',
+			tip: 'Shake until the outside of your shaker is frosted and almost painfully cold to hold - usually 10-15 seconds.',
+			source: 'Classic Technique',
 		},
 		{
-			title: "Ice Matters",
+			title: 'Ice Matters',
 			tip: "Clear ice isn't just pretty - it's denser and melts slower, giving you better control over dilution in your drinks.",
-			source: "Ice Science"
+			source: 'Ice Science',
 		},
 		{
-			title: "Fresh Citrus",
-			tip: "Always use freshly squeezed citrus juice. The flavor degrades significantly after just a few hours.",
-			source: "Classic Technique"
+			title: 'Fresh Citrus',
+			tip: 'Always use freshly squeezed citrus juice. The flavor degrades significantly after just a few hours.',
+			source: 'Classic Technique',
 		},
 	];
 
@@ -82,13 +78,13 @@
 </svelte:head>
 
 <!-- Hero Section -->
-<div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4">
+<div
+	class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4"
+>
 	<div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
 	<div class="relative px-6 py-10 md:py-14">
 		<div class="max-w-2xl">
-			<h1 class="text-4xl md:text-5xl font-bold mb-3">
-				Cocktail Catalog
-			</h1>
+			<h1 class="text-4xl md:text-5xl font-bold mb-3">Cocktail Catalog</h1>
 			<p class="text-lg text-muted-foreground mb-6">
 				Explore recipes by spirit, discover new favorites, and master the art of mixology.
 			</p>
@@ -110,14 +106,18 @@
 
 		<!-- Quick stats -->
 		<div class="flex flex-wrap gap-4 mt-8">
-			<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border">
+			<div
+				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+			>
 				<FlaskConical class="h-5 w-5 text-primary" />
 				<div>
 					<p class="text-2xl font-bold">{totalRecipes}</p>
 					<p class="text-xs text-muted-foreground">Total Recipes</p>
 				</div>
 			</div>
-			<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border">
+			<div
+				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+			>
 				<GlassWater class="h-5 w-5 text-primary" />
 				<div>
 					<p class="text-2xl font-bold">{spirits.length}</p>
@@ -125,7 +125,9 @@
 				</div>
 			</div>
 			{#if popularSpirit}
-				<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border">
+				<div
+					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				>
 					<TrendingUp class="h-5 w-5 text-primary" />
 					<div>
 						<p class="text-2xl font-bold">{popularSpirit.recipeCategoryDescription}</p>
@@ -157,7 +159,9 @@
 		{#each spirits as spirit}
 			{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
 			<a href="/catalog/browse/{spirit.recipeCategoryId}" class="block group">
-				<Card.Root class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300">
+				<Card.Root
+					class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300"
+				>
 					<!-- Background image -->
 					<div class="absolute inset-0">
 						<img
@@ -165,7 +169,9 @@
 							alt={spirit.recipeCategoryDescription}
 							class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
 						/>
-						<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+						<div
+							class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
+						></div>
 					</div>
 
 					<!-- Content -->
@@ -175,7 +181,8 @@
 								{spirit.recipeCategoryDescription}
 							</h3>
 							<Badge variant="secondary" class="bg-background/80 backdrop-blur-sm">
-								{count} {count === 1 ? 'recipe' : 'recipes'}
+								{count}
+								{count === 1 ? 'recipe' : 'recipes'}
 							</Badge>
 						</div>
 						<p class="text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -208,7 +215,9 @@
 						class="h-full w-full object-cover"
 					/>
 				{:else}
-					<div class="h-full w-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+					<div
+						class="h-full w-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
+					>
 						<Sparkles class="h-12 w-12 text-primary/40" />
 					</div>
 				{/if}
@@ -225,7 +234,7 @@
 				</p>
 				<a
 					href="/catalog/{featuredCocktail.recipeId}"
-					class={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full")}
+					class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full')}
 				>
 					View Recipe
 					<ArrowRight class="ml-2 h-4 w-4" />
@@ -235,7 +244,7 @@
 	{/if}
 
 	<!-- Recent Cocktails -->
-	<Card.Root class={featuredCocktail ? "lg:col-span-2" : "lg:col-span-3"}>
+	<Card.Root class={featuredCocktail ? 'lg:col-span-2' : 'lg:col-span-3'}>
 		<Card.Header>
 			<Card.Title class="flex items-center gap-2">
 				<BookOpen class="h-5 w-5 text-primary" />
@@ -275,7 +284,9 @@
 									{cocktail.recipeCategoryDescription}
 								</p>
 							</div>
-							<ArrowRight class="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+							<ArrowRight
+								class="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+							/>
 						</a>
 					{/each}
 				</div>
@@ -330,7 +341,7 @@
 				<p class="text-muted-foreground text-sm mb-4 max-w-xs">
 					Explore our curated collection of cocktail recipes.
 				</p>
-				<a href="/catalog/browse" class={buttonVariants({ variant: "outline" })}>
+				<a href="/catalog/browse" class={buttonVariants({ variant: 'outline' })}>
 					Browse All
 					<ArrowRight class="h-4 w-4 ml-2" />
 				</a>

@@ -1,12 +1,14 @@
 <script lang="ts">
+	import { AlertCircle, ArrowLeft, Loader2, Lock, XCircle } from 'lucide-svelte';
+
 	import { enhance } from '$app/forms';
 	import * as Alert from '$lib/components/ui/alert';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { cn } from '$lib/utils';
+
 	import type { ActionData, PageData } from './$types';
-	import { AlertCircle, Lock, Loader2, ArrowLeft, XCircle } from 'lucide-svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	let isSubmitting = $state(false);
@@ -25,7 +27,7 @@
 			<p class="mb-3 font-normal text-muted-foreground">
 				This password reset link has expired. Please request a new one.
 			</p>
-			<a href="/forgot-password" class={cn(buttonVariants({ variant: "outline" }))}>
+			<a href="/forgot-password" class={cn(buttonVariants({ variant: 'outline' }))}>
 				Request new link
 			</a>
 		</div>
@@ -37,7 +39,7 @@
 			<p class="mb-3 font-normal text-muted-foreground">
 				This password reset link is invalid. Please request a new one.
 			</p>
-			<a href="/forgot-password" class={cn(buttonVariants({ variant: "outline" }))}>
+			<a href="/forgot-password" class={cn(buttonVariants({ variant: 'outline' }))}>
 				Request new link
 			</a>
 		</div>
@@ -50,9 +52,7 @@
 					Enter a new password for <span class="font-medium text-foreground">{data.email}</span>.
 				</p>
 			{:else}
-				<p class="text-sm text-muted-foreground">
-					Enter your new password below.
-				</p>
+				<p class="text-sm text-muted-foreground">Enter your new password below.</p>
 			{/if}
 		</div>
 
@@ -110,7 +110,7 @@
 					{/if}
 				</Button>
 
-				<a href="/login" class={cn(buttonVariants({ variant: "ghost" }))}>
+				<a href="/login" class={cn(buttonVariants({ variant: 'ghost' }))}>
 					<ArrowLeft class="w-4 h-4 mr-2" />
 					Back to login
 				</a>

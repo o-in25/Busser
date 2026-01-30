@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import { Textarea } from '$lib/components/ui/textarea';
+	import { Brain, Loader2 } from 'lucide-svelte';
+
 	import { Button } from '$lib/components/ui/button';
 	import { Helper } from '$lib/components/ui/helper';
-	import { Brain, Loader2 } from 'lucide-svelte';
+	import { Label } from '$lib/components/ui/label';
+	import { Textarea } from '$lib/components/ui/textarea';
 
 	export let value = '';
 	export let label = 'Description';
@@ -25,8 +26,8 @@
 				body: JSON.stringify({ trigger }),
 			});
 			const res = await response.json();
-      console.log(res);
-      const description = res.description;
+			console.log(res);
+			const { description } = res;
 			if (!res.description) throw new Error('Invalid response generated.');
 
 			value = description;
@@ -41,7 +42,9 @@
 
 <Label for="textarea-id" class="mb-2">{label}</Label>
 <div class="mt-3">
-	<div class="flex items-start gap-3 p-3 rounded-xl bg-white/50 dark:bg-zinc-800/40 backdrop-blur-sm border border-input/50">
+	<div
+		class="flex items-start gap-3 p-3 rounded-xl bg-white/50 dark:bg-zinc-800/40 backdrop-blur-sm border border-input/50"
+	>
 		<Button
 			variant="outline"
 			size="icon"
@@ -67,8 +70,6 @@
 		/>
 	</div>
 	{#if showHelperText}
-		<Helper color="red" class="mt-2">
-			Could not generate text from prompt.
-		</Helper>
+		<Helper color="red" class="mt-2">Could not generate text from prompt.</Helper>
 	{/if}
 </div>

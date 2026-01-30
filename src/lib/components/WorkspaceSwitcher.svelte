@@ -1,20 +1,19 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import {
+		ArrowRightLeft,
 		Building2,
-		Users,
-		User,
-		Globe,
-		Crown,
-		ChevronDown,
 		Check,
+		ChevronDown,
+		Crown,
+		Globe,
 		Settings,
-		ArrowRightLeft
+		User,
+		Users,
 	} from 'lucide-svelte';
+
+	import { goto } from '$app/navigation';
+	import { Button } from '$lib/components/ui/button';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	// Props
@@ -104,9 +103,7 @@
 				{/each}
 			</DropdownMenu.Group>
 		{:else}
-			<div class="px-2 py-4 text-center text-sm text-muted-foreground">
-				No workspaces available
-			</div>
+			<div class="px-2 py-4 text-center text-sm text-muted-foreground">No workspaces available</div>
 		{/if}
 
 		<DropdownMenu.Separator />

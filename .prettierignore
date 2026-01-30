@@ -1,0 +1,8 @@
+node_modules
+.svelte-kit
+build
+dist
+.vercel
+.netlify
+package-lock.json
+pnpm-lock.yaml

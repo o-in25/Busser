@@ -1,3 +1,3 @@
-import Root, { type BadgeVariant, badgeVariants } from "./badge.svelte";
+import Root, { type BadgeVariant, badgeVariants } from './badge.svelte';
 
-export { Root, Root as Badge, badgeVariants, type BadgeVariant };
+export { Root as Badge, type BadgeVariant, badgeVariants, Root };

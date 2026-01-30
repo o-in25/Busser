@@ -1,26 +1,27 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select';
-	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import { cn } from '$lib/utils';
 	import {
-		Search,
-		X,
-		LayoutGrid,
-		List,
 		ArrowLeft,
 		ChevronLeft,
 		ChevronRight,
 		FlaskConical,
+		LayoutGrid,
+		List,
+		Search,
+		X,
 	} from 'lucide-svelte';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
+
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
+	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { Input } from '$lib/components/ui/input';
+	import * as Select from '$lib/components/ui/select';
+	import { cn } from '$lib/utils';
+
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
@@ -112,13 +113,14 @@
 <div class="container mx-auto px-4 mt-4">
 	<!-- Header -->
 	<div class="flex items-center gap-4 mb-6">
-		<a href="/catalog" class={cn(buttonVariants({ variant: "ghost", size: "icon" }))}>
+		<a href="/catalog" class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
 			<ArrowLeft class="h-5 w-5" />
 		</a>
 		<div>
 			<h1 class="text-2xl font-bold">Browse Catalog</h1>
 			<p class="text-muted-foreground">
-				{data.pagination.total} {data.pagination.total === 1 ? 'recipe' : 'recipes'} in your collection
+				{data.pagination.total}
+				{data.pagination.total === 1 ? 'recipe' : 'recipes'} in your collection
 			</p>
 		</div>
 	</div>
@@ -179,8 +181,8 @@
 			<div class="flex items-center border rounded-md overflow-hidden">
 				<button
 					class={cn(
-						"p-2 transition-colors",
-						viewMode === 'grid' ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+						'p-2 transition-colors',
+						viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('grid')}
 					aria-label="Grid view"
@@ -189,8 +191,8 @@
 				</button>
 				<button
 					class={cn(
-						"p-2 transition-colors",
-						viewMode === 'list' ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+						'p-2 transition-colors',
+						viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('list')}
 					aria-label="List view"
@@ -217,22 +219,20 @@
 					{/if}
 				</p>
 				{#if searchInput}
-					<Button variant="outline" onclick={clearSearch}>
-						Clear Search
-					</Button>
+					<Button variant="outline" onclick={clearSearch}>Clear Search</Button>
 				{:else}
-					<a href="/catalog/add" class={buttonVariants()}>
-						Add Recipe
-					</a>
+					<a href="/catalog/add" class={buttonVariants()}> Add Recipe </a>
 				{/if}
 			</Card.Content>
 		</Card.Root>
 	{:else}
-		<div class={cn(
-			viewMode === 'grid'
-				? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-				: "flex flex-col gap-3"
-		)}>
+		<div
+			class={cn(
+				viewMode === 'grid'
+					? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+					: 'flex flex-col gap-3'
+			)}
+		>
 			{#each data.recipes as recipe (recipe.recipeId)}
 				<CatalogBrowseCard {recipe} {viewMode} />
 			{/each}

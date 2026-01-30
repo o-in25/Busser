@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { CheckCircle2, Loader2, Mail } from 'lucide-svelte';
+
 	import { Button } from '$lib/components/ui/button';
-	import { CheckCircle2, Mail, Loader2 } from 'lucide-svelte';
+
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -19,7 +21,7 @@
 			const response = await fetch('/api/mail/user-registration', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email: data.email })
+				body: JSON.stringify({ email: data.email }),
 			});
 
 			const result = await response.json();
@@ -41,9 +43,7 @@
 
 <div>
 	<CheckCircle2 class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
-	<h4 class="text-xl font-semibold mb-2">
-		Check your email
-	</h4>
+	<h4 class="text-xl font-semibold mb-2">Check your email</h4>
 	<p class="mb-3 font-normal text-muted-foreground">
 		Thanks for signing up! We've sent a confirmation link to
 		{#if data.email}
@@ -65,11 +65,7 @@
 				Verification email sent! Please check your inbox.
 			</p>
 		{:else}
-			<Button
-				variant="outline"
-				onclick={resendEmail}
-				disabled={isResending || !data.email}
-			>
+			<Button variant="outline" onclick={resendEmail} disabled={isResending || !data.email}>
 				{#if isResending}
 					<Loader2 class="w-4 h-4 mr-2 animate-spin" />
 					Sending...

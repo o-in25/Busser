@@ -1,45 +1,46 @@
 <script lang="ts">
+	import {
+		AlertCircle,
+		ArrowRight,
+		Bell,
+		BookOpen,
+		CheckCircle2,
+		ChefHat,
+		ChevronRight,
+		FlaskConical,
+		GlassWater,
+		Lightbulb,
+		Loader2,
+		LogIn,
+		Mail,
+		Package,
+		Plus,
+		Search,
+		Send,
+		ShoppingCart,
+		Shuffle,
+		Sparkles,
+		Star,
+		TrendingUp,
+		Users,
+	} from 'lucide-svelte';
+	import { fade } from 'svelte/transition';
+
+	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import logo from '$lib/assets/logo.png';
+	import placeholder from '$lib/assets/placeholder@2x.jpg';
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Separator } from '$lib/components/ui/separator';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { cn } from '$lib/utils';
-	import type { PageData, ActionData } from './$types';
-	import { page } from '$app/stores';
-	import {
-		LogIn,
-		ArrowRight,
-		Mail,
-		GlassWater,
-		FlaskConical,
-		Package,
-		Sparkles,
-		BookOpen,
-		Plus,
-		Shuffle,
-		TrendingUp,
-		ShoppingCart,
-		ChevronRight,
-		CheckCircle2,
-		AlertCircle,
-		Send,
-		Loader2,
-		Bell,
-		Search,
-		ChefHat,
-		Lightbulb,
-		Users,
-		Star,
-	} from 'lucide-svelte';
-	import { fade, fly } from 'svelte/transition';
-	import { goto } from '$app/navigation';
-	import { enhance } from '$app/forms';
-	import placeholder from '$lib/assets/placeholder@2x.jpg';
-	import logo from '$lib/assets/logo.png';
+
+	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -49,7 +50,9 @@
 	let requestSuccess = $state(false);
 
 	// Form error state - cast to handle the union type properly
-	let requestInviteForm = $derived(form?.requestInvite as { error?: string; email?: string; message?: string } | undefined);
+	let requestInviteForm = $derived(
+		form?.requestInvite as { error?: string; email?: string; message?: string } | undefined
+	);
 
 	const { recipes, spirits, dashboardData, landingData } = data;
 
@@ -58,24 +61,27 @@
 	const canModify = workspaceRole === 'owner' || workspaceRole === 'editor';
 
 	// Gallery setup for authenticated users
-	const gallery = recipes?.map(({
-		recipeImageUrl,
-		recipeName,
-		recipeCategoryDescription,
-		recipeId,
-		recipeCategoryId,
-		recipeDescription,
-	}) => ({
-		src: recipeImageUrl || placeholder,
-		alt: recipeName,
-		hasImage: !!recipeImageUrl,
-		data: {
-			recipeCategoryDescription,
-			recipeId,
-			recipeCategoryId,
-			recipeDescription,
-		},
-	})) || [];
+	const gallery =
+		recipes?.map(
+			({
+				recipeImageUrl,
+				recipeName,
+				recipeCategoryDescription,
+				recipeId,
+				recipeCategoryId,
+				recipeDescription,
+			}) => ({
+				src: recipeImageUrl || placeholder,
+				alt: recipeName,
+				hasImage: !!recipeImageUrl,
+				data: {
+					recipeCategoryDescription,
+					recipeId,
+					recipeCategoryId,
+					recipeDescription,
+				},
+			})
+		) || [];
 
 	// Filter state for gallery
 	let sortBy: string | number = $state('all');
@@ -91,17 +97,13 @@
 		}
 	};
 
-	const hasAny = (spiritId: number) =>
-		gallery.filter((item: any) => item.data.recipeCategoryId === spiritId).length < 1;
-
 	// Surprise me - pick random available recipe
 	function surpriseMe() {
 		if (gallery.length === 0) return;
 		const randomRecipe = gallery[Math.floor(Math.random() * gallery.length)];
 		goto(`/catalog/${randomRecipe.data.recipeId}`);
 	}
-
-	</script>
+</script>
 
 <svelte:head>
 	<title>Home - Busser</title>
@@ -113,7 +115,9 @@
 	<!-- Hero Section -->
 	<section class="relative overflow-hidden py-12 md:py-18 rounded-2xl mt-4">
 		<!-- Background gradient -->
-		<div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-orange-500/10 -z-10 rounded-2xl"></div>
+		<div
+			class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-orange-500/10 -z-10 rounded-2xl"
+		></div>
 		<div class="absolute inset-0 bg-grid-pattern opacity-5 -z-10"></div>
 
 		<div class="max-w-4xl mx-auto text-center px-4">
@@ -123,7 +127,9 @@
 			<!-- Headline -->
 			<h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
 				From Shelf To
-				<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500">
+				<span
+					class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500"
+				>
 					Shaker
 				</span>
 			</h1>
@@ -136,14 +142,17 @@
 			<!-- CTAs -->
 			<div class="flex flex-col sm:flex-row justify-center gap-4">
 				<a
-					class={cn(buttonVariants({ size: "lg" }), "bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white border-0 text-lg px-8")}
+					class={cn(
+						buttonVariants({ size: 'lg' }),
+						'bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white border-0 text-lg px-8'
+					)}
 					href="/signup"
 				>
 					<Mail class="w-5 h-5 mr-2" />
 					Sign Up
 				</a>
 				<a
-					class={cn(buttonVariants({ variant: "outline", size: "lg" }), "text-lg px-8")}
+					class={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'text-lg px-8')}
 					href="/login"
 				>
 					<LogIn class="w-5 h-5 mr-2" />
@@ -165,17 +174,24 @@
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 				<!-- Inventory Management -->
-				<Card.Root class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors">
-					<div class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-2xl"></div>
+				<Card.Root
+					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+				>
+					<div
+						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-2xl"
+					></div>
 					<Card.Header class="pb-2">
-						<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+						<div
+							class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+						>
 							<Package class="h-6 w-6 text-primary" />
 						</div>
 						<Card.Title class="text-lg">Inventory Management</Card.Title>
 					</Card.Header>
 					<Card.Content>
 						<p class="text-sm text-muted-foreground mb-3">
-							Track your spirits, liqueurs, mixers, and ingredients in one place. Organize by category and never lose track of what you have.
+							Track your spirits, liqueurs, mixers, and ingredients in one place. Organize by
+							category and never lose track of what you have.
 						</p>
 						<div class="flex flex-wrap gap-2">
 							<Badge variant="outline" class="text-xs">
@@ -191,17 +207,24 @@
 				</Card.Root>
 
 				<!-- Recipe Catalog -->
-				<Card.Root class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors">
-					<div class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-amber-500/10 blur-2xl"></div>
+				<Card.Root
+					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+				>
+					<div
+						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-amber-500/10 blur-2xl"
+					></div>
 					<Card.Header class="pb-2">
-						<div class="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors">
+						<div
+							class="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors"
+						>
 							<BookOpen class="h-6 w-6 text-amber-600 dark:text-amber-400" />
 						</div>
 						<Card.Title class="text-lg">Recipe Catalog</Card.Title>
 					</Card.Header>
 					<Card.Content>
 						<p class="text-sm text-muted-foreground mb-3">
-							Browse a curated collection of classic and modern cocktails. Each recipe includes detailed ingredients and step-by-step instructions.
+							Browse a curated collection of classic and modern cocktails. Each recipe includes
+							detailed ingredients and step-by-step instructions.
 						</p>
 						<div class="flex flex-wrap gap-2">
 							<Badge variant="outline" class="text-xs">
@@ -217,17 +240,24 @@
 				</Card.Root>
 
 				<!-- Smart Matching -->
-				<Card.Root class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors">
-					<div class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-green-500/10 blur-2xl"></div>
+				<Card.Root
+					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+				>
+					<div
+						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-green-500/10 blur-2xl"
+					></div>
 					<Card.Header class="pb-2">
-						<div class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors">
+						<div
+							class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors"
+						>
 							<ChefHat class="h-6 w-6 text-green-600 dark:text-green-400" />
 						</div>
 						<Card.Title class="text-lg">Smart Matching</Card.Title>
 					</Card.Header>
 					<Card.Content>
 						<p class="text-sm text-muted-foreground mb-3">
-							Discover which cocktails you can make right now based on your current inventory. No more guessing or missing ingredients.
+							Discover which cocktails you can make right now based on your current inventory. No
+							more guessing or missing ingredients.
 						</p>
 						<div class="flex flex-wrap gap-2">
 							<Badge variant="outline" class="text-xs">
@@ -243,17 +273,24 @@
 				</Card.Root>
 
 				<!-- AI-Powered -->
-				<Card.Root class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors">
-					<div class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-violet-500/10 blur-2xl"></div>
+				<Card.Root
+					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+				>
+					<div
+						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-violet-500/10 blur-2xl"
+					></div>
 					<Card.Header class="pb-2">
-						<div class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center mb-3 group-hover:bg-violet-500/20 transition-colors">
+						<div
+							class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center mb-3 group-hover:bg-violet-500/20 transition-colors"
+						>
 							<Sparkles class="h-6 w-6 text-violet-600 dark:text-violet-400" />
 						</div>
 						<Card.Title class="text-lg">AI-Powered Tools</Card.Title>
 					</Card.Header>
 					<Card.Content>
 						<p class="text-sm text-muted-foreground mb-3">
-							Leverage intelligent features to generate recipe suggestions and get personalized recommendations based on your preferences.
+							Leverage intelligent features to generate recipe suggestions and get personalized
+							recommendations based on your preferences.
 						</p>
 						<div class="flex flex-wrap gap-2">
 							<Badge variant="outline" class="text-xs">
@@ -270,15 +307,20 @@
 			</div>
 
 			<!-- Workspace Feature -->
-			<Card.Root class="bg-gradient-to-br from-primary/5 via-background to-primary/5 border-primary/20">
+			<Card.Root
+				class="bg-gradient-to-br from-primary/5 via-background to-primary/5 border-primary/20"
+			>
 				<Card.Content class="flex flex-col md:flex-row items-center gap-6 py-6">
-					<div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+					<div
+						class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
+					>
 						<Users class="h-8 w-8 text-primary" />
 					</div>
 					<div class="text-center md:text-left">
 						<h3 class="text-lg font-semibold mb-2">Workspace Collaboration</h3>
 						<p class="text-sm text-muted-foreground">
-							Create shared workspaces to manage your bar with friends, family, or colleagues. Perfect for home bars, small events, or collaborative cocktail exploration.
+							Create shared workspaces to manage your bar with friends, family, or colleagues.
+							Perfect for home bars, small events, or collaborative cocktail exploration.
 						</p>
 					</div>
 				</Card.Content>
@@ -292,9 +334,7 @@
 			<div class="max-w-6xl mx-auto">
 				<div class="text-center mb-12">
 					<h2 class="text-3xl md:text-4xl font-bold mb-4">Sample Recipes</h2>
-					<p class="text-muted-foreground text-lg">
-						A few cocktails from the catalog
-					</p>
+					<p class="text-muted-foreground text-lg">A few cocktails from the catalog</p>
 				</div>
 
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -306,7 +346,9 @@
 									alt={recipe.recipeName}
 									class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
 								/>
-								<div class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+								<div
+									class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
+								></div>
 								<div class="absolute bottom-0 left-0 right-0 p-4">
 									<p class="font-bold text-foreground">{recipe.recipeName}</p>
 									<p class="text-xs text-muted-foreground">{recipe.recipeCategoryDescription}</p>
@@ -322,18 +364,19 @@
 	<!-- Final CTA Section -->
 	<section class="py-16 px-4">
 		<div class="max-w-3xl mx-auto text-center">
-			<div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-8 md:p-12">
+			<div
+				class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-8 md:p-12"
+			>
 				<div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
 				<div class="relative">
-					<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-						Get Started
-					</h2>
-					<p class="text-white/80 text-lg mb-8">
-						Create an account to start tracking your bar.
-					</p>
+					<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Get Started</h2>
+					<p class="text-white/80 text-lg mb-8">Create an account to start tracking your bar.</p>
 					<a
 						href="/signup"
-						class={cn(buttonVariants({ size: "lg" }), "bg-white text-purple-600 hover:bg-white/90 text-lg px-8")}
+						class={cn(
+							buttonVariants({ size: 'lg' }),
+							'bg-white text-purple-600 hover:bg-white/90 text-lg px-8'
+						)}
 					>
 						Sign Up
 						<ArrowRight class="ml-2 h-5 w-5" />
@@ -348,7 +391,7 @@
 				</p>
 				<button
 					type="button"
-					onclick={() => requestModalOpen = true}
+					onclick={() => (requestModalOpen = true)}
 					class="text-sm text-primary hover:underline"
 				>
 					Don't have an invite? Request one here.
@@ -370,14 +413,21 @@
 			{#if requestSuccess}
 				<!-- Success State -->
 				<div class="py-6 text-center">
-					<div class="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+					<div
+						class="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4"
+					>
 						<CheckCircle2 class="h-8 w-8 text-green-500" />
 					</div>
 					<h3 class="text-lg font-semibold mb-2">Request Submitted!</h3>
 					<p class="text-muted-foreground text-sm mb-4">
 						We'll review your request and get back to you soon.
 					</p>
-					<Button onclick={() => { requestModalOpen = false; requestSuccess = false; }}>
+					<Button
+						onclick={() => {
+							requestModalOpen = false;
+							requestSuccess = false;
+						}}
+					>
 						Got it
 					</Button>
 				</div>
@@ -387,7 +437,7 @@
 					method="POST"
 					action="?/requestInvite"
 					class="space-y-4"
-	use:enhance={() => {
+					use:enhance={() => {
 						isSubmitting = true;
 						return async ({ result, update }) => {
 							isSubmitting = false;
@@ -412,7 +462,9 @@
 
 					<div class="space-y-2">
 						<Label for="request-message">
-							Why do you want to join? <span class="text-muted-foreground font-normal">(optional)</span>
+							Why do you want to join? <span class="text-muted-foreground font-normal"
+								>(optional)</span
+							>
 						</Label>
 						<Textarea
 							id="request-message"
@@ -433,16 +485,12 @@
 						<Button
 							type="button"
 							variant="outline"
-							onclick={() => requestModalOpen = false}
+							onclick={() => (requestModalOpen = false)}
 							class="w-full sm:w-auto"
 						>
 							Cancel
 						</Button>
-						<Button
-							type="submit"
-							class="w-full sm:w-auto"
-							disabled={isSubmitting}
-						>
+						<Button type="submit" class="w-full sm:w-auto" disabled={isSubmitting}>
 							{#if isSubmitting}
 								<Loader2 class="h-4 w-4 mr-2 animate-spin" />
 								Submitting...
@@ -456,7 +504,6 @@
 			{/if}
 		</Dialog.Content>
 	</Dialog.Root>
-
 {:else}
 	<!-- ==================== AUTHENTICATED DASHBOARD ==================== -->
 
@@ -468,9 +515,7 @@
 					<h1 class="text-3xl md:text-4xl font-bold mb-2">
 						Welcome back, {dashboardData.userName}!
 					</h1>
-					<p class="text-muted-foreground">
-						Here's what's happening with your home bar today.
-					</p>
+					<p class="text-muted-foreground">Here's what's happening with your home bar today.</p>
 				</div>
 
 				<!-- Quick Stats Cards -->
@@ -506,7 +551,9 @@
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 				{#if canModify}
 					<a href="/inventory/add" class="block">
-						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+						<Card.Root
+							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full"
+						>
 							<div class="flex items-center gap-3">
 								<div class="p-2 rounded-lg bg-primary/10">
 									<Plus class="h-5 w-5 text-primary" />
@@ -521,7 +568,9 @@
 				{/if}
 
 				<a href="/catalog/browse" class="block">
-					<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+					<Card.Root
+						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full"
+					>
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-lg bg-primary/10">
 								<BookOpen class="h-5 w-5 text-primary" />
@@ -536,7 +585,9 @@
 
 				{#if gallery.length > 0}
 					<button onclick={surpriseMe} class="block text-left w-full">
-						<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+						<Card.Root
+							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full"
+						>
 							<div class="flex items-center gap-3">
 								<div class="p-2 rounded-lg bg-amber-500/10">
 									<Shuffle class="h-5 w-5 text-amber-500" />
@@ -551,7 +602,9 @@
 				{/if}
 
 				<a href="/inventory" class="block">
-					<Card.Root class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full">
+					<Card.Root
+						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full"
+					>
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-lg bg-primary/10">
 								<Package class="h-5 w-5 text-primary" />
@@ -578,7 +631,10 @@
 						Cocktails you can make right now with your inventory
 					</p>
 				</div>
-				<a href="/catalog/browse?available=true" class="text-sm text-primary hover:underline flex items-center">
+				<a
+					href="/catalog/browse?available=true"
+					class="text-sm text-primary hover:underline flex items-center"
+				>
 					View all
 					<ChevronRight class="h-4 w-4" />
 				</a>
@@ -595,7 +651,9 @@
 					All ({gallery.length})
 				</Button>
 				{#each spirits as spirit}
-					{@const count = gallery.filter(g => g.data.recipeCategoryId === spirit.recipeCategoryId).length}
+					{@const count = gallery.filter(
+						(g) => g.data.recipeCategoryId === spirit.recipeCategoryId
+					).length}
 					{#if count > 0}
 						<Button
 							variant={sortBy === spirit.recipeCategoryId ? 'default' : 'outline'}
@@ -632,12 +690,10 @@
 				<!-- Recipe Grid -->
 				<div class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{#each filter.slice(0, 8) as item (item.data.recipeId)}
-						<a
-							href="/catalog/{item.data.recipeId}"
-							class="block group"
-							in:fade={{ duration: 200 }}
-						>
-							<Card.Root class="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+						<a href="/catalog/{item.data.recipeId}" class="block group" in:fade={{ duration: 200 }}>
+							<Card.Root
+								class="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105"
+							>
 								<div class="relative aspect-square">
 									<img
 										src={item.src}
@@ -645,8 +701,13 @@
 										class="h-full w-full object-cover"
 										loading="lazy"
 									/>
-									<div class="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-									<Badge variant="secondary" class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm">
+									<div
+										class="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+									></div>
+									<Badge
+										variant="secondary"
+										class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm"
+									>
 										{item.data.recipeCategoryDescription}
 									</Badge>
 								</div>
@@ -665,7 +726,7 @@
 
 				{#if filter.length > 8}
 					<div class="text-center mt-4">
-						<a href="/catalog/browse?available=true" class={buttonVariants({ variant: "outline" })}>
+						<a href="/catalog/browse?available=true" class={buttonVariants({ variant: 'outline' })}>
 							View All {filter.length} Available Recipes
 							<ArrowRight class="ml-2 h-4 w-4" />
 						</a>
@@ -710,7 +771,10 @@
 									<p class="font-bold truncate">{recipe.recipeName}</p>
 									<p class="text-xs text-muted-foreground">{recipe.recipeCategoryDescription}</p>
 									{#if recipe.missingIngredient}
-										<Badge variant="outline" class="mt-1 text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+										<Badge
+											variant="outline"
+											class="mt-1 text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30"
+										>
 											<ShoppingCart class="h-3 w-3 mr-1" />
 											Need: {recipe.missingIngredient}
 										</Badge>
@@ -718,7 +782,7 @@
 								</div>
 								<a
 									href="/catalog/{recipe.recipeId}"
-									class={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+									class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
 								>
 									<ChevronRight class="h-5 w-5" />
 								</a>
@@ -740,7 +804,9 @@
 								alt={dashboardData.topSpirit.recipeCategoryDescription}
 								class="w-full h-full object-cover"
 							/>
-							<div class="absolute inset-0 bg-gradient-to-r from-transparent to-background md:bg-gradient-to-t md:from-transparent md:to-background"></div>
+							<div
+								class="absolute inset-0 bg-gradient-to-r from-transparent to-background md:bg-gradient-to-t md:from-transparent md:to-background"
+							></div>
 						</div>
 						<Card.Content class="flex-1 flex flex-col justify-center p-6">
 							<Badge variant="secondary" class="w-fit mb-2">
@@ -751,11 +817,12 @@
 								{dashboardData.topSpirit.recipeCategoryDescription}
 							</h3>
 							<p class="text-muted-foreground text-sm mb-3">
-								You can make {dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId]} cocktails with your {dashboardData.topSpirit.recipeCategoryDescription?.toLowerCase() ?? ''} collection.
+								You can make {dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId]} cocktails
+								with your {dashboardData.topSpirit.recipeCategoryDescription?.toLowerCase() ?? ''} collection.
 							</p>
 							<a
 								href="/catalog/browse/{dashboardData.topSpirit.recipeCategoryId}"
-								class={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-fit")}
+								class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-fit')}
 							>
 								Explore {dashboardData.topSpirit.recipeCategoryDescription} Cocktails
 								<ArrowRight class="ml-2 h-4 w-4" />

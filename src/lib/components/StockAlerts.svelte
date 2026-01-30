@@ -1,15 +1,14 @@
 <script lang="ts">
-	import type { Product } from '$lib/types';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
-	import { XCircle, AlertTriangle, ChevronDown, ArrowRight } from 'lucide-svelte';
-	import { cn } from '$lib/utils';
+	import { AlertTriangle, ArrowRight, ChevronDown, XCircle } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
+
+	import { Badge } from '$lib/components/ui/badge';
+	import type { Product } from '$lib/types';
+	import { cn } from '$lib/utils';
 
 	let {
 		outOfStockItems,
-		lowStockItems
+		lowStockItems,
 	}: {
 		outOfStockItems: Product[];
 		lowStockItems: Product[];
@@ -25,11 +24,13 @@
 	<div class="space-y-4 mb-6">
 		<!-- Out of Stock Section -->
 		{#if outOfStockItems.length > 0}
-			<div class="rounded-lg border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20 overflow-hidden">
+			<div
+				class="rounded-lg border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20 overflow-hidden"
+			>
 				<button
 					type="button"
 					class="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-red-100/50 dark:hover:bg-red-900/20 transition-colors"
-					onclick={() => outOfStockOpen = !outOfStockOpen}
+					onclick={() => (outOfStockOpen = !outOfStockOpen)}
 				>
 					<div class="flex items-center gap-2">
 						<XCircle class="h-5 w-5 text-red-500" />
@@ -37,10 +38,12 @@
 							Out of Stock ({outOfStockItems.length})
 						</span>
 					</div>
-					<ChevronDown class={cn(
-						"h-4 w-4 text-red-500 transition-transform duration-200",
-						outOfStockOpen && "rotate-180"
-					)} />
+					<ChevronDown
+						class={cn(
+							'h-4 w-4 text-red-500 transition-transform duration-200',
+							outOfStockOpen && 'rotate-180'
+						)}
+					/>
 				</button>
 				{#if outOfStockOpen}
 					<div transition:slide={{ duration: 200 }}>
@@ -69,7 +72,9 @@
 											<p class="text-xs text-muted-foreground truncate">{item.categoryName}</p>
 										</div>
 									</div>
-									<ArrowRight class="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0" />
+									<ArrowRight
+										class="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0"
+									/>
 								</a>
 							{/each}
 						</div>
@@ -80,11 +85,13 @@
 
 		<!-- Low Stock Section -->
 		{#if lowStockItems.length > 0}
-			<div class="rounded-lg border border-yellow-200 dark:border-yellow-900 bg-yellow-50/50 dark:bg-yellow-950/20 overflow-hidden">
+			<div
+				class="rounded-lg border border-yellow-200 dark:border-yellow-900 bg-yellow-50/50 dark:bg-yellow-950/20 overflow-hidden"
+			>
 				<button
 					type="button"
 					class="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-yellow-100/50 dark:hover:bg-yellow-900/20 transition-colors"
-					onclick={() => lowStockOpen = !lowStockOpen}
+					onclick={() => (lowStockOpen = !lowStockOpen)}
 				>
 					<div class="flex items-center gap-2">
 						<AlertTriangle class="h-5 w-5 text-yellow-500" />
@@ -92,10 +99,12 @@
 							Low Stock ({lowStockItems.length})
 						</span>
 					</div>
-					<ChevronDown class={cn(
-						"h-4 w-4 text-yellow-500 transition-transform duration-200",
-						lowStockOpen && "rotate-180"
-					)} />
+					<ChevronDown
+						class={cn(
+							'h-4 w-4 text-yellow-500 transition-transform duration-200',
+							lowStockOpen && 'rotate-180'
+						)}
+					/>
 				</button>
 				{#if lowStockOpen}
 					<div transition:slide={{ duration: 200 }}>
@@ -126,7 +135,9 @@
 									</div>
 									<div class="flex items-center gap-2">
 										<Badge variant="secondary" class="shrink-0">Qty: 1</Badge>
-										<ArrowRight class="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0" />
+										<ArrowRight
+											class="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0"
+										/>
 									</div>
 								</a>
 							{/each}

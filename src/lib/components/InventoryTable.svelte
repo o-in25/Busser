@@ -1,20 +1,15 @@
 <script lang="ts">
-	import type { PaginationData, Product, Spirit } from '$lib/types';
-	import * as Table from '$lib/components/ui/table';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { cn } from '$lib/utils';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
-	import { Indicator } from '$lib/components/ui/indicator';
-	import {
-		Check,
-		ChevronLeft,
-		ChevronRight,
-		Info,
-		FlaskConical,
-	} from 'lucide-svelte';
-	import { page } from '$app/stores';
+	import { Check, ChevronLeft, ChevronRight, FlaskConical, Info } from 'lucide-svelte';
+
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Indicator } from '$lib/components/ui/indicator';
+	import * as Table from '$lib/components/ui/table';
+	import type { PaginationData, Product, Spirit } from '$lib/types';
+	import { cn } from '$lib/utils';
 
 	export let products: Product[];
 	export let paginationData: PaginationData;
@@ -52,7 +47,10 @@
 	$: urlParams_$ = $page.url.searchParams;
 
 	const regex = new RegExp(
-		`\\b(${tableData.map(({ recipeCategoryDescription }) => recipeCategoryDescription?.toLowerCase() ?? '').filter(Boolean).join('|')})\\b`,
+		`\\b(${tableData
+			.map(({ recipeCategoryDescription }) => recipeCategoryDescription?.toLowerCase() ?? '')
+			.filter(Boolean)
+			.join('|')})\\b`,
 		'i'
 	);
 
@@ -68,7 +66,7 @@
 				const params = new URLSearchParams(queryString);
 				page.active = params.get('page') === activeUrl;
 			});
-			pages = pages;
+			pages = pages; // eslint-disable-line no-self-assign -- trigger Svelte reactivity
 		}
 	}
 
@@ -100,10 +98,7 @@
 		</Table.Header>
 		<Table.Body>
 			{#each search as product}
-				<Table.Row
-					onclick={() => handleRowClick(product)}
-					class="cursor-pointer glass-table-row"
-				>
+				<Table.Row onclick={() => handleRowClick(product)} class="cursor-pointer glass-table-row">
 					<Table.Cell>{product.productName}</Table.Cell>
 					<Table.Cell class="hidden sm:table-cell">
 						{product.categoryName}
@@ -178,8 +173,7 @@
 			<Button
 				variant="outline"
 				size="icon"
-				onclick={() =>
-					navigate('inventory', paginationData.prevPage || paginationData.currentPage)}
+				onclick={() => navigate('inventory', paginationData.prevPage || paginationData.currentPage)}
 				disabled={!paginationData.prevPage}
 			>
 				<span class="sr-only">Previous</span>
@@ -196,8 +190,7 @@
 			<Button
 				variant="outline"
 				size="icon"
-				onclick={() =>
-					navigate('inventory', paginationData.nextPage || paginationData.currentPage)}
+				onclick={() => navigate('inventory', paginationData.nextPage || paginationData.currentPage)}
 				disabled={!paginationData.nextPage}
 			>
 				<span class="sr-only">Next</span>

@@ -1,12 +1,15 @@
 <script lang="ts">
+	import { AlertTriangle, CheckCircle2, Package, XCircle } from 'lucide-svelte';
+
 	import type { InventoryStats } from '$lib/types';
-	import { Package, CheckCircle2, XCircle, AlertTriangle } from 'lucide-svelte';
 
 	let { stats }: { stats: InventoryStats } = $props();
 </script>
 
 <!-- Header Section with Dashboard Stats -->
-<div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4">
+<div
+	class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4"
+>
 	<div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
 	<div class="relative px-6 py-8 md:py-10">
 		<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -20,7 +23,9 @@
 			<!-- Quick Stats -->
 			<div class="grid grid-cols-2 md:flex gap-3">
 				<!-- Total -->
-				<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border">
+				<div
+					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				>
 					<Package class="h-5 w-5 text-primary" />
 					<div>
 						<p class="text-xl font-bold">{stats.total}</p>
@@ -29,7 +34,9 @@
 				</div>
 
 				<!-- In Stock -->
-				<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border">
+				<div
+					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				>
 					<CheckCircle2 class="h-5 w-5 text-green-500" />
 					<div>
 						<p class="text-xl font-bold">{stats.inStock}</p>
@@ -38,7 +45,9 @@
 				</div>
 
 				<!-- Out of Stock -->
-				<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border">
+				<div
+					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				>
 					<XCircle class="h-5 w-5 text-red-500" />
 					<div>
 						<p class="text-xl font-bold">{stats.outOfStock}</p>
@@ -47,7 +56,9 @@
 				</div>
 
 				<!-- Low Stock -->
-				<div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border">
+				<div
+					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				>
 					<AlertTriangle class="h-5 w-5 text-yellow-500" />
 					<div>
 						<p class="text-xl font-bold">{stats.lowStock}</p>

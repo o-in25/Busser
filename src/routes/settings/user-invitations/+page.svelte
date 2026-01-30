@@ -1,22 +1,34 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
-	import * as Table from '$lib/components/ui/table';
-	import { DatePicker } from '$lib/components/ui/date-picker';
-	import type { PageData, ActionData } from './$types';
-	import { Plus, Trash2, Copy, Mail, Clock, Check, X, UserPlus, MailPlus, AlertCircle } from 'lucide-svelte';
-	import { enhance } from '$app/forms';
-	import { notificationStore } from '../../../stores';
+	import {
+		AlertCircle,
+		Check,
+		Clock,
+		Copy,
+		Mail,
+		MailPlus,
+		Plus,
+		Trash2,
+		UserPlus,
+		X,
+	} from 'lucide-svelte';
 	import moment from 'moment';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	import { enhance } from '$app/forms';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { DatePicker } from '$lib/components/ui/date-picker';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import * as Table from '$lib/components/ui/table';
+
+	import { notificationStore } from '../../../stores';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 	let formModal = $state(false);
 	let selectedDate = $state('');
-	let deleteConfirmId = $state<number | null>(null);
 
 	// Pre-fill modal state for fulfilling requests
 	let prefillEmail = $state('');
@@ -53,11 +65,14 @@
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-2xl font-bold">Invitations</h1>
-			<p class="text-sm text-muted-foreground mt-1">
-				Manage user invitations and access requests
-			</p>
+			<p class="text-sm text-muted-foreground mt-1">Manage user invitations and access requests</p>
 		</div>
-		<Button onclick={() => { resetPrefill(); formModal = true; }}>
+		<Button
+			onclick={() => {
+				resetPrefill();
+				formModal = true;
+			}}
+		>
 			<Plus class="h-4 w-4 mr-2" />
 			Create Invite
 		</Button>
@@ -73,9 +88,7 @@
 							<AlertCircle class="h-5 w-5 text-amber-500" />
 							Pending Requests
 						</Card.Title>
-						<Card.Description>
-							Users requesting access to the system
-						</Card.Description>
+						<Card.Description>Users requesting access to the system</Card.Description>
 					</div>
 					<Badge variant="secondary" class="text-sm bg-amber-500/10 text-amber-600">
 						{pendingCount}
@@ -85,7 +98,9 @@
 			<Card.Content>
 				<div class="grid gap-3">
 					{#each data.pendingRequests as request}
-						<div class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg bg-amber-500/5">
+						<div
+							class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg bg-amber-500/5"
+						>
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2 mb-1">
 									<Mail class="h-4 w-4 text-muted-foreground shrink-0" />
@@ -104,21 +119,29 @@
 							<div class="flex items-center gap-2 shrink-0">
 								<Button
 									size="sm"
-									onclick={() => openCreateModalForRequest(request.email, request.invitationRequestId)}
+									onclick={() =>
+										openCreateModalForRequest(request.email, request.invitationRequestId)}
 								>
 									<Check class="h-4 w-4 mr-1" />
 									Create Invite
 								</Button>
-								<form method="POST" action="?/rejectRequest" class="inline-block" use:enhance={() => {
-									return async ({ result, update }) => {
-										if (result.type === 'success') {
-											$notificationStore.success = { message: 'Request rejected.' };
-										} else if (result.type === 'failure') {
-											$notificationStore.error = { message: String(result.data?.error || 'Failed to reject request') };
-										}
-										await update();
-									};
-								}}>
+								<form
+									method="POST"
+									action="?/rejectRequest"
+									class="inline-block"
+									use:enhance={() => {
+										return async ({ result, update }) => {
+											if (result.type === 'success') {
+												$notificationStore.success = { message: 'Request rejected.' };
+											} else if (result.type === 'failure') {
+												$notificationStore.error = {
+													message: String(result.data?.error || 'Failed to reject request'),
+												};
+											}
+											await update();
+										};
+									}}
+								>
 									<input type="hidden" name="requestId" value={request.invitationRequestId} />
 									<Button
 										variant="outline"
@@ -193,7 +216,11 @@
 									{#if invite.userId}
 										<Badge variant="secondary">Used</Badge>
 									{:else}
-										<Badge variant="outline" class="text-green-600 border-green-300 bg-green-50 dark:bg-green-950/30">Available</Badge>
+										<Badge
+											variant="outline"
+											class="text-green-600 border-green-300 bg-green-50 dark:bg-green-950/30"
+											>Available</Badge
+										>
 									{/if}
 								</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell text-muted-foreground">
@@ -203,16 +230,23 @@
 									{invite.expiresAt ? moment(invite.expiresAt).format('MMM D, YYYY') : 'Never'}
 								</Table.Cell>
 								<Table.Cell class="text-right pr-6">
-									<form method="POST" action="?/delete" class="inline-block" use:enhance={() => {
-										return async ({ result, update }) => {
-											if (result.type === 'success') {
-												$notificationStore.success = { message: 'Invitation deleted.' };
-											} else if (result.type === 'failure') {
-												$notificationStore.error = { message: String(result.data?.error || 'Failed to delete invitation') };
-											}
-											await update();
-										};
-									}}>
+									<form
+										method="POST"
+										action="?/delete"
+										class="inline-block"
+										use:enhance={() => {
+											return async ({ result, update }) => {
+												if (result.type === 'success') {
+													$notificationStore.success = { message: 'Invitation deleted.' };
+												} else if (result.type === 'failure') {
+													$notificationStore.error = {
+														message: String(result.data?.error || 'Failed to delete invitation'),
+													};
+												}
+												await update();
+											};
+										}}
+									>
 										<input type="hidden" name="invitationId" value={invite.invitationId} />
 										<Button
 											variant="outline"
@@ -239,7 +273,12 @@
 					<p class="text-sm text-muted-foreground mb-4">
 						Create an invitation to invite users to Busser.
 					</p>
-					<Button onclick={() => { resetPrefill(); formModal = true; }}>
+					<Button
+						onclick={() => {
+							resetPrefill();
+							formModal = true;
+						}}
+					>
 						<Plus class="h-4 w-4 mr-2" />
 						Create First Invite
 					</Button>
@@ -249,7 +288,12 @@
 	</Card.Root>
 </div>
 
-<Dialog.Root bind:open={formModal} onOpenChange={(open) => { if (!open) resetPrefill(); }}>
+<Dialog.Root
+	bind:open={formModal}
+	onOpenChange={(open) => {
+		if (!open) resetPrefill();
+	}}
+>
 	<Dialog.Content class="sm:max-w-lg">
 		<Dialog.Header>
 			<Dialog.Title>
@@ -274,9 +318,15 @@
 					if (result.type === 'success') {
 						formModal = false;
 						resetPrefill();
-						$notificationStore.success = { message: prefillRequestId ? 'Invitation created and request fulfilled.' : 'Invitation created.' };
+						$notificationStore.success = {
+							message: prefillRequestId
+								? 'Invitation created and request fulfilled.'
+								: 'Invitation created.',
+						};
 					} else if (result.type === 'failure') {
-						$notificationStore.error = { message: String(result.data?.error || 'Failed to create invitation') };
+						$notificationStore.error = {
+							message: String(result.data?.error || 'Failed to create invitation'),
+						};
 					}
 					await update();
 				};
@@ -288,13 +338,7 @@
 			<div class="grid grid-cols-3 gap-4">
 				<div class="space-y-2">
 					<Label for="code">Code</Label>
-					<Input
-						type="text"
-						name="code"
-						id="code"
-						maxlength={6}
-						class="font-mono uppercase"
-					/>
+					<Input type="text" name="code" id="code" maxlength={6} class="font-mono uppercase" />
 					<p class="text-xs text-muted-foreground">Leave blank to auto-generate a unique code.</p>
 				</div>
 				<div class="space-y-2 col-span-2">

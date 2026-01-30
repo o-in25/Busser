@@ -1,29 +1,23 @@
 <script lang="ts">
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Info } from 'lucide-svelte';
-	import type { ActionData, PageData } from './$types';
-	import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
-	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
-	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
+
 	import { page } from '$app/state';
-	import { getContext } from 'svelte';
+	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
+	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
+	import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
+	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+
+	import type { ActionData, PageData } from './$types';
 	export let form: ActionData;
 	export let data: PageData;
-	const permissions: string[] = getContext('permissions');
 	const { userId } = page.params;
 </script>
 
 <svelte:head>
 	<title>Reset Password - Busser</title>
 </svelte:head>
-<Breadcrumb
-	name="Users"
-	href="/settings/users"
->
-	<BreadcrumbItem
-		name="Edit User"
-		href="/settings/users/{userId}/edit"
-	></BreadcrumbItem>
+<Breadcrumb name="Users" href="/settings/users">
+	<BreadcrumbItem name="Edit User" href="/settings/users/{userId}/edit"></BreadcrumbItem>
 	<BreadcrumbItem name="Reset Password"></BreadcrumbItem>
 </Breadcrumb>
 <div class="px-4 pb-4 mt-3 flex justify-left items-center">

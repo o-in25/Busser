@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { AlertCircle, CheckCircle2, Loader2, Mail } from 'lucide-svelte';
+
 	import { applyAction, enhance } from '$app/forms';
 	import * as Alert from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
-	import type { ActionData, PageData } from './$types';
-	import { AlertCircle, Mail, Loader2, CheckCircle2 } from 'lucide-svelte';
 	import UserForm from '$lib/components/UserForm.svelte';
+
+	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	let formRef: any;
@@ -24,7 +26,7 @@
 			const response = await fetch('/api/mail/user-registration', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email })
+				body: JSON.stringify({ email }),
 			});
 
 			const result = await response.json();
@@ -53,7 +55,9 @@
 		<Alert.Root variant="success">
 			<CheckCircle2 class="h-4 w-4" />
 			<Alert.Title>Password reset successful</Alert.Title>
-			<Alert.Description>Your password has been reset. You can now log in with your new password.</Alert.Description>
+			<Alert.Description
+				>Your password has been reset. You can now log in with your new password.</Alert.Description
+			>
 		</Alert.Root>
 	{/if}
 	{#if (form as any)?.needsVerification}
@@ -120,7 +124,7 @@
 				email: form?.errors?.email ?? { hasError: false, message: '' },
 				password: form?.errors?.password ?? { hasError: false, message: '' },
 				passwordConfirm: form?.errors?.passwordConfirm ?? { hasError: false, message: '' },
-				invitationCode: { hasError: false, message: '' }
+				invitationCode: { hasError: false, message: '' },
 			}}
 		/>
 	</form>

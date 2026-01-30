@@ -1,12 +1,14 @@
 <script lang="ts">
+	import { AlertCircle, ArrowLeft, CheckCircle2, Loader2, Mail } from 'lucide-svelte';
+
 	import { enhance } from '$app/forms';
 	import * as Alert from '$lib/components/ui/alert';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { cn } from '$lib/utils';
+
 	import type { ActionData } from './$types';
-	import { AlertCircle, Mail, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-svelte';
 
 	let { form }: { form: ActionData } = $props();
 	let isSubmitting = $state(false);
@@ -22,14 +24,15 @@
 			<CheckCircle2 class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
 			<h4 class="text-xl font-semibold mb-2">Check your email</h4>
 			<p class="mb-3 font-normal text-muted-foreground">
-				If an account exists for <span class="font-medium text-foreground">{(form as any)?.email}</span>,
-				we've sent a password reset link. The link will expire in 1 hour.
+				If an account exists for <span class="font-medium text-foreground"
+					>{(form as any)?.email}</span
+				>, we've sent a password reset link. The link will expire in 1 hour.
 			</p>
 			<p class="text-sm text-muted-foreground mb-6">
 				Didn't receive the email? Check your spam folder or try again.
 			</p>
 			<div class="flex gap-3">
-				<a href="/login" class={cn(buttonVariants({ variant: "outline" }))}>
+				<a href="/login" class={cn(buttonVariants({ variant: 'outline' }))}>
 					<ArrowLeft class="w-4 h-4 mr-2" />
 					Back to login
 				</a>
@@ -85,7 +88,7 @@
 					{/if}
 				</Button>
 
-				<a href="/login" class={cn(buttonVariants({ variant: "ghost" }))}>
+				<a href="/login" class={cn(buttonVariants({ variant: 'ghost' }))}>
 					<ArrowLeft class="w-4 h-4 mr-2" />
 					Back to login
 				</a>

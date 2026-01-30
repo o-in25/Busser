@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { Citrus, Wrench } from 'lucide-svelte';
+
 	import Calculator from '$lib/components/Calculator.svelte';
 	import * as Card from '$lib/components/ui/card';
-	import { Wrench, FlaskConical, Citrus } from 'lucide-svelte';
 </script>
 
 <svelte:head>
@@ -13,9 +13,7 @@
 	<!-- Header -->
 	<div>
 		<h1 class="text-2xl font-bold">Tools</h1>
-		<p class="text-sm text-muted-foreground mt-1">
-			Bartending calculators and utilities
-		</p>
+		<p class="text-sm text-muted-foreground mt-1">Bartending calculators and utilities</p>
 	</div>
 
 	<!-- Tools Grid -->
@@ -30,7 +28,9 @@
 					<div class="flex-1">
 						<Card.Title class="text-xl">Super Juice Calculator</Card.Title>
 						<Card.Description class="mt-1">
-							Calculate the perfect ratios for making super juice — a bartending technique that maximizes citrus yield and extends shelf life by extracting flavor from peels using citric and malic acids.
+							Calculate the perfect ratios for making super juice — a bartending technique that
+							maximizes citrus yield and extends shelf life by extracting flavor from peels using
+							citric and malic acids.
 						</Card.Description>
 					</div>
 				</div>
@@ -48,7 +48,8 @@
 				</div>
 				<h3 class="font-semibold mb-1">More Tools Coming Soon</h3>
 				<p class="text-sm text-muted-foreground max-w-md">
-					We're working on adding more bartending utilities like dilution calculators, batch scaling tools, and cost analysis.
+					We're working on adding more bartending utilities like dilution calculators, batch scaling
+					tools, and cost analysis.
 				</p>
 			</Card.Content>
 		</Card.Root>

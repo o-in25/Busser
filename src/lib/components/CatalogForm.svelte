@@ -1,34 +1,40 @@
 <script lang="ts">
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { SpiritCard } from '$lib/components/ui/spirit-card';
-	import { ServingMethodToggle } from '$lib/components/ui/serving-method';
-	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
-	import { CollapsibleSection } from '$lib/components/ui/collapsible';
-	import type {
-		PreparationMethod,
-		Spirit,
-		View,
-	} from '$lib/types';
-	import FileUpload from './FileUpload.svelte';
-	import RecipeStepCard from './RecipeStepCard.svelte';
-	import CocktailMetrics from './CocktailMetrics.svelte';
-	import CatalogFormWizard from './CatalogFormWizard.svelte';
-	import FormDraftManager from './FormDraftManager.svelte';
-	import { v4 as uuidv4 } from 'uuid';
-	import { Plus, Candy, Droplet, Sparkles, Gauge, BookOpen, Image, FlaskConical } from 'lucide-svelte';
-	import { applyAction, enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import {
+		BookOpen,
+		Candy,
+		Droplet,
+		FlaskConical,
+		Gauge,
+		Image,
+		Plus,
+		Sparkles,
+	} from 'lucide-svelte';
+	import { getContext } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
-	import { notificationStore } from '../../stores';
-	import Prompt from './Prompt.svelte';
+	import { v4 as uuidv4 } from 'uuid';
+
+	import { applyAction, enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { CollapsibleSection } from '$lib/components/ui/collapsible';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { ServingMethodToggle } from '$lib/components/ui/serving-method';
+	import { SpiritCard } from '$lib/components/ui/spirit-card';
 	import { convertFromMl, convertToMl } from '$lib/math';
-	import { getContext } from 'svelte';
-	import { cn } from '$lib/utils';
+	import type { PreparationMethod, Spirit, View } from '$lib/types';
+
+	import { notificationStore } from '../../stores';
+	import CatalogFormWizard from './CatalogFormWizard.svelte';
+	import CocktailMetrics from './CocktailMetrics.svelte';
+	import FileUpload from './FileUpload.svelte';
+	import FormDraftManager from './FormDraftManager.svelte';
+	import Prompt from './Prompt.svelte';
+	import RecipeStepCard from './RecipeStepCard.svelte';
 
 	// props
 	let {
@@ -51,7 +57,7 @@
 	const isAddMode = !recipe.recipeId;
 
 	// Process recipe steps on init
-	const processedSteps = initialRecipeSteps.map(step => ({
+	const processedSteps = initialRecipeSteps.map((step) => ({
 		...step,
 		productIdQuantityInMilliliters: convertFromMl(
 			step.productIdQuantityUnit,
@@ -88,7 +94,7 @@
 	const removeStep = (stepNumber: number) => {
 		if (steps.length > 1) {
 			steps.splice(stepNumber, 1);
-			steps = steps;
+			steps = steps; // eslint-disable-line no-self-assign -- trigger Svelte reactivity
 		}
 	};
 
@@ -111,7 +117,9 @@
 	let [defaultSpirit] = spirits;
 
 	let selectedSpiritId = $state(recipe.recipeCategoryId || defaultSpirit.recipeCategoryId);
-	let selectedPrepMethodId = $state(recipe.recipeTechniqueDescriptionId || defaultPrepMethod.recipeTechniqueDescriptionId);
+	let selectedPrepMethodId = $state(
+		recipe.recipeTechniqueDescriptionId || defaultPrepMethod.recipeTechniqueDescriptionId
+	);
 
 	// Ratings state
 	let sweetnessRating = $state(recipe.recipeSweetnessRating || 5);
@@ -149,7 +157,8 @@
 		if (data.recipeName) recipe.recipeName = data.recipeName as string;
 		if (data.recipeDescription) recipe.recipeDescription = data.recipeDescription as string;
 		if (data.recipeCategoryId) selectedSpiritId = data.recipeCategoryId as number;
-		if (data.recipeTechniqueDescriptionId) selectedPrepMethodId = data.recipeTechniqueDescriptionId as number;
+		if (data.recipeTechniqueDescriptionId)
+			selectedPrepMethodId = data.recipeTechniqueDescriptionId as number;
 		if (data.recipeSweetnessRating) sweetnessRating = data.recipeSweetnessRating as number;
 		if (data.recipeDrynessRating) drynessRating = data.recipeDrynessRating as number;
 		if (data.recipeVersatilityRating) versatilityRating = data.recipeVersatilityRating as number;
@@ -175,7 +184,7 @@
 		enctype="multipart/form-data"
 		use:enhance={({ formData }) => {
 			disabled = true;
-			let json = steps.map(step => ({
+			let json = steps.map((step) => ({
 				...step,
 				productIdQuantityInMilliliters: convertToMl(
 					step.productIdQuantityUnit,
@@ -209,7 +218,7 @@
 	>
 		<!-- Mobile wizard view -->
 		<CatalogFormWizard bind:currentStep={wizardStep}>
-			{#snippet children({ step, isActive })}
+			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Step 1: Details (Name + Spirit Category) -->
 					<div class="space-y-6">
@@ -234,7 +243,7 @@
 									<SpiritCard
 										{spirit}
 										selected={spirit.recipeCategoryId === selectedSpiritId}
-										onselect={(s) => selectedSpiritId = s.recipeCategoryId}
+										onselect={(s) => (selectedSpiritId = s.recipeCategoryId)}
 									/>
 								{/each}
 							</div>
@@ -253,20 +262,14 @@
 							/>
 						</div>
 						<div>
-							<FileUpload
-								name="recipeImageUrl"
-								signedUrl={recipe.recipeImageUrl || undefined}
-							/>
+							<FileUpload name="recipeImageUrl" signedUrl={recipe.recipeImageUrl || undefined} />
 						</div>
 					</div>
 				{:else if step === 2}
 					<!-- Step 3: Preparation Method -->
 					<div class="space-y-4">
 						<Label class="text-base font-medium block">How is it served?</Label>
-						<ServingMethodToggle
-							methods={preparationMethods}
-							bind:value={selectedPrepMethodId}
-						/>
+						<ServingMethodToggle methods={preparationMethods} bind:value={selectedPrepMethodId} />
 					</div>
 				{:else if step === 3}
 					<!-- Step 4: Flavor Ratings -->
@@ -303,10 +306,7 @@
 				{:else if step === 4}
 					<!-- Step 5: Ingredients -->
 					<div class="space-y-4">
-						<CocktailMetrics
-							{steps}
-							recipeTechniqueDescriptionId={selectedPrepMethodId}
-						/>
+						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 						{#each steps as step, stepNumber (step.key)}
 							<div
 								transition:scale={{
@@ -325,12 +325,7 @@
 								/>
 							</div>
 						{/each}
-						<Button
-							type="button"
-							variant="outline"
-							class="w-full"
-							onclick={addStep}
-						>
+						<Button type="button" variant="outline" class="w-full" onclick={addStep}>
 							<Plus class="w-4 h-4 mr-2" />
 							Add Ingredient
 						</Button>
@@ -372,7 +367,7 @@
 								<SpiritCard
 									{spirit}
 									selected={spirit.recipeCategoryId === selectedSpiritId}
-									onselect={(s) => selectedSpiritId = s.recipeCategoryId}
+									onselect={(s) => (selectedSpiritId = s.recipeCategoryId)}
 								/>
 							{/each}
 						</div>
@@ -381,11 +376,7 @@
 			</Card.Root>
 
 			<!-- Section 2: Description (collapsible) -->
-			<CollapsibleSection
-				title="Description"
-				icon={Image}
-				bind:open={descriptionOpen}
-			>
+			<CollapsibleSection title="Description" icon={Image} bind:open={descriptionOpen}>
 				<div class="space-y-6">
 					<Prompt
 						bind:value={recipe.recipeDescription}
@@ -394,10 +385,7 @@
 						name="recipeDescription"
 						url="/api/generator/catalog"
 					/>
-					<FileUpload
-						name="recipeImageUrl"
-						signedUrl={recipe.recipeImageUrl || undefined}
-					/>
+					<FileUpload name="recipeImageUrl" signedUrl={recipe.recipeImageUrl || undefined} />
 				</div>
 			</CollapsibleSection>
 
@@ -410,19 +398,12 @@
 					</Card.Title>
 				</Card.Header>
 				<Card.Content>
-					<ServingMethodToggle
-						methods={preparationMethods}
-						bind:value={selectedPrepMethodId}
-					/>
+					<ServingMethodToggle methods={preparationMethods} bind:value={selectedPrepMethodId} />
 				</Card.Content>
 			</Card.Root>
 
 			<!-- Section 4: Flavor Profile (collapsible) -->
-			<CollapsibleSection
-				title="Flavor Profile"
-				icon={Gauge}
-				bind:open={ratingsOpen}
-			>
+			<CollapsibleSection title="Flavor Profile" icon={Gauge} bind:open={ratingsOpen}>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<FlavorSlider
 						label="Sweetness"
@@ -467,10 +448,7 @@
 				</Card.Header>
 				<Card.Content class="space-y-4">
 					<!-- Metrics display -->
-					<CocktailMetrics
-						{steps}
-						recipeTechniqueDescriptionId={selectedPrepMethodId}
-					/>
+					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 
 					<!-- Recipe steps -->
 					{#each steps as step, stepNumber (step.key)}
@@ -494,12 +472,7 @@
 
 					<!-- Add step button -->
 					<div class="flex justify-center pt-2">
-						<Button
-							type="button"
-							variant="outline"
-							class="rounded-full"
-							onclick={addStep}
-						>
+						<Button type="button" variant="outline" class="rounded-full" onclick={addStep}>
 							<Plus class="w-5 h-5 mr-2" />
 							Add Ingredient
 						</Button>
@@ -510,17 +483,11 @@
 			<!-- Action buttons (desktop only) -->
 			<div class="flex justify-end gap-3">
 				{#if recipe.recipeId && canModify}
-					<Button
-						type="button"
-						variant="destructive"
-						onclick={() => (modalOpen = true)}
-					>
+					<Button type="button" variant="destructive" onclick={() => (modalOpen = true)}>
 						Delete
 					</Button>
 				{/if}
-				<Button type="submit" {disabled}>
-					Save Recipe
-				</Button>
+				<Button type="submit" {disabled}>Save Recipe</Button>
 			</div>
 		</div>
 	</form>
@@ -533,9 +500,7 @@
 					<Dialog.Title>Confirm Delete</Dialog.Title>
 					<Dialog.Description>
 						Delete <span class="font-semibold">{recipe?.recipeName}</span> from catalog?
-						<p class="text-destructive font-bold mt-2">
-							Once deleted, it can't be recovered.
-						</p>
+						<p class="text-destructive font-bold mt-2">Once deleted, it can't be recovered.</p>
 					</Dialog.Description>
 				</Dialog.Header>
 				<Dialog.Footer>
