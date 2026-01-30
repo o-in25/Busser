@@ -56,15 +56,17 @@
 	// Determine if this is add mode (for draft functionality)
 	const isAddMode = !recipe.recipeId;
 
-	// Process recipe steps on init
-	const processedSteps = initialRecipeSteps.map((step) => ({
-		...step,
-		productIdQuantityInMilliliters: convertFromMl(
-			step.productIdQuantityUnit,
-			step.productIdQuantityInMilliliters
-		),
-		key: uuidv4(),
-	}));
+	// Process recipe steps reactively
+	const processedSteps = $derived(
+		initialRecipeSteps.map((step) => ({
+			...step,
+			productIdQuantityInMilliliters: convertFromMl(
+				step.productIdQuantityUnit,
+				step.productIdQuantityInMilliliters
+			),
+			key: uuidv4(),
+		}))
+	);
 
 	const createStep = (): View.BasicRecipeStep & { key: string } => ({
 		recipeId: recipe.recipeId || 0,
@@ -85,16 +87,24 @@
 		key: uuidv4(),
 	});
 
-	let steps = $state(processedSteps.length ? processedSteps : [createStep()]);
+	let steps: (View.BasicRecipeStep & { key: string })[] = $state([]);
+	$effect.pre(() => {
+		if (processedSteps.length && steps.length === 0) {
+			steps = [...processedSteps];
+		} else if (steps.length === 0) {
+			steps = [createStep()];
+		}
+	});
 
 	const addStep = () => {
 		steps = [...steps, createStep()];
 	};
 
 	const removeStep = (stepNumber: number) => {
-		if (steps.length > 1) {
-			steps.splice(stepNumber, 1);
-			steps = steps; // eslint-disable-line no-self-assign -- trigger Svelte reactivity
+		if (Array.isArray(steps) && steps.length > 1) {
+			const newSteps = [...steps];
+			newSteps.splice(stepNumber, 1);
+			steps = newSteps;
 		}
 	};
 
@@ -112,14 +122,18 @@
 		}
 	};
 
-	// form props
-	let [defaultPrepMethod] = preparationMethods;
-	let [defaultSpirit] = spirits;
-
-	let selectedSpiritId = $state(recipe.recipeCategoryId || defaultSpirit.recipeCategoryId);
-	let selectedPrepMethodId = $state(
-		recipe.recipeTechniqueDescriptionId || defaultPrepMethod.recipeTechniqueDescriptionId
-	);
+	// form props - these are $state because they can be modified by user selection or draft restore
+	let selectedSpiritId: number | undefined = $state(undefined);
+	let selectedPrepMethodId: number | undefined = $state(undefined);
+	$effect.pre(() => {
+		if (selectedSpiritId === undefined) {
+			selectedSpiritId = recipe.recipeCategoryId || spirits[0]?.recipeCategoryId;
+		}
+		if (selectedPrepMethodId === undefined) {
+			selectedPrepMethodId =
+				recipe.recipeTechniqueDescriptionId || preparationMethods[0]?.recipeTechniqueDescriptionId;
+		}
+	});
 
 	// Ratings state
 	let sweetnessRating = $state(recipe.recipeSweetnessRating || 5);
@@ -137,7 +151,7 @@
 	let wizardStep = $state(0);
 
 	// Draft manager reference
-	let draftManager: FormDraftManager;
+	let draftManager = $state<FormDraftManager>();
 
 	// Draft data for autosave
 	let draftData = $derived({

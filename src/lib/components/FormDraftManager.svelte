@@ -29,7 +29,7 @@
 	let lastSaved = $state<Date | null>(null);
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
-	const STORAGE_KEY = `draft_${draftKey}`;
+	const STORAGE_KEY = $derived(`draft_${draftKey}`);
 
 	interface StoredDraft {
 		data: DraftData;

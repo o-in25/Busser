@@ -42,32 +42,45 @@
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	let slug = $page.params.id;
-	let productName = $state(product?.productName ?? '');
-	let productPricePerUnit = $state(
-		product?.productPricePerUnit !== undefined ? String(product.productPricePerUnit) : ''
-	);
-	let productUnitSizeInMilliliters = $state(
-		product?.productUnitSizeInMilliliters !== undefined
-			? String(product.productUnitSizeInMilliliters)
-			: ''
-	);
-	let productProof = $state(
-		product?.productProof !== undefined ? String(product.productProof) : ''
-	);
-	let categoryId = $state<string | null>(
-		product?.categoryId !== undefined ? String(product.categoryId) : null
-	);
-	let productImageUrl = $state(product?.productImageUrl);
-	let productInStockQuantity = $state(product?.productInStockQuantity ?? 0);
-	let productSweetnessRating = $state(product?.productSweetnessRating ?? 0.0);
-	let productDrynessRating = $state(product?.productDrynessRating ?? 0.0);
-	let productStrengthRating = $state(product?.productStrengthRating ?? 0.0);
-	let productVersatilityRating = $state(product?.productVersatilityRating ?? 0.0);
-	let productDescription = $state(product?.productDescription ?? '');
+	let productName = $state('');
+	let productPricePerUnit = $state('');
+	let productUnitSizeInMilliliters = $state('');
+	let productProof = $state('');
+	let categoryId = $state<string | null>(null);
+	let productImageUrl = $state<string | undefined>();
+	let productInStockQuantity = $state(0);
+	let productSweetnessRating = $state(0.0);
+	let productDrynessRating = $state(0.0);
+	let productStrengthRating = $state(0.0);
+	let productVersatilityRating = $state(0.0);
+	let productDescription = $state('');
 
-	let productDetailId = product?.productDetailId;
+	// Sync state with product changes
+	$effect(() => {
+		if (product) {
+			productName = product.productName ?? '';
+			productPricePerUnit =
+				product.productPricePerUnit !== undefined ? String(product.productPricePerUnit) : '';
+			productUnitSizeInMilliliters =
+				product.productUnitSizeInMilliliters !== undefined
+					? String(product.productUnitSizeInMilliliters)
+					: '';
+			productProof = product.productProof !== undefined ? String(product.productProof) : '';
+			categoryId = product.categoryId !== undefined ? String(product.categoryId) : null;
+			productImageUrl = product.productImageUrl;
+			productInStockQuantity = product.productInStockQuantity ?? 0;
+			productSweetnessRating = product.productSweetnessRating ?? 0.0;
+			productDrynessRating = product.productDrynessRating ?? 0.0;
+			productStrengthRating = product.productStrengthRating ?? 0.0;
+			productVersatilityRating = product.productVersatilityRating ?? 0.0;
+			productDescription = product.productDescription ?? '';
+		}
+	});
+
+	// Use a derived value so it always reflects the latest product
+	let productDetailId = $derived(() => product?.productDetailId);
 	let modalOpen = $state(false);
-	let draftManager: FormDraftManager;
+	let draftManager = $state<FormDraftManager>();
 	let currentWizardStep = $state(0);
 
 	// Calculated fields
@@ -543,7 +556,7 @@
 			<input type="hidden" name="productVersatilityRating" value={productVersatilityRating} />
 			<input type="hidden" name="productStrengthRating" value={productStrengthRating} />
 			<input type="hidden" name="productDescription" value={productDescription} />
-			<input type="hidden" value={productDetailId} />
+			<input type="hidden" value={productDetailId()} />
 		</div>
 
 		<!-- Submit buttons (desktop only - mobile uses wizard buttons) -->

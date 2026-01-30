@@ -42,35 +42,43 @@
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
-	// AI-generated content
 	let content: RecipeGeneratorSchema | null = $state(null);
 	let contentLoading = $state(true);
 
-	// Steps with checked state
-	let steps = $state(initialRecipeSteps.map((step) => ({ ...step, checked: false })));
+	// steps with checked state
+	let steps = $derived(initialRecipeSteps.map((step) => ({ ...step, checked: false })));
 
 	// Lightbox state
 	let lightboxOpen = $state(false);
 
-	// Calculate derived values
+	// used initialize before render and reset when steps change
+	let completed: boolean[] = $state([]);
+	$effect.pre(() => {
+		if (completed.length !== initialRecipeSteps.length) {
+			completed = Array(initialRecipeSteps.length).fill(false);
+		}
+	});
+
+	// derived values
 	let abv = $derived(calculateAbv(initialRecipeSteps, recipe.recipeTechniqueDescriptionId || 1));
 	let ingredientCount = $derived(initialRecipeSteps.length);
-	let completedSteps = $derived(steps.filter((s) => s.checked).length);
+	let completedSteps = $derived(completed.filter((c) => c).length);
 	let allStepsCompleted = $derived(completedSteps === steps.length && steps.length > 0);
 
-	// Get the actual image URL
+	// get the actual image URL
 	let lightImageUrl = $derived(recipe.recipeImageUrl || placeholderLight);
 	let darkImageUrl = $derived(recipe.recipeImageUrl || placeholderDark);
 
-	// Serving method icon mapping
 	const servingMethodIcons: Record<string, typeof Martini> = {
 		Stirred: Martini,
 		Shaken: GlassWater,
 		Built: FlaskConical,
 	};
-	const ServingIcon = servingMethodIcons[recipe.recipeTechniqueDescriptionText || ''] || GlassWater;
+	let ServingIcon = $derived(
+		servingMethodIcons[recipe.recipeTechniqueDescriptionText || ''] || GlassWater
+	);
 
-	// Fetch AI-generated content
+	// fetch generator content
 	onMount(async () => {
 		try {
 			const result = await fetch(`/api/generator/recipe`, {
@@ -86,13 +94,9 @@
 		}
 	});
 
-	function toggleStep(index: number) {
-		steps[index].checked = !steps[index].checked;
-	}
-
 	function openLightbox() {
 		lightboxOpen = true;
-		// Prevent body scroll when lightbox is open
+		// stops body scroll when lightbox is open
 		document.body.style.overflow = 'hidden';
 	}
 
@@ -291,8 +295,7 @@
 									quantity={step.productIdQuantityInMilliliters}
 									unit={step.productIdQuantityUnit}
 									description={step.recipeStepDescription}
-									bind:checked={step.checked}
-									ontoggle={() => toggleStep(index)}
+									bind:checked={completed[index]}
 								/>
 							{/each}
 						</div>

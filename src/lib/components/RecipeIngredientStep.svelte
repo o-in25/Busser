@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Check } from 'lucide-svelte';
-
 	import { convertFromMl, getUnits } from '$lib/math';
 	import { cn } from '$lib/utils';
 
@@ -13,7 +12,6 @@
 		unit,
 		description,
 		checked = $bindable(false),
-		ontoggle,
 		...restProps
 	}: {
 		class?: string;
@@ -24,17 +22,15 @@
 		unit: string;
 		description?: string | null;
 		checked?: boolean;
-		ontoggle?: (checked: boolean) => void;
 		[key: string]: unknown;
 	} = $props();
 
 	const units = getUnits();
-	const displayQuantity = convertFromMl(unit, quantity);
-	const unitLabel = units[unit]?.i18n(quantity) || unit;
+	const displayQuantity = $derived(convertFromMl(unit, quantity));
+	const unitLabel = $derived(units[unit]?.i18n(quantity) || unit);
 
 	function handleToggle() {
-		checked = !checked;
-		ontoggle?.(checked);
+		checked = !checked; // propagates to parent
 	}
 </script>
 
@@ -81,11 +77,13 @@
 			<span class="text-muted-foreground">of</span>
 			<span class="font-medium text-foreground">{categoryName}</span>
 		</div>
+
 		{#if productName && productName !== categoryName}
 			<p class={cn('text-sm text-muted-foreground mt-0.5', checked && 'line-through opacity-60')}>
 				{productName}
 			</p>
 		{/if}
+
 		{#if description}
 			<p
 				class={cn(

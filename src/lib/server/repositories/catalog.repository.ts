@@ -135,7 +135,6 @@ export class CatalogRepository extends BaseRepository {
 						.havingRaw('COUNT(rs.RecipeStepId) > 1');
 				})
 				.limit(6);
-			console.log('uasd');
 			const recipes: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(result);
 
 			const recipesWithMissing = await Promise.all(
