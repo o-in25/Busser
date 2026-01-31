@@ -7,7 +7,7 @@ import type { User } from '$lib/types/auth';
 
 //color-theme
 export const themeStore = writable<string>(
-	(browser && localStorage.getItem('color-theme')) || 'light'
+	(browser && localStorage.getItem('color-theme')) || 'dark'
 );
 
 const notification = () => {

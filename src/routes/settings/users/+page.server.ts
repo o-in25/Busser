@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { hasGlobalPermission } from '$lib/server/auth';
-import { getUsersInOwnedWorkspaces } from '$lib/server/user';
+import { getUsers, getUsersInOwnedWorkspaces } from '$lib/server/user';
 
 import type { PageServerLoad } from './$types';
 
@@ -24,7 +24,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		});
 	}
 
-	// scope to users in workspaces where current user is owner
-	const users = await getUsersInOwnedWorkspaces(locals.user.userId);
+	// admins with edit_admin can see all users, otherwise scope to owned workspaces
+	const isAdmin = hasGlobalPermission(locals.user, 'edit_admin');
+	const users = isAdmin ? await getUsers() : await getUsersInOwnedWorkspaces(locals.user.userId);
 	return { args: users };
 };

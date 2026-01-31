@@ -485,7 +485,7 @@ export class UserRepository extends BaseRepository {
 				}
 
 				// assign default role
-				dbResult = await trx('role').select('roleId').where('roleName', 'VIEWER').first();
+				dbResult = await trx('role').select('roleId').where('roleName', 'USER').first();
 				dbResult = marshal(dbResult);
 
 				if (!dbResult?.roleId) throw new Error('Could not register user for default role.');
@@ -496,6 +496,31 @@ export class UserRepository extends BaseRepository {
 				await trx('invitation')
 					.update({ userId: user.userId })
 					.where({ invitationId: invitation.invitationId });
+
+				// create default personal workspace for user
+				const slug = user.username
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, '-')
+					.replace(/^-|-$/g, '')
+					.substring(0, 40);
+				const suffix = Math.random().toString(36).substring(2, 10);
+				const workspaceId = `${slug}-${suffix}`;
+				const workspaceName = `${user.username}'s Workspace`;
+
+				await trx('workspace').insert({
+					workspaceId,
+					workspaceName,
+					workspaceType: 'personal',
+					createdDate: Logger.now(),
+					createdBy: user.userId,
+				});
+
+				await trx('workspaceUser').insert({
+					workspaceId,
+					userId: user.userId,
+					workspaceRole: 'owner',
+					joinedDate: Logger.now(),
+				});
 
 				return { user };
 			});
@@ -701,7 +726,7 @@ export class UserRepository extends BaseRepository {
 				.where({ userId })
 				.first();
 
-			const currentUrl = dbResult?.avatar_image_url || dbResult?.avatarImageUrl;
+			const currentUrl = dbResult?.avatarImageUrl || dbResult?.avatarImageUrl;
 			if (currentUrl) {
 				await deleteSignedUrl(currentUrl);
 			}
@@ -733,7 +758,7 @@ export class UserRepository extends BaseRepository {
 				.where({ userId })
 				.first();
 
-			const currentUrl = dbResult?.avatar_image_url || dbResult?.avatarImageUrl;
+			const currentUrl = dbResult?.avatarImageUrl || dbResult?.avatarImageUrl;
 			if (currentUrl) {
 				await deleteSignedUrl(currentUrl);
 			}

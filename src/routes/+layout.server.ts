@@ -11,6 +11,14 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		const result = await userRepo.findById(user.userId);
 		if (result.status === 'success' && result.data) {
 			user.avatarImageUrl = result.data.avatarImageUrl;
+
+			// generate avatar on first login if user doesn't have one
+			if (!user.avatarImageUrl) {
+				const avatarResult = await userRepo.generateAndUploadAvatar(user.userId);
+				if (avatarResult.status === 'success' && avatarResult.data) {
+					user.avatarImageUrl = avatarResult.data;
+				}
+			}
 		}
 	}
 
