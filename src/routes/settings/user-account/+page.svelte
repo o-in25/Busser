@@ -318,19 +318,19 @@
 		</Card.Content>
 	</Card.Root>
 
-	<!-- Default Workspace Card (only show if user has multiple workspaces) -->
-	{#if data.workspaces && data.workspaces.length > 1}
-		<Card.Root>
-			<Card.Header>
-				<Card.Title class="flex items-center gap-2">
-					<ArrowRight class="h-5 w-5" />
-					Default Workspace
-				</Card.Title>
-				<Card.Description>
-					Select your preferred workspace. This will be automatically selected when you log in.
-				</Card.Description>
-			</Card.Header>
-			<Card.Content>
+	<!-- Default Workspace Card -->
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="flex items-center gap-2">
+				<ArrowRight class="h-5 w-5" />
+				Default Workspace
+			</Card.Title>
+			<Card.Description>
+				Select your preferred workspace. This will be automatically selected when you log in.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			{#if data.workspaces && data.workspaces.length > 0}
 				<form
 					method="POST"
 					action="?/setPreferredWorkspace"
@@ -347,10 +347,14 @@
 							<button
 								type="button"
 								onclick={() => (selectedWorkspaceId = workspace.workspaceId)}
+								disabled={data.workspaces.length === 1}
 								class="w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all {selectedWorkspaceId ===
 								workspace.workspaceId
 									? 'border-primary bg-primary/5'
-									: 'border-transparent bg-muted/30 hover:bg-muted/50'}"
+									: 'border-transparent bg-muted/30 hover:bg-muted/50'} {data.workspaces
+									.length === 1
+									? 'opacity-60 cursor-not-allowed'
+									: ''}"
 							>
 								<div class="flex items-center gap-3">
 									<div
@@ -406,7 +410,8 @@
 							type="submit"
 							disabled={!selectedWorkspaceId ||
 								selectedWorkspaceId === data.preferredWorkspaceId ||
-								isSubmitting}
+								isSubmitting ||
+								data.workspaces.length === 1}
 						>
 							{#if isSubmitting}
 								Saving...
@@ -416,7 +421,17 @@
 						</Button>
 					</div>
 				</form>
-			</Card.Content>
-		</Card.Root>
-	{/if}
+			{:else}
+				<div class="text-center py-8">
+					<div
+						class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
+					>
+						<Building2 class="h-8 w-8 text-muted-foreground/50" />
+					</div>
+					<h3 class="font-semibold mb-1">No Workspaces</h3>
+					<p class="text-sm text-muted-foreground">You don't belong to any workspaces yet.</p>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
 </div>
