@@ -14,8 +14,8 @@
 		lowStockItems: Product[];
 	} = $props();
 
-	let outOfStockOpen = $state(true);
-	let lowStockOpen = $state(true);
+	let outOfStockOpen = $state(false);
+	let lowStockOpen = $state(false);
 
 	const hasAlerts = $derived(outOfStockItems.length > 0 || lowStockItems.length > 0);
 </script>

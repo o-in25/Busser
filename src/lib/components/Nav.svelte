@@ -7,12 +7,9 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
+	import Placeholder from './Placeholder.svelte';
 	// props
-	let {
-		user,
-		activeUrl,
-		avatarDataUri,
-	}: { user: User | null; activeUrl: string; avatarDataUri: string } = $props();
+	let { user, activeUrl }: { user: User | null; activeUrl: string } = $props();
 
 	// Check if navbar has content (nav links, user menu, etc.)
 	let hasNavContent = $derived(!!user);
@@ -60,7 +57,7 @@
 					<Sheet.Header class="text-left">
 						<!-- User Profile in Drawer -->
 						<div class="flex items-center gap-3 pb-4">
-							<img src={avatarDataUri} alt="User Avatar" class="w-10 h-10 rounded-full" />
+							<Placeholder id="avatar-menu-mobile" src={user?.avatarImageUrl} />
 							<div>
 								<p class="text-lg font-medium text-foreground">
 									{user?.username}
@@ -197,7 +194,7 @@
 			<div class="hidden md:block">
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
-						<img src={avatarDataUri} alt="User Avatar" class="w-10 h-10 rounded-full" />
+						<Placeholder id="avatar-menu-desktop" src={user?.avatarImageUrl} />
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
 						<DropdownMenu.Label>

@@ -15,8 +15,10 @@ import type {
 } from '$lib/types';
 
 import { DbProvider } from '../db';
+import { generateRandomShapeAvatar } from '../generators/avatar-generator';
 import { Logger } from '../logger';
 import { MailClient } from '../mail';
+import { deleteSignedUrl, uploadAvatarBuffer } from '../storage';
 import { AuthRepository } from './auth.repository';
 import { BaseRepository, marshal, marshalToType } from './base.repository';
 
@@ -45,7 +47,7 @@ export class UserRepository extends BaseRepository {
 		try {
 			const user: User = await this.db.query.transaction(async (trx) => {
 				let dbResult: any = await trx('user')
-					.select('userId', 'email', 'username', 'lastActivityDate')
+					.select('userId', 'email', 'username', 'lastActivityDate', 'avatarImageUrl')
 					.first()
 					.where({ userId });
 
@@ -498,6 +500,11 @@ export class UserRepository extends BaseRepository {
 				return { user };
 			});
 
+			// generate avatar for new user (non-blocking)
+			this.generateAndUploadAvatar(user.userId).catch((err) => {
+				console.error('Failed to generate avatar for new user:', err);
+			});
+
 			// send verification email
 			const now = moment();
 			const tokenExpiration = moment().add(24, 'hours');
@@ -667,6 +674,85 @@ export class UserRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error('Error setting preferred workspace:', error.message);
 			return { status: 'error', error: 'Failed to set preferred workspace.' };
+		}
+	}
+
+	async updateAvatarUrl(userId: string, avatarImageUrl: string | null): Promise<QueryResult> {
+		try {
+			const rowsUpdated = await this.db.table('user').where({ userId }).update({ avatarImageUrl });
+
+			if (rowsUpdated === 0) {
+				return { status: 'error', error: 'User not found.' };
+			}
+
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error('Error updating avatar URL:', error.message);
+			return { status: 'error', error: 'Failed to update avatar.' };
+		}
+	}
+
+	async generateAndUploadAvatar(userId: string): Promise<QueryResult<string>> {
+		try {
+			// get current avatar to delete if exists
+			const dbResult = await this.db
+				.table('user')
+				.select('avatarImageUrl')
+				.where({ userId })
+				.first();
+
+			const currentUrl = dbResult?.avatar_image_url || dbResult?.avatarImageUrl;
+			if (currentUrl) {
+				await deleteSignedUrl(currentUrl);
+			}
+
+			// generate new avatar
+			const avatar = generateRandomShapeAvatar(`${userId}-${Date.now()}`);
+			const publicUrl = await uploadAvatarBuffer(avatar.buffer, userId, 'image/svg+xml');
+
+			if (!publicUrl) {
+				return { status: 'error', error: 'Failed to upload avatar.' };
+			}
+
+			// update user record
+			await this.db.table('user').where({ userId }).update({ avatarImageUrl: publicUrl });
+
+			return { status: 'success', data: publicUrl };
+		} catch (error: any) {
+			console.error('Error generating avatar:', error.message);
+			return { status: 'error', error: 'Failed to generate avatar.' };
+		}
+	}
+
+	async uploadCustomAvatar(userId: string, file: File): Promise<QueryResult<string>> {
+		try {
+			// get current avatar to delete if exists
+			const dbResult = await this.db
+				.table('user')
+				.select('avatarImageUrl')
+				.where({ userId })
+				.first();
+
+			const currentUrl = dbResult?.avatar_image_url || dbResult?.avatarImageUrl;
+			if (currentUrl) {
+				await deleteSignedUrl(currentUrl);
+			}
+
+			// upload new avatar
+			const buffer = Buffer.from(await file.arrayBuffer());
+			const publicUrl = await uploadAvatarBuffer(buffer, userId, file.type);
+
+			if (!publicUrl) {
+				return { status: 'error', error: 'Failed to upload avatar.' };
+			}
+
+			// update user record
+			await this.db.table('user').where({ userId }).update({ avatarImageUrl: publicUrl });
+
+			return { status: 'success', data: publicUrl };
+		} catch (error: any) {
+			console.error('Error uploading avatar:', error.message);
+			return { status: 'error', error: 'Failed to upload avatar.' };
 		}
 	}
 

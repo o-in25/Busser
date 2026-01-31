@@ -271,14 +271,13 @@
 		<strong
 			>When you post Contributions, you grant us a license (including use of your name, trademarks,
 			and logos):</strong
-		> By posting any Contributions, you grant us an unrestricted, unlimited, irrevocable, perpetual,
-		non-exclusive, transferable, royalty-free, fully-paid, worldwide right, and license to: use, copy,
-		reproduce, distribute, sell, resell, publish, broadcast, retitle, store, publicly perform, publicly
-		display, reformat, translate, excerpt (in whole or in part), and exploit your Contributions (including,
-		without limitation, your image, name, and voice) for any purpose, commercial, advertising, or otherwise,
-		to prepare derivative works of, or incorporate into other works, your Contributions, and to sublicense
-		the licenses granted in this section. Our use and distribution may occur in any media formats and
-		through any media channels.
+		> By posting any Contributions, you grant us an unrestricted, unlimited, irrevocable, perpetual, non-exclusive,
+		transferable, royalty-free, fully-paid, worldwide right, and license to: use, copy, reproduce, distribute,
+		sell, resell, publish, broadcast, retitle, store, publicly perform, publicly display, reformat, translate,
+		excerpt (in whole or in part), and exploit your Contributions (including, without limitation, your
+		image, name, and voice) for any purpose, commercial, advertising, or otherwise, to prepare derivative
+		works of, or incorporate into other works, your Contributions, and to sublicense the licenses granted
+		in this section. Our use and distribution may occur in any media formats and through any media channels.
 	</p>
 
 	<p class="text-muted-foreground mb-4">

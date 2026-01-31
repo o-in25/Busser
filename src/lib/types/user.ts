@@ -8,6 +8,7 @@ export type User = {
 	roles: Role[];
 	permissions: Permission[];
 	verified: number;
+	avatarImageUrl?: string;
 };
 
 export type Role = {

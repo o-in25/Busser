@@ -231,37 +231,38 @@
 <StockAlerts outOfStockItems={data.outOfStockItems} lowStockItems={data.lowStockItems} />
 
 <!-- Toolbar -->
-<div class="flex flex-col sm:flex-row gap-3 mb-6">
-	<!-- Search -->
-	<form onsubmit={handleSearch} class="flex-1">
-		<div class="relative">
-			<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-			<Input
-				type="text"
-				placeholder="Search products..."
-				bind:value={searchInput}
-				class="pl-10 pr-10"
-			/>
-			{#if searchInput}
-				<button
-					type="button"
-					onclick={clearSearch}
-					class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-				>
-					<X class="h-4 w-4" />
-				</button>
-			{/if}
-		</div>
-	</form>
+<div class="flex flex-col gap-3 mb-6">
+	<!-- Row 1: Search, Categories, Stock Filter (+ action buttons on large screens) -->
+	<div class="flex flex-col sm:flex-row gap-3 lg:items-center">
+		<!-- Search -->
+		<form onsubmit={handleSearch} class="flex-1">
+			<div class="relative">
+				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+				<Input
+					type="text"
+					placeholder="Search products..."
+					bind:value={searchInput}
+					class="pl-10 pr-10"
+				/>
+				{#if searchInput}
+					<button
+						type="button"
+						onclick={clearSearch}
+						class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+					>
+						<X class="h-4 w-4" />
+					</button>
+				{/if}
+			</div>
+		</form>
 
-	<div class="flex items-center gap-2 flex-wrap">
 		<!-- Category Filter Select -->
 		<Select.Root
 			type="single"
 			value={selectedCategory}
 			onValueChange={(v) => handleCategoryChange(v ?? '')}
 		>
-			<Select.Trigger class="w-[180px]">
+			<Select.Trigger class="w-full sm:w-[180px]">
 				<Tags class="h-4 w-4 mr-2" />
 				<Select.Value placeholder="All Categories" />
 			</Select.Trigger>
@@ -293,7 +294,7 @@
 			value={stockFilter}
 			onValueChange={(v) => handleStockFilterChange(v ?? '')}
 		>
-			<Select.Trigger class="w-[180px]">
+			<Select.Trigger class="w-full sm:w-[180px]">
 				<Package class="h-4 w-4 mr-2" />
 				<Select.Value placeholder="All Stock Levels" />
 			</Select.Trigger>
@@ -304,6 +305,65 @@
 			</Select.Content>
 		</Select.Root>
 
+		<!-- Action buttons (large screens only - inline with filters) -->
+		<div class="hidden lg:flex items-center gap-2">
+			<!-- View Toggle -->
+			<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
+				<button
+					class={cn(
+						'h-10 w-10 flex items-center justify-center transition-colors',
+						viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+					)}
+					onclick={() => setViewMode('table')}
+					aria-label="Table view"
+				>
+					<TableIcon class="h-4 w-4" />
+				</button>
+				<button
+					class={cn(
+						'h-10 w-10 flex items-center justify-center transition-colors',
+						viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+					)}
+					onclick={() => setViewMode('grid')}
+					aria-label="Grid view"
+				>
+					<LayoutGrid class="h-4 w-4" />
+				</button>
+				<button
+					class={cn(
+						'h-10 w-10 flex items-center justify-center transition-colors',
+						viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+					)}
+					onclick={() => setViewMode('list')}
+					aria-label="List view"
+				>
+					<List class="h-4 w-4" />
+				</button>
+			</div>
+
+			<!-- Refresh Button -->
+			<Button
+				variant="outline"
+				size="icon"
+				onclick={handleRefresh}
+				disabled={isRefreshing}
+				aria-label="Refresh inventory"
+			>
+				<RefreshCw class={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
+			</Button>
+
+			<!-- Add Product Button -->
+			{#if canModify}
+				<a href="{basePath}/add" class={cn(buttonVariants(), 'shrink-0')}>
+					<Plus class="h-4 w-4 mr-2" />
+					<span>Add Product</span>
+				</a>
+			{/if}
+		</div>
+	</div>
+
+	<!-- Row 2: Action buttons (small/medium screens only) -->
+	<div class="flex items-center gap-2 lg:hidden">
 		<!-- View Toggle -->
 		<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
 			<button
@@ -349,11 +409,14 @@
 			<RefreshCw class={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
 		</Button>
 
+		<!-- Spacer -->
+		<div class="flex-1"></div>
+
 		<!-- Add Product Button -->
 		{#if canModify}
 			<a href="{basePath}/add" class={cn(buttonVariants(), 'shrink-0')}>
-				<Plus class="h-4 w-4 sm:mr-2" />
-				<span class="hidden sm:inline">Add Product</span>
+				<Plus class="h-4 w-4 mr-2" />
+				<span>Add Product</span>
 			</a>
 		{/if}
 	</div>

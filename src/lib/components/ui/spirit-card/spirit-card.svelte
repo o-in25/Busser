@@ -62,10 +62,10 @@
 		<!-- Label bar at bottom -->
 		<div
 			class={cn(
-				'w-full py-2 px-3 text-center border-t transition-colors',
+				'w-full py-2 px-3 text-center border-t transition-colors backdrop-blur-sm',
 				selected
-					? 'bg-primary/10 border-primary/20'
-					: 'bg-gray-50 dark:bg-gray-700 border-gray-100 dark:border-gray-600'
+					? 'bg-primary/20 border-primary/20'
+					: 'bg-background/80 border-gray-100 dark:border-gray-600'
 			)}
 		>
 			<span

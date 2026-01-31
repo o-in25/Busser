@@ -104,6 +104,37 @@ export async function getSignedUrl(file: File, fileName: string = ''): Promise<s
 	}
 }
 
+export async function uploadAvatarBuffer(
+	buffer: Buffer,
+	userId: string,
+	contentType: string = 'image/svg+xml'
+): Promise<string> {
+	try {
+		const ext = contentType.includes('svg') ? 'svg' : contentType.split('/')[1] || 'png';
+		const name = `avatars/${userId}-${Date.now()}.${ext}`;
+		const newFile = bucket.file(name);
+
+		await newFile.save(buffer, { contentType });
+
+		const publicUrl = newFile.publicUrl();
+		const [metadata] = await newFile.getMetadata();
+
+		await db.table<Upload>('upload').insert({
+			externalUploadId: metadata.id,
+			name: metadata.name,
+			bucket: metadata.bucket,
+			contentType: metadata.contentType,
+			size: parseInt(metadata.size?.toString() || '0'),
+			publicUrl,
+		});
+
+		return publicUrl;
+	} catch (error) {
+		console.error(error);
+		return '';
+	}
+}
+
 // 15 minutes expiration
 export async function getSignedUrlFromUnsignedUrl(
 	unsignedUrl: string,

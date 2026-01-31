@@ -30,8 +30,8 @@
 
 	import { notificationStore } from '../../stores';
 	import Autocomplete from './Autocomplete.svelte';
-	import FileUpload from './FileUpload.svelte';
 	import FormDraftManager from './FormDraftManager.svelte';
+	import ImagePrompt from './ImagePrompt.svelte';
 	import InventoryFormWizard from './InventoryFormWizard.svelte';
 	import Prompt from './Prompt.svelte';
 
@@ -359,7 +359,11 @@
 							name="productDescription-mobile"
 							url="/api/generator/inventory"
 						/>
-						<FileUpload name="productImageUrl" signedUrl={productImageUrl} />
+						<ImagePrompt
+							name="productImageUrl"
+							bind:signedUrl={productImageUrl}
+							trigger={productName}
+						/>
 					</div>
 				{/if}
 			{/snippet}
@@ -546,7 +550,11 @@
 						name="productDescription"
 						url="/api/generator/inventory"
 					/>
-					<FileUpload name="productImageUrl" signedUrl={productImageUrl} />
+					<ImagePrompt
+						name="productImageUrl"
+						bind:signedUrl={productImageUrl}
+						trigger={productName}
+					/>
 				</div>
 			</CollapsibleSection>
 		</div>

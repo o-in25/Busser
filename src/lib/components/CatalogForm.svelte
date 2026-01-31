@@ -32,8 +32,8 @@
 	import { notificationStore } from '../../stores';
 	import CatalogFormWizard from './CatalogFormWizard.svelte';
 	import CocktailMetrics from './CocktailMetrics.svelte';
-	import FileUpload from './FileUpload.svelte';
 	import FormDraftManager from './FormDraftManager.svelte';
+	import ImagePrompt from './ImagePrompt.svelte';
 	import Prompt from './Prompt.svelte';
 	import RecipeStepCard from './RecipeStepCard.svelte';
 
@@ -332,7 +332,11 @@
 							/>
 						</div>
 						<div>
-							<FileUpload name="recipeImageUrl" signedUrl={recipe.recipeImageUrl || undefined} />
+							<ImagePrompt
+								name="recipeImageUrl"
+								bind:signedUrl={recipe.recipeImageUrl}
+								trigger={recipe.recipeName}
+							/>
 						</div>
 					</div>
 				{:else if step === 2}
@@ -462,7 +466,11 @@
 						name="recipeDescription"
 						url="/api/generator/catalog"
 					/>
-					<FileUpload name="recipeImageUrl" signedUrl={recipe.recipeImageUrl || undefined} />
+					<ImagePrompt
+						name="recipeImageUrl"
+						bind:signedUrl={recipe.recipeImageUrl}
+						trigger={recipe.recipeName}
+					/>
 				</div>
 			</CollapsibleSection>
 

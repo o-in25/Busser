@@ -11,8 +11,8 @@
 		This Cookie Policy explains how Busser ("Company," "we," "us," and "our") uses cookies and
 		similar technologies to recognize you when you visit our website at
 		<a href="https://busserapp.com" class="text-primary hover:underline">https://busserapp.com</a>
-		("Website"). It explains what these technologies are and why we use them, as well as your rights
-		to control our use of them.
+		("Website"). It explains what these technologies are and why we use them, as well as your rights to
+		control our use of them.
 	</p>
 
 	<p class="text-muted-foreground mb-4">
@@ -211,11 +211,11 @@
 			rel="noopener noreferrer"
 			class="text-primary hover:underline">Global Storage Settings Panel</a
 		>
-		and following the instructions (which may include instructions that explain, for example, how to
-		delete existing Flash Cookies (referred to "information" on the Macromedia site), how to prevent
-		Flash LSOs from being placed on your computer without your being asked, and (for Flash Player 8 and
-		later) how to block Flash Cookies that are not being delivered by the operator of the page you are
-		on at the time).
+		and following the instructions (which may include instructions that explain, for example, how to delete
+		existing Flash Cookies (referred to "information" on the Macromedia site), how to prevent Flash LSOs
+		from being placed on your computer without your being asked, and (for Flash Player 8 and later) how
+		to block Flash Cookies that are not being delivered by the operator of the page you are on at the
+		time).
 	</p>
 
 	<p class="text-muted-foreground mb-4">
