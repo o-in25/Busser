@@ -116,6 +116,7 @@
 	const flipDurationMs = 300;
 	const dropTargetStyle = {}; // Remove default yellow outline
 	const centreDraggedOnCursor = false; // Keep element relative to click position
+	const dragHandleSelector = '.drag-handle'; // Only drag from handle
 
 	// Transform the dragged element - subtle but visible, locked to Y-axis only
 	function transformDraggedElement(
@@ -246,7 +247,7 @@
 	/>
 {/if}
 
-<div class="px-4 py-4 mt-3">
+<div class="px-2 sm:px-4 py-4 mt-3">
 	<form
 		class="relative"
 		method="POST"
@@ -293,7 +294,7 @@
 					<!-- Step 1: Details (Name + Spirit Category) -->
 					<div class="space-y-6">
 						<div>
-							<Label for="recipeName" class="mb-2 text-base font-medium">Recipe Name</Label>
+							<Label for="recipeName" class="mb-2">Name</Label>
 							<Input
 								type="text"
 								id="recipeName"
@@ -301,7 +302,6 @@
 								placeholder="e.g., Old Fashioned"
 								bind:value={recipe.recipeName}
 								required
-								class="text-lg"
 							/>
 						</div>
 
@@ -389,6 +389,7 @@
 								dropTargetStyle,
 								transformDraggedElement,
 								centreDraggedOnCursor,
+								dragHandleSelector,
 							}}
 							onconsider={handleDndConsider}
 							onfinalize={handleDndFinalize}
@@ -543,6 +544,7 @@
 							dropTargetStyle,
 							transformDraggedElement,
 							centreDraggedOnCursor,
+							dragHandleSelector,
 						}}
 						onconsider={handleDndConsider}
 						onfinalize={handleDndFinalize}

@@ -1,29 +1,35 @@
 <script lang="ts">
 	import {
+		ArrowUpDown,
 		ChevronLeft,
 		ChevronRight,
 		FlaskConical,
+		GlassWater,
 		LayoutGrid,
 		List,
+		Plus,
 		Search,
 		X,
 	} from 'lucide-svelte';
-	import { onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	const workspace = getContext<WorkspaceWithRole>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	// View mode
 	let viewMode = $state<'grid' | 'list'>('grid');
@@ -31,6 +37,7 @@
 	// Filter state
 	let searchInput = $state(data.filters.search || '');
 	let selectedSort = $state(data.filters.sort || 'name-asc');
+	let selectedSpirit = $state(data.filters.spiritId || 'all');
 
 	// Sort options
 	const sortOptions = [
@@ -60,11 +67,13 @@
 
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const sort = overrides.sort !== undefined ? overrides.sort : selectedSort;
+		const spirit = overrides.spirit !== undefined ? overrides.spirit : selectedSpirit;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 
 		params.set('page', String(pageNum));
 		if (search) params.set('search', String(search));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
+		if (spirit && spirit !== 'all') params.set('spirit', String(spirit));
 
 		const queryString = params.toString();
 		return queryString ? `/catalog/browse?${queryString}` : '/catalog/browse';
@@ -78,6 +87,11 @@
 	function handleSortChange(value: string) {
 		selectedSort = value;
 		goto(buildUrl({ sort: value, page: 1 }), { keepFocus: true });
+	}
+
+	function handleSpiritChange(value: string) {
+		selectedSpirit = value;
+		goto(buildUrl({ spirit: value, page: 1 }), { keepFocus: true });
 	}
 
 	function clearSearch() {
@@ -103,6 +117,19 @@
 	$effect(() => {
 		searchInput = data.filters.search || '';
 		selectedSort = data.filters.sort || 'name-asc';
+		selectedSpirit = data.filters.spiritId || 'all';
+	});
+
+	// Compute display labels for dropdowns
+	const sortLabel = $derived.by(() => {
+		const option = sortOptions.find((o) => o.value === selectedSort);
+		return option?.label || 'Name (A-Z)';
+	});
+
+	const spiritLabel = $derived.by(() => {
+		if (!selectedSpirit || selectedSpirit === 'all') return 'All Spirits';
+		const spirit = data.spirits.find((s) => String(s.recipeCategoryId) === selectedSpirit);
+		return spirit?.recipeCategoryDescription || 'All Spirits';
 	});
 </script>
 
@@ -123,50 +150,65 @@
 		</div>
 	</div>
 
-	<!-- Spirit category quick filters -->
-	<div class="flex flex-wrap gap-2 mb-6">
-		{#each data.spirits as spirit}
-			<a href="/catalog/browse/{spirit.recipeCategoryId}">
-				<Badge variant="outline" class="cursor-pointer hover:bg-accent transition-colors">
-					{spirit.recipeCategoryDescription}
-				</Badge>
-			</a>
-		{/each}
-	</div>
-
 	<!-- Toolbar -->
-	<div class="flex flex-col sm:flex-row gap-3 mb-6">
-		<!-- Search -->
-		<form onsubmit={handleSearch} class="flex-1">
-			<div class="relative">
-				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-				<Input
-					type="text"
-					placeholder="Search recipes..."
-					bind:value={searchInput}
-					class="pl-10 pr-10"
-				/>
-				{#if searchInput}
-					<button
-						type="button"
-						onclick={clearSearch}
-						class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-					>
-						<X class="h-4 w-4" />
-					</button>
-				{/if}
-			</div>
-		</form>
+	<div class="flex flex-col gap-3 mb-6">
+		<!-- Row 1: Search, Spirit Filter, Sort (+ action buttons on large screens) -->
+		<div class="flex flex-col sm:flex-row gap-3 lg:items-center">
+			<!-- Search -->
+			<form onsubmit={handleSearch} class="flex-1">
+				<div class="relative">
+					<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+					<Input
+						type="text"
+						placeholder="Search recipes..."
+						bind:value={searchInput}
+						class="pl-10 pr-10"
+					/>
+					{#if searchInput}
+						<button
+							type="button"
+							onclick={clearSearch}
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+						>
+							<X class="h-4 w-4" />
+						</button>
+					{/if}
+				</div>
+			</form>
 
-		<div class="flex items-center gap-2">
+			<!-- Spirit Filter Select -->
+			<Select.Root
+				type="single"
+				value={selectedSpirit}
+				onValueChange={(v) => handleSpiritChange(v ?? 'all')}
+			>
+				<Select.Trigger class="w-full sm:w-[180px]">
+					<GlassWater class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="All Spirits">{spiritLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Item value="all" label="All Spirits" />
+					{#if data.spirits.length > 0}
+						<Select.Separator />
+					{/if}
+					{#each data.spirits as spirit}
+						<Select.Item
+							value={String(spirit.recipeCategoryId)}
+							label={spirit.recipeCategoryDescription}
+						/>
+					{/each}
+				</Select.Content>
+			</Select.Root>
+
 			<!-- Sort Select -->
 			<Select.Root
 				type="single"
 				value={selectedSort}
 				onValueChange={(v) => handleSortChange(v ?? 'name-asc')}
 			>
-				<Select.Trigger class="w-[150px]">
-					<Select.Value placeholder="Sort by" />
+				<Select.Trigger class="w-full sm:w-[160px]">
+					<ArrowUpDown class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="Sort by">{sortLabel}</Select.Value>
 				</Select.Trigger>
 				<Select.Content>
 					{#each sortOptions as option}
@@ -175,11 +217,49 @@
 				</Select.Content>
 			</Select.Root>
 
+			<!-- Action buttons (large screens only - inline with filters) -->
+			<div class="hidden lg:flex items-center gap-2">
+				<!-- View Toggle -->
+				<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
+					<button
+						class={cn(
+							'h-10 w-10 flex items-center justify-center transition-colors',
+							viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+						)}
+						onclick={() => setViewMode('grid')}
+						aria-label="Grid view"
+					>
+						<LayoutGrid class="h-4 w-4" />
+					</button>
+					<button
+						class={cn(
+							'h-10 w-10 flex items-center justify-center transition-colors',
+							viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+						)}
+						onclick={() => setViewMode('list')}
+						aria-label="List view"
+					>
+						<List class="h-4 w-4" />
+					</button>
+				</div>
+
+				<!-- Add Recipe Button -->
+				{#if canModify}
+					<a href="/catalog/add" class={cn(buttonVariants(), 'shrink-0')}>
+						<Plus class="h-4 w-4 mr-2" />
+						<span>Add Recipe</span>
+					</a>
+				{/if}
+			</div>
+		</div>
+
+		<!-- Row 2: Action buttons (small/medium screens only) -->
+		<div class="flex items-center gap-2 lg:hidden">
 			<!-- View Toggle -->
-			<div class="flex items-center border rounded-md overflow-hidden">
+			<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
 				<button
 					class={cn(
-						'p-2 transition-colors',
+						'h-10 w-10 flex items-center justify-center transition-colors',
 						viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('grid')}
@@ -189,7 +269,7 @@
 				</button>
 				<button
 					class={cn(
-						'p-2 transition-colors',
+						'h-10 w-10 flex items-center justify-center transition-colors',
 						viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('list')}
@@ -198,6 +278,17 @@
 					<List class="h-4 w-4" />
 				</button>
 			</div>
+
+			<!-- Spacer -->
+			<div class="flex-1"></div>
+
+			<!-- Add Recipe Button -->
+			{#if canModify}
+				<a href="/catalog/add" class={cn(buttonVariants(), 'shrink-0')}>
+					<Plus class="h-4 w-4 mr-2" />
+					<span>Add Recipe</span>
+				</a>
+			{/if}
 		</div>
 	</div>
 

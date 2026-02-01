@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		ClipboardList,
-		Home,
-		LayoutGrid,
-		LogOut,
-		Ruler,
-		Settings,
-	} from 'lucide-svelte';
+	import { ClipboardList, Home, LayoutGrid, LogOut, Ruler, Settings } from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import logoNav from '$lib/assets/logo-nav.png';
@@ -58,10 +51,7 @@
 	<nav class="mobile-nav-container flex md:hidden">
 		<div class="mobile-nav-pill">
 			{#each navItems as item}
-				<a
-					href={item.href}
-					class="mobile-nav-item {isActive(item.href) ? 'active' : ''}"
-				>
+				<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}">
 					<item.icon class="h-5 w-5" />
 					<span class="mobile-nav-label">{item.label}</span>
 				</a>
@@ -82,10 +72,7 @@
 		{#if user}
 			<div class="desktop-nav-pill">
 				{#each navItems as item}
-					<a
-						href={item.href}
-						class="desktop-nav-item {isActive(item.href) ? 'active' : ''}"
-					>
+					<a href={item.href} class="desktop-nav-item {isActive(item.href) ? 'active' : ''}">
 						<item.icon class="h-4 w-4" />
 						<span>{item.label}</span>
 					</a>
@@ -130,20 +117,12 @@
 		padding: 0.5rem 0;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		background: linear-gradient(
-			180deg,
-			rgba(255, 255, 255, 0.8) 0%,
-			rgba(255, 255, 255, 0.6) 100%
-		);
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	:global(.dark) .mobile-logo-header {
-		background: linear-gradient(
-			180deg,
-			rgba(24, 24, 27, 0.8) 0%,
-			rgba(24, 24, 27, 0.6) 100%
-		);
+		background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(24, 24, 27, 0.6) 100%);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
@@ -154,7 +133,7 @@
 		left: 0;
 		right: 0;
 		z-index: 50;
-		padding: 0.5rem;
+		padding: 0.5rem 1rem;
 		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 		justify-content: center;
 	}
@@ -163,9 +142,11 @@
 	.mobile-nav-pill {
 		display: flex;
 		align-items: center;
+		justify-content: space-around;
 		gap: 0.125rem;
 		padding: 0.375rem;
 		border-radius: 9999px;
+		width: 100%;
 		background: linear-gradient(
 			135deg,
 			rgba(255, 255, 255, 0.7) 0%,
@@ -204,7 +185,7 @@
 		color: rgba(113, 113, 122, 1);
 		transition: all 0.2s ease;
 		text-decoration: none;
-		min-width: 3rem;
+		flex: 1;
 	}
 
 	.mobile-nav-item:hover {
@@ -212,11 +193,7 @@
 	}
 
 	.mobile-nav-item.active {
-		background: linear-gradient(
-			135deg,
-			rgba(232, 25, 95, 0.15) 0%,
-			rgba(165, 125, 213, 0.15) 100%
-		);
+		background: linear-gradient(135deg, rgba(232, 25, 95, 0.15) 0%, rgba(165, 125, 213, 0.15) 100%);
 		color: rgba(232, 25, 95, 1);
 		box-shadow: 0 2px 8px rgba(232, 25, 95, 0.2);
 	}
@@ -230,11 +207,7 @@
 	}
 
 	:global(.dark) .mobile-nav-item.active {
-		background: linear-gradient(
-			135deg,
-			rgba(248, 78, 128, 0.2) 0%,
-			rgba(165, 125, 213, 0.2) 100%
-		);
+		background: linear-gradient(135deg, rgba(248, 78, 128, 0.2) 0%, rgba(165, 125, 213, 0.2) 100%);
 		color: rgba(248, 78, 128, 1);
 		box-shadow: 0 2px 8px rgba(248, 78, 128, 0.25);
 	}
@@ -255,20 +228,12 @@
 		padding: 0.75rem 0;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		background: linear-gradient(
-			180deg,
-			rgba(255, 255, 255, 0.8) 0%,
-			rgba(255, 255, 255, 0.6) 100%
-		);
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 	}
 
 	:global(.dark) .desktop-nav {
-		background: linear-gradient(
-			180deg,
-			rgba(24, 24, 27, 0.8) 0%,
-			rgba(24, 24, 27, 0.6) 100%
-		);
+		background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(24, 24, 27, 0.6) 100%);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
@@ -324,11 +289,7 @@
 	}
 
 	.desktop-nav-item.active {
-		background: linear-gradient(
-			135deg,
-			rgba(232, 25, 95, 0.12) 0%,
-			rgba(165, 125, 213, 0.12) 100%
-		);
+		background: linear-gradient(135deg, rgba(232, 25, 95, 0.12) 0%, rgba(165, 125, 213, 0.12) 100%);
 		color: rgba(232, 25, 95, 1);
 		box-shadow: 0 2px 8px rgba(232, 25, 95, 0.15);
 	}

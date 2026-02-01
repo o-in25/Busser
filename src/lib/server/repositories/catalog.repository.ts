@@ -56,6 +56,10 @@ export class CatalogRepository extends BaseRepository {
 				query = query.where('recipeName', 'like', `%${filter.recipeName}%`);
 			}
 
+			if (filter?.recipeCategoryId) {
+				query = query.where('recipeCategoryId', filter.recipeCategoryId);
+			}
+
 			query = query.orderBy('recipeName');
 			const { data, pagination } = await query.paginate({
 				perPage,

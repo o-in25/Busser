@@ -14,7 +14,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const body = await request.json();
-	console.log(body);
 	const generator = new RecipeGenerator();
 	const result = await generator.generateContent(body.trigger);
 	return json(result);

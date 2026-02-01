@@ -44,11 +44,7 @@ export class MailClient {
 				throw new Error('Email service is not configured.');
 			}
 
-			console.log('Attempting to send registration email to:', to);
-			console.log('Using domain:', MailClient.domain);
-			console.log('Base URL:', MailClient.baseUrl);
-
-			const result = await MailClient.client.messages.create(MailClient.domain, {
+			await MailClient.client.messages.create(MailClient.domain, {
 				from: MailClient.from,
 				to,
 				subject: 'Welcome to Busser',
@@ -60,7 +56,6 @@ export class MailClient {
 				}),
 			});
 
-			console.log('Registration email sent successfully:', result.id, result.message);
 			return true;
 		} catch (error: any) {
 			console.error('Failed to send registration email:', error.message);
@@ -79,9 +74,7 @@ export class MailClient {
 				throw new Error('Email service is not configured.');
 			}
 
-			console.log('Attempting to send password reset email to:', to);
-
-			const result = await MailClient.client.messages.create(MailClient.domain, {
+			await MailClient.client.messages.create(MailClient.domain, {
 				from: MailClient.from,
 				to,
 				subject: 'Reset your Busser password',
@@ -93,7 +86,6 @@ export class MailClient {
 				}),
 			});
 
-			console.log('Password reset email sent successfully:', result.id, result.message);
 			return true;
 		} catch (error: any) {
 			console.error('Failed to send password reset email:', error.message);
@@ -112,9 +104,7 @@ export class MailClient {
 				throw new Error('Email service is not configured.');
 			}
 
-			console.log('Attempting to send workspace invitation email to:', to);
-
-			const result = await MailClient.client.messages.create(MailClient.domain, {
+			await MailClient.client.messages.create(MailClient.domain, {
 				from: MailClient.from,
 				to,
 				subject: `You've been invited to join ${workspaceName} on Busser`,
@@ -128,7 +118,6 @@ export class MailClient {
 				}),
 			});
 
-			console.log('Workspace invitation email sent successfully:', result.id, result.message);
 			return true;
 		} catch (error: any) {
 			console.error('Failed to send workspace invitation email:', error.message);
