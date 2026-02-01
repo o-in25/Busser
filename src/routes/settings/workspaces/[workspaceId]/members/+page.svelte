@@ -1,17 +1,8 @@
 <script lang="ts">
-	import {
-		ArrowLeft,
-		Clock,
-		Crown,
-		Eye,
-		Mail,
-		Pencil,
-		Shield,
-		Trash2,
-		Users,
-	} from 'lucide-svelte';
+	import { Clock, Crown, Eye, Mail, Pencil, Shield, Trash2, Users } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -85,13 +76,13 @@
 <div class="space-y-6">
 	<!-- Header with back link -->
 	<div class="flex items-center gap-4">
-		<a
-			href="/settings/workspaces"
-			class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-		>
-			<ArrowLeft class="h-4 w-4" />
-			Back to Workspaces
-		</a>
+		<BackButton
+			fallback="/settings/workspaces"
+			label="Back to Workspaces"
+			size="sm"
+			variant="ghost"
+			class="text-muted-foreground hover:text-foreground"
+		/>
 	</div>
 
 	<!-- Title -->

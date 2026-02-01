@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		ArrowLeft,
 		ChevronLeft,
 		ChevronRight,
 		FlaskConical,
@@ -13,6 +12,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -113,9 +113,7 @@
 <div class="container mx-auto px-4 mt-4">
 	<!-- Header -->
 	<div class="flex items-center gap-4 mb-6">
-		<a href="/catalog" class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
-			<ArrowLeft class="h-5 w-5" />
-		</a>
+		<BackButton fallback="/catalog" />
 		<div>
 			<h1 class="text-2xl font-bold">Browse Catalog</h1>
 			<p class="text-muted-foreground">
