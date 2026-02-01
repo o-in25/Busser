@@ -5,11 +5,14 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import UserForm from '$lib/components/UserForm.svelte';
 
-	import type { ActionData } from './$types';
+	import type { ActionData, PageData } from './$types';
 
-	let { form }: { form: ActionData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let errors = $derived(form?.errors);
+
+	// pre-fill invitation code from URL
+	let invitationCode = $state(data.invitationCode || '');
 
 	let formRef: any;
 </script>
@@ -24,6 +27,6 @@
 		</Alert.Root>
 	{/if}
 	<form class="space-y-6" method="POST" action="/signup" use:enhance>
-		<UserForm bind:this={formRef} user={null} action="register" {errors} />
+		<UserForm bind:this={formRef} user={null} action="register" {errors} bind:invitationCode />
 	</form>
 </div>

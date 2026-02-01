@@ -14,6 +14,7 @@ vite.config.ts.timestamp-*
 .vercel/
 .fly/*
 cloud-sql-proxy
+cloud-sql-proxy.exe
 service-account.json
 startup-dev.sh
 /.claude

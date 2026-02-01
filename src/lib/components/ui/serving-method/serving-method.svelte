@@ -66,7 +66,7 @@
 	{#if selectedMethod}
 		<div class="flex items-center justify-center gap-2">
 			<Badge variant="secondary" class="text-xs font-normal">
-				<span class="text-muted-foreground">Dilution:</span>
+				<span class="text-foreground">Dilution:</span>
 				<span class="ml-1 font-medium">{selectedMethod.recipeTechniqueDilutionPercentage}%</span>
 			</Badge>
 		</div>

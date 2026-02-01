@@ -1,23 +1,28 @@
 <script lang="ts">
 	import {
+		AlertTriangle,
 		ArrowRight,
 		Building2,
 		Check,
 		Crown,
 		Globe,
 		KeyRound,
+		LogOut,
 		Mail,
 		Pencil,
 		Shield,
+		Trash2,
 		User,
 		Users,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
@@ -27,6 +32,9 @@
 	// Track selected workspace for the form
 	let selectedWorkspaceId = $state(data.preferredWorkspaceId || '');
 	let isSubmitting = $state(false);
+	let isSigningOut = $state(false);
+	let isDeleting = $state(false);
+	let deleteDialogOpen = $state(false);
 
 	// Update selected when data changes
 	$effect(() => {
@@ -35,6 +43,21 @@
 
 	const permissions: string[] = getContext('permissions') || [];
 	const roles: string[] = getContext('roles') || [];
+
+	// check if user is admin (cannot delete their own account)
+	const isAdmin = roles.includes('ADMIN');
+
+	async function handleSignOut() {
+		isSigningOut = true;
+		const response = await fetch('/logout', {
+			method: 'POST',
+			body: new FormData(),
+		});
+		if (response.ok) {
+			await goto('/');
+		}
+		isSigningOut = false;
+	}
 
 	// filter to only admin-related permissions (system-level access)
 	const adminPermissions = permissions.filter((p) => p.includes('admin'));
@@ -347,10 +370,14 @@
 							<button
 								type="button"
 								onclick={() => (selectedWorkspaceId = workspace.workspaceId)}
+								disabled={data.workspaces.length === 1}
 								class="w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all {selectedWorkspaceId ===
 								workspace.workspaceId
 									? 'border-primary bg-primary/5'
-									: 'border-transparent bg-muted/30 hover:bg-muted/50'}"
+									: 'border-transparent bg-muted/30 hover:bg-muted/50'} {data.workspaces
+									.length === 1
+									? 'opacity-60 cursor-not-allowed'
+									: ''}"
 							>
 								<div class="flex items-center gap-3">
 									<div
@@ -406,7 +433,8 @@
 							type="submit"
 							disabled={!selectedWorkspaceId ||
 								selectedWorkspaceId === data.preferredWorkspaceId ||
-								isSubmitting}
+								isSubmitting ||
+								data.workspaces.length === 1}
 						>
 							{#if isSubmitting}
 								Saving...
@@ -425,6 +453,103 @@
 					</div>
 					<h3 class="font-semibold mb-1">No Workspaces</h3>
 					<p class="text-sm text-muted-foreground">You don't belong to any workspaces yet.</p>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Account Actions Card -->
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="flex items-center gap-2">
+				<LogOut class="h-5 w-5" />
+				Account Actions
+			</Card.Title>
+			<Card.Description>Sign out or manage your account</Card.Description>
+		</Card.Header>
+		<Card.Content class="space-y-4">
+			<!-- Sign Out -->
+			<div class="flex items-center justify-between p-4 rounded-lg bg-muted/30">
+				<div class="flex items-center gap-3">
+					<div class="p-2 rounded-lg bg-muted">
+						<LogOut class="h-4 w-4 text-muted-foreground" />
+					</div>
+					<div>
+						<p class="font-medium">Sign Out</p>
+						<p class="text-sm text-muted-foreground">
+							Sign out of your account on this device
+						</p>
+					</div>
+				</div>
+				<Button variant="outline" onclick={handleSignOut} disabled={isSigningOut}>
+					{#if isSigningOut}
+						Signing out...
+					{:else}
+						Sign Out
+					{/if}
+				</Button>
+			</div>
+
+			<!-- Delete Account (hidden for admins) -->
+			{#if !isAdmin}
+				<div class="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/20">
+					<div class="flex items-center gap-3">
+						<div class="p-2 rounded-lg bg-destructive/10">
+							<Trash2 class="h-4 w-4 text-destructive" />
+						</div>
+						<div>
+							<p class="font-medium text-destructive">Delete Account</p>
+							<p class="text-sm text-muted-foreground">
+								Permanently delete your account and all associated data
+							</p>
+						</div>
+					</div>
+					<Dialog.Root bind:open={deleteDialogOpen}>
+						<Dialog.Trigger>
+							<Button variant="destructive">
+								Delete Account
+							</Button>
+						</Dialog.Trigger>
+						<Dialog.Content>
+							<Dialog.Header>
+								<Dialog.Title class="flex items-center gap-2">
+									<AlertTriangle class="h-5 w-5 text-destructive" />
+									Delete Account
+								</Dialog.Title>
+								<Dialog.Description>
+									This action cannot be undone. This will permanently delete your account, remove
+									you from all workspaces, and delete all your personal data.
+								</Dialog.Description>
+							</Dialog.Header>
+							<Dialog.Footer>
+								<Button variant="outline" onclick={() => (deleteDialogOpen = false)}>
+									Cancel
+								</Button>
+								<form
+									method="POST"
+									action="?/deleteAccount"
+									use:enhance={() => {
+										isDeleting = true;
+										return async ({ result }) => {
+											isDeleting = false;
+											if (result.type === 'redirect') {
+												deleteDialogOpen = false;
+												await goto(result.location);
+											}
+										};
+									}}
+								>
+									<Button type="submit" variant="destructive" disabled={isDeleting}>
+										{#if isDeleting}
+											Deleting...
+										{:else}
+											Yes, Delete My Account
+										{/if}
+									</Button>
+								</form>
+							</Dialog.Footer>
+						</Dialog.Content>
+					</Dialog.Root>
 				</div>
 			{/if}
 		</Card.Content>

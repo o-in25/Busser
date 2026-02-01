@@ -1,9 +1,8 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { CatalogGenerator } from '$lib/server/generators/catalog-generator';
-
 import type { RequestHandler } from './$types';
+import { RecipeGenerator } from '$lib/server/generators/recipe-generator';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.activeWorkspaceId) {
@@ -15,7 +14,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const body = await request.json();
-	const generator = new CatalogGenerator();
-	const result = await generator.generateContent(body.recipeName);
+	console.log(body);
+	const generator = new RecipeGenerator();
+	const result = await generator.generateContent(body.trigger);
 	return json(result);
 };

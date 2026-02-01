@@ -1,21 +1,20 @@
 <script lang="ts">
-	import { ClipboardList, Home, LayoutGrid, LogOut, Menu, Ruler, Settings } from 'lucide-svelte';
+	import {
+		ClipboardList,
+		Home,
+		LayoutGrid,
+		LogOut,
+		Ruler,
+		Settings,
+	} from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
-	import logo from '$lib/assets/logo-nav.png';
+	import logoNav from '$lib/assets/logo-nav.png';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Separator } from '$lib/components/ui/separator';
-	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
-
 	import Placeholder from './Placeholder.svelte';
 
-	// props
 	let { user, activeUrl }: { user: User | null; activeUrl: string } = $props();
-
-	// Check if navbar has content (nav links, user menu, etc.)
-	let hasNavContent = $derived(!!user);
-	let sheetOpen = $state(false);
 
 	async function logout() {
 		const response = await fetch('/logout', {
@@ -25,7 +24,6 @@
 		if (response.ok) {
 			await invalidateAll();
 			await goto(`/`);
-			sheetOpen = false;
 		}
 	}
 
@@ -36,198 +34,332 @@
 		}
 		return activeUrl.startsWith(path);
 	}
+
+	const navItems = [
+		{ href: '/', icon: Home, label: 'Home' },
+		{ href: '/inventory', icon: ClipboardList, label: 'Inventory' },
+		{ href: '/catalog', icon: LayoutGrid, label: 'Catalog' },
+		{ href: '/tools', icon: Ruler, label: 'Tools' },
+		{ href: '/settings', icon: Settings, label: 'Settings' },
+	];
 </script>
 
-<!-- Desktop Navigation -->
-<nav class="glass-nav sticky top-0 z-50 w-full px-4 py-3">
-	<div
-		class="mx-auto flex max-w-7xl items-center {hasNavContent
-			? 'justify-center md:justify-between'
-			: 'justify-center'} relative"
-	>
-		<!-- Mobile Menu Button -->
-		{#if user}
-			<Sheet.Root bind:open={sheetOpen}>
-				<Sheet.Trigger
-					class="absolute left-0 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 md:hidden"
+<!-- Mobile Top Logo (visible on small screens) -->
+{#if user}
+	<div class="mobile-logo-header flex md:hidden">
+		<a href="/">
+			<img src={logoNav} class="h-8" alt="Busser" />
+		</a>
+	</div>
+{/if}
+
+<!-- Mobile Bottom Navigation (visible on small screens) -->
+{#if user}
+	<nav class="mobile-nav-container flex md:hidden">
+		<div class="mobile-nav-pill">
+			{#each navItems as item}
+				<a
+					href={item.href}
+					class="mobile-nav-item {isActive(item.href) ? 'active' : ''}"
 				>
-					<Menu class="h-6 w-6" />
-					<span class="sr-only">Open menu</span>
-				</Sheet.Trigger>
+					<item.icon class="h-5 w-5" />
+					<span class="mobile-nav-label">{item.label}</span>
+				</a>
+			{/each}
+		</div>
+	</nav>
+{/if}
 
-				<Sheet.Content side="left" class="w-80 glass-panel border-r-0">
-					<Sheet.Header class="text-left">
-						<!-- User Profile in Drawer -->
-						<div class="flex items-center gap-3 pb-4">
-							<Placeholder id="avatar-menu-mobile" />
-							<div>
-								<p class="text-lg font-medium text-foreground">
-									{user?.username}
-								</p>
-								<p class="text-sm text-muted-foreground">
-									{user?.email}
-								</p>
-							</div>
-						</div>
-					</Sheet.Header>
-
-					<Separator class="my-4" />
-
-					<!-- Navigation Links -->
-					<nav class="flex flex-col gap-2">
-						<a
-							href="/"
-							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
-								'/'
-							)
-								? 'bg-primary/10 text-foreground'
-								: ''}"
-						>
-							<Home class="h-5 w-5" />
-							Home
-						</a>
-
-						<a
-							href="/inventory"
-							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
-								'/inventory'
-							)
-								? 'bg-primary/10 text-foreground'
-								: ''}"
-						>
-							<ClipboardList class="h-5 w-5" />
-							Inventory
-						</a>
-
-						<a
-							href="/catalog"
-							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
-								'/catalog'
-							)
-								? 'bg-primary/10 text-foreground'
-								: ''}"
-						>
-							<LayoutGrid class="h-5 w-5" />
-							Catalog
-						</a>
-
-						<Separator class="my-4" />
-
-						<a
-							href="/tools"
-							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
-								'/tools'
-							)
-								? 'bg-primary/10 text-foreground'
-								: ''}"
-						>
-							<Ruler class="h-5 w-5" />
-							Tools
-						</a>
-
-						<a
-							href="/settings"
-							onclick={() => (sheetOpen = false)}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground {isActive(
-								'/settings'
-							)
-								? 'bg-primary/10 text-foreground'
-								: ''}"
-						>
-							<Settings class="h-5 w-5" />
-							Settings
-						</a>
-
-						<Separator class="my-4" />
-
-						<button
-							onclick={logout}
-							class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground"
-						>
-							<LogOut class="h-5 w-5" />
-							Sign Out
-						</button>
-					</nav>
-				</Sheet.Content>
-			</Sheet.Root>
-		{/if}
-
-		<!-- Logo -->
-		<a href="/" class="md:mx-0">
-			<img src={logo} class="h-12" alt="Busser Logo" />
+<!-- Desktop Top Navigation (visible on medium+ screens) -->
+<nav class="desktop-nav hidden md:block">
+	<div class="mx-auto flex max-w-7xl items-center justify-between px-4">
+		<!-- Logo (left) -->
+		<a href="/" class="flex-shrink-0">
+			<img src={logoNav} class="h-10" alt="Busser" />
 		</a>
 
-		<!-- Desktop Navigation Links -->
+		<!-- Center nav pill -->
 		{#if user}
-			<div class="hidden md:flex md:items-center md:gap-6">
-				<a
-					href="/"
-					class="text-sm font-medium transition-colors hover:text-primary {isActive('/')
-						? 'text-primary'
-						: 'text-muted-foreground'}"
-				>
-					Home
-				</a>
-				<a
-					href="/inventory"
-					class="text-sm font-medium transition-colors hover:text-primary {isActive('/inventory')
-						? 'text-primary'
-						: 'text-muted-foreground'}"
-				>
-					Inventory
-				</a>
-				<a
-					href="/catalog"
-					class="text-sm font-medium transition-colors hover:text-primary {isActive('/catalog')
-						? 'text-primary'
-						: 'text-muted-foreground'}"
-				>
-					Catalog
-				</a>
+			<div class="desktop-nav-pill">
+				{#each navItems as item}
+					<a
+						href={item.href}
+						class="desktop-nav-item {isActive(item.href) ? 'active' : ''}"
+					>
+						<item.icon class="h-4 w-4" />
+						<span>{item.label}</span>
+					</a>
+				{/each}
 			</div>
 		{/if}
 
-		<!-- User Menu (Desktop) -->
+		<!-- Avatar (right) -->
 		{#if user}
-			<div class="hidden md:block">
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger>
-						<Placeholder id="avatar-menu" />
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
-						<DropdownMenu.Label>
-							<div class="flex flex-col space-y-1">
-								<p class="text-sm font-medium">{user?.username}</p>
-								<p class="text-xs text-muted-foreground">{user?.email}</p>
-							</div>
-						</DropdownMenu.Label>
-						<DropdownMenu.Separator />
-						<DropdownMenu.Item class="cursor-pointer" onclick={() => goto('/settings')}>
-							<Settings class="mr-2 h-4 w-4" />
-							Settings
-						</DropdownMenu.Item>
-						<DropdownMenu.Item class="cursor-pointer" onclick={() => goto('/tools')}>
-							<Ruler class="mr-2 h-4 w-4" />
-							Tools
-						</DropdownMenu.Item>
-						<DropdownMenu.Separator />
-						<DropdownMenu.Item onclick={logout} class="cursor-pointer">
-							<LogOut class="mr-2 h-4 w-4" />
-							Sign out
-						</DropdownMenu.Item>
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
-			</div>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger class="desktop-avatar-button">
+					<Placeholder id="avatar-desktop" src={user?.avatarImageUrl} />
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
+					<DropdownMenu.Label>
+						<div class="flex flex-col space-y-1">
+							<p class="text-sm font-medium">{user?.username}</p>
+							<p class="text-xs text-muted-foreground">{user?.email}</p>
+						</div>
+					</DropdownMenu.Label>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Item onclick={logout} class="cursor-pointer">
+						<LogOut class="mr-2 h-4 w-4" />
+						Sign out
+					</DropdownMenu.Item>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		{:else}
+			<!-- Empty placeholder to maintain layout when logged out -->
+			<div class="w-10"></div>
 		{/if}
 	</div>
 </nav>
 
 <style>
-	.user-nav {
-		width: 40px;
+	/* mobile top logo */
+	.mobile-logo-header {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		justify-content: center;
+		padding: 0.5rem 0;
+		backdrop-filter: blur(20px) saturate(1.5);
+		-webkit-backdrop-filter: blur(20px) saturate(1.5);
+		background: linear-gradient(
+			180deg,
+			rgba(255, 255, 255, 0.8) 0%,
+			rgba(255, 255, 255, 0.6) 100%
+		);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	:global(.dark) .mobile-logo-header {
+		background: linear-gradient(
+			180deg,
+			rgba(24, 24, 27, 0.8) 0%,
+			rgba(24, 24, 27, 0.6) 100%
+		);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	/* mobile bottom nav container */
+	.mobile-nav-container {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 50;
+		padding: 0.5rem;
+		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+		justify-content: center;
+	}
+
+	/* mobile main nav pill */
+	.mobile-nav-pill {
+		display: flex;
+		align-items: center;
+		gap: 0.125rem;
+		padding: 0.375rem;
+		border-radius: 9999px;
+		background: linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.7) 0%,
+			rgba(253, 242, 248, 0.6) 50%,
+			rgba(245, 243, 255, 0.6) 100%
+		);
+		backdrop-filter: blur(20px) saturate(1.5);
+		-webkit-backdrop-filter: blur(20px) saturate(1.5);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.08),
+			inset 0 1px 0 rgba(255, 255, 255, 0.4);
+	}
+
+	:global(.dark) .mobile-nav-pill {
+		background: linear-gradient(
+			135deg,
+			rgba(39, 39, 42, 0.7) 0%,
+			rgba(50, 30, 40, 0.6) 50%,
+			rgba(40, 30, 50, 0.6) 100%
+		);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	}
+
+	/* mobile nav item */
+	.mobile-nav-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 0.375rem 0.625rem;
+		border-radius: 9999px;
+		color: rgba(113, 113, 122, 1);
+		transition: all 0.2s ease;
+		text-decoration: none;
+		min-width: 3rem;
+	}
+
+	.mobile-nav-item:hover {
+		color: rgba(63, 63, 70, 1);
+	}
+
+	.mobile-nav-item.active {
+		background: linear-gradient(
+			135deg,
+			rgba(232, 25, 95, 0.15) 0%,
+			rgba(165, 125, 213, 0.15) 100%
+		);
+		color: rgba(232, 25, 95, 1);
+		box-shadow: 0 2px 8px rgba(232, 25, 95, 0.2);
+	}
+
+	:global(.dark) .mobile-nav-item {
+		color: rgba(161, 161, 170, 1);
+	}
+
+	:global(.dark) .mobile-nav-item:hover {
+		color: rgba(212, 212, 216, 1);
+	}
+
+	:global(.dark) .mobile-nav-item.active {
+		background: linear-gradient(
+			135deg,
+			rgba(248, 78, 128, 0.2) 0%,
+			rgba(165, 125, 213, 0.2) 100%
+		);
+		color: rgba(248, 78, 128, 1);
+		box-shadow: 0 2px 8px rgba(248, 78, 128, 0.25);
+	}
+
+	.mobile-nav-label {
+		font-size: 0.625rem;
+		font-weight: 500;
+		margin-top: 0.125rem;
+		white-space: nowrap;
+	}
+
+	/* desktop top nav */
+	.desktop-nav {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		width: 100%;
+		padding: 0.75rem 0;
+		backdrop-filter: blur(20px) saturate(1.5);
+		-webkit-backdrop-filter: blur(20px) saturate(1.5);
+		background: linear-gradient(
+			180deg,
+			rgba(255, 255, 255, 0.8) 0%,
+			rgba(255, 255, 255, 0.6) 100%
+		);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+	}
+
+	:global(.dark) .desktop-nav {
+		background: linear-gradient(
+			180deg,
+			rgba(24, 24, 27, 0.8) 0%,
+			rgba(24, 24, 27, 0.6) 100%
+		);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	/* desktop nav pill */
+	.desktop-nav-pill {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.375rem;
+		border-radius: 9999px;
+		background: linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.6) 0%,
+			rgba(253, 242, 248, 0.5) 50%,
+			rgba(245, 243, 255, 0.5) 100%
+		);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.06),
+			inset 0 1px 0 rgba(255, 255, 255, 0.4);
+	}
+
+	:global(.dark) .desktop-nav-pill {
+		background: linear-gradient(
+			135deg,
+			rgba(39, 39, 42, 0.6) 0%,
+			rgba(50, 30, 40, 0.5) 50%,
+			rgba(40, 30, 50, 0.5) 100%
+		);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	}
+
+	/* desktop nav item */
+	.desktop-nav-item {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.875rem;
+		border-radius: 9999px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: rgba(113, 113, 122, 1);
+		transition: all 0.2s ease;
+		text-decoration: none;
+	}
+
+	.desktop-nav-item:hover {
+		color: rgba(63, 63, 70, 1);
+		background: rgba(0, 0, 0, 0.03);
+	}
+
+	.desktop-nav-item.active {
+		background: linear-gradient(
+			135deg,
+			rgba(232, 25, 95, 0.12) 0%,
+			rgba(165, 125, 213, 0.12) 100%
+		);
+		color: rgba(232, 25, 95, 1);
+		box-shadow: 0 2px 8px rgba(232, 25, 95, 0.15);
+	}
+
+	:global(.dark) .desktop-nav-item {
+		color: rgba(161, 161, 170, 1);
+	}
+
+	:global(.dark) .desktop-nav-item:hover {
+		color: rgba(212, 212, 216, 1);
+		background: rgba(255, 255, 255, 0.05);
+	}
+
+	:global(.dark) .desktop-nav-item.active {
+		background: linear-gradient(
+			135deg,
+			rgba(248, 78, 128, 0.18) 0%,
+			rgba(165, 125, 213, 0.18) 100%
+		);
+		color: rgba(248, 78, 128, 1);
+		box-shadow: 0 2px 8px rgba(248, 78, 128, 0.2);
+	}
+
+	/* desktop avatar button */
+	.desktop-avatar-button {
+		cursor: pointer;
+		border-radius: 9999px;
+		transition: all 0.2s ease;
+	}
+
+	.desktop-avatar-button:hover {
+		opacity: 0.8;
 	}
 </style>

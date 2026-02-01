@@ -135,7 +135,6 @@ export class CatalogRepository extends BaseRepository {
 						.havingRaw('COUNT(rs.RecipeStepId) > 1');
 				})
 				.limit(6);
-			console.log('uasd');
 			const recipes: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(result);
 
 			const recipesWithMissing = await Promise.all(
@@ -315,6 +314,7 @@ export class CatalogRepository extends BaseRepository {
 				// update recipe record
 				if (oldRecipe) {
 					let query: any = {
+						WorkspaceId: workspaceId,
 						RecipeId: recipe.recipeId,
 						RecipeCategoryId: recipe.recipeCategoryId,
 						RecipeDescriptionId: keys.recipeDescriptionId,
@@ -339,7 +339,6 @@ export class CatalogRepository extends BaseRepository {
 						productIdQuantityUnit,
 						recipeStepDescription,
 					}) => ({
-						workspaceId,
 						recipeId: keys.recipeId || 0,
 						productId,
 						productIdQuantityInMilliliters,

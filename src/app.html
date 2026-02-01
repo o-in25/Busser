@@ -42,14 +42,15 @@
 		%sveltekit.head%
 		<script>
 			if (localStorage.getItem('color-theme')) {
-				// explicit preference - overrides author's choice
+				// explicit preference - overrides default
 				localStorage.getItem('color-theme') === 'dark'
 					? window.document.documentElement.classList.add('dark')
 					: window.document.documentElement.classList.remove('dark');
 			} else {
-				// browser preference - does not overrides
-				if (window.matchMedia('(prefers-color-scheme: dark)').matches)
-					window.document.documentElement.classList.add('dark');
+				// no preference - keep dark as default (already set on html element)
+				// only switch to light if user explicitly prefers it
+				if (window.matchMedia('(prefers-color-scheme: light)').matches)
+					window.document.documentElement.classList.remove('dark');
 			}
 		</script>
 	</head>

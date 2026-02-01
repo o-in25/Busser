@@ -7,4 +7,10 @@ export default defineConfig({
 		noExternal: ['svelte-sonner'],
 		external: ['form-data', 'mailgun.js'],
 	},
+	build: {
+		sourcemap: true,
+	},
+	server: {
+		sourcemapIgnoreList: false,
+	},
 });

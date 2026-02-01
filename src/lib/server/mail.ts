@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { MAILGUN_KEY, APP_URL } = process.env;
 
 import FormData from 'form-data';
@@ -13,10 +14,18 @@ export interface IPasswordResetEmailParams {
 	token: string;
 }
 
+export interface IWorkspaceInvitationEmailParams {
+	workspaceName: string;
+	inviterName: string;
+	invitationCode: string;
+	role: 'owner' | 'editor' | 'viewer';
+}
+
 export class MailClient {
 	private static domain: string = 'busserapp.com';
 	private static from: string = 'The Busser Team <noreply@busserapp.com>';
-	private static baseUrl: string = APP_URL || 'https://busserapp.com';
+	// eslint-disable-next-line no-constant-binary-expression
+	private static baseUrl: string = 'http://localhost:5173'; //|| APP_URL || 'https://busserapp.com';
 	private static mailgun = new Mailgun(FormData);
 	private static client = this.mailgun.client({
 		username: 'api',
@@ -92,6 +101,41 @@ export class MailClient {
 			console.error('Failed to send password reset email:', error.message);
 			console.error('Full error:', error);
 			throw new Error(`Failed to send password reset email: ${error.message}`);
+		}
+	}
+
+	public async sendWorkspaceInvitationEmail(
+		to: string[],
+		{ workspaceName, inviterName, invitationCode, role }: IWorkspaceInvitationEmailParams
+	): Promise<boolean> {
+		try {
+			if (!MAILGUN_KEY) {
+				console.error('MAILGUN_KEY is not configured');
+				throw new Error('Email service is not configured.');
+			}
+
+			console.log('Attempting to send workspace invitation email to:', to);
+
+			const result = await MailClient.client.messages.create(MailClient.domain, {
+				from: MailClient.from,
+				to,
+				subject: `You've been invited to join ${workspaceName} on Busser`,
+				template: 'workspace-invitation-email',
+				'h:X-Mailgun-Variables': JSON.stringify({
+					url: MailClient.baseUrl,
+					workspaceName,
+					inviterName,
+					invitationCode,
+					role,
+				}),
+			});
+
+			console.log('Workspace invitation email sent successfully:', result.id, result.message);
+			return true;
+		} catch (error: any) {
+			console.error('Failed to send workspace invitation email:', error.message);
+			console.error('Full error:', error);
+			throw new Error(`Failed to send workspace invitation email: ${error.message}`);
 		}
 	}
 }

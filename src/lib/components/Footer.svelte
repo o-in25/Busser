@@ -5,7 +5,7 @@
 </script>
 
 <footer class="mt-auto glass-nav border-t border-b-0 rounded-none">
-	<div class="w-full mx-auto max-w-screen-xl p-4 md:p-6 flex flex-col gap-8">
+	<div class="w-full mx-auto max-w-screen-xl px-2 py-4 md:p-6 flex flex-col gap-8">
 		<!-- Row 1: Logo + Links -->
 		<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
 			<!-- Logo -->

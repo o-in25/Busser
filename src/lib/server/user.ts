@@ -28,6 +28,13 @@ export const resendVerificationEmailByEmail =
 	userRepo.resendVerificationEmailByEmail.bind(userRepo);
 export const requestPasswordReset = userRepo.requestPasswordReset.bind(userRepo);
 
+// invitation management (delegate to repository)
+export const createInvitation = userRepo.createInvitation.bind(userRepo);
+export const getWorkspaceInvitations = userRepo.getWorkspaceInvitations.bind(userRepo);
+export const deleteInvitation = userRepo.deleteInvitation.bind(userRepo);
+export const getInvitationByCode = userRepo.getInvitationByCode.bind(userRepo);
+export const acceptWorkspaceInvitation = userRepo.acceptWorkspaceInvitation.bind(userRepo);
+
 // preferred workspace (delegate to repository)
 export const getPreferredWorkspaceId = userRepo.getPreferredWorkspaceId.bind(userRepo);
 export const setPreferredWorkspaceId = userRepo.setPreferredWorkspaceId.bind(userRepo);

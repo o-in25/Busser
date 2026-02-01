@@ -11,7 +11,8 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"format:check": "prettier --check .",
+		"cloudsql:proxy": "cross-env-shell \"cloud-sql-proxy $INSTANCE_CONNECTION_NAME\""
 	},
 	"devDependencies": {
 		"@flydotio/dockerfile": "^0.7.8",
@@ -26,6 +27,7 @@
 		"@typescript-eslint/eslint-plugin": "^8.54.0",
 		"@typescript-eslint/parser": "^8.54.0",
 		"autoprefixer": "^10.4.19",
+		"cross-env": "^10.1.0",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-prettier": "^5.5.5",
@@ -45,6 +47,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@google-cloud/aiplatform": "^6.2.0",
 		"@google-cloud/storage": "^7.12.0",
 		"@internationalized/date": "^3.10.1",
 		"bcrypt": "^5.1.1",
@@ -53,6 +56,7 @@
 		"change-case": "^5.4.4",
 		"clsx": "^2.1.1",
 		"crypto-js": "^4.2.0",
+		"dicebear": "^9.3.1",
 		"fast-json-stringify": "^5.15.0",
 		"form-data": "^4.0.5",
 		"http-status-codes": "^2.3.0",
@@ -71,6 +75,7 @@
 		"oracledb": "^6.8.0",
 		"pg-query-stream": "^4.8.0",
 		"sqlite3": "^5.1.7",
+		"svelte-dnd-action": "^0.9.69",
 		"svelte-guard": "^1.0.0",
 		"svelte-infinite": "^0.5.0",
 		"svelte-sonner": "^1.0.7",

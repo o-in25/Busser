@@ -10,8 +10,9 @@
 		Sparkles,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
-	import { quintOut } from 'svelte/easing';
-	import { scale } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
+	import { cubicOut } from 'svelte/easing';
+	import { dndzone } from 'svelte-dnd-action';
 	import { v4 as uuidv4 } from 'uuid';
 
 	import { applyAction, enhance } from '$app/forms';
@@ -31,8 +32,8 @@
 	import { notificationStore } from '../../stores';
 	import CatalogFormWizard from './CatalogFormWizard.svelte';
 	import CocktailMetrics from './CocktailMetrics.svelte';
-	import FileUpload from './FileUpload.svelte';
 	import FormDraftManager from './FormDraftManager.svelte';
+	import ImagePrompt from './ImagePrompt.svelte';
 	import Prompt from './Prompt.svelte';
 	import RecipeStepCard from './RecipeStepCard.svelte';
 
@@ -40,7 +41,7 @@
 	let {
 		spirits,
 		preparationMethods,
-		recipe = $bindable({} as View.BasicRecipe),
+		recipe: initialRecipe = {} as View.BasicRecipe,
 		recipeSteps: initialRecipeSteps = [],
 	}: {
 		spirits: Spirit[];
@@ -49,6 +50,9 @@
 		recipeSteps?: View.BasicRecipeStep[];
 	} = $props();
 
+	// Make recipe deeply reactive for two-way binding on properties
+	let recipe = $state(initialRecipe);
+
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
@@ -56,17 +60,19 @@
 	// Determine if this is add mode (for draft functionality)
 	const isAddMode = !recipe.recipeId;
 
-	// Process recipe steps on init
-	const processedSteps = initialRecipeSteps.map((step) => ({
-		...step,
-		productIdQuantityInMilliliters: convertFromMl(
-			step.productIdQuantityUnit,
-			step.productIdQuantityInMilliliters
-		),
-		key: uuidv4(),
-	}));
+	// Process recipe steps reactively
+	const processedSteps = $derived(
+		initialRecipeSteps.map((step) => ({
+			...step,
+			productIdQuantityInMilliliters: convertFromMl(
+				step.productIdQuantityUnit,
+				step.productIdQuantityInMilliliters
+			),
+			id: uuidv4(),
+		}))
+	);
 
-	const createStep = (): View.BasicRecipeStep & { key: string } => ({
+	const createStep = (): View.BasicRecipeStep & { id: string } => ({
 		recipeId: recipe.recipeId || 0,
 		recipeStepId: 0,
 		productId: 0,
@@ -82,21 +88,80 @@
 		productPricePerUnit: 0,
 		productUnitSizeInMilliliters: 0,
 		productProof: 0,
-		key: uuidv4(),
+		id: uuidv4(),
 	});
 
-	let steps = $state(processedSteps.length ? processedSteps : [createStep()]);
+	let steps: (View.BasicRecipeStep & { id: string })[] = $state([]);
+	$effect.pre(() => {
+		if (processedSteps.length && steps.length === 0) {
+			steps = [...processedSteps];
+		} else if (steps.length === 0) {
+			steps = [createStep()];
+		}
+	});
 
 	const addStep = () => {
 		steps = [...steps, createStep()];
 	};
 
 	const removeStep = (stepNumber: number) => {
-		if (steps.length > 1) {
-			steps.splice(stepNumber, 1);
-			steps = steps; // eslint-disable-line no-self-assign -- trigger Svelte reactivity
+		if (Array.isArray(steps) && steps.length > 1) {
+			const newSteps = [...steps];
+			newSteps.splice(stepNumber, 1);
+			steps = newSteps;
 		}
 	};
+
+	// Drag and drop config for svelte-dnd-action
+	const flipDurationMs = 300;
+	const dropTargetStyle = {}; // Remove default yellow outline
+	const centreDraggedOnCursor = false; // Keep element relative to click position
+
+	// Transform the dragged element - subtle but visible, locked to Y-axis only
+	function transformDraggedElement(
+		el: HTMLElement | undefined,
+		_data: unknown,
+		_index: number | undefined
+	) {
+		if (!el) return;
+
+		// Capture original dimensions before any transforms
+		const originalWidth = el.offsetWidth;
+
+		// Find the dndzone container to lock horizontal position
+		const container = el.parentElement;
+		if (!container) return;
+
+		const containerRect = container.getBoundingClientRect();
+		const lockX = containerRect.left;
+
+		// Style the element - scale down for visual feedback
+		el.style.opacity = '0.85';
+		el.style.transform = 'scale(0.95)';
+		el.style.transformOrigin = 'center center';
+		el.style.boxShadow = '0 8px 24px -4px rgba(0, 0, 0, 0.25)';
+		el.style.outline = 'none';
+		el.style.cursor = 'grabbing';
+		el.style.pointerEvents = 'none';
+		el.style.width = `${originalWidth}px`;
+
+		// Continuously enforce horizontal position (lock X-axis movement)
+		const enforcePosition = () => {
+			if (el.isConnected) {
+				el.style.left = `${lockX}px`;
+				requestAnimationFrame(enforcePosition);
+			}
+		};
+		requestAnimationFrame(enforcePosition);
+	}
+
+	function handleDndConsider(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
+		steps = e.detail.items;
+	}
+
+	function handleDndFinalize(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
+		steps = e.detail.items;
+	}
 
 	const deleteRecipe = async () => {
 		const response = await fetch(`/api/catalog/${recipe.recipeId}`, {
@@ -112,14 +177,18 @@
 		}
 	};
 
-	// form props
-	let [defaultPrepMethod] = preparationMethods;
-	let [defaultSpirit] = spirits;
-
-	let selectedSpiritId = $state(recipe.recipeCategoryId || defaultSpirit.recipeCategoryId);
-	let selectedPrepMethodId = $state(
-		recipe.recipeTechniqueDescriptionId || defaultPrepMethod.recipeTechniqueDescriptionId
-	);
+	// form props - these are $state because they can be modified by user selection or draft restore
+	let selectedSpiritId: number | undefined = $state(undefined);
+	let selectedPrepMethodId: number | undefined = $state(undefined);
+	$effect.pre(() => {
+		if (selectedSpiritId === undefined) {
+			selectedSpiritId = recipe.recipeCategoryId || spirits[0]?.recipeCategoryId;
+		}
+		if (selectedPrepMethodId === undefined) {
+			selectedPrepMethodId =
+				recipe.recipeTechniqueDescriptionId || preparationMethods[0]?.recipeTechniqueDescriptionId;
+		}
+	});
 
 	// Ratings state
 	let sweetnessRating = $state(recipe.recipeSweetnessRating || 5);
@@ -137,7 +206,7 @@
 	let wizardStep = $state(0);
 
 	// Draft manager reference
-	let draftManager: FormDraftManager;
+	let draftManager = $state<FormDraftManager>();
 
 	// Draft data for autosave
 	let draftData = $derived({
@@ -163,7 +232,7 @@
 		if (data.recipeDrynessRating) drynessRating = data.recipeDrynessRating as number;
 		if (data.recipeVersatilityRating) versatilityRating = data.recipeVersatilityRating as number;
 		if (data.recipeStrengthRating) strengthRating = data.recipeStrengthRating as number;
-		if (data.steps) steps = data.steps as (View.BasicRecipeStep & { key: string })[];
+		if (data.steps) steps = data.steps as (View.BasicRecipeStep & { id: string })[];
 	}
 </script>
 
@@ -198,6 +267,7 @@
 					if (isAddMode && draftManager) {
 						draftManager.clearDraft();
 					}
+					$notificationStore.success = { message: 'Catalog updated.' };
 					goto(result.location);
 				} else {
 					await applyAction(result);
@@ -258,11 +328,15 @@
 								trigger={recipe.recipeName}
 								id="recipeDescription"
 								name="recipeDescription"
-								url="/api/generator/catalog"
+								url="/api/generator/recipe"
 							/>
 						</div>
 						<div>
-							<FileUpload name="recipeImageUrl" signedUrl={recipe.recipeImageUrl || undefined} />
+							<ImagePrompt
+								name="recipeImageUrl"
+								bind:signedUrl={recipe.recipeImageUrl}
+								trigger={recipe.recipeName}
+							/>
 						</div>
 					</div>
 				{:else if step === 2}
@@ -307,24 +381,31 @@
 					<!-- Step 5: Ingredients -->
 					<div class="space-y-4">
 						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
-						{#each steps as step, stepNumber (step.key)}
-							<div
-								transition:scale={{
-									duration: 250,
-									delay: 0,
-									opacity: 0.5,
-									start: 0,
-									easing: quintOut,
-								}}
-							>
-								<RecipeStepCard
-									bind:step={steps[stepNumber]}
-									{stepNumber}
-									onremove={removeStep}
-									canRemove={steps.length > 1}
-								/>
-							</div>
-						{/each}
+
+						<div
+							use:dndzone={{
+								items: steps,
+								flipDurationMs,
+								dropTargetStyle,
+								transformDraggedElement,
+								centreDraggedOnCursor,
+							}}
+							onconsider={handleDndConsider}
+							onfinalize={handleDndFinalize}
+							class="space-y-4"
+						>
+							{#each steps as step, stepNumber (step.id)}
+								<div animate:flip={{ duration: flipDurationMs, easing: cubicOut }}>
+									<RecipeStepCard
+										bind:step={steps[stepNumber]}
+										{stepNumber}
+										onremove={removeStep}
+										canRemove={steps.length > 1}
+									/>
+								</div>
+							{/each}
+						</div>
+
 						<Button type="button" variant="outline" class="w-full" onclick={addStep}>
 							<Plus class="w-4 h-4 mr-2" />
 							Add Ingredient
@@ -385,7 +466,11 @@
 						name="recipeDescription"
 						url="/api/generator/catalog"
 					/>
-					<FileUpload name="recipeImageUrl" signedUrl={recipe.recipeImageUrl || undefined} />
+					<ImagePrompt
+						name="recipeImageUrl"
+						bind:signedUrl={recipe.recipeImageUrl}
+						trigger={recipe.recipeName}
+					/>
 				</div>
 			</CollapsibleSection>
 
@@ -451,24 +536,29 @@
 					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 
 					<!-- Recipe steps -->
-					{#each steps as step, stepNumber (step.key)}
-						<div
-							transition:scale={{
-								duration: 250,
-								delay: 0,
-								opacity: 0.5,
-								start: 0,
-								easing: quintOut,
-							}}
-						>
-							<RecipeStepCard
-								bind:step={steps[stepNumber]}
-								{stepNumber}
-								onremove={removeStep}
-								canRemove={steps.length > 1}
-							/>
-						</div>
-					{/each}
+					<div
+						use:dndzone={{
+							items: steps,
+							flipDurationMs,
+							dropTargetStyle,
+							transformDraggedElement,
+							centreDraggedOnCursor,
+						}}
+						onconsider={handleDndConsider}
+						onfinalize={handleDndFinalize}
+						class="space-y-4"
+					>
+						{#each steps as step, stepNumber (step.id)}
+							<div animate:flip={{ duration: flipDurationMs, easing: cubicOut }}>
+								<RecipeStepCard
+									bind:step={steps[stepNumber]}
+									{stepNumber}
+									onremove={removeStep}
+									canRemove={steps.length > 1}
+								/>
+							</div>
+						{/each}
+					</div>
 
 					<!-- Add step button -->
 					<div class="flex justify-center pt-2">
@@ -519,3 +609,12 @@
 		</Dialog.Root>
 	{/if}
 </div>
+
+<style>
+	/* Style the original item's placeholder while dragging */
+	:global([data-is-dnd-shadow-item-hint]) {
+		opacity: 0.5 !important;
+		border: 2px dashed hsl(var(--primary) / 0.5) !important;
+		border-radius: var(--radius) !important;
+	}
+</style>

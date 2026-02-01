@@ -117,7 +117,6 @@ export class InventoryRepository extends BaseRepository {
 				const productImageUrl = await this.getImageUrl(image);
 				const [childRow] = await trx('productdetail')
 					.insert({
-						workspaceId,
 						ProductId: parentRowId,
 						ProductImageUrl: productImageUrl,
 						ProductDescription: product.productDescription,
@@ -184,7 +183,6 @@ export class InventoryRepository extends BaseRepository {
 
 				await trx('productdetail')
 					.insert({
-						workspaceId,
 						ProductId: values.ProductId,
 						ProductImageUrl: values.ProductImageUrl,
 						ProductDescription: values.ProductDescription,
@@ -249,6 +247,37 @@ export class InventoryRepository extends BaseRepository {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Could not delete inventory item.' };
+		}
+	}
+
+	async toggleInStockQuantity(
+		workspaceId: string,
+		productId: number
+	): Promise<QueryResult<Product>> {
+		try {
+			const existing = await this.findById(workspaceId, productId);
+			if (!existing) {
+				return { status: 'error', error: 'Product not found in this workspace.' };
+			}
+
+			const newQuantity = existing.productInStockQuantity ? 0 : 1;
+
+			await this.db
+				.table('product')
+				.where('ProductId', productId)
+				.where('workspaceId', workspaceId)
+				.update({ ProductInStockQuantity: newQuantity });
+
+			const updated = await this.findById(workspaceId, productId);
+			if (!updated) {
+				return { status: 'error', error: 'Failed to retrieve updated product.' };
+			}
+
+			return { status: 'success', data: updated };
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not toggle stock status.' };
 		}
 	}
 

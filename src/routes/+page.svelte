@@ -54,14 +54,17 @@
 		form?.requestInvite as { error?: string; email?: string; message?: string } | undefined
 	);
 
-	const { recipes, spirits, dashboardData, landingData } = data;
+	const recipes = $derived(data.recipes);
+	const spirits = $derived(data.spirits);
+	const dashboardData = $derived(data.dashboardData);
+	const landingData = $derived(data.landingData);
 
 	// workspace role determines resource access (viewer can only read)
-	const workspaceRole = dashboardData?.workspaceRole;
-	const canModify = workspaceRole === 'owner' || workspaceRole === 'editor';
+	const workspaceRole = $derived(dashboardData?.workspaceRole);
+	const canModify = $derived(workspaceRole === 'owner' || workspaceRole === 'editor');
 
 	// Gallery setup for authenticated users
-	const gallery =
+	const gallery = $derived(
 		recipes?.map(
 			({
 				recipeImageUrl,
@@ -81,7 +84,8 @@
 					recipeDescription,
 				},
 			})
-		) || [];
+		) || []
+	);
 
 	// Filter state for gallery
 	let sortBy: string | number = $state('all');

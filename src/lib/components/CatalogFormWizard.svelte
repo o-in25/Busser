@@ -105,7 +105,6 @@
 	<!-- Content slot for each step -->
 	<div class="min-h-[350px]">
 		{#if children}
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			{#each steps as _, index}
 				<div class={cn(index === currentStep ? 'block' : 'hidden')}>
 					{@render children({ step: index, isActive: index === currentStep })}

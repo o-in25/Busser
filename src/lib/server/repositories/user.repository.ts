@@ -15,8 +15,10 @@ import type {
 } from '$lib/types';
 
 import { DbProvider } from '../db';
+import { generateRandomShapeAvatar } from '../generators/avatar-generator';
 import { Logger } from '../logger';
 import { MailClient } from '../mail';
+import { deleteSignedUrl, uploadAvatarBuffer } from '../storage';
 import { AuthRepository } from './auth.repository';
 import { BaseRepository, marshal, marshalToType } from './base.repository';
 
@@ -45,7 +47,7 @@ export class UserRepository extends BaseRepository {
 		try {
 			const user: User = await this.db.query.transaction(async (trx) => {
 				let dbResult: any = await trx('user')
-					.select('userId', 'email', 'username', 'lastActivityDate')
+					.select('UserId', 'Email', 'Username', 'LastActivityDate', 'AvatarImageUrl')
 					.first()
 					.where({ userId });
 
@@ -263,7 +265,9 @@ export class UserRepository extends BaseRepository {
 	async createInvitation(
 		email: string | null = null,
 		expiresAt: string | null = null,
-		invitationCode: string | null = null
+		invitationCode: string | null = null,
+		workspaceId: string | null = null,
+		workspaceRole: 'owner' | 'editor' | 'viewer' | null = null
 	): Promise<QueryResult<Invitation>> {
 		try {
 			const code = invitationCode?.trim() || generateSecureCode();
@@ -276,6 +280,8 @@ export class UserRepository extends BaseRepository {
 				expiresAt: expiresAt || null,
 				userId: null,
 				lastSentAt: null,
+				workspaceId: workspaceId || null,
+				workspaceRole: workspaceRole || null,
 			});
 
 			const dbResult = await this.db.table('invitation').where({ invitationId }).first();
@@ -288,6 +294,21 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
+	async getWorkspaceInvitations(workspaceId: string): Promise<QueryResult<Invitation[]>> {
+		try {
+			const dbResult = await this.db
+				.table('invitation')
+				.where({ workspaceId })
+				.whereNull('userId')
+				.select();
+			const invitations = marshalToType<Invitation[]>(dbResult);
+			return { status: 'success', data: invitations };
+		} catch (error: any) {
+			console.error('Failed to get workspace invitations:', error.message);
+			return { status: 'error', error: error.message };
+		}
+	}
+
 	async deleteInvitation(invitationId: number): Promise<QueryResult<number>> {
 		try {
 			const rowsDeleted = await this.db.table('invitation').where({ invitationId }).del();
@@ -295,6 +316,80 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: rowsDeleted };
 		} catch (error: any) {
 			console.error('Failed to delete invitation:', error.message);
+			return { status: 'error', error: error.message };
+		}
+	}
+
+	async getInvitationByCode(invitationCode: string): Promise<QueryResult<Invitation>> {
+		try {
+			const dbResult = await this.db.table('invitation').where({ invitationCode }).first();
+			if (!dbResult) {
+				return { status: 'error', error: 'Invitation not found.' };
+			}
+			const invitation = marshalToType<Invitation>(dbResult);
+			return { status: 'success', data: invitation };
+		} catch (error: any) {
+			console.error('Failed to get invitation:', error.message);
+			return { status: 'error', error: error.message };
+		}
+	}
+
+	async acceptWorkspaceInvitation(
+		invitationCode: string,
+		userId: string
+	): Promise<QueryResult<{ workspaceId: string; workspaceRole: string }>> {
+		try {
+			return await this.db.query.transaction(async (trx) => {
+				// get invitation
+				const dbResult = await trx('invitation').where({ invitationCode }).first();
+				if (!dbResult) throw new Error('Invitation not found.');
+
+				const invitation = marshalToType<Invitation>(dbResult);
+
+				if (invitation.userId !== null) {
+					throw new Error('Invitation has already been used.');
+				}
+
+				if (invitation.expiresAt && moment().isAfter(moment(invitation.expiresAt))) {
+					throw new Error('Invitation has expired.');
+				}
+
+				if (!invitation.workspaceId || !invitation.workspaceRole) {
+					throw new Error('This is not a workspace invitation.');
+				}
+
+				// check if user is already a member
+				const existingMember = await trx('workspaceUser')
+					.where({ workspaceId: invitation.workspaceId, userId })
+					.first();
+
+				if (existingMember) {
+					throw new Error('You are already a member of this workspace.');
+				}
+
+				// add user to workspace
+				await trx('workspaceUser').insert({
+					workspaceId: invitation.workspaceId,
+					userId,
+					workspaceRole: invitation.workspaceRole,
+					joinedDate: Logger.now(),
+				});
+
+				// mark invitation as used
+				await trx('invitation')
+					.where({ invitationId: invitation.invitationId })
+					.update({ userId });
+
+				return {
+					status: 'success' as const,
+					data: {
+						workspaceId: invitation.workspaceId,
+						workspaceRole: invitation.workspaceRole,
+					},
+				};
+			});
+		} catch (error: any) {
+			console.error('Failed to accept invitation:', error.message);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -433,20 +528,25 @@ export class UserRepository extends BaseRepository {
 		try {
 			const { user } = await this.db.query.transaction(async (trx) => {
 				let user: Pick<User, 'userId' | 'username' | 'email'>;
-				let invitation: Pick<Invitation, 'invitationId' | 'userId' | 'email' | 'expiresAt'>;
+				let invitation: Pick<
+					Invitation,
+					'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
+				>;
 
 				// validate invitation
 				let dbResult: any = await trx('invitation')
-					.select('invitationId', 'userId', 'email', 'expiresAt')
+					.select('invitationId', 'userId', 'email', 'expiresAt', 'workspaceId', 'workspaceRole')
 					.where({ invitationCode })
 					.first();
 
 				if (!dbResult) throw new Error('Invalid invitation code.');
 
-				invitation =
-					marshalToType<Pick<Invitation, 'invitationId' | 'userId' | 'email' | 'expiresAt'>>(
-						dbResult
-					);
+				invitation = marshalToType<
+					Pick<
+						Invitation,
+						'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
+					>
+				>(dbResult);
 
 				if (!invitation.invitationId || invitation.userId !== null) {
 					throw new Error('Invitation code has already been used.');
@@ -483,7 +583,7 @@ export class UserRepository extends BaseRepository {
 				}
 
 				// assign default role
-				dbResult = await trx('role').select('roleId').where('roleName', 'VIEWER').first();
+				dbResult = await trx('role').select('roleId').where('roleName', 'USER').first();
 				dbResult = marshal(dbResult);
 
 				if (!dbResult?.roleId) throw new Error('Could not register user for default role.');
@@ -495,7 +595,47 @@ export class UserRepository extends BaseRepository {
 					.update({ userId: user.userId })
 					.where({ invitationId: invitation.invitationId });
 
+				// create default personal workspace for user
+				const slug = user.username
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, '-')
+					.replace(/^-|-$/g, '')
+					.substring(0, 40);
+				const suffix = Math.random().toString(36).substring(2, 10);
+				const workspaceId = `${slug}-${suffix}`;
+				const workspaceName = `${user.username}'s Workspace`;
+
+				await trx('workspace').insert({
+					workspaceId,
+					workspaceName,
+					workspaceType: 'personal',
+					createdDate: Logger.now(),
+					createdBy: user.userId,
+				});
+
+				await trx('workspaceUser').insert({
+					workspaceId,
+					userId: user.userId,
+					workspaceRole: 'owner',
+					joinedDate: Logger.now(),
+				});
+
+				// if invitation was for a specific workspace, add user to that workspace too
+				if (invitation.workspaceId && invitation.workspaceRole) {
+					await trx('workspaceUser').insert({
+						workspaceId: invitation.workspaceId,
+						userId: user.userId,
+						workspaceRole: invitation.workspaceRole,
+						joinedDate: Logger.now(),
+					});
+				}
+
 				return { user };
+			});
+
+			// generate avatar for new user (non-blocking)
+			this.generateAndUploadAvatar(user.userId).catch((err) => {
+				console.error('Failed to generate avatar for new user:', err);
 			});
 
 			// send verification email
@@ -667,6 +807,91 @@ export class UserRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error('Error setting preferred workspace:', error.message);
 			return { status: 'error', error: 'Failed to set preferred workspace.' };
+		}
+	}
+
+	async updateAvatarUrl(userId: string, avatarImageUrl: string | null): Promise<QueryResult> {
+		try {
+			const result = await this.db
+				.table('user')
+				.where({ userId })
+				.update({ AvatarImageUrl: avatarImageUrl });
+
+			// knex mysql returns number of matched rows
+			const rowsUpdated = Array.isArray(result) ? result[0] : result;
+
+			if (rowsUpdated === 0) {
+				return { status: 'error', error: 'User not found.' };
+			}
+
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error('Error updating avatar URL:', error.message);
+			return { status: 'error', error: 'Failed to update avatar.' };
+		}
+	}
+
+	async generateAndUploadAvatar(userId: string): Promise<QueryResult<string>> {
+		try {
+			// get current avatar to delete if exists
+			const dbResult = await this.db
+				.table('user')
+				.select('AvatarImageUrl')
+				.where({ userId })
+				.first();
+
+			const currentUrl = dbResult?.AvatarImageUrl;
+			if (currentUrl) {
+				await deleteSignedUrl(currentUrl);
+			}
+
+			// generate new avatar
+			const avatar = generateRandomShapeAvatar(`${userId}-${Date.now()}`);
+			const publicUrl = await uploadAvatarBuffer(avatar.buffer, userId, 'image/svg+xml');
+
+			if (!publicUrl) {
+				return { status: 'error', error: 'Failed to upload avatar.' };
+			}
+
+			// update user record
+			await this.db.table('user').where({ userId }).update({ AvatarImageUrl: publicUrl });
+
+			return { status: 'success', data: publicUrl };
+		} catch (error: any) {
+			console.error('Error generating avatar:', error.message);
+			return { status: 'error', error: 'Failed to generate avatar.' };
+		}
+	}
+
+	async uploadCustomAvatar(userId: string, file: File): Promise<QueryResult<string>> {
+		try {
+			// get current avatar to delete if exists
+			const dbResult = await this.db
+				.table('user')
+				.select('AvatarImageUrl')
+				.where({ userId })
+				.first();
+
+			const currentUrl = dbResult?.AvatarImageUrl;
+			if (currentUrl) {
+				await deleteSignedUrl(currentUrl);
+			}
+
+			// upload new avatar
+			const buffer = Buffer.from(await file.arrayBuffer());
+			const publicUrl = await uploadAvatarBuffer(buffer, userId, file.type);
+
+			if (!publicUrl) {
+				return { status: 'error', error: 'Failed to upload avatar.' };
+			}
+
+			// update user record
+			await this.db.table('user').where({ userId }).update({ AvatarImageUrl: publicUrl });
+
+			return { status: 'success', data: publicUrl };
+		} catch (error: any) {
+			console.error('Error uploading avatar:', error.message);
+			return { status: 'error', error: 'Failed to upload avatar.' };
 		}
 	}
 

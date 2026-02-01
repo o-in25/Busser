@@ -9,7 +9,7 @@
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 </script>
 
-<div class="min-h-[calc(100vh-80px)] flex flex-col items-center px-4 py-8">
+<div class="min-h-[calc(100vh-80px)] flex flex-col items-center px-2 py-8 md:px-4">
 	<!-- Logo links back to home (only shown when not signed in) -->
 	{#if !data.user}
 		<a href="/" class="hover:opacity-80 transition-opacity mb-6">

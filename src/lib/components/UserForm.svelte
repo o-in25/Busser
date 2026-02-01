@@ -95,8 +95,8 @@
 	</div>
 {/if}
 
-<!-- role -->
-{#if action === 'edit' || action === 'add'}
+<!-- role (only show for admins) -->
+{#if (action === 'edit' || action === 'add') && permissions?.includes('edit_admin')}
 	<div class="space-y-2">
 		<Label>Role</Label>
 		<input class="hidden" name="roles" id="roles" bind:value={selected} />
@@ -105,7 +105,6 @@
 				<button
 					type="button"
 					onclick={() => toggleRole(String(role.value))}
-					disabled={!permissions.includes('edit_admin')}
 					class="px-3 py-1.5 text-sm rounded-full border transition-colors
 						{selected.includes(String(role.value))
 						? 'bg-primary text-primary-foreground border-primary'

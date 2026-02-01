@@ -156,7 +156,6 @@
 							<Table.Head class="pl-6">Name</Table.Head>
 							<Table.Head>Type</Table.Head>
 							<Table.Head>Role</Table.Head>
-							<Table.Head class="hidden md:table-cell">ID</Table.Head>
 							<Table.Head class="hidden sm:table-cell">Created</Table.Head>
 							<Table.Head class="text-right pr-6">Actions</Table.Head>
 						</Table.Row>
@@ -207,9 +206,6 @@
 										{workspace.workspaceRole.charAt(0).toUpperCase() +
 											workspace.workspaceRole.slice(1)}
 									</Badge>
-								</Table.Cell>
-								<Table.Cell class="hidden md:table-cell font-mono text-xs text-muted-foreground">
-									{workspace.workspaceId}
 								</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell text-muted-foreground">
 									{formatDate(workspace.createdDate)}

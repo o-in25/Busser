@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { ArrowLeft, FlaskConical, LayoutGrid, List } from 'lucide-svelte';
+	import { FlaskConical, LayoutGrid, List } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
@@ -57,13 +58,7 @@
 
 		<!-- Content -->
 		<div class="relative px-6 py-12">
-			<a
-				href="/catalog/browse"
-				class={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'mb-4 gap-2')}
-			>
-				<ArrowLeft class="h-4 w-4" />
-				All Recipes
-			</a>
+			<BackButton fallback="/catalog/browse" label="All Recipes" size="sm" class="mb-4" />
 
 			<h1 class="text-3xl md:text-4xl font-bold mb-2">
 				{data.spirit.recipeCategoryDescription} Cocktails

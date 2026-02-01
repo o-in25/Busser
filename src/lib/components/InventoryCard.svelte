@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertTriangle, CheckCircle2, FlaskConical, XCircle } from 'lucide-svelte';
+	import { TriangleAlert, CircleCheck, FlaskConical, CircleX } from 'lucide-svelte';
 
 	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
 	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
@@ -32,7 +32,7 @@
 			return {
 				label: 'Out of Stock',
 				variant: 'destructive' as const,
-				icon: XCircle,
+				icon: CircleX,
 				color: 'text-red-500',
 			};
 		}
@@ -40,14 +40,14 @@
 			return {
 				label: 'Low Stock',
 				variant: 'secondary' as const,
-				icon: AlertTriangle,
+				icon: TriangleAlert,
 				color: 'text-yellow-500',
 			};
 		}
 		return {
 			label: 'In Stock',
 			variant: 'default' as const,
-			icon: CheckCircle2,
+			icon: CircleCheck,
 			color: 'text-green-500',
 		};
 	});

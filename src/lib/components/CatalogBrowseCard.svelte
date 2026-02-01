@@ -21,7 +21,9 @@
 		Shaken: GlassWater,
 		Built: FlaskConical,
 	};
-	const TechniqueIcon = techniqueIcons[recipe.recipeTechniqueDescriptionText || ''] || GlassWater;
+	const TechniqueIcon = $derived(
+		techniqueIcons[recipe.recipeTechniqueDescriptionText || ''] || GlassWater
+	);
 </script>
 
 {#if viewMode === 'grid'}

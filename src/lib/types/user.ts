@@ -8,6 +8,7 @@ export type User = {
 	roles: Role[];
 	permissions: Permission[];
 	verified: number;
+	avatarImageUrl?: string;
 };
 
 export type Role = {
@@ -39,6 +40,8 @@ export type Invitation = {
 	issuedAt: Date | null;
 	expiresAt: Date | null;
 	lastSentAt: Date | null;
+	workspaceId: string | null;
+	workspaceRole: 'owner' | 'editor' | 'viewer' | null;
 };
 
 export type InvitationRequest = {

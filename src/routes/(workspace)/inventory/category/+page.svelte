@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		ArrowLeft,
 		ChevronLeft,
 		ChevronRight,
 		Pencil,
@@ -14,6 +13,7 @@
 
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -103,9 +103,7 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between gap-4 mb-6 mt-4">
 		<div class="flex items-center gap-4">
-			<a href="/inventory" class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
-				<ArrowLeft class="h-5 w-5" />
-			</a>
+			<BackButton fallback="/inventory" />
 			<div>
 				<h1 class="text-2xl font-bold">Manage Categories</h1>
 				<p class="text-muted-foreground">Organize your inventory with categories</p>
