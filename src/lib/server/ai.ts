@@ -3,12 +3,12 @@ import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod.mjs';
 import { ZodSchema } from 'zod';
 
-const { OPENAI_API_KEY, GOOGLE_SERVICE_KEY, GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION } =
-	process.env;
+const { OPENAI_API_KEY, GOOGLE_SERVICE_KEY } = process.env;
 
 // decode google credentials
 const base64Decode = (str: string) => (str ? Buffer.from(str, 'base64').toString() : '{}');
 const googleCredentials = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY || ''));
+const LOCATION = 'us-central1';
 
 // clients (initialized lazily on first use)
 let openai: OpenAI | null = null;
@@ -23,10 +23,9 @@ function getOpenAI(): OpenAI {
 
 function getVertexClient(): PredictionServiceClient {
 	if (!vertexClient) {
-		const location = GOOGLE_CLOUD_LOCATION || 'us-central1';
 		vertexClient = new PredictionServiceClient({
 			credentials: googleCredentials,
-			apiEndpoint: `${location}-aiplatform.googleapis.com`,
+			apiEndpoint: `${LOCATION}-aiplatform.googleapis.com`,
 		});
 	}
 	return vertexClient;
@@ -65,11 +64,8 @@ export async function generateImage(
 	// const { aspectRatio = '1:1', numberOfImages = 1, negativePrompt, referenceImageBase64 } = options;
 	const { aspectRatio = '1:1', numberOfImages = 1, negativePrompt } = options;
 
-	const projectId = GOOGLE_CLOUD_PROJECT || googleCredentials.project_id || '';
-	const location = GOOGLE_CLOUD_LOCATION || 'us-central1';
-
 	// 002 is significantly better at isolated products
-	const endpoint = `projects/${projectId}/locations/${location}/publishers/google/models/imagen-3.0-generate-002`;
+	const endpoint = `projects/${googleCredentials.project_id}/locations/${LOCATION}/publishers/google/models/imagen-3.0-generate-002`;
 
 	const instances: any[] = [{ prompt }];
 
