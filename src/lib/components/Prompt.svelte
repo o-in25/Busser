@@ -9,7 +9,7 @@
 	import { notificationStore } from '../../stores';
 
 	let {
-		value = $bindable(''),
+		value = $bindable(),
 		label = 'Description',
 		trigger,
 		id,
@@ -28,12 +28,20 @@
 		placeholder?: string;
 	} = $props();
 
+	// ensure value is always a string for internal use
+	let internalValue = $derived(value ?? '');
+
+	// sync internal changes back to parent
+	function updateValue(newValue: string) {
+		value = newValue;
+	}
+
 	let isGenerating = $state(false);
 	let errorMessage = $state('');
 	let generationProgress = $state(0);
 	let textareaWrapper = $state<HTMLDivElement | null>(null);
 
-	let hasContent = $derived(value && value.trim().length > 0);
+	let hasContent = $derived(internalValue.trim().length > 0);
 
 	// auto-resize textarea based on content
 	const autoResize = () => {
@@ -46,7 +54,7 @@
 
 	$effect(() => {
 		// trigger resize when value changes
-		value;
+		internalValue;
 		autoResize();
 	});
 
@@ -71,7 +79,7 @@
 	};
 
 	const clearContent = () => {
-		value = '';
+		updateValue('');
 		errorMessage = '';
 	};
 
@@ -98,7 +106,7 @@
 			if (!result.description) throw new Error('No description returned.');
 
 			stopProgressAnimation();
-			value = result.description;
+			updateValue(result.description);
 
 			$notificationStore.success = { message: 'Description generated successfully!' };
 		} catch (error: unknown) {
@@ -178,10 +186,13 @@
 					!isGenerating
 						? 'pl-14'
 						: ''} {isGenerating ? 'opacity-30' : ''}"
-					bind:value
+					value={internalValue}
 					disabled={isGenerating}
 					{placeholder}
-					oninput={autoResize}
+					oninput={(e) => {
+						updateValue(e.currentTarget.value);
+						autoResize();
+					}}
 				/>
 
 				<!-- clear button -->
@@ -203,7 +214,7 @@
 						class="absolute bottom-2 right-3 text-xs text-muted-foreground/60"
 						transition:fade={{ duration: 150 }}
 					>
-						{value.length} chars
+						{internalValue.length} chars
 					</div>
 				{/if}
 			</div>

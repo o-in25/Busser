@@ -10,11 +10,15 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	const perPage = parseInt(url.searchParams.get('perPage') || '24');
 	const search = url.searchParams.get('search') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
+	const spiritId = url.searchParams.get('spirit') || '';
 
 	// Build filter
 	const filter: Record<string, any> = {};
 	if (search) {
 		filter.recipeName = search;
+	}
+	if (spiritId) {
+		filter.recipeCategoryId = parseInt(spiritId);
 	}
 
 	// Get recipes and spirits in parallel
@@ -48,6 +52,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		filters: {
 			search,
 			sort,
+			spiritId,
 			page,
 		},
 	};

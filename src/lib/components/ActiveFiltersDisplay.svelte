@@ -24,10 +24,13 @@
 		onClearAll: () => void;
 	} = $props();
 
-	const hasActiveFilters = $derived(!!search || !!categoryId || !!stockFilter);
+	const hasSearch = $derived(!!search);
+	const hasCategory = $derived(!!categoryId && categoryId !== 'all');
+	const hasStockFilter = $derived(!!stockFilter && stockFilter !== 'all');
+	const hasActiveFilters = $derived(hasSearch || hasCategory || hasStockFilter);
 
 	const categoryName = $derived(
-		categoryId
+		hasCategory
 			? categories.find((c) => String(c.categoryId) === categoryId)?.categoryName || categoryId
 			: ''
 	);
@@ -43,7 +46,7 @@
 	<div class="flex flex-wrap items-center gap-2 mb-6">
 		<span class="text-sm text-muted-foreground">Active filters:</span>
 
-		{#if search}
+		{#if hasSearch}
 			<Badge variant="secondary" class="gap-1">
 				Search: "{search}"
 				<button onclick={onClearSearch} class="ml-1 hover:text-destructive">
@@ -52,7 +55,7 @@
 			</Badge>
 		{/if}
 
-		{#if categoryId}
+		{#if hasCategory}
 			<Badge variant="secondary" class="gap-1">
 				Category: {categoryName}
 				<button onclick={onClearCategory} class="ml-1 hover:text-destructive">
@@ -61,7 +64,7 @@
 			</Badge>
 		{/if}
 
-		{#if stockFilter}
+		{#if hasStockFilter}
 			<Badge variant="secondary" class="gap-1">
 				Stock: {stockFilterLabels[stockFilter] || stockFilter}
 				<button onclick={onClearStockFilter} class="ml-1 hover:text-destructive">

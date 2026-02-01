@@ -523,7 +523,7 @@
 				</div>
 
 				<!-- Quick Stats Cards -->
-				<div class="flex gap-3">
+				<div class="grid grid-cols-2 gap-3 w-full md:w-auto md:flex">
 					<Card.Root class="px-4 py-3">
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-full bg-green-500/10">

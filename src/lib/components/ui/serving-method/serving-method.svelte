@@ -40,7 +40,7 @@
 <div class={cn('space-y-2', className)} {...restProps}>
 	<input type="hidden" {name} {value} />
 
-	<div class="flex rounded-lg border border-input bg-card p-1 gap-1">
+	<div class="grid grid-cols-2 sm:flex rounded-lg border border-input bg-card p-1 gap-1">
 		{#each methods as method}
 			{@const isSelected = method.recipeTechniqueDescriptionId === value}
 			{@const MethodIcon = iconMap[method.recipeTechniqueDescriptionText] || Martini}
@@ -48,7 +48,7 @@
 			<button
 				type="button"
 				class={cn(
-					'flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-md text-sm font-medium transition-all duration-200',
+					'sm:flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-md text-sm font-medium transition-all duration-200',
 					isSelected
 						? 'bg-primary text-primary-foreground shadow-sm'
 						: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
@@ -56,8 +56,7 @@
 				onclick={() => handleSelect(method)}
 			>
 				<MethodIcon class="h-4 w-4" />
-				<span class="hidden sm:inline">{method.recipeTechniqueDescriptionText}</span>
-				<span class="sm:hidden">{method.recipeTechniqueDescriptionText.slice(0, 4)}</span>
+				<span>{method.recipeTechniqueDescriptionText}</span>
 			</button>
 		{/each}
 	</div>

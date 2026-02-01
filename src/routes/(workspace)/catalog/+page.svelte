@@ -147,7 +147,7 @@
 			Explore by Spirit
 		</h2>
 		<a
-			class="text-sm font-medium hover:underline flex items-center text-muted-foreground hover:text-foreground transition-colors"
+			class="hidden sm:flex text-sm font-medium hover:underline items-center text-muted-foreground hover:text-foreground transition-colors"
 			href="/catalog/browse"
 		>
 			View all cocktails
@@ -199,6 +199,14 @@
 				</Card.Root>
 			</a>
 		{/each}
+	</div>
+
+	<!-- Mobile: View all button -->
+	<div class="flex sm:hidden justify-center mt-4">
+		<a href="/catalog/browse" class={cn(buttonVariants({ variant: 'outline' }), 'w-full')}>
+			View All Cocktails
+			<ArrowRight class="ml-2 h-4 w-4" />
+		</a>
 	</div>
 </section>
 

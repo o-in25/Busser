@@ -64,7 +64,7 @@
 <Card.Root class={cn('relative group flex', className)} {...restProps}>
 	<!-- Drag handle - always visible -->
 	<div
-		class="flex-shrink-0 w-10 flex items-center justify-center border-r border-border/50 cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
+		class="drag-handle flex-shrink-0 w-10 flex items-center justify-center border-r border-border/50 cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
 	>
 		<GripVertical class="h-5 w-5 text-muted-foreground" />
 	</div>

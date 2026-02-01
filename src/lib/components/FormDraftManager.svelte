@@ -110,7 +110,7 @@
 </script>
 
 <Dialog.Root bind:open={showRestorePrompt}>
-	<Dialog.Content class="sm:max-w-md">
+	<Dialog.Content class="max-w-[calc(100%-2rem)] sm:max-w-md rounded-2xl">
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<RotateCcw class="h-5 w-5 text-primary" />

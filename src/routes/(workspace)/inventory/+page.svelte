@@ -212,6 +212,18 @@
 			(stockFilter && stockFilter !== 'all')
 	);
 
+	// Compute display labels for select dropdowns
+	const categoryLabel = $derived.by(() => {
+		if (!selectedCategory || selectedCategory === 'all') return 'All Categories';
+		const cat = data.categories.find((c) => String(c.categoryId) === selectedCategory);
+		return cat ? `${cat.categoryName} (${cat.count})` : 'All Categories';
+	});
+
+	const stockFilterLabel = $derived.by(() => {
+		const option = stockFilterOptions.find((o) => o.value === stockFilter);
+		return option?.label || 'All Stock Levels';
+	});
+
 	// Update local state when page data changes (for SSR navigation)
 	$effect(() => {
 		searchInput = data.filters?.search || '';
@@ -240,7 +252,7 @@
 				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 				<Input
 					type="text"
-					placeholder="Search products..."
+					placeholder="Search inventory..."
 					bind:value={searchInput}
 					class="pl-10 pr-10"
 				/>
@@ -264,7 +276,7 @@
 		>
 			<Select.Trigger class="w-full sm:w-[180px]">
 				<Tags class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="All Categories" />
+				<Select.Value placeholder="All Categories">{categoryLabel}</Select.Value>
 			</Select.Trigger>
 			<Select.Content>
 				<Select.Item value="all" label="All Categories" />
@@ -296,7 +308,7 @@
 		>
 			<Select.Trigger class="w-full sm:w-[180px]">
 				<Package class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="All Stock Levels" />
+				<Select.Value placeholder="All Stock Levels">{stockFilterLabel}</Select.Value>
 			</Select.Trigger>
 			<Select.Content>
 				{#each stockFilterOptions as option}
