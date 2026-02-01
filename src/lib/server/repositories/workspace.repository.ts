@@ -61,6 +61,27 @@ export class WorkspaceRepository extends BaseRepository {
 		}
 	}
 
+	// get basic workspace info without permission check (for invitations)
+	async getWorkspaceInfo(workspaceId: string): Promise<QueryResult<Workspace>> {
+		try {
+			const dbResult = await this.db
+				.table<Workspace>('workspace')
+				.select('workspaceId', 'workspaceName', 'workspaceType', 'createdDate', 'createdBy')
+				.where({ workspaceId })
+				.first();
+
+			if (!dbResult) {
+				return { status: 'error', error: 'Workspace not found.' };
+			}
+
+			const workspace = this.marshalToType<Workspace>(dbResult);
+			return { status: 'success', data: workspace };
+		} catch (error: any) {
+			console.error('Error getting workspace info:', error.message);
+			return { status: 'error', error: error.message };
+		}
+	}
+
 	// get a single workspace with permission check
 	async getWorkspace(userId: string, workspaceId: string): Promise<QueryResult<WorkspaceWithRole>> {
 		try {

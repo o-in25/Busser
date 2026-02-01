@@ -1,15 +1,38 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { registerUser } from '$lib/server/user';
+import { getInvitationByCode, registerUser } from '$lib/server/user';
 
 import type { PageServerLoad } from './$types';
 
-export const load = (async () => {
-	// if(locals.user?.userId) {
-	//   return redirect(StatusCodes.TEMPORARY_REDIRECT, '/')
-	// }
-	return {};
+export const load = (async ({ url, locals }) => {
+	// if user is already logged in, redirect to home
+	if (locals.user?.userId) {
+		redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
+	}
+
+	const code = url.searchParams.get('code');
+
+	// if no code, just show the signup page
+	if (!code) {
+		return { invitationCode: null, existingUserEmail: null };
+	}
+
+	// look up the invitation
+	const invitationResult = await getInvitationByCode(code);
+
+	if (invitationResult.status === 'error' || !invitationResult.data) {
+		return { invitationCode: code, existingUserEmail: null };
+	}
+
+	const invitation = invitationResult.data;
+
+	// if this is a workspace invitation, redirect to the accept page
+	if (invitation.workspaceId && invitation.workspaceRole) {
+		redirect(StatusCodes.TEMPORARY_REDIRECT, `/invitations/accept?code=${code}`);
+	}
+
+	return { invitationCode: code, existingUserEmail: null };
 }) satisfies PageServerLoad;
 
 export const actions = {

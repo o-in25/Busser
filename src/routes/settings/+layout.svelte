@@ -80,20 +80,18 @@
 			</a>
 		</li>
 	{/if}
-	{#if permissions.includes('edit_admin')}
-		<li class="group" role="presentation">
-			<a
-				href="/settings/workspaces"
-				type="button"
-				role="tab"
-				class={activeUrl$.includes('workspaces') ? activeClass : defaultClass}
-			>
-				<div class="flex items-center gap-2">
-					<Building2 class="h-5 w-5" /><span class="hidden md:inline-block">Workspaces</span>
-				</div>
-			</a>
-		</li>
-	{/if}
+	<li class="group" role="presentation">
+		<a
+			href="/settings/workspaces"
+			type="button"
+			role="tab"
+			class={activeUrl$.includes('workspaces') ? activeClass : defaultClass}
+		>
+			<div class="flex items-center gap-2">
+				<Building2 class="h-5 w-5" /><span class="hidden md:inline-block">Workspaces</span>
+			</div>
+		</a>
+	</li>
 </ul>
 <div class="h-0.5 bg-zinc-200/50 dark:bg-zinc-700/40"></div>
 <div class="p-4 glass-surface mt-4">

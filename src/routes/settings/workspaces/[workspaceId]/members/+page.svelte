@@ -1,11 +1,22 @@
 <script lang="ts">
-	import { ArrowLeft, Crown, Eye, Pencil, Shield, Trash2, UserPlus, Users } from 'lucide-svelte';
+	import {
+		ArrowLeft,
+		Clock,
+		Crown,
+		Eye,
+		Mail,
+		Pencil,
+		Shield,
+		Trash2,
+		Users,
+	} from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
+	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
@@ -15,14 +26,14 @@
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	// local state
-	let addDialogOpen = $state(false);
+	let inviteDialogOpen = $state(false);
 	let removeDialogOpen = $state(false);
 	let selectedUserId = $state<string | null>(null);
 	let selectedUsername = $state<string>('');
 
 	// form state
-	let newMemberUserId = $state('');
-	let newMemberRole = $state<'owner' | 'editor' | 'viewer'>('viewer');
+	let inviteEmail = $state('');
+	let inviteRole = $state<'owner' | 'editor' | 'viewer'>('viewer');
 
 	// role display helpers
 	const roleLabels: Record<string, string> = {
@@ -50,10 +61,10 @@
 		removeDialogOpen = true;
 	}
 
-	// reset add form
-	function resetAddForm() {
-		newMemberUserId = '';
-		newMemberRole = 'viewer';
+	// reset invite form
+	function resetInviteForm() {
+		inviteEmail = '';
+		inviteRole = 'viewer';
 	}
 
 	// format date
@@ -91,9 +102,9 @@
 				Manage access to <span class="font-medium">{data.workspace.workspaceName}</span>
 			</p>
 		</div>
-		<Button onclick={() => (addDialogOpen = true)} disabled={data.availableUsers.length === 0}>
-			<UserPlus class="h-4 w-4 mr-2" />
-			Add Member
+		<Button onclick={() => (inviteDialogOpen = true)}>
+			<Mail class="h-4 w-4 mr-2" />
+			Invite Member
 		</Button>
 	</div>
 
@@ -107,12 +118,14 @@
 	<!-- Success Message -->
 	{#if form?.success}
 		<div class="bg-green-500/10 text-green-600 dark:text-green-400 px-4 py-3 rounded-md text-sm">
-			{#if form.action === 'add'}
-				Member added successfully.
-			{:else if form.action === 'update'}
+			{#if form.action === 'update'}
 				Member role updated successfully.
 			{:else if form.action === 'remove'}
 				Member removed successfully.
+			{:else if form.action === 'invite'}
+				Invitation sent successfully.
+			{:else if form.action === 'cancel'}
+				Invitation cancelled.
 			{:else}
 				Operation completed successfully.
 			{/if}
@@ -276,6 +289,85 @@
 		</Card.Content>
 	</Card.Root>
 
+	<!-- Pending Invitations -->
+	{#if data.pendingInvitations.length > 0}
+		<Card.Root>
+			<Card.Header>
+				<div class="flex items-center justify-between">
+					<div>
+						<Card.Title class="flex items-center gap-2">
+							<Clock class="h-5 w-5" />
+							Pending Invitations
+						</Card.Title>
+						<Card.Description>
+							{data.pendingInvitations.length} pending invitation{data.pendingInvitations.length !==
+							1
+								? 's'
+								: ''}
+						</Card.Description>
+					</div>
+					<Badge variant="outline" class="text-sm">
+						{data.pendingInvitations.length}
+					</Badge>
+				</div>
+			</Card.Header>
+			<Card.Content class="p-0">
+				<Table.Root>
+					<Table.Header>
+						<Table.Row class="hover:bg-transparent">
+							<Table.Head class="pl-6">Email</Table.Head>
+							<Table.Head>Role</Table.Head>
+							<Table.Head class="hidden sm:table-cell">Expires</Table.Head>
+							<Table.Head class="text-right pr-6">Actions</Table.Head>
+						</Table.Row>
+					</Table.Header>
+					<Table.Body>
+						{#each data.pendingInvitations as invitation (invitation.invitationId)}
+							{@const RoleIcon = roleIcons[invitation.workspaceRole || 'viewer']}
+							<Table.Row>
+								<Table.Cell class="pl-6">
+									<span class="font-medium">{invitation.email}</span>
+								</Table.Cell>
+								<Table.Cell>
+									<Badge
+										variant={roleVariants[invitation.workspaceRole || 'viewer']}
+										class="gap-1"
+									>
+										<RoleIcon class="h-3 w-3" />
+										{roleLabels[invitation.workspaceRole || 'viewer']}
+									</Badge>
+								</Table.Cell>
+								<Table.Cell class="hidden sm:table-cell text-muted-foreground">
+									{invitation.expiresAt ? formatDate(invitation.expiresAt) : 'Never'}
+								</Table.Cell>
+								<Table.Cell class="text-right pr-6">
+									<form
+										method="POST"
+										action="?/cancelInvitation"
+										use:enhance
+										class="inline"
+									>
+										<input type="hidden" name="invitationId" value={invitation.invitationId} />
+										<Button
+											type="submit"
+											variant="outline"
+											size="icon"
+											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+											title="Cancel invitation"
+										>
+											<Trash2 class="h-4 w-4" />
+											<span class="sr-only">Cancel</span>
+										</Button>
+									</form>
+								</Table.Cell>
+							</Table.Row>
+						{/each}
+					</Table.Body>
+				</Table.Root>
+			</Card.Content>
+		</Card.Root>
+	{/if}
+
 	<!-- Role Legend -->
 	<Card.Root>
 		<Card.Header>
@@ -311,102 +403,6 @@
 	</Card.Root>
 </div>
 
-<!-- Add Member Dialog -->
-<Dialog.Root bind:open={addDialogOpen}>
-	<Dialog.Content class="sm:max-w-[425px]">
-		<Dialog.Header>
-			<Dialog.Title>Add Member</Dialog.Title>
-			<Dialog.Description>Add a user to this workspace and assign their role.</Dialog.Description>
-		</Dialog.Header>
-		<form
-			method="POST"
-			action="?/addMember"
-			use:enhance={() => {
-				return async ({ result, update }) => {
-					if (result.type === 'success') {
-						addDialogOpen = false;
-						resetAddForm();
-					}
-					await update();
-				};
-			}}
-		>
-			<div class="grid gap-4 py-4">
-				<div class="grid gap-2">
-					<Label for="userId">User</Label>
-					<Select.Root
-						type="single"
-						name="userId"
-						value={newMemberUserId}
-						onValueChange={(v) => (newMemberUserId = v ?? '')}
-					>
-						<Select.Trigger>
-							<Select.Value placeholder="Select a user" />
-						</Select.Trigger>
-						<Select.Content>
-							{#each data.availableUsers as user}
-								<Select.Item value={user.userId} label={user.username}>
-									<div class="flex flex-col">
-										<span>{user.username}</span>
-										<span class="text-xs text-muted-foreground">{user.email}</span>
-									</div>
-								</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-					<input type="hidden" name="userId" value={newMemberUserId} />
-					{#if data.availableUsers.length === 0}
-						<p class="text-xs text-muted-foreground">
-							No users available to add. All known users are already members.
-						</p>
-					{/if}
-				</div>
-				<div class="grid gap-2">
-					<Label for="role">Role</Label>
-					<Select.Root
-						type="single"
-						name="role"
-						value={newMemberRole}
-						onValueChange={(v) =>
-							(newMemberRole = (v as 'owner' | 'editor' | 'viewer') ?? 'viewer')}
-					>
-						<Select.Trigger>
-							<Select.Value placeholder="Select role" />
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="viewer" label="Viewer">
-								<div class="flex items-center gap-2">
-									<Eye class="h-4 w-4" />
-									Viewer (read-only)
-								</div>
-							</Select.Item>
-							<Select.Item value="editor" label="Editor">
-								<div class="flex items-center gap-2">
-									<Pencil class="h-4 w-4" />
-									Editor (can modify)
-								</div>
-							</Select.Item>
-							<Select.Item value="owner" label="Owner">
-								<div class="flex items-center gap-2">
-									<Crown class="h-4 w-4" />
-									Owner (full access)
-								</div>
-							</Select.Item>
-						</Select.Content>
-					</Select.Root>
-					<input type="hidden" name="role" value={newMemberRole} />
-				</div>
-			</div>
-			<Dialog.Footer>
-				<Button type="button" variant="outline" onclick={() => (addDialogOpen = false)}>
-					Cancel
-				</Button>
-				<Button type="submit" disabled={!newMemberUserId}>Add Member</Button>
-			</Dialog.Footer>
-		</form>
-	</Dialog.Content>
-</Dialog.Root>
-
 <!-- Remove Member Confirmation -->
 <Dialog.Root bind:open={removeDialogOpen}>
 	<Dialog.Content class="sm:max-w-[425px]">
@@ -440,5 +436,87 @@
 				<Button type="submit" variant="destructive">Remove</Button>
 			</form>
 		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
+
+<!-- Invite Member Dialog -->
+<Dialog.Root bind:open={inviteDialogOpen}>
+	<Dialog.Content class="sm:max-w-[425px]">
+		<Dialog.Header>
+			<Dialog.Title>Invite Member</Dialog.Title>
+			<Dialog.Description>
+				Send an invitation email. They'll be added to this workspace when they accept.
+			</Dialog.Description>
+		</Dialog.Header>
+		<form
+			method="POST"
+			action="?/inviteNewUser"
+			use:enhance={() => {
+				return async ({ result, update }) => {
+					if (result.type === 'success') {
+						inviteDialogOpen = false;
+						resetInviteForm();
+					}
+					await update();
+				};
+			}}
+		>
+			<div class="grid gap-4 py-4">
+				<div class="grid gap-2">
+					<Label for="email">Email Address</Label>
+					<Input
+						type="email"
+						id="email"
+						name="email"
+						placeholder="colleague@example.com"
+						bind:value={inviteEmail}
+						required
+					/>
+				</div>
+				<div class="grid gap-2">
+					<Label for="inviteRole">Role</Label>
+					<Select.Root
+						type="single"
+						name="role"
+						value={inviteRole}
+						onValueChange={(v) => (inviteRole = (v as 'owner' | 'editor' | 'viewer') ?? 'viewer')}
+					>
+						<Select.Trigger>
+							<Select.Value placeholder="Select role" />
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="viewer" label="Viewer">
+								<div class="flex items-center gap-2">
+									<Eye class="h-4 w-4" />
+									Viewer (read-only)
+								</div>
+							</Select.Item>
+							<Select.Item value="editor" label="Editor">
+								<div class="flex items-center gap-2">
+									<Pencil class="h-4 w-4" />
+									Editor (can modify)
+								</div>
+							</Select.Item>
+							<Select.Item value="owner" label="Owner">
+								<div class="flex items-center gap-2">
+									<Crown class="h-4 w-4" />
+									Owner (full access)
+								</div>
+							</Select.Item>
+						</Select.Content>
+					</Select.Root>
+					<input type="hidden" name="role" value={inviteRole} />
+				</div>
+			</div>
+			<Dialog.Footer>
+				<Button type="button" variant="outline" onclick={() => (inviteDialogOpen = false)}>
+					Cancel
+				</Button>
+				<Button type="submit" disabled={!inviteEmail}>
+					<Mail class="h-4 w-4 mr-2" />
+					Send Invitation
+				</Button>
+			</Dialog.Footer>
+		</form>
 	</Dialog.Content>
 </Dialog.Root>

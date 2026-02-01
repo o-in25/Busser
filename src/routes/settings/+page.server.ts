@@ -16,10 +16,25 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 function dataUriToBuffer(dataUri: string): { buffer: Buffer; mimeType: string } {
-	const [header, base64] = dataUri.split(',');
-	const mimeMatch = header.match(/:(.*?);/);
+	const commaIndex = dataUri.indexOf(',');
+	const header = dataUri.slice(0, commaIndex);
+	const data = dataUri.slice(commaIndex + 1);
+
+	// extract mime type (handles both "data:image/svg+xml," and "data:image/svg+xml;base64,")
+	const mimeMatch = header.match(/^data:([^;,]+)/);
 	const mimeType = mimeMatch ? mimeMatch[1] : 'image/svg+xml';
-	const buffer = Buffer.from(base64, 'base64');
+
+	// check if base64 encoded or url encoded
+	const isBase64 = header.includes(';base64');
+
+	let buffer: Buffer;
+	if (isBase64) {
+		buffer = Buffer.from(data, 'base64');
+	} else {
+		// url-encoded (dicebear uses this for svg)
+		buffer = Buffer.from(decodeURIComponent(data), 'utf-8');
+	}
+
 	return { buffer, mimeType };
 }
 

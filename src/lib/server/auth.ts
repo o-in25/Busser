@@ -48,6 +48,7 @@ export const rejectInvitationRequest = userRepo.rejectInvitationRequest.bind(use
 export const hasWorkspaceAccess = workspaceRepo.hasWorkspaceAccess.bind(workspaceRepo);
 export const getUserWorkspaces = workspaceRepo.getUserWorkspaces.bind(workspaceRepo);
 export const getWorkspace = workspaceRepo.getWorkspace.bind(workspaceRepo);
+export const getWorkspaceInfo = workspaceRepo.getWorkspaceInfo.bind(workspaceRepo);
 export const createWorkspace = workspaceRepo.createWorkspace.bind(workspaceRepo);
 export const getAllWorkspaces = workspaceRepo.getAllWorkspaces.bind(workspaceRepo);
 export const updateWorkspace = workspaceRepo.updateWorkspace.bind(workspaceRepo);

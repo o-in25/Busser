@@ -1,17 +1,18 @@
 import { error, fail } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
+import moment from 'moment';
+
 import {
-	addWorkspaceMember,
 	getWorkspace,
 	getWorkspaceMembers,
 	isWorkspaceOwner,
 	removeWorkspaceMember,
 	updateWorkspaceMemberRole,
 } from '$lib/server/auth';
-import { hasGlobalPermission } from '$lib/server/auth';
+import { MailClient } from '$lib/server/mail';
 import type { WorkspaceRole } from '$lib/server/repositories/workspace.repository';
-import { getInvitableUsers } from '$lib/server/user';
+import { createInvitation, deleteInvitation, getWorkspaceInvitations } from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -56,57 +57,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		});
 	}
 
-	// get users that can be invited
-	const hasEditAdmin = hasGlobalPermission(locals.user, 'edit_admin');
-	const invitableUsers = await getInvitableUsers(locals.user.userId, hasEditAdmin);
-
-	// filter out users who are already members
-	const memberUserIds = new Set(membersResult.data?.map((m) => m.userId) || []);
-	const availableUsers = invitableUsers.filter((u) => !memberUserIds.has(u.userId));
+	// get pending workspace invitations
+	const invitationsResult = await getWorkspaceInvitations(workspaceId);
+	const pendingInvitations =
+		invitationsResult.status === 'success' ? invitationsResult.data || [] : [];
 
 	return {
 		workspace: workspaceResult.data,
 		members: membersResult.data || [],
-		availableUsers,
+		pendingInvitations,
 		currentUserId: locals.user.userId,
 	};
 };
 
 export const actions: Actions = {
-	addMember: async ({ request, params, locals }) => {
-		if (!locals.user) {
-			return fail(StatusCodes.UNAUTHORIZED, { error: 'Authentication required.' });
-		}
-
-		const { workspaceId } = params;
-
-		// verify owner
-		const isOwner = await isWorkspaceOwner(locals.user.userId, workspaceId);
-		if (!isOwner) {
-			return fail(StatusCodes.FORBIDDEN, { error: 'Only workspace owners can add members.' });
-		}
-
-		const formData = await request.formData();
-		const userId = formData.get('userId')?.toString();
-		const role = formData.get('role')?.toString() as WorkspaceRole;
-
-		if (!userId) {
-			return fail(StatusCodes.BAD_REQUEST, { error: 'User is required.' });
-		}
-
-		if (!role || !['owner', 'editor', 'viewer'].includes(role)) {
-			return fail(StatusCodes.BAD_REQUEST, { error: 'Invalid role.' });
-		}
-
-		const result = await addWorkspaceMember(workspaceId, userId, role);
-
-		if (result.status === 'error') {
-			return fail(StatusCodes.BAD_REQUEST, { error: result.error });
-		}
-
-		return { success: true, action: 'add' };
-	},
-
 	updateRole: async ({ request, params, locals }) => {
 		if (!locals.user) {
 			return fail(StatusCodes.UNAUTHORIZED, { error: 'Authentication required.' });
@@ -182,5 +146,99 @@ export const actions: Actions = {
 		}
 
 		return { success: true, action: 'remove' };
+	},
+
+	inviteNewUser: async ({ request, params, locals }) => {
+		if (!locals.user) {
+			return fail(StatusCodes.UNAUTHORIZED, { error: 'Authentication required.' });
+		}
+
+		const { workspaceId } = params;
+
+		// verify owner
+		const isOwner = await isWorkspaceOwner(locals.user.userId, workspaceId);
+		if (!isOwner) {
+			return fail(StatusCodes.FORBIDDEN, { error: 'Only workspace owners can invite users.' });
+		}
+
+		const formData = await request.formData();
+		const email = formData.get('email')?.toString()?.trim()?.toLowerCase();
+		const role = formData.get('role')?.toString() as WorkspaceRole;
+
+		if (!email) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Email is required.' });
+		}
+
+		// basic email validation
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Invalid email address.' });
+		}
+
+		if (!role || !['owner', 'editor', 'viewer'].includes(role)) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Invalid role.' });
+		}
+
+		// get workspace for email
+		const workspaceResult = await getWorkspace(locals.user.userId, workspaceId);
+		if (workspaceResult.status === 'error' || !workspaceResult.data) {
+			return fail(StatusCodes.NOT_FOUND, { error: 'Workspace not found.' });
+		}
+
+		// create invitation with 7 day expiration
+		const expiresAt = moment().add(7, 'days').format('YYYY-MM-DD HH:mm:ss');
+		const result = await createInvitation(email, expiresAt, null, workspaceId, role);
+
+		if (result.status === 'error') {
+			return fail(StatusCodes.BAD_REQUEST, { error: result.error });
+		}
+
+		if (!result.data) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Failed to create invitation.' });
+		}
+
+		// send invitation email
+		try {
+			const mailClient = new MailClient();
+			await mailClient.sendWorkspaceInvitationEmail([email], {
+				workspaceName: workspaceResult.data.workspaceName,
+				inviterName: locals.user.username,
+				invitationCode: result.data.invitationCode,
+				role,
+			});
+		} catch (error: any) {
+			console.error('Failed to send invitation email:', error.message);
+			// invitation was created, but email failed - don't fail the action
+		}
+
+		return { success: true, action: 'invite' };
+	},
+
+	cancelInvitation: async ({ request, params, locals }) => {
+		if (!locals.user) {
+			return fail(StatusCodes.UNAUTHORIZED, { error: 'Authentication required.' });
+		}
+
+		const { workspaceId } = params;
+
+		// verify owner
+		const isOwner = await isWorkspaceOwner(locals.user.userId, workspaceId);
+		if (!isOwner) {
+			return fail(StatusCodes.FORBIDDEN, { error: 'Only workspace owners can cancel invitations.' });
+		}
+
+		const formData = await request.formData();
+		const invitationId = formData.get('invitationId')?.toString();
+
+		if (!invitationId) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Invitation ID is required.' });
+		}
+
+		const result = await deleteInvitation(parseInt(invitationId, 10));
+
+		if (result.status === 'error') {
+			return fail(StatusCodes.BAD_REQUEST, { error: result.error });
+		}
+
+		return { success: true, action: 'cancel' };
 	},
 };
