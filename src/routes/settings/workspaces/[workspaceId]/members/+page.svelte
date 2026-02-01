@@ -320,10 +320,7 @@
 									<span class="font-medium">{invitation.email}</span>
 								</Table.Cell>
 								<Table.Cell>
-									<Badge
-										variant={roleVariants[invitation.workspaceRole || 'viewer']}
-										class="gap-1"
-									>
+									<Badge variant={roleVariants[invitation.workspaceRole || 'viewer']} class="gap-1">
 										<RoleIcon class="h-3 w-3" />
 										{roleLabels[invitation.workspaceRole || 'viewer']}
 									</Badge>
@@ -332,12 +329,7 @@
 									{invitation.expiresAt ? formatDate(invitation.expiresAt) : 'Never'}
 								</Table.Cell>
 								<Table.Cell class="text-right pr-6">
-									<form
-										method="POST"
-										action="?/cancelInvitation"
-										use:enhance
-										class="inline"
-									>
+									<form method="POST" action="?/cancelInvitation" use:enhance class="inline">
 										<input type="hidden" name="invitationId" value={invitation.invitationId} />
 										<Button
 											type="submit"
