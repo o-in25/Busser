@@ -18,6 +18,7 @@
 		stepNumber,
 		onremove,
 		canRemove = true,
+		reorderMode = false,
 		...restProps
 	}: {
 		class?: string;
@@ -25,6 +26,7 @@
 		stepNumber: number;
 		onremove?: (stepNumber: number) => void;
 		canRemove?: boolean;
+		reorderMode?: boolean;
 		[key: string]: unknown;
 	} = $props();
 
@@ -35,41 +37,80 @@
 		step.productId = productIdValue ? parseInt(productIdValue, 10) : 0;
 	});
 
-	// Quick select options for quantities
-	const ozQuickOptions = [
-		{ label: '0.25oz', value: '0.25:oz' },
-		{ label: '0.5oz', value: '0.5:oz' },
-		{ label: '0.75oz', value: '0.75:oz' },
-		{ label: '1oz', value: '1:oz' },
-		{ label: '1.5oz', value: '1.5:oz' },
-		{ label: '2oz', value: '2:oz' },
-	];
+	// unit selection with local state for proper reactivity
+	let selectedUnit = $state(step.productIdQuantityUnit || 'oz');
+	$effect(() => {
+		step.productIdQuantityUnit = selectedUnit;
+		// always set to 4 oz equivalent when "top off" is selected
+		if (selectedUnit === 'top off') {
+			step.productIdQuantityInMilliliters = 4;
+		}
+	});
 
-	const dashQuickOptions = [
-		{ label: '1 dash', value: '1:dash' },
-		{ label: '2 dash', value: '2:dash' },
-		{ label: '3 dash', value: '3:dash' },
-	];
+	let isTopOff = $derived(selectedUnit === 'top off');
+
+	// all available units
+	const units = ['oz', 'ml', 'dash', 'tsp', 'tbsp', 'cube', 'top off'];
+
+	// quick select options per unit
+	const quickOptionsByUnit: Record<string, { label: string; value: string }[]> = {
+		oz: [
+			{ label: '0.25', value: '0.25' },
+			{ label: '0.5', value: '0.5' },
+			{ label: '0.75', value: '0.75' },
+			{ label: '1', value: '1' },
+			{ label: '1.5', value: '1.5' },
+			{ label: '2', value: '2' },
+		],
+		ml: [
+			{ label: '15', value: '15' },
+			{ label: '22.5', value: '22.5' },
+			{ label: '30', value: '30' },
+			{ label: '45', value: '45' },
+			{ label: '60', value: '60' },
+		],
+		dash: [
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+			{ label: '3', value: '3' },
+		],
+		tsp: [
+			{ label: '0.5', value: '0.5' },
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+		],
+		tbsp: [
+			{ label: '0.5', value: '0.5' },
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+		],
+		cube: [
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+		],
+	};
+
+	// get quick options for currently selected unit
+	let quickOptions = $derived(quickOptionsByUnit[selectedUnit] || []);
 
 	function handleQuickSelect(val: string | number) {
-		const [qty, unit] = String(val).split(':');
-		step.productIdQuantityInMilliliters = parseFloat(qty);
-		step.productIdQuantityUnit = unit;
+		step.productIdQuantityInMilliliters = parseFloat(String(val));
 	}
 
 	let descriptionLength = $derived(step.recipeStepDescription?.length || 0);
 	const maxDescription = 200;
 </script>
 
-<Card.Root class={cn('relative group flex', className)} {...restProps}>
-	<!-- Drag handle - always visible -->
-	<div
-		class="drag-handle flex-shrink-0 w-10 flex items-center justify-center border-r border-border/50 cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
-	>
-		<GripVertical class="h-5 w-5 text-muted-foreground" />
-	</div>
+<Card.Root class={cn('relative group', reorderMode && 'flex', className)} {...restProps}>
+	{#if reorderMode}
+		<!-- drag handle - touch here to drag -->
+		<div
+			class="drag-handle flex-shrink-0 w-10 flex items-center justify-center border-r border-border/50 cursor-grab active:cursor-grabbing touch-none"
+		>
+			<GripVertical class="h-5 w-5 text-muted-foreground" />
+		</div>
+	{/if}
 
-	<!-- Card content wrapper -->
 	<div class="flex-1 min-w-0">
 		<Card.Header class="pb-3">
 			<div class="flex items-center justify-between">
@@ -124,28 +165,24 @@
 							(step.productIdQuantityInMilliliters = parseFloat(e.currentTarget.value) || 0)}
 						step="0.25"
 						min="0"
+						disabled={isTopOff}
 					/>
-					<Select.Root
-						type="single"
-						value={step.productIdQuantityUnit}
-						onValueChange={(v) => (step.productIdQuantityUnit = v ?? 'oz')}
-					>
+					<Select.Root type="single" bind:value={selectedUnit}>
 						<Select.Trigger class="w-24">
-							<Select.Value placeholder="oz" />
+							{selectedUnit}
 						</Select.Trigger>
 						<Select.Content>
-							{#each ['oz', 'ml', 'dash', 'cube'] as unit}
+							{#each units as unit}
 								<Select.Item value={unit} label={unit} />
 							{/each}
 						</Select.Content>
 					</Select.Root>
 				</div>
 
-				<!-- Quick select for oz amounts -->
-				<QuickSelect options={ozQuickOptions} onselect={handleQuickSelect} class="mt-2" />
-
-				<!-- Quick select for dashes -->
-				<QuickSelect options={dashQuickOptions} onselect={handleQuickSelect} />
+				<!-- Quick select for current unit -->
+				{#if quickOptions.length > 0}
+					<QuickSelect options={quickOptions} onselect={handleQuickSelect} class="mt-2" />
+				{/if}
 			</div>
 
 			<!-- Description -->

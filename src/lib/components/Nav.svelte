@@ -9,6 +9,35 @@
 
 	let { user, activeUrl }: { user: User | null; activeUrl: string } = $props();
 
+	// scroll direction tracking for mobile header
+	let lastScrollY = $state(0);
+	let headerVisible = $state(true);
+	const scrollThreshold = 10;
+
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+
+		function handleScroll() {
+			const currentScrollY = window.scrollY;
+			const scrollDelta = currentScrollY - lastScrollY;
+
+			// only trigger if scroll exceeds threshold
+			if (Math.abs(scrollDelta) > scrollThreshold) {
+				if (scrollDelta > 0 && currentScrollY > 50) {
+					// scrolling down and past the top
+					headerVisible = false;
+				} else {
+					// scrolling up
+					headerVisible = true;
+				}
+				lastScrollY = currentScrollY;
+			}
+		}
+
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		return () => window.removeEventListener('scroll', handleScroll);
+	});
+
 	async function logout() {
 		const response = await fetch('/logout', {
 			method: 'POST',
@@ -39,9 +68,9 @@
 
 <!-- Mobile Top Logo (visible on small screens) -->
 {#if user}
-	<div class="mobile-logo-header flex md:hidden">
+	<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
 		<a href="/">
-			<img src={logoNav} class="h-8" alt="Busser" />
+			<img src={logoNav} class="h-10" alt="Busser" />
 		</a>
 	</div>
 {/if}
@@ -114,11 +143,16 @@
 		top: 0;
 		z-index: 50;
 		justify-content: center;
-		padding: 0.5rem 0;
+		padding: 0.75rem 0;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
 		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+		transition: transform 0.3s ease;
+	}
+
+	.mobile-logo-header.header-hidden {
+		transform: translateY(-100%);
 	}
 
 	:global(.dark) .mobile-logo-header {
@@ -133,7 +167,7 @@
 		left: 0;
 		right: 0;
 		z-index: 50;
-		padding: 0.5rem 1rem;
+		padding: 0.5rem 1.5rem !important;
 		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 		justify-content: center;
 	}
