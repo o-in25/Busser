@@ -17,7 +17,63 @@ export const dilutionByStirred = (abv: number) => -1.21 * Math.pow(abv, 2) + 1.2
 // Dilution of a shaken drink shaken with 120 grams of ¼-inch cubes for 10 seconds:
 export const dilutionByShaken = (abv: number) => 1.567 * Math.pow(abv, 2) + 1.742 * abv + 0.203;
 
-const units = {
+// Dry shake approximation: ~70% of normal shake dilution (no ice first pass)
+export const dilutionByDryShake = (abv: number) => dilutionByShaken(abv) * 0.7;
+
+// Whip shake: ~40% of normal shake dilution (small ice piece shaken until melted)
+export const dilutionByWhipShake = (abv: number) => dilutionByShaken(abv) * 0.4;
+
+type DilutionMethod = 'stirred' | 'shaken' | 'dry_shake' | 'whip_shake' | 'built' | 'blended';
+
+// map technique IDs to dilution method names
+// update these IDs to match your database
+const techniqueIdToMethod: Record<number, DilutionMethod> = {
+	1: 'stirred',
+	2: 'shaken',
+	3: 'built',
+	4: 'dry_shake',
+	5: 'whip_shake',
+	6: 'blended',
+};
+
+export const getMethodFromTechniqueId = (id: number): DilutionMethod =>
+	techniqueIdToMethod[id] || 'shaken';
+
+// Calculate dilution amount in ml based on volume and ABV
+export const calculateDilutionMl = (
+	volumeMl: number,
+	abvDecimal: number,
+	method: DilutionMethod
+) => {
+	let dilutionPercent: number;
+	switch (method) {
+		case 'stirred':
+			dilutionPercent = dilutionByStirred(abvDecimal);
+			break;
+		case 'dry_shake':
+			dilutionPercent = dilutionByDryShake(abvDecimal);
+			break;
+		case 'whip_shake':
+			dilutionPercent = dilutionByWhipShake(abvDecimal);
+			break;
+		case 'built':
+			// built drinks have minimal dilution from ice melt over time
+			dilutionPercent = 0.1;
+			break;
+		case 'blended':
+			// blended drinks have high dilution from crushed ice
+			dilutionPercent = dilutionByShaken(abvDecimal) * 1.2;
+			break;
+		default:
+			dilutionPercent = dilutionByShaken(abvDecimal);
+	}
+	return volumeMl * dilutionPercent;
+};
+
+const units: Record<
+	string,
+	{ toMl: number; fromMl: (ml: number) => number; i18n: (qty: number) => string }
+> = {
 	ml: { toMl: 1, fromMl: (ml) => ml, i18n: (qty: number) => (qty === 1 ? 'ml' : 'ml') },
 	oz: {
 		toMl: 30,
@@ -33,6 +89,21 @@ const units = {
 		toMl: 2.5,
 		fromMl: (ml: number) => ml / 2.5,
 		i18n: (qty: number) => (qty === 1 ? 'cube' : 'cubes'),
+	},
+	tsp: {
+		toMl: 5,
+		fromMl: (ml: number) => ml / 5,
+		i18n: (qty: number) => (qty === 1 ? 'tsp' : 'tsp'),
+	},
+	tbsp: {
+		toMl: 15,
+		fromMl: (ml: number) => ml / 15,
+		i18n: (qty: number) => (qty === 1 ? 'tbsp' : 'tbsp'),
+	},
+	'top off': {
+		toMl: 30,
+		fromMl: (ml: number) => ml / 30,
+		i18n: () => 'top off',
 	},
 };
 
@@ -78,25 +149,58 @@ export const calculateAbv = (
 	recipeSteps: { productIdQuantityInMilliliters: number; productProof: number }[],
 	recipeTechniqueDescriptionId: number
 ) => {
-	// in ml
-	let volume = recipeSteps.reduce(
+	// total volume in ml
+	const volume = recipeSteps.reduce(
 		(acc, { productIdQuantityInMilliliters }) => acc + productIdQuantityInMilliliters,
 		0
 	);
-	let abv = recipeSteps.reduce((acc, { productProof, productIdQuantityInMilliliters }) => {
+
+	// total alcohol in ml
+	const alcoholMl = recipeSteps.reduce((acc, { productProof, productIdQuantityInMilliliters }) => {
 		acc += (productProof / 2 / 100) * productIdQuantityInMilliliters;
 		return acc;
 	}, 0);
 
-	if (recipeTechniqueDescriptionId === 1) {
-		volume += dilutionByStirred(abv / 100);
-	} else {
-		// TODO: we don't have a formula for dry shakes
-		volume += dilutionByShaken(abv / 100);
-	}
-	let total = abv / volume;
-	total = (Math.ceil(total * 100) / 100) * 100;
-	return `${total.toFixed(0)}% abv`;
+	// abv before dilution
+	const abvDecimal = volume > 0 ? alcoholMl / volume : 0;
+
+	// calculate dilution based on technique
+	const method = getMethodFromTechniqueId(recipeTechniqueDescriptionId);
+	const dilutionMl = calculateDilutionMl(volume, abvDecimal, method);
+
+	// final abv after dilution
+	const finalVolume = volume + dilutionMl;
+	const finalAbv = finalVolume > 0 ? (alcoholMl / finalVolume) * 100 : 0;
+
+	return `${finalAbv.toFixed(0)}% abv`;
+};
+
+// Helper to get dilution info for display
+export const getDilutionInfo = (
+	recipeSteps: { productIdQuantityInMilliliters: number; productProof: number }[],
+	recipeTechniqueDescriptionId: number
+) => {
+	const volume = recipeSteps.reduce(
+		(acc, { productIdQuantityInMilliliters }) => acc + productIdQuantityInMilliliters,
+		0
+	);
+
+	const alcoholMl = recipeSteps.reduce((acc, { productProof, productIdQuantityInMilliliters }) => {
+		acc += (productProof / 2 / 100) * productIdQuantityInMilliliters;
+		return acc;
+	}, 0);
+
+	const abvDecimal = volume > 0 ? alcoholMl / volume : 0;
+	const method = getMethodFromTechniqueId(recipeTechniqueDescriptionId);
+	const dilutionMl = calculateDilutionMl(volume, abvDecimal, method);
+
+	return {
+		volumeMl: volume,
+		dilutionMl,
+		finalVolumeMl: volume + dilutionMl,
+		dilutionOz: dilutionMl / 30,
+		method,
+	};
 };
 
 export const convertToMl = (unit: string, value: number) => value * units[unit].toMl;

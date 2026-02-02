@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		ArrowUpDown,
 		BookOpen,
 		Candy,
 		Droplet,
@@ -8,8 +9,10 @@
 		Image,
 		Plus,
 		Sparkles,
+		Wand2,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
+	import { flip } from 'svelte/animate';
 	import { dndzone } from 'svelte-dnd-action';
 	import { v4 as uuidv4 } from 'uuid';
 
@@ -110,7 +113,55 @@
 		}
 	};
 
-	// preserve width and lock horizontal position when dragging
+	// base spirit categories for auto-reorder sorting
+	const baseSpirits = new Set([
+		'whiskey',
+		'bourbon',
+		'rye',
+		'scotch',
+		'vodka',
+		'gin',
+		'rum',
+		'tequila',
+		'mezcal',
+		'brandy',
+		'cognac',
+		'armagnac',
+	]);
+
+	const isBaseSpirit = (categoryName: string) =>
+		baseSpirits.has(categoryName.toLowerCase().trim());
+
+	const isTopOff = (step: View.BasicRecipeStep) => step.productIdQuantityUnit === 'top off';
+
+	// auto-reorder: cheapest first, base spirits second-to-last, top-off last
+	const autoReorderSteps = () => {
+		const topOffSteps: typeof steps = [];
+		const spiritSteps: typeof steps = [];
+		const otherSteps: typeof steps = [];
+
+		for (const step of steps) {
+			if (isTopOff(step)) {
+				topOffSteps.push(step);
+			} else if (isBaseSpirit(step.categoryName)) {
+				spiritSteps.push(step);
+			} else {
+				otherSteps.push(step);
+			}
+		}
+
+		// sort each group by price (cheapest first)
+		const byPrice = (a: View.BasicRecipeStep, b: View.BasicRecipeStep) =>
+			a.productPricePerUnit - b.productPricePerUnit;
+
+		otherSteps.sort(byPrice);
+		spiritSteps.sort(byPrice);
+		topOffSteps.sort(byPrice);
+
+		steps = [...otherSteps, ...spiritSteps, ...topOffSteps];
+	};
+
+	// preserve width, lock horizontal position, and scale down when dragging
 	function transformDraggedElement(el: HTMLElement | undefined) {
 		if (!el) return;
 		const container = el.parentElement;
@@ -119,7 +170,21 @@
 		const containerRect = container.getBoundingClientRect();
 		el.style.width = `${containerRect.width}px`;
 		el.style.left = `${containerRect.left}px`;
+		el.style.transform = 'scale(0.33)';
+		el.style.opacity = '0.9';
+		el.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
 	}
+
+	// dnd config (cast to any to avoid incomplete type defs)
+	const getDndOptions = (items: typeof steps, disabled: boolean) =>
+		({
+			items,
+			flipDurationMs: 200,
+			transformDraggedElement,
+			dragHandleSelector: '.drag-handle',
+			dropTargetStyle: {},
+			dragDisabled: disabled,
+		}) as any;
 
 	// minimal dnd handlers
 	function handleDndConsider(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
@@ -171,6 +236,7 @@
 	let disabled = $state(false);
 	let modalOpen = $state(false);
 	let wizardStep = $state(0);
+	let reorderMode = $state(false);
 
 	// Draft manager reference
 	let draftManager = $state<FormDraftManager>();
@@ -306,13 +372,7 @@
 						</div>
 					</div>
 				{:else if step === 2}
-					<!-- Step 3: Preparation Method -->
-					<div class="space-y-4">
-						<Label class="text-base font-medium block">How is it served?</Label>
-						<ServingMethodToggle methods={preparationMethods} bind:value={selectedPrepMethodId} />
-					</div>
-				{:else if step === 3}
-					<!-- Step 4: Flavor Ratings -->
+					<!-- Step 3: Flavor Ratings -->
 					<div class="space-y-6">
 						<FlavorSlider
 							label="Sweetness"
@@ -343,24 +403,49 @@
 							color="orange"
 						/>
 					</div>
-				{:else if step === 4}
-					<!-- Step 5: Ingredients -->
+				{:else if step === 3}
+					<!-- Step 4: Ingredients -->
 					<div class="space-y-4">
 						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
+						<div class="flex gap-2">
+							<Button
+								type="button"
+								variant={reorderMode ? 'default' : 'outline'}
+								size="sm"
+								class="flex-1"
+								onclick={() => (reorderMode = !reorderMode)}
+							>
+								<ArrowUpDown class="w-4 h-4 mr-2" />
+								{reorderMode ? 'Done' : 'Reorder'}
+							</Button>
+							{#if reorderMode}
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									class="flex-1"
+									onclick={autoReorderSteps}
+								>
+									<Wand2 class="w-4 h-4 mr-2" />
+									Auto
+								</Button>
+							{/if}
+						</div>
 
 						<div
-							use:dndzone={{ items: steps, flipDurationMs: 200, transformDraggedElement }}
+							use:dndzone={getDndOptions(steps, !reorderMode)}
 							onconsider={handleDndConsider}
 							onfinalize={handleDndFinalize}
 							class="space-y-4"
 						>
 							{#each steps as step, stepNumber (step.id)}
-								<div>
+								<div animate:flip={{ duration: 200 }}>
 									<RecipeStepCard
 										bind:step={steps[stepNumber]}
 										{stepNumber}
 										onremove={removeStep}
 										canRemove={steps.length > 1}
+										{reorderMode}
 									/>
 								</div>
 							{/each}
@@ -370,6 +455,17 @@
 							<Plus class="w-4 h-4 mr-2" />
 							Add Ingredient
 						</Button>
+					</div>
+				{:else if step === 4}
+					<!-- Step 5: Preparation Method -->
+					<div class="space-y-4">
+						<Label class="text-base font-medium block">How is it served?</Label>
+						<ServingMethodToggle
+							methods={preparationMethods}
+							bind:value={selectedPrepMethodId}
+							variant="cards"
+							{steps}
+						/>
 					</div>
 				{/if}
 			{/snippet}
@@ -484,31 +580,49 @@
 			<!-- Section 5: Ingredients (not collapsible) -->
 			<Card.Root>
 				<Card.Header class="pb-4">
-					<div class="flex items-center justify-between">
-						<Card.Title class="flex items-center gap-2 text-lg">
-							<FlaskConical class="h-5 w-5 text-primary" />
-							Ingredients
-						</Card.Title>
-					</div>
+					<Card.Title class="flex items-center gap-2 text-lg">
+						<FlaskConical class="h-5 w-5 text-primary" />
+						Ingredients
+					</Card.Title>
 				</Card.Header>
 				<Card.Content class="space-y-4">
 					<!-- Metrics display -->
 					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 
+					<!-- Reorder toggle -->
+					<div class="flex gap-2">
+						<Button
+							type="button"
+							variant={reorderMode ? 'default' : 'outline'}
+							size="sm"
+							onclick={() => (reorderMode = !reorderMode)}
+						>
+							<ArrowUpDown class="w-4 h-4 mr-2" />
+							{reorderMode ? 'Done' : 'Reorder'}
+						</Button>
+						{#if reorderMode}
+							<Button type="button" variant="outline" size="sm" onclick={autoReorderSteps}>
+								<Wand2 class="w-4 h-4 mr-2" />
+								Auto-Reorder
+							</Button>
+						{/if}
+					</div>
+
 					<!-- Recipe steps -->
 					<div
-						use:dndzone={{ items: steps, flipDurationMs: 200, transformDraggedElement }}
+						use:dndzone={getDndOptions(steps, !reorderMode)}
 						onconsider={handleDndConsider}
 						onfinalize={handleDndFinalize}
 						class="space-y-4"
 					>
 						{#each steps as step, stepNumber (step.id)}
-							<div>
+							<div animate:flip={{ duration: 200 }}>
 								<RecipeStepCard
 									bind:step={steps[stepNumber]}
 									{stepNumber}
 									onremove={removeStep}
 									canRemove={steps.length > 1}
+									{reorderMode}
 								/>
 							</div>
 						{/each}
@@ -564,3 +678,11 @@
 	{/if}
 </div>
 
+<style>
+	/* placeholder shown where dragged item will be inserted */
+	:global([data-is-dnd-shadow-item-hint]) {
+		opacity: 0.4;
+		border-top: 3px solid hsl(var(--primary));
+		margin-top: -2px;
+	}
+</style>

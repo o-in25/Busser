@@ -52,6 +52,8 @@ export type PreparationMethod = {
 	recipeTechniqueDescriptionId: number;
 	recipeTechniqueDescriptionText: string;
 	recipeTechniqueDilutionPercentage: number;
+	recipeTechniqueDescriptionInstructions?: string;
+	recipeTechniqueDescriptionImageUrl?: string;
 };
 
 // recipetechnique table (links recipe to preparation method)
@@ -156,6 +158,8 @@ export namespace Table {
 	export type RecipeTechniqueDescription = {
 		recipeTechniqueDescriptionId?: number;
 		recipeTechniqueDescriptionText: string;
+		recipeTechniqueDescriptionInstructions: string;
+		recipeTechniqueDescriptionImageUrl: string;
 		recipeTechniqueDilutionPercentage: number;
 	};
 
