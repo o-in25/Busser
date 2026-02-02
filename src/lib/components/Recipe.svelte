@@ -5,9 +5,11 @@
 		Expand,
 		FlaskConical,
 		GlassWater,
+		Layers,
 		Martini,
 		Pencil,
 		Percent,
+		Sparkles,
 		X,
 	} from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
@@ -64,6 +66,17 @@
 	let ingredientCount = $derived(initialRecipeSteps.length);
 	let completedSteps = $derived(completed.filter((c) => c).length);
 	let allStepsCompleted = $derived(completedSteps === steps.length && steps.length > 0);
+
+	// Check for flexible matching ingredients
+	let hasFlexibleIngredients = $derived(
+		initialRecipeSteps.some((step) => step.matchMode && step.matchMode !== 'EXACT_PRODUCT')
+	);
+	let hasCategoryMatch = $derived(
+		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_CATEGORY')
+	);
+	let hasSpiritMatch = $derived(
+		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_BASE_SPIRIT')
+	);
 
 	// get the actual image URL
 	let lightImageUrl = $derived(recipe.recipeImageUrl || placeholderLight);
@@ -279,6 +292,23 @@
 							</Badge>
 						{/if}
 					</div>
+					<!-- Flexible matching legend -->
+					{#if hasFlexibleIngredients}
+						<div class="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
+							{#if hasCategoryMatch}
+								<span class="flex items-center gap-1">
+									<Layers class="w-3 h-3 text-blue-500" />
+									Any in category
+								</span>
+							{/if}
+							{#if hasSpiritMatch}
+								<span class="flex items-center gap-1">
+									<Sparkles class="w-3 h-3 text-amber-500" />
+									Any base spirit
+								</span>
+							{/if}
+						</div>
+					{/if}
 				</Card.Header>
 				<Card.Content>
 					{#if steps.length === 0}
@@ -295,6 +325,8 @@
 									quantity={step.productIdQuantityInMilliliters}
 									unit={step.productIdQuantityUnit}
 									description={step.recipeStepDescription}
+									matchMode={step.matchMode}
+									baseSpiritId={step.baseSpiritId}
 									bind:checked={completed[index]}
 								/>
 							{/each}

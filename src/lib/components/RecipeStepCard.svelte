@@ -5,9 +5,10 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { QuickSelect } from '$lib/components/ui/quick-select';
+	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import type { View } from '$lib/types';
+	import type { MatchMode, SelectOption, View } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	import Autocomplete from './Autocomplete.svelte';
@@ -35,6 +36,46 @@
 
 	$effect(() => {
 		step.productId = productIdValue ? parseInt(productIdValue, 10) : 0;
+	});
+
+	// Handle product selection - populate category info for match mode selector
+	function handleProductSelect(item: SelectOption) {
+		step.productName = item.name;
+		step.categoryId = item.categoryId ?? 0;
+		step.categoryName = item.categoryName ?? '';
+		step.baseSpiritId = item.baseSpiritId ?? null;
+		// Also set stepCategoryId for category-based matching
+		step.stepCategoryId = item.categoryId ?? null;
+		// Reset match mode to default when changing products
+		matchMode = 'EXACT_PRODUCT';
+	}
+
+	// Match mode selection
+	let matchMode: MatchMode = $state(step.matchMode || 'EXACT_PRODUCT');
+	$effect(() => {
+		step.matchMode = matchMode;
+		// When using category/spirit matching, store the categoryId
+		if (matchMode !== 'EXACT_PRODUCT' && step.categoryId === undefined) {
+			step.categoryId = step.categoryId ?? null;
+		}
+	});
+
+	// Determine if base spirit matching is available (only for spirit categories)
+	let hasBaseSpirit = $derived(step.baseSpiritId !== null && step.baseSpiritId !== undefined);
+
+	// Get display names for the match mode options
+	let categoryDisplayName = $derived(step.categoryName || 'this category');
+	let baseSpiritDisplayName = $derived.by(() => {
+		// Map baseSpiritId to spirit name
+		const spiritNames: Record<number, string> = {
+			4: 'Whiskey',
+			5: 'Gin',
+			6: 'Vodka',
+			7: 'Tequila',
+			8: 'Rum',
+			9: 'Brandy',
+		};
+		return step.baseSpiritId ? spiritNames[step.baseSpiritId] || 'this spirit' : 'this spirit';
 	});
 
 	// unit selection with local state for proper reactivity
@@ -146,8 +187,53 @@
 					fetchUrl="/api/select/products"
 					bind:value={productIdValue}
 					key={step.productName}
+					onselect={handleProductSelect}
 				/>
 			</div>
+
+			<!-- Match mode selector -->
+			{#if step.productId}
+				<div class="space-y-2">
+					<Label class="text-sm">Ingredient Matching</Label>
+					<RadioGroup.Root bind:value={matchMode} class="flex flex-col gap-2">
+						<div class="flex items-center gap-2">
+							<RadioGroup.Item value="EXACT_PRODUCT" id={`match-exact-${stepNumber}`} />
+							<Label for={`match-exact-${stepNumber}`} class="text-sm font-normal cursor-pointer">
+								This exact product only
+							</Label>
+						</div>
+						<div class="flex items-center gap-2">
+							<RadioGroup.Item value="ANY_IN_CATEGORY" id={`match-category-${stepNumber}`} />
+							<Label
+								for={`match-category-${stepNumber}`}
+								class="text-sm font-normal cursor-pointer"
+							>
+								Any <span class="font-medium">{categoryDisplayName}</span>
+							</Label>
+						</div>
+						{#if hasBaseSpirit}
+							<div class="flex items-center gap-2">
+								<RadioGroup.Item value="ANY_IN_BASE_SPIRIT" id={`match-spirit-${stepNumber}`} />
+								<Label
+									for={`match-spirit-${stepNumber}`}
+									class="text-sm font-normal cursor-pointer"
+								>
+									Any <span class="font-medium">{baseSpiritDisplayName}</span>
+								</Label>
+							</div>
+						{/if}
+					</RadioGroup.Root>
+					<p class="text-xs text-muted-foreground">
+						{#if matchMode === 'EXACT_PRODUCT'}
+							Recipe requires this specific product to be in stock.
+						{:else if matchMode === 'ANY_IN_CATEGORY'}
+							Recipe can use any {categoryDisplayName} from your inventory.
+						{:else}
+							Recipe can use any {baseSpiritDisplayName} from your inventory.
+						{/if}
+					</p>
+				</div>
+			{/if}
 
 			<!-- Amount section -->
 			<div class="space-y-2">

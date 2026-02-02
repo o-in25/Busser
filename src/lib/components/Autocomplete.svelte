@@ -5,6 +5,7 @@
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import type { SelectOption } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	export let label: string;
@@ -16,6 +17,7 @@
 	export let required = false;
 	export let actionUrl = '';
 	export let grant = '';
+	export let onselect: ((item: SelectOption) => void) | undefined = undefined;
 	const permissions: string[] = getContext('permissions');
 
 	let items: any[] = [];
@@ -50,9 +52,10 @@
 			show = false;
 		}, 100);
 
-	const handleClick = (itemName: string) => {
-		selectValue = itemName;
+	const handleClick = (item: SelectOption) => {
+		selectValue = item.name;
 		show = false;
+		onselect?.(item);
 	};
 </script>
 
@@ -93,7 +96,7 @@
 					<button
 						type="button"
 						class="w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
-						onmousedown={() => handleClick(item.name)}
+						onmousedown={() => handleClick(item)}
 					>
 						{item.name}
 					</button>

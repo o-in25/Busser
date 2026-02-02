@@ -366,13 +366,23 @@ export class InventoryRepository extends BaseRepository {
 	async getProductOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
 			let result = await this.db
-				.table('product')
-				.where('workspaceId', workspaceId)
-				.select('ProductId', 'ProductName');
-			let products: Product[] = marshal<Product[]>(result);
-			return products.map(({ productId, productName }) => ({
+				.table('product as p')
+				.join('category as c', 'p.CategoryId', 'c.CategoryId')
+				.where('p.workspaceId', workspaceId)
+				.select(
+					'p.ProductId',
+					'p.ProductName',
+					'c.CategoryId',
+					'c.CategoryName',
+					'c.BaseSpiritId'
+				);
+			let products = marshal<any[]>(result);
+			return products.map(({ productId, productName, categoryId, categoryName, baseSpiritId }) => ({
 				name: productName,
 				value: productId || 0,
+				categoryId,
+				categoryName,
+				baseSpiritId,
 			}));
 		} catch (error: any) {
 			console.error(error);
@@ -506,9 +516,17 @@ export class InventoryRepository extends BaseRepository {
 					'category.CategoryId',
 					'category.CategoryName',
 					'category.CategoryDescription',
+					'category.BaseSpiritId',
+					'category.ParentCategoryId',
 					this.db.query.raw('COUNT(product.ProductId) as productCount')
 				)
-				.groupBy('category.CategoryId', 'category.CategoryName', 'category.CategoryDescription')
+				.groupBy(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.BaseSpiritId',
+					'category.ParentCategoryId'
+				)
 				.orderBy('category.CategoryName');
 
 			if (search) {
@@ -525,6 +543,8 @@ export class InventoryRepository extends BaseRepository {
 				categoryId: row.CategoryId,
 				categoryName: row.CategoryName,
 				categoryDescription: row.CategoryDescription,
+				baseSpiritId: row.BaseSpiritId,
+				parentCategoryId: row.ParentCategoryId,
 				productCount: Number(row.productCount),
 			}));
 

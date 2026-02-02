@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Check } from 'lucide-svelte';
+	import { Check, Layers, Sparkles } from 'lucide-svelte';
 	import { convertFromMl, getUnits } from '$lib/math';
+	import type { MatchMode } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	let {
@@ -11,6 +12,8 @@
 		quantity,
 		unit,
 		description,
+		matchMode = 'EXACT_PRODUCT',
+		baseSpiritId,
 		checked = $bindable(false),
 		...restProps
 	}: {
@@ -21,6 +24,8 @@
 		quantity: number;
 		unit: string;
 		description?: string | null;
+		matchMode?: MatchMode;
+		baseSpiritId?: number | null;
 		checked?: boolean;
 		[key: string]: unknown;
 	} = $props();
@@ -28,6 +33,25 @@
 	const units = getUnits();
 	const displayQuantity = $derived(convertFromMl(unit, quantity));
 	const unitLabel = $derived(units[unit]?.i18n(quantity) || unit);
+
+	// Map baseSpiritId to spirit name for display
+	const spiritNames: Record<number, string> = {
+		4: 'Whiskey',
+		5: 'Gin',
+		6: 'Vodka',
+		7: 'Tequila',
+		8: 'Rum',
+		9: 'Brandy',
+	};
+	const baseSpiritName = $derived(baseSpiritId ? spiritNames[baseSpiritId] : null);
+
+	// Determine what to display based on match mode
+	const isFlexible = $derived(matchMode !== 'EXACT_PRODUCT');
+	const flexibleLabel = $derived.by(() => {
+		if (matchMode === 'ANY_IN_CATEGORY') return `Any ${categoryName}`;
+		if (matchMode === 'ANY_IN_BASE_SPIRIT' && baseSpiritName) return `Any ${baseSpiritName}`;
+		return null;
+	});
 
 	function handleToggle() {
 		checked = !checked; // propagates to parent
@@ -77,8 +101,28 @@
 			</div>
 		{/if}
 
-		<!-- Product name -->
-		{#if productName && productName !== categoryName}
+		<!-- Product name with flexible matching indicator -->
+		{#if isFlexible && flexibleLabel}
+			<div class="flex items-center gap-1.5 mt-0.5">
+				{#if matchMode === 'ANY_IN_BASE_SPIRIT'}
+					<Sparkles class="w-3 h-3 text-amber-500" />
+				{:else}
+					<Layers class="w-3 h-3 text-blue-500" />
+				{/if}
+				{#if checked}
+					<s class="text-xs text-muted-foreground">{flexibleLabel}</s>
+				{:else}
+					<span class="text-xs text-muted-foreground">{flexibleLabel}</span>
+				{/if}
+			</div>
+			{#if productName && productName !== categoryName}
+				{#if checked}
+					<s class="text-xs text-muted-foreground/60 mt-0.5 block">Using: {productName}</s>
+				{:else}
+					<p class="text-xs text-muted-foreground/60 mt-0.5">Using: {productName}</p>
+				{/if}
+			{/if}
+		{:else if productName && productName !== categoryName}
 			{#if checked}
 				<s class="text-sm text-muted-foreground mt-0.5 block">{productName}</s>
 			{:else}

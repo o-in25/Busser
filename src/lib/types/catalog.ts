@@ -3,6 +3,12 @@
 //         recipestep, recipetechnique, recipetechniquedescription
 // views: basicrecipe, basicrecipestep, basicrecipecategory, spirits, preparationmethod
 
+// Match mode for recipe ingredients
+// - EXACT_PRODUCT: Only the specific product satisfies the recipe step
+// - ANY_IN_CATEGORY: Any product in the same category satisfies the step
+// - ANY_IN_BASE_SPIRIT: Any product with the same base spirit satisfies the step
+export type MatchMode = 'EXACT_PRODUCT' | 'ANY_IN_CATEGORY' | 'ANY_IN_BASE_SPIRIT';
+
 // recipecategory table (whiskey cocktails, tiki, etc.)
 export type RecipeCategory = {
 	recipeCategoryId: number;
@@ -42,6 +48,8 @@ export type RecipeStep = {
 	recipeStepId: number;
 	recipeId: number;
 	productId: number;
+	categoryId: number | null;
+	matchMode: MatchMode;
 	productIdQuantityInMilliliters: number;
 	recipeStepDescription: string | null;
 	productIdQuantityUnit: string;
@@ -96,10 +104,14 @@ export type BasicRecipeStep = {
 	recipeId: number;
 	recipeStepId: number;
 	recipeStepDescription: string | null;
+	matchMode: MatchMode;
+	stepCategoryId: number | null;
 	productName: string;
 	productId: number;
+	categoryId: number;
 	categoryName: string;
 	categoryDescription: string | null;
+	baseSpiritId: number | null;
 	supplierName: string | null;
 	supplierDetails: string | null;
 	productIdQuantityInMilliliters: number;
@@ -143,6 +155,8 @@ export namespace Table {
 		recipeStepId?: number;
 		recipeId: number;
 		productId: number;
+		categoryId?: number | null;
+		matchMode?: MatchMode;
 		productIdQuantityInMilliliters: number;
 		recipeStepDescription: string | null;
 		productIdQuantityUnit: string;
@@ -197,6 +211,10 @@ export namespace View {
 		recipeStepId?: number;
 		recipeId?: number;
 		productId: number;
+		categoryId?: number;
+		stepCategoryId?: number | null;
+		matchMode?: MatchMode;
+		baseSpiritId?: number | null;
 		recipeStepDescription: string;
 		productName: string;
 		categoryName: string;
@@ -236,6 +254,8 @@ export namespace QueryRequest {
 	export type RecipeSteps = {
 		recipeStepId?: number;
 		productId: number;
+		categoryId?: number | null;
+		matchMode?: MatchMode;
 		productIdQuantityInMilliliters: number;
 		productIdQuantityUnit: string;
 		recipeStepDescription: string;

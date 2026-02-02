@@ -339,12 +339,16 @@ export class CatalogRepository extends BaseRepository {
 				let steps: Table.RecipeStep[] = recipeSteps.map(
 					({
 						productId,
+						categoryId,
+						matchMode,
 						productIdQuantityInMilliliters,
 						productIdQuantityUnit,
 						recipeStepDescription,
 					}) => ({
 						recipeId: keys.recipeId || 0,
 						productId,
+						categoryId: categoryId || null,
+						matchMode: matchMode || 'EXACT_PRODUCT',
 						productIdQuantityInMilliliters,
 						productIdQuantityUnit,
 						recipeStepDescription,
