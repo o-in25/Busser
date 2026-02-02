@@ -10,8 +10,6 @@
 		Sparkles,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
-	import { flip } from 'svelte/animate';
-	import { cubicOut } from 'svelte/easing';
 	import { dndzone } from 'svelte-dnd-action';
 	import { v4 as uuidv4 } from 'uuid';
 
@@ -112,50 +110,18 @@
 		}
 	};
 
-	// Drag and drop config for svelte-dnd-action
-	const flipDurationMs = 300;
-	const dropTargetStyle = {}; // Remove default yellow outline
-	const centreDraggedOnCursor = false; // Keep element relative to click position
-	const dragHandleSelector = '.drag-handle'; // Only drag from handle
-
-	// Transform the dragged element - subtle but visible, locked to Y-axis only
-	function transformDraggedElement(
-		el: HTMLElement | undefined,
-		_data: unknown,
-		_index: number | undefined
-	) {
+	// preserve width and lock horizontal position when dragging
+	function transformDraggedElement(el: HTMLElement | undefined) {
 		if (!el) return;
-
-		// Capture original dimensions before any transforms
-		const originalWidth = el.offsetWidth;
-
-		// Find the dndzone container to lock horizontal position
 		const container = el.parentElement;
 		if (!container) return;
 
 		const containerRect = container.getBoundingClientRect();
-		const lockX = containerRect.left;
-
-		// Style the element - scale down for visual feedback
-		el.style.opacity = '0.85';
-		el.style.transform = 'scale(0.95)';
-		el.style.transformOrigin = 'center center';
-		el.style.boxShadow = '0 8px 24px -4px rgba(0, 0, 0, 0.25)';
-		el.style.outline = 'none';
-		el.style.cursor = 'grabbing';
-		el.style.pointerEvents = 'none';
-		el.style.width = `${originalWidth}px`;
-
-		// Continuously enforce horizontal position (lock X-axis movement)
-		const enforcePosition = () => {
-			if (el.isConnected) {
-				el.style.left = `${lockX}px`;
-				requestAnimationFrame(enforcePosition);
-			}
-		};
-		requestAnimationFrame(enforcePosition);
+		el.style.width = `${containerRect.width}px`;
+		el.style.left = `${containerRect.left}px`;
 	}
 
+	// minimal dnd handlers
 	function handleDndConsider(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
 		steps = e.detail.items;
 	}
@@ -383,20 +349,13 @@
 						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 
 						<div
-							use:dndzone={{
-								items: steps,
-								flipDurationMs,
-								dropTargetStyle,
-								transformDraggedElement,
-								centreDraggedOnCursor,
-								dragHandleSelector,
-							}}
+							use:dndzone={{ items: steps, flipDurationMs: 200, transformDraggedElement }}
 							onconsider={handleDndConsider}
 							onfinalize={handleDndFinalize}
 							class="space-y-4"
 						>
 							{#each steps as step, stepNumber (step.id)}
-								<div animate:flip={{ duration: flipDurationMs, easing: cubicOut }}>
+								<div>
 									<RecipeStepCard
 										bind:step={steps[stepNumber]}
 										{stepNumber}
@@ -538,20 +497,13 @@
 
 					<!-- Recipe steps -->
 					<div
-						use:dndzone={{
-							items: steps,
-							flipDurationMs,
-							dropTargetStyle,
-							transformDraggedElement,
-							centreDraggedOnCursor,
-							dragHandleSelector,
-						}}
+						use:dndzone={{ items: steps, flipDurationMs: 200, transformDraggedElement }}
 						onconsider={handleDndConsider}
 						onfinalize={handleDndFinalize}
 						class="space-y-4"
 					>
 						{#each steps as step, stepNumber (step.id)}
-							<div animate:flip={{ duration: flipDurationMs, easing: cubicOut }}>
+							<div>
 								<RecipeStepCard
 									bind:step={steps[stepNumber]}
 									{stepNumber}
@@ -612,11 +564,3 @@
 	{/if}
 </div>
 
-<style>
-	/* Style the original item's placeholder while dragging */
-	:global([data-is-dnd-shadow-item-hint]) {
-		opacity: 0.5 !important;
-		border: 2px dashed hsl(var(--primary) / 0.5) !important;
-		border-radius: var(--radius) !important;
-	}
-</style>

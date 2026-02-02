@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GripVertical, X } from 'lucide-svelte';
+	import { X } from 'lucide-svelte';
 
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
@@ -61,15 +61,7 @@
 	const maxDescription = 200;
 </script>
 
-<Card.Root class={cn('relative group flex', className)} {...restProps}>
-	<!-- Drag handle - always visible -->
-	<div
-		class="drag-handle flex-shrink-0 w-10 flex items-center justify-center border-r border-border/50 cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
-	>
-		<GripVertical class="h-5 w-5 text-muted-foreground" />
-	</div>
-
-	<!-- Card content wrapper -->
+<Card.Root class={cn('relative group', className)} {...restProps}>
 	<div class="flex-1 min-w-0">
 		<Card.Header class="pb-3">
 			<div class="flex items-center justify-between">
