@@ -38,8 +38,13 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
+	// Get all categories for parent selection (excluding current category)
+	const { data: categories } = await inventoryRepo.findAllCategories(workspaceId, 1, 1000, null);
+	const parentCategories = (categories || []).filter((c) => c.categoryId !== Number(id));
+
 	return {
 		category: result.data,
+		parentCategories,
 	};
 };
 
@@ -62,6 +67,8 @@ export const actions: Actions = {
 
 		const categoryName = formData.get('categoryName') as string;
 		const categoryDescription = (formData.get('categoryDescription') as string) || '';
+		const parentCategoryIdRaw = formData.get('parentCategoryId') as string;
+		const parentCategoryId = parentCategoryIdRaw ? Number(parentCategoryIdRaw) : null;
 
 		if (!categoryName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Category name is required.' });
@@ -71,6 +78,8 @@ export const actions: Actions = {
 			categoryId: Number(id),
 			categoryName,
 			categoryDescription,
+			parentCategoryId,
+			baseSpiritId: null, // Will be derived from parent in repository
 		};
 
 		const result = await inventoryRepo.updateCategory(workspaceId, category);

@@ -4,6 +4,7 @@
 		BookOpen,
 		FlaskConical,
 		GlassWater,
+		Heart,
 		Lightbulb,
 		Plus,
 		Search,
@@ -13,7 +14,8 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -24,8 +26,20 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	const { spirits, spiritCounts, recentCocktails, featuredCocktail, totalRecipes, popularSpirit } =
-		data.args;
+	const {
+		spirits,
+		spiritCounts,
+		recentCocktails,
+		featuredCocktail,
+		totalRecipes,
+		popularSpirit,
+		favoriteRecipeIds,
+		featuredRecipeIds,
+	} = data.args;
+
+	// Track favorite/featured state locally for optimistic updates
+	let favorites = $state(new Set(favoriteRecipeIds));
+	let featured = $state(new Set(featuredRecipeIds));
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
@@ -106,15 +120,16 @@
 
 		<!-- Quick stats -->
 		<div class="flex flex-wrap gap-4 mt-8">
-			<div
-				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+			<a
+				href="/catalog/browse"
+				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 			>
 				<FlaskConical class="h-5 w-5 text-primary" />
 				<div>
 					<p class="text-2xl font-bold">{totalRecipes}</p>
 					<p class="text-xs text-muted-foreground">Total Recipes</p>
 				</div>
-			</div>
+			</a>
 			<div
 				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
 			>
@@ -125,15 +140,16 @@
 				</div>
 			</div>
 			{#if popularSpirit}
-				<div
-					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				<a
+					href="/catalog/browse/{popularSpirit.recipeCategoryId}"
+					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 				>
 					<TrendingUp class="h-5 w-5 text-primary" />
 					<div>
 						<p class="text-2xl font-bold">{popularSpirit.recipeCategoryDescription}</p>
 						<p class="text-xs text-muted-foreground">Most Popular</p>
 					</div>
-				</div>
+				</a>
 			{/if}
 		</div>
 	</div>
@@ -234,6 +250,41 @@
 					<Star class="h-3 w-3 mr-1" />
 					Featured
 				</Badge>
+				<!-- Action buttons on featured card -->
+				<div class="absolute top-3 right-3 flex gap-1">
+					<form
+						method="POST"
+						action="?/toggleFavorite"
+						use:enhance={() => {
+							if (favorites.has(featuredCocktail.recipeId)) {
+								favorites.delete(featuredCocktail.recipeId);
+							} else {
+								favorites.add(featuredCocktail.recipeId);
+							}
+							favorites = favorites;
+							return async ({ result }) => {
+								if (result.type === 'failure') invalidateAll();
+							};
+						}}
+					>
+						<input type="hidden" name="recipeId" value={featuredCocktail.recipeId} />
+						<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+						<button
+							type="submit"
+							class="p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+							title={favorites.has(featuredCocktail.recipeId) ? 'Remove from favorites' : 'Add to favorites'}
+						>
+							<Heart
+								class={cn(
+									'h-4 w-4 transition-colors',
+									favorites.has(featuredCocktail.recipeId)
+										? 'fill-red-500 text-red-500'
+										: 'text-muted-foreground hover:text-red-500'
+								)}
+							/>
+						</button>
+					</form>
+				</div>
 			</div>
 			<Card.Content class="pt-4">
 				<h3 class="font-bold text-lg mb-1">{featuredCocktail.recipeName}</h3>
@@ -266,12 +317,11 @@
 				</p>
 			{:else}
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					{#each recentCocktails.slice(0, 4) as cocktail}
-						<a
-							href="/catalog/{cocktail.recipeId}"
+					{#each recentCocktails.slice(0, 6) as cocktail}
+						<div
 							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
 						>
-							<div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
+							<a href="/catalog/{cocktail.recipeId}" class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
 								{#if cocktail.recipeImageUrl}
 									<img
 										src={cocktail.recipeImageUrl}
@@ -283,19 +333,91 @@
 										<GlassWater class="h-5 w-5 text-muted-foreground" />
 									</div>
 								{/if}
-							</div>
-							<div class="flex-1 min-w-0">
+							</a>
+							<a href="/catalog/{cocktail.recipeId}" class="flex-1 min-w-0">
 								<p class="font-medium truncate group-hover:text-primary transition-colors">
 									{cocktail.recipeName}
 								</p>
 								<p class="text-xs text-muted-foreground">
 									{cocktail.recipeCategoryDescription}
 								</p>
+							</a>
+							<div class="flex items-center gap-1">
+								<form
+									method="POST"
+									action="?/toggleFavorite"
+									use:enhance={() => {
+										// Optimistic update
+										if (favorites.has(cocktail.recipeId)) {
+											favorites.delete(cocktail.recipeId);
+										} else {
+											favorites.add(cocktail.recipeId);
+										}
+										favorites = favorites;
+										return async ({ result }) => {
+											if (result.type === 'failure') {
+												// Revert on failure
+												invalidateAll();
+											}
+										};
+									}}
+								>
+									<input type="hidden" name="recipeId" value={cocktail.recipeId} />
+									<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+									<button
+										type="submit"
+										class="p-1.5 rounded-md hover:bg-muted transition-colors"
+										title={favorites.has(cocktail.recipeId) ? 'Remove from favorites' : 'Add to favorites'}
+									>
+										<Heart
+											class={cn(
+												'h-4 w-4 transition-colors',
+												favorites.has(cocktail.recipeId)
+													? 'fill-red-500 text-red-500'
+													: 'text-muted-foreground hover:text-red-500'
+											)}
+										/>
+									</button>
+								</form>
+								{#if canModify}
+									<form
+										method="POST"
+										action="?/toggleFeatured"
+										use:enhance={() => {
+											// Optimistic update
+											if (featured.has(cocktail.recipeId)) {
+												featured.delete(cocktail.recipeId);
+											} else {
+												featured.add(cocktail.recipeId);
+											}
+											featured = featured;
+											return async ({ result }) => {
+												if (result.type === 'failure') {
+													invalidateAll();
+												}
+											};
+										}}
+									>
+										<input type="hidden" name="recipeId" value={cocktail.recipeId} />
+										<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+										<button
+											type="submit"
+											class="p-1.5 rounded-md hover:bg-muted transition-colors"
+											title={featured.has(cocktail.recipeId) ? 'Remove from featured' : 'Add to featured'}
+										>
+											<Star
+												class={cn(
+													'h-4 w-4 transition-colors',
+													featured.has(cocktail.recipeId)
+														? 'fill-yellow-500 text-yellow-500'
+														: 'text-muted-foreground hover:text-yellow-500'
+												)}
+											/>
+										</button>
+									</form>
+								{/if}
 							</div>
-							<ArrowRight
-								class="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-							/>
-						</a>
+						</div>
 					{/each}
 				</div>
 			{/if}

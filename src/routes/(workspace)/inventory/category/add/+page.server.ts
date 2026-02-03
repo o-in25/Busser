@@ -19,7 +19,12 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		redirect(StatusCodes.SEE_OTHER, '/inventory/category');
 	}
 
-	return {};
+	// Get all categories for parent selection
+	const { data: categories } = await inventoryRepo.findAllCategories(workspaceId, 1, 1000, null);
+
+	return {
+		parentCategories: categories || [],
+	};
 };
 
 export const actions: Actions = {
@@ -40,6 +45,8 @@ export const actions: Actions = {
 
 		const categoryName = formData.get('categoryName') as string;
 		const categoryDescription = (formData.get('categoryDescription') as string) || '';
+		const parentCategoryIdRaw = formData.get('parentCategoryId') as string;
+		const parentCategoryId = parentCategoryIdRaw ? Number(parentCategoryIdRaw) : null;
 
 		if (!categoryName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Category name is required.' });
@@ -48,7 +55,8 @@ export const actions: Actions = {
 		const result = await inventoryRepo.createCategory(
 			workspaceId,
 			categoryName,
-			categoryDescription
+			categoryDescription,
+			parentCategoryId
 		);
 
 		if (result.status === 'error') {

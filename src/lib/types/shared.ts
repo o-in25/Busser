@@ -36,6 +36,10 @@ export type Page = {
 export type SelectOption = {
 	name: string;
 	value: string | number;
+	// Optional category metadata for product options
+	categoryId?: number;
+	categoryName?: string;
+	baseSpiritId?: number | null;
 };
 
 // logging

@@ -22,6 +22,7 @@
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
 	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
 	import InventoryDetailDrawer from '$lib/components/InventoryDetailDrawer.svelte';
+	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
 	import StockAlerts from '$lib/components/StockAlerts.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -235,6 +236,9 @@
 <svelte:head>
 	<title>Inventory - Busser</title>
 </svelte:head>
+
+<!-- Inventory Section Navigation -->
+<InventoryNav />
 
 <!-- Dashboard Header -->
 <InventoryDashboard stats={data.stats} />

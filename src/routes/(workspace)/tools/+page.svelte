@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { Citrus, Wrench } from 'lucide-svelte';
+	import { Citrus, Wine, Wrench } from 'lucide-svelte';
 
+	import BacCalculator from '$lib/components/BacCalculator.svelte';
 	import Calculator from '$lib/components/Calculator.svelte';
 	import * as Card from '$lib/components/ui/card';
+
+	let { data } = $props();
 </script>
 
 <svelte:head>
@@ -37,6 +40,27 @@
 			</Card.Header>
 			<Card.Content>
 				<Calculator />
+			</Card.Content>
+		</Card.Root>
+
+		<!-- BAC Estimator Card -->
+		<Card.Root class="lg:col-span-2">
+			<Card.Header>
+				<div class="flex items-start gap-4">
+					<div class="p-3 rounded-xl bg-rose-500/10">
+						<Wine class="h-6 w-6 text-rose-500" />
+					</div>
+					<div class="flex-1">
+						<Card.Title class="text-xl">BAC Estimator</Card.Title>
+						<Card.Description class="mt-1">
+							Estimate blood alcohol content based on cocktails consumed. For educational purposes
+							and promoting responsible consumption.
+						</Card.Description>
+					</div>
+				</div>
+			</Card.Header>
+			<Card.Content>
+				<BacCalculator recipes={data.bacCalculatorRecipes} />
 			</Card.Content>
 		</Card.Root>
 

@@ -1,6 +1,10 @@
 <script lang="ts">
 	import BackButton from '$lib/components/BackButton.svelte';
 	import CategoryForm from '$lib/components/CategoryForm.svelte';
+
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -17,5 +21,5 @@
 		</div>
 	</div>
 
-	<CategoryForm action="add" />
+	<CategoryForm action="add" parentCategories={data.parentCategories} />
 </div>

@@ -366,13 +366,23 @@ export class InventoryRepository extends BaseRepository {
 	async getProductOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
 			let result = await this.db
-				.table('product')
-				.where('workspaceId', workspaceId)
-				.select('ProductId', 'ProductName');
-			let products: Product[] = marshal<Product[]>(result);
-			return products.map(({ productId, productName }) => ({
+				.table('product as p')
+				.join('category as c', 'p.CategoryId', 'c.CategoryId')
+				.where('p.workspaceId', workspaceId)
+				.select(
+					'p.ProductId',
+					'p.ProductName',
+					'c.CategoryId',
+					'c.CategoryName',
+					'c.BaseSpiritId'
+				);
+			let products = marshal<any[]>(result);
+			return products.map(({ productId, productName, categoryId, categoryName, baseSpiritId }) => ({
 				name: productName,
 				value: productId || 0,
+				categoryId,
+				categoryName,
+				baseSpiritId,
 			}));
 		} catch (error: any) {
 			console.error(error);
@@ -422,13 +432,25 @@ export class InventoryRepository extends BaseRepository {
 	async createCategory(
 		workspaceId: string,
 		categoryName: string,
-		categoryDescription: string | null
+		categoryDescription: string | null,
+		parentCategoryId: number | null = null
 	): Promise<QueryResult<number>> {
 		try {
+			// If parent category is specified, inherit its baseSpiritId
+			let baseSpiritId: number | null = null;
+			if (parentCategoryId) {
+				const parent = await this.findCategoryById(workspaceId, parentCategoryId);
+				if (parent.status === 'success' && parent.data) {
+					baseSpiritId = parent.data.baseSpiritId ?? null;
+				}
+			}
+
 			const [categoryId] = await this.db.table('category').insert({
 				workspaceId,
 				CategoryName: titleCase(categoryName.trim()),
 				CategoryDescription: categoryDescription,
+				ParentCategoryId: parentCategoryId,
+				BaseSpiritId: baseSpiritId,
 			});
 			return { status: 'success', data: categoryId };
 		} catch (error: any) {
@@ -445,13 +467,24 @@ export class InventoryRepository extends BaseRepository {
 		try {
 			let dbResult: any;
 			let key = category.categoryId;
-			const { categoryName, categoryDescription } = category;
+			const { categoryName, categoryDescription, parentCategoryId } = category;
+
+			// If parent category is specified, inherit its baseSpiritId
+			let baseSpiritId: number | null = null;
+			if (parentCategoryId) {
+				const parent = await this.findCategoryById(workspaceId, parentCategoryId);
+				if (parent.status === 'success' && parent.data) {
+					baseSpiritId = parent.data.baseSpiritId ?? null;
+				}
+			}
 
 			if (!key) {
 				[dbResult] = await this.db.table('category').insert({
 					workspaceId,
 					CategoryName: categoryName,
 					CategoryDescription: categoryDescription,
+					ParentCategoryId: parentCategoryId,
+					BaseSpiritId: baseSpiritId,
 				});
 				if (!dbResult) throw new Error('Could not create new category.');
 				key = dbResult;
@@ -462,7 +495,12 @@ export class InventoryRepository extends BaseRepository {
 
 				dbResult = await this.db
 					.table('category')
-					.update({ CategoryName: categoryName, CategoryDescription: categoryDescription })
+					.update({
+						CategoryName: categoryName,
+						CategoryDescription: categoryDescription,
+						ParentCategoryId: parentCategoryId,
+						BaseSpiritId: baseSpiritId,
+					})
 					.where('categoryId', key)
 					.where('workspaceId', workspaceId);
 				if (dbResult < 1) {
@@ -506,9 +544,17 @@ export class InventoryRepository extends BaseRepository {
 					'category.CategoryId',
 					'category.CategoryName',
 					'category.CategoryDescription',
+					'category.BaseSpiritId',
+					'category.ParentCategoryId',
 					this.db.query.raw('COUNT(product.ProductId) as productCount')
 				)
-				.groupBy('category.CategoryId', 'category.CategoryName', 'category.CategoryDescription')
+				.groupBy(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.BaseSpiritId',
+					'category.ParentCategoryId'
+				)
 				.orderBy('category.CategoryName');
 
 			if (search) {
@@ -525,6 +571,8 @@ export class InventoryRepository extends BaseRepository {
 				categoryId: row.CategoryId,
 				categoryName: row.CategoryName,
 				categoryDescription: row.CategoryDescription,
+				baseSpiritId: row.BaseSpiritId,
+				parentCategoryId: row.ParentCategoryId,
 				productCount: Number(row.productCount),
 			}));
 

@@ -8,6 +8,7 @@ import type {
 	Spirit,
 	Table,
 	View,
+	WorkspaceFeatured,
 } from '$lib/types';
 
 import { DbProvider } from '../db';
@@ -126,6 +127,7 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string
 	): Promise<Array<View.BasicRecipe & { missingIngredient: string | null }>> {
 		try {
+			// Find recipes missing exactly one ingredient (using EffectiveInStock for flexible matching)
 			const result = await this.db
 				.table('basicrecipe as r')
 				.select('r.*')
@@ -133,9 +135,9 @@ export class CatalogRepository extends BaseRepository {
 				.whereIn('r.RecipeId', function () {
 					this.select('rs.RecipeId')
 						.from('basicrecipestep as rs')
-						// .where('rs.workspaceId', workspaceId)
 						.groupBy('rs.RecipeId')
-						.havingRaw('SUM(CASE WHEN rs.ProductInStockQuantity = 0 THEN 1 ELSE 0 END) = 1')
+						// EffectiveInStock accounts for flexible matching (ANY_IN_CATEGORY, ANY_IN_BASE_SPIRIT)
+						.havingRaw('SUM(CASE WHEN rs.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
 						.havingRaw('COUNT(rs.RecipeStepId) > 1');
 				})
 				.limit(6);
@@ -143,14 +145,20 @@ export class CatalogRepository extends BaseRepository {
 
 			const recipesWithMissing = await Promise.all(
 				recipes.map(async (recipe) => {
+					// Find the missing ingredient (the one with EffectiveInStock = 0)
 					const missing = await this.db
 						.table('basicrecipestep')
-						.select('ProductName')
+						.select('ProductName', 'CategoryName', 'MatchMode')
 						.where('RecipeId', recipe.recipeId)
 						.where('WorkspaceId', workspaceId)
-						.where('ProductInStockQuantity', 0)
+						.where('EffectiveInStock', 0)
 						.first();
-					return { ...recipe, missingIngredient: missing?.ProductName || null };
+					// Show category name for flexible matches, product name for exact
+					const ingredientName =
+						missing?.MatchMode !== 'EXACT_PRODUCT'
+							? missing?.CategoryName
+							: missing?.ProductName;
+					return { ...recipe, missingIngredient: ingredientName || null };
 				})
 			);
 
@@ -339,12 +347,16 @@ export class CatalogRepository extends BaseRepository {
 				let steps: Table.RecipeStep[] = recipeSteps.map(
 					({
 						productId,
+						categoryId,
+						matchMode,
 						productIdQuantityInMilliliters,
 						productIdQuantityUnit,
 						recipeStepDescription,
 					}) => ({
 						recipeId: keys.recipeId || 0,
 						productId,
+						categoryId: categoryId || null,
+						matchMode: matchMode || 'EXACT_PRODUCT',
 						productIdQuantityInMilliliters,
 						productIdQuantityUnit,
 						recipeStepDescription,
@@ -414,5 +426,121 @@ export class CatalogRepository extends BaseRepository {
 		if (!image || image.size === 0 || image.name === 'undefined') return null;
 		const signedUrl = await getSignedUrl(image);
 		return signedUrl.length ? signedUrl : null;
+	}
+
+	// Workspace featured management
+	async getFeatured(workspaceId: string): Promise<View.BasicRecipe[]> {
+		try {
+			const dbResult = await this.db
+				.table('basicrecipe as r')
+				.join('workspacefeatured as wf', function () {
+					this.on('r.RecipeId', '=', 'wf.recipeId').andOn(
+						'r.WorkspaceId',
+						'=',
+						'wf.workspaceId'
+					);
+				})
+				.where('wf.workspaceId', workspaceId)
+				.orderBy('wf.featuredOrder', 'asc')
+				.select('r.*');
+			return marshalToType<View.BasicRecipe[]>(dbResult);
+		} catch (error: any) {
+			console.error('Error getting featured recipes:', error.message);
+			return [];
+		}
+	}
+
+	async addFeatured(workspaceId: string, recipeId: number): Promise<QueryResult> {
+		try {
+			// get max order
+			const maxOrderResult = await this.db
+				.table('workspacefeatured')
+				.where({ workspaceId })
+				.max('featuredOrder as maxOrder')
+				.first<{ maxOrder: number | null }>();
+			const nextOrder = (maxOrderResult?.maxOrder ?? -1) + 1;
+
+			await this.db.table('workspacefeatured').insert({
+				workspaceId,
+				recipeId,
+				featuredOrder: nextOrder,
+			});
+			return { status: 'success' };
+		} catch (error: any) {
+			if (error.code === 'ER_DUP_ENTRY') {
+				return { status: 'error', error: 'Recipe is already featured.' };
+			}
+			console.error('Error adding featured recipe:', error.message);
+			return { status: 'error', error: 'Failed to add featured recipe.' };
+		}
+	}
+
+	async removeFeatured(workspaceId: string, recipeId: number): Promise<QueryResult> {
+		try {
+			const rowsDeleted = await this.db
+				.table('workspacefeatured')
+				.where({ workspaceId, recipeId })
+				.del();
+			if (rowsDeleted === 0) {
+				return { status: 'error', error: 'Featured recipe not found.' };
+			}
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error('Error removing featured recipe:', error.message);
+			return { status: 'error', error: 'Failed to remove featured recipe.' };
+		}
+	}
+
+	async isFeatured(workspaceId: string, recipeId: number): Promise<boolean> {
+		try {
+			const dbResult = await this.db
+				.table('workspacefeatured')
+				.where({ workspaceId, recipeId })
+				.first();
+			return !!dbResult;
+		} catch (error: any) {
+			console.error('Error checking featured:', error.message);
+			return false;
+		}
+	}
+
+	async toggleFeatured(
+		workspaceId: string,
+		recipeId: number
+	): Promise<QueryResult<{ isFeatured: boolean }>> {
+		try {
+			const exists = await this.isFeatured(workspaceId, recipeId);
+			if (exists) {
+				const result = await this.removeFeatured(workspaceId, recipeId);
+				if (result.status === 'error') return result;
+				return { status: 'success', data: { isFeatured: false } };
+			} else {
+				const result = await this.addFeatured(workspaceId, recipeId);
+				if (result.status === 'error') return result;
+				return { status: 'success', data: { isFeatured: true } };
+			}
+		} catch (error: any) {
+			console.error('Error toggling featured:', error.message);
+			return { status: 'error', error: 'Failed to toggle featured.' };
+		}
+	}
+
+	async reorderFeatured(
+		workspaceId: string,
+		orderedRecipeIds: number[]
+	): Promise<QueryResult> {
+		try {
+			await this.db.query.transaction(async (trx) => {
+				for (let i = 0; i < orderedRecipeIds.length; i++) {
+					await trx('workspacefeatured')
+						.where({ workspaceId, recipeId: orderedRecipeIds[i] })
+						.update({ featuredOrder: i });
+				}
+			});
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error('Error reordering featured recipes:', error.message);
+			return { status: 'error', error: 'Failed to reorder featured recipes.' };
+		}
 	}
 }
