@@ -54,10 +54,6 @@
 	let matchMode: MatchMode = $state(step.matchMode || 'EXACT_PRODUCT');
 	$effect(() => {
 		step.matchMode = matchMode;
-		// When using category/spirit matching, store the categoryId
-		if (matchMode !== 'EXACT_PRODUCT' && step.categoryId === undefined) {
-			step.categoryId = step.categoryId ?? null;
-		}
 	});
 
 	// Determine if base spirit matching is available (only for spirit categories)
@@ -195,32 +191,11 @@
 			{#if step.productId}
 				<div class="space-y-2">
 					<Label class="text-sm">Ingredient Matching</Label>
-					<RadioGroup.Root bind:value={matchMode} class="flex flex-col gap-2">
-						<div class="flex items-center gap-2">
-							<RadioGroup.Item value="EXACT_PRODUCT" id={`match-exact-${stepNumber}`} />
-							<Label for={`match-exact-${stepNumber}`} class="text-sm font-normal cursor-pointer">
-								This exact product only
-							</Label>
-						</div>
-						<div class="flex items-center gap-2">
-							<RadioGroup.Item value="ANY_IN_CATEGORY" id={`match-category-${stepNumber}`} />
-							<Label
-								for={`match-category-${stepNumber}`}
-								class="text-sm font-normal cursor-pointer"
-							>
-								Any <span class="font-medium">{categoryDisplayName}</span>
-							</Label>
-						</div>
+					<RadioGroup.Root bind:value={matchMode}>
+						<RadioGroup.Item value="EXACT_PRODUCT">Exact</RadioGroup.Item>
+						<RadioGroup.Item value="ANY_IN_CATEGORY">{categoryDisplayName}</RadioGroup.Item>
 						{#if hasBaseSpirit}
-							<div class="flex items-center gap-2">
-								<RadioGroup.Item value="ANY_IN_BASE_SPIRIT" id={`match-spirit-${stepNumber}`} />
-								<Label
-									for={`match-spirit-${stepNumber}`}
-									class="text-sm font-normal cursor-pointer"
-								>
-									Any <span class="font-medium">{baseSpiritDisplayName}</span>
-								</Label>
-							</div>
+							<RadioGroup.Item value="ANY_IN_BASE_SPIRIT">Any {baseSpiritDisplayName}</RadioGroup.Item>
 						{/if}
 					</RadioGroup.Root>
 					<p class="text-xs text-muted-foreground">
@@ -246,7 +221,7 @@
 						type="number"
 						class="flex-1"
 						placeholder="0"
-						value={String(step.productIdQuantityInMilliliters)}
+						value={isTopOff ? '' : String(step.productIdQuantityInMilliliters)}
 						oninput={(e) =>
 							(step.productIdQuantityInMilliliters = parseFloat(e.currentTarget.value) || 0)}
 						step="0.25"

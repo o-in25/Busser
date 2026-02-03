@@ -35,9 +35,12 @@ export const load = (async ({ parent, locals }) => {
 	// Get workspace featured cocktails (curated by workspace admins)
 	const featuredCocktails = await catalogRepo.getFeatured(workspaceId);
 
-	// Fallback: if no featured cocktails, pick a random one from recent
-	let featuredCocktail: View.BasicRecipe | null = featuredCocktails[0] || null;
-	if (!featuredCocktail && recentCocktails.length > 0) {
+	// Pick a random featured cocktail, or fall back to random recent if none featured
+	let featuredCocktail: View.BasicRecipe | null = null;
+	if (featuredCocktails.length > 0) {
+		const randomIndex = Math.floor(Math.random() * featuredCocktails.length);
+		featuredCocktail = featuredCocktails[randomIndex];
+	} else if (recentCocktails.length > 0) {
 		const randomIndex = Math.floor(Math.random() * recentCocktails.length);
 		featuredCocktail = recentCocktails[randomIndex];
 	}

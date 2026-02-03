@@ -35,6 +35,13 @@
 	});
 </script>
 
-<div role="radiogroup" class={cn('grid gap-2', className)} {...restProps}>
+<div
+	role="radiogroup"
+	class={cn(
+		'inline-flex w-full rounded-lg bg-muted p-1 gap-1',
+		className
+	)}
+	{...restProps}
+>
 	{@render children?.()}
 </div>
