@@ -162,6 +162,26 @@
 		const option = showFilterOptions.find((o) => o.value === selectedShowFilter);
 		return option?.label || 'All Recipes';
 	});
+
+	function handleToggleFavorite(id: number) {
+		const newFavorites = new Set(favorites);
+		if (newFavorites.has(id)) {
+			newFavorites.delete(id);
+		} else {
+			newFavorites.add(id);
+		}
+		favorites = newFavorites;
+	}
+
+	function handleToggleFeatured(id: number) {
+		const newFeatured = new Set(featured);
+		if (newFeatured.has(id)) {
+			newFeatured.delete(id);
+		} else {
+			newFeatured.add(id);
+		}
+		featured = newFeatured;
+	}
 </script>
 
 <svelte:head>
@@ -378,22 +398,9 @@
 					isFeatured={featured.has(recipe.recipeId)}
 					{canModify}
 					workspaceId={workspace.workspaceId}
-					onToggleFavorite={(id) => {
-						if (favorites.has(id)) {
-							favorites.delete(id);
-						} else {
-							favorites.add(id);
-						}
-						favorites = favorites;
-					}}
-					onToggleFeatured={(id) => {
-						if (featured.has(id)) {
-							featured.delete(id);
-						} else {
-							featured.add(id);
-						}
-						featured = featured;
-					}}
+					actionPath="?"
+					onToggleFavorite={handleToggleFavorite}
+					onToggleFeatured={handleToggleFeatured}
 				/>
 			{/each}
 		</div>

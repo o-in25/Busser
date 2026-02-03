@@ -20,6 +20,12 @@
 	// Local state for optimistic updates
 	let isFavorite = $state(data.isFavorite);
 	let isFeatured = $state(data.isFeatured);
+
+	// Sync when server data changes (e.g., after navigation or invalidation)
+	$effect(() => {
+		isFavorite = data.isFavorite;
+		isFeatured = data.isFeatured;
+	});
 </script>
 
 <svelte:head>
