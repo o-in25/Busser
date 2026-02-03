@@ -117,6 +117,7 @@ export type BasicRecipeStep = {
 	productIdQuantityInMilliliters: number;
 	productIdQuantityUnit: string;
 	productInStockQuantity: number;
+	effectiveInStock: number; // 1 if available considering MatchMode, 0 otherwise
 	productPricePerUnit: number;
 	productUnitSizeInMilliliters: number;
 	productProof: number;
@@ -182,7 +183,9 @@ export namespace Table {
 	export type Category = {
 		categoryId?: number;
 		categoryName: string;
-		categoryDescription: string;
+		categoryDescription: string | null;
+		baseSpiritId?: number | null;
+		parentCategoryId?: number | null;
 	};
 }
 
@@ -223,6 +226,7 @@ export namespace View {
 		supplierDetails: string | null;
 		productIdQuantityInMilliliters: number;
 		productInStockQuantity: number;
+		effectiveInStock?: number; // 1 if available considering MatchMode, 0 otherwise
 		productPricePerUnit: number;
 		productUnitSizeInMilliliters: number;
 		productIdQuantityUnit: string;

@@ -432,13 +432,25 @@ export class InventoryRepository extends BaseRepository {
 	async createCategory(
 		workspaceId: string,
 		categoryName: string,
-		categoryDescription: string | null
+		categoryDescription: string | null,
+		parentCategoryId: number | null = null
 	): Promise<QueryResult<number>> {
 		try {
+			// If parent category is specified, inherit its baseSpiritId
+			let baseSpiritId: number | null = null;
+			if (parentCategoryId) {
+				const parent = await this.findCategoryById(workspaceId, parentCategoryId);
+				if (parent.status === 'success' && parent.data) {
+					baseSpiritId = parent.data.baseSpiritId ?? null;
+				}
+			}
+
 			const [categoryId] = await this.db.table('category').insert({
 				workspaceId,
 				CategoryName: titleCase(categoryName.trim()),
 				CategoryDescription: categoryDescription,
+				ParentCategoryId: parentCategoryId,
+				BaseSpiritId: baseSpiritId,
 			});
 			return { status: 'success', data: categoryId };
 		} catch (error: any) {
@@ -455,13 +467,24 @@ export class InventoryRepository extends BaseRepository {
 		try {
 			let dbResult: any;
 			let key = category.categoryId;
-			const { categoryName, categoryDescription } = category;
+			const { categoryName, categoryDescription, parentCategoryId } = category;
+
+			// If parent category is specified, inherit its baseSpiritId
+			let baseSpiritId: number | null = null;
+			if (parentCategoryId) {
+				const parent = await this.findCategoryById(workspaceId, parentCategoryId);
+				if (parent.status === 'success' && parent.data) {
+					baseSpiritId = parent.data.baseSpiritId ?? null;
+				}
+			}
 
 			if (!key) {
 				[dbResult] = await this.db.table('category').insert({
 					workspaceId,
 					CategoryName: categoryName,
 					CategoryDescription: categoryDescription,
+					ParentCategoryId: parentCategoryId,
+					BaseSpiritId: baseSpiritId,
 				});
 				if (!dbResult) throw new Error('Could not create new category.');
 				key = dbResult;
@@ -472,7 +495,12 @@ export class InventoryRepository extends BaseRepository {
 
 				dbResult = await this.db
 					.table('category')
-					.update({ CategoryName: categoryName, CategoryDescription: categoryDescription })
+					.update({
+						CategoryName: categoryName,
+						CategoryDescription: categoryDescription,
+						ParentCategoryId: parentCategoryId,
+						BaseSpiritId: baseSpiritId,
+					})
 					.where('categoryId', key)
 					.where('workspaceId', workspaceId);
 				if (dbResult < 1) {

@@ -372,7 +372,7 @@
 		<!-- Desktop Card Layout (hidden on mobile) -->
 		<div class="hidden md:block space-y-6">
 			<!-- Basic Information Card -->
-			<Card.Root>
+			<Card.Root class="relative z-10">
 				<Card.Header class="pb-4">
 					<Card.Title class="flex items-center gap-2 text-lg">
 						<Package class="h-5 w-5 text-primary" />

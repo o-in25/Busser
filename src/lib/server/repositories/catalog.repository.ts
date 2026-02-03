@@ -126,6 +126,7 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string
 	): Promise<Array<View.BasicRecipe & { missingIngredient: string | null }>> {
 		try {
+			// Find recipes missing exactly one ingredient (using EffectiveInStock for flexible matching)
 			const result = await this.db
 				.table('basicrecipe as r')
 				.select('r.*')
@@ -133,9 +134,9 @@ export class CatalogRepository extends BaseRepository {
 				.whereIn('r.RecipeId', function () {
 					this.select('rs.RecipeId')
 						.from('basicrecipestep as rs')
-						// .where('rs.workspaceId', workspaceId)
 						.groupBy('rs.RecipeId')
-						.havingRaw('SUM(CASE WHEN rs.ProductInStockQuantity = 0 THEN 1 ELSE 0 END) = 1')
+						// EffectiveInStock accounts for flexible matching (ANY_IN_CATEGORY, ANY_IN_BASE_SPIRIT)
+						.havingRaw('SUM(CASE WHEN rs.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
 						.havingRaw('COUNT(rs.RecipeStepId) > 1');
 				})
 				.limit(6);
@@ -143,14 +144,20 @@ export class CatalogRepository extends BaseRepository {
 
 			const recipesWithMissing = await Promise.all(
 				recipes.map(async (recipe) => {
+					// Find the missing ingredient (the one with EffectiveInStock = 0)
 					const missing = await this.db
 						.table('basicrecipestep')
-						.select('ProductName')
+						.select('ProductName', 'CategoryName', 'MatchMode')
 						.where('RecipeId', recipe.recipeId)
 						.where('WorkspaceId', workspaceId)
-						.where('ProductInStockQuantity', 0)
+						.where('EffectiveInStock', 0)
 						.first();
-					return { ...recipe, missingIngredient: missing?.ProductName || null };
+					// Show category name for flexible matches, product name for exact
+					const ingredientName =
+						missing?.MatchMode !== 'EXACT_PRODUCT'
+							? missing?.CategoryName
+							: missing?.ProductName;
+					return { ...recipe, missingIngredient: ingredientName || null };
 				})
 			);
 

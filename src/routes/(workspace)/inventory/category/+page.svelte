@@ -13,7 +13,7 @@
 
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
-	import BackButton from '$lib/components/BackButton.svelte';
+	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -99,15 +99,15 @@
 	<title>Manage Categories - Inventory</title>
 </svelte:head>
 
+<!-- Inventory Section Navigation -->
+<InventoryNav />
+
 <div class="container mx-auto max-w-4xl">
 	<!-- Header -->
-	<div class="flex items-center justify-between gap-4 mb-6 mt-4">
-		<div class="flex items-center gap-4">
-			<BackButton fallback="/inventory" />
-			<div>
-				<h1 class="text-2xl font-bold">Manage Categories</h1>
-				<p class="text-muted-foreground">Organize your inventory with categories</p>
-			</div>
+	<div class="flex items-center justify-between gap-4 mb-6">
+		<div>
+			<h1 class="text-2xl font-bold">Categories</h1>
+			<p class="text-muted-foreground">Organize your inventory with categories</p>
 		</div>
 		{#if canModify}
 			<a href="/inventory/category/add" class={cn(buttonVariants())}>

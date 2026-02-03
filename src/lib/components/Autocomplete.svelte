@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Plus } from 'lucide-svelte';
-	import { getContext, onMount } from 'svelte';
+	import { beforeUpdate, getContext, onMount } from 'svelte';
 
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -21,6 +21,9 @@
 	const permissions: string[] = getContext('permissions');
 
 	let items: any[] = [];
+	let show = false;
+	let selectValue = key || '';
+	let prevValue: string | null = null;
 
 	onMount(async () => {
 		let response = await fetch(fetchUrl, {
@@ -30,8 +33,23 @@
 		items = selectOptions;
 	});
 
-	let show = false;
-	$: selectValue = key || '';
+	// Handle external value changes (e.g., draft restore) imperatively to avoid reactive cycles
+	beforeUpdate(() => {
+		// Update selectValue when key prop changes (for edit mode)
+		if (key && selectValue !== key) {
+			selectValue = key;
+		}
+
+		// Resolve selectValue from value when value changes externally
+		if (value !== prevValue && value && items.length > 0 && !key) {
+			const matchedItem = items.find((item) => String(item.value) === String(value));
+			if (matchedItem && selectValue !== matchedItem.name) {
+				selectValue = matchedItem.name;
+			}
+		}
+		prevValue = value;
+	});
+
 	$: search = items.filter(
 		({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1
 	);
@@ -90,7 +108,7 @@
 	{#if show}
 		<div class="relative">
 			<div
-				class="absolute w-full max-h-44 overflow-y-auto z-20 mt-1 rounded-md border bg-popover text-popover-foreground shadow-md"
+				class="absolute w-full max-h-44 overflow-y-auto z-50 mt-1 rounded-md border bg-popover text-popover-foreground shadow-md"
 			>
 				{#each search as item}
 					<button

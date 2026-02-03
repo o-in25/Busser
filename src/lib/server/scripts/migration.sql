@@ -73,7 +73,8 @@ ALTER TABLE `app_d`.`recipestep`
 
 -- ============================================
 -- STEP 4: Update basicrecipestep view
--- Adds MatchMode, StepCategoryId, and BaseSpiritId to the view
+-- Adds MatchMode, StepCategoryId, BaseSpiritId, and EffectiveInStock to the view
+-- EffectiveInStock accounts for flexible matching based on MatchMode
 -- ============================================
 
 CREATE OR REPLACE VIEW `app_d`.`basicrecipestep` AS
@@ -97,7 +98,35 @@ SELECT
   `p`.`ProductPricePerUnit` AS `ProductPricePerUnit`,
   `p`.`ProductUnitSizeInMilliliters` AS `ProductUnitSizeInMilliliters`,
   `p`.`ProductProof` AS `ProductProof`,
-  `p`.`WorkspaceId` AS `WorkspaceId`
+  `p`.`WorkspaceId` AS `WorkspaceId`,
+  -- EffectiveInStock: 1 if ingredient is available considering MatchMode, 0 otherwise
+  CASE
+    -- EXACT_PRODUCT: only the specific product counts
+    WHEN `rs`.`MatchMode` = 'EXACT_PRODUCT' THEN
+      CASE WHEN `p`.`ProductInStockQuantity` > 0 THEN 1 ELSE 0 END
+
+    -- ANY_IN_CATEGORY: any product in the same category works
+    WHEN `rs`.`MatchMode` = 'ANY_IN_CATEGORY' THEN
+      CASE WHEN EXISTS (
+        SELECT 1 FROM `app_d`.`product` `p2`
+        WHERE `p2`.`CategoryId` = `c`.`CategoryId`
+        AND `p2`.`ProductInStockQuantity` > 0
+        AND `p2`.`WorkspaceId` = `p`.`WorkspaceId`
+      ) THEN 1 ELSE 0 END
+
+    -- ANY_IN_BASE_SPIRIT: any product with the same base spirit works
+    WHEN `rs`.`MatchMode` = 'ANY_IN_BASE_SPIRIT' THEN
+      CASE WHEN EXISTS (
+        SELECT 1 FROM `app_d`.`product` `p3`
+        JOIN `app_d`.`category` `c3` ON `p3`.`CategoryId` = `c3`.`CategoryId`
+        WHERE `c3`.`BaseSpiritId` = `c`.`BaseSpiritId`
+        AND `c`.`BaseSpiritId` IS NOT NULL
+        AND `p3`.`ProductInStockQuantity` > 0
+        AND `p3`.`WorkspaceId` = `p`.`WorkspaceId`
+      ) THEN 1 ELSE 0 END
+
+    ELSE 0
+  END AS `EffectiveInStock`
 FROM `app_d`.`recipestep` `rs`
 JOIN `app_d`.`product` `p` ON `rs`.`ProductId` = `p`.`ProductId`
 JOIN `app_d`.`category` `c` ON `p`.`CategoryId` = `c`.`CategoryId`

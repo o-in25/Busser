@@ -106,15 +106,16 @@
 
 		<!-- Quick stats -->
 		<div class="flex flex-wrap gap-4 mt-8">
-			<div
-				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+			<a
+				href="/catalog/browse"
+				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 			>
 				<FlaskConical class="h-5 w-5 text-primary" />
 				<div>
 					<p class="text-2xl font-bold">{totalRecipes}</p>
 					<p class="text-xs text-muted-foreground">Total Recipes</p>
 				</div>
-			</div>
+			</a>
 			<div
 				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
 			>
@@ -125,15 +126,16 @@
 				</div>
 			</div>
 			{#if popularSpirit}
-				<div
-					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				<a
+					href="/catalog/browse/{popularSpirit.recipeCategoryId}"
+					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 				>
 					<TrendingUp class="h-5 w-5 text-primary" />
 					<div>
 						<p class="text-2xl font-bold">{popularSpirit.recipeCategoryDescription}</p>
 						<p class="text-xs text-muted-foreground">Most Popular</p>
 					</div>
-				</div>
+				</a>
 			{/if}
 		</div>
 	</div>
@@ -266,7 +268,7 @@
 				</p>
 			{:else}
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					{#each recentCocktails.slice(0, 4) as cocktail}
+					{#each recentCocktails.slice(0, 6) as cocktail}
 						<a
 							href="/catalog/{cocktail.recipeId}"
 							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"

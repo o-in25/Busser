@@ -81,8 +81,9 @@
 
 	function restoreDraft() {
 		if (savedDraft) {
-			data = savedDraft;
-			onrestore?.(savedDraft);
+			const draftToRestore = { ...savedDraft };
+			data = draftToRestore;
+			onrestore?.(draftToRestore);
 		}
 		showRestorePrompt = false;
 	}
