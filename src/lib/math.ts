@@ -351,7 +351,7 @@ export const getImpairmentLevel = (
     };
   }
   return {
-    level: "Dangerous",
+    level: "Lethal",
     description: "Life-threatening - seek medical attention",
     color: "red",
   };

@@ -25,10 +25,11 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	}
 
 	// Get recipes, spirits, favorites, and featured in parallel
-	const [catalogResult, spirits, userFavorites, featuredRecipes] = await Promise.all([
+	const [catalogResult, spirits, userFavorites, favoriteRecipes, featuredRecipes] = await Promise.all([
 		catalogRepo.findAll(workspaceId, page, perPage, Object.keys(filter).length > 0 ? filter : null),
 		catalogRepo.getSpirits(),
 		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
+		userId ? userRepo.getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
 		catalogRepo.getFeatured(workspaceId),
 	]);
 
@@ -40,19 +41,20 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 
 	// Apply show filter (favorites/featured)
 	if (showFilter === 'favorites') {
-		data = data.filter((recipe) => favoriteRecipeIds.has(recipe.recipeId));
-		// Update pagination to reflect filtered count
+		// Use the actual favorite recipes, not filtered paginated results
+		data = favoriteRecipes;
 		pagination = {
 			...pagination,
-			total: data.length,
+			total: favoriteRecipes.length,
 			lastPage: 1,
 			currentPage: 1,
 		};
 	} else if (showFilter === 'featured') {
-		data = data.filter((recipe) => featuredRecipeIds.has(recipe.recipeId));
+		// Use the actual featured recipes, not filtered paginated results
+		data = featuredRecipes;
 		pagination = {
 			...pagination,
-			total: data.length,
+			total: featuredRecipes.length,
 			lastPage: 1,
 			currentPage: 1,
 		};

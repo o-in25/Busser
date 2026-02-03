@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Circle } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 	import type { Writable } from 'svelte/store';
 
@@ -10,12 +9,14 @@
 		value,
 		disabled = false,
 		id,
+		children,
 		...restProps
 	}: {
 		class?: string;
 		value: string;
 		disabled?: boolean;
 		id?: string;
+		children?: import('svelte').Snippet;
 		[key: string]: unknown;
 	} = $props();
 
@@ -47,15 +48,15 @@
 	{disabled}
 	{id}
 	class={cn(
-		'aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-		isSelected && 'bg-primary',
+		'flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+		isSelected
+			? 'bg-primary text-primary-foreground shadow-sm'
+			: 'text-muted-foreground hover:text-foreground',
 		className
 	)}
 	onclick={handleClick}
 	onkeydown={handleKeydown}
 	{...restProps}
 >
-	{#if isSelected}
-		<Circle class="h-2.5 w-2.5 fill-primary-foreground text-primary-foreground mx-auto" />
-	{/if}
+	{@render children?.()}
 </button>

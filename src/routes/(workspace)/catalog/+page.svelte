@@ -81,10 +81,52 @@
 			tip: 'Always use freshly squeezed citrus juice. The flavor degrades significantly after just a few hours.',
 			source: 'Classic Technique',
 		},
+		{
+			title: 'Why Freezer Ice is Cloudy',
+			tip: 'Ice trays freeze from all sides, trapping gas and impurities in the center. Clear ice forms layer by layer from one direction, pushing out impurities as it grows.',
+			source: 'Ice Science',
+		},
+		{
+			title: 'The Supercooling Effect',
+			tip: 'Water needs to be chilled below 0°C to form ice crystals. Slow freezing produces fewer, larger crystals that are clearer and melt more slowly.',
+			source: 'Dave Arnold',
+		},
+		{
+			title: 'Essential Bar Tools',
+			tip: 'Start with a good jigger set, Hawthorne strainer, julep strainer, muddler, and a Y-peeler. These basics will cover most cocktail recipes.',
+			source: 'Bar Equipment',
+		},
+		{
+			title: 'The 2-Inch Cube',
+			tip: 'Large ice cubes have less surface area relative to volume, meaning slower melting and less dilution - perfect for spirit-forward drinks.',
+			source: 'Ice Science',
+		},
+		{
+			title: 'Water Expands When It Freezes',
+			tip: 'Water expands about 9% when freezing. This force can shatter rocks and pipes - and explains those peaks on your ice cubes.',
+			source: 'Ice Science',
+		},
+		{
+			title: 'The Lewis Bag',
+			tip: 'For crushed ice, use a Lewis bag and mallet. It gives you control over ice texture and is quieter than an electric crusher.',
+			source: 'Bar Equipment',
+		},
 	];
 
 	// Pick a random tip
-	const todaysTip = bartenderTips[Math.floor(Math.random() * bartenderTips.length)];
+	function getRandomTip() {
+		return bartenderTips[Math.floor(Math.random() * bartenderTips.length)];
+	}
+	let currentTip = $state(getRandomTip());
+
+	function showNewTip() {
+		let newTip = getRandomTip();
+		// Ensure we get a different tip if possible
+		while (bartenderTips.length > 1 && newTip.title === currentTip.title) {
+			newTip = getRandomTip();
+		}
+		currentTip = newTip;
+	}
 </script>
 
 <svelte:head>
@@ -256,14 +298,17 @@
 						method="POST"
 						action="?/toggleFavorite"
 						use:enhance={() => {
-							if (favorites.has(featuredCocktail.recipeId)) {
-								favorites.delete(featuredCocktail.recipeId);
+							const newFavorites = new Set(favorites);
+							if (newFavorites.has(featuredCocktail.recipeId)) {
+								newFavorites.delete(featuredCocktail.recipeId);
 							} else {
-								favorites.add(featuredCocktail.recipeId);
+								newFavorites.add(featuredCocktail.recipeId);
 							}
-							favorites = favorites;
+							favorites = newFavorites;
 							return async ({ result }) => {
-								if (result.type === 'failure') invalidateAll();
+								if (result.type !== 'success' || (result.data && !result.data.success)) {
+									invalidateAll();
+								}
 							};
 						}}
 					>
@@ -335,10 +380,10 @@
 								{/if}
 							</a>
 							<a href="/catalog/{cocktail.recipeId}" class="flex-1 min-w-0">
-								<p class="font-medium truncate group-hover:text-primary transition-colors">
+								<p class="font-medium truncate group-hover:text-accent-foreground transition-colors">
 									{cocktail.recipeName}
 								</p>
-								<p class="text-xs text-muted-foreground">
+								<p class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors">
 									{cocktail.recipeCategoryDescription}
 								</p>
 							</a>
@@ -347,16 +392,17 @@
 									method="POST"
 									action="?/toggleFavorite"
 									use:enhance={() => {
-										// Optimistic update
-										if (favorites.has(cocktail.recipeId)) {
-											favorites.delete(cocktail.recipeId);
+										// Optimistic update with new Set for reactivity
+										const newFavorites = new Set(favorites);
+										if (newFavorites.has(cocktail.recipeId)) {
+											newFavorites.delete(cocktail.recipeId);
 										} else {
-											favorites.add(cocktail.recipeId);
+											newFavorites.add(cocktail.recipeId);
 										}
-										favorites = favorites;
+										favorites = newFavorites;
 										return async ({ result }) => {
-											if (result.type === 'failure') {
-												// Revert on failure
+											// Revert on any error
+											if (result.type !== 'success' || (result.data && !result.data.success)) {
 												invalidateAll();
 											}
 										};
@@ -366,14 +412,14 @@
 									<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
 									<button
 										type="submit"
-										class="p-1.5 rounded-md hover:bg-muted transition-colors"
+										class="p-1.5 rounded-md hover:bg-background/50 transition-colors"
 										title={favorites.has(cocktail.recipeId) ? 'Remove from favorites' : 'Add to favorites'}
 									>
 										<Heart
 											class={cn(
-												'h-4 w-4 transition-colors',
+												'h-4 w-4 transition-colors group-hover:text-accent-foreground',
 												favorites.has(cocktail.recipeId)
-													? 'fill-red-500 text-red-500'
+													? 'fill-red-500 text-red-500 group-hover:fill-accent-foreground'
 													: 'text-muted-foreground hover:text-red-500'
 											)}
 										/>
@@ -384,15 +430,17 @@
 										method="POST"
 										action="?/toggleFeatured"
 										use:enhance={() => {
-											// Optimistic update
-											if (featured.has(cocktail.recipeId)) {
-												featured.delete(cocktail.recipeId);
+											// Optimistic update with new Set for reactivity
+											const newFeatured = new Set(featured);
+											if (newFeatured.has(cocktail.recipeId)) {
+												newFeatured.delete(cocktail.recipeId);
 											} else {
-												featured.add(cocktail.recipeId);
+												newFeatured.add(cocktail.recipeId);
 											}
-											featured = featured;
+											featured = newFeatured;
 											return async ({ result }) => {
-												if (result.type === 'failure') {
+												// Revert on any error
+												if (result.type !== 'success' || (result.data && !result.data.success)) {
 													invalidateAll();
 												}
 											};
@@ -402,14 +450,14 @@
 										<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
 										<button
 											type="submit"
-											class="p-1.5 rounded-md hover:bg-muted transition-colors"
+											class="p-1.5 rounded-md hover:bg-background/50 transition-colors"
 											title={featured.has(cocktail.recipeId) ? 'Remove from featured' : 'Add to featured'}
 										>
 											<Star
 												class={cn(
-													'h-4 w-4 transition-colors',
+													'h-4 w-4 transition-colors group-hover:text-accent-foreground',
 													featured.has(cocktail.recipeId)
-														? 'fill-yellow-500 text-yellow-500'
+														? 'fill-yellow-500 text-yellow-500 group-hover:fill-accent-foreground'
 														: 'text-muted-foreground hover:text-yellow-500'
 												)}
 											/>
@@ -428,7 +476,10 @@
 <!-- Bottom Row: Bartender Tip + Add Recipe CTA -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 	<!-- Bartender Tip -->
-	<Card.Root class="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border-amber-500/20">
+	<Card.Root
+		class="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border-amber-500/20 cursor-pointer hover:border-amber-500/40 transition-colors"
+		onclick={showNewTip}
+	>
 		<Card.Header>
 			<Card.Title class="flex items-center gap-2 text-amber-600 dark:text-amber-400">
 				<Lightbulb class="h-5 w-5" />
@@ -436,12 +487,15 @@
 			</Card.Title>
 		</Card.Header>
 		<Card.Content>
-			<h4 class="font-semibold mb-2">{todaysTip.title}</h4>
+			<h4 class="font-semibold mb-2">{currentTip.title}</h4>
 			<p class="text-muted-foreground text-sm leading-relaxed mb-3">
-				"{todaysTip.tip}"
+				"{currentTip.tip}"
 			</p>
 			<p class="text-xs text-muted-foreground/70 italic">
-				— {todaysTip.source}
+				— {currentTip.source}
+			</p>
+			<p class="text-xs text-amber-600/50 dark:text-amber-400/50 mt-3">
+				Click for another tip
 			</p>
 		</Card.Content>
 	</Card.Root>
