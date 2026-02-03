@@ -13,7 +13,7 @@
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -36,6 +36,10 @@
 	// Filter state
 	let searchInput = $state(data.filters.search || '');
 	let selectedSort = $state(data.filters.sort || 'name-asc');
+
+	// Track favorites/featured for optimistic updates
+	let favorites = $state(new Set(data.favoriteRecipeIds));
+	let featured = $state(new Set(data.featuredRecipeIds));
 
 	// Sort options
 	const sortOptions = [
@@ -111,6 +115,8 @@
 	$effect(() => {
 		searchInput = data.filters.search || '';
 		selectedSort = data.filters.sort || 'name-asc';
+		favorites = new Set(data.favoriteRecipeIds);
+		featured = new Set(data.featuredRecipeIds);
 	});
 
 	// Compute display label for sort dropdown
@@ -118,6 +124,26 @@
 		const option = sortOptions.find((o) => o.value === selectedSort);
 		return option?.label || 'Name (A-Z)';
 	});
+
+	function handleToggleFavorite(id: number) {
+		const newFavorites = new Set(favorites);
+		if (newFavorites.has(id)) {
+			newFavorites.delete(id);
+		} else {
+			newFavorites.add(id);
+		}
+		favorites = newFavorites;
+	}
+
+	function handleToggleFeatured(id: number) {
+		const newFeatured = new Set(featured);
+		if (newFeatured.has(id)) {
+			newFeatured.delete(id);
+		} else {
+			newFeatured.add(id);
+		}
+		featured = newFeatured;
+	}
 </script>
 
 <svelte:head>
@@ -345,7 +371,17 @@
 			)}
 		>
 			{#each data.recipes as recipe (recipe.recipeId)}
-				<CatalogBrowseCard {recipe} {viewMode} />
+				<CatalogBrowseCard
+					{recipe}
+					{viewMode}
+					isFavorite={favorites.has(recipe.recipeId)}
+					isFeatured={featured.has(recipe.recipeId)}
+					{canModify}
+					workspaceId={workspace.workspaceId}
+					actionPath="?"
+					onToggleFavorite={handleToggleFavorite}
+					onToggleFeatured={handleToggleFeatured}
+				/>
 			{/each}
 		</div>
 
