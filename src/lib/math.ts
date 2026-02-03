@@ -111,6 +111,11 @@ const units: Record<
     fromMl: (ml: number) => ml / 5,
     i18n: (qty: number) => (qty === 1 ? "tsp" : "tsp"),
   },
+  barspoon: {
+    toMl: 5,
+    fromMl: (ml: number) => ml / 5,
+    i18n: (qty: number) => (qty === 1 ? "barspoon" : "barspoons"),
+  },
   tbsp: {
     toMl: 15,
     fromMl: (ml: number) => ml / 15,

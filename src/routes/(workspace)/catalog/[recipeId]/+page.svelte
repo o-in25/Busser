@@ -35,9 +35,9 @@
 <div class="container mx-auto max-w-6xl px-4">
 	<!-- Back navigation + action buttons -->
 	<div class="mb-4 mt-4 flex items-center justify-between">
-		<BackButton fallback="/catalog" label="Back to Catalog" size="sm" />
+		<BackButton fallback="/catalog" label="Back to Catalog" size="sm" class="max-sm:[&>span]:hidden max-sm:gap-0" />
 
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-1 sm:gap-2">
 			<!-- Favorite button -->
 			<form
 				method="POST"
@@ -58,10 +58,10 @@
 					type="submit"
 					variant={isFavorite ? 'default' : 'outline'}
 					size="sm"
-					class={cn(isFavorite && 'bg-red-500 hover:bg-red-600 border-red-500')}
+					class={cn('max-sm:px-2', isFavorite && 'bg-red-500 hover:bg-red-600 border-red-500')}
 				>
-					<Heart class={cn('h-4 w-4 mr-2', isFavorite && 'fill-current')} />
-					{isFavorite ? 'Favorited' : 'Favorite'}
+					<Heart class={cn('h-4 w-4 sm:mr-2', isFavorite && 'fill-current')} />
+					<span class="hidden sm:inline">{isFavorite ? 'Favorited' : 'Favorite'}</span>
 				</Button>
 			</form>
 
@@ -86,10 +86,10 @@
 						type="submit"
 						variant={isFeatured ? 'default' : 'outline'}
 						size="sm"
-						class={cn(isFeatured && 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-black')}
+						class={cn('max-sm:px-2', isFeatured && 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-black')}
 					>
-						<Star class={cn('h-4 w-4 mr-2', isFeatured && 'fill-current')} />
-						{isFeatured ? 'Featured' : 'Feature'}
+						<Star class={cn('h-4 w-4 sm:mr-2', isFeatured && 'fill-current')} />
+						<span class="hidden sm:inline">{isFeatured ? 'Featured' : 'Feature'}</span>
 					</Button>
 				</form>
 			{/if}

@@ -87,7 +87,7 @@
 	let isTopOff = $derived(selectedUnit === 'top off');
 
 	// all available units
-	const units = ['oz', 'ml', 'dash', 'tsp', 'tbsp', 'cube', 'top off'];
+	const units = ['oz', 'ml', 'dash', 'barspoon', 'tsp', 'tbsp', 'cube', 'top off'];
 
 	// quick select options per unit
 	const quickOptionsByUnit: Record<string, { label: string; value: string }[]> = {
@@ -115,6 +115,11 @@
 			{ label: '0.5', value: '0.5' },
 			{ label: '1', value: '1' },
 			{ label: '2', value: '2' },
+		],
+		barspoon: [
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+			{ label: '3', value: '3' },
 		],
 		tbsp: [
 			{ label: '0.5', value: '0.5' },
@@ -229,7 +234,7 @@
 						disabled={isTopOff}
 					/>
 					<Select.Root type="single" bind:value={selectedUnit}>
-						<Select.Trigger class="w-24">
+						<Select.Trigger class="w-32">
 							{selectedUnit}
 						</Select.Trigger>
 						<Select.Content>

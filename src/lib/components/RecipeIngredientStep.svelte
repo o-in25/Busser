@@ -32,7 +32,25 @@
 
 	const units = getUnits();
 	const displayQuantity = $derived(convertFromMl(unit, quantity));
-	const unitLabel = $derived(units[unit]?.i18n(quantity) || unit);
+	const unitLabel = $derived(units[unit]?.i18n(displayQuantity) || unit);
+
+	// Format the ingredient line based on unit type
+	const formattedIngredient = $derived.by(() => {
+		const unitLower = unit.toLowerCase();
+
+		// "Top off" is a special case - no quantity needed
+		if (unitLower === 'top off') {
+			return { prefix: 'Top off with', ingredient: categoryName };
+		}
+
+		// Countable discrete units - use space before unit, no "of"
+		if (unitLower === 'dash' || unitLower === 'cube' || unitLower === 'barspoon') {
+			return { prefix: `${Math.round(displayQuantity)} ${unitLabel}`, ingredient: categoryName };
+		}
+
+		// Volumetric units (oz, ml, tsp, tbsp) - no space, no "of"
+		return { prefix: `${displayQuantity}${unitLabel}`, ingredient: categoryName };
+	});
 
 	// Map baseSpiritId to spirit name for display
 	const spiritNames: Record<number, string> = {
@@ -91,13 +109,13 @@
 		<!-- Top line -->
 		{#if checked}
 			<s class="text-foreground font-semibold">
-				{displayQuantity}{unitLabel} <span class="text-muted-foreground">of</span>
-				{categoryName}
+				{formattedIngredient.prefix}
+				<span class="text-muted-foreground">{formattedIngredient.ingredient}</span>
 			</s>
 		{:else}
 			<div class="text-foreground font-semibold">
-				{displayQuantity}{unitLabel} <span class="text-muted-foreground">of</span>
-				{categoryName}
+				{formattedIngredient.prefix}
+				<span class="text-muted-foreground">{formattedIngredient.ingredient}</span>
 			</div>
 		{/if}
 

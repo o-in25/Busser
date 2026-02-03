@@ -105,7 +105,7 @@ export class InventoryRepository extends BaseRepository {
 				const [parentRow] = await trx('product').insert({
 					workspaceId,
 					CategoryId: product.categoryId,
-					SupplierId: product.supplierId,
+					SupplierId: product.supplierId || 1,
 					ProductName: product.productName,
 					ProductInStockQuantity: product.productInStockQuantity,
 					ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
