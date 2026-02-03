@@ -249,3 +249,60 @@ WHERE `br`.`RecipeId` IN (
 -- ALTER TABLE `app_d`.`category` DROP FOREIGN KEY `fk_category_parent`;
 -- ALTER TABLE `app_d`.`category` DROP COLUMN `BaseSpiritId`;
 -- ALTER TABLE `app_d`.`category` DROP COLUMN `ParentCategoryId`;
+
+
+-- ============================================
+-- Migration: User Favorites & Workspace Featured
+-- Description: Adds support for users to favorite recipes (personal) and
+--              workspaces to have curated featured cocktails (shared).
+-- Date: 2025
+-- ============================================
+
+-- ============================================
+-- STEP 1: Create workspaceFeatured table in app_d
+-- Stores curated featured cocktails per workspace (visible to all workspace members)
+-- ============================================
+
+CREATE TABLE `app_d`.`workspaceFeatured` (
+  `featuredId` INT AUTO_INCREMENT PRIMARY KEY,
+  `workspaceId` VARCHAR(64) NOT NULL,
+  `recipeId` INT NOT NULL,
+  `featuredOrder` INT NOT NULL DEFAULT 0,
+  `createdDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_workspacefeatured_recipe`
+    FOREIGN KEY (`recipeId`) REFERENCES `app_d`.`recipe`(`RecipeId`) ON DELETE CASCADE,
+  UNIQUE KEY `uq_workspace_recipe` (`workspaceId`, `recipeId`)
+);
+
+CREATE INDEX `idx_workspacefeatured_workspace` ON `app_d`.`workspaceFeatured`(`workspaceId`);
+
+
+-- ============================================
+-- STEP 2: Create userFavorite table in user_d
+-- Stores personal favorite recipes per user
+-- Uses cross-database FK to app_d.recipe
+-- ============================================
+
+CREATE TABLE `user_d`.`userFavorite` (
+  `favoriteId` VARCHAR(36) PRIMARY KEY,
+  `userId` VARCHAR(36) NOT NULL,
+  `recipeId` INT NOT NULL,
+  `workspaceId` VARCHAR(64) NOT NULL,
+  `createdDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_userfavorite_user`
+    FOREIGN KEY (`userId`) REFERENCES `user_d`.`user`(`userId`) ON DELETE CASCADE,
+  CONSTRAINT `fk_userfavorite_recipe`
+    FOREIGN KEY (`recipeId`) REFERENCES `app_d`.`recipe`(`RecipeId`) ON DELETE CASCADE,
+  UNIQUE KEY `uq_user_recipe` (`userId`, `recipeId`)
+);
+
+CREATE INDEX `idx_userfavorite_user` ON `user_d`.`userFavorite`(`userId`);
+CREATE INDEX `idx_userfavorite_workspace` ON `user_d`.`userFavorite`(`workspaceId`);
+
+
+-- ============================================
+-- ROLLBACK SCRIPT (if needed)
+-- ============================================
+
+-- DROP TABLE IF EXISTS `user_d`.`userFavorite`;
+-- DROP TABLE IF EXISTS `app_d`.`workspaceFeatured`;

@@ -1,12 +1,14 @@
 import { catalogRepo } from '$lib/server/core';
+import { userRepo } from '$lib/server/auth';
 import type { View } from '$lib/types';
 
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
-export const load = (async ({ parent }) => {
+export const load = (async ({ parent, locals }) => {
 	// get workspace from parent layout
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
+	const userId = locals.user?.userId;
 
 	// Get all spirits (global reference data)
 	const spirits = await catalogRepo.getSpirits();
@@ -30,12 +32,24 @@ export const load = (async ({ parent }) => {
 		}
 	}
 
-	// Pick a random featured cocktail (if we have any)
-	let featuredCocktail: View.BasicRecipe | null = null;
-	if (recentCocktails.length > 0) {
+	// Get workspace featured cocktails (curated by workspace admins)
+	const featuredCocktails = await catalogRepo.getFeatured(workspaceId);
+
+	// Fallback: if no featured cocktails, pick a random one from recent
+	let featuredCocktail: View.BasicRecipe | null = featuredCocktails[0] || null;
+	if (!featuredCocktail && recentCocktails.length > 0) {
 		const randomIndex = Math.floor(Math.random() * recentCocktails.length);
 		featuredCocktail = recentCocktails[randomIndex];
 	}
+
+	// Get user's favorites for this workspace
+	const userFavorites = userId
+		? await userRepo.getFavorites(userId, workspaceId)
+		: [];
+	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
+
+	// Get featured recipe IDs for this workspace
+	const featuredRecipeIds = new Set(featuredCocktails.map((f) => f.recipeId));
 
 	// Find most popular spirit (one with most recipes)
 	let popularSpirit = spirits[0] || null;
@@ -54,8 +68,59 @@ export const load = (async ({ parent }) => {
 			spiritCounts,
 			recentCocktails,
 			featuredCocktail,
+			featuredCocktails,
 			totalRecipes,
 			popularSpirit,
+			favoriteRecipeIds: [...favoriteRecipeIds],
+			featuredRecipeIds: [...featuredRecipeIds],
 		},
 	};
 }) satisfies PageServerLoad;
+
+export const actions: Actions = {
+	toggleFavorite: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		if (!userId) {
+			return { success: false, error: 'Not authenticated' };
+		}
+
+		const formData = await request.formData();
+		const recipeId = Number(formData.get('recipeId'));
+		const workspaceId = formData.get('workspaceId') as string;
+
+		if (!recipeId || !workspaceId) {
+			return { success: false, error: 'Missing required fields' };
+		}
+
+		const result = await userRepo.toggleFavorite(userId, recipeId, workspaceId);
+
+		if (result.status === 'error') {
+			return { success: false, error: result.error };
+		}
+
+		return { success: true, isFavorite: result.data?.isFavorite };
+	},
+
+	toggleFeatured: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		if (!userId) {
+			return { success: false, error: 'Not authenticated' };
+		}
+
+		const formData = await request.formData();
+		const recipeId = Number(formData.get('recipeId'));
+		const workspaceId = formData.get('workspaceId') as string;
+
+		if (!recipeId || !workspaceId) {
+			return { success: false, error: 'Missing required fields' };
+		}
+
+		const result = await catalogRepo.toggleFeatured(workspaceId, recipeId);
+
+		if (result.status === 'error') {
+			return { success: false, error: result.error };
+		}
+
+		return { success: true, isFeatured: result.data?.isFeatured };
+	},
+};

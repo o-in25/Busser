@@ -1,16 +1,19 @@
 import { catalogRepo } from '$lib/server/core';
+import { userRepo } from '$lib/server/auth';
 
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, parent }) => {
+export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
+	const userId = locals.user?.userId;
 
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const perPage = parseInt(url.searchParams.get('perPage') || '24');
 	const search = url.searchParams.get('search') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 	const spiritId = url.searchParams.get('spirit') || '';
+	const showFilter = url.searchParams.get('show') || ''; // 'favorites' | 'featured' | ''
 
 	// Build filter
 	const filter: Record<string, any> = {};
@@ -21,13 +24,39 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		filter.recipeCategoryId = parseInt(spiritId);
 	}
 
-	// Get recipes and spirits in parallel
-	const [catalogResult, spirits] = await Promise.all([
+	// Get recipes, spirits, favorites, and featured in parallel
+	const [catalogResult, spirits, userFavorites, featuredRecipes] = await Promise.all([
 		catalogRepo.findAll(workspaceId, page, perPage, Object.keys(filter).length > 0 ? filter : null),
 		catalogRepo.getSpirits(),
+		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
+		catalogRepo.getFeatured(workspaceId),
 	]);
 
 	let { data, pagination } = catalogResult;
+
+	// Build sets for quick lookup
+	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
+	const featuredRecipeIds = new Set(featuredRecipes.map((f) => f.recipeId));
+
+	// Apply show filter (favorites/featured)
+	if (showFilter === 'favorites') {
+		data = data.filter((recipe) => favoriteRecipeIds.has(recipe.recipeId));
+		// Update pagination to reflect filtered count
+		pagination = {
+			...pagination,
+			total: data.length,
+			lastPage: 1,
+			currentPage: 1,
+		};
+	} else if (showFilter === 'featured') {
+		data = data.filter((recipe) => featuredRecipeIds.has(recipe.recipeId));
+		pagination = {
+			...pagination,
+			total: data.length,
+			lastPage: 1,
+			currentPage: 1,
+		};
+	}
 
 	// Apply client-side sorting
 	switch (sort) {
@@ -49,11 +78,62 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		recipes: data,
 		pagination,
 		spirits,
+		favoriteRecipeIds: [...favoriteRecipeIds],
+		featuredRecipeIds: [...featuredRecipeIds],
 		filters: {
 			search,
 			sort,
 			spiritId,
+			showFilter,
 			page,
 		},
 	};
+};
+
+export const actions: Actions = {
+	toggleFavorite: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		if (!userId) {
+			return { success: false, error: 'Not authenticated' };
+		}
+
+		const formData = await request.formData();
+		const recipeId = Number(formData.get('recipeId'));
+		const workspaceId = formData.get('workspaceId') as string;
+
+		if (!recipeId || !workspaceId) {
+			return { success: false, error: 'Missing required fields' };
+		}
+
+		const result = await userRepo.toggleFavorite(userId, recipeId, workspaceId);
+
+		if (result.status === 'error') {
+			return { success: false, error: result.error };
+		}
+
+		return { success: true, isFavorite: result.data?.isFavorite };
+	},
+
+	toggleFeatured: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		if (!userId) {
+			return { success: false, error: 'Not authenticated' };
+		}
+
+		const formData = await request.formData();
+		const recipeId = Number(formData.get('recipeId'));
+		const workspaceId = formData.get('workspaceId') as string;
+
+		if (!recipeId || !workspaceId) {
+			return { success: false, error: 'Missing required fields' };
+		}
+
+		const result = await catalogRepo.toggleFeatured(workspaceId, recipeId);
+
+		if (result.status === 'error') {
+			return { success: false, error: result.error };
+		}
+
+		return { success: true, isFeatured: result.data?.isFeatured };
+	},
 };

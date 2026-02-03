@@ -12,6 +12,7 @@ import type {
 	Role,
 	SelectOption,
 	User,
+	UserFavorite,
 } from '$lib/types';
 
 import { DbProvider } from '../db';
@@ -1017,6 +1018,89 @@ export class UserRepository extends BaseRepository {
 				status: 'error',
 				error: 'Failed to process password reset request. Please try again.',
 			};
+		}
+	}
+
+	// User favorites management
+	async getFavorites(userId: string, workspaceId?: string): Promise<UserFavorite[]> {
+		try {
+			let query = this.db.table('userFavorite').where({ userId });
+			if (workspaceId) {
+				query = query.where({ workspaceId });
+			}
+			const dbResult = await query.orderBy('createdDate', 'desc');
+			return marshalToType<UserFavorite[]>(dbResult);
+		} catch (error: any) {
+			console.error('Error getting favorites:', error.message);
+			return [];
+		}
+	}
+
+	async addFavorite(userId: string, recipeId: number, workspaceId: string): Promise<QueryResult> {
+		try {
+			const favoriteId = crypto.randomUUID();
+			await this.db.table('userFavorite').insert({
+				favoriteId,
+				userId,
+				recipeId,
+				workspaceId,
+				createdDate: Logger.now(),
+			});
+			return { status: 'success' };
+		} catch (error: any) {
+			if (error.code === 'ER_DUP_ENTRY') {
+				return { status: 'error', error: 'Recipe is already in favorites.' };
+			}
+			console.error('Error adding favorite:', error.message);
+			return { status: 'error', error: 'Failed to add favorite.' };
+		}
+	}
+
+	async removeFavorite(userId: string, recipeId: number): Promise<QueryResult> {
+		try {
+			const rowsDeleted = await this.db.table('userFavorite').where({ userId, recipeId }).del();
+			if (rowsDeleted === 0) {
+				return { status: 'error', error: 'Favorite not found.' };
+			}
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error('Error removing favorite:', error.message);
+			return { status: 'error', error: 'Failed to remove favorite.' };
+		}
+	}
+
+	async isFavorite(userId: string, recipeId: number): Promise<boolean> {
+		try {
+			const dbResult = await this.db
+				.table('userFavorite')
+				.where({ userId, recipeId })
+				.first();
+			return !!dbResult;
+		} catch (error: any) {
+			console.error('Error checking favorite:', error.message);
+			return false;
+		}
+	}
+
+	async toggleFavorite(
+		userId: string,
+		recipeId: number,
+		workspaceId: string
+	): Promise<QueryResult<{ isFavorite: boolean }>> {
+		try {
+			const exists = await this.isFavorite(userId, recipeId);
+			if (exists) {
+				const result = await this.removeFavorite(userId, recipeId);
+				if (result.status === 'error') return result;
+				return { status: 'success', data: { isFavorite: false } };
+			} else {
+				const result = await this.addFavorite(userId, recipeId, workspaceId);
+				if (result.status === 'error') return result;
+				return { status: 'success', data: { isFavorite: true } };
+			}
+		} catch (error: any) {
+			console.error('Error toggling favorite:', error.message);
+			return { status: 'error', error: 'Failed to toggle favorite.' };
 		}
 	}
 }

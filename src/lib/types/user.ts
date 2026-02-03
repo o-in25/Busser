@@ -68,3 +68,11 @@ export interface WorkspaceUser {
 	workspaceRole: 'owner' | 'editor' | 'viewer';
 	joinedDate: Date;
 }
+
+export interface UserFavorite {
+	favoriteId: string;
+	userId: string;
+	recipeId: number;
+	workspaceId: string;
+	createdDate: Date;
+}

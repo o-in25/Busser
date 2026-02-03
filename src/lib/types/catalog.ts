@@ -9,6 +9,15 @@
 // - ANY_IN_BASE_SPIRIT: Any product with the same base spirit satisfies the step
 export type MatchMode = 'EXACT_PRODUCT' | 'ANY_IN_CATEGORY' | 'ANY_IN_BASE_SPIRIT';
 
+// workspacefeatured table - curated featured cocktails per workspace
+export interface WorkspaceFeatured {
+	featuredId: number;
+	workspaceId: string;
+	recipeId: number;
+	featuredOrder: number;
+	createdDate: Date;
+}
+
 // recipecategory table (whiskey cocktails, tiki, etc.)
 export type RecipeCategory = {
 	recipeCategoryId: number;
