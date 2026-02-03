@@ -231,6 +231,48 @@
 	let drynessRating = $state(recipe.recipeDrynessRating || 5);
 	let versatilityRating = $state(recipe.recipeVersatilityRating || 5);
 	let strengthRating = $state(recipe.recipeStrengthRating || 5);
+	let ratingsGenerating = $state(false);
+
+	// Generate ratings with AI
+	async function generateRatings() {
+		if (!recipe.recipeName || steps.length === 0) {
+			notificationStore.error('Please add a recipe name and at least one ingredient first.');
+			return;
+		}
+
+		ratingsGenerating = true;
+		try {
+			const response = await fetch('/api/generator/rating', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					recipeName: recipe.recipeName,
+					recipeDescription: recipe.recipeDescription,
+					ingredients: steps.map((step) => ({
+						name: step.productName || step.categoryName,
+						quantity: step.productIdQuantityInMilliliters,
+						unit: step.productIdQuantityUnit,
+						proof: step.productProof,
+					})),
+				}),
+			});
+
+			if (!response.ok) throw new Error('Failed to generate ratings');
+
+			const data = await response.json();
+			sweetnessRating = data.sweetnessRating;
+			drynessRating = data.drynessRating;
+			versatilityRating = data.versatilityRating;
+			strengthRating = data.strengthRating;
+
+			notificationStore.success('Ratings generated successfully!');
+		} catch (error) {
+			console.error('Failed to generate ratings:', error);
+			notificationStore.error('Failed to generate ratings. Please try again.');
+		} finally {
+			ratingsGenerating = false;
+		}
+	}
 
 	// Collapsible state - closed by default in add mode
 	let descriptionOpen = $state(!isAddMode);
@@ -376,39 +418,7 @@
 						</div>
 					</div>
 				{:else if step === 2}
-					<!-- Step 3: Flavor Ratings -->
-					<div class="space-y-6">
-						<FlavorSlider
-							label="Sweetness"
-							name="recipeSweetnessRating"
-							bind:value={sweetnessRating}
-							icon={Candy}
-							color="pink"
-						/>
-						<FlavorSlider
-							label="Dryness"
-							name="recipeDrynessRating"
-							bind:value={drynessRating}
-							icon={Droplet}
-							color="amber"
-						/>
-						<FlavorSlider
-							label="Versatility"
-							name="recipeVersatilityRating"
-							bind:value={versatilityRating}
-							icon={Sparkles}
-							color="purple"
-						/>
-						<FlavorSlider
-							label="Strength"
-							name="recipeStrengthRating"
-							bind:value={strengthRating}
-							icon={Gauge}
-							color="orange"
-						/>
-					</div>
-				{:else if step === 3}
-					<!-- Step 4: Ingredients -->
+					<!-- Step 3: Ingredients -->
 					<div class="space-y-4">
 						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 						<div class="flex gap-2">
@@ -460,8 +470,8 @@
 							Add Ingredient
 						</Button>
 					</div>
-				{:else if step === 4}
-					<!-- Step 5: Preparation Method -->
+				{:else if step === 3}
+					<!-- Step 4: Preparation Method -->
 					<div class="space-y-4">
 						<Label class="text-base font-medium block">How is it served?</Label>
 						<ServingMethodToggle
@@ -469,6 +479,48 @@
 							bind:value={selectedPrepMethodId}
 							variant="cards"
 							{steps}
+						/>
+					</div>
+				{:else if step === 4}
+					<!-- Step 5: Flavor Ratings -->
+					<div class="space-y-6">
+						<Button
+							type="button"
+							variant="outline"
+							class="w-full"
+							onclick={generateRatings}
+							disabled={ratingsGenerating}
+						>
+							<Wand2 class="w-4 h-4 mr-2" />
+							{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
+						</Button>
+						<FlavorSlider
+							label="Sweetness"
+							name="recipeSweetnessRating"
+							bind:value={sweetnessRating}
+							icon={Candy}
+							color="pink"
+						/>
+						<FlavorSlider
+							label="Dryness"
+							name="recipeDrynessRating"
+							bind:value={drynessRating}
+							icon={Droplet}
+							color="amber"
+						/>
+						<FlavorSlider
+							label="Versatility"
+							name="recipeVersatilityRating"
+							bind:value={versatilityRating}
+							icon={Sparkles}
+							color="purple"
+						/>
+						<FlavorSlider
+							label="Strength"
+							name="recipeStrengthRating"
+							bind:value={strengthRating}
+							icon={Gauge}
+							color="orange"
 						/>
 					</div>
 				{/if}
@@ -549,35 +601,46 @@
 
 			<!-- Section 4: Flavor Profile (collapsible) -->
 			<CollapsibleSection title="Flavor Profile" icon={Gauge} bind:open={ratingsOpen}>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FlavorSlider
-						label="Sweetness"
-						name="recipeSweetnessRating"
-						bind:value={sweetnessRating}
-						icon={Candy}
-						color="pink"
-					/>
-					<FlavorSlider
-						label="Dryness"
-						name="recipeDrynessRating"
-						bind:value={drynessRating}
-						icon={Droplet}
-						color="amber"
-					/>
-					<FlavorSlider
-						label="Versatility"
-						name="recipeVersatilityRating"
-						bind:value={versatilityRating}
-						icon={Sparkles}
-						color="purple"
-					/>
-					<FlavorSlider
-						label="Strength"
-						name="recipeStrengthRating"
-						bind:value={strengthRating}
-						icon={Gauge}
-						color="orange"
-					/>
+				<div class="space-y-4">
+					<Button
+						type="button"
+						variant="outline"
+						onclick={generateRatings}
+						disabled={ratingsGenerating}
+					>
+						<Wand2 class="w-4 h-4 mr-2" />
+						{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
+					</Button>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<FlavorSlider
+							label="Sweetness"
+							name="recipeSweetnessRating"
+							bind:value={sweetnessRating}
+							icon={Candy}
+							color="pink"
+						/>
+						<FlavorSlider
+							label="Dryness"
+							name="recipeDrynessRating"
+							bind:value={drynessRating}
+							icon={Droplet}
+							color="amber"
+						/>
+						<FlavorSlider
+							label="Versatility"
+							name="recipeVersatilityRating"
+							bind:value={versatilityRating}
+							icon={Sparkles}
+							color="purple"
+						/>
+						<FlavorSlider
+							label="Strength"
+							name="recipeStrengthRating"
+							bind:value={strengthRating}
+							icon={Gauge}
+							color="orange"
+						/>
+					</div>
 				</div>
 			</CollapsibleSection>
 

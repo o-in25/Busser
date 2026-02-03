@@ -8,6 +8,7 @@
 
 	interface Props {
 		fallback?: string;
+		href?: string;
 		label?: string;
 		size?: 'icon' | 'sm' | 'default';
 		variant?: 'ghost' | 'outline' | 'default';
@@ -16,6 +17,7 @@
 
 	let {
 		fallback = '/',
+		href,
 		label,
 		size = 'icon',
 		variant = 'ghost',
@@ -29,18 +31,26 @@
 			goto(fallback);
 		}
 	}
-</script>
 
-<button
-	onclick={handleBack}
-	class={cn(
+	const buttonClass = cn(
 		buttonVariants({ variant, size: label ? size : 'icon' }),
 		label && 'gap-2',
 		className
-	)}
->
-	<ArrowLeft class={label && size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
-	{#if label}
-		<span>{label}</span>
-	{/if}
-</button>
+	);
+</script>
+
+{#if href}
+	<a {href} class={buttonClass}>
+		<ArrowLeft class={label && size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
+		{#if label}
+			<span>{label}</span>
+		{/if}
+	</a>
+{:else}
+	<button onclick={handleBack} class={buttonClass}>
+		<ArrowLeft class={label && size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
+		{#if label}
+			<span>{label}</span>
+		{/if}
+	</button>
+{/if}

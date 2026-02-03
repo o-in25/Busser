@@ -149,24 +149,42 @@ export const calculateOverallScore = (
   if (![versatility, sweetness, dryness, strength].some((val) => val > 0))
     return 0;
 
+  // Base weights for each characteristic
   const weights = {
-    versatility: 0.4,
-    sweetnessDrynessRatio: 0.3,
+    versatility: 0.35,
+    flavorBalance: 0.35,
     strength: 0.3,
   };
+
+  // Calculate flavor balance score (average of sweetness and dryness)
+  const flavorBalance = (sweetness + dryness) / 2;
+
+  // Base score from weighted characteristics
   let totalScore =
     versatility * weights.versatility +
-    ((sweetness + dryness) / 2) * weights.sweetnessDrynessRatio +
+    flavorBalance * weights.flavorBalance +
     strength * weights.strength;
-  totalScore +=
-    (sweetness > 7 && dryness > 7 ? -0.1 : 0) +
-    (sweetness > 7 && dryness > 7 ? -0.1 : 0) +
-    (strength > 7 && (versatility < 5 || (sweetness + dryness) / 2 < 5)
-      ? -0.1
-      : 0);
-  totalScore = Math.min(Math.max(totalScore, 0), 10);
 
-  return totalScore;
+  // Penalty for contradictory flavor profile (very sweet AND very dry is unusual)
+  if (sweetness > 7 && dryness > 7) {
+    totalScore -= 0.5;
+  }
+
+  // Penalty for very strong drinks that lack balance or versatility
+  if (strength > 8 && (versatility < 4 || flavorBalance < 4)) {
+    totalScore -= 0.3;
+  }
+
+  // Small bonus for well-balanced profiles (all ratings between 4-7)
+  const isBalanced = [versatility, sweetness, dryness, strength].every(
+    (val) => val >= 4 && val <= 7,
+  );
+  if (isBalanced) {
+    totalScore += 0.3;
+  }
+
+  // Clamp to valid range
+  return Math.min(Math.max(totalScore, 0), 10);
 };
 
 export const calculateAbv = (

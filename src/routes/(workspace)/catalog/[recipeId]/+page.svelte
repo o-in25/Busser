@@ -35,7 +35,7 @@
 <div class="container mx-auto max-w-6xl px-4">
 	<!-- Back navigation + action buttons -->
 	<div class="mb-4 mt-4 flex items-center justify-between">
-		<BackButton fallback="/catalog" label="Back to Catalog" size="sm" class="max-sm:[&>span]:hidden max-sm:gap-0" />
+		<BackButton href="/catalog/browse" label="Back to Catalog" size="sm" class="max-sm:[&>span]:hidden max-sm:gap-0" />
 
 		<div class="flex items-center gap-1 sm:gap-2">
 			<!-- Favorite button -->
