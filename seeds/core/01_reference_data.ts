@@ -36,16 +36,14 @@ export async function seed(knex: Knex): Promise<void> {
 				RecipeCategoryId: 5,
 				RecipeCategoryDescriptionText:
 					'Gin is a distilled alcoholic beverage that gets its primary flavor from juniper berries. It has a distinctive, fresh taste that ranges from herbal to citrusy, depending on the botanicals used in its production.',
-				RecipeCategoryDescriptionImageUrl:
-					'https://storage.googleapis.com/busser/assets/gin.jpg',
+				RecipeCategoryDescriptionImageUrl: 'https://storage.googleapis.com/busser/assets/gin.jpg',
 			},
 			{
 				RecipeCategoryDescriptionId: 3,
 				RecipeCategoryId: 6,
 				RecipeCategoryDescriptionText:
 					'Vodka is a clear distilled alcoholic beverage, typically made from fermented grains or potatoes. It is known for its neutral flavor and smoothness, making it a popular base for many cocktails.',
-				RecipeCategoryDescriptionImageUrl:
-					'https://storage.googleapis.com/busser/assets/vodka.jpg',
+				RecipeCategoryDescriptionImageUrl: 'https://storage.googleapis.com/busser/assets/vodka.jpg',
 			},
 			{
 				RecipeCategoryDescriptionId: 4,
@@ -60,8 +58,7 @@ export async function seed(knex: Knex): Promise<void> {
 				RecipeCategoryId: 8,
 				RecipeCategoryDescriptionText:
 					'Rum is a distilled alcoholic beverage made from sugarcane byproducts, such as molasses or sugarcane juice. It is commonly produced in the Caribbean and Latin America, but also in other parts of the world.',
-				RecipeCategoryDescriptionImageUrl:
-					'https://storage.googleapis.com/busser/assets/rum.jpg',
+				RecipeCategoryDescriptionImageUrl: 'https://storage.googleapis.com/busser/assets/rum.jpg',
 			},
 			{
 				RecipeCategoryDescriptionId: 6,
