@@ -168,7 +168,7 @@
 		left: 0;
 		right: 0;
 		z-index: 50;
-		padding: 0.5rem 1.5rem !important;
+		padding: 0.5rem 0.75rem !important;
 		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 		justify-content: center;
 	}
@@ -215,7 +215,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 0.375rem 0.625rem;
+		padding: 0.375rem 0.25rem;
 		border-radius: 9999px;
 		color: rgba(113, 113, 122, 1);
 		transition: all 0.2s ease;

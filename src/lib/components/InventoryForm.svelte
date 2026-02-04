@@ -55,6 +55,10 @@
 	let productVersatilityRating = $state(0.0);
 	let productDescription = $state('');
 
+	// Pending image state (held in memory until form save)
+	let pendingImageFile = $state<File | null>(null);
+	let imageCleared = $state(false);
+
 	// Sync state with product changes
 	$effect(() => {
 		if (product) {
@@ -190,7 +194,20 @@
 		class="relative"
 		method="POST"
 		action={action === 'add' ? '?/add' : '?/edit'}
-		use:enhance={() => {
+		use:enhance={async ({ formData }) => {
+			// Upload pending image if any (held in memory until now)
+			if (pendingImageFile) {
+				const uploadData = new FormData();
+				uploadData.append('file', pendingImageFile);
+				const res = await fetch('/api/upload/image', { method: 'POST', body: uploadData });
+				const data = await res.json();
+				if (data.url) {
+					formData.set('productImageUrl', data.url);
+				}
+			} else if (imageCleared) {
+				formData.set('productImageCleared', 'true');
+			}
+
 			return async ({ result }) => {
 				if (result.type === 'redirect') {
 					draftManager?.clearDraft();
@@ -362,6 +379,8 @@
 						<ImagePrompt
 							name="productImageUrl"
 							bind:signedUrl={productImageUrl}
+							bind:pendingFile={pendingImageFile}
+							bind:imageCleared
 							trigger={productName}
 						/>
 					</div>

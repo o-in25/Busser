@@ -304,6 +304,10 @@
 			?.recipeTechniqueDescriptionText || ''
 	);
 
+	// Pending image state (held in memory until form save)
+	let pendingImageFile = $state<File | null>(null);
+	let imageCleared = $state(false);
+
 	// Collapsible state - closed by default in add mode
 	let descriptionOpen = $state(!isAddMode);
 	let ratingsOpen = $state(!isAddMode);
@@ -360,8 +364,22 @@
 		class="relative"
 		method="POST"
 		enctype="multipart/form-data"
-		use:enhance={({ formData }) => {
+		use:enhance={async ({ formData }) => {
 			disabled = true;
+
+			// Upload pending image if any (held in memory until now)
+			if (pendingImageFile) {
+				const uploadData = new FormData();
+				uploadData.append('file', pendingImageFile);
+				const res = await fetch('/api/upload/image', { method: 'POST', body: uploadData });
+				const data = await res.json();
+				if (data.url) {
+					formData.set('recipeImageUrl', data.url);
+				}
+			} else if (imageCleared) {
+				formData.set('recipeImageCleared', 'true');
+			}
+
 			let json = steps.map((step) => ({
 				...step,
 				productIdQuantityInMilliliters: convertToMl(
@@ -443,6 +461,8 @@
 							<ImagePrompt
 								name="recipeImageUrl"
 								bind:signedUrl={recipe.recipeImageUrl}
+								bind:pendingFile={pendingImageFile}
+								bind:imageCleared
 								trigger={recipe.recipeName}
 								ingredients={imageIngredients}
 								technique={imageTechnique}
@@ -623,6 +643,8 @@
 					<ImagePrompt
 						name="recipeImageUrl"
 						bind:signedUrl={recipe.recipeImageUrl}
+						bind:pendingFile={pendingImageFile}
+						bind:imageCleared
 						trigger={recipe.recipeName}
 						ingredients={imageIngredients}
 						technique={imageTechnique}

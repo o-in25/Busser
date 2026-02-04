@@ -128,7 +128,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			recipeVersatilityRating: proposal.ratings.versatility,
 		};
 
-		const result = await catalogRepo.save(workspaceId, recipe, recipeSteps, null as any);
+		const result = await catalogRepo.save(workspaceId, recipe, recipeSteps);
 
 		if (result.status === 'error') {
 			throw new Error(result.error);
