@@ -6,20 +6,22 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 
-	import { notificationStore } from '../../stores';
-
 	let {
 		name = 'image',
 		signedUrl = $bindable<string | null | undefined>(),
 		trigger,
 		label = 'Image',
 		url = '/api/generator/image',
+		ingredients = [],
+		technique = '',
 	}: {
 		name?: string;
 		signedUrl?: string | null;
 		trigger?: string;
 		label?: string;
 		url?: string;
+		ingredients?: string[];
+		technique?: string;
 	} = $props();
 
 	let files = $state<FileList | null>(null);
@@ -82,7 +84,11 @@
 			const response = await fetch(url, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ subject: trigger }),
+				body: JSON.stringify({
+					subject: trigger,
+					ingredients: ingredients.length ? ingredients : undefined,
+					technique: technique || undefined,
+				}),
 			});
 
 			if (!response.ok) {
@@ -113,12 +119,9 @@
 				fileInputRef.files = dataTransfer.files;
 				files = dataTransfer.files;
 			}
-
-			$notificationStore.success = { message: 'Image generated successfully!' };
 		} catch (error: unknown) {
 			console.error(error);
 			errorMessage = error instanceof Error ? error.message : 'Could not generate image.';
-			$notificationStore.error = { message: errorMessage };
 		} finally {
 			stopProgressAnimation();
 			isGenerating = false;

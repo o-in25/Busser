@@ -20,10 +20,10 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
 	const {

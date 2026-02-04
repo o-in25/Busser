@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ClipboardList, Home, LayoutGrid, LogOut, Ruler, Settings } from 'lucide-svelte';
+	import { ClipboardList, Home, LayoutGrid, LogOut, Ruler, Settings, Sparkles } from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import logoNav from '$lib/assets/logo-nav.png';
@@ -61,6 +61,7 @@
 		{ href: '/', icon: Home, label: 'Home' },
 		{ href: '/inventory', icon: ClipboardList, label: 'Inventory' },
 		{ href: '/catalog', icon: LayoutGrid, label: 'Catalog' },
+		{ href: '/assistant', icon: Sparkles, label: 'Busser AI' },
 		{ href: '/tools', icon: Ruler, label: 'Tools' },
 		{ href: '/settings', icon: Settings, label: 'Settings' },
 	];

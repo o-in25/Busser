@@ -55,10 +55,8 @@
 	);
 	$: value =
 		search.find(({ name }) => {
-			return name.toLowerCase().trim() === selectValue.toLocaleLowerCase().trim();
-		})?.value ||
-		value ||
-		null;
+			return name.toLowerCase().trim() === selectValue.toLowerCase().trim();
+		})?.value ?? null;
 	$: disabled = items.length === 0;
 
 	const showAutocomplete = () => (show = true);

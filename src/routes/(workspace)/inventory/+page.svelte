@@ -29,12 +29,12 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import type { Product } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
 	import { notificationStore } from '../../../stores';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
 

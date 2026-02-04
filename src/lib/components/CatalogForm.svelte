@@ -13,7 +13,7 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 	import { flip } from 'svelte/animate';
-	import { dndzone } from 'svelte-dnd-action';
+	import { dndzone, type DndEvent } from 'svelte-dnd-action';
 	import { v4 as uuidv4 } from 'uuid';
 
 	import { applyAction, enhance } from '$app/forms';
@@ -27,7 +27,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { ServingMethodToggle } from '$lib/components/ui/serving-method';
 	import { SpiritCard } from '$lib/components/ui/spirit-card';
-	import { convertFromMl, convertToMl } from '$lib/math';
+	import { calculateOverallScore, convertFromMl, convertToMl } from '$lib/math';
 	import type { PreparationMethod, Spirit, View } from '$lib/types';
 
 	import { notificationStore } from '../../stores';
@@ -191,12 +191,13 @@
 		}) as any;
 
 	// minimal dnd handlers
-	function handleDndConsider(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
-		steps = e.detail.items;
+	type StepWithId = View.BasicRecipeStep & { id: string };
+	function handleDndConsider(e: CustomEvent<DndEvent<StepWithId>>) {
+		steps = e.detail.items as StepWithId[];
 	}
 
-	function handleDndFinalize(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
-		steps = e.detail.items;
+	function handleDndFinalize(e: CustomEvent<DndEvent<StepWithId>>) {
+		steps = e.detail.items as StepWithId[];
 	}
 
 	const deleteRecipe = async () => {
@@ -231,6 +232,77 @@
 	let drynessRating = $state(recipe.recipeDrynessRating || 5);
 	let versatilityRating = $state(recipe.recipeVersatilityRating || 5);
 	let strengthRating = $state(recipe.recipeStrengthRating || 5);
+	let ratingsGenerating = $state(false);
+
+	// Calculate preview score based on current ratings
+	const previewScore = $derived(
+		calculateOverallScore(versatilityRating, sweetnessRating, drynessRating, strengthRating)
+	);
+
+	// Rating label and color based on score
+	const ratingsMap = [
+		{ max: 0, label: 'No Rating', bg: 'bg-gray-500' },
+		{ max: 2, label: 'Needs Work', bg: 'bg-red-500' },
+		{ max: 4, label: 'Below Average', bg: 'bg-orange-500' },
+		{ max: 5, label: 'Average', bg: 'bg-yellow-500' },
+		{ max: 6, label: 'Good', bg: 'bg-lime-500' },
+		{ max: 7, label: 'Great', bg: 'bg-green-500' },
+		{ max: 8, label: 'Excellent', bg: 'bg-emerald-500' },
+		{ max: 10, label: 'Outstanding', bg: 'bg-teal-500' },
+	];
+
+	const scoreLabel = $derived(
+		ratingsMap.find((r) => previewScore <= r.max) || ratingsMap[ratingsMap.length - 1]
+	);
+
+	// Generate ratings with AI
+	async function generateRatings() {
+		if (!recipe.recipeName || steps.length === 0) {
+			$notificationStore.error = { message: 'Please add a recipe name and at least one ingredient first.' };
+			return;
+		}
+
+		ratingsGenerating = true;
+		try {
+			const response = await fetch('/api/generator/rating', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					recipeName: recipe.recipeName,
+					recipeDescription: recipe.recipeDescription,
+					ingredients: steps.map((step) => ({
+						name: step.productName || step.categoryName,
+						quantity: step.productIdQuantityInMilliliters,
+						unit: step.productIdQuantityUnit,
+						proof: step.productProof,
+					})),
+				}),
+			});
+
+			if (!response.ok) throw new Error('Failed to generate ratings');
+
+			const data = await response.json();
+			sweetnessRating = data.sweetnessRating;
+			drynessRating = data.drynessRating;
+			versatilityRating = data.versatilityRating;
+			strengthRating = data.strengthRating;
+		} catch (error) {
+			console.error('Failed to generate ratings:', error);
+		} finally {
+			ratingsGenerating = false;
+		}
+	}
+
+	// Derive visual context for image generation
+	const imageIngredients = $derived(
+		steps
+			.filter((s) => s.productName || s.categoryName)
+			.map((s) => s.productName || s.categoryName)
+	);
+	const imageTechnique = $derived(
+		preparationMethods.find((m) => m.recipeTechniqueDescriptionId === selectedPrepMethodId)
+			?.recipeTechniqueDescriptionText || ''
+	);
 
 	// Collapsible state - closed by default in add mode
 	let descriptionOpen = $state(!isAddMode);
@@ -372,43 +444,13 @@
 								name="recipeImageUrl"
 								bind:signedUrl={recipe.recipeImageUrl}
 								trigger={recipe.recipeName}
+								ingredients={imageIngredients}
+								technique={imageTechnique}
 							/>
 						</div>
 					</div>
 				{:else if step === 2}
-					<!-- Step 3: Flavor Ratings -->
-					<div class="space-y-6">
-						<FlavorSlider
-							label="Sweetness"
-							name="recipeSweetnessRating"
-							bind:value={sweetnessRating}
-							icon={Candy}
-							color="pink"
-						/>
-						<FlavorSlider
-							label="Dryness"
-							name="recipeDrynessRating"
-							bind:value={drynessRating}
-							icon={Droplet}
-							color="amber"
-						/>
-						<FlavorSlider
-							label="Versatility"
-							name="recipeVersatilityRating"
-							bind:value={versatilityRating}
-							icon={Sparkles}
-							color="purple"
-						/>
-						<FlavorSlider
-							label="Strength"
-							name="recipeStrengthRating"
-							bind:value={strengthRating}
-							icon={Gauge}
-							color="orange"
-						/>
-					</div>
-				{:else if step === 3}
-					<!-- Step 4: Ingredients -->
+					<!-- Step 3: Ingredients -->
 					<div class="space-y-4">
 						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 						<div class="flex gap-2">
@@ -438,8 +480,8 @@
 
 						<div
 							use:dndzone={getDndOptions(steps, !reorderMode)}
-							onconsider={handleDndConsider}
-							onfinalize={handleDndFinalize}
+							onconsider={handleDndConsider as any}
+							onfinalize={handleDndFinalize as any}
 							class="space-y-4"
 						>
 							{#each steps as step, stepNumber (step.id)}
@@ -460,8 +502,8 @@
 							Add Ingredient
 						</Button>
 					</div>
-				{:else if step === 4}
-					<!-- Step 5: Preparation Method -->
+				{:else if step === 3}
+					<!-- Step 4: Preparation Method -->
 					<div class="space-y-4">
 						<Label class="text-base font-medium block">How is it served?</Label>
 						<ServingMethodToggle
@@ -469,6 +511,58 @@
 							bind:value={selectedPrepMethodId}
 							variant="cards"
 							{steps}
+						/>
+					</div>
+				{:else if step === 4}
+					<!-- Step 5: Flavor Ratings -->
+					<div class="space-y-6">
+						<!-- Score Preview -->
+						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+							<span class="text-sm text-muted-foreground">Overall Score</span>
+							<div class="flex items-center gap-2">
+								<span class={`px-2 py-0.5 rounded text-xs font-medium text-white ${scoreLabel.bg}`}>
+									{scoreLabel.label}
+								</span>
+								<span class="text-lg font-bold tabular-nums">{previewScore.toFixed(1)}</span>
+							</div>
+						</div>
+						<Button
+							type="button"
+							variant="outline"
+							class="w-full"
+							onclick={generateRatings}
+							disabled={ratingsGenerating}
+						>
+							<Wand2 class="w-4 h-4 mr-2" />
+							{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
+						</Button>
+						<FlavorSlider
+							label="Sweetness"
+							name="recipeSweetnessRating"
+							bind:value={sweetnessRating}
+							icon={Candy}
+							color="pink"
+						/>
+						<FlavorSlider
+							label="Dryness"
+							name="recipeDrynessRating"
+							bind:value={drynessRating}
+							icon={Droplet}
+							color="amber"
+						/>
+						<FlavorSlider
+							label="Versatility"
+							name="recipeVersatilityRating"
+							bind:value={versatilityRating}
+							icon={Sparkles}
+							color="purple"
+						/>
+						<FlavorSlider
+							label="Strength"
+							name="recipeStrengthRating"
+							bind:value={strengthRating}
+							icon={Gauge}
+							color="orange"
 						/>
 					</div>
 				{/if}
@@ -530,6 +624,8 @@
 						name="recipeImageUrl"
 						bind:signedUrl={recipe.recipeImageUrl}
 						trigger={recipe.recipeName}
+						ingredients={imageIngredients}
+						technique={imageTechnique}
 					/>
 				</div>
 			</CollapsibleSection>
@@ -549,35 +645,56 @@
 
 			<!-- Section 4: Flavor Profile (collapsible) -->
 			<CollapsibleSection title="Flavor Profile" icon={Gauge} bind:open={ratingsOpen}>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FlavorSlider
-						label="Sweetness"
-						name="recipeSweetnessRating"
-						bind:value={sweetnessRating}
-						icon={Candy}
-						color="pink"
-					/>
-					<FlavorSlider
-						label="Dryness"
-						name="recipeDrynessRating"
-						bind:value={drynessRating}
-						icon={Droplet}
-						color="amber"
-					/>
-					<FlavorSlider
-						label="Versatility"
-						name="recipeVersatilityRating"
-						bind:value={versatilityRating}
-						icon={Sparkles}
-						color="purple"
-					/>
-					<FlavorSlider
-						label="Strength"
-						name="recipeStrengthRating"
-						bind:value={strengthRating}
-						icon={Gauge}
-						color="orange"
-					/>
+				<div class="space-y-4">
+					<!-- Score Preview -->
+					<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+						<span class="text-sm text-muted-foreground">Overall Score</span>
+						<div class="flex items-center gap-2">
+							<span class={`px-2 py-0.5 rounded text-xs font-medium text-white ${scoreLabel.bg}`}>
+								{scoreLabel.label}
+							</span>
+							<span class="text-lg font-bold tabular-nums">{previewScore.toFixed(1)}</span>
+						</div>
+					</div>
+					<Button
+						type="button"
+						variant="outline"
+						onclick={generateRatings}
+						disabled={ratingsGenerating}
+					>
+						<Wand2 class="w-4 h-4 mr-2" />
+						{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
+					</Button>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<FlavorSlider
+							label="Sweetness"
+							name="recipeSweetnessRating"
+							bind:value={sweetnessRating}
+							icon={Candy}
+							color="pink"
+						/>
+						<FlavorSlider
+							label="Dryness"
+							name="recipeDrynessRating"
+							bind:value={drynessRating}
+							icon={Droplet}
+							color="amber"
+						/>
+						<FlavorSlider
+							label="Versatility"
+							name="recipeVersatilityRating"
+							bind:value={versatilityRating}
+							icon={Sparkles}
+							color="purple"
+						/>
+						<FlavorSlider
+							label="Strength"
+							name="recipeStrengthRating"
+							bind:value={strengthRating}
+							icon={Gauge}
+							color="orange"
+						/>
+					</div>
 				</div>
 			</CollapsibleSection>
 
@@ -615,8 +732,8 @@
 					<!-- Recipe steps -->
 					<div
 						use:dndzone={getDndOptions(steps, !reorderMode)}
-						onconsider={handleDndConsider}
-						onfinalize={handleDndFinalize}
+						onconsider={handleDndConsider as any}
+						onfinalize={handleDndFinalize as any}
 						class="space-y-4"
 					>
 						{#each steps as step, stepNumber (step.id)}

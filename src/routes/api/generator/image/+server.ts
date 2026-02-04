@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	try {
 		const body = await request.json();
-		const { subject } = body;
+		const { subject, ingredients, technique } = body;
 
 		if (!subject) {
 			error(StatusCodes.BAD_REQUEST, {
@@ -26,7 +26,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		const generator = new ImageGenerator();
-		const result = await generator.generateContent(subject);
+		const result = await generator.generateContent(subject, { ingredients, technique });
 		return json(result);
 	} catch (err: unknown) {
 		console.error('Image generation error:', err);

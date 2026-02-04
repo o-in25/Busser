@@ -145,10 +145,10 @@
 						<img
 							src={method.recipeTechniqueDescriptionImageUrl}
 							alt={method.recipeTechniqueDescriptionText}
-							class="h-5 w-5 rounded object-cover"
+							class="h-5 w-5 rounded object-cover sm:hidden"
 						/>
 					{:else}
-						<MethodIcon class="h-4 w-4" />
+						<MethodIcon class="h-4 w-4 sm:hidden" />
 					{/if}
 					<span>{method.recipeTechniqueDescriptionText}</span>
 				</button>

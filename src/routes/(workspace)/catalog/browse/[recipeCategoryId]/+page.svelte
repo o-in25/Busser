@@ -34,8 +34,8 @@
 	let viewMode = $state<'grid' | 'list'>('grid');
 
 	// Filter state
-	let searchInput = $state(data.filters.search || '');
-	let selectedSort = $state(data.filters.sort || 'name-asc');
+	let searchInput = $state(data.filters.search ?? '');
+	let selectedSort = $state(data.filters.sort ?? 'name-asc');
 
 	// Track favorites/featured for optimistic updates
 	let favorites = $state(new Set(data.favoriteRecipeIds));
@@ -113,8 +113,8 @@
 
 	// Update local state when page data changes
 	$effect(() => {
-		searchInput = data.filters.search || '';
-		selectedSort = data.filters.sort || 'name-asc';
+		searchInput = data.filters.search ?? '';
+		selectedSort = data.filters.sort ?? 'name-asc';
 		favorites = new Set(data.favoriteRecipeIds);
 		featured = new Set(data.featuredRecipeIds);
 	});

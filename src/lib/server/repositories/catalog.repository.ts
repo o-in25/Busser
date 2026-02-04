@@ -88,7 +88,7 @@ export class CatalogRepository extends BaseRepository {
 				let [dbResult] = await trx('basicrecipe').select().where({ recipeId, workspaceId });
 				recipe = marshal<View.BasicRecipe>(dbResult, camelCase);
 				if (!recipe) throw Error('Recipe not found in this workspace.');
-				dbResult = await trx('basicrecipestep').select().where({ recipeId, workspaceId });
+				dbResult = await trx('basicrecipestep').select().where({ recipeId, workspaceId }).orderBy('RecipeStepId', 'asc');
 				recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
 			});
 
@@ -270,7 +270,6 @@ export class CatalogRepository extends BaseRepository {
 				// create new recipe
 				if (!oldRecipe) {
 					[dbResult] = await trx('recipedescription').insert({
-						workspaceId,
 						RecipeDescription: recipe.recipeDescription,
 						RecipeDescriptionImageUrl: null,
 						RecipeSweetnessRating: recipe.recipeSweetnessRating,
@@ -401,7 +400,6 @@ export class CatalogRepository extends BaseRepository {
 
 				const deletedRows = await trx('recipedescription')
 					.where('RecipeDescriptionId', recipeDescriptionId)
-					.where('workspaceId', workspaceId)
 					.del();
 
 				if (deletedRows < 1)

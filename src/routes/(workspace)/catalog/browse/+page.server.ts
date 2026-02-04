@@ -1,5 +1,6 @@
 import { catalogRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
+import { calculateOverallScore } from '$lib/math';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -25,13 +26,19 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	}
 
 	// Get recipes, spirits, favorites, and featured in parallel
-	const [catalogResult, spirits, userFavorites, favoriteRecipes, featuredRecipes] = await Promise.all([
-		catalogRepo.findAll(workspaceId, page, perPage, Object.keys(filter).length > 0 ? filter : null),
-		catalogRepo.getSpirits(),
-		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
-		userId ? userRepo.getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
-		catalogRepo.getFeatured(workspaceId),
-	]);
+	const [catalogResult, spirits, userFavorites, favoriteRecipes, featuredRecipes] =
+		await Promise.all([
+			catalogRepo.findAll(
+				workspaceId,
+				page,
+				perPage,
+				Object.keys(filter).length > 0 ? filter : null
+			),
+			catalogRepo.getSpirits(),
+			userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
+			userId ? userRepo.getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
+			catalogRepo.getFeatured(workspaceId),
+		]);
 
 	let { data, pagination } = catalogResult;
 
@@ -67,6 +74,23 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			break;
 		case 'name-desc':
 			data.sort((a, b) => b.recipeName.localeCompare(a.recipeName));
+			break;
+		case 'top-rated':
+			data.sort((a, b) => {
+				const scoreA = calculateOverallScore(
+					a.recipeVersatilityRating,
+					a.recipeSweetnessRating,
+					a.recipeDrynessRating,
+					a.recipeStrengthRating
+				);
+				const scoreB = calculateOverallScore(
+					b.recipeVersatilityRating,
+					b.recipeSweetnessRating,
+					b.recipeDrynessRating,
+					b.recipeStrengthRating
+				);
+				return scoreB - scoreA; // Descending (highest first)
+			});
 			break;
 		case 'newest':
 			data.sort((a, b) => b.recipeId - a.recipeId);
