@@ -13,7 +13,7 @@ import type {
 
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
-import { deleteSignedUrl, getSignedUrl } from '../storage';
+import { deleteSignedUrl } from '../storage';
 import {
 	BaseRepository,
 	camelCase,
@@ -241,9 +241,12 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string,
 		recipe: QueryRequest.Recipe,
 		recipeSteps: QueryRequest.RecipeSteps[],
-		file: File
+		imageUrl: string = '',
+		imageCleared: boolean = false
 	): Promise<QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] }>> {
-		const recipeImageUrl = await this.getImageUrl(file);
+		// imageUrl: pre-uploaded URL from /api/upload/image (empty if no new image)
+		// imageCleared: user explicitly removed the image
+		const recipeImageUrl = imageCleared ? null : imageUrl || null;
 
 		try {
 			let newRecipe: { recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] } = {
@@ -260,7 +263,7 @@ export class CatalogRepository extends BaseRepository {
 				let dbResult;
 
 				let oldRecipe = await trx('recipe')
-					.select('RecipeDescriptionId', 'RecipeCategoryId')
+					.select('RecipeDescriptionId', 'RecipeCategoryId', 'RecipeImageUrl')
 					.where('RecipeId', recipe.recipeId || -1)
 					.where('workspaceId', workspaceId)
 					.first();
@@ -332,7 +335,11 @@ export class CatalogRepository extends BaseRepository {
 						RecipeName: recipe.recipeName,
 					};
 
-					if (recipeImageUrl !== null) {
+					if (recipeImageUrl !== null || imageCleared) {
+						// Delete old image from storage when replacing or clearing
+						if (oldRecipe.recipeImageUrl) {
+							await deleteSignedUrl(oldRecipe.recipeImageUrl);
+						}
 						query = { ...query, recipeImageUrl };
 					}
 
@@ -420,11 +427,6 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
-	private async getImageUrl(image: File | null): Promise<string | null> {
-		if (!image || image.size === 0 || image.name === 'undefined') return null;
-		const signedUrl = await getSignedUrl(image);
-		return signedUrl.length ? signedUrl : null;
-	}
 
 	// Workspace featured management
 	async getFeatured(workspaceId: string): Promise<View.BasicRecipe[]> {

@@ -83,7 +83,8 @@ export const actions: Actions = {
 		const recipeStrengthRating = Number(formData.get('recipeStrengthRating') || 5);
 		const recipeVersatilityRating = Number(formData.get('recipeVersatilityRating') || 5);
 		const recipeStepsJson = formData.get('recipeSteps') as string;
-		const recipeImageFile = formData.get('recipeImageUrl') as File;
+		const recipeImageUrl = (formData.get('recipeImageUrl') as string) || '';
+		const recipeImageCleared = formData.get('recipeImageCleared') === 'true';
 
 		if (!recipeName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Recipe name is required.' });
@@ -108,7 +109,7 @@ export const actions: Actions = {
 			recipeVersatilityRating,
 		};
 
-		const result = await catalogRepo.save(workspaceId, recipe, recipeSteps, recipeImageFile);
+		const result = await catalogRepo.save(workspaceId, recipe, recipeSteps, recipeImageUrl, recipeImageCleared);
 
 		if (result.status === 'error') {
 			return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: result.error });

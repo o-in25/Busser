@@ -9,6 +9,8 @@
 	let {
 		name = 'image',
 		signedUrl = $bindable<string | null | undefined>(),
+		pendingFile = $bindable<File | null>(null),
+		imageCleared = $bindable(false),
 		trigger,
 		label = 'Image',
 		url = '/api/generator/image',
@@ -17,6 +19,8 @@
 	}: {
 		name?: string;
 		signedUrl?: string | null;
+		pendingFile?: File | null;
+		imageCleared?: boolean;
 		trigger?: string;
 		label?: string;
 		url?: string;
@@ -36,6 +40,8 @@
 	$effect(() => {
 		if (files !== null && files.length > 0) {
 			const file = files[0];
+			pendingFile = file;
+			imageCleared = false;
 			const reader = new FileReader();
 			reader.onload = ({ target }) => {
 				signedUrl = target?.result?.toString() || '';
@@ -67,10 +73,12 @@
 	const clearAll = () => {
 		if (fileInputRef) {
 			fileInputRef.value = '';
-			files = null;
-			signedUrl = undefined;
-			errorMessage = '';
 		}
+		files = null;
+		signedUrl = undefined;
+		pendingFile = null;
+		imageCleared = true;
+		errorMessage = '';
 	};
 
 	const generateImage = async () => {
@@ -97,27 +105,37 @@
 			}
 
 			const result = await response.json();
-			if (!result.url) throw new Error('No image URL returned.');
+			if (!result.base64 || !result.mimeType) throw new Error('No image data returned.');
+
+			// Convert base64 to File and hold in memory
+			const byteString = atob(result.base64);
+			const ab = new ArrayBuffer(byteString.length);
+			const ia = new Uint8Array(ab);
+			for (let i = 0; i < byteString.length; i++) {
+				ia[i] = byteString.charCodeAt(i);
+			}
+			const ext = result.mimeType.split('/')[1] || 'png';
+			const blob = new Blob([ab], { type: result.mimeType });
+			const file = new File([blob], `generated.${ext}`, { type: result.mimeType });
+
+			// Create data URL for preview and preload before displaying
+			const dataUrl = result.url || `data:${result.mimeType};base64,${result.base64}`;
+			await new Promise<void>((resolve, reject) => {
+				const img = new Image();
+				img.onload = () => resolve();
+				img.onerror = () => reject(new Error('Failed to load generated image'));
+				img.src = dataUrl;
+			});
 
 			stopProgressAnimation();
-			signedUrl = result.url;
+			signedUrl = dataUrl;
+			pendingFile = file;
+			imageCleared = false;
 
-			// convert base64 to file and attach to file input for form submission
-			if (result.base64 && result.mimeType && fileInputRef) {
-				const byteString = atob(result.base64);
-				const ab = new ArrayBuffer(byteString.length);
-				const ia = new Uint8Array(ab);
-				for (let i = 0; i < byteString.length; i++) {
-					ia[i] = byteString.charCodeAt(i);
-				}
-				const ext = result.mimeType.split('/')[1] || 'png';
-				const blob = new Blob([ab], { type: result.mimeType });
-				const file = new File([blob], `generated.${ext}`, { type: result.mimeType });
-
-				const dataTransfer = new DataTransfer();
-				dataTransfer.items.add(file);
-				fileInputRef.files = dataTransfer.files;
-				files = dataTransfer.files;
+			// Clear manual file input
+			if (fileInputRef) {
+				fileInputRef.value = '';
+				files = null;
 			}
 		} catch (error: unknown) {
 			console.error(error);
@@ -238,7 +256,6 @@
 			</label>
 			<input
 				id={name}
-				{name}
 				type="file"
 				accept="image/*"
 				bind:files

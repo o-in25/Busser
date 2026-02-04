@@ -12,7 +12,7 @@ import type {
 
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
-import { deleteSignedUrl, getSignedUrl } from '../storage';
+import { deleteSignedUrl } from '../storage';
 import {
 	BaseRepository,
 	camelCase,
@@ -95,7 +95,7 @@ export class InventoryRepository extends BaseRepository {
 	async create(
 		workspaceId: string,
 		product: Product,
-		image: File | null = null
+		imageUrl: string = ''
 	): Promise<QueryResult<Product>> {
 		try {
 			let parentRowId: number | undefined;
@@ -114,11 +114,10 @@ export class InventoryRepository extends BaseRepository {
 				});
 				parentRowId = parentRow;
 
-				const productImageUrl = await this.getImageUrl(image);
 				const [childRow] = await trx('productdetail')
 					.insert({
 						ProductId: parentRowId,
-						ProductImageUrl: productImageUrl,
+						ProductImageUrl: imageUrl || null,
 						ProductDescription: product.productDescription,
 						ProductSweetnessRating: product.productSweetnessRating,
 						ProductDrynessRating: product.productDrynessRating,
@@ -152,7 +151,8 @@ export class InventoryRepository extends BaseRepository {
 	async update(
 		workspaceId: string,
 		product: Product,
-		image: File | null = null
+		imageUrl: string = '',
+		imageCleared: boolean = false
 	): Promise<QueryResult<Product>> {
 		try {
 			if (!product?.productId) throw Error('No inventory ID provided.');
@@ -161,8 +161,22 @@ export class InventoryRepository extends BaseRepository {
 			const existing = await this.findById(workspaceId, product.productId);
 			if (!existing) throw Error('Product not found in this workspace.');
 
-			const signedUrl = await this.getExistingOrNewImageUrl(product.productId, image);
-			product = { ...product, productImageUrl: signedUrl, supplierId: 1 };
+			// Resolve the image URL: new upload, cleared, or keep existing
+			let resolvedImageUrl: string | null;
+			if (imageCleared) {
+				resolvedImageUrl = null;
+			} else if (imageUrl) {
+				resolvedImageUrl = imageUrl;
+			} else {
+				resolvedImageUrl = existing.productImageUrl || null;
+			}
+
+			// Delete old image from storage when replacing or clearing
+			if ((resolvedImageUrl !== existing.productImageUrl || imageCleared) && existing.productImageUrl) {
+				await deleteSignedUrl(existing.productImageUrl);
+			}
+
+			product = { ...product, productImageUrl: resolvedImageUrl || '', supplierId: 1 };
 			const values = marshal<any>(product, pascalCase);
 
 			await this.db.query.transaction(async (trx) => {
@@ -615,28 +629,4 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	// private helpers
-	private async getImageUrl(image: File | null): Promise<string | null> {
-		if (!image || image.size === 0 || image.name === 'undefined') return null;
-		const signedUrl = await getSignedUrl(image);
-		return signedUrl.length ? signedUrl : null;
-	}
-
-	private async getExistingOrNewImageUrl(productId: number, image: File | null): Promise<string> {
-		let oldImage: any = await this.db
-			.table('productdetail')
-			.select('ProductImageUrl')
-			.where({ ProductId: productId })
-			.limit(1);
-
-		[oldImage] = marshal(oldImage, camelCase);
-		const existingUrl = oldImage?.productImageUrl || null;
-
-		if (!image || image.size === 0 || image.name === 'undefined') {
-			return existingUrl;
-		}
-
-		const signedUrl = await getSignedUrl(image);
-		return signedUrl || existingUrl;
-	}
 }
