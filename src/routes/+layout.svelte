@@ -30,6 +30,7 @@
 			home: '/',
 			catalog: '/catalog',
 			inventory: '/inventory',
+			assistant: '/assistant',
 			tools: '/tools',
 			settings: '/settings',
 		};

@@ -24,12 +24,12 @@
 	import { CollapsibleSection } from '$lib/components/ui/collapsible';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { calculateAbv } from '$lib/math';
-	import type { RecipeGeneratorSchema } from '$lib/server/generators/recipe-generator';
 	import type { View } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	import RecipeIngredientStep from './RecipeIngredientStep.svelte';
 	import RecipeVerdictCard from './RecipeVerdictCard.svelte';
+	import type { RecipeGeneratorSchema } from '$lib/server/generators/recipe-generator';
 
 	// Props using $props()
 	let {

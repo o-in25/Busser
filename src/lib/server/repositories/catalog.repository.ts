@@ -270,7 +270,6 @@ export class CatalogRepository extends BaseRepository {
 				// create new recipe
 				if (!oldRecipe) {
 					[dbResult] = await trx('recipedescription').insert({
-						workspaceId,
 						RecipeDescription: recipe.recipeDescription,
 						RecipeDescriptionImageUrl: null,
 						RecipeSweetnessRating: recipe.recipeSweetnessRating,
@@ -401,7 +400,6 @@ export class CatalogRepository extends BaseRepository {
 
 				const deletedRows = await trx('recipedescription')
 					.where('RecipeDescriptionId', recipeDescriptionId)
-					.where('workspaceId', workspaceId)
 					.del();
 
 				if (deletedRows < 1)

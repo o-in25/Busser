@@ -293,6 +293,17 @@
 		}
 	}
 
+	// Derive visual context for image generation
+	const imageIngredients = $derived(
+		steps
+			.filter((s) => s.productName || s.categoryName)
+			.map((s) => s.productName || s.categoryName)
+	);
+	const imageTechnique = $derived(
+		preparationMethods.find((m) => m.recipeTechniqueDescriptionId === selectedPrepMethodId)
+			?.recipeTechniqueDescriptionText || ''
+	);
+
 	// Collapsible state - closed by default in add mode
 	let descriptionOpen = $state(!isAddMode);
 	let ratingsOpen = $state(!isAddMode);
@@ -433,6 +444,8 @@
 								name="recipeImageUrl"
 								bind:signedUrl={recipe.recipeImageUrl}
 								trigger={recipe.recipeName}
+								ingredients={imageIngredients}
+								technique={imageTechnique}
 							/>
 						</div>
 					</div>
@@ -611,6 +624,8 @@
 						name="recipeImageUrl"
 						bind:signedUrl={recipe.recipeImageUrl}
 						trigger={recipe.recipeName}
+						ingredients={imageIngredients}
+						technique={imageTechnique}
 					/>
 				</div>
 			</CollapsibleSection>

@@ -26,13 +26,19 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	}
 
 	// Get recipes, spirits, favorites, and featured in parallel
-	const [catalogResult, spirits, userFavorites, favoriteRecipes, featuredRecipes] = await Promise.all([
-		catalogRepo.findAll(workspaceId, page, perPage, Object.keys(filter).length > 0 ? filter : null),
-		catalogRepo.getSpirits(),
-		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
-		userId ? userRepo.getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
-		catalogRepo.getFeatured(workspaceId),
-	]);
+	const [catalogResult, spirits, userFavorites, favoriteRecipes, featuredRecipes] =
+		await Promise.all([
+			catalogRepo.findAll(
+				workspaceId,
+				page,
+				perPage,
+				Object.keys(filter).length > 0 ? filter : null
+			),
+			catalogRepo.getSpirits(),
+			userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
+			userId ? userRepo.getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
+			catalogRepo.getFeatured(workspaceId),
+		]);
 
 	let { data, pagination } = catalogResult;
 

@@ -246,7 +246,7 @@
 					{#each data.spirits as spirit}
 						<Select.Item
 							value={String(spirit.recipeCategoryId)}
-							label={spirit.recipeCategoryDescription}
+							label={spirit.recipeCategoryDescription ?? undefined}
 						/>
 					{/each}
 				</Select.Content>

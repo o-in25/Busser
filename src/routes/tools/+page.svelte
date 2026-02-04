@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Citrus, Wine, Wrench } from 'lucide-svelte';
+	import { Citrus, Wine } from 'lucide-svelte';
 
 	import BacCalculator from '$lib/components/BacCalculator.svelte';
 	import Calculator from '$lib/components/Calculator.svelte';
@@ -61,20 +61,6 @@
 			</Card.Header>
 			<Card.Content>
 				<BacCalculator recipes={data.bacCalculatorRecipes} />
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Placeholder for future tools -->
-		<Card.Root class="border-dashed lg:col-span-2">
-			<Card.Content class="flex flex-col items-center justify-center py-12 text-center">
-				<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-					<Wrench class="h-8 w-8 text-muted-foreground/50" />
-				</div>
-				<h3 class="font-semibold mb-1">More Tools Coming Soon</h3>
-				<p class="text-sm text-muted-foreground max-w-md">
-					We're working on adding more bartending utilities like dilution calculators, batch scaling
-					tools, and cost analysis.
-				</p>
 			</Card.Content>
 		</Card.Root>
 	</div>

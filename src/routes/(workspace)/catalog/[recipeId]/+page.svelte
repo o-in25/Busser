@@ -7,10 +7,10 @@
 	import BackButton from '$lib/components/BackButton.svelte';
 	import Recipe from '$lib/components/Recipe.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
 
