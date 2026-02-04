@@ -6,8 +6,6 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 
-	import { notificationStore } from '../../stores';
-
 	let {
 		value = $bindable(),
 		label = 'Description',
@@ -108,11 +106,9 @@
 			stopProgressAnimation();
 			updateValue(result.description);
 
-			$notificationStore.success = { message: 'Description generated successfully!' };
 		} catch (error: unknown) {
 			console.error(error);
 			errorMessage = error instanceof Error ? error.message : 'Could not generate description.';
-			$notificationStore.error = { message: errorMessage };
 		} finally {
 			stopProgressAnimation();
 			isGenerating = false;

@@ -13,7 +13,7 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 	import { flip } from 'svelte/animate';
-	import { dndzone } from 'svelte-dnd-action';
+	import { dndzone, type DndEvent } from 'svelte-dnd-action';
 	import { v4 as uuidv4 } from 'uuid';
 
 	import { applyAction, enhance } from '$app/forms';
@@ -27,7 +27,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { ServingMethodToggle } from '$lib/components/ui/serving-method';
 	import { SpiritCard } from '$lib/components/ui/spirit-card';
-	import { convertFromMl, convertToMl } from '$lib/math';
+	import { calculateOverallScore, convertFromMl, convertToMl } from '$lib/math';
 	import type { PreparationMethod, Spirit, View } from '$lib/types';
 
 	import { notificationStore } from '../../stores';
@@ -191,12 +191,13 @@
 		}) as any;
 
 	// minimal dnd handlers
-	function handleDndConsider(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
-		steps = e.detail.items;
+	type StepWithId = View.BasicRecipeStep & { id: string };
+	function handleDndConsider(e: CustomEvent<DndEvent<StepWithId>>) {
+		steps = e.detail.items as StepWithId[];
 	}
 
-	function handleDndFinalize(e: CustomEvent<{ items: (View.BasicRecipeStep & { id: string })[] }>) {
-		steps = e.detail.items;
+	function handleDndFinalize(e: CustomEvent<DndEvent<StepWithId>>) {
+		steps = e.detail.items as StepWithId[];
 	}
 
 	const deleteRecipe = async () => {
@@ -233,10 +234,31 @@
 	let strengthRating = $state(recipe.recipeStrengthRating || 5);
 	let ratingsGenerating = $state(false);
 
+	// Calculate preview score based on current ratings
+	const previewScore = $derived(
+		calculateOverallScore(versatilityRating, sweetnessRating, drynessRating, strengthRating)
+	);
+
+	// Rating label and color based on score
+	const ratingsMap = [
+		{ max: 0, label: 'No Rating', bg: 'bg-gray-500' },
+		{ max: 2, label: 'Needs Work', bg: 'bg-red-500' },
+		{ max: 4, label: 'Below Average', bg: 'bg-orange-500' },
+		{ max: 5, label: 'Average', bg: 'bg-yellow-500' },
+		{ max: 6, label: 'Good', bg: 'bg-lime-500' },
+		{ max: 7, label: 'Great', bg: 'bg-green-500' },
+		{ max: 8, label: 'Excellent', bg: 'bg-emerald-500' },
+		{ max: 10, label: 'Outstanding', bg: 'bg-teal-500' },
+	];
+
+	const scoreLabel = $derived(
+		ratingsMap.find((r) => previewScore <= r.max) || ratingsMap[ratingsMap.length - 1]
+	);
+
 	// Generate ratings with AI
 	async function generateRatings() {
 		if (!recipe.recipeName || steps.length === 0) {
-			notificationStore.error('Please add a recipe name and at least one ingredient first.');
+			$notificationStore.error = { message: 'Please add a recipe name and at least one ingredient first.' };
 			return;
 		}
 
@@ -264,11 +286,8 @@
 			drynessRating = data.drynessRating;
 			versatilityRating = data.versatilityRating;
 			strengthRating = data.strengthRating;
-
-			notificationStore.success('Ratings generated successfully!');
 		} catch (error) {
 			console.error('Failed to generate ratings:', error);
-			notificationStore.error('Failed to generate ratings. Please try again.');
 		} finally {
 			ratingsGenerating = false;
 		}
@@ -448,8 +467,8 @@
 
 						<div
 							use:dndzone={getDndOptions(steps, !reorderMode)}
-							onconsider={handleDndConsider}
-							onfinalize={handleDndFinalize}
+							onconsider={handleDndConsider as any}
+							onfinalize={handleDndFinalize as any}
 							class="space-y-4"
 						>
 							{#each steps as step, stepNumber (step.id)}
@@ -484,6 +503,16 @@
 				{:else if step === 4}
 					<!-- Step 5: Flavor Ratings -->
 					<div class="space-y-6">
+						<!-- Score Preview -->
+						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+							<span class="text-sm text-muted-foreground">Overall Score</span>
+							<div class="flex items-center gap-2">
+								<span class={`px-2 py-0.5 rounded text-xs font-medium text-white ${scoreLabel.bg}`}>
+									{scoreLabel.label}
+								</span>
+								<span class="text-lg font-bold tabular-nums">{previewScore.toFixed(1)}</span>
+							</div>
+						</div>
 						<Button
 							type="button"
 							variant="outline"
@@ -602,6 +631,16 @@
 			<!-- Section 4: Flavor Profile (collapsible) -->
 			<CollapsibleSection title="Flavor Profile" icon={Gauge} bind:open={ratingsOpen}>
 				<div class="space-y-4">
+					<!-- Score Preview -->
+					<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+						<span class="text-sm text-muted-foreground">Overall Score</span>
+						<div class="flex items-center gap-2">
+							<span class={`px-2 py-0.5 rounded text-xs font-medium text-white ${scoreLabel.bg}`}>
+								{scoreLabel.label}
+							</span>
+							<span class="text-lg font-bold tabular-nums">{previewScore.toFixed(1)}</span>
+						</div>
+					</div>
 					<Button
 						type="button"
 						variant="outline"
@@ -678,8 +717,8 @@
 					<!-- Recipe steps -->
 					<div
 						use:dndzone={getDndOptions(steps, !reorderMode)}
-						onconsider={handleDndConsider}
-						onfinalize={handleDndFinalize}
+						onconsider={handleDndConsider as any}
+						onfinalize={handleDndFinalize as any}
 						class="space-y-4"
 					>
 						{#each steps as step, stepNumber (step.id)}

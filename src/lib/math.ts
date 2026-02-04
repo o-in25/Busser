@@ -149,38 +149,68 @@ export const calculateOverallScore = (
   if (![versatility, sweetness, dryness, strength].some((val) => val > 0))
     return 0;
 
-  // Base weights for each characteristic
-  const weights = {
-    versatility: 0.35,
-    flavorBalance: 0.35,
-    strength: 0.3,
+  // ===========================================
+  // VERSATILITY (50% of score) - LINEAR
+  // Higher is always better. This is the key differentiator.
+  // A 10 versatility (Old Fashioned, Martini) contributes 5 points
+  // A 3 versatility (Ramos Gin Fizz) contributes 1.5 points
+  // ===========================================
+  const versatilityScore = versatility * 0.5;
+
+  // ===========================================
+  // FLAVOR HARMONY (50% of score) - PARABOLIC
+  // Sweetness, dryness, and strength each have ideal ranges.
+  // Extremes are penalized. The relationship is parabolic, not linear.
+  // ===========================================
+
+  // Helper: calculate parabolic score (max at ideal, decreasing as you deviate)
+  const parabolicScore = (value: number, ideal: number, maxScore: number) => {
+    const deviation = Math.abs(value - ideal);
+    // Score decreases as deviation increases, using a gentle curve
+    // At ideal: full score. At ±5 from ideal: ~0 score
+    return Math.max(0, maxScore * (1 - Math.pow(deviation / 5, 1.5)));
   };
 
-  // Calculate flavor balance score (average of sweetness and dryness)
-  const flavorBalance = (sweetness + dryness) / 2;
+  // Sweetness: ideal around 5 (not too sweet like juice, not bone dry)
+  // Contributes up to 1.5 points
+  const sweetnessScore = parabolicScore(sweetness, 5, 1.5);
 
-  // Base score from weighted characteristics
+  // Dryness: ideal around 5 (some character, but not overwhelmingly bitter)
+  // Contributes up to 1.5 points
+  const drynessScore = parabolicScore(dryness, 5, 1.5);
+
+  // Strength: ideal around 6 (alcohol should be present but not overpowering)
+  // Contributes up to 1.5 points
+  const strengthScore = parabolicScore(strength, 6, 1.5);
+
   let totalScore =
-    versatility * weights.versatility +
-    flavorBalance * weights.flavorBalance +
-    strength * weights.strength;
+    versatilityScore + sweetnessScore + drynessScore + strengthScore;
 
-  // Penalty for contradictory flavor profile (very sweet AND very dry is unusual)
+  // ===========================================
+  // BONUSES AND PENALTIES
+  // ===========================================
+
+  // Bonus for intentional sweet/dry contrast (shows purposeful design)
+  // e.g., Margarita (sweet citrus + dry tequila), Negroni (sweet vermouth + bitter Campari)
+  const hasGoodContrast =
+    (sweetness >= 5 && dryness <= 4) || (dryness >= 5 && sweetness <= 4);
+  if (hasGoodContrast) {
+    totalScore += 0.5;
+  }
+
+  // Penalty for contradictory profile (very sweet AND very dry is confused)
   if (sweetness > 7 && dryness > 7) {
+    totalScore -= 1;
+  }
+
+  // Penalty for drinks that are too weak (tastes like juice, no alcohol presence)
+  if (strength < 3) {
     totalScore -= 0.5;
   }
 
-  // Penalty for very strong drinks that lack balance or versatility
-  if (strength > 8 && (versatility < 4 || flavorBalance < 4)) {
-    totalScore -= 0.3;
-  }
-
-  // Small bonus for well-balanced profiles (all ratings between 4-7)
-  const isBalanced = [versatility, sweetness, dryness, strength].every(
-    (val) => val >= 4 && val <= 7,
-  );
-  if (isBalanced) {
-    totalScore += 0.3;
+  // Penalty for drinks that are too strong AND unbalanced
+  if (strength > 8 && (sweetness < 3 || dryness < 3)) {
+    totalScore -= 0.5;
   }
 
   // Clamp to valid range

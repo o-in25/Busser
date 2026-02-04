@@ -6,8 +6,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 
-	import { notificationStore } from '../../stores';
-
 	let {
 		name = 'image',
 		signedUrl = $bindable<string | null | undefined>(),
@@ -113,12 +111,9 @@
 				fileInputRef.files = dataTransfer.files;
 				files = dataTransfer.files;
 			}
-
-			$notificationStore.success = { message: 'Image generated successfully!' };
 		} catch (error: unknown) {
 			console.error(error);
 			errorMessage = error instanceof Error ? error.message : 'Could not generate image.';
-			$notificationStore.error = { message: errorMessage };
 		} finally {
 			stopProgressAnimation();
 			isGenerating = false;

@@ -52,6 +52,7 @@
 	const sortOptions = [
 		{ value: 'name-asc', label: 'Name (A-Z)' },
 		{ value: 'name-desc', label: 'Name (Z-A)' },
+		{ value: 'top-rated', label: 'Top Rated' },
 		{ value: 'newest', label: 'Newest First' },
 		{ value: 'oldest', label: 'Oldest First' },
 	];
