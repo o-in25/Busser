@@ -7,13 +7,7 @@ import { InventoryRepository } from './repositories/inventory.repository';
 const { CORE_TABLE } = process.env;
 
 // re-export utilities from base
-export {
-	camelCase,
-	marshal,
-	marshalToType,
-	pascalCase,
-	titleCase,
-} from './repositories/base.repository';
+export { titleCase } from './repositories/base.repository';
 
 // singleton instances
 const db = new DbProvider(CORE_TABLE || '');

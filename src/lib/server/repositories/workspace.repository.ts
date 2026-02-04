@@ -3,7 +3,7 @@ import type { QueryResult, Workspace, WorkspaceUser } from '$lib/types';
 
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
-import { BaseRepository, marshalToType } from './base.repository';
+import { BaseRepository } from './base.repository';
 
 export type WorkspaceRole = 'owner' | 'editor' | 'viewer';
 
@@ -27,7 +27,7 @@ export class WorkspaceRepository extends BaseRepository {
 
 			if (!dbResult) return null;
 
-			const workspaceUser = this.marshalToType<Pick<WorkspaceUser, 'workspaceRole'>>(dbResult);
+			const workspaceUser = dbResult as Pick<WorkspaceUser, 'workspaceRole'>;
 			return workspaceUser.workspaceRole;
 		} catch (error: any) {
 			console.error('Error checking workspace access:', error.message);
@@ -52,7 +52,7 @@ export class WorkspaceRepository extends BaseRepository {
 				)
 				.orderBy('w.workspaceName', 'asc');
 
-			const workspaces = marshalToType<WorkspaceWithRole[]>(dbResult);
+			const workspaces = dbResult as WorkspaceWithRole[];
 
 			return { status: 'success', data: workspaces };
 		} catch (error: any) {
@@ -74,7 +74,7 @@ export class WorkspaceRepository extends BaseRepository {
 				return { status: 'error', error: 'Workspace not found.' };
 			}
 
-			const workspace = this.marshalToType<Workspace>(dbResult);
+			const workspace = dbResult as Workspace;
 			return { status: 'success', data: workspace };
 		} catch (error: any) {
 			console.error('Error getting workspace info:', error.message);
@@ -100,7 +100,7 @@ export class WorkspaceRepository extends BaseRepository {
 				return { status: 'error', error: 'Workspace not found.' };
 			}
 
-			const workspace = this.marshalToType<Workspace>(dbResult);
+			const workspace = dbResult as Workspace;
 
 			return {
 				status: 'success',
@@ -152,7 +152,7 @@ export class WorkspaceRepository extends BaseRepository {
 					.where({ workspaceId })
 					.first();
 
-				return this.marshalToType<Workspace>(dbResult);
+				return dbResult as Workspace;
 			});
 
 			return {
@@ -178,7 +178,7 @@ export class WorkspaceRepository extends BaseRepository {
 				.select('workspaceId', 'workspaceName', 'workspaceType', 'createdDate', 'createdBy')
 				.orderBy('workspaceName', 'asc');
 
-			const workspaces = marshalToType<Workspace[]>(dbResult);
+			const workspaces = dbResult as Workspace[];
 
 			return { status: 'success', data: workspaces };
 		} catch (error: any) {
@@ -227,7 +227,7 @@ export class WorkspaceRepository extends BaseRepository {
 				return { status: 'error', error: 'Workspace not found after update.' };
 			}
 
-			const workspace = this.marshalToType<Workspace>(dbResult);
+			const workspace = dbResult as Workspace;
 
 			return { status: 'success', data: workspace };
 		} catch (error: any) {
@@ -288,8 +288,7 @@ export class WorkspaceRepository extends BaseRepository {
 				.orderBy('wu.workspaceRole', 'asc')
 				.orderBy('u.username', 'asc');
 
-			const members =
-				marshalToType<Array<WorkspaceUser & { username: string; email: string }>>(dbResult);
+			const members = dbResult as Array<WorkspaceUser & { username: string; email: string }>;
 
 			return { status: 'success', data: members };
 		} catch (error: any) {
@@ -321,7 +320,7 @@ export class WorkspaceRepository extends BaseRepository {
 				return { status: 'error', error: 'Failed to add member.' };
 			}
 
-			const member = this.marshalToType<WorkspaceUser>(dbResult);
+			const member = dbResult as WorkspaceUser;
 
 			return { status: 'success', data: member };
 		} catch (error: any) {
@@ -376,7 +375,7 @@ export class WorkspaceRepository extends BaseRepository {
 				return { status: 'error', error: 'Failed to retrieve updated member.' };
 			}
 
-			const member = this.marshalToType<WorkspaceUser>(dbResult);
+			const member = dbResult as WorkspaceUser;
 
 			return { status: 'success', data: member };
 		} catch (error: any) {
