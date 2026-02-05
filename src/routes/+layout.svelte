@@ -45,6 +45,7 @@
 
 	$: activeUrl = getActiveUrl($page.url.pathname);
 	$: user = data.user;
+	$: workspaceName = data.workspaceName;
 	$: showNav = user && !isAuthRoute($page.url.pathname);
 
 	$: {
@@ -55,7 +56,7 @@
 
 <!-- nav (only show when logged in and not on auth routes) -->
 {#if showNav}
-	<Nav {activeUrl} {user} />
+	<Nav {activeUrl} {user} {workspaceName} />
 {/if}
 
 <!-- loading bar -->

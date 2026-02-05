@@ -10,7 +10,7 @@
 
 	let mobileMenuOpen = $state(false);
 
-	let { user, activeUrl }: { user: User | null; activeUrl: string } = $props();
+	let { user, activeUrl, workspaceName }: { user: User | null; activeUrl: string; workspaceName?: string | null } = $props();
 
 	// scroll direction tracking for mobile header
 	let lastScrollY = $state(0);
@@ -85,6 +85,9 @@
 						<div class="flex flex-col">
 							<Sheet.Title class="text-sm font-medium">{user?.username}</Sheet.Title>
 							<Sheet.Description class="text-xs text-muted-foreground">{user?.email}</Sheet.Description>
+							{#if workspaceName}
+								<span class="text-xs text-muted-foreground/70 mt-0.5">{workspaceName}</span>
+							{/if}
 						</div>
 					</div>
 				</Sheet.Header>
@@ -201,6 +204,9 @@
 						<div class="flex flex-col space-y-1">
 							<p class="text-sm font-medium">{user?.username}</p>
 							<p class="text-xs text-muted-foreground">{user?.email}</p>
+							{#if workspaceName}
+								<p class="text-xs text-muted-foreground/70">{workspaceName}</p>
+							{/if}
 						</div>
 					</DropdownMenu.Label>
 					<DropdownMenu.Separator />

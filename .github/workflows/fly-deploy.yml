@@ -17,6 +17,14 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for tags
 
+      - name: Bump version and create tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: v
+
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io
@@ -32,17 +40,10 @@ jobs:
             --build-arg JWT_SIGNING_KEY=${{secrets.JWT_SIGNING_KEY}} \
             --build-arg MAILGUN_KEY=${{secrets.MAILGUN_KEY}} \
             --build-arg INSTANCE_CONNECTION_NAME=${{secrets.INSTANCE_CONNECTION_NAME}} \
-            --build-arg APP_URL=${{secrets.APP_URL}}
+            --build-arg APP_URL=${{secrets.APP_URL}} \
+            --build-arg APP_VERSION=${{ steps.tag_version.outputs.new_tag }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: Bump version and create tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch
-          tag_prefix: v
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

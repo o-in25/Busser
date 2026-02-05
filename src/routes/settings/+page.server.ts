@@ -7,11 +7,12 @@ import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const userId = locals.user?.userId || '';
-	if (!userId) return { avatarImageUrl: null };
+	if (!userId) return { avatarImageUrl: null, appVersion: process.env.APP_VERSION || 'dev' };
 
 	const result = await userRepo.findById(userId);
 	return {
 		avatarImageUrl: result.status === 'success' ? result.data?.avatarImageUrl : null,
+		appVersion: process.env.APP_VERSION || 'dev',
 	};
 };
 
