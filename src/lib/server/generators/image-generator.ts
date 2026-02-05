@@ -8,11 +8,11 @@ export type ImageGeneratorResult = {
 
 const stylePrompts = {
 	photo: {
-		prompt: `Studio product photograph of a [SUBJECT] cocktail served in its traditional correct glassware with appropriate classic garnish and ice.
+		prompt: `Studio product photograph of a [SUBJECT] cocktail as it is traditionally served.
 Single drink centered in frame. Shot from a 30-degree elevated angle.
 High-key lighting: large soft diffused key light from above-front, fill light eliminating harsh shadows, edge light separating the glass from the background.
 Seamless pure white background, no surface texture visible. Only a subtle soft contact shadow directly beneath the glass.
-Crystal-clear focus on the drink. Visible condensation droplets on the glass. Liquid is realistic and transparent where appropriate.
+Crystal-clear focus on the drink. Liquid is realistic and transparent where appropriate.
 Professional commercial beverage photography, 80mm lens, shallow depth of field, color-accurate.`,
 		negativePrompt:
 			'text, words, letters, labels, logos, watermarks, people, hands, bar, countertop, table, wood, marble, granite, patterned surface, colored background, gradient background, room, kitchen, restaurant, multiple drinks, bottles, napkin, coaster, blurry, illustration, cartoon, painting, 3d render, artificial looking',

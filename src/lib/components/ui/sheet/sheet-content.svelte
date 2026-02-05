@@ -39,9 +39,9 @@
 			{@render children()}
 		{/if}
 		<SheetPrimitive.Close
-			class="absolute right-4 top-4 rounded-full p-1 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
+			class="absolute right-4 top-5 z-10 p-2 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 		>
-			<X class="h-4 w-4" />
+			<X class="h-5 w-5" />
 			<span class="sr-only">Close</span>
 		</SheetPrimitive.Close>
 	</SheetPrimitive.Content>

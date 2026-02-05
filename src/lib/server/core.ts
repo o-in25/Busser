@@ -7,13 +7,7 @@ import { InventoryRepository } from './repositories/inventory.repository';
 const { CORE_TABLE } = process.env;
 
 // re-export utilities from base
-export {
-	camelCase,
-	marshal,
-	marshalToType,
-	pascalCase,
-	titleCase,
-} from './repositories/base.repository';
+export { titleCase } from './repositories/base.repository';
 
 // singleton instances
 const db = new DbProvider(CORE_TABLE || '');
@@ -37,6 +31,8 @@ export const categorySelect = inventoryRepo.getCategoryOptions.bind(inventoryRep
 export const getCategory = inventoryRepo.findCategoryById.bind(inventoryRepo);
 export const addCategory = inventoryRepo.createCategory.bind(inventoryRepo);
 export const updateCategory = inventoryRepo.updateCategory.bind(inventoryRepo);
+export const getSubcategories = inventoryRepo.findSubcategories.bind(inventoryRepo);
+export const getProductsByCategory = inventoryRepo.findProductsByCategory.bind(inventoryRepo);
 
 // catalog functions (delegate to repository)
 export const getCatalog = catalogRepo.findAll.bind(catalogRepo);

@@ -3,7 +3,6 @@ import { StatusCodes } from 'http-status-codes';
 
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 
-import type { RecipeProposal } from '$lib/types/assistant';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -17,7 +16,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const body = await request.json();
-	const proposal: RecipeProposal = body.proposal;
+	const { proposal } = body;
 
 	if (!proposal) {
 		error(StatusCodes.BAD_REQUEST, {
@@ -33,7 +32,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			[];
 
 		for (const missing of proposal.missingIngredients) {
-			let categoryId = missing.categoryId;
+			let { categoryId } = missing;
 
 			// resolve category: find existing by name, or create if truly new
 			if (!categoryId) {
@@ -96,10 +95,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
-		// Step 2: Build recipe steps
+		// Step 2: Resolve productId for category-based ingredients that lack one
+		for (const ing of proposal.ingredients) {
+			if (!ing.productId && ing.categoryId) {
+				const products = await inventoryRepo.findAll(workspaceId, 1, 1, {
+					categoryId: ing.categoryId,
+				} as any);
+				if (products.data.length > 0) {
+					ing.productId = products.data[0].productId;
+				}
+			}
+		}
+
+		// Step 3: Build recipe steps
 		const recipeSteps = [
 			...proposal.ingredients.map((ing) => ({
-				productId: ing.productId!,
+				productId: ing.productId || 0,
 				categoryId: ing.categoryId,
 				matchMode: ing.matchMode,
 				productIdQuantityInMilliliters: ing.quantityMl,
@@ -116,7 +127,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			})),
 		];
 
-		// Step 3: Create the recipe
+		// Step 4: Create the recipe
 		const recipe = {
 			recipeName: proposal.recipeName,
 			recipeDescription: proposal.recipeDescription,

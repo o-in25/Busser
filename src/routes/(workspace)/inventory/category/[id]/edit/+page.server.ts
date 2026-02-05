@@ -39,12 +39,16 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	}
 
 	// Get all categories for parent selection (excluding current category)
-	const { data: categories } = await inventoryRepo.findAllCategories(workspaceId, 1, 1000, null);
+	const [{ data: categories }, { pagination }] = await Promise.all([
+		inventoryRepo.findAllCategories(workspaceId, 1, 1000, null),
+		inventoryRepo.findAll(workspaceId, 1, 1, { categoryId: Number(id) }),
+	]);
 	const parentCategories = (categories || []).filter((c) => c.categoryId !== Number(id));
 
 	return {
 		category: result.data,
 		parentCategories,
+		productCount: pagination.total || 0,
 	};
 };
 

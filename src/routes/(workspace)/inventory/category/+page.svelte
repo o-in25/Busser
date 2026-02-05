@@ -13,18 +13,34 @@
 
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
+	import CategoryDetailDrawer from '$lib/components/CategoryDetailDrawer.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
+	import type { Category } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	import { notificationStore } from '../../../../stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// Drawer state
+	let drawerOpen = $state(false);
+	let selectedCategory = $state<Category | null>(null);
+
+	function openDrawer(category: Category) {
+		selectedCategory = category;
+		drawerOpen = true;
+	}
+
+	function handleProductDeleted() {
+		drawerOpen = false;
+		invalidateAll();
+	}
 
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
@@ -196,7 +212,10 @@
 				</Table.Header>
 				<Table.Body>
 					{#each data.categories as category (category.categoryId)}
-						<Table.Row>
+						<Table.Row
+							class="cursor-pointer"
+							onclick={() => openDrawer(category)}
+						>
 							<Table.Cell class="font-medium">{category.categoryName}</Table.Cell>
 							<Table.Cell class="text-muted-foreground max-w-md truncate">
 								{category.categoryDescription || '—'}
@@ -209,7 +228,13 @@
 								</span>
 							</Table.Cell>
 							<Table.Cell class="text-right">
-								<div class="flex items-center justify-end gap-2">
+								<!-- svelte-ignore a11y_click_events_have_key_events -->
+								<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+								<div
+									class="flex items-center justify-end gap-2"
+									role="group"
+									onclick={(e) => e.stopPropagation()}
+								>
 									{#if canModify}
 										<a
 											href="/inventory/category/{category.categoryId}/edit"
@@ -289,6 +314,14 @@
 		{/if}
 	{/if}
 </div>
+
+<!-- Category Detail Drawer -->
+<CategoryDetailDrawer
+	bind:open={drawerOpen}
+	category={selectedCategory}
+	{canModify}
+	onProductDeleted={handleProductDeleted}
+/>
 
 <!-- Delete Confirmation Dialog -->
 <Dialog.Root bind:open={deleteDialogOpen}>

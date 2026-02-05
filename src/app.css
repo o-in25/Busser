@@ -77,8 +77,10 @@
            shadow-lg rounded-2xl transition-all duration-300;
 	}
 
-	.glass-card:hover {
-		@apply bg-white/75 dark:bg-zinc-800/55 shadow-xl;
+	@media (hover: hover) {
+		.glass-card:hover {
+			@apply bg-white/75 dark:bg-zinc-800/55 shadow-xl;
+		}
 	}
 
 	.glass-nav {
@@ -112,8 +114,13 @@
 	}
 
 	.glass-table-row {
-		@apply border-b border-zinc-200/30 dark:border-zinc-700/25
-           hover:bg-white/40 dark:hover:bg-zinc-700/30 transition-colors;
+		@apply border-b border-zinc-200/30 dark:border-zinc-700/25 transition-colors;
+	}
+
+	@media (hover: hover) {
+		.glass-table-row:hover {
+			@apply bg-white/40 dark:bg-zinc-700/30;
+		}
 	}
 }
 
@@ -121,14 +128,16 @@ input[type='range']::-webkit-slider-thumb {
 	background-color: #e5195f; /* primary-600 */
 }
 
-input[type='range']:hover::-webkit-slider-thumb {
-	background-color: #c10f50; /* primary-700 */
-}
-
 input[type='range']::-moz-range-thumb {
 	background-color: #e5195f; /* primary-600 */
 }
 
-input[type='range']:hover::-moz-range-thumb {
-	background-color: #c10f50; /* primary-700 */
+@media (hover: hover) {
+	input[type='range']:hover::-webkit-slider-thumb {
+		background-color: #c10f50; /* primary-700 */
+	}
+
+	input[type='range']:hover::-moz-range-thumb {
+		background-color: #c10f50; /* primary-700 */
+	}
 }

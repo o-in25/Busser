@@ -22,7 +22,7 @@ import { Logger } from '../logger';
 import { MailClient } from '../mail';
 import { deleteSignedUrl, uploadAvatarBuffer } from '../storage';
 import { AuthRepository } from './auth.repository';
-import { BaseRepository, marshal, marshalToType } from './base.repository';
+import { BaseRepository } from './base.repository';
 
 export class UserRepository extends BaseRepository {
 	private mailClient: MailClient;
@@ -53,26 +53,26 @@ export class UserRepository extends BaseRepository {
 					.first()
 					.where({ userId });
 
-				let user = marshalToType<User>(dbResult);
+				let user = dbResult as User;
 				if (!user.userId) throw new Error('User not found.');
 
 				// get role ids
 				dbResult = await trx('userRole').select('roleId').where({ userId });
-				let roleIds: any[] = marshal(dbResult);
+				let roleIds: any[] = dbResult;
 				roleIds = roleIds.map(({ roleId }) => roleId);
 
 				// get roles
 				dbResult = await trx('role').select().whereIn('roleId', roleIds);
-				const roles: Role[] = marshalToType<Role[]>(dbResult);
+				const roles = dbResult as Role[];
 
 				// get permission ids
 				dbResult = await trx('rolePermission').select('permissionId').whereIn('roleId', roleIds);
-				let permissionIds: any[] = marshal(dbResult);
+				let permissionIds: any[] = dbResult;
 				permissionIds = permissionIds.map(({ permissionId }) => permissionId);
 
 				// get permissions
 				dbResult = await trx('permission').select().whereIn('permissionId', permissionIds);
-				const permissions: Permission[] = marshalToType<Permission[]>(dbResult);
+				const permissions = dbResult as Permission[];
 
 				return { ...user, roles, permissions };
 			});
@@ -102,7 +102,7 @@ export class UserRepository extends BaseRepository {
 					.where({ username, email, password: hashedPassword })
 					.first();
 
-				const user: Partial<User> = marshalToType<Partial<User>>(dbResult);
+				const user = dbResult as Partial<User>;
 				if (!user.userId) throw new Error('Could not create user.');
 
 				userId = user.userId;
@@ -173,7 +173,7 @@ export class UserRepository extends BaseRepository {
 	async getRoleOptions(): Promise<SelectOption[]> {
 		try {
 			let result = await this.db.table('role').select();
-			let roles: Role[] = marshalToType<Role[]>(result);
+			let roles = result as Role[];
 			return roles.map(({ roleId, roleName }) => ({ name: roleName, value: roleId }));
 		} catch (error: any) {
 			console.error(error);
@@ -199,7 +199,7 @@ export class UserRepository extends BaseRepository {
 				'rp.permissionId'
 			);
 
-			const grants: Array<Role & Permission> = marshalToType<Array<Role & Permission>>(dbResult);
+			const grants = dbResult as Array<Role & Permission>;
 
 			return { status: 'success', data: grants };
 		} catch (error: any) {
@@ -230,7 +230,7 @@ export class UserRepository extends BaseRepository {
 							newPermissions.map(({ permissionName }) => permissionName)
 						);
 
-					newPermissions = marshalToType<Permission[]>(dbResult);
+					newPermissions = dbResult as Permission[];
 				}
 
 				oldPermissions = [...oldPermissions, ...newPermissions];
@@ -256,7 +256,7 @@ export class UserRepository extends BaseRepository {
 	async getInvitations(): Promise<QueryResult<Invitation[]>> {
 		try {
 			let dbResult = await this.db.table('invitation').select();
-			const invitations: Invitation[] = marshalToType<Invitation[]>(dbResult);
+			const invitations = dbResult as Invitation[];
 			return { status: 'success', data: invitations };
 		} catch (error: any) {
 			console.error(error);
@@ -287,7 +287,7 @@ export class UserRepository extends BaseRepository {
 			});
 
 			const dbResult = await this.db.table('invitation').where({ invitationId }).first();
-			const invitation = marshalToType<Invitation>(dbResult);
+			const invitation = dbResult as Invitation;
 
 			return { status: 'success', data: invitation };
 		} catch (error: any) {
@@ -303,7 +303,7 @@ export class UserRepository extends BaseRepository {
 				.where({ workspaceId })
 				.whereNull('userId')
 				.select();
-			const invitations = marshalToType<Invitation[]>(dbResult);
+			const invitations = dbResult as Invitation[];
 			return { status: 'success', data: invitations };
 		} catch (error: any) {
 			console.error('Failed to get workspace invitations:', error.message);
@@ -328,7 +328,7 @@ export class UserRepository extends BaseRepository {
 			if (!dbResult) {
 				return { status: 'error', error: 'Invitation not found.' };
 			}
-			const invitation = marshalToType<Invitation>(dbResult);
+			const invitation = dbResult as Invitation;
 			return { status: 'success', data: invitation };
 		} catch (error: any) {
 			console.error('Failed to get invitation:', error.message);
@@ -346,7 +346,7 @@ export class UserRepository extends BaseRepository {
 				const dbResult = await trx('invitation').where({ invitationCode }).first();
 				if (!dbResult) throw new Error('Invitation not found.');
 
-				const invitation = marshalToType<Invitation>(dbResult);
+				const invitation = dbResult as Invitation;
 
 				if (invitation.userId !== null) {
 					throw new Error('Invitation has already been used.');
@@ -378,9 +378,7 @@ export class UserRepository extends BaseRepository {
 				});
 
 				// mark invitation as used
-				await trx('invitation')
-					.where({ invitationId: invitation.invitationId })
-					.update({ userId });
+				await trx('invitation').where({ invitationId: invitation.invitationId }).update({ userId });
 
 				return {
 					status: 'success' as const,
@@ -460,7 +458,7 @@ export class UserRepository extends BaseRepository {
 			if (status) query = query.where({ status });
 
 			const dbResult = await query.select();
-			const requests = marshalToType<InvitationRequest[]>(dbResult);
+			const requests = dbResult as InvitationRequest[];
 
 			return { status: 'success', data: requests };
 		} catch (error: any) {
@@ -543,12 +541,10 @@ export class UserRepository extends BaseRepository {
 
 				if (!dbResult) throw new Error('Invalid invitation code.');
 
-				invitation = marshalToType<
-					Pick<
-						Invitation,
-						'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
-					>
-				>(dbResult);
+				invitation = dbResult as Pick<
+					Invitation,
+					'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
+				>;
 
 				if (!invitation.invitationId || invitation.userId !== null) {
 					throw new Error('Invitation code has already been used.');
@@ -578,7 +574,7 @@ export class UserRepository extends BaseRepository {
 					.where({ username, email, password: hashedPassword })
 					.first();
 
-				user = marshalToType<Pick<User, 'userId' | 'username' | 'email'>>(dbResult);
+				user = dbResult as Pick<User, 'userId' | 'username' | 'email'>;
 
 				if (!user.userId || !user.username || !user.email) {
 					throw new Error('Could not create user.');
@@ -586,7 +582,6 @@ export class UserRepository extends BaseRepository {
 
 				// assign default role
 				dbResult = await trx('role').select('roleId').where('roleName', 'USER').first();
-				dbResult = marshal(dbResult);
 
 				if (!dbResult?.roleId) throw new Error('Could not register user for default role.');
 
@@ -715,8 +710,7 @@ export class UserRepository extends BaseRepository {
 
 			if (!dbResult) throw new Error('User not found.');
 
-			const user =
-				marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+			const user = dbResult as Pick<User, 'userId' | 'username' | 'email' | 'verified'>;
 
 			if (user.verified === 1) throw new Error('User is already verified.');
 
@@ -750,8 +744,7 @@ export class UserRepository extends BaseRepository {
 
 			if (!dbResult) throw new Error('No account found with this email address.');
 
-			const user =
-				marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+			const user = dbResult as Pick<User, 'userId' | 'username' | 'email' | 'verified'>;
 
 			if (user.verified === 1) throw new Error('This account is already verified. You can log in.');
 
@@ -786,7 +779,7 @@ export class UserRepository extends BaseRepository {
 
 			if (!dbResult) return null;
 
-			const result = marshalToType<{ preferredWorkspaceId: string | null }>(dbResult);
+			const result = dbResult as { preferredWorkspaceId: string | null };
 			return result.preferredWorkspaceId;
 		} catch (error: any) {
 			console.error('Error getting preferred workspace:', error.message);
@@ -842,7 +835,7 @@ export class UserRepository extends BaseRepository {
 				.where({ userId })
 				.first();
 
-			const currentUrl = dbResult?.AvatarImageUrl;
+			const currentUrl = dbResult?.avatarImageUrl;
 			if (currentUrl) {
 				await deleteSignedUrl(currentUrl);
 			}
@@ -874,7 +867,7 @@ export class UserRepository extends BaseRepository {
 				.where({ userId })
 				.first();
 
-			const currentUrl = dbResult?.AvatarImageUrl;
+			const currentUrl = dbResult?.avatarImageUrl;
 			if (currentUrl) {
 				await deleteSignedUrl(currentUrl);
 			}
@@ -906,7 +899,7 @@ export class UserRepository extends BaseRepository {
 				.select('workspaceId')
 				.where({ userId, workspaceRole: 'owner' });
 
-			const workspaceIds = ownedWorkspaces.map((w: any) => w.workspaceId || w.workspace_id);
+			const workspaceIds = ownedWorkspaces.map((w: any) => w.workspaceId);
 
 			if (workspaceIds.length === 0) return [];
 
@@ -916,7 +909,7 @@ export class UserRepository extends BaseRepository {
 				.distinct('userId')
 				.whereIn('workspaceId', workspaceIds);
 
-			const userIds = userIdsResult.map((u: any) => u.userId || u.user_id);
+			const userIds = userIdsResult.map((u: any) => u.userId);
 
 			if (userIds.length === 0) return [];
 
@@ -950,7 +943,7 @@ export class UserRepository extends BaseRepository {
 				.select('workspaceId')
 				.where({ userId });
 
-			const workspaceIds = userWorkspaces.map((w: any) => w.workspaceId || w.workspace_id);
+			const workspaceIds = userWorkspaces.map((w: any) => w.workspaceId);
 
 			if (workspaceIds.length === 0) return [];
 
@@ -961,7 +954,7 @@ export class UserRepository extends BaseRepository {
 				.whereIn('workspaceId', workspaceIds)
 				.whereNot('userId', userId);
 
-			const userIds = userIdsResult.map((u: any) => u.userId || u.user_id);
+			const userIds = userIdsResult.map((u: any) => u.userId);
 
 			if (userIds.length === 0) return [];
 
@@ -993,8 +986,7 @@ export class UserRepository extends BaseRepository {
 				return { status: 'success' };
 			}
 
-			const user =
-				marshalToType<Pick<User, 'userId' | 'username' | 'email' | 'verified'>>(dbResult);
+			const user = dbResult as Pick<User, 'userId' | 'username' | 'email' | 'verified'>;
 
 			const now = moment();
 			const tokenExpiration = moment().add(1, 'hour');
@@ -1030,7 +1022,7 @@ export class UserRepository extends BaseRepository {
 				query = query.where({ workspaceId });
 			}
 			const dbResult = await query.orderBy('createdDate', 'desc');
-			return marshalToType<UserFavorite[]>(dbResult);
+			return dbResult as UserFavorite[];
 		} catch (error: any) {
 			console.error('Error getting favorites:', error.message);
 			return [];
@@ -1042,17 +1034,13 @@ export class UserRepository extends BaseRepository {
 			const dbResult = await this.db
 				.table('basicrecipe as r')
 				.join('userFavorite as uf', function () {
-					this.on('r.RecipeId', '=', 'uf.recipeId').andOn(
-						'r.WorkspaceId',
-						'=',
-						'uf.workspaceId'
-					);
+					this.on('r.RecipeId', '=', 'uf.recipeId').andOn('r.WorkspaceId', '=', 'uf.workspaceId');
 				})
 				.where('uf.userId', userId)
 				.where('uf.workspaceId', workspaceId)
 				.orderBy('uf.createdDate', 'desc')
 				.select('r.*');
-			return marshalToType<View.BasicRecipe[]>(dbResult);
+			return dbResult as View.BasicRecipe[];
 		} catch (error: any) {
 			console.error('Error getting favorite recipes:', error.message);
 			return [];
@@ -1094,10 +1082,7 @@ export class UserRepository extends BaseRepository {
 
 	async isFavorite(userId: string, recipeId: number): Promise<boolean> {
 		try {
-			const dbResult = await this.db
-				.table('userFavorite')
-				.where({ userId, recipeId })
-				.first();
+			const dbResult = await this.db.table('userFavorite').where({ userId, recipeId }).first();
 			return !!dbResult;
 		} catch (error: any) {
 			console.error('Error checking favorite:', error.message);

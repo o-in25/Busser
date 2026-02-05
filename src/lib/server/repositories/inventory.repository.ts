@@ -13,15 +13,7 @@ import type {
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { deleteSignedUrl } from '../storage';
-import {
-	BaseRepository,
-	camelCase,
-	emptyPagination,
-	marshal,
-	marshalToType,
-	pascalCase,
-	titleCase,
-} from './base.repository';
+import { BaseRepository, emptyPagination, titleCase } from './base.repository';
 
 export class InventoryRepository extends BaseRepository {
 	constructor(db: DbProvider) {
@@ -57,13 +49,10 @@ export class InventoryRepository extends BaseRepository {
 				query = query.andWhere('productInStockQuantity', '=', filter.productInStockQuantity);
 			}
 
-			let { data, pagination } = await query
+			const { data, pagination } = await query
 				.select()
 				.orderBy('productName')
 				.paginate({ perPage, currentPage, isLengthAware: true });
-
-			data = data.map((item) => Object.assign({}, item));
-			data = marshal(data);
 
 			return { data: data as Product[], pagination };
 		} catch (error: any) {
@@ -80,7 +69,7 @@ export class InventoryRepository extends BaseRepository {
 				.where('workspaceId', workspaceId)
 				.select();
 
-			let result: Product[] = marshal<Product[]>(data);
+			let result = data as Product[];
 			if (result.length === 0) {
 				throw Error('Product not found');
 			}
@@ -172,38 +161,40 @@ export class InventoryRepository extends BaseRepository {
 			}
 
 			// Delete old image from storage when replacing or clearing
-			if ((resolvedImageUrl !== existing.productImageUrl || imageCleared) && existing.productImageUrl) {
+			if (
+				(resolvedImageUrl !== existing.productImageUrl || imageCleared) &&
+				existing.productImageUrl
+			) {
 				await deleteSignedUrl(existing.productImageUrl);
 			}
 
 			product = { ...product, productImageUrl: resolvedImageUrl || '', supplierId: 1 };
-			const values = marshal<any>(product, pascalCase);
 
 			await this.db.query.transaction(async (trx) => {
 				await trx('product')
 					.insert({
 						workspaceId,
-						ProductId: values.ProductId,
-						CategoryId: values.CategoryId,
-						SupplierId: values.SupplierId,
-						ProductName: values.ProductName,
-						ProductInStockQuantity: values.ProductInStockQuantity,
-						ProductUnitSizeInMilliliters: values.ProductUnitSizeInMilliliters,
-						ProductPricePerUnit: values.ProductPricePerUnit,
-						ProductProof: values.ProductProof,
+						ProductId: product.productId,
+						CategoryId: product.categoryId,
+						SupplierId: product.supplierId,
+						ProductName: product.productName,
+						ProductInStockQuantity: product.productInStockQuantity,
+						ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
+						ProductPricePerUnit: product.productPricePerUnit,
+						ProductProof: product.productProof,
 					})
 					.onConflict('ProductId')
 					.merge();
 
 				await trx('productdetail')
 					.insert({
-						ProductId: values.ProductId,
-						ProductImageUrl: values.ProductImageUrl,
-						ProductDescription: values.ProductDescription,
-						ProductSweetnessRating: values.ProductSweetnessRating,
-						ProductDrynessRating: values.ProductDrynessRating,
-						ProductVersatilityRating: values.ProductVersatilityRating,
-						ProductStrengthRating: values.ProductStrengthRating,
+						ProductId: product.productId,
+						ProductImageUrl: product.productImageUrl,
+						ProductDescription: product.productDescription,
+						ProductSweetnessRating: product.productSweetnessRating,
+						ProductDrynessRating: product.productDrynessRating,
+						ProductVersatilityRating: product.productVersatilityRating,
+						ProductStrengthRating: product.productStrengthRating,
 					})
 					.onConflict('ProductId')
 					.merge();
@@ -211,7 +202,7 @@ export class InventoryRepository extends BaseRepository {
 				await trx.commit();
 			});
 
-			const newItem = await this.findById(workspaceId, values.ProductId);
+			const newItem = await this.findById(workspaceId, product.productId!);
 			if (!newItem) {
 				throw new Error(
 					'Inventory was successfully updated, but the subquery returned no results.'
@@ -237,7 +228,6 @@ export class InventoryRepository extends BaseRepository {
 					.where('workspaceId', workspaceId)
 					.first();
 
-				childRow = marshal(childRow, camelCase);
 				if (childRow?.productImageUrl) {
 					productImageUrl = childRow.productImageUrl;
 				}
@@ -342,8 +332,8 @@ export class InventoryRepository extends BaseRepository {
 				.orderBy('CategoryName');
 
 			return (result as any[]).map((row) => ({
-				categoryId: row.CategoryId,
-				categoryName: row.CategoryName,
+				categoryId: row.categoryId,
+				categoryName: row.categoryName,
 				count: Number(row.count),
 			}));
 		} catch (error: any) {
@@ -366,7 +356,7 @@ export class InventoryRepository extends BaseRepository {
 
 			const usageMap = new Map<number, number>();
 			result.forEach((row: any) => {
-				usageMap.set(row.ProductId, Number(row.recipeCount));
+				usageMap.set(row.productId, Number(row.recipeCount));
 			});
 
 			return usageMap;
@@ -383,14 +373,8 @@ export class InventoryRepository extends BaseRepository {
 				.table('product as p')
 				.join('category as c', 'p.CategoryId', 'c.CategoryId')
 				.where('p.workspaceId', workspaceId)
-				.select(
-					'p.ProductId',
-					'p.ProductName',
-					'c.CategoryId',
-					'c.CategoryName',
-					'c.BaseSpiritId'
-				);
-			let products = marshal<any[]>(result);
+				.select('p.ProductId', 'p.ProductName', 'c.CategoryId', 'c.CategoryName', 'c.BaseSpiritId');
+			let products = result as any[];
 			return products.map(({ productId, productName, categoryId, categoryName, baseSpiritId }) => ({
 				name: productName,
 				value: productId || 0,
@@ -410,7 +394,7 @@ export class InventoryRepository extends BaseRepository {
 				.table('category')
 				.where('workspaceId', workspaceId)
 				.select('CategoryId', 'CategoryName');
-			let categories: Category[] = marshal<Category[]>(result);
+			let categories = result as Category[];
 			return categories.map(({ categoryId, categoryName }) => ({
 				name: categoryName,
 				value: categoryId,
@@ -434,7 +418,7 @@ export class InventoryRepository extends BaseRepository {
 				.first();
 
 			if (!dbResult) throw new Error('No category found for given ID.');
-			const category = marshalToType<Table.Category>(dbResult);
+			const category = dbResult as Table.Category;
 			return { status: 'success', data: category };
 		} catch (error: any) {
 			console.error(error);
@@ -527,7 +511,7 @@ export class InventoryRepository extends BaseRepository {
 				.where('categoryId', key)
 				.where('workspaceId', workspaceId)
 				.select();
-			const newCategory = marshalToType<Table.Category>(dbResult);
+			const newCategory = dbResult as Table.Category;
 
 			return { status: 'success', data: newCategory };
 		} catch (error: any) {
@@ -582,11 +566,11 @@ export class InventoryRepository extends BaseRepository {
 			});
 
 			const categories = (data as any[]).map((row) => ({
-				categoryId: row.CategoryId,
-				categoryName: row.CategoryName,
-				categoryDescription: row.CategoryDescription,
-				baseSpiritId: row.BaseSpiritId,
-				parentCategoryId: row.ParentCategoryId,
+				categoryId: row.categoryId,
+				categoryName: row.categoryName,
+				categoryDescription: row.categoryDescription,
+				baseSpiritId: row.baseSpiritId,
+				parentCategoryId: row.parentCategoryId,
 				productCount: Number(row.productCount),
 			}));
 
@@ -594,6 +578,69 @@ export class InventoryRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error('Failed to get all categories:', error);
 			return { data: [], pagination: emptyPagination };
+		}
+	}
+
+	async findSubcategories(
+		workspaceId: string,
+		parentCategoryId: number
+	): Promise<(Category & { productCount: number })[]> {
+		try {
+			const result = await this.db
+				.table('category')
+				.where('category.workspaceId', workspaceId)
+				.where('category.ParentCategoryId', parentCategoryId)
+				.leftJoin('product', function () {
+					this.on('category.CategoryId', '=', 'product.CategoryId').andOn(
+						'category.workspaceId',
+						'=',
+						'product.workspaceId'
+					);
+				})
+				.select(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.BaseSpiritId',
+					'category.ParentCategoryId',
+					this.db.query.raw('COUNT(product.ProductId) as productCount')
+				)
+				.groupBy(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.BaseSpiritId',
+					'category.ParentCategoryId'
+				)
+				.orderBy('category.CategoryName');
+
+			return (result as any[]).map((row) => ({
+				categoryId: row.categoryId,
+				categoryName: row.categoryName,
+				categoryDescription: row.categoryDescription,
+				baseSpiritId: row.baseSpiritId,
+				parentCategoryId: row.parentCategoryId,
+				productCount: Number(row.productCount),
+			}));
+		} catch (error: any) {
+			console.error('Failed to get subcategories:', error);
+			return [];
+		}
+	}
+
+	async findProductsByCategory(workspaceId: string, categoryId: number): Promise<Product[]> {
+		try {
+			const result = await this.db
+				.table('inventory')
+				.where('workspaceId', workspaceId)
+				.where('categoryId', categoryId)
+				.select()
+				.orderBy('productName');
+
+			return result as Product[];
+		} catch (error: any) {
+			console.error('Failed to get products by category:', error);
+			return [];
 		}
 	}
 
@@ -628,5 +675,4 @@ export class InventoryRepository extends BaseRepository {
 			return { status: 'error', error: 'Could not delete category.' };
 		}
 	}
-
 }
