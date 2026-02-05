@@ -136,7 +136,7 @@
 
 {#if lastSaved}
 	<div
-		class="fixed bottom-4 right-4 flex items-center gap-2 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border shadow-sm z-50"
+		class="fixed bottom-20 md:bottom-4 right-4 flex items-center gap-2 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border shadow-sm z-50"
 	>
 		<Save class="h-3 w-3" />
 		<span>Draft saved</span>

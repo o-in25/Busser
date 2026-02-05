@@ -225,7 +225,6 @@ export class InventoryRepository extends BaseRepository {
 				let childRow = await trx('productdetail')
 					.select('ProductImageUrl')
 					.where('ProductId', productId)
-					.where('workspaceId', workspaceId)
 					.first();
 
 				if (childRow?.productImageUrl) {

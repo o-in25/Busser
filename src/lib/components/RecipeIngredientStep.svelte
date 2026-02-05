@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Check, Layers, Sparkles } from 'lucide-svelte';
-	import { convertFromMl, getUnits } from '$lib/math';
+	import { convertFromMl, getUnits, topOffPresets } from '$lib/math';
 	import type { MatchMode } from '$lib/types';
 	import { cn } from '$lib/utils';
 
@@ -38,13 +38,16 @@
 	const formattedIngredient = $derived.by(() => {
 		const unitLower = unit.toLowerCase();
 
-		// "Top off" is a special case - no quantity needed
+		// "Top off" uses preset labels
 		if (unitLower === 'top off') {
-			return { prefix: 'Top off with', ingredient: categoryName };
+			const preset = topOffPresets.find((p) => p.ml === quantity);
+			const presetLabel = preset?.label || 'Top off';
+			return { prefix: `${presetLabel} with`, ingredient: categoryName };
 		}
 
 		// Countable discrete units - use space before unit, no "of"
-		if (unitLower === 'dash' || unitLower === 'cube' || unitLower === 'barspoon') {
+		const countableUnits = ['dash', 'cube', 'barspoon', 'egg white', 'egg yolk', 'whole egg'];
+		if (countableUnits.includes(unitLower)) {
 			return { prefix: `${Math.round(displayQuantity)} ${unitLabel}`, ingredient: categoryName };
 		}
 
@@ -56,7 +59,8 @@
 	const isFlexible = $derived(matchMode !== 'EXACT_PRODUCT');
 	const flexibleLabel = $derived.by(() => {
 		if (matchMode === 'ANY_IN_CATEGORY') return `Any ${categoryName}`;
-		if (matchMode === 'ANY_IN_PARENT_CATEGORY' && parentCategoryName) return `Any ${parentCategoryName}`;
+		if (matchMode === 'ANY_IN_PARENT_CATEGORY' && parentCategoryName)
+			return `Any ${parentCategoryName}`;
 		return null;
 	});
 

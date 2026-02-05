@@ -637,7 +637,7 @@
 				</div>
 				<a
 					href="/catalog/browse?available=true"
-					class="text-sm text-primary hover:underline flex items-center"
+					class="text-sm text-primary hover:underline hidden md:flex items-center"
 				>
 					View all
 					<ChevronRight class="h-4 w-4" />

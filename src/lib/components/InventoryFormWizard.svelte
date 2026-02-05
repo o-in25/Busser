@@ -16,12 +16,14 @@
 		currentStep = $bindable(0),
 		children,
 		onfinish,
+		canProceed = true,
 	}: {
 		class?: string;
 		steps: Step[];
 		currentStep?: number;
 		children?: Snippet<[{ step: number; isActive: boolean }]>;
 		onfinish?: () => void;
+		canProceed?: boolean;
 	} = $props();
 
 	let progress = $derived(((currentStep + 1) / steps.length) * 100);
@@ -114,12 +116,12 @@
 		</Button>
 
 		{#if currentStep < steps.length - 1}
-			<Button type="button" onclick={nextStep} class="flex items-center gap-2">
+			<Button type="button" onclick={nextStep} disabled={!canProceed} class="flex items-center gap-2">
 				Next
 				<ChevronRight class="h-4 w-4" />
 			</Button>
 		{:else}
-			<Button type="submit" class="flex items-center gap-2">
+			<Button type="submit" disabled={!canProceed} class="flex items-center gap-2">
 				Save
 				<Check class="h-4 w-4" />
 			</Button>

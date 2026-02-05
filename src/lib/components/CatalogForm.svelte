@@ -23,6 +23,7 @@
 	import { CollapsibleSection } from '$lib/components/ui/collapsible';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
+	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { ServingMethodToggle } from '$lib/components/ui/serving-method';
@@ -319,6 +320,26 @@
 	let wizardStep = $state(0);
 	let reorderMode = $state(false);
 
+	// Validation state
+	let touched = $state({ recipeName: false });
+	const errors = $derived({
+		recipeName: !recipe.recipeName?.trim() ? 'Recipe name is required' : '',
+		ingredients: !steps.some((s) => s.productId > 0 || s.stepCategoryId)
+			? 'At least one ingredient is required'
+			: '',
+	});
+
+	// Step-based validation for wizard
+	const stepValid = $derived({
+		0: !!recipe.recipeName?.trim(), // name required
+		1: true, // description optional
+		2: steps.some((s) => s.productId > 0 || s.stepCategoryId), // at least one ingredient
+		3: true, // prep method has default
+		4: true, // ratings optional
+	});
+	const canProceedWizard = $derived(stepValid[wizardStep as keyof typeof stepValid] ?? true);
+	const isFormValid = $derived(stepValid[0] && stepValid[2]);
+
 	// Draft manager reference
 	let draftManager = $state<FormDraftManager>();
 
@@ -414,22 +435,44 @@
 			};
 		}}
 	>
+		<!-- Mobile delete section (shown above wizard in edit mode) -->
+		{#if recipe.recipeId && canModify}
+			<div class="md:hidden mb-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+				<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
+				<Button
+					type="button"
+					variant="destructive"
+					class="w-full"
+					onclick={() => (modalOpen = true)}
+				>
+					Delete Recipe
+				</Button>
+			</div>
+		{/if}
+
 		<!-- Mobile wizard view -->
-		<CatalogFormWizard bind:currentStep={wizardStep}>
+		<CatalogFormWizard bind:currentStep={wizardStep} canProceed={canProceedWizard}>
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Step 1: Details (Name + Spirit Category) -->
 					<div class="space-y-6">
 						<div>
-							<Label for="recipeName" class="mb-2">Name</Label>
+							<Label for="recipeName" class="mb-2">
+								Name <span class="text-destructive">*</span>
+							</Label>
 							<Input
 								type="text"
 								id="recipeName"
 								name="recipeName"
 								placeholder="e.g., Old Fashioned"
 								bind:value={recipe.recipeName}
+								onblur={() => (touched.recipeName = true)}
+								class={touched.recipeName && errors.recipeName ? 'border-destructive' : ''}
 								required
 							/>
+							{#if touched.recipeName && errors.recipeName}
+								<Helper color="red">{errors.recipeName}</Helper>
+							{/if}
 						</div>
 
 						<div>
@@ -473,6 +516,9 @@
 				{:else if step === 2}
 					<!-- Step 3: Ingredients -->
 					<div class="space-y-4">
+						{#if errors.ingredients}
+							<Helper color="red">{errors.ingredients}</Helper>
+						{/if}
 						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 						<div class="flex gap-2">
 							<Button
@@ -603,15 +649,22 @@
 				<Card.Content class="space-y-6">
 					<!-- Name -->
 					<div>
-						<Label for="recipeName" class="mb-2">Name</Label>
+						<Label for="recipeName" class="mb-2">
+							Name <span class="text-destructive">*</span>
+						</Label>
 						<Input
 							type="text"
 							id="recipeName"
 							name="recipeName"
 							placeholder="e.g., Old Fashioned"
 							bind:value={recipe.recipeName}
+							onblur={() => (touched.recipeName = true)}
+							class={touched.recipeName && errors.recipeName ? 'border-destructive' : ''}
 							required
 						/>
+						{#if touched.recipeName && errors.recipeName}
+							<Helper color="red">{errors.recipeName}</Helper>
+						{/if}
 					</div>
 
 					<!-- Spirit Category -->
@@ -730,6 +783,10 @@
 					</Card.Title>
 				</Card.Header>
 				<Card.Content class="space-y-4">
+					{#if errors.ingredients}
+						<Helper color="red">{errors.ingredients}</Helper>
+					{/if}
+
 					<!-- Metrics display -->
 					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 
@@ -789,7 +846,7 @@
 						Delete
 					</Button>
 				{/if}
-				<Button type="submit" {disabled}>Save Recipe</Button>
+				<Button type="submit" disabled={disabled || !isFormValid}>Save Recipe</Button>
 			</div>
 		</div>
 	</form>

@@ -8,6 +8,13 @@
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import {
+		convertFromMl,
+		convertToMl,
+		getUnitLabel,
+		getUnitOptions,
+		topOffPresets,
+	} from '$lib/math';
 	import type { MatchMode, SelectOption, View } from '$lib/types';
 	import { cn } from '$lib/utils';
 
@@ -59,7 +66,9 @@
 
 	// Determine if flexible matching options are available
 	// Only show match mode selector for categories that have a parent (i.e., are part of a hierarchy)
-	let hasParentCategory = $derived(step.parentCategoryId !== null && step.parentCategoryId !== undefined);
+	let hasParentCategory = $derived(
+		step.parentCategoryId !== null && step.parentCategoryId !== undefined
+	);
 
 	// Reset to EXACT_PRODUCT if category has no parent and a flexible mode was selected
 	$effect(() => {
@@ -74,18 +83,42 @@
 
 	// unit selection with local state for proper reactivity
 	let selectedUnit = $state(step.productIdQuantityUnit || 'oz');
-	$effect(() => {
-		step.productIdQuantityUnit = selectedUnit;
-		// always set to 4 oz equivalent when "top off" is selected
-		if (selectedUnit === 'top off') {
-			step.productIdQuantityInMilliliters = 4;
+	let previousUnit = $state(step.productIdQuantityUnit || 'oz');
+
+	// convert quantity when unit changes
+	function handleUnitChange(newUnit: string) {
+		if (newUnit === previousUnit) return;
+
+		const currentValue = step.productIdQuantityInMilliliters;
+
+		// convert current display value to ml, then to new unit
+		if (newUnit === 'top off') {
+			// switching to top off - set default preset
+			if (!topOffPresets.some((p) => p.ml === currentValue)) {
+				step.productIdQuantityInMilliliters = 90;
+			}
+		} else if (previousUnit === 'top off') {
+			// switching from top off - convert ml value to new unit
+			step.productIdQuantityInMilliliters = convertFromMl(newUnit, currentValue);
+		} else {
+			// normal unit to unit conversion
+			const mlValue = convertToMl(previousUnit, currentValue);
+			step.productIdQuantityInMilliliters = convertFromMl(newUnit, mlValue);
 		}
-	});
+
+		previousUnit = newUnit;
+		selectedUnit = newUnit;
+		step.productIdQuantityUnit = newUnit;
+	}
 
 	let isTopOff = $derived(selectedUnit === 'top off');
+	let selectedPreset = $derived(
+		topOffPresets.find((p) => p.ml === step.productIdQuantityInMilliliters)?.ml || 90
+	);
 
-	// all available units
-	const units = ['oz', 'ml', 'dash', 'barspoon', 'tsp', 'tbsp', 'cube', 'top off'];
+	// all available units with display labels
+	const unitOptions = getUnitOptions();
+	let selectedUnitLabel = $derived(getUnitLabel(selectedUnit));
 
 	// quick select options per unit
 	const quickOptionsByUnit: Record<string, { label: string; value: string }[]> = {
@@ -125,6 +158,18 @@
 			{ label: '2', value: '2' },
 		],
 		cube: [
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+		],
+		'egg white': [
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+		],
+		'egg yolk': [
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+		],
+		'whole egg': [
 			{ label: '1', value: '1' },
 			{ label: '2', value: '2' },
 		],
@@ -178,7 +223,7 @@
 
 		<Card.Content class="space-y-4">
 			<!-- Product name autocomplete -->
-			<div>
+			<div class="space-y-2">
 				<Autocomplete
 					label="Item from Inventory"
 					placeholder="Search for an ingredient..."
@@ -194,10 +239,10 @@
 			{#if step.productId && hasParentCategory}
 				<div class="space-y-2">
 					<Label class="text-sm">Ingredient Matching</Label>
-					<RadioGroup.Root bind:value={matchMode}>
-						<RadioGroup.Item value="EXACT_PRODUCT">Exact</RadioGroup.Item>
-						<RadioGroup.Item value="ANY_IN_CATEGORY">Any {categoryDisplayName}</RadioGroup.Item>
-						<RadioGroup.Item value="ANY_IN_PARENT_CATEGORY">Any {parentCategoryDisplayName}</RadioGroup.Item>
+					<RadioGroup.Root bind:value={matchMode} class="gap-0.5">
+						<RadioGroup.Item value="EXACT_PRODUCT" class="px-2 py-1.5 text-xs">Exact</RadioGroup.Item>
+						<RadioGroup.Item value="ANY_IN_CATEGORY" class="px-2 py-1.5 text-xs truncate">Any {categoryDisplayName}</RadioGroup.Item>
+						<RadioGroup.Item value="ANY_IN_PARENT_CATEGORY" class="px-2 py-1.5 text-xs truncate">Any {parentCategoryDisplayName}</RadioGroup.Item>
 					</RadioGroup.Root>
 					<p class="text-xs text-muted-foreground">
 						{#if matchMode === 'EXACT_PRODUCT'}
@@ -215,35 +260,66 @@
 			<div class="space-y-2">
 				<Label class="text-sm">Amount</Label>
 
-				<!-- Quantity + Unit inputs -->
-				<div class="flex gap-2">
-					<Input
-						name="productIdQuantityInMilliliters"
-						type="number"
-						class="flex-1"
-						placeholder="0"
-						value={isTopOff ? '' : String(step.productIdQuantityInMilliliters)}
-						oninput={(e) =>
-							(step.productIdQuantityInMilliliters = parseFloat(e.currentTarget.value) || 0)}
-						step="0.25"
-						min="0"
-						disabled={isTopOff}
-					/>
-					<Select.Root type="single" bind:value={selectedUnit}>
-						<Select.Trigger class="w-32">
-							{selectedUnit}
-						</Select.Trigger>
-						<Select.Content>
-							{#each units as unit}
-								<Select.Item value={unit} label={unit} />
+				{#if isTopOff}
+					<!-- Preset selector for top off -->
+					<div class="space-y-2">
+						<Select.Root type="single" value={selectedUnit} onValueChange={handleUnitChange}>
+							<Select.Trigger class="w-full">
+								{selectedUnitLabel}
+							</Select.Trigger>
+							<Select.Content>
+								{#each unitOptions as unit}
+									<Select.Item value={unit.value} label={unit.label} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
+						<div class="grid grid-cols-2 gap-2">
+							{#each topOffPresets as preset}
+								<button
+									type="button"
+									class={cn(
+										'px-3 py-2 text-sm rounded-lg border transition-colors',
+										selectedPreset === preset.ml
+											? 'bg-primary text-primary-foreground border-primary'
+											: 'bg-background hover:bg-muted border-input'
+									)}
+									onclick={() => (step.productIdQuantityInMilliliters = preset.ml)}
+								>
+									{preset.label}
+								</button>
 							{/each}
-						</Select.Content>
-					</Select.Root>
-				</div>
+						</div>
+					</div>
+				{:else}
+					<!-- Quantity + Unit inputs -->
+					<div class="flex gap-2">
+						<Input
+							name="productIdQuantityInMilliliters"
+							type="number"
+							class="flex-1"
+							placeholder="0"
+							value={String(step.productIdQuantityInMilliliters)}
+							oninput={(e) =>
+								(step.productIdQuantityInMilliliters = parseFloat(e.currentTarget.value) || 0)}
+							step="0.25"
+							min="0"
+						/>
+						<Select.Root type="single" value={selectedUnit} onValueChange={handleUnitChange}>
+							<Select.Trigger class="w-32">
+								{selectedUnitLabel}
+							</Select.Trigger>
+							<Select.Content>
+								{#each unitOptions as unit}
+									<Select.Item value={unit.value} label={unit.label} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</div>
 
-				<!-- Quick select for current unit -->
-				{#if quickOptions.length > 0}
-					<QuickSelect options={quickOptions} onselect={handleQuickSelect} class="mt-2" />
+					<!-- Quick select for current unit -->
+					{#if quickOptions.length > 0}
+						<QuickSelect options={quickOptions} onselect={handleQuickSelect} class="mt-2" />
+					{/if}
 				{/if}
 			</div>
 
