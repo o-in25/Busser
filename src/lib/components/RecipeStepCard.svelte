@@ -43,7 +43,8 @@
 		step.productName = item.name;
 		step.categoryId = item.categoryId ?? 0;
 		step.categoryName = item.categoryName ?? '';
-		step.baseSpiritId = item.baseSpiritId ?? null;
+		step.parentCategoryId = item.parentCategoryId ?? null;
+		step.parentCategoryName = item.parentCategoryName ?? null;
 		// Also set stepCategoryId for category-based matching
 		step.stepCategoryId = item.categoryId ?? null;
 		// Reset match mode to default when changing products
@@ -56,23 +57,20 @@
 		step.matchMode = matchMode;
 	});
 
-	// Determine if base spirit matching is available (only for spirit categories)
-	let hasBaseSpirit = $derived(step.baseSpiritId !== null && step.baseSpiritId !== undefined);
+	// Determine if flexible matching options are available
+	// Only show match mode selector for categories that have a parent (i.e., are part of a hierarchy)
+	let hasParentCategory = $derived(step.parentCategoryId !== null && step.parentCategoryId !== undefined);
+
+	// Reset to EXACT_PRODUCT if category has no parent and a flexible mode was selected
+	$effect(() => {
+		if (!hasParentCategory && matchMode !== 'EXACT_PRODUCT') {
+			matchMode = 'EXACT_PRODUCT';
+		}
+	});
 
 	// Get display names for the match mode options
 	let categoryDisplayName = $derived(step.categoryName || 'this category');
-	let baseSpiritDisplayName = $derived.by(() => {
-		// Map baseSpiritId to spirit name
-		const spiritNames: Record<number, string> = {
-			4: 'Whiskey',
-			5: 'Gin',
-			6: 'Vodka',
-			7: 'Tequila',
-			8: 'Rum',
-			9: 'Brandy',
-		};
-		return step.baseSpiritId ? spiritNames[step.baseSpiritId] || 'this spirit' : 'this spirit';
-	});
+	let parentCategoryDisplayName = $derived(step.parentCategoryName || 'this category');
 
 	// unit selection with local state for proper reactivity
 	let selectedUnit = $state(step.productIdQuantityUnit || 'oz');
@@ -192,16 +190,14 @@
 				/>
 			</div>
 
-			<!-- Match mode selector -->
-			{#if step.productId}
+			<!-- Match mode selector (only show for categories in a hierarchy) -->
+			{#if step.productId && hasParentCategory}
 				<div class="space-y-2">
 					<Label class="text-sm">Ingredient Matching</Label>
 					<RadioGroup.Root bind:value={matchMode}>
 						<RadioGroup.Item value="EXACT_PRODUCT">Exact</RadioGroup.Item>
-						<RadioGroup.Item value="ANY_IN_CATEGORY">{categoryDisplayName}</RadioGroup.Item>
-						{#if hasBaseSpirit}
-							<RadioGroup.Item value="ANY_IN_BASE_SPIRIT">Any {baseSpiritDisplayName}</RadioGroup.Item>
-						{/if}
+						<RadioGroup.Item value="ANY_IN_CATEGORY">Any {categoryDisplayName}</RadioGroup.Item>
+						<RadioGroup.Item value="ANY_IN_PARENT_CATEGORY">Any {parentCategoryDisplayName}</RadioGroup.Item>
 					</RadioGroup.Root>
 					<p class="text-xs text-muted-foreground">
 						{#if matchMode === 'EXACT_PRODUCT'}
@@ -209,7 +205,7 @@
 						{:else if matchMode === 'ANY_IN_CATEGORY'}
 							Recipe can use any {categoryDisplayName} from your inventory.
 						{:else}
-							Recipe can use any {baseSpiritDisplayName} from your inventory.
+							Recipe can use any {parentCategoryDisplayName} from your inventory.
 						{/if}
 					</p>
 				</div>

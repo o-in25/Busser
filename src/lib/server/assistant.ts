@@ -55,7 +55,6 @@ export class ToolExecutor {
 			categoryId: c.categoryId,
 			categoryName: c.categoryName,
 			categoryDescription: c.categoryDescription,
-			baseSpiritId: c.baseSpiritId,
 			parentCategoryId: c.parentCategoryId,
 			productCount: c.productCount,
 		}));
@@ -70,7 +69,6 @@ export class ToolExecutor {
 			categoryId: c.categoryId,
 			categoryName: c.categoryName,
 			categoryDescription: c.categoryDescription,
-			baseSpiritId: c.baseSpiritId,
 			parentCategoryId: c.parentCategoryId,
 			productCount: c.productCount,
 		}));

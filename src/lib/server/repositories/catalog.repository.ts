@@ -132,7 +132,7 @@ export class CatalogRepository extends BaseRepository {
 					this.select('rs.RecipeId')
 						.from('basicrecipestep as rs')
 						.groupBy('rs.RecipeId')
-						// EffectiveInStock accounts for flexible matching (ANY_IN_CATEGORY, ANY_IN_BASE_SPIRIT)
+						// EffectiveInStock accounts for flexible matching (ANY_IN_CATEGORY, ANY_IN_PARENT_CATEGORY)
 						.havingRaw('SUM(CASE WHEN rs.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
 						.havingRaw('COUNT(rs.RecipeStepId) > 1');
 				})

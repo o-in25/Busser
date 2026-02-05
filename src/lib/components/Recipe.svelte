@@ -73,8 +73,8 @@
 	let hasCategoryMatch = $derived(
 		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_CATEGORY')
 	);
-	let hasSpiritMatch = $derived(
-		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_BASE_SPIRIT')
+	let hasParentCategoryMatch = $derived(
+		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_PARENT_CATEGORY')
 	);
 
 	const servingMethodIcons: Record<string, typeof Martini> = {
@@ -296,10 +296,10 @@
 									Any in category
 								</span>
 							{/if}
-							{#if hasSpiritMatch}
+							{#if hasParentCategoryMatch}
 								<span class="flex items-center gap-1">
 									<Sparkles class="w-3 h-3 text-amber-500" />
-									Any base spirit
+									Any in parent category
 								</span>
 							{/if}
 						</div>
@@ -321,7 +321,7 @@
 									unit={step.productIdQuantityUnit}
 									description={step.recipeStepDescription}
 									matchMode={step.matchMode}
-									baseSpiritId={step.baseSpiritId}
+									parentCategoryName={step.parentCategoryName}
 									bind:checked={completed[index]}
 								/>
 							{/each}
