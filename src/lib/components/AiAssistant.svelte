@@ -231,7 +231,7 @@
 		{/if}
 
 		{#each messages as message, i}
-			{#if message.content}
+			{#if message.content && !message.proposal}
 				<ChatMessage
 					role={message.role}
 					content={message.content}

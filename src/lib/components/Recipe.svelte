@@ -16,8 +16,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
 
-	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
-	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
+	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -78,10 +77,6 @@
 		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_BASE_SPIRIT')
 	);
 
-	// get the actual image URL
-	let lightImageUrl = $derived(recipe.recipeImageUrl || placeholderLight);
-	let darkImageUrl = $derived(recipe.recipeImageUrl || placeholderDark);
-
 	const servingMethodIcons: Record<string, typeof Martini> = {
 		Stirred: Martini,
 		Shaken: GlassWater,
@@ -108,6 +103,7 @@
 	});
 
 	function openLightbox() {
+		if (!recipe.recipeImageUrl) return;
 		lightboxOpen = true;
 		// stops body scroll when lightbox is open
 		document.body.style.overflow = 'hidden';
@@ -131,34 +127,38 @@
 	<!-- Hero Section -->
 	<div class="relative rounded-xl overflow-hidden mb-6">
 		<!-- Background Image (clickable area) -->
-		<button
-			type="button"
-			class="absolute inset-0 w-full cursor-zoom-in group"
-			onclick={openLightbox}
-			aria-label="View full image"
-		>
-			<img
-				class="w-full h-full object-cover dark:hidden transition-transform duration-300 group-hover:scale-105"
-				src={lightImageUrl}
-				alt={recipe.recipeName}
-			/>
-			<img
-				class="w-full h-full object-cover hidden dark:block transition-transform duration-300 group-hover:scale-105"
-				src={darkImageUrl}
-				alt={recipe.recipeName}
-			/>
-			<!-- Gradient overlay -->
-			<div
-				class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"
-			></div>
-
-			<!-- Expand indicator -->
-			<div
-				class="absolute top-4 right-4 p-2 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+		{#if recipe.recipeImageUrl}
+			<button
+				type="button"
+				class="absolute inset-0 w-full cursor-zoom-in group"
+				onclick={openLightbox}
+				aria-label="View full image"
 			>
-				<Expand class="w-5 h-5 text-foreground" />
+				<img
+					class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+					src={recipe.recipeImageUrl}
+					alt={recipe.recipeName}
+				/>
+				<!-- Gradient overlay -->
+				<div
+					class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"
+				></div>
+
+				<!-- Expand indicator -->
+				<div
+					class="absolute top-4 right-4 p-2 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+				>
+					<Expand class="w-5 h-5 text-foreground" />
+				</div>
+			</button>
+		{:else}
+			<div class="absolute inset-0 w-full">
+				<ImagePlaceholder variant="recipe" class="w-20 h-20" />
+				<div
+					class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"
+				></div>
 			</div>
-		</button>
+		{/if}
 
 		<!-- Hero Content -->
 		<div class="relative pt-48 pb-6 px-4 md:px-6 pointer-events-none">
@@ -206,7 +206,7 @@
 	</div>
 
 	<!-- Lightbox Overlay -->
-	{#if lightboxOpen}
+	{#if lightboxOpen && recipe.recipeImageUrl}
 		<div
 			class="fixed inset-0 z-50 flex items-center justify-center"
 			role="dialog"
@@ -240,13 +240,8 @@
 			>
 				<button type="button" onclick={closeLightbox} class="block" aria-label="Close lightbox">
 					<img
-						class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl dark:hidden"
-						src={lightImageUrl}
-						alt={recipe.recipeName}
-					/>
-					<img
-						class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl hidden dark:block"
-						src={darkImageUrl}
+						class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+						src={recipe.recipeImageUrl}
 						alt={recipe.recipeName}
 					/>
 				</button>

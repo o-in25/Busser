@@ -3,8 +3,7 @@
 
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import placeholderDark from '$lib/assets/placeholder-alt-dark.png';
-	import placeholderLight from '$lib/assets/placeholder-alt-light.png';
+	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { calculateOverallScore } from '$lib/math';
@@ -87,24 +86,7 @@
 						class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
 					/>
 				{:else}
-					<div
-						class="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center dark:hidden"
-					>
-						<img
-							src={placeholderLight}
-							alt={recipe.recipeName}
-							class="w-20 h-20 object-contain opacity-40"
-						/>
-					</div>
-					<div
-						class="w-full h-full bg-gradient-to-br from-muted to-muted/50 items-center justify-center hidden dark:flex"
-					>
-						<img
-							src={placeholderDark}
-							alt={recipe.recipeName}
-							class="w-20 h-20 object-contain opacity-40"
-						/>
-					</div>
+					<ImagePlaceholder variant="recipe" class="w-20 h-20" />
 				{/if}
 				<!-- Gradient overlay on hover -->
 				<div
@@ -246,20 +228,7 @@
 							class="w-full h-full object-cover"
 						/>
 					{:else}
-						<div class="w-full h-full bg-muted flex items-center justify-center dark:hidden">
-							<img
-								src={placeholderLight}
-								alt={recipe.recipeName}
-								class="w-10 h-10 object-contain opacity-40"
-							/>
-						</div>
-						<div class="w-full h-full bg-muted items-center justify-center hidden dark:flex">
-							<img
-								src={placeholderDark}
-								alt={recipe.recipeName}
-								class="w-10 h-10 object-contain opacity-40"
-							/>
-						</div>
+						<ImagePlaceholder variant="recipe" class="w-10 h-10" />
 					{/if}
 					<!-- Favorite/Featured indicators -->
 					{#if isFavorite || isFeatured}

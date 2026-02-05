@@ -581,6 +581,69 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
+	async findSubcategories(
+		workspaceId: string,
+		parentCategoryId: number
+	): Promise<(Category & { productCount: number })[]> {
+		try {
+			const result = await this.db
+				.table('category')
+				.where('category.workspaceId', workspaceId)
+				.where('category.ParentCategoryId', parentCategoryId)
+				.leftJoin('product', function () {
+					this.on('category.CategoryId', '=', 'product.CategoryId').andOn(
+						'category.workspaceId',
+						'=',
+						'product.workspaceId'
+					);
+				})
+				.select(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.BaseSpiritId',
+					'category.ParentCategoryId',
+					this.db.query.raw('COUNT(product.ProductId) as productCount')
+				)
+				.groupBy(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.BaseSpiritId',
+					'category.ParentCategoryId'
+				)
+				.orderBy('category.CategoryName');
+
+			return (result as any[]).map((row) => ({
+				categoryId: row.categoryId,
+				categoryName: row.categoryName,
+				categoryDescription: row.categoryDescription,
+				baseSpiritId: row.baseSpiritId,
+				parentCategoryId: row.parentCategoryId,
+				productCount: Number(row.productCount),
+			}));
+		} catch (error: any) {
+			console.error('Failed to get subcategories:', error);
+			return [];
+		}
+	}
+
+	async findProductsByCategory(workspaceId: string, categoryId: number): Promise<Product[]> {
+		try {
+			const result = await this.db
+				.table('inventory')
+				.where('workspaceId', workspaceId)
+				.where('categoryId', categoryId)
+				.select()
+				.orderBy('productName');
+
+			return result as Product[];
+		} catch (error: any) {
+			console.error('Failed to get products by category:', error);
+			return [];
+		}
+	}
+
 	async deleteCategory(workspaceId: string, categoryId: number): Promise<QueryResult<number>> {
 		try {
 			// Check if category has products

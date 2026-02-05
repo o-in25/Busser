@@ -11,7 +11,7 @@ export class ToolExecutor {
 	async execute(toolName: string, args: any): Promise<string> {
 		switch (toolName) {
 			case 'search_inventory':
-				return this.searchInventory(args.query);
+				return this.searchInventory(args.query, args.categoryId);
 			case 'list_categories':
 				return this.listCategories();
 			case 'search_categories':
@@ -28,10 +28,12 @@ export class ToolExecutor {
 		}
 	}
 
-	private async searchInventory(query: string): Promise<string> {
-		const { data } = await inventoryRepo.findAll(this.workspaceId, 1, 50, {
-			productName: query,
-		} as any);
+	private async searchInventory(query?: string, categoryId?: number): Promise<string> {
+		const filter: any = {};
+		if (query) filter.productName = query;
+		if (categoryId) filter.categoryId = categoryId;
+
+		const { data } = await inventoryRepo.findAll(this.workspaceId, 1, 50, filter);
 
 		const results = data.map((p) => ({
 			productId: p.productId,

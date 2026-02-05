@@ -49,7 +49,7 @@ export const assistantTools: ChatCompletionTool[] = [
 		function: {
 			name: 'search_inventory',
 			description:
-				'Search the workspace inventory for products by name. Returns matching products with their IDs, categories, stock status, and proof. Use this to find ingredients for a recipe.',
+				'Search the workspace inventory for products. Can search by name, by category ID, or both. Returns matching products with their IDs, categories, stock status, and proof. Use this to find ingredients for a recipe. Stock level does not matter — all products in inventory are valid to use.',
 			parameters: {
 				type: 'object',
 				properties: {
@@ -58,8 +58,12 @@ export const assistantTools: ChatCompletionTool[] = [
 						description:
 							'Product name or partial name to search for (e.g. "rum", "lime", "angostura")',
 					},
+					categoryId: {
+						type: 'number',
+						description:
+							'Category ID to filter by. Use this to find products within a specific category (e.g. after finding a category via search_categories).',
+					},
 				},
-				required: ['query'],
 			},
 		},
 	},
@@ -164,8 +168,9 @@ export const assistantTools: ChatCompletionTool[] = [
 							type: 'object',
 							properties: {
 								productId: {
-									type: ['number', 'null'],
-									description: 'Product ID if found in inventory, null if not',
+									type: 'number',
+									description:
+										'Product ID from search_inventory results. Must be a valid ID — if no product was found, put the ingredient in missingIngredients instead.',
 								},
 								productName: {
 									type: 'string',
@@ -209,7 +214,8 @@ export const assistantTools: ChatCompletionTool[] = [
 								'description',
 							],
 						},
-						description: 'Ingredients that exist in inventory',
+						description:
+							'Ingredients where a matching product was found in inventory via search_inventory. Each item MUST have a valid productId. Do NOT include ingredients here if no product was found.',
 					},
 					missingIngredients: {
 						type: 'array',
@@ -255,7 +261,8 @@ export const assistantTools: ChatCompletionTool[] = [
 								'description',
 							],
 						},
-						description: 'Ingredients NOT found in inventory that need to be created',
+						description:
+							'Ingredients where NO matching product was found in inventory via search_inventory. These will be created as new products. An ingredient must be in EITHER ingredients OR missingIngredients, never both.',
 					},
 				},
 				required: [

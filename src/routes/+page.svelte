@@ -30,7 +30,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import logo from '$lib/assets/logo.png';
-	import placeholder from '$lib/assets/placeholder@2x.jpg';
+	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -74,7 +74,7 @@
 				recipeCategoryId,
 				recipeDescription,
 			}) => ({
-				src: recipeImageUrl || placeholder,
+				src: recipeImageUrl || '',
 				alt: recipeName,
 				hasImage: !!recipeImageUrl,
 				data: {
@@ -699,12 +699,16 @@
 								class="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105"
 							>
 								<div class="relative aspect-square">
-									<img
-										src={item.src}
-										alt={item.alt}
-										class="h-full w-full object-cover"
-										loading="lazy"
-									/>
+									{#if item.hasImage}
+										<img
+											src={item.src}
+											alt={item.alt}
+											class="h-full w-full object-cover"
+											loading="lazy"
+										/>
+									{:else}
+										<ImagePlaceholder variant="recipe" class="w-12 h-12" />
+									{/if}
 									<div
 										class="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
 									></div>

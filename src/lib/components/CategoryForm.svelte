@@ -19,10 +19,12 @@
 		action = 'add',
 		category = {} as Table.Category,
 		parentCategories = [],
+		productCount = 0,
 	}: {
 		action?: ComponentAction;
 		category?: Table.Category;
 		parentCategories?: Table.Category[];
+		productCount?: number;
 	} = $props();
 
 	// get workspace role for permission checks
@@ -157,9 +159,21 @@
 		<!-- Action buttons -->
 		<div class="flex justify-end gap-3">
 			{#if action === 'edit' && canModify}
-				<Button type="button" variant="destructive" onclick={() => (modalOpen = true)}>
-					Delete
-				</Button>
+				<div class="flex flex-col items-start gap-1">
+					<Button
+						type="button"
+						variant="destructive"
+						onclick={() => (modalOpen = true)}
+						disabled={productCount > 0}
+					>
+						Delete
+					</Button>
+					{#if productCount > 0}
+						<span class="text-xs text-muted-foreground">
+							Remove {productCount} product{productCount !== 1 ? 's' : ''} first
+						</span>
+					{/if}
+				</div>
 			{/if}
 			<Button type="submit" disabled={isSubmitting}>
 				{isSubmitting ? 'Saving...' : action === 'add' ? 'Create Category' : 'Save Changes'}

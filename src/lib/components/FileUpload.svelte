@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Upload, X } from 'lucide-svelte';
 
-	import placeholder from '$lib/assets/placeholder@2x.jpg';
+	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -13,7 +13,8 @@
 	let files: FileList | undefined;
 	let fileInputRef: HTMLInputElement | undefined;
 
-	$: src = signedUrl?.length ? signedUrl : placeholder;
+	$: src = signedUrl || '';
+	$: hasImage = !!signedUrl && signedUrl.length > 0;
 	$: hasFiles = files && files.length > 0;
 	$: fileNames = files
 		? Array.from(files)
@@ -38,7 +39,7 @@
 		if (fileInputRef) {
 			fileInputRef.value = '';
 			files = undefined;
-			signedUrl = placeholder;
+			signedUrl = '';
 			deleted = true;
 		}
 	};
@@ -77,11 +78,17 @@
 		</div>
 	</div>
 	<div class="glass-surface p-4 overflow-hidden">
-		<FancyImage
-			alt="Product Thumbnail"
-			{src}
-			divStyle="rounded-lg"
-			imgStyle="object-scale-down h-48 w-96 m-auto rounded-md"
-		/>
+		{#if hasImage}
+			<FancyImage
+				alt="Product Thumbnail"
+				{src}
+				divStyle="rounded-lg"
+				imgStyle="object-scale-down h-48 w-96 m-auto rounded-md"
+			/>
+		{:else}
+			<div class="h-48 w-96 m-auto rounded-md overflow-hidden">
+				<ImagePlaceholder variant="product" class="w-12 h-12" />
+			</div>
+		{/if}
 	</div>
 </div>

@@ -9,7 +9,7 @@
 	<title>Busser AI</title>
 </svelte:head>
 
-<div class="space-y-6">
+<div class="space-y-6 max-w-2xl mx-auto">
 	<div>
 		<div class="flex items-center gap-2">
 			<h1 class="text-2xl font-bold">Busser AI</h1>
