@@ -7,7 +7,6 @@ export type Category = {
 	categoryId: number;
 	categoryName: string;
 	categoryDescription: string | null;
-	baseSpiritId: number | null;
 	parentCategoryId: number | null;
 };
 

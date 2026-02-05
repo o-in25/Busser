@@ -40,7 +40,7 @@ const SYSTEM_PROMPT = `You are a cocktail recipe assistant for a bar management 
 Unless the user explicitly requests a specific brand, prefer broader match modes:
 
 - ANY_IN_CATEGORY (default): Any product in the same category works (e.g., any tonic water, any simple syrup, any lemon juice). Use this for most ingredients.
-- ANY_IN_BASE_SPIRIT: Any product with the same base spirit works. Use when the recipe calls for a spirit type generically (e.g., "rum" rather than "aged rum").
+- ANY_IN_PARENT_CATEGORY: Any product whose category shares the same parent category works. Use when the recipe calls for a broad type generically (e.g., "any gin" rather than "London Dry Gin", "any juice" rather than "lime juice").
 - EXACT_PRODUCT: ONLY use when the user explicitly requests a specific brand/product (e.g., "Beefeater Gin", "Angostura bitters").
 
 ## Finding ingredients — search by category, not just name
@@ -56,7 +56,7 @@ For each ingredient in the recipe:
 Each ingredient MUST go in EXACTLY ONE of these arrays — NEVER both. Almost all ingredients should go in the ingredients array.
 
 - **ingredients**: Use when a category with products exists in inventory. Set productId to any product from that category.
-  - Use ANY_IN_CATEGORY (most common) or ANY_IN_BASE_SPIRIT for generic ingredients.
+  - Use ANY_IN_CATEGORY (most common) or ANY_IN_PARENT_CATEGORY for generic ingredients.
   - Use EXACT_PRODUCT only when the user explicitly requested a specific brand.
 - **missingIngredients**: Use ONLY when the user explicitly requested a specific brand/SKU that does not exist in inventory AND related products exist in the same category. The system will create that specific product upon confirmation.
   - Example: User says "use Canada Dry tonic water", you find other tonic waters exist but not Canada Dry → add Canada Dry to missingIngredients.

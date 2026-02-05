@@ -13,7 +13,7 @@
 		unit,
 		description,
 		matchMode = 'EXACT_PRODUCT',
-		baseSpiritId,
+		parentCategoryName,
 		checked = $bindable(false),
 		...restProps
 	}: {
@@ -25,7 +25,7 @@
 		unit: string;
 		description?: string | null;
 		matchMode?: MatchMode;
-		baseSpiritId?: number | null;
+		parentCategoryName?: string | null;
 		checked?: boolean;
 		[key: string]: unknown;
 	} = $props();
@@ -52,22 +52,11 @@
 		return { prefix: `${displayQuantity}${unitLabel}`, ingredient: categoryName };
 	});
 
-	// Map baseSpiritId to spirit name for display
-	const spiritNames: Record<number, string> = {
-		4: 'Whiskey',
-		5: 'Gin',
-		6: 'Vodka',
-		7: 'Tequila',
-		8: 'Rum',
-		9: 'Brandy',
-	};
-	const baseSpiritName = $derived(baseSpiritId ? spiritNames[baseSpiritId] : null);
-
 	// Determine what to display based on match mode
 	const isFlexible = $derived(matchMode !== 'EXACT_PRODUCT');
 	const flexibleLabel = $derived.by(() => {
 		if (matchMode === 'ANY_IN_CATEGORY') return `Any ${categoryName}`;
-		if (matchMode === 'ANY_IN_BASE_SPIRIT' && baseSpiritName) return `Any ${baseSpiritName}`;
+		if (matchMode === 'ANY_IN_PARENT_CATEGORY' && parentCategoryName) return `Any ${parentCategoryName}`;
 		return null;
 	});
 
@@ -122,7 +111,7 @@
 		<!-- Product name with flexible matching indicator -->
 		{#if isFlexible && flexibleLabel}
 			<div class="flex items-center gap-1.5 mt-0.5">
-				{#if matchMode === 'ANY_IN_BASE_SPIRIT'}
+				{#if matchMode === 'ANY_IN_PARENT_CATEGORY'}
 					<Sparkles class="w-3 h-3 text-amber-500" />
 				{:else}
 					<Layers class="w-3 h-3 text-blue-500" />

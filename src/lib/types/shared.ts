@@ -39,7 +39,8 @@ export type SelectOption = {
 	// Optional category metadata for product options
 	categoryId?: number;
 	categoryName?: string;
-	baseSpiritId?: number | null;
+	parentCategoryId?: number | null;
+	parentCategoryName?: string | null;
 };
 
 // logging

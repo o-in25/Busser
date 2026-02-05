@@ -6,8 +6,8 @@
 // Match mode for recipe ingredients
 // - EXACT_PRODUCT: Only the specific product satisfies the recipe step
 // - ANY_IN_CATEGORY: Any product in the same category satisfies the step
-// - ANY_IN_BASE_SPIRIT: Any product with the same base spirit satisfies the step
-export type MatchMode = 'EXACT_PRODUCT' | 'ANY_IN_CATEGORY' | 'ANY_IN_BASE_SPIRIT';
+// - ANY_IN_PARENT_CATEGORY: Any product whose category shares the same parent satisfies the step
+export type MatchMode = 'EXACT_PRODUCT' | 'ANY_IN_CATEGORY' | 'ANY_IN_PARENT_CATEGORY';
 
 // workspacefeatured table - curated featured cocktails per workspace
 export interface WorkspaceFeatured {
@@ -120,7 +120,8 @@ export type BasicRecipeStep = {
 	categoryId: number;
 	categoryName: string;
 	categoryDescription: string | null;
-	baseSpiritId: number | null;
+	parentCategoryId: number | null;
+	parentCategoryName: string | null;
 	supplierName: string | null;
 	supplierDetails: string | null;
 	productIdQuantityInMilliliters: number;
@@ -193,7 +194,6 @@ export namespace Table {
 		categoryId?: number;
 		categoryName: string;
 		categoryDescription: string | null;
-		baseSpiritId?: number | null;
 		parentCategoryId?: number | null;
 	};
 }
@@ -226,7 +226,8 @@ export namespace View {
 		categoryId?: number;
 		stepCategoryId?: number | null;
 		matchMode?: MatchMode;
-		baseSpiritId?: number | null;
+		parentCategoryId?: number | null;
+		parentCategoryName?: string | null;
 		recipeStepDescription: string;
 		productName: string;
 		categoryName: string;

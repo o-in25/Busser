@@ -186,9 +186,9 @@ export const assistantTools: ChatCompletionTool[] = [
 								},
 								matchMode: {
 									type: 'string',
-									enum: ['EXACT_PRODUCT', 'ANY_IN_CATEGORY', 'ANY_IN_BASE_SPIRIT'],
+									enum: ['EXACT_PRODUCT', 'ANY_IN_CATEGORY', 'ANY_IN_PARENT_CATEGORY'],
 									description:
-										'EXACT_PRODUCT if specific product required, ANY_IN_CATEGORY if any product in the category works, ANY_IN_BASE_SPIRIT for any product of the same base spirit',
+										'EXACT_PRODUCT if specific product required, ANY_IN_CATEGORY if any product in the category works, ANY_IN_PARENT_CATEGORY for any product whose category shares the same parent category',
 								},
 								quantityMl: {
 									type: 'number',

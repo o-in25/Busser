@@ -4,36 +4,23 @@ import moment from 'moment';
 import { DbProvider } from './db';
 import { Logger } from './logger';
 
+const { GOOGLE_SERVICE_KEY, BUCKET } = process.env;
+
+// const { GOOGLE_SERVICE_KEY, BUCKET } = env;
 const base64Decode = (str: string) => (str ? Buffer.from(str, 'base64').toString() : '{}');
+const { USER_TABLE } = process.env;
 
-let _storage: Storage;
-let _bucket: ReturnType<Storage['bucket']>;
-let _db: DbProvider;
+const { client_email, private_key } = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY || ''));
+const storage = new Storage({
+	credentials: {
+		client_email,
+		private_key,
+	},
+});
 
-function getStorage() {
-	if (!_storage) {
-		const { GOOGLE_SERVICE_KEY } = process.env;
-		const { client_email, private_key } = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY || ''));
-		_storage = new Storage({ credentials: { client_email, private_key } });
-	}
-	return _storage;
-}
+const bucket = storage.bucket(BUCKET || '');
 
-function getBucket() {
-	if (!_bucket) {
-		const { BUCKET } = process.env;
-		_bucket = getStorage().bucket(BUCKET || '');
-	}
-	return _bucket;
-}
-
-function getDb() {
-	if (!_db) {
-		const { USER_TABLE } = process.env;
-		_db = new DbProvider(USER_TABLE || '');
-	}
-	return _db;
-}
+const db = new DbProvider(USER_TABLE || '');
 
 export type Upload = {
 	uploadId?: string;
@@ -54,7 +41,7 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
 	try {
 		const row = Object.assign(
 			{},
-			await getDb()
+			await db
 				.table<Upload>('upload')
 				.select('name', 'bucket')
 				.where('publicUrl', signedUrl)
@@ -66,9 +53,9 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
 			throw Error('No upload record found for signed URL.');
 		}
 
-		await getStorage().bucket(row.bucket).file(row.name).delete();
+		await storage.bucket(row.bucket).file(row.name).delete();
 
-		await getDb()
+		await db
 			.table<Upload>('upload')
 			.where('name', row.name)
 			.andWhere('bucket', row.bucket)
@@ -91,7 +78,7 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
 export async function getSignedUrl(file: File, fileName: string = ''): Promise<string> {
 	try {
 		const name = `${fileName || file.name}-${moment().format('MMDDYYYYSS')}`;
-		const newFile = getBucket().file(name);
+		const newFile = bucket.file(name);
 		const blob = await file.arrayBuffer();
 		const data = Buffer.from(blob);
 		await newFile.save(data, {
@@ -102,16 +89,14 @@ export async function getSignedUrl(file: File, fileName: string = ''): Promise<s
 		const [metadata] = await newFile.getMetadata();
 		// save a ref of the image so we can delete it
 		// later
-		await getDb()
-			.table<Upload>('upload')
-			.insert({
-				externalUploadId: metadata.id,
-				name: metadata.name,
-				bucket: metadata.bucket,
-				contentType: metadata.contentType,
-				size: parseInt(metadata.size?.toString() || '0'),
-				publicUrl,
-			});
+		await db.table<Upload>('upload').insert({
+			externalUploadId: metadata.id,
+			name: metadata.name,
+			bucket: metadata.bucket,
+			contentType: metadata.contentType,
+			size: parseInt(metadata.size?.toString() || '0'),
+			publicUrl,
+		});
 		return publicUrl;
 	} catch (error) {
 		console.error(error);
@@ -127,23 +112,21 @@ export async function uploadAvatarBuffer(
 	try {
 		const ext = contentType.includes('svg') ? 'svg' : contentType.split('/')[1] || 'png';
 		const name = `avatars/${userId}-${Date.now()}.${ext}`;
-		const newFile = getBucket().file(name);
+		const newFile = bucket.file(name);
 
 		await newFile.save(buffer, { contentType });
 
 		const publicUrl = newFile.publicUrl();
 		const [metadata] = await newFile.getMetadata();
 
-		await getDb()
-			.table<Upload>('upload')
-			.insert({
-				externalUploadId: metadata.id,
-				name: metadata.name,
-				bucket: metadata.bucket,
-				contentType: metadata.contentType,
-				size: parseInt(metadata.size?.toString() || '0'),
-				publicUrl,
-			});
+		await db.table<Upload>('upload').insert({
+			externalUploadId: metadata.id,
+			name: metadata.name,
+			bucket: metadata.bucket,
+			contentType: metadata.contentType,
+			size: parseInt(metadata.size?.toString() || '0'),
+			publicUrl,
+		});
 
 		return publicUrl;
 	} catch (error) {
@@ -160,7 +143,7 @@ export async function getSignedUrlFromUnsignedUrl(
 	const regex = /https:\/\/(?:[^/]+)\/(.+)/;
 	let [, fileName] = unsignedUrl.match(regex) || [];
 	fileName = fileName.split('/').pop() || '';
-	const file = getBucket().file(fileName);
+	const file = bucket.file(fileName);
 	const [signedUrl] = await file.getSignedUrl({
 		version: 'v4',
 		action: 'read',

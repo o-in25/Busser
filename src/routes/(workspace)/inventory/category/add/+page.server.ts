@@ -19,11 +19,12 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		redirect(StatusCodes.SEE_OTHER, '/inventory/category');
 	}
 
-	// Get all categories for parent selection
+	// Get top-level categories for parent selection (only categories without a parent)
 	const { data: categories } = await inventoryRepo.findAllCategories(workspaceId, 1, 1000, null);
+	const parentCategories = (categories || []).filter((c) => !c.parentCategoryId);
 
 	return {
-		parentCategories: categories || [],
+		parentCategories,
 	};
 };
 

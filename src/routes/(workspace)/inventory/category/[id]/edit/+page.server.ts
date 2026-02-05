@@ -43,7 +43,9 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		inventoryRepo.findAllCategories(workspaceId, 1, 1000, null),
 		inventoryRepo.findAll(workspaceId, 1, 1, { categoryId: Number(id) }),
 	]);
-	const parentCategories = (categories || []).filter((c) => c.categoryId !== Number(id));
+	const parentCategories = (categories || []).filter(
+		(c) => c.categoryId !== Number(id) && !c.parentCategoryId
+	);
 
 	return {
 		category: result.data,
@@ -83,7 +85,6 @@ export const actions: Actions = {
 			categoryName,
 			categoryDescription,
 			parentCategoryId,
-			baseSpiritId: null, // Will be derived from parent in repository
 		};
 
 		const result = await inventoryRepo.updateCategory(workspaceId, category);
