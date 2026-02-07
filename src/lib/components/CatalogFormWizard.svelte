@@ -23,20 +23,24 @@
 		class: className,
 		currentStep = $bindable(0),
 		children,
+		footer,
 		onfinish,
+		canProceed = true,
 	}: {
 		class?: string;
 		currentStep?: number;
 		children?: Snippet<[{ step: number; isActive: boolean }]>;
+		footer?: Snippet;
 		onfinish?: () => void;
+		canProceed?: boolean;
 	} = $props();
 
 	const steps: Step[] = [
 		{ title: 'Details', icon: BookOpen },
 		{ title: 'Description', icon: Image },
 		{ title: 'Ingredients', icon: FlaskConical },
-		{ title: 'Preparation', icon: Martini },
 		{ title: 'Ratings', icon: Gauge },
+		{ title: 'Preparation', icon: Martini },
 	];
 
 	let progress = $derived(((currentStep + 1) / steps.length) * 100);
@@ -127,15 +131,20 @@
 		</Button>
 
 		{#if currentStep < steps.length - 1}
-			<Button type="button" onclick={nextStep} class="flex items-center gap-2">
+			<Button type="button" onclick={nextStep} disabled={!canProceed} class="flex items-center gap-2">
 				Next
 				<ChevronRight class="h-4 w-4" />
 			</Button>
 		{:else}
-			<Button type="submit" class="flex items-center gap-2">
+			<Button type="submit" disabled={!canProceed} class="flex items-center gap-2">
 				Save
 				<Check class="h-4 w-4" />
 			</Button>
 		{/if}
 	</div>
+
+	<!-- Footer slot (for danger zone, etc.) -->
+	{#if footer}
+		{@render footer()}
+	{/if}
 </div>

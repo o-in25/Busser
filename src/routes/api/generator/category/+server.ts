@@ -21,10 +21,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		error(StatusCodes.BAD_REQUEST, {
 			reason: 'Bad Request',
 			code: StatusCodes.BAD_REQUEST,
-			message: 'Recipe name is required for description generation',
+			message: 'Category name is required for description generation',
 		});
 	}
 
-	const result = await generate('catalog-description', { name: trigger });
-	return json({ ...result, description: result.history });
+	const result = await generate('category-description', { name: trigger });
+	return json(result);
 };

@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 
+import { APP_VERSION } from '$env/static/private';
 import { userRepo } from '$lib/server/auth';
 import { uploadAvatarBuffer } from '$lib/server/storage';
 
@@ -7,11 +8,12 @@ import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const userId = locals.user?.userId || '';
-	if (!userId) return { avatarImageUrl: null };
+	if (!userId) return { avatarImageUrl: null, appVersion: APP_VERSION || 'dev' };
 
 	const result = await userRepo.findById(userId);
 	return {
 		avatarImageUrl: result.status === 'success' ? result.data?.avatarImageUrl : null,
+		appVersion: APP_VERSION || 'dev',
 	};
 };
 

@@ -1,10 +1,12 @@
-import { userRepo } from '$lib/server/auth';
+import { getWorkspace, userRepo } from '$lib/server/auth';
 
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
 	let { user } = locals;
 	user = JSON.parse(JSON.stringify(user));
+
+	let workspaceName: string | null = null;
 
 	// fetch fresh avatar url from db since jwt token may be stale
 	if (user?.userId) {
@@ -20,7 +22,15 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 				}
 			}
 		}
+
+		// fetch active workspace name for nav display
+		if (locals.activeWorkspaceId) {
+			const wsResult = await getWorkspace(user.userId, locals.activeWorkspaceId);
+			if (wsResult.status === 'success' && wsResult.data) {
+				workspaceName = wsResult.data.workspaceName;
+			}
+		}
 	}
 
-	return { user };
+	return { user, workspaceName };
 };

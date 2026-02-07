@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { InventoryGenerator } from '$lib/server/generators/inventory-generator';
+import { generate } from '$lib/server/generators/generator-factory';
 
 import type { RequestHandler } from './$types';
 
@@ -15,7 +15,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const body = await request.json();
-	const generator = new InventoryGenerator();
-	const result = await generator.generateContent(body.trigger);
+	const { trigger } = body;
+
+	if (!trigger) {
+		error(StatusCodes.BAD_REQUEST, {
+			reason: 'Bad Request',
+			code: StatusCodes.BAD_REQUEST,
+			message: 'Product name is required for description generation',
+		});
+	}
+
+	const result = await generate('inventory-description', { name: trigger });
 	return json(result);
 };

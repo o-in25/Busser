@@ -22,6 +22,7 @@
 	import { CollapsibleSection } from '$lib/components/ui/collapsible';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
+	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { QuickSelect } from '$lib/components/ui/quick-select';
@@ -169,6 +170,7 @@
 		const result = await response.json();
 		if ('data' in result) {
 			$notificationStore.success = { message: 'Inventory item deleted.' };
+			goto('/inventory');
 		} else {
 			$notificationStore.error = { message: result.message || result.error };
 		}
@@ -177,6 +179,40 @@
 	const openModal = () => {
 		modalOpen = true;
 	};
+
+	// Validation state
+	let touched = $state({
+		productName: false,
+		categoryId: false,
+		productPricePerUnit: false,
+		productUnitSizeInMilliliters: false,
+		productProof: false,
+	});
+
+	const errors = $derived({
+		productName: !productName.trim() ? 'Product name is required' : '',
+		categoryId: !categoryId ? 'Category is required' : '',
+		productPricePerUnit: !productPricePerUnit ? 'Price is required' : '',
+		productUnitSizeInMilliliters: !productUnitSizeInMilliliters ? 'Size is required' : '',
+		productProof: !productProof ? 'Proof is required' : '',
+	});
+
+	// Step-based validation for wizard
+	const stepValid = $derived({
+		0: !!productName.trim() && !!categoryId, // name + category required
+		1: !!productPricePerUnit && !!productUnitSizeInMilliliters && !!productProof, // purchase details
+		2: true, // flavor profile optional
+		3: true, // description optional
+	});
+	const canProceedWizard = $derived(stepValid[currentWizardStep as keyof typeof stepValid] ?? true);
+	const isFormValid = $derived(stepValid[0] && stepValid[1]);
+
+	// Track categoryId changes to mark as touched
+	$effect(() => {
+		if (categoryId !== null) {
+			touched.categoryId = true;
+		}
+	});
 </script>
 
 <!-- Draft Manager (only for add mode) -->
@@ -229,20 +265,27 @@
 		enctype="multipart/form-data"
 	>
 		<!-- Mobile Wizard View -->
-		<InventoryFormWizard steps={wizardSteps} bind:currentStep={currentWizardStep}>
+		<InventoryFormWizard steps={wizardSteps} bind:currentStep={currentWizardStep} canProceed={canProceedWizard}>
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Basic Info Step -->
 					<div class="space-y-4">
 						<div>
-							<Label for="productName" class="mb-2">Name</Label>
+							<Label for="productName" class="mb-2">
+								Name <span class="text-destructive">*</span>
+							</Label>
 							<Input
 								type="text"
 								id="productName"
 								name="productName"
 								required
 								bind:value={productName}
+								onblur={() => (touched.productName = true)}
+								class={touched.productName && errors.productName ? 'border-destructive' : ''}
 							/>
+							{#if touched.productName && errors.productName}
+								<Helper color="red">{errors.productName}</Helper>
+							{/if}
 						</div>
 						<div>
 							<Autocomplete
@@ -255,13 +298,18 @@
 								required={true}
 								bind:value={categoryId}
 							/>
+							{#if touched.categoryId && errors.categoryId}
+								<Helper color="red">{errors.categoryId}</Helper>
+							{/if}
 						</div>
 					</div>
 				{:else if step === 1}
 					<!-- Purchase Details Step -->
 					<div class="space-y-4">
 						<div>
-							<Label for="productPricePerUnit-mobile" class="mb-2">Price</Label>
+							<Label for="productPricePerUnit-mobile" class="mb-2">
+								Price <span class="text-destructive">*</span>
+							</Label>
 							<div class="relative">
 								<span
 									class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
@@ -272,28 +320,38 @@
 									id="productPricePerUnit-mobile"
 									step="any"
 									required
-									class="pl-7"
+									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit ? 'border-destructive' : ''}"
 									value={productPricePerUnit}
 									oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
+									onblur={() => (touched.productPricePerUnit = true)}
 								/>
 							</div>
+							{#if touched.productPricePerUnit && errors.productPricePerUnit}
+								<Helper color="red">{errors.productPricePerUnit}</Helper>
+							{/if}
 						</div>
 						<div>
-							<Label for="productUnitSizeInMilliliters-mobile" class="mb-2">Size</Label>
+							<Label for="productUnitSizeInMilliliters-mobile" class="mb-2">
+								Size <span class="text-destructive">*</span>
+							</Label>
 							<div class="relative">
 								<Input
 									type="number"
 									id="productUnitSizeInMilliliters-mobile"
 									required
-									class="pr-10"
+									class="pr-10 {touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters ? 'border-destructive' : ''}"
 									value={productUnitSizeInMilliliters}
 									oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
+									onblur={() => (touched.productUnitSizeInMilliliters = true)}
 								/>
 								<span
 									class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
 									>mL</span
 								>
 							</div>
+							{#if touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters}
+								<Helper color="red">{errors.productUnitSizeInMilliliters}</Helper>
+							{/if}
 							<QuickSelect
 								options={sizeOptions}
 								bind:value={productUnitSizeInMilliliters}
@@ -301,15 +359,22 @@
 							/>
 						</div>
 						<div>
-							<Label for="productProof-mobile" class="mb-2">Proof</Label>
+							<Label for="productProof-mobile" class="mb-2">
+								Proof <span class="text-destructive">*</span>
+							</Label>
 							<Input
 								type="number"
 								id="productProof-mobile"
 								max="200"
 								required
+								class={touched.productProof && errors.productProof ? 'border-destructive' : ''}
 								value={productProof}
 								oninput={(e) => (productProof = e.currentTarget.value)}
+								onblur={() => (touched.productProof = true)}
 							/>
+							{#if touched.productProof && errors.productProof}
+								<Helper color="red">{errors.productProof}</Helper>
+							{/if}
 							<QuickSelect options={proofOptions} bind:value={productProof} class="mt-2" />
 						</div>
 						<div class="flex flex-wrap gap-2 pt-2">
@@ -382,6 +447,8 @@
 							bind:pendingFile={pendingImageFile}
 							bind:imageCleared
 							trigger={productName}
+							type="product"
+							description={productDescription}
 						/>
 					</div>
 				{/if}
@@ -401,14 +468,21 @@
 				<Card.Content class="space-y-4">
 					<div class="grid gap-6 md:grid-cols-2">
 						<div>
-							<Label for="productName" class="mb-2">Name</Label>
+							<Label for="productName" class="mb-2">
+								Name <span class="text-destructive">*</span>
+							</Label>
 							<Input
 								type="text"
 								id="productName"
 								name="productName"
 								required
 								bind:value={productName}
+								onblur={() => (touched.productName = true)}
+								class={touched.productName && errors.productName ? 'border-destructive' : ''}
 							/>
+							{#if touched.productName && errors.productName}
+								<Helper color="red">{errors.productName}</Helper>
+							{/if}
 						</div>
 						<div>
 							<Autocomplete
@@ -421,6 +495,9 @@
 								required={true}
 								bind:value={categoryId}
 							/>
+							{#if touched.categoryId && errors.categoryId}
+								<Helper color="red">{errors.categoryId}</Helper>
+							{/if}
 						</div>
 					</div>
 				</Card.Content>
@@ -437,7 +514,9 @@
 				<Card.Content>
 					<div class="grid gap-6 md:grid-cols-3">
 						<div>
-							<Label for="productPricePerUnit" class="mb-2">Price</Label>
+							<Label for="productPricePerUnit" class="mb-2">
+								Price <span class="text-destructive">*</span>
+							</Label>
 							<div class="relative">
 								<span
 									class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
@@ -449,29 +528,39 @@
 									name="productPricePerUnit"
 									step="any"
 									required
-									class="pl-7"
+									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit ? 'border-destructive' : ''}"
 									value={productPricePerUnit}
 									oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
+									onblur={() => (touched.productPricePerUnit = true)}
 								/>
 							</div>
+							{#if touched.productPricePerUnit && errors.productPricePerUnit}
+								<Helper color="red">{errors.productPricePerUnit}</Helper>
+							{/if}
 						</div>
 						<div>
-							<Label for="productUnitSizeInMilliliters" class="mb-2">Size</Label>
+							<Label for="productUnitSizeInMilliliters" class="mb-2">
+								Size <span class="text-destructive">*</span>
+							</Label>
 							<div class="relative">
 								<Input
 									type="number"
 									id="productUnitSizeInMilliliters"
 									name="productUnitSizeInMilliliters"
 									required
-									class="pr-10"
+									class="pr-10 {touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters ? 'border-destructive' : ''}"
 									value={productUnitSizeInMilliliters}
 									oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
+									onblur={() => (touched.productUnitSizeInMilliliters = true)}
 								/>
 								<span
 									class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
 									>mL</span
 								>
 							</div>
+							{#if touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters}
+								<Helper color="red">{errors.productUnitSizeInMilliliters}</Helper>
+							{/if}
 							<QuickSelect
 								options={sizeOptions}
 								bind:value={productUnitSizeInMilliliters}
@@ -479,16 +568,23 @@
 							/>
 						</div>
 						<div>
-							<Label for="productProof" class="mb-2">Proof</Label>
+							<Label for="productProof" class="mb-2">
+								Proof <span class="text-destructive">*</span>
+							</Label>
 							<Input
 								type="number"
 								id="productProof"
 								name="productProof"
 								max="200"
 								required
+								class={touched.productProof && errors.productProof ? 'border-destructive' : ''}
 								value={productProof}
 								oninput={(e) => (productProof = e.currentTarget.value)}
+								onblur={() => (touched.productProof = true)}
 							/>
+							{#if touched.productProof && errors.productProof}
+								<Helper color="red">{errors.productProof}</Helper>
+							{/if}
 							<QuickSelect options={proofOptions} bind:value={productProof} class="mt-2" />
 						</div>
 					</div>
@@ -572,7 +668,11 @@
 					<ImagePrompt
 						name="productImageUrl"
 						bind:signedUrl={productImageUrl}
+						bind:pendingFile={pendingImageFile}
+						bind:imageCleared
 						trigger={productName}
+						type="product"
+						description={productDescription}
 					/>
 				</div>
 			</CollapsibleSection>
@@ -599,24 +699,29 @@
 		</div>
 
 		<!-- Submit buttons (desktop only - mobile uses wizard buttons) -->
-		<div class="hidden md:flex justify-end mt-6">
+		<div class="hidden md:flex justify-end gap-3 mt-6">
 			{#if action === 'edit' && canModify}
-				<div class="my-4 mr-4">
-					<Button
-						variant="outline"
-						class="w-full md:w-32 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
-						type="button"
-						size="lg"
-						onclick={openModal}
-					>
-						Delete
-					</Button>
-				</div>
+				<Button type="button" variant="destructive" onclick={openModal}>
+					Delete
+				</Button>
 			{/if}
-			<div class="my-4 order-2">
-				<Button class="w-full md:w-32" type="submit" size="lg">Save</Button>
-			</div>
+			<Button type="submit" disabled={!isFormValid}>Save</Button>
 		</div>
+
+		<!-- Mobile delete section -->
+		{#if action === 'edit' && canModify}
+			<div class="md:hidden mt-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+				<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
+				<Button
+					type="button"
+					variant="destructive"
+					class="w-full"
+					onclick={openModal}
+				>
+					Delete Item
+				</Button>
+			</div>
+		{/if}
 	</form>
 
 	<Dialog.Root bind:open={modalOpen}>

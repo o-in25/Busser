@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { RecipeGenerator } from '$lib/server/generators/recipe-generator';
+import { generate } from '$lib/server/generators/generator-factory';
 
 import type { RequestHandler } from './$types';
 
@@ -15,7 +15,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const body = await request.json();
-	const generator = new RecipeGenerator();
-	const result = await generator.generateContent(body.recipeName);
-	return json(result);
+	const { trigger } = body;
+
+	if (!trigger) {
+		error(StatusCodes.BAD_REQUEST, {
+			reason: 'Bad Request',
+			code: StatusCodes.BAD_REQUEST,
+			message: 'Recipe name is required for description generation',
+		});
+	}
+
+	const result = await generate('recipe-insights', { cocktailName: trigger });
+	return json({ ...result, description: result.history });
 };

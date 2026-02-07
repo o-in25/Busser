@@ -218,10 +218,10 @@
 	</div>
 
 	<!-- generate button -->
-	<div class="flex gap-3">
+	<div class="flex flex-col sm:flex-row gap-3">
 		<Button
 			variant="default"
-			class="gap-2"
+			class="flex-1 gap-2"
 			onclick={generateText}
 			disabled={isGenerating || !trigger}
 		>
@@ -235,7 +235,7 @@
 		</Button>
 
 		{#if hasContent}
-			<Button variant="outline" class="gap-2" onclick={clearContent} disabled={isGenerating}>
+			<Button variant="outline" class="flex-1 gap-2" onclick={clearContent} disabled={isGenerating}>
 				<X class="w-4 h-4" />
 				Clear
 			</Button>

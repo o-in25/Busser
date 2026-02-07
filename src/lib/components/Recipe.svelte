@@ -1,7 +1,8 @@
 <script lang="ts">
 	import {
-		BookOpen,
 		ChefHat,
+		DollarSign,
+		Droplets,
 		Expand,
 		FlaskConical,
 		GlassWater,
@@ -20,15 +21,14 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { CollapsibleSection } from '$lib/components/ui/collapsible';
-	import { Skeleton } from '$lib/components/ui/skeleton';
-	import { calculateAbv } from '$lib/math';
+	import { calculateAbv, getDilutionInfo, getMethodFromTechniqueId } from '$lib/math';
 	import type { View } from '$lib/types';
+	import type { RecipeInsightsOutput } from '$lib/types/generators';
 	import { cn } from '$lib/utils';
 
 	import RecipeIngredientStep from './RecipeIngredientStep.svelte';
+	import RecipeInsights from './RecipeInsights.svelte';
 	import RecipeVerdictCard from './RecipeVerdictCard.svelte';
-	import type { RecipeGeneratorSchema } from '$lib/server/generators/recipe-generator';
 
 	// Props using $props()
 	let {
@@ -43,7 +43,7 @@
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
-	let content: RecipeGeneratorSchema | null = $state(null);
+	let content: RecipeInsightsOutput | null = $state(null);
 	let contentLoading = $state(true);
 
 	// steps with checked state
@@ -77,6 +77,27 @@
 		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_PARENT_CATEGORY')
 	);
 
+	// dilution and volume calculations
+	let dilutionInfo = $derived(getDilutionInfo(initialRecipeSteps, recipe.recipeTechniqueDescriptionId || 1));
+	let dilutionMethod = $derived(getMethodFromTechniqueId(recipe.recipeTechniqueDescriptionId || 1));
+	let preVolumeMl = $derived(dilutionInfo.volumeMl);
+	let preVolumeOz = $derived((preVolumeMl / 30).toFixed(1));
+	let dilutionMl = $derived(dilutionInfo.dilutionMl);
+	let dilutionOz = $derived(dilutionInfo.dilutionOz.toFixed(1));
+	let finalVolumeMl = $derived(dilutionInfo.finalVolumeMl);
+	let finalVolumeOz = $derived((finalVolumeMl / 30).toFixed(1));
+
+	// estimated cost calculation
+	let estimatedCost = $derived(
+		initialRecipeSteps.reduce((acc, step) => {
+			if (step.productUnitSizeInMilliliters > 0 && step.productPricePerUnit > 0) {
+				const costPerMl = step.productPricePerUnit / step.productUnitSizeInMilliliters;
+				return acc + step.productIdQuantityInMilliliters * costPerMl;
+			}
+			return acc;
+		}, 0)
+	);
+
 	const servingMethodIcons: Record<string, typeof Martini> = {
 		Stirred: Martini,
 		Shaken: GlassWater,
@@ -91,7 +112,8 @@
 		try {
 			const result = await fetch(`/api/generator/recipe`, {
 				method: 'POST',
-				body: JSON.stringify({ recipeName: recipe.recipeName }),
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ trigger: recipe.recipeName }),
 			});
 			const response = await result.json();
 			content = response;
@@ -258,7 +280,80 @@
 		</div>
 	{/if}
 
-	<!-- Description if exists -->
+	<!-- Row 1: Ingredients + Verdict -->
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+		<!-- Ingredients Card -->
+		<Card.Root class="lg:col-span-2">
+			<Card.Header class="pb-3">
+				<div class="flex items-center justify-between">
+					<Card.Title class="flex items-center gap-2 text-lg">
+						<ChefHat class="h-5 w-5 text-primary" />
+						Ingredients
+					</Card.Title>
+					{#if steps.length > 0}
+						<Badge variant={allStepsCompleted ? 'default' : 'secondary'} class="transition-all">
+							{completedSteps} / {steps.length}
+						</Badge>
+					{/if}
+				</div>
+				<!-- Flexible matching legend -->
+				{#if hasFlexibleIngredients}
+					<div class="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
+						{#if hasCategoryMatch}
+							<span class="flex items-center gap-1">
+								<Layers class="w-3 h-3 text-blue-500" />
+								Any in category
+							</span>
+						{/if}
+						{#if hasParentCategoryMatch}
+							<span class="flex items-center gap-1">
+								<Sparkles class="w-3 h-3 text-amber-500" />
+								Any in parent category
+							</span>
+						{/if}
+					</div>
+				{/if}
+			</Card.Header>
+			<Card.Content>
+				{#if steps.length === 0}
+					<p class="text-muted-foreground text-center py-8">
+						No ingredients listed for this recipe.
+					</p>
+				{:else}
+					<div class="space-y-2">
+						{#each steps as step, index}
+							<RecipeIngredientStep
+								stepNumber={index + 1}
+								categoryName={step.categoryName}
+								productName={step.productName}
+								quantity={step.productIdQuantityInMilliliters}
+								unit={step.productIdQuantityUnit}
+								description={step.recipeStepDescription}
+								matchMode={step.matchMode}
+								parentCategoryName={step.parentCategoryName}
+								bind:checked={completed[index]}
+							/>
+						{/each}
+					</div>
+
+					{#if allStepsCompleted}
+						<div class="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/20 text-center">
+							<p class="text-primary font-medium">
+								All ingredients ready! Time to mix your cocktail.
+							</p>
+						</div>
+					{/if}
+				{/if}
+			</Card.Content>
+		</Card.Root>
+
+		<!-- Verdict Card (sticky on desktop) -->
+		<div class="lg:col-span-1 lg:sticky lg:top-4 lg:self-start">
+			<RecipeVerdictCard {recipe} recipeSteps={initialRecipeSteps} />
+		</div>
+	</div>
+
+	<!-- Row 2: Description (if exists) -->
 	{#if recipe.recipeDescription}
 		<Card.Root class="mb-6">
 			<Card.Content class="pt-6">
@@ -269,122 +364,77 @@
 		</Card.Root>
 	{/if}
 
-	<!-- Main Content Grid -->
-	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-		<!-- Left Column: Ingredients -->
-		<div class="lg:col-span-2 space-y-6">
-			<!-- Ingredients Card -->
-			<Card.Root>
-				<Card.Header class="pb-3">
+	<!-- Row 3: Preparation, Volume & Dilution, Cost Estimate -->
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+		<!-- Preparation card -->
+		<Card.Root>
+			<Card.Header class="pb-3">
+				<Card.Title class="flex items-center gap-2 text-base">
+					<GlassWater class="h-5 w-5 text-primary" />
+					Preparation
+				</Card.Title>
+			</Card.Header>
+			<Card.Content class="space-y-3">
+				<div class="flex items-center justify-between">
+					<span class="text-sm text-muted-foreground">Method</span>
+					<Badge variant="secondary">{recipe.recipeTechniqueDescriptionText}</Badge>
+				</div>
+				<div class="flex items-center justify-between">
+					<span class="text-sm text-muted-foreground">Base Spirit</span>
+					<Badge variant="outline">{recipe.recipeCategoryDescription}</Badge>
+				</div>
+			</Card.Content>
+		</Card.Root>
+
+		<!-- Volume & Dilution card -->
+		<Card.Root>
+			<Card.Header class="pb-3">
+				<Card.Title class="flex items-center gap-2 text-base">
+					<Droplets class="h-5 w-5 text-primary" />
+					Volume & Dilution
+				</Card.Title>
+			</Card.Header>
+			<Card.Content class="space-y-3">
+				<div class="flex items-center justify-between">
+					<span class="text-sm text-muted-foreground">Pre-dilution</span>
+					<span class="text-sm font-medium">{preVolumeOz} oz</span>
+				</div>
+				<div class="flex items-center justify-between">
+					<span class="text-sm text-muted-foreground">Water added</span>
+					<span class="text-sm font-medium text-blue-500">+{dilutionOz} oz</span>
+				</div>
+				<div class="flex items-center justify-between border-t pt-3">
+					<span class="text-sm font-medium">Final volume</span>
+					<span class="text-sm font-bold">{finalVolumeOz} oz</span>
+				</div>
+			</Card.Content>
+		</Card.Root>
+
+		<!-- Cost Estimate card -->
+		<Card.Root>
+			<Card.Header class="pb-3">
+				<Card.Title class="flex items-center gap-2 text-base">
+					<DollarSign class="h-5 w-5 text-primary" />
+					Cost Estimate
+				</Card.Title>
+			</Card.Header>
+			<Card.Content class="space-y-3">
+				{#if estimatedCost > 0}
 					<div class="flex items-center justify-between">
-						<Card.Title class="flex items-center gap-2 text-lg">
-							<ChefHat class="h-5 w-5 text-primary" />
-							Ingredients
-						</Card.Title>
-						{#if steps.length > 0}
-							<Badge variant={allStepsCompleted ? 'default' : 'secondary'} class="transition-all">
-								{completedSteps} / {steps.length}
-							</Badge>
-						{/if}
+						<span class="text-sm text-muted-foreground">Per drink</span>
+						<span class="text-sm font-bold">${estimatedCost.toFixed(2)}</span>
 					</div>
-					<!-- Flexible matching legend -->
-					{#if hasFlexibleIngredients}
-						<div class="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
-							{#if hasCategoryMatch}
-								<span class="flex items-center gap-1">
-									<Layers class="w-3 h-3 text-blue-500" />
-									Any in category
-								</span>
-							{/if}
-							{#if hasParentCategoryMatch}
-								<span class="flex items-center gap-1">
-									<Sparkles class="w-3 h-3 text-amber-500" />
-									Any in parent category
-								</span>
-							{/if}
-						</div>
-					{/if}
-				</Card.Header>
-				<Card.Content>
-					{#if steps.length === 0}
-						<p class="text-muted-foreground text-center py-8">
-							No ingredients listed for this recipe.
-						</p>
-					{:else}
-						<div class="space-y-2">
-							{#each steps as step, index}
-								<RecipeIngredientStep
-									stepNumber={index + 1}
-									categoryName={step.categoryName}
-									productName={step.productName}
-									quantity={step.productIdQuantityInMilliliters}
-									unit={step.productIdQuantityUnit}
-									description={step.recipeStepDescription}
-									matchMode={step.matchMode}
-									parentCategoryName={step.parentCategoryName}
-									bind:checked={completed[index]}
-								/>
-							{/each}
-						</div>
-
-						{#if allStepsCompleted}
-							<div class="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/20 text-center">
-								<p class="text-primary font-medium">
-									All ingredients ready! Time to mix your cocktail.
-								</p>
-							</div>
-						{/if}
-					{/if}
-				</Card.Content>
-			</Card.Root>
-
-			<!-- About/History Section -->
-			<CollapsibleSection title="About This Cocktail" icon={BookOpen} open={true}>
-				{#if contentLoading}
-					<div class="space-y-3">
-						<Skeleton class="h-4 w-full" />
-						<Skeleton class="h-4 w-full" />
-						<Skeleton class="h-4 w-3/4" />
+					<div class="flex items-center justify-between">
+						<span class="text-sm text-muted-foreground">Cost per oz</span>
+						<span class="text-sm font-medium">${(estimatedCost / parseFloat(finalVolumeOz)).toFixed(2)}</span>
 					</div>
-				{:else if content?.description}
-					<p class="text-muted-foreground leading-relaxed">
-						{content.description}
-					</p>
 				{:else}
-					<p class="text-muted-foreground italic">
-						No additional information available for this cocktail.
-					</p>
+					<p class="text-sm text-muted-foreground italic">No cost data available</p>
 				{/if}
-			</CollapsibleSection>
-		</div>
-
-		<!-- Right Column: Verdict -->
-		<div class="space-y-6">
-			<RecipeVerdictCard {recipe} recipeSteps={initialRecipeSteps} />
-
-			<!-- Serving suggestion card -->
-			<Card.Root>
-				<Card.Header class="pb-3">
-					<Card.Title class="flex items-center gap-2 text-base">
-						<GlassWater class="h-5 w-5 text-primary" />
-						Preparation
-					</Card.Title>
-				</Card.Header>
-				<Card.Content class="space-y-3">
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Method</span>
-						<Badge variant="secondary">{recipe.recipeTechniqueDescriptionText}</Badge>
-					</div>
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Dilution</span>
-						<span class="text-sm font-medium">{recipe.recipeTechniqueDilutionPercentage}%</span>
-					</div>
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Base Spirit</span>
-						<Badge variant="outline">{recipe.recipeCategoryDescription}</Badge>
-					</div>
-				</Card.Content>
-			</Card.Root>
-		</div>
+			</Card.Content>
+		</Card.Root>
 	</div>
+
+	<!-- Row 4: Cocktail Insights -->
+	<RecipeInsights {content} loading={contentLoading} />
 </section>

@@ -4,6 +4,7 @@
 		BookOpen,
 		Candy,
 		Droplet,
+		EqualApproximately,
 		FlaskConical,
 		Gauge,
 		Image,
@@ -23,6 +24,7 @@
 	import { CollapsibleSection } from '$lib/components/ui/collapsible';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
+	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { ServingMethodToggle } from '$lib/components/ui/serving-method';
@@ -134,8 +136,7 @@
 		'armagnac',
 	]);
 
-	const isBaseSpirit = (categoryName: string) =>
-		baseSpirits.has(categoryName.toLowerCase().trim());
+	const isBaseSpirit = (categoryName: string) => baseSpirits.has(categoryName.toLowerCase().trim());
 
 	const isTopOff = (step: View.BasicRecipeStep) => step.productIdQuantityUnit === 'top off';
 
@@ -259,7 +260,9 @@
 	// Generate ratings with AI
 	async function generateRatings() {
 		if (!recipe.recipeName || steps.length === 0) {
-			$notificationStore.error = { message: 'Please add a recipe name and at least one ingredient first.' };
+			$notificationStore.error = {
+				message: 'Please add a recipe name and at least one ingredient first.',
+			};
 			return;
 		}
 
@@ -296,9 +299,7 @@
 
 	// Derive visual context for image generation
 	const imageIngredients = $derived(
-		steps
-			.filter((s) => s.productName || s.categoryName)
-			.map((s) => s.productName || s.categoryName)
+		steps.filter((s) => s.productName || s.categoryName).map((s) => s.productName || s.categoryName)
 	);
 	const imageTechnique = $derived(
 		preparationMethods.find((m) => m.recipeTechniqueDescriptionId === selectedPrepMethodId)
@@ -318,6 +319,26 @@
 	let modalOpen = $state(false);
 	let wizardStep = $state(0);
 	let reorderMode = $state(false);
+
+	// Validation state
+	let touched = $state({ recipeName: false });
+	const errors = $derived({
+		recipeName: !recipe.recipeName?.trim() ? 'Recipe name is required' : '',
+		ingredients: !steps.some((s) => s.productId > 0 || s.stepCategoryId)
+			? 'At least one ingredient is required'
+			: '',
+	});
+
+	// Step-based validation for wizard
+	const stepValid = $derived({
+		0: !!recipe.recipeName?.trim(), // name required
+		1: true, // description optional
+		2: steps.some((s) => s.productId > 0 || s.stepCategoryId), // at least one ingredient
+		3: true, // ratings optional
+		4: true, // prep method has default
+	});
+	const canProceedWizard = $derived(stepValid[wizardStep as keyof typeof stepValid] ?? true);
+	const isFormValid = $derived(stepValid[0] && stepValid[2]);
 
 	// Draft manager reference
 	let draftManager = $state<FormDraftManager>();
@@ -415,21 +436,43 @@
 		}}
 	>
 		<!-- Mobile wizard view -->
-		<CatalogFormWizard bind:currentStep={wizardStep}>
+		<CatalogFormWizard bind:currentStep={wizardStep} canProceed={canProceedWizard}>
+			{#snippet footer()}
+				{#if recipe.recipeId && canModify}
+					<div class="mt-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+						<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
+						<Button
+							type="button"
+							variant="destructive"
+							class="w-full"
+							onclick={() => (modalOpen = true)}
+						>
+							Delete Recipe
+						</Button>
+					</div>
+				{/if}
+			{/snippet}
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Step 1: Details (Name + Spirit Category) -->
 					<div class="space-y-6">
 						<div>
-							<Label for="recipeName" class="mb-2">Name</Label>
+							<Label for="recipeName" class="mb-2">
+								Name <span class="text-destructive">*</span>
+							</Label>
 							<Input
 								type="text"
 								id="recipeName"
 								name="recipeName"
 								placeholder="e.g., Old Fashioned"
 								bind:value={recipe.recipeName}
+								onblur={() => (touched.recipeName = true)}
+								class={touched.recipeName && errors.recipeName ? 'border-destructive' : ''}
 								required
 							/>
+							{#if touched.recipeName && errors.recipeName}
+								<Helper color="red">{errors.recipeName}</Helper>
+							{/if}
 						</div>
 
 						<div>
@@ -473,6 +516,9 @@
 				{:else if step === 2}
 					<!-- Step 3: Ingredients -->
 					<div class="space-y-4">
+						{#if errors.ingredients}
+							<Helper color="red">{errors.ingredients}</Helper>
+						{/if}
 						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 						<div class="flex gap-2">
 							<Button
@@ -524,18 +570,7 @@
 						</Button>
 					</div>
 				{:else if step === 3}
-					<!-- Step 4: Preparation Method -->
-					<div class="space-y-4">
-						<Label class="text-base font-medium block">How is it served?</Label>
-						<ServingMethodToggle
-							methods={preparationMethods}
-							bind:value={selectedPrepMethodId}
-							variant="cards"
-							{steps}
-						/>
-					</div>
-				{:else if step === 4}
-					<!-- Step 5: Flavor Ratings -->
+					<!-- Step 4: Flavor Ratings -->
 					<div class="space-y-6">
 						<!-- Score Preview -->
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
@@ -554,7 +589,7 @@
 							onclick={generateRatings}
 							disabled={ratingsGenerating}
 						>
-							<Wand2 class="w-4 h-4 mr-2" />
+							<Sparkles class="w-4 h-4 mr-2" />
 							{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
 						</Button>
 						<FlavorSlider
@@ -586,6 +621,18 @@
 							color="orange"
 						/>
 					</div>
+				{:else if step === 4}
+					<!-- Step 5: Preparation Method -->
+					<div class="space-y-4">
+						<Label class="text-base font-medium block">How is it served?</Label>
+						<ServingMethodToggle
+							methods={preparationMethods}
+							bind:value={selectedPrepMethodId}
+							variant="cards"
+							{steps}
+						/>
+						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
+					</div>
 				{/if}
 			{/snippet}
 		</CatalogFormWizard>
@@ -603,15 +650,22 @@
 				<Card.Content class="space-y-6">
 					<!-- Name -->
 					<div>
-						<Label for="recipeName" class="mb-2">Name</Label>
+						<Label for="recipeName" class="mb-2">
+							Name <span class="text-destructive">*</span>
+						</Label>
 						<Input
 							type="text"
 							id="recipeName"
 							name="recipeName"
 							placeholder="e.g., Old Fashioned"
 							bind:value={recipe.recipeName}
+							onblur={() => (touched.recipeName = true)}
+							class={touched.recipeName && errors.recipeName ? 'border-destructive' : ''}
 							required
 						/>
+						{#if touched.recipeName && errors.recipeName}
+							<Helper color="red">{errors.recipeName}</Helper>
+						{/if}
 					</div>
 
 					<!-- Spirit Category -->
@@ -653,20 +707,7 @@
 				</div>
 			</CollapsibleSection>
 
-			<!-- Section 3: Preparation Method (not collapsible) -->
-			<Card.Root>
-				<Card.Header class="pb-4">
-					<Card.Title class="flex items-center gap-2 text-lg">
-						<FlaskConical class="h-5 w-5 text-primary" />
-						Preparation Method
-					</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					<ServingMethodToggle methods={preparationMethods} bind:value={selectedPrepMethodId} />
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Section 4: Flavor Profile (collapsible) -->
+			<!-- Section 3: Flavor Profile (collapsible) -->
 			<CollapsibleSection title="Flavor Profile" icon={Gauge} bind:open={ratingsOpen}>
 				<div class="space-y-4">
 					<!-- Score Preview -->
@@ -685,7 +726,7 @@
 						onclick={generateRatings}
 						disabled={ratingsGenerating}
 					>
-						<Wand2 class="w-4 h-4 mr-2" />
+						<Sparkles class="w-4 h-4 mr-2" />
 						{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
 					</Button>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -707,7 +748,7 @@
 							label="Versatility"
 							name="recipeVersatilityRating"
 							bind:value={versatilityRating}
-							icon={Sparkles}
+							icon={EqualApproximately}
 							color="purple"
 						/>
 						<FlavorSlider
@@ -721,7 +762,7 @@
 				</div>
 			</CollapsibleSection>
 
-			<!-- Section 5: Ingredients (not collapsible) -->
+			<!-- Section 4: Ingredients (not collapsible) -->
 			<Card.Root>
 				<Card.Header class="pb-4">
 					<Card.Title class="flex items-center gap-2 text-lg">
@@ -730,6 +771,10 @@
 					</Card.Title>
 				</Card.Header>
 				<Card.Content class="space-y-4">
+					{#if errors.ingredients}
+						<Helper color="red">{errors.ingredients}</Helper>
+					{/if}
+
 					<!-- Metrics display -->
 					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 
@@ -782,6 +827,20 @@
 				</Card.Content>
 			</Card.Root>
 
+			<!-- Section 5: Preparation Method (not collapsible) -->
+			<Card.Root>
+				<Card.Header class="pb-4">
+					<Card.Title class="flex items-center gap-2 text-lg">
+						<FlaskConical class="h-5 w-5 text-primary" />
+						Preparation Method
+					</Card.Title>
+				</Card.Header>
+				<Card.Content class="space-y-4">
+					<ServingMethodToggle methods={preparationMethods} bind:value={selectedPrepMethodId} />
+					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
+				</Card.Content>
+			</Card.Root>
+
 			<!-- Action buttons (desktop only) -->
 			<div class="flex justify-end gap-3">
 				{#if recipe.recipeId && canModify}
@@ -789,7 +848,7 @@
 						Delete
 					</Button>
 				{/if}
-				<Button type="submit" {disabled}>Save Recipe</Button>
+				<Button type="submit" disabled={disabled || !isFormValid}>Save Recipe</Button>
 			</div>
 		</div>
 	</form>

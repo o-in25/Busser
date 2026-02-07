@@ -5,6 +5,7 @@
 
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
+	import GenerateImageModal from './GenerateImageModal.svelte';
 
 	let {
 		name = 'image',
@@ -16,6 +17,8 @@
 		url = '/api/generator/image',
 		ingredients = [],
 		technique = '',
+		type = 'cocktail',
+		description = '',
 	}: {
 		name?: string;
 		signedUrl?: string | null;
@@ -26,6 +29,8 @@
 		url?: string;
 		ingredients?: string[];
 		technique?: string;
+		type?: 'cocktail' | 'product';
+		description?: string;
 	} = $props();
 
 	let files = $state<FileList | null>(null);
@@ -34,6 +39,7 @@
 	let errorMessage = $state('');
 	let generationProgress = $state(0);
 	let lightboxOpen = $state(false);
+	let generateModalOpen = $state(false);
 
 	let src = $derived(signedUrl || '');
 	let hasImage = $derived(!!signedUrl && signedUrl.length > 0);
@@ -82,13 +88,13 @@
 		errorMessage = '';
 	};
 
-	const generateImage = async () => {
+	const generateImage = async (customPrompt?: string) => {
 		isGenerating = true;
 		errorMessage = '';
 		startProgressAnimation();
 
 		try {
-			if (!trigger) throw new Error('Enter a name first to generate an image.');
+			if (!trigger && !customPrompt) throw new Error('Enter a name first to generate an image.');
 
 			const response = await fetch(url, {
 				method: 'POST',
@@ -97,6 +103,9 @@
 					subject: trigger,
 					ingredients: ingredients.length ? ingredients : undefined,
 					technique: technique || undefined,
+					type,
+					description: description || undefined,
+					customPrompt,
 				}),
 			});
 
@@ -161,6 +170,14 @@
 		if (e.key === 'Escape' && lightboxOpen) {
 			closeLightbox();
 		}
+	}
+
+	function handleGenerateFromModal(mode: 'auto' | 'custom', customPrompt?: string) {
+		generateImage(mode === 'custom' ? customPrompt : undefined);
+	}
+
+	function openGenerateModal() {
+		generateModalOpen = true;
 	}
 </script>
 
@@ -265,9 +282,10 @@
 	>
 		<!-- generate button -->
 		<Button
+			type="button"
 			variant="default"
 			class="flex-1 gap-2"
-			onclick={generateImage}
+			onclick={openGenerateModal}
 			disabled={isGenerating || !trigger}
 		>
 			{#if isGenerating}
@@ -361,6 +379,14 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Generate Image Modal -->
+<GenerateImageModal
+	bind:open={generateModalOpen}
+	{trigger}
+	{type}
+	ongenerate={handleGenerateFromModal}
+/>
 
 <style>
 	.glass-generating {

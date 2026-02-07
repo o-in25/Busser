@@ -3,17 +3,17 @@
 
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import type { Spirit, View } from '$lib/types';
+	import type { CatalogDescriptionOutput } from '$lib/types/generators';
 
 	import CatalogItem from './CatalogItem.svelte';
 	import FancyImage from './FancyImage.svelte';
 	import IconList from './IconList.svelte';
-	import type { CatalogGeneratorSchema } from '$lib/server/generators/catalog-generator';
 
 	// props
 	export let spirit: Spirit;
 	export let recipes: View.BasicRecipe[] | [];
 
-	let content: CatalogGeneratorSchema;
+	let content: CatalogDescriptionOutput;
 
 	// fetch generated content on load
 	onMount(async () => {

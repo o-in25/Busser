@@ -220,7 +220,7 @@
 				</div>
 				<div class="p-4 rounded-lg bg-muted/30">
 					<p class="text-sm text-muted-foreground mb-1">Version</p>
-					<p class="font-semibold">v2.1.1</p>
+					<p class="font-semibold">{data.appVersion}</p>
 				</div>
 			</div>
 		</Card.Content>

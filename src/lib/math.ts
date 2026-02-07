@@ -70,54 +70,93 @@ export const calculateDilutionMl = (
 	return volumeMl * dilutionPercent;
 };
 
+export const topOffPresets = [
+  { value: 30, ml: 30, label: "Splash" },
+  { value: 60, ml: 60, label: "Light top" },
+  { value: 90, ml: 90, label: "Top off" },
+  { value: 120, ml: 120, label: "Full fill" },
+];
+
 const units: Record<
-	string,
-	{
-		toMl: number;
-		fromMl: (ml: number) => number;
-		i18n: (qty: number) => string;
-	}
+  string,
+  {
+    label: string;
+    toMl: number;
+    fromMl: (ml: number) => number;
+    i18n: (qty: number, ml?: number) => string;
+    presets?: boolean;
+  }
 > = {
-	ml: {
-		toMl: 1,
-		fromMl: (ml) => ml,
-		i18n: (qty: number) => (qty === 1 ? 'ml' : 'ml'),
-	},
-	oz: {
-		toMl: 30,
-		fromMl: (ml: number) => ml / 30,
-		i18n: (qty: number) => (qty === 1 ? 'oz' : 'oz'),
-	},
-	dash: {
-		toMl: 0.92,
-		fromMl: (ml: number) => Math.round(ml / 0.92),
-		i18n: (qty: number) => (Math.round(qty) === 1 ? 'dash' : 'dashes'),
-	},
-	cube: {
-		toMl: 2.5,
-		fromMl: (ml: number) => ml / 2.5,
-		i18n: (qty: number) => (qty === 1 ? 'cube' : 'cubes'),
-	},
-	tsp: {
-		toMl: 5,
-		fromMl: (ml: number) => ml / 5,
-		i18n: (qty: number) => (qty === 1 ? 'tsp' : 'tsp'),
-	},
-	barspoon: {
-		toMl: 5,
-		fromMl: (ml: number) => ml / 5,
-		i18n: (qty: number) => (qty === 1 ? 'barspoon' : 'barspoons'),
-	},
-	tbsp: {
-		toMl: 15,
-		fromMl: (ml: number) => ml / 15,
-		i18n: (qty: number) => (qty === 1 ? 'tbsp' : 'tbsp'),
-	},
-	'top off': {
-		toMl: 30,
-		fromMl: (ml: number) => ml / 30,
-		i18n: () => 'top off',
-	},
+  ml: {
+    label: "mL",
+    toMl: 1,
+    fromMl: (ml) => ml,
+    i18n: (qty: number) => (qty === 1 ? "ml" : "ml"),
+  },
+  oz: {
+    label: "oz",
+    toMl: 30,
+    fromMl: (ml: number) => ml / 30,
+    i18n: (qty: number) => (qty === 1 ? "oz" : "oz"),
+  },
+  dash: {
+    label: "Dash",
+    toMl: 0.92,
+    fromMl: (ml: number) => Math.round(ml / 0.92),
+    i18n: (qty: number) => (Math.round(qty) === 1 ? "dash" : "dashes"),
+  },
+  cube: {
+    label: "Cube",
+    toMl: 2.5,
+    fromMl: (ml: number) => ml / 2.5,
+    i18n: (qty: number) => (qty === 1 ? "cube" : "cubes"),
+  },
+  tsp: {
+    label: "tsp",
+    toMl: 5,
+    fromMl: (ml: number) => ml / 5,
+    i18n: (qty: number) => (qty === 1 ? "tsp" : "tsp"),
+  },
+  barspoon: {
+    label: "Barspoon",
+    toMl: 5,
+    fromMl: (ml: number) => ml / 5,
+    i18n: (qty: number) => (qty === 1 ? "barspoon" : "barspoons"),
+  },
+  tbsp: {
+    label: "tbsp",
+    toMl: 15,
+    fromMl: (ml: number) => ml / 15,
+    i18n: (qty: number) => (qty === 1 ? "tbsp" : "tbsp"),
+  },
+  "top off": {
+    label: "Top-off",
+    toMl: 1,
+    fromMl: (ml: number) => ml,
+    i18n: (_qty: number, ml?: number) => {
+      const preset = topOffPresets.find((p) => p.ml === ml);
+      return preset?.label || "top off";
+    },
+    presets: true,
+  },
+  "egg white": {
+    label: "Egg White",
+    toMl: 30,
+    fromMl: (ml: number) => ml / 30,
+    i18n: (qty: number) => (qty === 1 ? "egg white" : "egg whites"),
+  },
+  "egg yolk": {
+    label: "Egg Yolk",
+    toMl: 18,
+    fromMl: (ml: number) => ml / 18,
+    i18n: (qty: number) => (qty === 1 ? "egg yolk" : "egg yolks"),
+  },
+  "whole egg": {
+    label: "Whole Egg",
+    toMl: 50,
+    fromMl: (ml: number) => ml / 50,
+    i18n: (qty: number) => (qty === 1 ? "whole egg" : "whole eggs"),
+  },
 };
 
 export const weightedMean = (arrValues: number[], arrWeights: number[]) => {
@@ -273,6 +312,12 @@ export const getDilutionInfo = (
 export const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
 export const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);
 export const getUnits = () => units;
+export const getUnitLabel = (unit: string) => units[unit]?.label || unit;
+export const getUnitOptions = () =>
+  Object.entries(units).map(([value, config]) => ({
+    value,
+    label: config.label,
+  }));
 
 export function generateSecureCode(length = 6) {
 	const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
