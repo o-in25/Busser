@@ -1,7 +1,8 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { RatingGenerator, type RatingGeneratorInput } from '$lib/server/generators/rating-generator';
+import { generate } from '$lib/server/generators/generator-factory';
+import type { RecipeRatingsInput } from '$lib/types/generators';
 
 import type { RequestHandler } from './$types';
 
@@ -14,7 +15,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	}
 
-	const body: RatingGeneratorInput = await request.json();
+	const body: RecipeRatingsInput = await request.json();
 
 	if (!body.recipeName || !body.ingredients?.length) {
 		error(StatusCodes.BAD_REQUEST, {
@@ -24,7 +25,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	}
 
-	const generator = new RatingGenerator();
-	const result = await generator.generateRatings(body);
+	const result = await generate('recipe-ratings', body);
 	return json(result);
 };

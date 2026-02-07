@@ -1,8 +1,9 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
+import { generate } from '$lib/server/generators/generator-factory';
+
 import type { RequestHandler } from './$types';
-import { ImageGenerator } from '$lib/server/generators/image-generator';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.activeWorkspaceId) {
@@ -15,19 +16,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	try {
 		const body = await request.json();
-		const { subject, ingredients, technique } = body;
+		const { subject, ingredients, technique, type, description, customPrompt } = body;
 
-		if (!subject) {
+		if (!subject && !customPrompt) {
 			error(StatusCodes.BAD_REQUEST, {
 				reason: 'Bad Request',
 				code: StatusCodes.BAD_REQUEST,
-				message: 'Subject is required for image generation',
+				message: 'Subject or custom prompt is required for image generation',
 			});
 		}
 
-		const generator = new ImageGenerator();
-		const result = await generator.generateContent(subject, { ingredients, technique });
-		return json(result);
+		if (type === 'product') {
+			const result = await generate('inventory-image', { subject, description, customPrompt });
+			return json(result);
+		} else {
+			const result = await generate('catalog-image', { subject, ingredients, technique, customPrompt });
+			return json(result);
+		}
 	} catch (err: unknown) {
 		console.error('Image generation error:', err);
 		const message = err instanceof Error ? err.message : 'Failed to generate image';

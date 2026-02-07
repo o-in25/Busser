@@ -92,7 +92,7 @@
 	</div>
 
 	<!-- Content slot for each step -->
-	<div class="min-h-[300px]">
+	<div>
 		{#if children}
 			{#each steps as _, index}
 				<div class={cn(index === currentStep ? 'block' : 'hidden')}>

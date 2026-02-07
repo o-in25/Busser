@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { CategoryGenerator } from '$lib/server/generators/category-generator';
+import { generate } from '$lib/server/generators/generator-factory';
 
 import type { RequestHandler } from './$types';
 
@@ -25,7 +25,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	}
 
-	const generator = new CategoryGenerator();
-	const result = await generator.generateContent(trigger);
+	const result = await generate('category-description', { name: trigger });
 	return json(result);
 };

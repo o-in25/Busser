@@ -4,6 +4,7 @@
 		BookOpen,
 		Candy,
 		Droplet,
+		EqualApproximately,
 		FlaskConical,
 		Gauge,
 		Image,
@@ -135,8 +136,7 @@
 		'armagnac',
 	]);
 
-	const isBaseSpirit = (categoryName: string) =>
-		baseSpirits.has(categoryName.toLowerCase().trim());
+	const isBaseSpirit = (categoryName: string) => baseSpirits.has(categoryName.toLowerCase().trim());
 
 	const isTopOff = (step: View.BasicRecipeStep) => step.productIdQuantityUnit === 'top off';
 
@@ -260,7 +260,9 @@
 	// Generate ratings with AI
 	async function generateRatings() {
 		if (!recipe.recipeName || steps.length === 0) {
-			$notificationStore.error = { message: 'Please add a recipe name and at least one ingredient first.' };
+			$notificationStore.error = {
+				message: 'Please add a recipe name and at least one ingredient first.',
+			};
 			return;
 		}
 
@@ -297,9 +299,7 @@
 
 	// Derive visual context for image generation
 	const imageIngredients = $derived(
-		steps
-			.filter((s) => s.productName || s.categoryName)
-			.map((s) => s.productName || s.categoryName)
+		steps.filter((s) => s.productName || s.categoryName).map((s) => s.productName || s.categoryName)
 	);
 	const imageTechnique = $derived(
 		preparationMethods.find((m) => m.recipeTechniqueDescriptionId === selectedPrepMethodId)
@@ -334,8 +334,8 @@
 		0: !!recipe.recipeName?.trim(), // name required
 		1: true, // description optional
 		2: steps.some((s) => s.productId > 0 || s.stepCategoryId), // at least one ingredient
-		3: true, // prep method has default
-		4: true, // ratings optional
+		3: true, // ratings optional
+		4: true, // prep method has default
 	});
 	const canProceedWizard = $derived(stepValid[wizardStep as keyof typeof stepValid] ?? true);
 	const isFormValid = $derived(stepValid[0] && stepValid[2]);
@@ -435,23 +435,23 @@
 			};
 		}}
 	>
-		<!-- Mobile delete section (shown above wizard in edit mode) -->
-		{#if recipe.recipeId && canModify}
-			<div class="md:hidden mb-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-				<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
-				<Button
-					type="button"
-					variant="destructive"
-					class="w-full"
-					onclick={() => (modalOpen = true)}
-				>
-					Delete Recipe
-				</Button>
-			</div>
-		{/if}
-
 		<!-- Mobile wizard view -->
 		<CatalogFormWizard bind:currentStep={wizardStep} canProceed={canProceedWizard}>
+			{#snippet footer()}
+				{#if recipe.recipeId && canModify}
+					<div class="mt-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+						<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
+						<Button
+							type="button"
+							variant="destructive"
+							class="w-full"
+							onclick={() => (modalOpen = true)}
+						>
+							Delete Recipe
+						</Button>
+					</div>
+				{/if}
+			{/snippet}
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Step 1: Details (Name + Spirit Category) -->
@@ -570,18 +570,7 @@
 						</Button>
 					</div>
 				{:else if step === 3}
-					<!-- Step 4: Preparation Method -->
-					<div class="space-y-4">
-						<Label class="text-base font-medium block">How is it served?</Label>
-						<ServingMethodToggle
-							methods={preparationMethods}
-							bind:value={selectedPrepMethodId}
-							variant="cards"
-							{steps}
-						/>
-					</div>
-				{:else if step === 4}
-					<!-- Step 5: Flavor Ratings -->
+					<!-- Step 4: Flavor Ratings -->
 					<div class="space-y-6">
 						<!-- Score Preview -->
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
@@ -600,7 +589,7 @@
 							onclick={generateRatings}
 							disabled={ratingsGenerating}
 						>
-							<Wand2 class="w-4 h-4 mr-2" />
+							<Sparkles class="w-4 h-4 mr-2" />
 							{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
 						</Button>
 						<FlavorSlider
@@ -631,6 +620,18 @@
 							icon={Gauge}
 							color="orange"
 						/>
+					</div>
+				{:else if step === 4}
+					<!-- Step 5: Preparation Method -->
+					<div class="space-y-4">
+						<Label class="text-base font-medium block">How is it served?</Label>
+						<ServingMethodToggle
+							methods={preparationMethods}
+							bind:value={selectedPrepMethodId}
+							variant="cards"
+							{steps}
+						/>
+						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 					</div>
 				{/if}
 			{/snippet}
@@ -706,20 +707,7 @@
 				</div>
 			</CollapsibleSection>
 
-			<!-- Section 3: Preparation Method (not collapsible) -->
-			<Card.Root>
-				<Card.Header class="pb-4">
-					<Card.Title class="flex items-center gap-2 text-lg">
-						<FlaskConical class="h-5 w-5 text-primary" />
-						Preparation Method
-					</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					<ServingMethodToggle methods={preparationMethods} bind:value={selectedPrepMethodId} />
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Section 4: Flavor Profile (collapsible) -->
+			<!-- Section 3: Flavor Profile (collapsible) -->
 			<CollapsibleSection title="Flavor Profile" icon={Gauge} bind:open={ratingsOpen}>
 				<div class="space-y-4">
 					<!-- Score Preview -->
@@ -738,7 +726,7 @@
 						onclick={generateRatings}
 						disabled={ratingsGenerating}
 					>
-						<Wand2 class="w-4 h-4 mr-2" />
+						<Sparkles class="w-4 h-4 mr-2" />
 						{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
 					</Button>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -760,7 +748,7 @@
 							label="Versatility"
 							name="recipeVersatilityRating"
 							bind:value={versatilityRating}
-							icon={Sparkles}
+							icon={EqualApproximately}
 							color="purple"
 						/>
 						<FlavorSlider
@@ -774,7 +762,7 @@
 				</div>
 			</CollapsibleSection>
 
-			<!-- Section 5: Ingredients (not collapsible) -->
+			<!-- Section 4: Ingredients (not collapsible) -->
 			<Card.Root>
 				<Card.Header class="pb-4">
 					<Card.Title class="flex items-center gap-2 text-lg">
@@ -836,6 +824,20 @@
 							Add Ingredient
 						</Button>
 					</div>
+				</Card.Content>
+			</Card.Root>
+
+			<!-- Section 5: Preparation Method (not collapsible) -->
+			<Card.Root>
+				<Card.Header class="pb-4">
+					<Card.Title class="flex items-center gap-2 text-lg">
+						<FlaskConical class="h-5 w-5 text-primary" />
+						Preparation Method
+					</Card.Title>
+				</Card.Header>
+				<Card.Content class="space-y-4">
+					<ServingMethodToggle methods={preparationMethods} bind:value={selectedPrepMethodId} />
+					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
 				</Card.Content>
 			</Card.Root>
 

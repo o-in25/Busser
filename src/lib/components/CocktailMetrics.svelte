@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { DollarSign, Droplets, FlaskConical, Percent } from 'lucide-svelte';
+	import { DollarSign, Droplets, FlaskConical, GlassWater, Percent } from 'lucide-svelte';
 
 	import { CalculatedBadge } from '$lib/components/ui/calculated-badge';
-	import { calculateAbv, convertToMl } from '$lib/math';
+	import { calculateAbv, convertToMl, getDilutionInfo } from '$lib/math';
 	import type { View } from '$lib/types';
 	import { cn } from '$lib/utils';
 
@@ -59,10 +59,36 @@
 	// Count of ingredients with a product selected
 	let ingredientCount = $derived(steps.filter((s) => s.productId > 0).length);
 
+	// Calculate dilution (water added) using getDilutionInfo
+	let dilutionOz = $derived(() => {
+		// convert steps to ml for the dilution calculation
+		const stepsInMl = steps.map((step) => ({
+			productIdQuantityInMilliliters: convertToMl(
+				step.productIdQuantityUnit,
+				step.productIdQuantityInMilliliters
+			),
+			productProof: step.productProof || 0,
+		}));
+
+		// only calculate if we have volume
+		const totalVolume = stepsInMl.reduce((acc, s) => acc + s.productIdQuantityInMilliliters, 0);
+		if (totalVolume <= 0) return 0;
+
+		const info = getDilutionInfo(stepsInMl, recipeTechniqueDescriptionId);
+		return info.dilutionOz;
+	});
+
 	// Format helpers
 	let displayVolume = $derived(totalVolumeOz > 0 ? totalVolumeOz.toFixed(1) : '--');
 	let displayCost = $derived(estimatedCost > 0 ? `$${estimatedCost.toFixed(2)}` : '--');
 	let displayCount = $derived(ingredientCount > 0 ? ingredientCount : '--');
+	let displayDilution = $derived(() => {
+		const oz = dilutionOz();
+		if (oz > 0) {
+			return `+${oz.toFixed(1)}`;
+		}
+		return '--';
+	});
 </script>
 
 <div
@@ -72,6 +98,8 @@
 	<CalculatedBadge label="ABV" value={abv()} icon={Percent} />
 
 	<CalculatedBadge label="Volume" value={displayVolume} unit="oz" icon={Droplets} />
+
+	<CalculatedBadge label="Dilution" value={displayDilution()} unit="oz" icon={GlassWater} />
 
 	<CalculatedBadge label="Est. Cost" value={displayCost} icon={DollarSign} />
 

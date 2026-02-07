@@ -84,7 +84,7 @@
 		<Label for="autoselect" class="mb-2 block">{label}</Label>
 		<input id="autoselect" class="hidden" bind:value />
 	{/if}
-	<div class="flex gap-2">
+	<div class="flex">
 		<Input
 			type="text"
 			{placeholder}

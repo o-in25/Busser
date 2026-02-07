@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { RecipeGenerator } from '$lib/server/generators/recipe-generator';
+import { generate } from '$lib/server/generators/generator-factory';
 
 import type { RequestHandler } from './$types';
 
@@ -25,7 +25,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	}
 
-	const generator = new RecipeGenerator();
-	const result = await generator.generateContent(trigger);
+	const result = await generate('recipe-insights', { cocktailName: trigger });
 	return json(result);
 };

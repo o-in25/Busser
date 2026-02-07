@@ -170,6 +170,7 @@
 		const result = await response.json();
 		if ('data' in result) {
 			$notificationStore.success = { message: 'Inventory item deleted.' };
+			goto('/inventory');
 		} else {
 			$notificationStore.error = { message: result.message || result.error };
 		}
@@ -446,6 +447,8 @@
 							bind:pendingFile={pendingImageFile}
 							bind:imageCleared
 							trigger={productName}
+							type="product"
+							description={productDescription}
 						/>
 					</div>
 				{/if}
@@ -665,7 +668,11 @@
 					<ImagePrompt
 						name="productImageUrl"
 						bind:signedUrl={productImageUrl}
+						bind:pendingFile={pendingImageFile}
+						bind:imageCleared
 						trigger={productName}
+						type="product"
+						description={productDescription}
 					/>
 				</div>
 			</CollapsibleSection>
