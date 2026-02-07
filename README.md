@@ -5,7 +5,7 @@
 A modern web application for managing your home bar. Track your inventory, discover cocktails you
 can make with what you have, and share your bar with friends and family.
 
-**Live at:** https://busserapp.com
+**Live at:** https://busser.fly.dev
 
 ## Features
 
