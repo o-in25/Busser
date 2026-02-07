@@ -12,7 +12,17 @@
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"cloudsql:proxy": "cross-env-shell \"cloud-sql-proxy $INSTANCE_CONNECTION_NAME\""
+		"cloudsql:proxy": "cross-env-shell \"./cloud-sql-proxy $INSTANCE_CONNECTION_NAME\"",
+		"migrate:core": "tsx node_modules/.bin/knex migrate:latest --knexfile knexfile.ts --env core",
+		"migrate:user": "tsx node_modules/.bin/knex migrate:latest --knexfile knexfile.ts --env user",
+		"migrate:rollback:core": "tsx node_modules/.bin/knex migrate:rollback --knexfile knexfile.ts --env core",
+		"migrate:rollback:user": "tsx node_modules/.bin/knex migrate:rollback --knexfile knexfile.ts --env user",
+		"migrate:status:core": "tsx node_modules/.bin/knex migrate:status --knexfile knexfile.ts --env core",
+		"migrate:status:user": "tsx node_modules/.bin/knex migrate:status --knexfile knexfile.ts --env user",
+		"seed:core": "tsx node_modules/.bin/knex seed:run --knexfile knexfile.ts --env core",
+		"seed:user": "tsx node_modules/.bin/knex seed:run --knexfile knexfile.ts --env user",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"devDependencies": {
 		"@flydotio/dockerfile": "^0.7.8",
@@ -43,7 +53,8 @@
 		"tailwindcss": "^3.4.7",
 		"tslib": "^2.4.1",
 		"typescript": "^5.5.0",
-		"vite": "^6.2.4"
+		"vite": "^6.2.4",
+		"vitest": "^4.0.18"
 	},
 	"type": "module",
 	"dependencies": {
