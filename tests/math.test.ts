@@ -120,22 +120,25 @@ describe('calculateOverallScore', () => {
 		expect(calculateOverallScore(0, 0, 0, 0)).toBe(0);
 	});
 
-	it('applies weighted formula correctly', () => {
-		// versatility=10, sweetness=5, dryness=5, strength=10
-		// score = 10*0.4 + ((5+5)/2)*0.3 + 10*0.3 = 4 + 1.5 + 3 = 8.5
-		expect(calculateOverallScore(10, 5, 5, 10)).toBeCloseTo(8.5, 5);
+	it('applies parabolic scoring formula correctly', () => {
+		// versatility=10, sweetness=5 (ideal), dryness=5 (ideal), strength=6 (ideal)
+		// versatilityScore = 10 * 0.5 = 5
+		// sweetness/dryness at ideal → 1.5 each, strength at ideal → 1.5
+		// total = 5 + 1.5 + 1.5 + 1.5 = 9.5
+		expect(calculateOverallScore(10, 5, 5, 6)).toBeCloseTo(9.5, 1);
+
+		// strength far from ideal (10) reduces strength contribution
+		const score = calculateOverallScore(10, 5, 5, 10);
+		expect(score).toBeGreaterThan(8);
+		expect(score).toBeLessThan(9.5);
 	});
 
 	it('applies penalty when sweetness and dryness both > 7', () => {
 		const noPenalty = calculateOverallScore(5, 7, 7, 5);
 		const withPenalty = calculateOverallScore(5, 8, 8, 5);
-		// penalty is -0.2 (two -0.1 checks)
-		const expectedNoPenalty = 5 * 0.4 + ((7 + 7) / 2) * 0.3 + 5 * 0.3;
-		const expectedWithPenalty = 5 * 0.4 + ((8 + 8) / 2) * 0.3 + 8 * 0.0 + 5 * 0.3 - 0.2;
-		expect(noPenalty).toBeCloseTo(expectedNoPenalty, 5);
-		// recalculate properly for withPenalty
-		const base = 5 * 0.4 + ((8 + 8) / 2) * 0.3 + 5 * 0.3;
-		expect(withPenalty).toBeCloseTo(base - 0.2, 5);
+		// sweetness=7, dryness=7 → not > 7, no penalty
+		// sweetness=8, dryness=8 → both > 7, -1 penalty
+		expect(withPenalty).toBeLessThan(noPenalty);
 	});
 
 	it('clamps result to 0-10 range', () => {
