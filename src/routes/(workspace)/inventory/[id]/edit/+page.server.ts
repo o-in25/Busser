@@ -80,7 +80,8 @@ export const actions: Actions = {
 		const productVersatilityRating =
 			parseFloat(formData.get('productVersatilityRating') as string) || 0;
 		const productDescription = (formData.get('productDescription') as string) || '';
-		const productImageFile = formData.get('productImageUrl') as File;
+		const productImageUrl = (formData.get('productImageUrl') as string) || '';
+		const productImageCleared = formData.get('productImageCleared') === 'true';
 
 		if (!productName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Product name is required.' });
@@ -105,7 +106,7 @@ export const actions: Actions = {
 			productDescription,
 		} as Product;
 
-		const result = await inventoryRepo.update(workspaceId, product, productImageFile);
+		const result = await inventoryRepo.update(workspaceId, product, productImageUrl, productImageCleared);
 
 		if (result.status === 'error') {
 			return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: result.error });

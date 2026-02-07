@@ -3,6 +3,21 @@
 //         recipestep, recipetechnique, recipetechniquedescription
 // views: basicrecipe, basicrecipestep, basicrecipecategory, spirits, preparationmethod
 
+// Match mode for recipe ingredients
+// - EXACT_PRODUCT: Only the specific product satisfies the recipe step
+// - ANY_IN_CATEGORY: Any product in the same category satisfies the step
+// - ANY_IN_PARENT_CATEGORY: Any product whose category shares the same parent satisfies the step
+export type MatchMode = 'EXACT_PRODUCT' | 'ANY_IN_CATEGORY' | 'ANY_IN_PARENT_CATEGORY';
+
+// workspacefeatured table - curated featured cocktails per workspace
+export interface WorkspaceFeatured {
+	featuredId: number;
+	workspaceId: string;
+	recipeId: number;
+	featuredOrder: number;
+	createdDate: Date;
+}
+
 // recipecategory table (whiskey cocktails, tiki, etc.)
 export type RecipeCategory = {
 	recipeCategoryId: number;
@@ -42,6 +57,8 @@ export type RecipeStep = {
 	recipeStepId: number;
 	recipeId: number;
 	productId: number;
+	categoryId: number | null;
+	matchMode: MatchMode;
 	productIdQuantityInMilliliters: number;
 	recipeStepDescription: string | null;
 	productIdQuantityUnit: string;
@@ -96,15 +113,21 @@ export type BasicRecipeStep = {
 	recipeId: number;
 	recipeStepId: number;
 	recipeStepDescription: string | null;
+	matchMode: MatchMode;
+	stepCategoryId: number | null;
 	productName: string;
 	productId: number;
+	categoryId: number;
 	categoryName: string;
 	categoryDescription: string | null;
+	parentCategoryId: number | null;
+	parentCategoryName: string | null;
 	supplierName: string | null;
 	supplierDetails: string | null;
 	productIdQuantityInMilliliters: number;
 	productIdQuantityUnit: string;
 	productInStockQuantity: number;
+	effectiveInStock: number; // 1 if available considering MatchMode, 0 otherwise
 	productPricePerUnit: number;
 	productUnitSizeInMilliliters: number;
 	productProof: number;
@@ -143,6 +166,8 @@ export namespace Table {
 		recipeStepId?: number;
 		recipeId: number;
 		productId: number;
+		categoryId?: number | null;
+		matchMode?: MatchMode;
 		productIdQuantityInMilliliters: number;
 		recipeStepDescription: string | null;
 		productIdQuantityUnit: string;
@@ -168,7 +193,8 @@ export namespace Table {
 	export type Category = {
 		categoryId?: number;
 		categoryName: string;
-		categoryDescription: string;
+		categoryDescription: string | null;
+		parentCategoryId?: number | null;
 	};
 }
 
@@ -197,6 +223,11 @@ export namespace View {
 		recipeStepId?: number;
 		recipeId?: number;
 		productId: number;
+		categoryId?: number;
+		stepCategoryId?: number | null;
+		matchMode?: MatchMode;
+		parentCategoryId?: number | null;
+		parentCategoryName?: string | null;
 		recipeStepDescription: string;
 		productName: string;
 		categoryName: string;
@@ -205,6 +236,7 @@ export namespace View {
 		supplierDetails: string | null;
 		productIdQuantityInMilliliters: number;
 		productInStockQuantity: number;
+		effectiveInStock?: number; // 1 if available considering MatchMode, 0 otherwise
 		productPricePerUnit: number;
 		productUnitSizeInMilliliters: number;
 		productIdQuantityUnit: string;
@@ -236,6 +268,8 @@ export namespace QueryRequest {
 	export type RecipeSteps = {
 		recipeStepId?: number;
 		productId: number;
+		categoryId?: number | null;
+		matchMode?: MatchMode;
 		productIdQuantityInMilliliters: number;
 		productIdQuantityUnit: string;
 		recipeStepDescription: string;

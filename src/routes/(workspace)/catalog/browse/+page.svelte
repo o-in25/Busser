@@ -3,18 +3,22 @@
 		ArrowUpDown,
 		ChevronLeft,
 		ChevronRight,
+		Filter,
 		FlaskConical,
 		GlassWater,
+		Heart,
 		LayoutGrid,
 		List,
 		Plus,
 		Search,
+		Star,
 		X,
 	} from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { goto, invalidateAll } from '$app/navigation';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -38,13 +42,26 @@
 	let searchInput = $state(data.filters.search || '');
 	let selectedSort = $state(data.filters.sort || 'name-asc');
 	let selectedSpirit = $state(data.filters.spiritId || 'all');
+	let selectedShowFilter = $state(data.filters.showFilter || 'all');
+
+	// Track favorites/featured for optimistic updates
+	let favorites = $state(new Set(data.favoriteRecipeIds));
+	let featured = $state(new Set(data.featuredRecipeIds));
 
 	// Sort options
 	const sortOptions = [
 		{ value: 'name-asc', label: 'Name (A-Z)' },
 		{ value: 'name-desc', label: 'Name (Z-A)' },
+		{ value: 'top-rated', label: 'Top Rated' },
 		{ value: 'newest', label: 'Newest First' },
 		{ value: 'oldest', label: 'Oldest First' },
+	];
+
+	// Show filter options
+	const showFilterOptions = [
+		{ value: 'all', label: 'All Recipes', icon: FlaskConical },
+		{ value: 'favorites', label: 'My Favorites', icon: Heart },
+		{ value: 'featured', label: 'Featured', icon: Star },
 	];
 
 	// Restore view mode from localStorage
@@ -68,12 +85,14 @@
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const sort = overrides.sort !== undefined ? overrides.sort : selectedSort;
 		const spirit = overrides.spirit !== undefined ? overrides.spirit : selectedSpirit;
+		const show = overrides.show !== undefined ? overrides.show : selectedShowFilter;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 
 		params.set('page', String(pageNum));
 		if (search) params.set('search', String(search));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
 		if (spirit && spirit !== 'all') params.set('spirit', String(spirit));
+		if (show && show !== 'all') params.set('show', String(show));
 
 		const queryString = params.toString();
 		return queryString ? `/catalog/browse?${queryString}` : '/catalog/browse';
@@ -92,6 +111,11 @@
 	function handleSpiritChange(value: string) {
 		selectedSpirit = value;
 		goto(buildUrl({ spirit: value, page: 1 }), { keepFocus: true });
+	}
+
+	function handleShowFilterChange(value: string) {
+		selectedShowFilter = value;
+		goto(buildUrl({ show: value, page: 1 }), { keepFocus: true });
 	}
 
 	function clearSearch() {
@@ -118,6 +142,9 @@
 		searchInput = data.filters.search || '';
 		selectedSort = data.filters.sort || 'name-asc';
 		selectedSpirit = data.filters.spiritId || 'all';
+		selectedShowFilter = data.filters.showFilter || 'all';
+		favorites = new Set(data.favoriteRecipeIds);
+		featured = new Set(data.featuredRecipeIds);
 	});
 
 	// Compute display labels for dropdowns
@@ -131,6 +158,31 @@
 		const spirit = data.spirits.find((s) => String(s.recipeCategoryId) === selectedSpirit);
 		return spirit?.recipeCategoryDescription || 'All Spirits';
 	});
+
+	const showFilterLabel = $derived.by(() => {
+		const option = showFilterOptions.find((o) => o.value === selectedShowFilter);
+		return option?.label || 'All Recipes';
+	});
+
+	function handleToggleFavorite(id: number) {
+		const newFavorites = new Set(favorites);
+		if (newFavorites.has(id)) {
+			newFavorites.delete(id);
+		} else {
+			newFavorites.add(id);
+		}
+		favorites = newFavorites;
+	}
+
+	function handleToggleFeatured(id: number) {
+		const newFeatured = new Set(featured);
+		if (newFeatured.has(id)) {
+			newFeatured.delete(id);
+		} else {
+			newFeatured.add(id);
+		}
+		featured = newFeatured;
+	}
 </script>
 
 <svelte:head>
@@ -194,8 +246,25 @@
 					{#each data.spirits as spirit}
 						<Select.Item
 							value={String(spirit.recipeCategoryId)}
-							label={spirit.recipeCategoryDescription}
+							label={spirit.recipeCategoryDescription ?? undefined}
 						/>
+					{/each}
+				</Select.Content>
+			</Select.Root>
+
+			<!-- Show Filter Select (Favorites/Featured) -->
+			<Select.Root
+				type="single"
+				value={selectedShowFilter}
+				onValueChange={(v) => handleShowFilterChange(v ?? 'all')}
+			>
+				<Select.Trigger class="w-full sm:w-[160px]">
+					<Filter class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="All Recipes">{showFilterLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					{#each showFilterOptions as option}
+						<Select.Item value={option.value} label={option.label} />
 					{/each}
 				</Select.Content>
 			</Select.Root>
@@ -323,7 +392,17 @@
 			)}
 		>
 			{#each data.recipes as recipe (recipe.recipeId)}
-				<CatalogBrowseCard {recipe} {viewMode} />
+				<CatalogBrowseCard
+					{recipe}
+					{viewMode}
+					isFavorite={favorites.has(recipe.recipeId)}
+					isFeatured={featured.has(recipe.recipeId)}
+					{canModify}
+					workspaceId={workspace.workspaceId}
+					actionPath="?"
+					onToggleFavorite={handleToggleFavorite}
+					onToggleFeatured={handleToggleFeatured}
+				/>
 			{/each}
 		</div>
 

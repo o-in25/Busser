@@ -1,15 +1,18 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { Facebook, Instagram, Twitter } from 'lucide-svelte';
 
 	import logo from '$lib/assets/logo.png';
+
+	const isActive = (path: string) => $page.url.pathname === path;
 </script>
 
 <footer class="mt-auto glass-nav border-t border-b-0 rounded-none">
 	<div class="w-full mx-auto max-w-screen-xl px-2 py-4 md:p-6 flex flex-col gap-8">
 		<!-- Row 1: Logo + Links -->
-		<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+		<div class="flex flex-col md:flex-row items-start justify-between gap-8">
 			<!-- Logo -->
-			<div class="flex-shrink-0">
+			<div class="flex-shrink-0 -mt-4 md:-mt-6">
 				<a href="/" class="hover:opacity-80 transition-opacity">
 					<img src={logo} alt="Busser" class="h-32" />
 				</a>
@@ -22,13 +25,34 @@
 					<h3 class="text-sm font-semibold text-heading uppercase mb-3">Legal</h3>
 					<ul class="text-sm text-muted-foreground space-y-2">
 						<li>
-							<a href="/privacy" class="hover:text-foreground transition-colors">Privacy Policy</a>
+							<a
+								href="/privacy"
+								class="hover:text-foreground transition-colors {isActive('/privacy')
+									? 'text-primary font-medium'
+									: ''}"
+							>
+								Privacy Policy
+							</a>
 						</li>
 						<li>
-							<a href="/terms" class="hover:text-foreground transition-colors">Terms of Service</a>
+							<a
+								href="/terms"
+								class="hover:text-foreground transition-colors {isActive('/terms')
+									? 'text-primary font-medium'
+									: ''}"
+							>
+								Terms of Service
+							</a>
 						</li>
 						<li>
-							<a href="/cookies" class="hover:text-foreground transition-colors">Cookie Policy</a>
+							<a
+								href="/cookies"
+								class="hover:text-foreground transition-colors {isActive('/cookies')
+									? 'text-primary font-medium'
+									: ''}"
+							>
+								Cookie Policy
+							</a>
 						</li>
 					</ul>
 				</div>
@@ -37,7 +61,16 @@
 				<div class="min-w-[120px]">
 					<h3 class="text-sm font-semibold text-heading uppercase mb-3">Help</h3>
 					<ul class="text-sm text-muted-foreground space-y-2">
-						<li><a href="/about" class="hover:text-foreground transition-colors">About</a></li>
+						<li>
+							<a
+								href="/about"
+								class="hover:text-foreground transition-colors {isActive('/about')
+									? 'text-primary font-medium'
+									: ''}"
+							>
+								About
+							</a>
+						</li>
 					</ul>
 				</div>
 

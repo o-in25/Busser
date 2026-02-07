@@ -1,9 +1,20 @@
 <script lang="ts">
 	import { AlertTriangle, CheckCircle2, Package, XCircle } from 'lucide-svelte';
 
+	import { goto } from '$app/navigation';
 	import type { InventoryStats } from '$lib/types';
+	import { cn } from '$lib/utils';
 
 	let { stats }: { stats: InventoryStats } = $props();
+
+	function applyFilter(stockFilter: string) {
+		const params = new URLSearchParams();
+		params.set('page', '1');
+		if (stockFilter !== 'all') {
+			params.set('stockFilter', stockFilter);
+		}
+		goto(`/inventory?${params.toString()}`);
+	}
 </script>
 
 <!-- Header Section with Dashboard Stats -->
@@ -23,48 +34,68 @@
 			<!-- Quick Stats -->
 			<div class="grid grid-cols-2 md:flex gap-3">
 				<!-- Total -->
-				<div
-					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				<button
+					onclick={() => applyFilter('all')}
+					class={cn(
+						'flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
+						'hover:border-primary/50 hover:bg-background transition-colors cursor-pointer',
+						'min-w-[120px]'
+					)}
 				>
-					<Package class="h-5 w-5 text-primary" />
-					<div>
+					<Package class="h-5 w-5 text-primary shrink-0" />
+					<div class="text-left">
 						<p class="text-xl font-bold">{stats.total}</p>
 						<p class="text-xs text-muted-foreground">Total</p>
 					</div>
-				</div>
+				</button>
 
 				<!-- In Stock -->
-				<div
-					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				<button
+					onclick={() => applyFilter('in-stock')}
+					class={cn(
+						'flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
+						'hover:border-green-500/50 hover:bg-background transition-colors cursor-pointer',
+						'min-w-[120px]'
+					)}
 				>
-					<CheckCircle2 class="h-5 w-5 text-green-500" />
-					<div>
+					<CheckCircle2 class="h-5 w-5 text-green-500 shrink-0" />
+					<div class="text-left">
 						<p class="text-xl font-bold">{stats.inStock}</p>
 						<p class="text-xs text-muted-foreground">In Stock</p>
 					</div>
-				</div>
+				</button>
 
 				<!-- Out of Stock -->
-				<div
-					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				<button
+					onclick={() => applyFilter('out-of-stock')}
+					class={cn(
+						'flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
+						'hover:border-red-500/50 hover:bg-background transition-colors cursor-pointer',
+						'min-w-[120px]'
+					)}
 				>
-					<XCircle class="h-5 w-5 text-red-500" />
-					<div>
+					<XCircle class="h-5 w-5 text-red-500 shrink-0" />
+					<div class="text-left">
 						<p class="text-xl font-bold">{stats.outOfStock}</p>
 						<p class="text-xs text-muted-foreground">Out of Stock</p>
 					</div>
-				</div>
+				</button>
 
 				<!-- Low Stock -->
-				<div
-					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				<button
+					onclick={() => applyFilter('low-stock')}
+					class={cn(
+						'flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
+						'hover:border-yellow-500/50 hover:bg-background transition-colors cursor-pointer',
+						'min-w-[120px]'
+					)}
 				>
-					<AlertTriangle class="h-5 w-5 text-yellow-500" />
-					<div>
+					<AlertTriangle class="h-5 w-5 text-yellow-500 shrink-0" />
+					<div class="text-left">
 						<p class="text-xl font-bold">{stats.lowStock}</p>
 						<p class="text-xs text-muted-foreground">Low Stock</p>
 					</div>
-				</div>
+				</button>
 			</div>
 		</div>
 	</div>

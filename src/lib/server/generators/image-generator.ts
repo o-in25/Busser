@@ -8,22 +8,33 @@ export type ImageGeneratorResult = {
 
 const stylePrompts = {
 	photo: {
-		// Keep it simple; the 'enhancePrompt' flag will expand this into
-		// a professional photography description.
-		prompt: `Professional high-key product photography of a [SUBJECT]. 
-             Isolated on a pure #FFFFFF white background. 
-             Minimal soft contact shadows only.`,
+		prompt: `Studio product photograph of a [SUBJECT] cocktail as it is traditionally served.
+Single drink centered in frame. Shot from a 30-degree elevated angle.
+High-key lighting: large soft diffused key light from above-front, fill light eliminating harsh shadows, edge light separating the glass from the background.
+Seamless pure white background, no surface texture visible. Only a subtle soft contact shadow directly beneath the glass.
+Crystal-clear focus on the drink. Liquid is realistic and transparent where appropriate.
+Professional commercial beverage photography, 80mm lens, shallow depth of field, color-accurate.`,
 		negativePrompt:
-			'table, bar, wood, marble, surface, background texture, room, kitchen, messy shadows',
+			'text, words, letters, labels, logos, watermarks, people, hands, bar, countertop, table, wood, marble, granite, patterned surface, colored background, gradient background, room, kitchen, restaurant, multiple drinks, bottles, napkin, coaster, blurry, illustration, cartoon, painting, 3d render, artificial looking',
 	},
 };
 
+export type ImageContext = {
+	ingredients?: string[];
+	technique?: string;
+};
+
 export class ImageGenerator {
-	// Pass your goal.png's base64 string here
-	async generateContent(subject: string): Promise<ImageGeneratorResult> {
-		//generateContent(subject: string, goalImageBase64?: string)
+	async generateContent(subject: string, context?: ImageContext): Promise<ImageGeneratorResult> {
 		const config = stylePrompts.photo;
-		const fullPrompt = `Subject: ${subject}. ${config.prompt}`;
+		let fullPrompt = config.prompt.replace('[SUBJECT]', subject);
+
+		if (context?.ingredients?.length) {
+			fullPrompt += `\nThe drink is made with: ${context.ingredients.join(', ')}.`;
+		}
+		if (context?.technique) {
+			fullPrompt += ` Prepared ${context.technique.toLowerCase()}.`;
+		}
 
 		const result = await generateImage(fullPrompt, {
 			aspectRatio: '1:1',

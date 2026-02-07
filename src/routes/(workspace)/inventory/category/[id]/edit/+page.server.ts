@@ -38,8 +38,19 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
+	// Get all categories for parent selection (excluding current category)
+	const [{ data: categories }, { pagination }] = await Promise.all([
+		inventoryRepo.findAllCategories(workspaceId, 1, 1000, null),
+		inventoryRepo.findAll(workspaceId, 1, 1, { categoryId: Number(id) }),
+	]);
+	const parentCategories = (categories || []).filter(
+		(c) => c.categoryId !== Number(id) && !c.parentCategoryId
+	);
+
 	return {
 		category: result.data,
+		parentCategories,
+		productCount: pagination.total || 0,
 	};
 };
 
@@ -62,6 +73,8 @@ export const actions: Actions = {
 
 		const categoryName = formData.get('categoryName') as string;
 		const categoryDescription = (formData.get('categoryDescription') as string) || '';
+		const parentCategoryIdRaw = formData.get('parentCategoryId') as string;
+		const parentCategoryId = parentCategoryIdRaw ? Number(parentCategoryIdRaw) : null;
 
 		if (!categoryName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Category name is required.' });
@@ -71,6 +84,7 @@ export const actions: Actions = {
 			categoryId: Number(id),
 			categoryName,
 			categoryDescription,
+			parentCategoryId,
 		};
 
 		const result = await inventoryRepo.updateCategory(workspaceId, category);

@@ -12,14 +12,8 @@ import type {
 
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
-import { deleteSignedUrl, getSignedUrl } from '../storage';
-import {
-	BaseRepository,
-	camelCase,
-	emptyPagination,
-	marshal,
-	marshalToType,
-} from './base.repository';
+import { deleteSignedUrl } from '../storage';
+import { BaseRepository, emptyPagination } from './base.repository';
 
 export class CatalogRepository extends BaseRepository {
 	constructor(db: DbProvider) {
@@ -66,7 +60,7 @@ export class CatalogRepository extends BaseRepository {
 				currentPage,
 				isLengthAware: true,
 			});
-			const result: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(data);
+			const result = data as View.BasicRecipe[];
 
 			return { data: result, pagination };
 		} catch (error: any) {
@@ -85,10 +79,13 @@ export class CatalogRepository extends BaseRepository {
 
 			await this.db.query.transaction(async (trx) => {
 				let [dbResult] = await trx('basicrecipe').select().where({ recipeId, workspaceId });
-				recipe = marshal<View.BasicRecipe>(dbResult, camelCase);
+				recipe = dbResult as View.BasicRecipe;
 				if (!recipe) throw Error('Recipe not found in this workspace.');
-				dbResult = await trx('basicrecipestep').select().where({ recipeId, workspaceId });
-				recipeSteps = marshal<View.BasicRecipeStep[]>(dbResult, camelCase);
+				dbResult = await trx('basicrecipestep')
+					.select()
+					.where({ recipeId, workspaceId })
+					.orderBy('RecipeStepId', 'asc');
+				recipeSteps = dbResult as View.BasicRecipeStep[];
 			});
 
 			if (!recipe || !recipeSteps) {
@@ -114,7 +111,7 @@ export class CatalogRepository extends BaseRepository {
 						.where('WorkspaceId', workspaceId)
 						.groupBy('RecipeId');
 				});
-			const data: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(dbResult);
+			const data = dbResult as View.BasicRecipe[];
 			return { status: 'success', data };
 		} catch (error: any) {
 			console.error(error);
@@ -126,6 +123,7 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string
 	): Promise<Array<View.BasicRecipe & { missingIngredient: string | null }>> {
 		try {
+			// Find recipes missing exactly one ingredient (using EffectiveInStock for flexible matching)
 			const result = await this.db
 				.table('basicrecipe as r')
 				.select('r.*')
@@ -133,24 +131,28 @@ export class CatalogRepository extends BaseRepository {
 				.whereIn('r.RecipeId', function () {
 					this.select('rs.RecipeId')
 						.from('basicrecipestep as rs')
-						// .where('rs.workspaceId', workspaceId)
 						.groupBy('rs.RecipeId')
-						.havingRaw('SUM(CASE WHEN rs.ProductInStockQuantity = 0 THEN 1 ELSE 0 END) = 1')
+						// EffectiveInStock accounts for flexible matching (ANY_IN_CATEGORY, ANY_IN_PARENT_CATEGORY)
+						.havingRaw('SUM(CASE WHEN rs.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
 						.havingRaw('COUNT(rs.RecipeStepId) > 1');
 				})
 				.limit(6);
-			const recipes: View.BasicRecipe[] = marshalToType<View.BasicRecipe[]>(result);
+			const recipes = result as View.BasicRecipe[];
 
 			const recipesWithMissing = await Promise.all(
 				recipes.map(async (recipe) => {
+					// Find the missing ingredient (the one with EffectiveInStock = 0)
 					const missing = await this.db
 						.table('basicrecipestep')
-						.select('ProductName')
+						.select('ProductName', 'CategoryName', 'MatchMode')
 						.where('RecipeId', recipe.recipeId)
 						.where('WorkspaceId', workspaceId)
-						.where('ProductInStockQuantity', 0)
+						.where('EffectiveInStock', 0)
 						.first();
-					return { ...recipe, missingIngredient: missing?.ProductName || null };
+					// Show category name for flexible matches, product name for exact
+					const ingredientName =
+						missing?.matchMode !== 'EXACT_PRODUCT' ? missing?.categoryName : missing?.productName;
+					return { ...recipe, missingIngredient: ingredientName || null };
 				})
 			);
 
@@ -171,7 +173,7 @@ export class CatalogRepository extends BaseRepository {
 				query.where('recipeCategoryId', recipeCategoryId);
 			}
 			const dbResult = await query;
-			const data = marshal<BasicRecipe[]>(dbResult);
+			const data = dbResult as BasicRecipe[];
 			return { status: 'success', data };
 		} catch (error: any) {
 			console.error(error);
@@ -183,7 +185,7 @@ export class CatalogRepository extends BaseRepository {
 	async getCategories(): Promise<QueryResult<View.BasicRecipeCategory[]>> {
 		try {
 			let dbResult = await this.db.table<View.BasicRecipeCategory>('basicrecipecategory').select();
-			const data: View.BasicRecipeCategory[] = marshalToType<View.BasicRecipeCategory[]>(dbResult);
+			const data = dbResult as View.BasicRecipeCategory[];
 			return { status: 'success', data };
 		} catch (error: any) {
 			console.error(error);
@@ -198,7 +200,7 @@ export class CatalogRepository extends BaseRepository {
 				.table<Spirit>('spirits')
 				.select()
 				.orderBy('recipeCategoryDescription');
-			return marshal<Spirit[]>(dbResult);
+			return dbResult as Spirit[];
 		} catch (error) {
 			console.error(error);
 			return [];
@@ -208,7 +210,7 @@ export class CatalogRepository extends BaseRepository {
 	async getSpiritById(id: number | string): Promise<Spirit | null> {
 		try {
 			const dbResult = await this.db.table<Spirit>('spirits').where('RecipeCategoryId', id);
-			const [result] = marshal<Spirit[]>(dbResult);
+			const [result] = dbResult as Spirit[];
 			if (!result) throw Error('Spirit not found.');
 			return result;
 		} catch (error) {
@@ -220,7 +222,7 @@ export class CatalogRepository extends BaseRepository {
 	async getPreparationMethods(): Promise<QueryResult<PreparationMethod[]>> {
 		try {
 			const dbResult = await this.db.table<PreparationMethod>('preparationmethod');
-			const data = marshal<PreparationMethod[]>(dbResult);
+			const data = dbResult as PreparationMethod[];
 			return { status: 'success', data };
 		} catch (error: any) {
 			console.error(error);
@@ -233,9 +235,12 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string,
 		recipe: QueryRequest.Recipe,
 		recipeSteps: QueryRequest.RecipeSteps[],
-		file: File
+		imageUrl: string = '',
+		imageCleared: boolean = false
 	): Promise<QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] }>> {
-		const recipeImageUrl = await this.getImageUrl(file);
+		// imageUrl: pre-uploaded URL from /api/upload/image (empty if no new image)
+		// imageCleared: user explicitly removed the image
+		const recipeImageUrl = imageCleared ? null : imageUrl || null;
 
 		try {
 			let newRecipe: { recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] } = {
@@ -251,18 +256,15 @@ export class CatalogRepository extends BaseRepository {
 
 				let dbResult;
 
-				let oldRecipe = await trx('recipe')
-					.select('RecipeDescriptionId', 'RecipeCategoryId')
+				const oldRecipe = await trx('recipe')
+					.select('RecipeDescriptionId', 'RecipeCategoryId', 'RecipeImageUrl')
 					.where('RecipeId', recipe.recipeId || -1)
 					.where('workspaceId', workspaceId)
 					.first();
 
-				oldRecipe = marshal(oldRecipe, camelCase);
-
 				// create new recipe
 				if (!oldRecipe) {
 					[dbResult] = await trx('recipedescription').insert({
-						workspaceId,
 						RecipeDescription: recipe.recipeDescription,
 						RecipeDescriptionImageUrl: null,
 						RecipeSweetnessRating: recipe.recipeSweetnessRating,
@@ -325,7 +327,11 @@ export class CatalogRepository extends BaseRepository {
 						RecipeName: recipe.recipeName,
 					};
 
-					if (recipeImageUrl !== null) {
+					if (recipeImageUrl !== null || imageCleared) {
+						// Delete old image from storage when replacing or clearing
+						if (oldRecipe.recipeImageUrl) {
+							await deleteSignedUrl(oldRecipe.recipeImageUrl);
+						}
 						query = { ...query, recipeImageUrl };
 					}
 
@@ -339,12 +345,16 @@ export class CatalogRepository extends BaseRepository {
 				let steps: Table.RecipeStep[] = recipeSteps.map(
 					({
 						productId,
+						categoryId,
+						matchMode,
 						productIdQuantityInMilliliters,
 						productIdQuantityUnit,
 						recipeStepDescription,
 					}) => ({
 						recipeId: keys.recipeId || 0,
 						productId,
+						categoryId: categoryId || null,
+						matchMode: matchMode || 'EXACT_PRODUCT',
 						productIdQuantityInMilliliters,
 						productIdQuantityUnit,
 						recipeStepDescription,
@@ -358,12 +368,12 @@ export class CatalogRepository extends BaseRepository {
 					.select()
 					.where({ recipeId: keys.recipeId, workspaceId })
 					.first();
-				newRecipe.recipe = marshalToType<View.BasicRecipe>(dbResult, camelCase);
+				newRecipe.recipe = dbResult as View.BasicRecipe;
 
 				dbResult = await trx('basicrecipestep')
 					.select()
 					.where({ recipeId: keys.recipeId, workspaceId });
-				newRecipe.recipeSteps = marshalToType<View.BasicRecipeStep[]>(dbResult, camelCase);
+				newRecipe.recipeSteps = dbResult as View.BasicRecipeStep[];
 			});
 
 			return { status: 'success', data: newRecipe };
@@ -382,14 +392,13 @@ export class CatalogRepository extends BaseRepository {
 					.where('RecipeId', recipeId)
 					.where('workspaceId', workspaceId);
 
-				const [parentRow] = marshal<any[]>(dbResult, camelCase);
+				const [parentRow] = dbResult as any[];
 				if (!parentRow) throw new Error('Recipe not found in this workspace.');
 
 				const { recipeDescriptionId, recipeImageUrl } = parentRow;
 
 				const deletedRows = await trx('recipedescription')
 					.where('RecipeDescriptionId', recipeDescriptionId)
-					.where('workspaceId', workspaceId)
 					.del();
 
 				if (deletedRows < 1)
@@ -410,9 +419,112 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
-	private async getImageUrl(image: File | null): Promise<string | null> {
-		if (!image || image.size === 0 || image.name === 'undefined') return null;
-		const signedUrl = await getSignedUrl(image);
-		return signedUrl.length ? signedUrl : null;
+	// Workspace featured management
+	async getFeatured(workspaceId: string): Promise<View.BasicRecipe[]> {
+		try {
+			const dbResult = await this.db
+				.table('basicrecipe as r')
+				.join('workspacefeatured as wf', function () {
+					this.on('r.RecipeId', '=', 'wf.recipeId').andOn('r.WorkspaceId', '=', 'wf.workspaceId');
+				})
+				.where('wf.workspaceId', workspaceId)
+				.orderBy('wf.featuredOrder', 'asc')
+				.select('r.*');
+			return dbResult as View.BasicRecipe[];
+		} catch (error: any) {
+			console.error('Error getting featured recipes:', error.message);
+			return [];
+		}
+	}
+
+	async addFeatured(workspaceId: string, recipeId: number): Promise<QueryResult> {
+		try {
+			// get max order
+			const maxOrderResult = await this.db
+				.table('workspacefeatured')
+				.where({ workspaceId })
+				.max('featuredOrder as maxOrder')
+				.first<{ maxOrder: number | null }>();
+			const nextOrder = (maxOrderResult?.maxOrder ?? -1) + 1;
+
+			await this.db.table('workspacefeatured').insert({
+				workspaceId,
+				recipeId,
+				featuredOrder: nextOrder,
+			});
+			return { status: 'success' };
+		} catch (error: any) {
+			if (error.code === 'ER_DUP_ENTRY') {
+				return { status: 'error', error: 'Recipe is already featured.' };
+			}
+			console.error('Error adding featured recipe:', error.message);
+			return { status: 'error', error: 'Failed to add featured recipe.' };
+		}
+	}
+
+	async removeFeatured(workspaceId: string, recipeId: number): Promise<QueryResult> {
+		try {
+			const rowsDeleted = await this.db
+				.table('workspacefeatured')
+				.where({ workspaceId, recipeId })
+				.del();
+			if (rowsDeleted === 0) {
+				return { status: 'error', error: 'Featured recipe not found.' };
+			}
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error('Error removing featured recipe:', error.message);
+			return { status: 'error', error: 'Failed to remove featured recipe.' };
+		}
+	}
+
+	async isFeatured(workspaceId: string, recipeId: number): Promise<boolean> {
+		try {
+			const dbResult = await this.db
+				.table('workspacefeatured')
+				.where({ workspaceId, recipeId })
+				.first();
+			return !!dbResult;
+		} catch (error: any) {
+			console.error('Error checking featured:', error.message);
+			return false;
+		}
+	}
+
+	async toggleFeatured(
+		workspaceId: string,
+		recipeId: number
+	): Promise<QueryResult<{ isFeatured: boolean }>> {
+		try {
+			const exists = await this.isFeatured(workspaceId, recipeId);
+			if (exists) {
+				const result = await this.removeFeatured(workspaceId, recipeId);
+				if (result.status === 'error') return result;
+				return { status: 'success', data: { isFeatured: false } };
+			} else {
+				const result = await this.addFeatured(workspaceId, recipeId);
+				if (result.status === 'error') return result;
+				return { status: 'success', data: { isFeatured: true } };
+			}
+		} catch (error: any) {
+			console.error('Error toggling featured:', error.message);
+			return { status: 'error', error: 'Failed to toggle featured.' };
+		}
+	}
+
+	async reorderFeatured(workspaceId: string, orderedRecipeIds: number[]): Promise<QueryResult> {
+		try {
+			await this.db.query.transaction(async (trx) => {
+				for (let i = 0; i < orderedRecipeIds.length; i++) {
+					await trx('workspacefeatured')
+						.where({ workspaceId, recipeId: orderedRecipeIds[i] })
+						.update({ featuredOrder: i });
+				}
+			});
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error('Error reordering featured recipes:', error.message);
+			return { status: 'error', error: 'Failed to reorder featured recipes.' };
+		}
 	}
 }

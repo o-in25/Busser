@@ -5,9 +5,10 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { QuickSelect } from '$lib/components/ui/quick-select';
+	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import type { View } from '$lib/types';
+	import type { MatchMode, SelectOption, View } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	import Autocomplete from './Autocomplete.svelte';
@@ -37,6 +38,40 @@
 		step.productId = productIdValue ? parseInt(productIdValue, 10) : 0;
 	});
 
+	// Handle product selection - populate category info for match mode selector
+	function handleProductSelect(item: SelectOption) {
+		step.productName = item.name;
+		step.categoryId = item.categoryId ?? 0;
+		step.categoryName = item.categoryName ?? '';
+		step.parentCategoryId = item.parentCategoryId ?? null;
+		step.parentCategoryName = item.parentCategoryName ?? null;
+		// Also set stepCategoryId for category-based matching
+		step.stepCategoryId = item.categoryId ?? null;
+		// Reset match mode to default when changing products
+		matchMode = 'EXACT_PRODUCT';
+	}
+
+	// Match mode selection
+	let matchMode: MatchMode = $state(step.matchMode || 'EXACT_PRODUCT');
+	$effect(() => {
+		step.matchMode = matchMode;
+	});
+
+	// Determine if flexible matching options are available
+	// Only show match mode selector for categories that have a parent (i.e., are part of a hierarchy)
+	let hasParentCategory = $derived(step.parentCategoryId !== null && step.parentCategoryId !== undefined);
+
+	// Reset to EXACT_PRODUCT if category has no parent and a flexible mode was selected
+	$effect(() => {
+		if (!hasParentCategory && matchMode !== 'EXACT_PRODUCT') {
+			matchMode = 'EXACT_PRODUCT';
+		}
+	});
+
+	// Get display names for the match mode options
+	let categoryDisplayName = $derived(step.categoryName || 'this category');
+	let parentCategoryDisplayName = $derived(step.parentCategoryName || 'this category');
+
 	// unit selection with local state for proper reactivity
 	let selectedUnit = $state(step.productIdQuantityUnit || 'oz');
 	$effect(() => {
@@ -50,7 +85,7 @@
 	let isTopOff = $derived(selectedUnit === 'top off');
 
 	// all available units
-	const units = ['oz', 'ml', 'dash', 'tsp', 'tbsp', 'cube', 'top off'];
+	const units = ['oz', 'ml', 'dash', 'barspoon', 'tsp', 'tbsp', 'cube', 'top off'];
 
 	// quick select options per unit
 	const quickOptionsByUnit: Record<string, { label: string; value: string }[]> = {
@@ -78,6 +113,11 @@
 			{ label: '0.5', value: '0.5' },
 			{ label: '1', value: '1' },
 			{ label: '2', value: '2' },
+		],
+		barspoon: [
+			{ label: '1', value: '1' },
+			{ label: '2', value: '2' },
+			{ label: '3', value: '3' },
 		],
 		tbsp: [
 			{ label: '0.5', value: '0.5' },
@@ -146,8 +186,30 @@
 					fetchUrl="/api/select/products"
 					bind:value={productIdValue}
 					key={step.productName}
+					onselect={handleProductSelect}
 				/>
 			</div>
+
+			<!-- Match mode selector (only show for categories in a hierarchy) -->
+			{#if step.productId && hasParentCategory}
+				<div class="space-y-2">
+					<Label class="text-sm">Ingredient Matching</Label>
+					<RadioGroup.Root bind:value={matchMode}>
+						<RadioGroup.Item value="EXACT_PRODUCT">Exact</RadioGroup.Item>
+						<RadioGroup.Item value="ANY_IN_CATEGORY">Any {categoryDisplayName}</RadioGroup.Item>
+						<RadioGroup.Item value="ANY_IN_PARENT_CATEGORY">Any {parentCategoryDisplayName}</RadioGroup.Item>
+					</RadioGroup.Root>
+					<p class="text-xs text-muted-foreground">
+						{#if matchMode === 'EXACT_PRODUCT'}
+							Recipe requires this specific product to be in stock.
+						{:else if matchMode === 'ANY_IN_CATEGORY'}
+							Recipe can use any {categoryDisplayName} from your inventory.
+						{:else}
+							Recipe can use any {parentCategoryDisplayName} from your inventory.
+						{/if}
+					</p>
+				</div>
+			{/if}
 
 			<!-- Amount section -->
 			<div class="space-y-2">
@@ -160,7 +222,7 @@
 						type="number"
 						class="flex-1"
 						placeholder="0"
-						value={String(step.productIdQuantityInMilliliters)}
+						value={isTopOff ? '' : String(step.productIdQuantityInMilliliters)}
 						oninput={(e) =>
 							(step.productIdQuantityInMilliliters = parseFloat(e.currentTarget.value) || 0)}
 						step="0.25"
@@ -168,7 +230,7 @@
 						disabled={isTopOff}
 					/>
 					<Select.Root type="single" bind:value={selectedUnit}>
-						<Select.Trigger class="w-24">
+						<Select.Trigger class="w-32">
 							{selectedUnit}
 						</Select.Trigger>
 						<Select.Content>

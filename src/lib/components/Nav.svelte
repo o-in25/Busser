@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { ClipboardList, Home, LayoutGrid, LogOut, Ruler, Settings } from 'lucide-svelte';
+	import { ClipboardList, Cookie, ExternalLink, FileText, Github, Home, Info, LayoutGrid, LogOut, Menu, Ruler, Settings, Shield, Sparkles } from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import logoNav from '$lib/assets/logo-nav.png';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
 	import Placeholder from './Placeholder.svelte';
+
+	let mobileMenuOpen = $state(false);
 
 	let { user, activeUrl }: { user: User | null; activeUrl: string } = $props();
 
@@ -61,17 +64,95 @@
 		{ href: '/', icon: Home, label: 'Home' },
 		{ href: '/inventory', icon: ClipboardList, label: 'Inventory' },
 		{ href: '/catalog', icon: LayoutGrid, label: 'Catalog' },
+		{ href: '/assistant', icon: Sparkles, label: 'Busser AI' },
 		{ href: '/tools', icon: Ruler, label: 'Tools' },
-		{ href: '/settings', icon: Settings, label: 'Settings' },
 	];
 </script>
 
 <!-- Mobile Top Logo (visible on small screens) -->
 {#if user}
 	<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
+		<Sheet.Root bind:open={mobileMenuOpen}>
+			<Sheet.Trigger class="w-8 h-8 flex items-center justify-center" aria-label="Open menu">
+				<Menu class="h-5 w-5 text-muted-foreground" />
+			</Sheet.Trigger>
+			<Sheet.Content side="left" class="flex flex-col">
+				<Sheet.Header class="text-left">
+					<div class="flex items-center gap-3">
+						<div class="w-10 h-10 rounded-full flex-shrink-0">
+							<Placeholder id="avatar-drawer" src={user?.avatarImageUrl} />
+						</div>
+						<div class="flex flex-col">
+							<Sheet.Title class="text-sm font-medium">{user?.username}</Sheet.Title>
+							<Sheet.Description class="text-xs text-muted-foreground">{user?.email}</Sheet.Description>
+						</div>
+					</div>
+				</Sheet.Header>
+
+				<div class="h-px bg-border my-4"></div>
+
+				<!-- Main -->
+				<div class="flex flex-col gap-1">
+					<button
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left"
+						onclick={() => { mobileMenuOpen = false; goto('/settings'); }}
+					>
+						<Settings class="h-4 w-4 text-muted-foreground" />
+						Settings
+					</button>
+				</div>
+
+				<div class="h-px bg-border my-4"></div>
+
+				<!-- Legal -->
+				<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Legal</p>
+				<div class="flex flex-col gap-1">
+					<a href="/privacy" onclick={() => { mobileMenuOpen = false; }} class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors">
+						<Shield class="h-4 w-4 text-muted-foreground" />
+						Privacy Policy
+					</a>
+					<a href="/terms" onclick={() => { mobileMenuOpen = false; }} class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors">
+						<FileText class="h-4 w-4 text-muted-foreground" />
+						Terms of Service
+					</a>
+					<a href="/cookies" onclick={() => { mobileMenuOpen = false; }} class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors">
+						<Cookie class="h-4 w-4 text-muted-foreground" />
+						Cookie Policy
+					</a>
+				</div>
+
+				<div class="h-px bg-border my-4"></div>
+
+				<!-- Help & Contribute -->
+				<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Help & Contribute</p>
+				<div class="flex flex-col gap-1">
+					<a href="/about" onclick={() => { mobileMenuOpen = false; }} class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors">
+						<Info class="h-4 w-4 text-muted-foreground" />
+						About
+					</a>
+					<a href="https://github.com/o-in25/Busser" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors">
+						<Github class="h-4 w-4 text-muted-foreground" />
+						GitHub
+						<ExternalLink class="h-3 w-3 text-muted-foreground/50 ml-auto" />
+					</a>
+				</div>
+
+				<!-- Sign out pinned to bottom -->
+				<div class="mt-auto pt-4 border-t border-border">
+					<button
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left"
+						onclick={() => { mobileMenuOpen = false; logout(); }}
+					>
+						<LogOut class="h-4 w-4 text-muted-foreground" />
+						Sign out
+					</button>
+				</div>
+			</Sheet.Content>
+		</Sheet.Root>
 		<a href="/">
 			<img src={logoNav} class="h-10" alt="Busser" />
 		</a>
+		<div class="w-8"></div>
 	</div>
 {/if}
 
@@ -123,6 +204,11 @@
 						</div>
 					</DropdownMenu.Label>
 					<DropdownMenu.Separator />
+					<DropdownMenu.Item onclick={() => goto('/settings')} class="cursor-pointer">
+						<Settings class="mr-2 h-4 w-4" />
+						Settings
+					</DropdownMenu.Item>
+					<DropdownMenu.Separator />
 					<DropdownMenu.Item onclick={logout} class="cursor-pointer">
 						<LogOut class="mr-2 h-4 w-4" />
 						Sign out
@@ -142,8 +228,9 @@
 		position: sticky;
 		top: 0;
 		z-index: 50;
-		justify-content: center;
-		padding: 0.75rem 0;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.75rem 1.25rem;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
 		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
@@ -167,7 +254,7 @@
 		left: 0;
 		right: 0;
 		z-index: 50;
-		padding: 0.5rem 1.5rem !important;
+		padding: 0.5rem 0.75rem !important;
 		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 		justify-content: center;
 	}
@@ -214,7 +301,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 0.375rem 0.625rem;
+		padding: 0.375rem 0.25rem;
 		border-radius: 9999px;
 		color: rgba(113, 113, 122, 1);
 		transition: all 0.2s ease;

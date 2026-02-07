@@ -22,18 +22,19 @@
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
 	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
 	import InventoryDetailDrawer from '$lib/components/InventoryDetailDrawer.svelte';
+	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
 	import StockAlerts from '$lib/components/StockAlerts.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import type { Product } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
 	import { notificationStore } from '../../../stores';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
 
@@ -235,6 +236,9 @@
 <svelte:head>
 	<title>Inventory - Busser</title>
 </svelte:head>
+
+<!-- Inventory Section Navigation -->
+<InventoryNav />
 
 <!-- Dashboard Header -->
 <InventoryDashboard stats={data.stats} />

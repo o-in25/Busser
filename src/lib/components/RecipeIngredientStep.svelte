@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Check } from 'lucide-svelte';
+	import { Check, Layers, Sparkles } from 'lucide-svelte';
 	import { convertFromMl, getUnits } from '$lib/math';
+	import type { MatchMode } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	let {
@@ -11,6 +12,8 @@
 		quantity,
 		unit,
 		description,
+		matchMode = 'EXACT_PRODUCT',
+		parentCategoryName,
 		checked = $bindable(false),
 		...restProps
 	}: {
@@ -21,13 +24,41 @@
 		quantity: number;
 		unit: string;
 		description?: string | null;
+		matchMode?: MatchMode;
+		parentCategoryName?: string | null;
 		checked?: boolean;
 		[key: string]: unknown;
 	} = $props();
 
 	const units = getUnits();
 	const displayQuantity = $derived(convertFromMl(unit, quantity));
-	const unitLabel = $derived(units[unit]?.i18n(quantity) || unit);
+	const unitLabel = $derived(units[unit]?.i18n(displayQuantity) || unit);
+
+	// Format the ingredient line based on unit type
+	const formattedIngredient = $derived.by(() => {
+		const unitLower = unit.toLowerCase();
+
+		// "Top off" is a special case - no quantity needed
+		if (unitLower === 'top off') {
+			return { prefix: 'Top off with', ingredient: categoryName };
+		}
+
+		// Countable discrete units - use space before unit, no "of"
+		if (unitLower === 'dash' || unitLower === 'cube' || unitLower === 'barspoon') {
+			return { prefix: `${Math.round(displayQuantity)} ${unitLabel}`, ingredient: categoryName };
+		}
+
+		// Volumetric units (oz, ml, tsp, tbsp) - no space, no "of"
+		return { prefix: `${displayQuantity}${unitLabel}`, ingredient: categoryName };
+	});
+
+	// Determine what to display based on match mode
+	const isFlexible = $derived(matchMode !== 'EXACT_PRODUCT');
+	const flexibleLabel = $derived.by(() => {
+		if (matchMode === 'ANY_IN_CATEGORY') return `Any ${categoryName}`;
+		if (matchMode === 'ANY_IN_PARENT_CATEGORY' && parentCategoryName) return `Any ${parentCategoryName}`;
+		return null;
+	});
 
 	function handleToggle() {
 		checked = !checked; // propagates to parent
@@ -67,18 +98,38 @@
 		<!-- Top line -->
 		{#if checked}
 			<s class="text-foreground font-semibold">
-				{displayQuantity}{unitLabel} <span class="text-muted-foreground">of</span>
-				{categoryName}
+				{formattedIngredient.prefix}
+				<span class="text-muted-foreground">{formattedIngredient.ingredient}</span>
 			</s>
 		{:else}
 			<div class="text-foreground font-semibold">
-				{displayQuantity}{unitLabel} <span class="text-muted-foreground">of</span>
-				{categoryName}
+				{formattedIngredient.prefix}
+				<span class="text-muted-foreground">{formattedIngredient.ingredient}</span>
 			</div>
 		{/if}
 
-		<!-- Product name -->
-		{#if productName && productName !== categoryName}
+		<!-- Product name with flexible matching indicator -->
+		{#if isFlexible && flexibleLabel}
+			<div class="flex items-center gap-1.5 mt-0.5">
+				{#if matchMode === 'ANY_IN_PARENT_CATEGORY'}
+					<Sparkles class="w-3 h-3 text-amber-500" />
+				{:else}
+					<Layers class="w-3 h-3 text-blue-500" />
+				{/if}
+				{#if checked}
+					<s class="text-xs text-muted-foreground">{flexibleLabel}</s>
+				{:else}
+					<span class="text-xs text-muted-foreground">{flexibleLabel}</span>
+				{/if}
+			</div>
+			{#if productName && productName !== categoryName}
+				{#if checked}
+					<s class="text-xs text-muted-foreground/60 mt-0.5 block">Using: {productName}</s>
+				{:else}
+					<p class="text-xs text-muted-foreground/60 mt-0.5">Using: {productName}</p>
+				{/if}
+			{/if}
+		{:else if productName && productName !== categoryName}
 			{#if checked}
 				<s class="text-sm text-muted-foreground mt-0.5 block">{productName}</s>
 			{:else}

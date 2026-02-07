@@ -29,7 +29,7 @@ export const load = (async ({ url, locals }) => {
 
 	// if this is a workspace invitation, redirect to the accept page
 	if (invitation.workspaceId && invitation.workspaceRole) {
-		redirect(StatusCodes.TEMPORARY_REDIRECT, `/invitations/accept?code=${code}`);
+		redirect(StatusCodes.TEMPORARY_REDIRECT, `/accept-invite?code=${code}`);
 	}
 
 	return { invitationCode: code, existingUserEmail: null };

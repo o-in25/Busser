@@ -2,12 +2,12 @@
 	import { onMount } from 'svelte';
 
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import type { CatalogGeneratorSchema } from '$lib/server/generators/catalog-generator';
 	import type { Spirit, View } from '$lib/types';
 
 	import CatalogItem from './CatalogItem.svelte';
 	import FancyImage from './FancyImage.svelte';
 	import IconList from './IconList.svelte';
+	import type { CatalogGeneratorSchema } from '$lib/server/generators/catalog-generator';
 
 	// props
 	export let spirit: Spirit;

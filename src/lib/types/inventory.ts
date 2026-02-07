@@ -7,6 +7,7 @@ export type Category = {
 	categoryId: number;
 	categoryName: string;
 	categoryDescription: string | null;
+	parentCategoryId: number | null;
 };
 
 // supplier table

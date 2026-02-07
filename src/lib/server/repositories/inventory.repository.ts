@@ -12,16 +12,8 @@ import type {
 
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
-import { deleteSignedUrl, getSignedUrl } from '../storage';
-import {
-	BaseRepository,
-	camelCase,
-	emptyPagination,
-	marshal,
-	marshalToType,
-	pascalCase,
-	titleCase,
-} from './base.repository';
+import { deleteSignedUrl } from '../storage';
+import { BaseRepository, emptyPagination, titleCase } from './base.repository';
 
 export class InventoryRepository extends BaseRepository {
 	constructor(db: DbProvider) {
@@ -57,13 +49,10 @@ export class InventoryRepository extends BaseRepository {
 				query = query.andWhere('productInStockQuantity', '=', filter.productInStockQuantity);
 			}
 
-			let { data, pagination } = await query
+			const { data, pagination } = await query
 				.select()
 				.orderBy('productName')
 				.paginate({ perPage, currentPage, isLengthAware: true });
-
-			data = data.map((item) => Object.assign({}, item));
-			data = marshal(data);
 
 			return { data: data as Product[], pagination };
 		} catch (error: any) {
@@ -80,7 +69,7 @@ export class InventoryRepository extends BaseRepository {
 				.where('workspaceId', workspaceId)
 				.select();
 
-			let result: Product[] = marshal<Product[]>(data);
+			let result = data as Product[];
 			if (result.length === 0) {
 				throw Error('Product not found');
 			}
@@ -95,7 +84,7 @@ export class InventoryRepository extends BaseRepository {
 	async create(
 		workspaceId: string,
 		product: Product,
-		image: File | null = null
+		imageUrl: string = ''
 	): Promise<QueryResult<Product>> {
 		try {
 			let parentRowId: number | undefined;
@@ -105,7 +94,7 @@ export class InventoryRepository extends BaseRepository {
 				const [parentRow] = await trx('product').insert({
 					workspaceId,
 					CategoryId: product.categoryId,
-					SupplierId: product.supplierId,
+					SupplierId: product.supplierId || 1,
 					ProductName: product.productName,
 					ProductInStockQuantity: product.productInStockQuantity,
 					ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
@@ -114,11 +103,10 @@ export class InventoryRepository extends BaseRepository {
 				});
 				parentRowId = parentRow;
 
-				const productImageUrl = await this.getImageUrl(image);
 				const [childRow] = await trx('productdetail')
 					.insert({
 						ProductId: parentRowId,
-						ProductImageUrl: productImageUrl,
+						ProductImageUrl: imageUrl || null,
 						ProductDescription: product.productDescription,
 						ProductSweetnessRating: product.productSweetnessRating,
 						ProductDrynessRating: product.productDrynessRating,
@@ -152,7 +140,8 @@ export class InventoryRepository extends BaseRepository {
 	async update(
 		workspaceId: string,
 		product: Product,
-		image: File | null = null
+		imageUrl: string = '',
+		imageCleared: boolean = false
 	): Promise<QueryResult<Product>> {
 		try {
 			if (!product?.productId) throw Error('No inventory ID provided.');
@@ -161,35 +150,51 @@ export class InventoryRepository extends BaseRepository {
 			const existing = await this.findById(workspaceId, product.productId);
 			if (!existing) throw Error('Product not found in this workspace.');
 
-			const signedUrl = await this.getExistingOrNewImageUrl(product.productId, image);
-			product = { ...product, productImageUrl: signedUrl, supplierId: 1 };
-			const values = marshal<any>(product, pascalCase);
+			// Resolve the image URL: new upload, cleared, or keep existing
+			let resolvedImageUrl: string | null;
+			if (imageCleared) {
+				resolvedImageUrl = null;
+			} else if (imageUrl) {
+				resolvedImageUrl = imageUrl;
+			} else {
+				resolvedImageUrl = existing.productImageUrl || null;
+			}
+
+			// Delete old image from storage when replacing or clearing
+			if (
+				(resolvedImageUrl !== existing.productImageUrl || imageCleared) &&
+				existing.productImageUrl
+			) {
+				await deleteSignedUrl(existing.productImageUrl);
+			}
+
+			product = { ...product, productImageUrl: resolvedImageUrl || '', supplierId: 1 };
 
 			await this.db.query.transaction(async (trx) => {
 				await trx('product')
 					.insert({
 						workspaceId,
-						ProductId: values.ProductId,
-						CategoryId: values.CategoryId,
-						SupplierId: values.SupplierId,
-						ProductName: values.ProductName,
-						ProductInStockQuantity: values.ProductInStockQuantity,
-						ProductUnitSizeInMilliliters: values.ProductUnitSizeInMilliliters,
-						ProductPricePerUnit: values.ProductPricePerUnit,
-						ProductProof: values.ProductProof,
+						ProductId: product.productId,
+						CategoryId: product.categoryId,
+						SupplierId: product.supplierId,
+						ProductName: product.productName,
+						ProductInStockQuantity: product.productInStockQuantity,
+						ProductUnitSizeInMilliliters: product.productUnitSizeInMilliliters,
+						ProductPricePerUnit: product.productPricePerUnit,
+						ProductProof: product.productProof,
 					})
 					.onConflict('ProductId')
 					.merge();
 
 				await trx('productdetail')
 					.insert({
-						ProductId: values.ProductId,
-						ProductImageUrl: values.ProductImageUrl,
-						ProductDescription: values.ProductDescription,
-						ProductSweetnessRating: values.ProductSweetnessRating,
-						ProductDrynessRating: values.ProductDrynessRating,
-						ProductVersatilityRating: values.ProductVersatilityRating,
-						ProductStrengthRating: values.ProductStrengthRating,
+						ProductId: product.productId,
+						ProductImageUrl: product.productImageUrl,
+						ProductDescription: product.productDescription,
+						ProductSweetnessRating: product.productSweetnessRating,
+						ProductDrynessRating: product.productDrynessRating,
+						ProductVersatilityRating: product.productVersatilityRating,
+						ProductStrengthRating: product.productStrengthRating,
 					})
 					.onConflict('ProductId')
 					.merge();
@@ -197,7 +202,7 @@ export class InventoryRepository extends BaseRepository {
 				await trx.commit();
 			});
 
-			const newItem = await this.findById(workspaceId, values.ProductId);
+			const newItem = await this.findById(workspaceId, product.productId!);
 			if (!newItem) {
 				throw new Error(
 					'Inventory was successfully updated, but the subquery returned no results.'
@@ -223,7 +228,6 @@ export class InventoryRepository extends BaseRepository {
 					.where('workspaceId', workspaceId)
 					.first();
 
-				childRow = marshal(childRow, camelCase);
 				if (childRow?.productImageUrl) {
 					productImageUrl = childRow.productImageUrl;
 				}
@@ -328,8 +332,8 @@ export class InventoryRepository extends BaseRepository {
 				.orderBy('CategoryName');
 
 			return (result as any[]).map((row) => ({
-				categoryId: row.CategoryId,
-				categoryName: row.CategoryName,
+				categoryId: row.categoryId,
+				categoryName: row.categoryName,
 				count: Number(row.count),
 			}));
 		} catch (error: any) {
@@ -352,7 +356,7 @@ export class InventoryRepository extends BaseRepository {
 
 			const usageMap = new Map<number, number>();
 			result.forEach((row: any) => {
-				usageMap.set(row.ProductId, Number(row.recipeCount));
+				usageMap.set(row.productId, Number(row.recipeCount));
 			});
 
 			return usageMap;
@@ -366,14 +370,36 @@ export class InventoryRepository extends BaseRepository {
 	async getProductOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
 			let result = await this.db
-				.table('product')
-				.where('workspaceId', workspaceId)
-				.select('ProductId', 'ProductName');
-			let products: Product[] = marshal<Product[]>(result);
-			return products.map(({ productId, productName }) => ({
-				name: productName,
-				value: productId || 0,
-			}));
+				.table('product as p')
+				.join('category as c', 'p.CategoryId', 'c.CategoryId')
+				.leftJoin('category as pc', 'c.ParentCategoryId', 'pc.CategoryId')
+				.where('p.workspaceId', workspaceId)
+				.select(
+					'p.ProductId',
+					'p.ProductName',
+					'c.CategoryId',
+					'c.CategoryName',
+					'c.ParentCategoryId',
+					'pc.CategoryName as ParentCategoryName'
+				);
+			let products = result as any[];
+			return products.map(
+				({
+					productId,
+					productName,
+					categoryId,
+					categoryName,
+					parentCategoryId,
+					parentCategoryName,
+				}) => ({
+					name: productName,
+					value: productId || 0,
+					categoryId,
+					categoryName,
+					parentCategoryId: parentCategoryId ?? null,
+					parentCategoryName: parentCategoryName ?? null,
+				})
+			);
 		} catch (error: any) {
 			console.error(error);
 			return [];
@@ -382,11 +408,18 @@ export class InventoryRepository extends BaseRepository {
 
 	async getCategoryOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
+			// Only show leaf categories (those that have no children)
 			let result = await this.db
-				.table('category')
-				.where('workspaceId', workspaceId)
-				.select('CategoryId', 'CategoryName');
-			let categories: Category[] = marshal<Category[]>(result);
+				.table('category as c')
+				.where('c.workspaceId', workspaceId)
+				.whereNotExists(function () {
+					this.select('*')
+						.from('category as child')
+						.whereRaw('child.ParentCategoryId = c.CategoryId');
+				})
+				.select('c.CategoryId', 'c.CategoryName')
+				.orderBy('c.CategoryName');
+			let categories = result as Category[];
 			return categories.map(({ categoryId, categoryName }) => ({
 				name: categoryName,
 				value: categoryId,
@@ -410,7 +443,7 @@ export class InventoryRepository extends BaseRepository {
 				.first();
 
 			if (!dbResult) throw new Error('No category found for given ID.');
-			const category = marshalToType<Table.Category>(dbResult);
+			const category = dbResult as Table.Category;
 			return { status: 'success', data: category };
 		} catch (error: any) {
 			console.error(error);
@@ -422,13 +455,15 @@ export class InventoryRepository extends BaseRepository {
 	async createCategory(
 		workspaceId: string,
 		categoryName: string,
-		categoryDescription: string | null
+		categoryDescription: string | null,
+		parentCategoryId: number | null = null
 	): Promise<QueryResult<number>> {
 		try {
 			const [categoryId] = await this.db.table('category').insert({
 				workspaceId,
 				CategoryName: titleCase(categoryName.trim()),
 				CategoryDescription: categoryDescription,
+				ParentCategoryId: parentCategoryId,
 			});
 			return { status: 'success', data: categoryId };
 		} catch (error: any) {
@@ -445,13 +480,14 @@ export class InventoryRepository extends BaseRepository {
 		try {
 			let dbResult: any;
 			let key = category.categoryId;
-			const { categoryName, categoryDescription } = category;
+			const { categoryName, categoryDescription, parentCategoryId } = category;
 
 			if (!key) {
 				[dbResult] = await this.db.table('category').insert({
 					workspaceId,
 					CategoryName: categoryName,
 					CategoryDescription: categoryDescription,
+					ParentCategoryId: parentCategoryId,
 				});
 				if (!dbResult) throw new Error('Could not create new category.');
 				key = dbResult;
@@ -462,7 +498,11 @@ export class InventoryRepository extends BaseRepository {
 
 				dbResult = await this.db
 					.table('category')
-					.update({ CategoryName: categoryName, CategoryDescription: categoryDescription })
+					.update({
+						CategoryName: categoryName,
+						CategoryDescription: categoryDescription,
+						ParentCategoryId: parentCategoryId,
+					})
 					.where('categoryId', key)
 					.where('workspaceId', workspaceId);
 				if (dbResult < 1) {
@@ -475,7 +515,7 @@ export class InventoryRepository extends BaseRepository {
 				.where('categoryId', key)
 				.where('workspaceId', workspaceId)
 				.select();
-			const newCategory = marshalToType<Table.Category>(dbResult);
+			const newCategory = dbResult as Table.Category;
 
 			return { status: 'success', data: newCategory };
 		} catch (error: any) {
@@ -506,9 +546,15 @@ export class InventoryRepository extends BaseRepository {
 					'category.CategoryId',
 					'category.CategoryName',
 					'category.CategoryDescription',
+					'category.ParentCategoryId',
 					this.db.query.raw('COUNT(product.ProductId) as productCount')
 				)
-				.groupBy('category.CategoryId', 'category.CategoryName', 'category.CategoryDescription')
+				.groupBy(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.ParentCategoryId'
+				)
 				.orderBy('category.CategoryName');
 
 			if (search) {
@@ -522,9 +568,10 @@ export class InventoryRepository extends BaseRepository {
 			});
 
 			const categories = (data as any[]).map((row) => ({
-				categoryId: row.CategoryId,
-				categoryName: row.CategoryName,
-				categoryDescription: row.CategoryDescription,
+				categoryId: row.categoryId,
+				categoryName: row.categoryName,
+				categoryDescription: row.categoryDescription,
+				parentCategoryId: row.parentCategoryId,
 				productCount: Number(row.productCount),
 			}));
 
@@ -532,6 +579,66 @@ export class InventoryRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error('Failed to get all categories:', error);
 			return { data: [], pagination: emptyPagination };
+		}
+	}
+
+	async findSubcategories(
+		workspaceId: string,
+		parentCategoryId: number
+	): Promise<(Category & { productCount: number })[]> {
+		try {
+			const result = await this.db
+				.table('category')
+				.where('category.workspaceId', workspaceId)
+				.where('category.ParentCategoryId', parentCategoryId)
+				.leftJoin('product', function () {
+					this.on('category.CategoryId', '=', 'product.CategoryId').andOn(
+						'category.workspaceId',
+						'=',
+						'product.workspaceId'
+					);
+				})
+				.select(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.ParentCategoryId',
+					this.db.query.raw('COUNT(product.ProductId) as productCount')
+				)
+				.groupBy(
+					'category.CategoryId',
+					'category.CategoryName',
+					'category.CategoryDescription',
+					'category.ParentCategoryId'
+				)
+				.orderBy('category.CategoryName');
+
+			return (result as any[]).map((row) => ({
+				categoryId: row.categoryId,
+				categoryName: row.categoryName,
+				categoryDescription: row.categoryDescription,
+				parentCategoryId: row.parentCategoryId,
+				productCount: Number(row.productCount),
+			}));
+		} catch (error: any) {
+			console.error('Failed to get subcategories:', error);
+			return [];
+		}
+	}
+
+	async findProductsByCategory(workspaceId: string, categoryId: number): Promise<Product[]> {
+		try {
+			const result = await this.db
+				.table('inventory')
+				.where('workspaceId', workspaceId)
+				.where('categoryId', categoryId)
+				.select()
+				.orderBy('productName');
+
+			return result as Product[];
+		} catch (error: any) {
+			console.error('Failed to get products by category:', error);
+			return [];
 		}
 	}
 
@@ -565,30 +672,5 @@ export class InventoryRepository extends BaseRepository {
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Could not delete category.' };
 		}
-	}
-
-	// private helpers
-	private async getImageUrl(image: File | null): Promise<string | null> {
-		if (!image || image.size === 0 || image.name === 'undefined') return null;
-		const signedUrl = await getSignedUrl(image);
-		return signedUrl.length ? signedUrl : null;
-	}
-
-	private async getExistingOrNewImageUrl(productId: number, image: File | null): Promise<string> {
-		let oldImage: any = await this.db
-			.table('productdetail')
-			.select('ProductImageUrl')
-			.where({ ProductId: productId })
-			.limit(1);
-
-		[oldImage] = marshal(oldImage, camelCase);
-		const existingUrl = oldImage?.productImageUrl || null;
-
-		if (!image || image.size === 0 || image.name === 'undefined') {
-			return existingUrl;
-		}
-
-		const signedUrl = await getSignedUrl(image);
-		return signedUrl || existingUrl;
 	}
 }

@@ -17,7 +17,7 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
-	import placeholder from '$lib/assets/placeholder@2x.jpg';
+	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
@@ -43,9 +43,9 @@
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
-	// Fallback if image can't load
-	let productImage = $state(product?.productImageUrl || placeholder);
-	const imageLoadError = () => (productImage = placeholder);
+	// Image state
+	let imageError = $state(false);
+	let hasImage = $derived(!!product?.productImageUrl && !imageError);
 
 	// Calculated fields
 	const pricePerOunce = $derived.by(() => {
@@ -175,13 +175,16 @@
 	<div class="space-y-6">
 		<!-- Hero Image -->
 		<div class="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-muted">
-			<img class="hidden" src={product.productImageUrl} onerror={imageLoadError} alt="" />
-			<img
-				src={productImage}
-				alt={product.productName}
-				class="w-full h-full object-cover"
-				onerror={imageLoadError}
-			/>
+			{#if hasImage}
+				<img
+					src={product.productImageUrl}
+					alt={product.productName}
+					class="w-full h-full object-cover"
+					onerror={() => (imageError = true)}
+				/>
+			{:else}
+				<ImagePlaceholder variant="product" class="w-20 h-20" />
+			{/if}
 			{#if isBaseSpirit && hasFlavorProfile}
 				<div class="absolute bottom-3 right-3">
 					<span

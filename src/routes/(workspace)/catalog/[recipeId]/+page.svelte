@@ -1,10 +1,31 @@
 <script lang="ts">
+	import { Heart, Star } from 'lucide-svelte';
+	import { getContext } from 'svelte';
+
+	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import Recipe from '$lib/components/Recipe.svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
+
+	const workspace = getContext<WorkspaceWithRole>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+
+	// Local state for optimistic updates
+	let isFavorite = $state(data.isFavorite);
+	let isFeatured = $state(data.isFeatured);
+
+	// Sync when server data changes (e.g., after navigation or invalidation)
+	$effect(() => {
+		isFavorite = data.isFavorite;
+		isFeatured = data.isFeatured;
+	});
 </script>
 
 <svelte:head>
@@ -12,9 +33,67 @@
 </svelte:head>
 
 <div class="container mx-auto max-w-6xl px-4">
-	<!-- Back navigation -->
-	<div class="mb-4 mt-4">
-		<BackButton fallback="/catalog" label="Back to Catalog" size="sm" />
+	<!-- Back navigation + action buttons -->
+	<div class="mb-4 mt-4 flex items-center justify-between">
+		<BackButton href="/catalog/browse" label="Back to Catalog" size="sm" class="max-sm:[&>span]:hidden max-sm:gap-0" />
+
+		<div class="flex items-center gap-1 sm:gap-2">
+			<!-- Favorite button -->
+			<form
+				method="POST"
+				action="?/toggleFavorite"
+				use:enhance={() => {
+					isFavorite = !isFavorite;
+					return async ({ result }) => {
+						if (result.type === 'failure') {
+							isFavorite = !isFavorite;
+							invalidateAll();
+						}
+					};
+				}}
+			>
+				<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+				<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+				<Button
+					type="submit"
+					variant={isFavorite ? 'default' : 'outline'}
+					size="sm"
+					class={cn('max-sm:px-2', isFavorite && 'bg-red-500 hover:bg-red-600 border-red-500')}
+				>
+					<Heart class={cn('h-4 w-4 sm:mr-2', isFavorite && 'fill-current')} />
+					<span class="hidden sm:inline">{isFavorite ? 'Favorited' : 'Favorite'}</span>
+				</Button>
+			</form>
+
+			<!-- Featured button (only for editors/owners) -->
+			{#if canModify}
+				<form
+					method="POST"
+					action="?/toggleFeatured"
+					use:enhance={() => {
+						isFeatured = !isFeatured;
+						return async ({ result }) => {
+							if (result.type === 'failure') {
+								isFeatured = !isFeatured;
+								invalidateAll();
+							}
+						};
+					}}
+				>
+					<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+					<Button
+						type="submit"
+						variant={isFeatured ? 'default' : 'outline'}
+						size="sm"
+						class={cn('max-sm:px-2', isFeatured && 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-black')}
+					>
+						<Star class={cn('h-4 w-4 sm:mr-2', isFeatured && 'fill-current')} />
+						<span class="hidden sm:inline">{isFeatured ? 'Featured' : 'Feature'}</span>
+					</Button>
+				</form>
+			{/if}
+		</div>
 	</div>
 
 	<Recipe recipe={data.recipe} recipeSteps={data.recipeSteps} />

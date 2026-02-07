@@ -34,9 +34,9 @@
 	const steps: Step[] = [
 		{ title: 'Details', icon: BookOpen },
 		{ title: 'Description', icon: Image },
-		{ title: 'Ratings', icon: Gauge },
 		{ title: 'Ingredients', icon: FlaskConical },
 		{ title: 'Preparation', icon: Martini },
+		{ title: 'Ratings', icon: Gauge },
 	];
 
 	let progress = $derived(((currentStep + 1) / steps.length) * 100);

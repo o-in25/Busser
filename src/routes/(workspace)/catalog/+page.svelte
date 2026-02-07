@@ -4,6 +4,7 @@
 		BookOpen,
 		FlaskConical,
 		GlassWater,
+		Heart,
 		Lightbulb,
 		Plus,
 		Search,
@@ -13,19 +14,32 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
-	const { spirits, spiritCounts, recentCocktails, featuredCocktail, totalRecipes, popularSpirit } =
-		data.args;
+	const {
+		spirits,
+		spiritCounts,
+		recentCocktails,
+		featuredCocktail,
+		totalRecipes,
+		popularSpirit,
+		favoriteRecipeIds,
+		featuredRecipeIds,
+	} = data.args;
+
+	// Track favorite/featured state locally for optimistic updates
+	let favorites = $state(new Set(favoriteRecipeIds));
+	let featured = $state(new Set(featuredRecipeIds));
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
@@ -67,10 +81,52 @@
 			tip: 'Always use freshly squeezed citrus juice. The flavor degrades significantly after just a few hours.',
 			source: 'Classic Technique',
 		},
+		{
+			title: 'Why Freezer Ice is Cloudy',
+			tip: 'Ice trays freeze from all sides, trapping gas and impurities in the center. Clear ice forms layer by layer from one direction, pushing out impurities as it grows.',
+			source: 'Ice Science',
+		},
+		{
+			title: 'The Supercooling Effect',
+			tip: 'Water needs to be chilled below 0°C to form ice crystals. Slow freezing produces fewer, larger crystals that are clearer and melt more slowly.',
+			source: 'Dave Arnold',
+		},
+		{
+			title: 'Essential Bar Tools',
+			tip: 'Start with a good jigger set, Hawthorne strainer, julep strainer, muddler, and a Y-peeler. These basics will cover most cocktail recipes.',
+			source: 'Bar Equipment',
+		},
+		{
+			title: 'The 2-Inch Cube',
+			tip: 'Large ice cubes have less surface area relative to volume, meaning slower melting and less dilution - perfect for spirit-forward drinks.',
+			source: 'Ice Science',
+		},
+		{
+			title: 'Water Expands When It Freezes',
+			tip: 'Water expands about 9% when freezing. This force can shatter rocks and pipes - and explains those peaks on your ice cubes.',
+			source: 'Ice Science',
+		},
+		{
+			title: 'The Lewis Bag',
+			tip: 'For crushed ice, use a Lewis bag and mallet. It gives you control over ice texture and is quieter than an electric crusher.',
+			source: 'Bar Equipment',
+		},
 	];
 
 	// Pick a random tip
-	const todaysTip = bartenderTips[Math.floor(Math.random() * bartenderTips.length)];
+	function getRandomTip() {
+		return bartenderTips[Math.floor(Math.random() * bartenderTips.length)];
+	}
+	let currentTip = $state(getRandomTip());
+
+	function showNewTip() {
+		let newTip = getRandomTip();
+		// Ensure we get a different tip if possible
+		while (bartenderTips.length > 1 && newTip.title === currentTip.title) {
+			newTip = getRandomTip();
+		}
+		currentTip = newTip;
+	}
 </script>
 
 <svelte:head>
@@ -106,15 +162,16 @@
 
 		<!-- Quick stats -->
 		<div class="flex flex-wrap gap-4 mt-8">
-			<div
-				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+			<a
+				href="/catalog/browse"
+				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 			>
 				<FlaskConical class="h-5 w-5 text-primary" />
 				<div>
 					<p class="text-2xl font-bold">{totalRecipes}</p>
 					<p class="text-xs text-muted-foreground">Total Recipes</p>
 				</div>
-			</div>
+			</a>
 			<div
 				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
 			>
@@ -125,15 +182,16 @@
 				</div>
 			</div>
 			{#if popularSpirit}
-				<div
-					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				<a
+					href="/catalog/browse/{popularSpirit.recipeCategoryId}"
+					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 				>
 					<TrendingUp class="h-5 w-5 text-primary" />
 					<div>
 						<p class="text-2xl font-bold">{popularSpirit.recipeCategoryDescription}</p>
 						<p class="text-xs text-muted-foreground">Most Popular</p>
 					</div>
-				</div>
+				</a>
 			{/if}
 		</div>
 	</div>
@@ -234,6 +292,44 @@
 					<Star class="h-3 w-3 mr-1" />
 					Featured
 				</Badge>
+				<!-- Action buttons on featured card -->
+				<div class="absolute top-3 right-3 flex gap-1">
+					<form
+						method="POST"
+						action="?/toggleFavorite"
+						use:enhance={() => {
+							const newFavorites = new Set(favorites);
+							if (newFavorites.has(featuredCocktail.recipeId)) {
+								newFavorites.delete(featuredCocktail.recipeId);
+							} else {
+								newFavorites.add(featuredCocktail.recipeId);
+							}
+							favorites = newFavorites;
+							return async ({ result }) => {
+								if (result.type !== 'success' || (result.data && !result.data.success)) {
+									invalidateAll();
+								}
+							};
+						}}
+					>
+						<input type="hidden" name="recipeId" value={featuredCocktail.recipeId} />
+						<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+						<button
+							type="submit"
+							class="p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+							title={favorites.has(featuredCocktail.recipeId) ? 'Remove from favorites' : 'Add to favorites'}
+						>
+							<Heart
+								class={cn(
+									'h-4 w-4 transition-colors',
+									favorites.has(featuredCocktail.recipeId)
+										? 'fill-red-500 text-red-500'
+										: 'text-muted-foreground hover:text-red-500'
+								)}
+							/>
+						</button>
+					</form>
+				</div>
 			</div>
 			<Card.Content class="pt-4">
 				<h3 class="font-bold text-lg mb-1">{featuredCocktail.recipeName}</h3>
@@ -266,12 +362,11 @@
 				</p>
 			{:else}
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					{#each recentCocktails.slice(0, 4) as cocktail}
-						<a
-							href="/catalog/{cocktail.recipeId}"
+					{#each recentCocktails.slice(0, 6) as cocktail}
+						<div
 							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
 						>
-							<div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
+							<a href="/catalog/{cocktail.recipeId}" class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
 								{#if cocktail.recipeImageUrl}
 									<img
 										src={cocktail.recipeImageUrl}
@@ -283,19 +378,94 @@
 										<GlassWater class="h-5 w-5 text-muted-foreground" />
 									</div>
 								{/if}
-							</div>
-							<div class="flex-1 min-w-0">
-								<p class="font-medium truncate group-hover:text-primary transition-colors">
+							</a>
+							<a href="/catalog/{cocktail.recipeId}" class="flex-1 min-w-0">
+								<p class="font-medium truncate group-hover:text-accent-foreground transition-colors">
 									{cocktail.recipeName}
 								</p>
-								<p class="text-xs text-muted-foreground">
+								<p class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors">
 									{cocktail.recipeCategoryDescription}
 								</p>
+							</a>
+							<div class="flex items-center gap-1">
+								<form
+									method="POST"
+									action="?/toggleFavorite"
+									use:enhance={() => {
+										// Optimistic update with new Set for reactivity
+										const newFavorites = new Set(favorites);
+										if (newFavorites.has(cocktail.recipeId)) {
+											newFavorites.delete(cocktail.recipeId);
+										} else {
+											newFavorites.add(cocktail.recipeId);
+										}
+										favorites = newFavorites;
+										return async ({ result }) => {
+											// Revert on any error
+											if (result.type !== 'success' || (result.data && !result.data.success)) {
+												invalidateAll();
+											}
+										};
+									}}
+								>
+									<input type="hidden" name="recipeId" value={cocktail.recipeId} />
+									<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+									<button
+										type="submit"
+										class="p-1.5 rounded-md hover:bg-background/50 transition-colors"
+										title={favorites.has(cocktail.recipeId) ? 'Remove from favorites' : 'Add to favorites'}
+									>
+										<Heart
+											class={cn(
+												'h-4 w-4 transition-colors group-hover:text-accent-foreground',
+												favorites.has(cocktail.recipeId)
+													? 'fill-red-500 text-red-500 group-hover:fill-accent-foreground'
+													: 'text-muted-foreground hover:text-red-500'
+											)}
+										/>
+									</button>
+								</form>
+								{#if canModify}
+									<form
+										method="POST"
+										action="?/toggleFeatured"
+										use:enhance={() => {
+											// Optimistic update with new Set for reactivity
+											const newFeatured = new Set(featured);
+											if (newFeatured.has(cocktail.recipeId)) {
+												newFeatured.delete(cocktail.recipeId);
+											} else {
+												newFeatured.add(cocktail.recipeId);
+											}
+											featured = newFeatured;
+											return async ({ result }) => {
+												// Revert on any error
+												if (result.type !== 'success' || (result.data && !result.data.success)) {
+													invalidateAll();
+												}
+											};
+										}}
+									>
+										<input type="hidden" name="recipeId" value={cocktail.recipeId} />
+										<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+										<button
+											type="submit"
+											class="p-1.5 rounded-md hover:bg-background/50 transition-colors"
+											title={featured.has(cocktail.recipeId) ? 'Remove from featured' : 'Add to featured'}
+										>
+											<Star
+												class={cn(
+													'h-4 w-4 transition-colors group-hover:text-accent-foreground',
+													featured.has(cocktail.recipeId)
+														? 'fill-yellow-500 text-yellow-500 group-hover:fill-accent-foreground'
+														: 'text-muted-foreground hover:text-yellow-500'
+												)}
+											/>
+										</button>
+									</form>
+								{/if}
 							</div>
-							<ArrowRight
-								class="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-							/>
-						</a>
+						</div>
 					{/each}
 				</div>
 			{/if}
@@ -306,7 +476,10 @@
 <!-- Bottom Row: Bartender Tip + Add Recipe CTA -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 	<!-- Bartender Tip -->
-	<Card.Root class="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border-amber-500/20">
+	<Card.Root
+		class="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border-amber-500/20 cursor-pointer hover:border-amber-500/40 transition-colors"
+		onclick={showNewTip}
+	>
 		<Card.Header>
 			<Card.Title class="flex items-center gap-2 text-amber-600 dark:text-amber-400">
 				<Lightbulb class="h-5 w-5" />
@@ -314,12 +487,15 @@
 			</Card.Title>
 		</Card.Header>
 		<Card.Content>
-			<h4 class="font-semibold mb-2">{todaysTip.title}</h4>
+			<h4 class="font-semibold mb-2">{currentTip.title}</h4>
 			<p class="text-muted-foreground text-sm leading-relaxed mb-3">
-				"{todaysTip.tip}"
+				"{currentTip.tip}"
 			</p>
 			<p class="text-xs text-muted-foreground/70 italic">
-				— {todaysTip.source}
+				— {currentTip.source}
+			</p>
+			<p class="text-xs text-amber-600/50 dark:text-amber-400/50 mt-3">
+				Click for another tip
 			</p>
 		</Card.Content>
 	</Card.Root>

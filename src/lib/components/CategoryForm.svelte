@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Tags } from 'lucide-svelte';
+	import { GitBranch, Tags } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { applyAction, enhance } from '$app/forms';
@@ -9,6 +9,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import * as Select from '$lib/components/ui/select';
 	import type { ComponentAction, Table } from '$lib/types';
 
 	import { notificationStore } from '../../stores';
@@ -17,9 +18,13 @@
 	let {
 		action = 'add',
 		category = {} as Table.Category,
+		parentCategories = [],
+		productCount = 0,
 	}: {
 		action?: ComponentAction;
 		category?: Table.Category;
+		parentCategories?: Table.Category[];
+		productCount?: number;
 	} = $props();
 
 	// get workspace role for permission checks
@@ -29,8 +34,18 @@
 	// Form state
 	let categoryName = $state(category.categoryName ?? '');
 	let categoryDescription = $state(category.categoryDescription ?? '');
+	let parentCategoryId = $state<string>(
+		category.parentCategoryId ? String(category.parentCategoryId) : ''
+	);
 	let isSubmitting = $state(false);
 	let modalOpen = $state(false);
+
+	// Get display name for selected parent
+	const selectedParentLabel = $derived(() => {
+		if (!parentCategoryId) return 'None (top-level category)';
+		const parent = parentCategories.find((c) => c.categoryId === Number(parentCategoryId));
+		return parent?.categoryName || 'None';
+	});
 
 	// Delete handler
 	const deleteCategory = async () => {
@@ -101,6 +116,34 @@
 					/>
 				</div>
 
+				<!-- Parent Category Selector -->
+				{#if parentCategories.length > 0}
+					<div>
+						<Label for="parentCategoryId" class="mb-2 flex items-center gap-1.5">
+							<GitBranch class="h-4 w-4" />
+							Parent Category
+						</Label>
+						<p class="text-xs text-muted-foreground mb-2">
+							Link this category to a parent (e.g., "White Rum" → "Rum")
+						</p>
+						<input type="hidden" name="parentCategoryId" value={parentCategoryId} />
+						<Select.Root type="single" bind:value={parentCategoryId}>
+							<Select.Trigger class="w-full">
+								{selectedParentLabel()}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="" label="None (top-level category)" />
+								{#each parentCategories as parent}
+									<Select.Item
+										value={String(parent.categoryId)}
+										label={parent.categoryName}
+									/>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</div>
+				{/if}
+
 				<div>
 					<Prompt
 						bind:value={categoryDescription}
@@ -116,9 +159,21 @@
 		<!-- Action buttons -->
 		<div class="flex justify-end gap-3">
 			{#if action === 'edit' && canModify}
-				<Button type="button" variant="destructive" onclick={() => (modalOpen = true)}>
-					Delete
-				</Button>
+				<div class="flex flex-col items-start gap-1">
+					<Button
+						type="button"
+						variant="destructive"
+						onclick={() => (modalOpen = true)}
+						disabled={productCount > 0}
+					>
+						Delete
+					</Button>
+					{#if productCount > 0}
+						<span class="text-xs text-muted-foreground">
+							Remove {productCount} product{productCount !== 1 ? 's' : ''} first
+						</span>
+					{/if}
+				</div>
 			{/if}
 			<Button type="submit" disabled={isSubmitting}>
 				{isSubmitting ? 'Saving...' : action === 'add' ? 'Create Category' : 'Save Changes'}

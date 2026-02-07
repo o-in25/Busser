@@ -1,25 +1,31 @@
 <script lang="ts">
-	import { ImagePlus, Loader2, Sparkles, Upload, Wand2, X } from 'lucide-svelte';
-	import { fade, fly } from 'svelte/transition';
+	import { Expand, ImagePlus, Loader2, Sparkles, Upload, Wand2, X } from 'lucide-svelte';
+	import { cubicOut } from 'svelte/easing';
+	import { fade, fly, scale } from 'svelte/transition';
 
-	import placeholder from '$lib/assets/placeholder@2x.jpg';
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
-
-	import { notificationStore } from '../../stores';
 
 	let {
 		name = 'image',
 		signedUrl = $bindable<string | null | undefined>(),
+		pendingFile = $bindable<File | null>(null),
+		imageCleared = $bindable(false),
 		trigger,
 		label = 'Image',
 		url = '/api/generator/image',
+		ingredients = [],
+		technique = '',
 	}: {
 		name?: string;
 		signedUrl?: string | null;
+		pendingFile?: File | null;
+		imageCleared?: boolean;
 		trigger?: string;
 		label?: string;
 		url?: string;
+		ingredients?: string[];
+		technique?: string;
 	} = $props();
 
 	let files = $state<FileList | null>(null);
@@ -27,13 +33,16 @@
 	let isGenerating = $state(false);
 	let errorMessage = $state('');
 	let generationProgress = $state(0);
+	let lightboxOpen = $state(false);
 
-	let src = $derived(signedUrl?.length ? signedUrl : placeholder);
-	let hasImage = $derived(signedUrl && signedUrl !== placeholder && signedUrl.length > 0);
+	let src = $derived(signedUrl || '');
+	let hasImage = $derived(!!signedUrl && signedUrl.length > 0);
 
 	$effect(() => {
 		if (files !== null && files.length > 0) {
 			const file = files[0];
+			pendingFile = file;
+			imageCleared = false;
 			const reader = new FileReader();
 			reader.onload = ({ target }) => {
 				signedUrl = target?.result?.toString() || '';
@@ -65,10 +74,12 @@
 	const clearAll = () => {
 		if (fileInputRef) {
 			fileInputRef.value = '';
-			files = null;
-			signedUrl = undefined;
-			errorMessage = '';
 		}
+		files = null;
+		signedUrl = undefined;
+		pendingFile = null;
+		imageCleared = true;
+		errorMessage = '';
 	};
 
 	const generateImage = async () => {
@@ -82,7 +93,11 @@
 			const response = await fetch(url, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ subject: trigger }),
+				body: JSON.stringify({
+					subject: trigger,
+					ingredients: ingredients.length ? ingredients : undefined,
+					technique: technique || undefined,
+				}),
 			});
 
 			if (!response.ok) {
@@ -91,40 +106,65 @@
 			}
 
 			const result = await response.json();
-			if (!result.url) throw new Error('No image URL returned.');
+			if (!result.base64 || !result.mimeType) throw new Error('No image data returned.');
+
+			// Convert base64 to File and hold in memory
+			const byteString = atob(result.base64);
+			const ab = new ArrayBuffer(byteString.length);
+			const ia = new Uint8Array(ab);
+			for (let i = 0; i < byteString.length; i++) {
+				ia[i] = byteString.charCodeAt(i);
+			}
+			const ext = result.mimeType.split('/')[1] || 'png';
+			const blob = new Blob([ab], { type: result.mimeType });
+			const file = new File([blob], `generated.${ext}`, { type: result.mimeType });
+
+			// Create data URL for preview and preload before displaying
+			const dataUrl = result.url || `data:${result.mimeType};base64,${result.base64}`;
+			await new Promise<void>((resolve, reject) => {
+				const img = new Image();
+				img.onload = () => resolve();
+				img.onerror = () => reject(new Error('Failed to load generated image'));
+				img.src = dataUrl;
+			});
 
 			stopProgressAnimation();
-			signedUrl = result.url;
+			signedUrl = dataUrl;
+			pendingFile = file;
+			imageCleared = false;
 
-			// convert base64 to file and attach to file input for form submission
-			if (result.base64 && result.mimeType && fileInputRef) {
-				const byteString = atob(result.base64);
-				const ab = new ArrayBuffer(byteString.length);
-				const ia = new Uint8Array(ab);
-				for (let i = 0; i < byteString.length; i++) {
-					ia[i] = byteString.charCodeAt(i);
-				}
-				const ext = result.mimeType.split('/')[1] || 'png';
-				const blob = new Blob([ab], { type: result.mimeType });
-				const file = new File([blob], `generated.${ext}`, { type: result.mimeType });
-
-				const dataTransfer = new DataTransfer();
-				dataTransfer.items.add(file);
-				fileInputRef.files = dataTransfer.files;
-				files = dataTransfer.files;
+			// Clear manual file input
+			if (fileInputRef) {
+				fileInputRef.value = '';
+				files = null;
 			}
-
-			$notificationStore.success = { message: 'Image generated successfully!' };
 		} catch (error: unknown) {
 			console.error(error);
 			errorMessage = error instanceof Error ? error.message : 'Could not generate image.';
-			$notificationStore.error = { message: errorMessage };
 		} finally {
 			stopProgressAnimation();
 			isGenerating = false;
 		}
 	};
+
+	function openLightbox() {
+		lightboxOpen = true;
+		document.body.style.overflow = 'hidden';
+	}
+
+	function closeLightbox() {
+		lightboxOpen = false;
+		document.body.style.overflow = '';
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape' && lightboxOpen) {
+			closeLightbox();
+		}
+	}
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <div class="space-y-4">
 	<Label class="text-base font-medium">{label}</Label>
@@ -175,20 +215,37 @@
 			<!-- actual image -->
 			<div class="relative w-full h-full min-h-48">
 				{#if hasImage && !isGenerating}
-					<img
-						{src}
-						alt="Preview"
-						class="w-full h-full object-cover rounded-xl transition-opacity duration-300"
-					/>
-					<!-- clear button overlay -->
 					<button
 						type="button"
-						onclick={clearAll}
-						class="absolute top-2 right-2 p-1.5 rounded-lg bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-all duration-200"
-						title="Remove image"
+						class="w-full h-full cursor-zoom-in"
+						onclick={openLightbox}
+						aria-label="View full image"
 					>
-						<X class="w-4 h-4" />
+						<img
+							{src}
+							alt="Preview"
+							class="w-full h-full object-cover rounded-xl transition-opacity duration-300"
+						/>
 					</button>
+					<!-- action buttons overlay -->
+					<div class="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+						<button
+							type="button"
+							onclick={openLightbox}
+							class="p-1.5 rounded-lg bg-black/50 hover:bg-black/70 text-white"
+							title="Full screen preview"
+						>
+							<Expand class="w-4 h-4" />
+						</button>
+						<button
+							type="button"
+							onclick={clearAll}
+							class="p-1.5 rounded-lg bg-black/50 hover:bg-black/70 text-white"
+							title="Remove image"
+						>
+							<X class="w-4 h-4" />
+						</button>
+					</div>
 				{:else if !isGenerating}
 					<!-- placeholder state -->
 					<div
@@ -235,7 +292,6 @@
 			</label>
 			<input
 				id={name}
-				{name}
 				type="file"
 				accept="image/*"
 				bind:files
@@ -264,6 +320,47 @@
 		</p>
 	{/if}
 </div>
+
+<!-- Lightbox Overlay -->
+{#if lightboxOpen}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center"
+		role="dialog"
+		aria-modal="true"
+		aria-label="Image lightbox"
+	>
+		<button
+			type="button"
+			class="absolute inset-0 bg-background/95 backdrop-blur-md cursor-zoom-out"
+			onclick={closeLightbox}
+			aria-label="Close lightbox"
+			transition:fade={{ duration: 200 }}
+		></button>
+
+		<button
+			type="button"
+			class="absolute top-4 right-4 z-10 p-3 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors"
+			onclick={closeLightbox}
+			aria-label="Close"
+			transition:fade={{ duration: 200, delay: 100 }}
+		>
+			<X class="w-6 h-6" />
+		</button>
+
+		<div
+			class="relative max-w-[90vw] max-h-[85vh] cursor-zoom-out"
+			transition:scale={{ duration: 300, easing: cubicOut, start: 0.9 }}
+		>
+			<button type="button" onclick={closeLightbox} class="block" aria-label="Close lightbox">
+				<img
+					class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+					{src}
+					alt="Full preview"
+				/>
+			</button>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.glass-generating {
