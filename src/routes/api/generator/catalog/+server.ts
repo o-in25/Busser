@@ -26,5 +26,5 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const result = await generate('catalog-description', { name: trigger });
-	return json(result);
+	return json({ ...result, description: result.history });
 };
