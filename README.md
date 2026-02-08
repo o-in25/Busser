@@ -5,7 +5,7 @@
 A modern web application for managing your home bar. Track your inventory, discover cocktails you
 can make with what you have, and share your bar with friends and family.
 
-**Live at:** https://busser.fly.dev
+**Live at:** https://busserapp.com
 
 ## Features
 
@@ -37,10 +37,13 @@ Service account credentials are required to authenticate with the
 
 ```bash
 pnpm install        # Install dependencies
+pnpm run cloudsql:proxy        # Start auth proxy
 pnpm run dev        # Start dev server at http://localhost:5173
 pnpm run check      # TypeScript validation
 pnpm run build      # Production build
 pnpm run preview    # Preview production build
+pnpm test           # Run all tests once
+pnpm test:watch     # Run tests in watch mode
 ```
 
 ### Environment Variables
