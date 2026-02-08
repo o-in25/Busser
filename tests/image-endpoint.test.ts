@@ -67,7 +67,11 @@ describe('image generation endpoint', async () => {
 		vi.mocked(generate).mockResolvedValue(mockResult);
 
 		const response = await POST({
-			request: makeJsonRequest({ subject: 'Bourbon', type: 'product', description: 'smooth whiskey' }),
+			request: makeJsonRequest({
+				subject: 'Bourbon',
+				type: 'product',
+				description: 'smooth whiskey',
+			}),
 			locals: { activeWorkspaceId: 'ws-1' },
 		} as any);
 
@@ -119,7 +123,7 @@ describe('image generation endpoint', async () => {
 			locals: { activeWorkspaceId: 'ws-1' },
 		} as any);
 
-		const [, input] = vi.mocked(generate).mock.calls[0];
+		const [, input] = vi.mocked(generate).mock.calls[0] as [string, { customPrompt?: string }];
 		expect(input.customPrompt).toBe('A red cocktail in a rocks glass');
 	});
 
