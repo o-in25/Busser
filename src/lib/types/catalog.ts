@@ -3,6 +3,18 @@
 //         recipestep, recipetechnique, recipetechniquedescription
 // views: basicrecipe, basicrecipestep, basicrecipecategory, spirits, preparationmethod
 
+export type AdvancedFilter = {
+	readyToMake?: boolean;
+	ingredientProductId?: number;
+	strengthMin?: number;
+	strengthMax?: number;
+	ingredientCountMin?: number;
+	ingredientCountMax?: number;
+	preparationMethodId?: number;
+	ratingMin?: number;
+	ratingMax?: number;
+};
+
 // Match mode for recipe ingredients
 // - EXACT_PRODUCT: Only the specific product satisfies the recipe step
 // - ANY_IN_CATEGORY: Any product in the same category satisfies the step

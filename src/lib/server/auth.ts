@@ -3,6 +3,7 @@
 
 import { DbProvider } from './db';
 import { AuthRepository } from './repositories/auth.repository';
+import { SettingsRepository } from './repositories/settings.repository';
 import { UserRepository } from './repositories/user.repository';
 import { WorkspaceRepository } from './repositories/workspace.repository';
 const { USER_TABLE } = process.env;
@@ -12,9 +13,10 @@ const db = new DbProvider(USER_TABLE || '');
 const authRepo = new AuthRepository(db);
 const userRepo = new UserRepository(db, authRepo);
 const workspaceRepo = new WorkspaceRepository(db);
+const settingsRepo = new SettingsRepository(db);
 
 // export repositories for direct access
-export { authRepo, userRepo, workspaceRepo };
+export { authRepo, userRepo, workspaceRepo, settingsRepo };
 
 // auth functions (delegate to repository)
 export const verifyToken = authRepo.verifyToken.bind(authRepo);
@@ -73,6 +75,10 @@ export async function isWorkspaceOwner(userId: string, workspaceId: string): Pro
 	const role = await hasWorkspaceAccess(userId, workspaceId);
 	return role === 'owner';
 }
+
+// settings functions (delegate to settings repository)
+export const isInviteOnly = settingsRepo.isInviteOnly.bind(settingsRepo);
+export const setAppSetting = settingsRepo.set.bind(settingsRepo);
 
 // check if user has a global permission
 export function hasGlobalPermission(

@@ -27,6 +27,6 @@
 		</Alert.Root>
 	{/if}
 	<form class="space-y-6" method="POST" action="/signup" use:enhance>
-		<UserForm bind:this={formRef} user={null} action="register" {errors} bind:invitationCode />
+		<UserForm bind:this={formRef} user={null} action="register" {errors} bind:invitationCode inviteOnly={data.inviteOnly} />
 	</form>
 </div>

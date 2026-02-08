@@ -7,6 +7,7 @@
 		Mail,
 		MailPlus,
 		Plus,
+		ShieldCheck,
 		Trash2,
 		UserPlus,
 		X,
@@ -21,6 +22,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { Switch } from '$lib/components/ui/switch';
 	import * as Table from '$lib/components/ui/table';
 
 	import { notificationStore } from '../../../stores';
@@ -29,6 +31,8 @@
 	let { data }: { data: PageData } = $props();
 	let formModal = $state(false);
 	let selectedDate = $state('');
+	let inviteOnly = $state(data.inviteOnly);
+	let toggleFormRef: HTMLFormElement;
 
 	// Pre-fill modal state for fulfilling requests
 	let prefillEmail = $state('');
@@ -77,6 +81,57 @@
 			Create Invite
 		</Button>
 	</div>
+
+	<!-- Registration Mode Toggle -->
+	<Card.Root>
+		<Card.Header>
+			<div class="flex items-center justify-between">
+				<div>
+					<Card.Title class="flex items-center gap-2">
+						<ShieldCheck class="h-5 w-5" />
+						Registration Mode
+					</Card.Title>
+					<Card.Description>
+						When invite-only mode is enabled, users must provide a valid invitation code to sign up.
+						Disabling this allows anyone to register.
+					</Card.Description>
+				</div>
+				<form
+					bind:this={toggleFormRef}
+					method="POST"
+					action="?/toggleInviteOnly"
+					use:enhance={() => {
+						return async ({ result, update }) => {
+							if (result.type === 'success') {
+								$notificationStore.success = {
+									message: inviteOnly
+										? 'Invite-only mode enabled.'
+										: 'Open registration enabled.',
+								};
+							} else if (result.type === 'failure') {
+								inviteOnly = !inviteOnly;
+								$notificationStore.error = {
+									message: 'Failed to update registration mode.',
+								};
+							}
+							await update();
+						};
+					}}
+				>
+					<input type="hidden" name="enabled" value={inviteOnly} />
+					<Switch
+						checked={inviteOnly}
+						onCheckedChange={(checked) => {
+							inviteOnly = checked;
+							const input = toggleFormRef.querySelector<HTMLInputElement>('input[name="enabled"]');
+							if (input) input.value = String(checked);
+							toggleFormRef.requestSubmit();
+						}}
+					/>
+				</form>
+			</div>
+		</Card.Header>
+	</Card.Root>
 
 	<!-- Pending Requests Section -->
 	{#if data.pendingRequests && data.pendingRequests.length > 0}

@@ -54,24 +54,26 @@
 	}
 </script>
 
-<!-- nav (only show when logged in and not on auth routes) -->
-{#if showNav}
-	<Nav {activeUrl} {user} {workspaceName} />
-{/if}
+<div class="flex flex-col min-h-screen">
+	<!-- nav (only show when logged in and not on auth routes) -->
+	{#if showNav}
+		<Nav {activeUrl} {user} {workspaceName} />
+	{/if}
 
-<!-- loading bar -->
-<ProgressBar color="#ec4899" zIndex={50} />
+	<!-- loading bar -->
+	<ProgressBar color="#ec4899" zIndex={50} />
 
-<!-- page content with bottom padding on mobile for fixed nav -->
-<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}">
-	<slot />
-</div>
+	<!-- page content with bottom padding on mobile for fixed nav -->
+	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}">
+		<slot />
+	</div>
 
-<!-- toast -->
-<Notification />
-<Toaster position="bottom-right" richColors />
+	<!-- toast -->
+	<Notification />
+	<Toaster position="bottom-right" richColors />
 
-<!-- footer (hidden on mobile when nav shown, since bottom nav takes that space) -->
-<div class="{showNav ? 'hidden md:block' : ''}">
-	<Footer />
+	<!-- footer (hidden on mobile when nav shown, since bottom nav takes that space) -->
+	<div class="mt-auto {showNav ? 'hidden md:block' : ''}">
+		<Footer />
+	</div>
 </div>

@@ -250,10 +250,14 @@
 				<!-- Content -->
 				<a href="/catalog/{recipe.recipeId}" class="flex-1 min-w-0">
 					<!-- Row 1: Recipe Name (Category) -->
-					<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
-						{recipe.recipeName}
-						<span class="font-normal text-muted-foreground">({recipe.recipeCategoryDescription})</span>
-					</h3>
+					<div class="flex items-center gap-2">
+						<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
+							{recipe.recipeName}
+						</h3>
+						<Badge variant="secondary" class="shrink-0 text-xs">
+							{recipe.recipeCategoryDescription}
+						</Badge>
+					</div>
 
 					<!-- Row 2: Description -->
 					<p class="text-sm text-muted-foreground line-clamp-1">

@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
+import { isInviteOnly } from '$lib/server/auth';
 import { getInvitationByCode, registerUser } from '$lib/server/user';
 
 import type { PageServerLoad } from './$types';
@@ -12,17 +13,18 @@ export const load = (async ({ url, locals }) => {
 	}
 
 	const code = url.searchParams.get('code');
+	const inviteOnly = await isInviteOnly();
 
 	// if no code, just show the signup page
 	if (!code) {
-		return { invitationCode: null, existingUserEmail: null };
+		return { invitationCode: null, existingUserEmail: null, inviteOnly };
 	}
 
 	// look up the invitation
 	const invitationResult = await getInvitationByCode(code);
 
 	if (invitationResult.status === 'error' || !invitationResult.data) {
-		return { invitationCode: code, existingUserEmail: null };
+		return { invitationCode: code, existingUserEmail: null, inviteOnly };
 	}
 
 	const invitation = invitationResult.data;
@@ -32,13 +34,15 @@ export const load = (async ({ url, locals }) => {
 		redirect(StatusCodes.TEMPORARY_REDIRECT, `/accept-invite?code=${code}`);
 	}
 
-	return { invitationCode: code, existingUserEmail: null };
+	return { invitationCode: code, existingUserEmail: null, inviteOnly };
 }) satisfies PageServerLoad;
 
 export const actions = {
 	default: async ({ request }) => {
 		let formData: any = await request.formData();
 		formData = Object.fromEntries(formData);
+
+		const inviteOnly = await isInviteOnly();
 
 		let errors = {
 			username: {
@@ -111,7 +115,7 @@ export const actions = {
 				}
 			}
 
-			if (!invitationCode?.trim()) {
+			if (inviteOnly && !invitationCode?.trim()) {
 				errors.invitationCode = {
 					hasError: true,
 					message: 'Invitation code is required.',
@@ -135,7 +139,7 @@ export const actions = {
 			formData.username,
 			formData.email,
 			formData.password,
-			formData.invitationCode
+			inviteOnly ? formData.invitationCode : null
 		);
 		if (queryResult.status === 'error') {
 			return fail(StatusCodes.BAD_REQUEST, {

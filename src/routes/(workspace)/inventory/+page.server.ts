@@ -21,6 +21,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	const productName = url.searchParams.get('productName') || '';
 	const categoryId = url.searchParams.get('categoryId') || '';
 	const stockFilter = url.searchParams.get('stockFilter') || '';
+	const sort = url.searchParams.get('sort') || 'name-asc';
 
 	// Build filter object
 	let filter: Record<string, any> = {};
@@ -36,7 +37,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 
 	// Fetch all data in parallel
 	const [inventoryResult, stats, categories] = await Promise.all([
-		inventoryRepo.findAll(workspaceId, page, 20, Object.keys(filter).length > 0 ? filter : null),
+		inventoryRepo.findAll(workspaceId, page, 20, Object.keys(filter).length > 0 ? filter : null, sort),
 		inventoryRepo.getStats(workspaceId),
 		inventoryRepo.getCategoryBreakdown(workspaceId),
 	]);
@@ -75,6 +76,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 			search: productName,
 			categoryId,
 			stockFilter,
+			sort,
 			page,
 		},
 	};

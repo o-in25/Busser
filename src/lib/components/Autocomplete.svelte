@@ -24,6 +24,7 @@
 	let show = false;
 	let selectValue = key || '';
 	let prevValue: string | null = null;
+	let prevKey: string | undefined = key;
 
 	onMount(async () => {
 		let response = await fetch(fetchUrl, {
@@ -35,9 +36,10 @@
 
 	// Handle external value changes (e.g., draft restore) imperatively to avoid reactive cycles
 	beforeUpdate(() => {
-		// Update selectValue when key prop changes (for edit mode)
-		if (key && selectValue !== key) {
-			selectValue = key;
+		// only sync selectValue when key prop changes from the parent, not on user input
+		if (key !== prevKey) {
+			selectValue = key || '';
+			prevKey = key;
 		}
 
 		// Resolve selectValue from value when value changes externally

@@ -76,3 +76,8 @@ export interface UserFavorite {
 	workspaceId: string;
 	createdDate: Date;
 }
+
+export type AppSetting = {
+	settingKey: string;
+	settingValue: string | null;
+};

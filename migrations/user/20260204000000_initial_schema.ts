@@ -9,171 +9,185 @@
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-	// ── reference tables (no foreign key dependencies) ──
+	// baseline migration: skip tables that already exist
 
-	await knex.schema.createTable('loglevel', (t) => {
-		t.increments('logLevelId').primary();
-		t.string('level', 10).notNullable().unique();
-	});
+	if (!(await knex.schema.hasTable('loglevel'))) {
+		await knex.schema.createTable('loglevel', (t) => {
+			t.increments('logLevelId').primary();
+			t.string('level', 10).notNullable().unique();
+		});
+	}
 
-	await knex.schema.createTable('role', (t) => {
-		t.string('roleId', 36).notNullable();
-		t.string('roleName', 10).notNullable().unique();
-		t.primary(['roleId', 'roleName']);
-		t.unique(['roleId']);
-	});
+	if (!(await knex.schema.hasTable('role'))) {
+		await knex.schema.createTable('role', (t) => {
+			t.string('roleId', 36).notNullable();
+			t.string('roleName', 10).notNullable().unique();
+			t.primary(['roleId', 'roleName']);
+			t.unique(['roleId']);
+		});
+	}
 
-	await knex.schema.createTable('permission', (t) => {
-		t.string('permissionId', 36).notNullable();
-		t.string('permissionName', 45).notNullable().unique();
-		t.primary(['permissionId', 'permissionName']);
-		t.unique(['permissionId']);
-	});
+	if (!(await knex.schema.hasTable('permission'))) {
+		await knex.schema.createTable('permission', (t) => {
+			t.string('permissionId', 36).notNullable();
+			t.string('permissionName', 45).notNullable().unique();
+			t.primary(['permissionId', 'permissionName']);
+			t.unique(['permissionId']);
+		});
+	}
 
-	// ── user (created without preferredWorkspaceId FK to break circular dep) ──
+	if (!(await knex.schema.hasTable('user'))) {
+		await knex.schema.createTable('user', (t) => {
+			t.string('userId', 36).notNullable().primary();
+			t.string('email', 255).notNullable().unique();
+			t.string('username', 45).notNullable().unique();
+			t.string('password', 255).notNullable();
+			t.datetime('lastActivityDate').nullable();
+			t.tinyint('verified').notNullable().defaultTo(0);
+			t.string('preferredWorkspaceId', 64).nullable();
+			t.string('avatarImageUrl', 255).nullable();
+		});
+	}
 
-	await knex.schema.createTable('user', (t) => {
-		t.string('userId', 36).notNullable().primary();
-		t.string('email', 255).notNullable().unique();
-		t.string('username', 45).notNullable().unique();
-		t.string('password', 255).notNullable();
-		t.datetime('lastActivityDate').nullable();
-		t.tinyint('verified').notNullable().defaultTo(0);
-		t.string('preferredWorkspaceId', 64).nullable();
-		t.string('avatarImageUrl', 255).nullable();
-		// FK for preferredWorkspaceId added after workspace table is created
-	});
+	if (!(await knex.schema.hasTable('workspace'))) {
+		await knex.schema.createTable('workspace', (t) => {
+			t.string('workspaceId', 64).notNullable().primary();
+			t.string('workspaceName', 255).notNullable();
+			t.enum('workspaceType', ['personal', 'shared']).notNullable().defaultTo('personal');
+			t.datetime('createdDate').notNullable().defaultTo(knex.fn.now());
+			t.string('createdBy', 36).notNullable();
 
-	// ── workspace (references user) ──
+			t.foreign('createdBy').references('user.userId').onDelete('CASCADE');
+		});
 
-	await knex.schema.createTable('workspace', (t) => {
-		t.string('workspaceId', 64).notNullable().primary();
-		t.string('workspaceName', 255).notNullable();
-		t.enum('workspaceType', ['personal', 'shared']).notNullable().defaultTo('personal');
-		t.datetime('createdDate').notNullable().defaultTo(knex.fn.now());
-		t.string('createdBy', 36).notNullable();
+		// circular FK from user -> workspace (only needed on fresh create)
+		await knex.schema.alterTable('user', (t) => {
+			t.foreign('preferredWorkspaceId', 'FK_user_preferredWorkspace')
+				.references('workspace.workspaceId')
+				.onDelete('SET NULL');
+		});
+	}
 
-		t.foreign('createdBy').references('user.userId').onDelete('CASCADE');
-	});
+	if (!(await knex.schema.hasTable('userRole'))) {
+		await knex.schema.createTable('userRole', (t) => {
+			t.string('userId', 36).notNullable();
+			t.string('roleId', 36).notNullable();
+			t.primary(['userId', 'roleId']);
 
-	// ── now add the circular FK from user -> workspace ──
+			t.foreign('userId').references('user.userId').onDelete('CASCADE').onUpdate('CASCADE');
+			t.foreign('roleId').references('role.roleId').onDelete('CASCADE').onUpdate('CASCADE');
+		});
+	}
 
-	await knex.schema.alterTable('user', (t) => {
-		t.foreign('preferredWorkspaceId', 'FK_user_preferredWorkspace')
-			.references('workspace.workspaceId')
-			.onDelete('SET NULL');
-	});
+	if (!(await knex.schema.hasTable('rolePermission'))) {
+		await knex.schema.createTable('rolePermission', (t) => {
+			t.string('roleId', 36).notNullable();
+			t.string('permissionId', 36).notNullable();
+			t.primary(['roleId', 'permissionId']);
 
-	// ── join tables ──
+			t.foreign('roleId').references('role.roleId').onDelete('CASCADE').onUpdate('CASCADE');
+			t.foreign('permissionId')
+				.references('permission.permissionId')
+				.onDelete('CASCADE')
+				.onUpdate('CASCADE');
+		});
+	}
 
-	await knex.schema.createTable('userRole', (t) => {
-		t.string('userId', 36).notNullable();
-		t.string('roleId', 36).notNullable();
-		t.primary(['userId', 'roleId']);
+	if (!(await knex.schema.hasTable('workspaceUser'))) {
+		await knex.schema.createTable('workspaceUser', (t) => {
+			t.string('workspaceId', 64).notNullable();
+			t.string('userId', 36).notNullable();
+			t.enum('workspaceRole', ['owner', 'editor', 'viewer']).notNullable().defaultTo('viewer');
+			t.datetime('joinedDate').notNullable().defaultTo(knex.fn.now());
+			t.primary(['workspaceId', 'userId']);
 
-		t.foreign('userId').references('user.userId').onDelete('CASCADE').onUpdate('CASCADE');
-		t.foreign('roleId').references('role.roleId').onDelete('CASCADE').onUpdate('CASCADE');
-	});
+			t.foreign('workspaceId').references('workspace.workspaceId').onDelete('CASCADE');
+			t.foreign('userId').references('user.userId').onDelete('CASCADE');
+		});
+	}
 
-	await knex.schema.createTable('rolePermission', (t) => {
-		t.string('roleId', 36).notNullable();
-		t.string('permissionId', 36).notNullable();
-		t.primary(['roleId', 'permissionId']);
+	if (!(await knex.schema.hasTable('log'))) {
+		await knex.schema.createTable('log', (t) => {
+			t.increments('logId').primary();
+			t.integer('logLevelId').notNullable();
+			t.string('logMessage', 1000).notNullable();
+			t.datetime('logDate').notNullable();
+			t.string('logStackTrace', 10000).nullable();
+		});
+	}
 
-		t.foreign('roleId').references('role.roleId').onDelete('CASCADE').onUpdate('CASCADE');
-		t.foreign('permissionId')
-			.references('permission.permissionId')
-			.onDelete('CASCADE')
-			.onUpdate('CASCADE');
-	});
+	if (!(await knex.schema.hasTable('invitation'))) {
+		await knex.schema.createTable('invitation', (t) => {
+			t.bigIncrements('invitationId').primary();
+			t.string('userId', 36).nullable();
+			t.string('invitationCode', 6).nullable().unique();
+			t.timestamp('createdAt').defaultTo(knex.fn.now());
+			t.timestamp('issuedAt').nullable();
+			t.timestamp('expiresAt').nullable();
+			t.timestamp('lastSentAt').nullable();
+			t.string('email', 255).nullable();
+			t.string('workspaceId', 255).nullable();
+			t.enum('workspaceRole', ['owner', 'editor', 'viewer']).nullable();
 
-	await knex.schema.createTable('workspaceUser', (t) => {
-		t.string('workspaceId', 64).notNullable();
-		t.string('userId', 36).notNullable();
-		t.enum('workspaceRole', ['owner', 'editor', 'viewer']).notNullable().defaultTo('viewer');
-		t.datetime('joinedDate').notNullable().defaultTo(knex.fn.now());
-		t.primary(['workspaceId', 'userId']);
+			t.foreign('userId').references('user.userId').onDelete('CASCADE').onUpdate('CASCADE');
+			t.foreign('workspaceId', 'fk_invitation_workspace')
+				.references('workspace.workspaceId')
+				.onDelete('CASCADE');
+		});
+	}
 
-		t.foreign('workspaceId').references('workspace.workspaceId').onDelete('CASCADE');
-		t.foreign('userId').references('user.userId').onDelete('CASCADE');
-	});
+	if (!(await knex.schema.hasTable('invitationRequest'))) {
+		await knex.schema.createTable('invitationRequest', (t) => {
+			t.increments('invitationRequestId').primary();
+			t.string('email', 255).notNullable();
+			t.text('message').nullable();
+			t.enum('status', ['pending', 'fulfilled', 'rejected']).defaultTo('pending');
+			t.timestamp('createdAt').defaultTo(knex.fn.now());
+			t.timestamp('resolvedAt').nullable();
+			t.string('resolvedBy', 36).nullable();
+		});
+	}
 
-	// ── domain tables ──
+	if (!(await knex.schema.hasTable('upload'))) {
+		await knex.schema.createTable('upload', (t) => {
+			t.string('uploadId', 36).notNullable();
+			t.string('externalUploadId', 255).notNullable().unique();
+			t.string('publicUrl', 255).notNullable();
+			t.string('name', 255).notNullable().unique();
+			t.string('bucket', 45).notNullable();
+			t.string('contentType', 45).notNullable();
+			t.integer('size').notNullable();
+			t.string('status', 15).defaultTo('ACTIVE');
+			t.primary(['uploadId', 'externalUploadId']);
+			t.unique(['uploadId']);
+		});
+	}
 
-	await knex.schema.createTable('log', (t) => {
-		t.increments('logId').primary();
-		t.integer('logLevelId').notNullable();
-		t.string('logMessage', 1000).notNullable();
-		t.datetime('logDate').notNullable();
-		t.string('logStackTrace', 10000).nullable();
-	});
+	if (!(await knex.schema.hasTable('userFavorite'))) {
+		await knex.schema.createTable('userFavorite', (t) => {
+			t.string('favoriteId', 36).notNullable().primary();
+			t.string('userId', 36).notNullable();
+			t.integer('recipeId').notNullable();
+			t.string('workspaceId', 64).notNullable();
+			t.datetime('createdDate').notNullable().defaultTo(knex.fn.now());
+			t.unique(['userId', 'recipeId']);
+			t.index('recipeId', 'fk_userfavorite_recipe');
+			t.index('userId', 'idx_userfavorite_user');
+			t.index('workspaceId', 'idx_userfavorite_workspace');
 
-	await knex.schema.createTable('invitation', (t) => {
-		t.bigIncrements('invitationId').primary();
-		t.string('userId', 36).nullable();
-		t.string('invitationCode', 6).nullable().unique();
-		t.timestamp('createdAt').defaultTo(knex.fn.now());
-		t.timestamp('issuedAt').nullable();
-		t.timestamp('expiresAt').nullable();
-		t.timestamp('lastSentAt').nullable();
-		t.string('email', 255).nullable();
-		t.string('workspaceId', 255).nullable();
-		t.enum('workspaceRole', ['owner', 'editor', 'viewer']).nullable();
+			t.foreign('userId').references('user.userId').onDelete('CASCADE');
+		});
 
-		t.foreign('userId').references('user.userId').onDelete('CASCADE').onUpdate('CASCADE');
-		t.foreign('workspaceId', 'fk_invitation_workspace')
-			.references('workspace.workspaceId')
-			.onDelete('CASCADE');
-	});
+		await knex.raw(`
+			ALTER TABLE userFavorite
+			ADD CONSTRAINT fk_userfavorite_recipe
+			FOREIGN KEY (recipeId) REFERENCES app_d.recipe(RecipeId) ON DELETE CASCADE
+		`);
+	}
 
-	await knex.schema.createTable('invitationRequest', (t) => {
-		t.increments('invitationRequestId').primary();
-		t.string('email', 255).notNullable();
-		t.text('message').nullable();
-		t.enum('status', ['pending', 'fulfilled', 'rejected']).defaultTo('pending');
-		t.timestamp('createdAt').defaultTo(knex.fn.now());
-		t.timestamp('resolvedAt').nullable();
-		t.string('resolvedBy', 36).nullable();
-	});
-
-	await knex.schema.createTable('upload', (t) => {
-		t.string('uploadId', 36).notNullable();
-		t.string('externalUploadId', 255).notNullable().unique();
-		t.string('publicUrl', 255).notNullable();
-		t.string('name', 255).notNullable().unique();
-		t.string('bucket', 45).notNullable();
-		t.string('contentType', 45).notNullable();
-		t.integer('size').notNullable();
-		t.string('status', 15).defaultTo('ACTIVE');
-		t.primary(['uploadId', 'externalUploadId']);
-		t.unique(['uploadId']);
-	});
-
-	await knex.schema.createTable('userFavorite', (t) => {
-		t.string('favoriteId', 36).notNullable().primary();
-		t.string('userId', 36).notNullable();
-		t.integer('recipeId').notNullable();
-		t.string('workspaceId', 64).notNullable();
-		t.datetime('createdDate').notNullable().defaultTo(knex.fn.now());
-		t.unique(['userId', 'recipeId']);
-		t.index('recipeId', 'fk_userfavorite_recipe');
-		t.index('userId', 'idx_userfavorite_user');
-		t.index('workspaceId', 'idx_userfavorite_workspace');
-
-		t.foreign('userId').references('user.userId').onDelete('CASCADE');
-		// FK to app_d.recipe is cross-database; added via raw SQL
-	});
-
+	// view: create or replace is safe to run always
 	await knex.raw(`
-		ALTER TABLE userFavorite
-		ADD CONSTRAINT fk_userfavorite_recipe
-		FOREIGN KEY (recipeId) REFERENCES app_d.recipe(RecipeId) ON DELETE CASCADE
-	`);
-
-	// ── views ──
-
-	await knex.raw(`
-		CREATE VIEW userAccessControl AS
+		CREATE OR REPLACE VIEW userAccessControl AS
 		SELECT
 			u.userId,
 			GROUP_CONCAT(DISTINCT r.roleName SEPARATOR ',') AS roles,
