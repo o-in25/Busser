@@ -262,7 +262,7 @@ describe('inventory edit action', async () => {
 			// redirect
 		}
 
-		const [, , imageUrl, imageCleared] = vi.mocked(inventoryRepo.update).mock.calls[0];
+		const [, , , imageCleared] = vi.mocked(inventoryRepo.update).mock.calls[0];
 		expect(imageCleared).toBe(true);
 	});
 
