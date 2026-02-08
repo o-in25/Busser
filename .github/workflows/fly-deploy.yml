@@ -30,8 +30,12 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     concurrency: deploy-group
+    environment:
+      name: production
+      url: https://busserapp.com
     permissions:
       contents: write
+      deployments: write
     steps:
       - uses: actions/checkout@v4
         with:
