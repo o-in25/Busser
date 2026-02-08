@@ -15,6 +15,7 @@
 	export let password = '';
 	export let passwordConfirm = '';
 	export let invitationCode = '';
+	export let inviteOnly: boolean = true;
 
 	export const clearSensitiveFields = () => {
 		password = '';
@@ -183,7 +184,7 @@
 		</div>
 	{/if}
 
-	{#if action === 'register'}
+	{#if action === 'register' && inviteOnly}
 		<fieldset>
 			<!-- invitation code -->
 			<div class="space-y-2">

@@ -99,10 +99,14 @@
 
 				<!-- Recipe usage indicator -->
 				{#if recipeCount > 0}
-					<div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+					<a
+						href="/catalog/browse?ingredient={product.productId}"
+						class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+						onclick={(e) => e.stopPropagation()}
+					>
 						<FlaskConical class="h-3.5 w-3.5" />
 						<span>Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span>
-					</div>
+					</a>
 				{/if}
 			</Card.Content>
 		</Card.Root>
@@ -150,10 +154,14 @@
 					<!-- Meta info -->
 					<div class="flex items-center gap-3 mt-2">
 						{#if recipeCount > 0}
-							<span class="flex items-center gap-1 text-xs text-muted-foreground">
+							<a
+								href="/catalog/browse?ingredient={product.productId}"
+								class="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+								onclick={(e) => e.stopPropagation()}
+							>
 								<FlaskConical class="h-3.5 w-3.5" />
 								Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}
-							</span>
+							</a>
 						{/if}
 						{#if product.productProof > 0}
 							<span class="text-xs text-muted-foreground">

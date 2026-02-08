@@ -6,6 +6,7 @@
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Indicator } from '$lib/components/ui/indicator';
 	import * as Table from '$lib/components/ui/table';
 	import type { PaginationData, Product, Spirit } from '$lib/types';
@@ -16,12 +17,36 @@
 	export let tableData: Spirit[] = [];
 	export let recipeUsage: Record<number, number> = {};
 	export let onRowClick: ((product: Product) => void) | null = null;
+	export let selectable: boolean = false;
+	export let selectedIds: number[] = [];
+	export let onSelectionChange: ((ids: number[]) => void) | null = null;
 
 	const handleRowClick = (product: Product) => {
 		if (onRowClick) {
 			onRowClick(product);
 		}
 	};
+
+	const toggleSelection = (productId: number | null) => {
+		if (!productId) return;
+		const idx = selectedIds.indexOf(productId);
+		const next = idx >= 0
+			? selectedIds.filter((id) => id !== productId)
+			: [...selectedIds, productId];
+		selectedIds = next;
+		onSelectionChange?.(next);
+	};
+
+	const toggleAll = (checked: boolean) => {
+		const next = checked
+			? products.map((p) => p.productId).filter((id): id is number => id !== null)
+			: [];
+		selectedIds = next;
+		onSelectionChange?.(next);
+	};
+
+	$: allSelected =
+		products.length > 0 && products.every((p) => p.productId && selectedIds.includes(p.productId));
 
 	const paginate = ({ total, perPage }: { total: number; perPage: number }) => {
 		let range = Math.ceil(total / perPage);
@@ -89,6 +114,15 @@
 	<Table.Root>
 		<Table.Header class="glass-table-header">
 			<Table.Row>
+				{#if selectable}
+					<Table.Head class="w-10">
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<div class="flex items-center justify-center" onclick={(e) => e.stopPropagation()}>
+							<Checkbox checked={allSelected} onchange={toggleAll} />
+						</div>
+					</Table.Head>
+				{/if}
 				<Table.Head class="hidden sm:table-cell">Name</Table.Head>
 				<Table.Head class="hidden sm:table-cell">Category</Table.Head>
 				<Table.Head class="hidden sm:table-cell">Status</Table.Head>
@@ -99,6 +133,18 @@
 		<Table.Body>
 			{#each search as product}
 				<Table.Row onclick={() => handleRowClick(product)} class="cursor-pointer glass-table-row">
+					{#if selectable}
+						<Table.Cell class="w-10">
+							<!-- svelte-ignore a11y_click_events_have_key_events -->
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div class="flex items-center justify-center" onclick={(e) => e.stopPropagation()}>
+								<Checkbox
+									checked={!!product.productId && selectedIds.includes(product.productId)}
+									onchange={() => toggleSelection(product.productId)}
+								/>
+							</div>
+						</Table.Cell>
+					{/if}
 					<Table.Cell>{product.productName}</Table.Cell>
 					<Table.Cell class="hidden sm:table-cell">
 						{product.categoryName}
@@ -117,10 +163,12 @@
 					<Table.Cell class="hidden sm:table-cell">
 						{#if product.productId && recipeUsage[product.productId]}
 							<div class="flex justify-center">
-								<Badge variant="secondary" class="gap-1">
-									<FlaskConical class="h-3 w-3" />
-									{recipeUsage[product.productId]}
-								</Badge>
+								<a href="/catalog/browse?ingredient={product.productId}">
+									<Badge variant="secondary" class="gap-1 hover:bg-secondary/80 transition-colors cursor-pointer">
+										<FlaskConical class="h-3 w-3" />
+										{recipeUsage[product.productId]}
+									</Badge>
+								</a>
 							</div>
 						{:else}
 							<div class="flex justify-center">

@@ -523,7 +523,7 @@ export class UserRepository extends BaseRepository {
 		username: string,
 		email: string,
 		password: string,
-		invitationCode: string
+		invitationCode: string | null
 	): Promise<QueryResult> {
 		try {
 			const { user } = await this.db.query.transaction(async (trx) => {
@@ -531,35 +531,37 @@ export class UserRepository extends BaseRepository {
 				let invitation: Pick<
 					Invitation,
 					'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
-				>;
+				> | null = null;
 
-				// validate invitation
-				let dbResult: any = await trx('invitation')
-					.select('invitationId', 'userId', 'email', 'expiresAt', 'workspaceId', 'workspaceRole')
-					.where({ invitationCode })
-					.first();
+				// validate invitation (only when code is provided)
+				if (invitationCode) {
+					let dbResult: any = await trx('invitation')
+						.select('invitationId', 'userId', 'email', 'expiresAt', 'workspaceId', 'workspaceRole')
+						.where({ invitationCode })
+						.first();
 
-				if (!dbResult) throw new Error('Invalid invitation code.');
+					if (!dbResult) throw new Error('Invalid invitation code.');
 
-				invitation = dbResult as Pick<
-					Invitation,
-					'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
-				>;
+					invitation = dbResult as Pick<
+						Invitation,
+						'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
+					>;
 
-				if (!invitation.invitationId || invitation.userId !== null) {
-					throw new Error('Invitation code has already been used.');
-				}
+					if (!invitation.invitationId || invitation.userId !== null) {
+						throw new Error('Invitation code has already been used.');
+					}
 
-				if (invitation.expiresAt && moment().isAfter(moment(invitation.expiresAt))) {
-					throw new Error('Invitation code has expired.');
-				}
+					if (invitation.expiresAt && moment().isAfter(moment(invitation.expiresAt))) {
+						throw new Error('Invitation code has expired.');
+					}
 
-				if (invitation.email && invitation.email.toLowerCase() !== email.toLowerCase()) {
-					throw new Error('Email does not match the invitation.');
+					if (invitation.email && invitation.email.toLowerCase() !== email.toLowerCase()) {
+						throw new Error('Email does not match the invitation.');
+					}
 				}
 
 				// check username/email
-				dbResult = await trx('user').select('username').where({ username }).first();
+				let dbResult: any = await trx('user').select('username').where({ username }).first();
 				if (dbResult) throw new Error('Username already taken.');
 
 				dbResult = await trx('user').select('email').where({ email }).first();
@@ -588,9 +590,11 @@ export class UserRepository extends BaseRepository {
 				await trx('userRole').insert({ userId: user.userId, roleId: dbResult.roleId });
 
 				// mark invitation as used
-				await trx('invitation')
-					.update({ userId: user.userId })
-					.where({ invitationId: invitation.invitationId });
+				if (invitation) {
+					await trx('invitation')
+						.update({ userId: user.userId })
+						.where({ invitationId: invitation.invitationId });
+				}
 
 				// create default personal workspace for user
 				const slug = user.username
@@ -618,7 +622,7 @@ export class UserRepository extends BaseRepository {
 				});
 
 				// if invitation was for a specific workspace, add user to that workspace too
-				if (invitation.workspaceId && invitation.workspaceRole) {
+				if (invitation?.workspaceId && invitation?.workspaceRole) {
 					await trx('workspaceUser').insert({
 						workspaceId: invitation.workspaceId,
 						userId: user.userId,

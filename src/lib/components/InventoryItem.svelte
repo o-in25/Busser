@@ -241,10 +241,12 @@
 				{stockStatus.label}
 			</Badge>
 			{#if recipeCount > 0}
-				<Badge variant="outline" class="gap-1.5">
-					<FlaskConical class="h-3.5 w-3.5" />
-					Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}
-				</Badge>
+				<a href="/catalog/browse?ingredient={product.productId}">
+					<Badge variant="outline" class="gap-1.5 hover:bg-accent transition-colors cursor-pointer">
+						<FlaskConical class="h-3.5 w-3.5" />
+						Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}
+					</Badge>
+				</a>
 			{/if}
 		</div>
 

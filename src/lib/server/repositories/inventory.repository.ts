@@ -24,7 +24,8 @@ export class InventoryRepository extends BaseRepository {
 		workspaceId: string,
 		currentPage: number,
 		perPage: number = 25,
-		filter: (Partial<Product> & { stockFilter?: string }) | null = null
+		filter: (Partial<Product> & { stockFilter?: string }) | null = null,
+		sort: string = 'name-asc'
 	): Promise<PaginationResult<Product[]>> {
 		try {
 			let query = this.db.table('inventory').where('workspaceId', workspaceId);
@@ -49,9 +50,18 @@ export class InventoryRepository extends BaseRepository {
 				query = query.andWhere('productInStockQuantity', '=', filter.productInStockQuantity);
 			}
 
+			// resolve sort column and direction
+			const sortMap: Record<string, { column: string; order: 'asc' | 'desc' }> = {
+				'name-asc': { column: 'productName', order: 'asc' },
+				'name-desc': { column: 'productName', order: 'desc' },
+				'newest': { column: 'productId', order: 'desc' },
+				'oldest': { column: 'productId', order: 'asc' },
+			};
+			const { column, order } = sortMap[sort] || sortMap['name-asc'];
+
 			const { data, pagination } = await query
 				.select()
-				.orderBy('productName')
+				.orderBy(column, order)
 				.paginate({ perPage, currentPage, isLengthAware: true });
 
 			return { data: data as Product[], pagination };
@@ -250,6 +260,25 @@ export class InventoryRepository extends BaseRepository {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Could not delete inventory item.' };
+		}
+	}
+
+	async setStockQuantity(
+		workspaceId: string,
+		productIds: number[],
+		quantity: number
+	): Promise<QueryResult<number>> {
+		try {
+			const updated = await this.db
+				.table('product')
+				.whereIn('ProductId', productIds)
+				.where('workspaceId', workspaceId)
+				.update({ ProductInStockQuantity: quantity });
+			return { status: 'success', data: updated };
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not update stock status.' };
 		}
 	}
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		ArrowUpDown,
 		ChevronLeft,
 		ChevronRight,
 		LayoutGrid,
@@ -11,6 +12,9 @@
 		Settings2,
 		TableIcon,
 		Tags,
+		Trash2,
+		PackageCheck,
+		PackageX,
 		X,
 	} from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
@@ -27,6 +31,7 @@
 	import StockAlerts from '$lib/components/StockAlerts.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import type { Product } from '$lib/types';
@@ -49,6 +54,7 @@
 	let searchInput = $state(data.filters?.search || '');
 	let selectedCategory = $state(data.filters?.categoryId || 'all');
 	let stockFilter = $state(data.filters?.stockFilter || 'all');
+	let sortOption = $state(data.filters?.sort || 'name-asc');
 
 	// Drawer state
 	let drawerOpen = $state(false);
@@ -56,6 +62,71 @@
 
 	// Refresh state
 	let isRefreshing = $state(false);
+
+	// Bulk selection state (use array instead of Set for Svelte 5 reactivity)
+	let selectedIds = $state<number[]>([]);
+	let deleteDialogOpen = $state(false);
+	let bulkActionLoading = $state(false);
+
+	function handleSelectionChange(ids: number[]) {
+		selectedIds = ids;
+	}
+
+	function clearSelection() {
+		selectedIds = [];
+	}
+
+	async function handleBulkSetStock(inStock: boolean) {
+		if (selectedIds.length === 0) return;
+		bulkActionLoading = true;
+		try {
+			const res = await fetch('/api/inventory/bulk/stock', {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ productIds: selectedIds, inStock }),
+			});
+			if (!res.ok) {
+				const err = await res.json();
+				$notificationStore.error = { message: err?.message || 'Failed to update stock.' };
+				return;
+			}
+			const result = await res.json();
+			const label = inStock ? 'in stock' : 'out of stock';
+			clearSelection();
+			$notificationStore.success = { message: `Marked ${result.updated} item(s) as ${label}.` };
+			await invalidateAll();
+		} catch {
+			$notificationStore.error = { message: 'Failed to update stock.' };
+		} finally {
+			bulkActionLoading = false;
+		}
+	}
+
+	async function handleBulkDelete() {
+		if (selectedIds.length === 0) return;
+		bulkActionLoading = true;
+		try {
+			const res = await fetch('/api/inventory/bulk', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ productIds: selectedIds }),
+			});
+			if (!res.ok) {
+				const err = await res.json();
+				$notificationStore.error = { message: err?.message || 'Failed to delete items.' };
+				return;
+			}
+			const result = await res.json();
+			deleteDialogOpen = false;
+			clearSelection();
+			$notificationStore.success = { message: `Deleted ${result.succeeded} item(s).` };
+			await invalidateAll();
+		} catch {
+			$notificationStore.error = { message: 'Failed to delete items.' };
+		} finally {
+			bulkActionLoading = false;
+		}
+	}
 
 	// Handle refresh
 	async function handleRefresh() {
@@ -125,12 +196,14 @@
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const category = overrides.categoryId !== undefined ? overrides.categoryId : selectedCategory;
 		const stock = overrides.stockFilter !== undefined ? overrides.stockFilter : stockFilter;
+		const sort = overrides.sort !== undefined ? overrides.sort : sortOption;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 
 		params.set('page', String(pageNum));
 		if (search) params.set('productName', String(search));
 		if (category && category !== 'all') params.set('categoryId', String(category));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
+		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -158,6 +231,12 @@
 		goto(buildUrl({ stockFilter: value, page: 1 }), { keepFocus: true });
 	}
 
+	// Handle sort change
+	function handleSortChange(value: string) {
+		sortOption = value;
+		goto(buildUrl({ sort: value, page: 1 }), { keepFocus: true });
+	}
+
 	// Clear functions
 	function clearSearch() {
 		searchInput = '';
@@ -178,6 +257,7 @@
 		searchInput = '';
 		selectedCategory = 'all';
 		stockFilter = 'all';
+		sortOption = 'name-asc';
 		goto(`${basePath}?page=1`);
 	}
 
@@ -187,6 +267,14 @@
 		{ value: 'in-stock', label: 'In Stock' },
 		{ value: 'low-stock', label: 'Low Stock' },
 		{ value: 'out-of-stock', label: 'Out of Stock' },
+	];
+
+	// Sort options
+	const sortOptions = [
+		{ value: 'name-asc', label: 'Name (A-Z)' },
+		{ value: 'name-desc', label: 'Name (Z-A)' },
+		{ value: 'newest', label: 'Newest First' },
+		{ value: 'oldest', label: 'Oldest First' },
 	];
 
 	// Pagination navigation
@@ -225,11 +313,17 @@
 		return option?.label || 'All Stock Levels';
 	});
 
+	const sortLabel = $derived.by(() => {
+		const option = sortOptions.find((o) => o.value === sortOption);
+		return option?.label || 'Name (A-Z)';
+	});
+
 	// Update local state when page data changes (for SSR navigation)
 	$effect(() => {
 		searchInput = data.filters?.search || '';
 		selectedCategory = data.filters?.categoryId || 'all';
 		stockFilter = data.filters?.stockFilter || 'all';
+		sortOption = data.filters?.sort || 'name-asc';
 	});
 </script>
 
@@ -249,9 +343,9 @@
 <!-- Toolbar -->
 <div class="flex flex-col gap-3 mb-6">
 	<!-- Row 1: Search, Categories, Stock Filter (+ action buttons on large screens) -->
-	<div class="flex flex-col sm:flex-row gap-3 lg:items-center">
-		<!-- Search -->
-		<form onsubmit={handleSearch} class="flex-1">
+	<div class="flex flex-col lg:flex-row gap-3 lg:items-center">
+		<!-- Search (full width on mobile/tablet, flex-1 on desktop) -->
+		<form onsubmit={handleSearch} class="lg:flex-1">
 			<div class="relative">
 				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 				<Input
@@ -272,54 +366,74 @@
 			</div>
 		</form>
 
-		<!-- Category Filter Select -->
-		<Select.Root
-			type="single"
-			value={selectedCategory}
-			onValueChange={(v) => handleCategoryChange(v ?? '')}
-		>
-			<Select.Trigger class="w-full sm:w-[180px]">
-				<Tags class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="All Categories">{categoryLabel}</Select.Value>
-			</Select.Trigger>
-			<Select.Content>
-				<Select.Item value="all" label="All Categories" />
-				{#if data.categories.length > 0}
+		<!-- Filters (stacked on mobile, row on sm+) -->
+		<div class="flex flex-col sm:flex-row gap-3">
+			<!-- Category Filter Select -->
+			<Select.Root
+				type="single"
+				value={selectedCategory}
+				onValueChange={(v) => handleCategoryChange(v ?? '')}
+			>
+				<Select.Trigger class="w-full sm:w-[180px]">
+					<Tags class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="All Categories">{categoryLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Item value="all" label="All Categories" />
+					{#if data.categories.length > 0}
+						<Select.Separator />
+					{/if}
+					{#each data.categories as category}
+						<Select.Item
+							value={String(category.categoryId)}
+							label="{category.categoryName} ({category.count})"
+						/>
+					{/each}
 					<Select.Separator />
-				{/if}
-				{#each data.categories as category}
-					<Select.Item
-						value={String(category.categoryId)}
-						label="{category.categoryName} ({category.count})"
-					/>
-				{/each}
-				<Select.Separator />
-				<a
-					href="{basePath}/category"
-					class="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
-				>
-					<Settings2 class="h-4 w-4" />
-					Manage Categories
-				</a>
-			</Select.Content>
-		</Select.Root>
+					<a
+						href="{basePath}/category"
+						class="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
+					>
+						<Settings2 class="h-4 w-4" />
+						Manage Categories
+					</a>
+				</Select.Content>
+			</Select.Root>
 
-		<!-- Stock Filter Select -->
-		<Select.Root
-			type="single"
-			value={stockFilter}
-			onValueChange={(v) => handleStockFilterChange(v ?? '')}
-		>
-			<Select.Trigger class="w-full sm:w-[180px]">
-				<Package class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="All Stock Levels">{stockFilterLabel}</Select.Value>
-			</Select.Trigger>
-			<Select.Content>
-				{#each stockFilterOptions as option}
-					<Select.Item value={option.value} label={option.label} />
-				{/each}
-			</Select.Content>
-		</Select.Root>
+			<!-- Stock Filter Select -->
+			<Select.Root
+				type="single"
+				value={stockFilter}
+				onValueChange={(v) => handleStockFilterChange(v ?? '')}
+			>
+				<Select.Trigger class="w-full sm:w-[180px]">
+					<Package class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="All Stock Levels">{stockFilterLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					{#each stockFilterOptions as option}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+
+			<!-- Sort Select -->
+			<Select.Root
+				type="single"
+				value={sortOption}
+				onValueChange={(v) => handleSortChange(v ?? 'name-asc')}
+			>
+				<Select.Trigger class="w-full sm:w-[180px]">
+					<ArrowUpDown class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="Name (A-Z)">{sortLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					{#each sortOptions as option}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
 
 		<!-- Action buttons (large screens only - inline with filters) -->
 		<div class="hidden lg:flex items-center gap-2">
@@ -487,12 +601,54 @@
 		</Card.Content>
 	</Card.Root>
 {:else if viewMode === 'table'}
+	<!-- Bulk Action Bar -->
+	{#if canModify && selectedIds.length > 0}
+		<div class="sticky top-0 z-10 mb-4 flex items-center gap-3 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm">
+			<span class="text-sm font-medium">{selectedIds.length} selected</span>
+			<div class="flex-1"></div>
+			<Button
+				variant="outline"
+				size="sm"
+				onclick={() => handleBulkSetStock(true)}
+				disabled={bulkActionLoading}
+			>
+				<PackageCheck class="h-4 w-4 mr-1.5" />
+				Mark In Stock
+			</Button>
+			<Button
+				variant="outline"
+				size="sm"
+				onclick={() => handleBulkSetStock(false)}
+				disabled={bulkActionLoading}
+			>
+				<PackageX class="h-4 w-4 mr-1.5" />
+				Mark Out of Stock
+			</Button>
+			<Button
+				variant="destructive"
+				size="sm"
+				onclick={() => (deleteDialogOpen = true)}
+				disabled={bulkActionLoading}
+			>
+				<Trash2 class="h-4 w-4 mr-1.5" />
+				Delete
+			</Button>
+			<Button variant="ghost" size="sm" onclick={clearSelection}>
+				<X class="h-4 w-4 mr-1.5" />
+				Clear
+			</Button>
+		</div>
+	{/if}
+
 	<!-- Table View -->
 	<InventoryTable
 		products={data.data}
 		paginationData={data.pagination}
 		recipeUsage={data.recipeUsage}
 		onRowClick={handleCardClick}
+		selectable={canModify}
+		{selectedIds}
+		onSelectionChange={handleSelectionChange}
 	/>
 {:else}
 	<!-- Grid/List View -->
@@ -579,6 +735,30 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Bulk Delete Confirmation Dialog -->
+<Dialog.Root bind:open={deleteDialogOpen}>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Delete {selectedIds.length} item(s)?</Dialog.Title>
+			<Dialog.Description>
+				This will permanently remove the selected products from your inventory. This action cannot be undone.
+			</Dialog.Description>
+		</Dialog.Header>
+		<Dialog.Footer>
+			<Button variant="outline" onclick={() => (deleteDialogOpen = false)} disabled={bulkActionLoading}>
+				Cancel
+			</Button>
+			<Button variant="destructive" onclick={handleBulkDelete} disabled={bulkActionLoading}>
+				{#if bulkActionLoading}
+					Deleting...
+				{:else}
+					Delete
+				{/if}
+			</Button>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
 
 <!-- Detail Drawer -->
 <InventoryDetailDrawer

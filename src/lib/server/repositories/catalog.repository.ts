@@ -1,5 +1,6 @@
 // catalog domain repository
 import type {
+	AdvancedFilter,
 	BasicRecipe,
 	PaginationResult,
 	PreparationMethod,
@@ -24,7 +25,8 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string,
 		currentPage: number,
 		perPage: number = 25,
-		filter: (Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep>) | null = null
+		filter: (Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep>) | null = null,
+		advancedFilter: AdvancedFilter | null = null
 	): Promise<PaginationResult<View.BasicRecipe[]>> {
 		try {
 			let query = this.db.table('basicrecipe as r').select().where('r.workspaceId', workspaceId);
@@ -52,6 +54,64 @@ export class CatalogRepository extends BaseRepository {
 
 			if (filter?.recipeCategoryId) {
 				query = query.where('recipeCategoryId', filter.recipeCategoryId);
+			}
+
+			// advanced filters
+			if (advancedFilter) {
+				if (advancedFilter.readyToMake) {
+					query = query.whereIn(
+						'r.RecipeId',
+						this.db
+							.table('availablerecipes')
+							.select('RecipeId')
+							.where('WorkspaceId', workspaceId)
+							.groupBy('RecipeId')
+					);
+				}
+
+				if (advancedFilter.ingredientProductId) {
+					query = query.whereIn(
+						'r.RecipeId',
+						this.db
+							.table('basicrecipestep as rs')
+							.select('rs.RecipeId')
+							.where('rs.ProductId', advancedFilter.ingredientProductId)
+					);
+				}
+
+				if (advancedFilter.strengthMin !== undefined) {
+					query = query.where('r.recipeStrengthRating', '>=', advancedFilter.strengthMin);
+				}
+				if (advancedFilter.strengthMax !== undefined) {
+					query = query.where('r.recipeStrengthRating', '<=', advancedFilter.strengthMax);
+				}
+
+				if (advancedFilter.ingredientCountMin !== undefined || advancedFilter.ingredientCountMax !== undefined) {
+					query = query.whereIn(
+						'r.RecipeId',
+						this.db
+							.table('basicrecipestep as rs')
+							.select('rs.RecipeId')
+							.groupBy('rs.RecipeId')
+							.having(
+								this.db.query.raw(
+									advancedFilter.ingredientCountMin !== undefined && advancedFilter.ingredientCountMax !== undefined
+										? 'COUNT(rs.RecipeStepId) >= ? AND COUNT(rs.RecipeStepId) <= ?'
+										: advancedFilter.ingredientCountMin !== undefined
+											? 'COUNT(rs.RecipeStepId) >= ?'
+											: 'COUNT(rs.RecipeStepId) <= ?',
+									[
+										...(advancedFilter.ingredientCountMin !== undefined ? [advancedFilter.ingredientCountMin] : []),
+										...(advancedFilter.ingredientCountMax !== undefined ? [advancedFilter.ingredientCountMax] : []),
+									]
+								)
+							)
+					);
+				}
+
+				if (advancedFilter.preparationMethodId) {
+					query = query.where('r.recipeTechniqueDescriptionId', advancedFilter.preparationMethodId);
+				}
 			}
 
 			query = query.orderBy('recipeName');

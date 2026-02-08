@@ -46,9 +46,7 @@ export const load = (async ({ parent, locals }) => {
 	}
 
 	// Get user's favorites for this workspace
-	const userFavorites = userId
-		? await userRepo.getFavorites(userId, workspaceId)
-		: [];
+	const userFavorites = userId ? await userRepo.getFavorites(userId, workspaceId) : [];
 	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
 
 	// Get featured recipe IDs for this workspace
