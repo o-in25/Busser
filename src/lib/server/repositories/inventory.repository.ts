@@ -54,8 +54,8 @@ export class InventoryRepository extends BaseRepository {
 			const sortMap: Record<string, { column: string; order: 'asc' | 'desc' }> = {
 				'name-asc': { column: 'productName', order: 'asc' },
 				'name-desc': { column: 'productName', order: 'desc' },
-				'newest': { column: 'productId', order: 'desc' },
-				'oldest': { column: 'productId', order: 'asc' },
+				newest: { column: 'productId', order: 'desc' },
+				oldest: { column: 'productId', order: 'asc' },
 			};
 			const { column, order } = sortMap[sort] || sortMap['name-asc'];
 
@@ -436,15 +436,9 @@ export class InventoryRepository extends BaseRepository {
 
 	async getCategoryOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
-			// Only show leaf categories (those that have no children)
 			let result = await this.db
 				.table('category as c')
 				.where('c.workspaceId', workspaceId)
-				.whereNotExists(function () {
-					this.select('*')
-						.from('category as child')
-						.whereRaw('child.ParentCategoryId = c.CategoryId');
-				})
 				.select('c.CategoryId', 'c.CategoryName')
 				.orderBy('c.CategoryName');
 			let categories = result as Category[];

@@ -13,7 +13,6 @@ import type {
 	SelectOption,
 	User,
 	UserFavorite,
-	View,
 } from '$lib/types';
 
 import { DbProvider } from '../db';
@@ -1029,24 +1028,6 @@ export class UserRepository extends BaseRepository {
 			return dbResult as UserFavorite[];
 		} catch (error: any) {
 			console.error('Error getting favorites:', error.message);
-			return [];
-		}
-	}
-
-	async getFavoriteRecipes(userId: string, workspaceId: string): Promise<View.BasicRecipe[]> {
-		try {
-			const dbResult = await this.db
-				.table('basicrecipe as r')
-				.join('userFavorite as uf', function () {
-					this.on('r.RecipeId', '=', 'uf.recipeId').andOn('r.WorkspaceId', '=', 'uf.workspaceId');
-				})
-				.where('uf.userId', userId)
-				.where('uf.workspaceId', workspaceId)
-				.orderBy('uf.createdDate', 'desc')
-				.select('r.*');
-			return dbResult as View.BasicRecipe[];
-		} catch (error: any) {
-			console.error('Error getting favorite recipes:', error.message);
 			return [];
 		}
 	}

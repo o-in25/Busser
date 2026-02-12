@@ -1,14 +1,5 @@
 <script lang="ts">
-	import {
-		ChevronLeft,
-		ChevronRight,
-		Pencil,
-		Plus,
-		Search,
-		Tags,
-		Trash2,
-		X,
-	} from 'lucide-svelte';
+	import { ChevronLeft, ChevronRight, Pencil, Plus, Search, Tags, Trash2, X } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { enhance } from '$app/forms';
@@ -212,10 +203,7 @@
 				</Table.Header>
 				<Table.Body>
 					{#each data.categories as category (category.categoryId)}
-						<Table.Row
-							class="cursor-pointer"
-							onclick={() => openDrawer(category)}
-						>
+						<Table.Row class="cursor-pointer" onclick={() => openDrawer(category)}>
 							<Table.Cell class="font-medium">{category.categoryName}</Table.Cell>
 							<Table.Cell class="text-muted-foreground max-w-md truncate">
 								{category.categoryDescription || '—'}

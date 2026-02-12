@@ -10,7 +10,6 @@
 		{
 			value: 'lime',
 			name: 'Lime',
-			emoji: '🍋‍🟩',
 			weights: [
 				{ key: 'citricAcidWgt', weight: 0.66 },
 				{ key: 'malicAcidWgt', weight: 0.33 },
@@ -21,7 +20,6 @@
 		{
 			value: 'lemon',
 			name: 'Lemon',
-			emoji: '🍋',
 			weights: [
 				{ key: 'citricAcidWgt', weight: 1 },
 				{ key: 'malicAcidWgt', weight: 0 },
@@ -32,7 +30,6 @@
 		{
 			value: 'orange',
 			name: 'Orange',
-			emoji: '🍊',
 			weights: [
 				{ key: 'citricAcidWgt', weight: 0.9 },
 				{ key: 'malicAcidWgt', weight: 0.1 },
@@ -43,7 +40,6 @@
 		{
 			value: 'grapefruit',
 			name: 'Grapefruit',
-			emoji: '🍊',
 			weights: [
 				{ key: 'citricAcidWgt', weight: 0.8 },
 				{ key: 'malicAcidWgt', weight: 0.2 },
@@ -139,7 +135,7 @@
 				<Select.Content>
 					{#each selections as item}
 						<Select.Item value={item.value} label={item.name}>
-							<span class="mr-2">{item.emoji}</span>
+							<!-- <span class="mr-2">{item.icon}</span> -->
 							{item.name}
 						</Select.Item>
 					{/each}

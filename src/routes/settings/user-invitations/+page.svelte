@@ -104,9 +104,7 @@
 						return async ({ result, update }) => {
 							if (result.type === 'success') {
 								$notificationStore.success = {
-									message: inviteOnly
-										? 'Invite-only mode enabled.'
-										: 'Open registration enabled.',
+									message: inviteOnly ? 'Invite-only mode enabled.' : 'Open registration enabled.',
 								};
 							} else if (result.type === 'failure') {
 								inviteOnly = !inviteOnly;

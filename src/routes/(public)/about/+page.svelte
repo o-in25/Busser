@@ -165,9 +165,9 @@
 							Build Your Cocktail Catalog
 						</h3>
 						<p class="text-sm text-muted-foreground mb-3">
-							Add cocktail recipes to your catalog with detailed ingredients and preparation methods.
-							Each recipe links to items in your inventory, so Busser knows exactly what you need to
-							make each drink.
+							Add cocktail recipes to your catalog with detailed ingredients and preparation
+							methods. Each recipe links to items in your inventory, so Busser knows exactly what
+							you need to make each drink.
 						</p>
 						<div class="bg-muted/50 rounded-lg p-3 text-sm mb-3">
 							<p class="font-medium mb-2 flex items-center gap-2">
@@ -204,8 +204,8 @@
 								Smart Features
 							</p>
 							<p class="text-muted-foreground">
-								Busser automatically calculates the ABV of your cocktails, shows which drinks you can
-								make with your current inventory, and even suggests what's "almost available" if
+								Busser automatically calculates the ABV of your cocktails, shows which drinks you
+								can make with your current inventory, and even suggests what's "almost available" if
 								you're just one ingredient short.
 							</p>
 						</div>
@@ -231,8 +231,8 @@
 						</h3>
 						<p class="text-sm text-muted-foreground mb-3">
 							With your inventory stocked and recipes cataloged, Busser becomes your bartending
-							companion. Browse your catalog filtered by what you can make tonight, explore by spirit
-							category, or use the tools section for helpful calculators.
+							companion. Browse your catalog filtered by what you can make tonight, explore by
+							spirit category, or use the tools section for helpful calculators.
 						</p>
 						<div class="flex flex-wrap gap-2">
 							<Badge variant="secondary" class="text-xs">

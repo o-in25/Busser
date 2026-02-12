@@ -245,7 +245,9 @@
 						/>
 					</button>
 					<!-- action buttons overlay -->
-					<div class="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+					<div
+						class="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200"
+					>
 						<button
 							type="button"
 							onclick={openLightbox}

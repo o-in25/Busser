@@ -86,7 +86,10 @@ export class CatalogRepository extends BaseRepository {
 					query = query.where('r.recipeStrengthRating', '<=', advancedFilter.strengthMax);
 				}
 
-				if (advancedFilter.ingredientCountMin !== undefined || advancedFilter.ingredientCountMax !== undefined) {
+				if (
+					advancedFilter.ingredientCountMin !== undefined ||
+					advancedFilter.ingredientCountMax !== undefined
+				) {
 					query = query.whereIn(
 						'r.RecipeId',
 						this.db
@@ -95,14 +98,19 @@ export class CatalogRepository extends BaseRepository {
 							.groupBy('rs.RecipeId')
 							.having(
 								this.db.query.raw(
-									advancedFilter.ingredientCountMin !== undefined && advancedFilter.ingredientCountMax !== undefined
+									advancedFilter.ingredientCountMin !== undefined &&
+										advancedFilter.ingredientCountMax !== undefined
 										? 'COUNT(rs.RecipeStepId) >= ? AND COUNT(rs.RecipeStepId) <= ?'
 										: advancedFilter.ingredientCountMin !== undefined
 											? 'COUNT(rs.RecipeStepId) >= ?'
 											: 'COUNT(rs.RecipeStepId) <= ?',
 									[
-										...(advancedFilter.ingredientCountMin !== undefined ? [advancedFilter.ingredientCountMin] : []),
-										...(advancedFilter.ingredientCountMax !== undefined ? [advancedFilter.ingredientCountMax] : []),
+										...(advancedFilter.ingredientCountMin !== undefined
+											? [advancedFilter.ingredientCountMin]
+											: []),
+										...(advancedFilter.ingredientCountMax !== undefined
+											? [advancedFilter.ingredientCountMax]
+											: []),
 									]
 								)
 							)
@@ -569,6 +577,21 @@ export class CatalogRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error('Error toggling featured:', error.message);
 			return { status: 'error', error: 'Failed to toggle featured.' };
+		}
+	}
+
+	async getRecipesByIds(workspaceId: string, recipeIds: number[]): Promise<View.BasicRecipe[]> {
+		if (recipeIds.length === 0) return [];
+		try {
+			const dbResult = await this.db
+				.table('basicrecipe')
+				.where('WorkspaceId', workspaceId)
+				.whereIn('RecipeId', recipeIds)
+				.select();
+			return dbResult as View.BasicRecipe[];
+		} catch (error: any) {
+			console.error('Error getting recipes by ids:', error.message);
+			return [];
 		}
 	}
 

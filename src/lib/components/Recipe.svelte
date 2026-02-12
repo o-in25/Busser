@@ -21,7 +21,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { calculateAbv, getDilutionInfo, getMethodFromTechniqueId } from '$lib/math';
+	import { calculateAbv, getDilutionInfo } from '$lib/math';
 	import type { View } from '$lib/types';
 	import type { RecipeInsightsOutput } from '$lib/types/generators';
 	import { cn } from '$lib/utils';
@@ -78,11 +78,13 @@
 	);
 
 	// dilution and volume calculations
-	let dilutionInfo = $derived(getDilutionInfo(initialRecipeSteps, recipe.recipeTechniqueDescriptionId || 1));
-	let dilutionMethod = $derived(getMethodFromTechniqueId(recipe.recipeTechniqueDescriptionId || 1));
+	let dilutionInfo = $derived(
+		getDilutionInfo(initialRecipeSteps, recipe.recipeTechniqueDescriptionId || 1)
+	);
+	// let dilutionMethod = $derived(getMethodFromTechniqueId(recipe.recipeTechniqueDescriptionId || 1));
 	let preVolumeMl = $derived(dilutionInfo.volumeMl);
 	let preVolumeOz = $derived((preVolumeMl / 30).toFixed(1));
-	let dilutionMl = $derived(dilutionInfo.dilutionMl);
+	// let dilutionMl = $derived(dilutionInfo.dilutionMl);
 	let dilutionOz = $derived(dilutionInfo.dilutionOz.toFixed(1));
 	let finalVolumeMl = $derived(dilutionInfo.finalVolumeMl);
 	let finalVolumeOz = $derived((finalVolumeMl / 30).toFixed(1));
@@ -426,7 +428,9 @@
 					</div>
 					<div class="flex items-center justify-between">
 						<span class="text-sm text-muted-foreground">Cost per oz</span>
-						<span class="text-sm font-medium">${(estimatedCost / parseFloat(finalVolumeOz)).toFixed(2)}</span>
+						<span class="text-sm font-medium"
+							>${(estimatedCost / parseFloat(finalVolumeOz)).toFixed(2)}</span
+						>
 					</div>
 				{:else}
 					<p class="text-sm text-muted-foreground italic">No cost data available</p>

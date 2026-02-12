@@ -117,7 +117,9 @@
 						{/if}
 					</div>
 					{#if isSelected}
-						<div class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground shrink-0">
+						<div
+							class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground shrink-0"
+						>
 							<Check class="h-4 w-4" />
 						</div>
 					{/if}

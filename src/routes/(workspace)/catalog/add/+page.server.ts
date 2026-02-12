@@ -87,7 +87,13 @@ export const actions: Actions = {
 			recipeVersatilityRating,
 		};
 
-		const result = await catalogRepo.save(workspaceId, recipe, recipeSteps, recipeImageUrl, recipeImageCleared);
+		const result = await catalogRepo.save(
+			workspaceId,
+			recipe,
+			recipeSteps,
+			recipeImageUrl,
+			recipeImageCleared
+		);
 
 		if (result.status === 'error') {
 			return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: result.error });

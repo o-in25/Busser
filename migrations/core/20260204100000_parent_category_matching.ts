@@ -34,9 +34,11 @@ export async function up(knex: Knex): Promise<void> {
 
 	// Create new parent categories (Gin, Whiskey, Vodka, Tequila, Brandy, Liqueur)
 	// Use a workspace from existing categories
-	const [{ workspaceId }] = await knex.raw(
-		`SELECT DISTINCT WorkspaceId as workspaceId FROM category WHERE WorkspaceId IS NOT NULL LIMIT 1`
-	).then((r: any) => r[0] || [{ workspaceId: null }]);
+	const [{ workspaceId }] = await knex
+		.raw(
+			`SELECT DISTINCT WorkspaceId as workspaceId FROM category WHERE WorkspaceId IS NOT NULL LIMIT 1`
+		)
+		.then((r: any) => r[0] || [{ workspaceId: null }]);
 
 	if (workspaceId) {
 		// Insert new parent categories (only if they don't already exist)
@@ -69,13 +71,13 @@ export async function up(knex: Knex): Promise<void> {
 			return row?.CategoryId || null;
 		};
 
-		const rumId = await getExistingId('Rum');       // id 71
-		const juiceId = await getExistingId('Juice');     // id 5
-		const syrupId = await getExistingId('Syrup');     // id 20
+		const rumId = await getExistingId('Rum'); // id 71
+		const juiceId = await getExistingId('Juice'); // id 5
+		const syrupId = await getExistingId('Syrup'); // id 20
 		const bittersId = await getExistingId('Bitters'); // id 3
 		const vermouthId = await getExistingId('Vermouth'); // id 6
-		const sodaId = await getExistingId('Soda');       // id 67
-		const creamId = await getExistingId('Cream');     // id 74
+		const sodaId = await getExistingId('Soda'); // id 67
+		// const creamId = await getExistingId('Cream'); // id 74
 
 		// Helper to set ParentCategoryId for a list of child category names
 		const setParent = async (parentId: number | null, childNames: string[]) => {
@@ -90,8 +92,12 @@ export async function up(knex: Knex): Promise<void> {
 
 		// Gin children
 		await setParent(ginId, [
-			'London Dry Gin', 'Plymouth Gin', 'Old Tom Gin', 'Genever Gin',
-			'Barrel Aged Gin', 'Beefeater Gin',
+			'London Dry Gin',
+			'Plymouth Gin',
+			'Old Tom Gin',
+			'Genever Gin',
+			'Barrel Aged Gin',
+			'Beefeater Gin',
 		]);
 
 		// Whiskey children
@@ -99,8 +105,12 @@ export async function up(knex: Knex): Promise<void> {
 
 		// Rum children
 		await setParent(rumId, [
-			'White Rum', 'Dark Rum', 'Overproof Rum', 'Gold Rum',
-			'Jamaican Rum', 'Rhum Agricole (white)',
+			'White Rum',
+			'Dark Rum',
+			'Overproof Rum',
+			'Gold Rum',
+			'Jamaican Rum',
+			'Rhum Agricole (white)',
 		]);
 
 		// Vodka children
@@ -117,8 +127,12 @@ export async function up(knex: Knex): Promise<void> {
 
 		// Syrup children
 		await setParent(syrupId, [
-			'Simple Syrup', 'Honey Syrup', 'Agave Syrup',
-			'Cinnamon Simple Syrup', 'Orgeat Syrup', 'Grenadine',
+			'Simple Syrup',
+			'Honey Syrup',
+			'Agave Syrup',
+			'Cinnamon Simple Syrup',
+			'Orgeat Syrup',
+			'Grenadine',
 		]);
 
 		// Bitters children
@@ -136,8 +150,12 @@ export async function up(knex: Knex): Promise<void> {
 
 		// Liqueur children
 		await setParent(liqueurId, [
-			'Herbal Liqueur', 'Orange Liqueur', 'Blackcurrant Liqueur',
-			'Cherry Heering', 'Curaçao', 'Amaro',
+			'Herbal Liqueur',
+			'Orange Liqueur',
+			'Blackcurrant Liqueur',
+			'Cherry Heering',
+			'Curaçao',
+			'Amaro',
 		]);
 	}
 

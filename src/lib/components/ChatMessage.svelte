@@ -32,8 +32,10 @@
 			? 'bg-primary text-primary-foreground rounded-br-md'
 			: 'bg-muted rounded-bl-md'}"
 	>
-		<p class="whitespace-pre-wrap">{content}{#if isStreaming}<span
+		<p class="whitespace-pre-wrap">
+			{content}{#if isStreaming}<span
 					class="inline-block w-1.5 h-4 ml-0.5 bg-current animate-pulse rounded-sm"
-				></span>{/if}</p>
+				></span>{/if}
+		</p>
 	</div>
 </div>

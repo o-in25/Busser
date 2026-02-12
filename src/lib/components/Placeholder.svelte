@@ -1,5 +1,9 @@
 <script lang="ts">
-	let { id, src = '', size = 'md' }: { id: string; src?: string; size?: 'sm' | 'md' | 'lg' } = $props();
+	let {
+		id,
+		src = '',
+		size = 'md',
+	}: { id: string; src?: string; size?: 'sm' | 'md' | 'lg' } = $props();
 
 	const sizeClasses = {
 		sm: 'w-8 h-8',
@@ -16,7 +20,9 @@
 
 <div
 	{id}
-	class="cursor-pointer relative {sizeClasses[size]} overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600"
+	class="cursor-pointer relative {sizeClasses[
+		size
+	]} overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600"
 >
 	{#if src}
 		<img {src} alt="Avatar" class="w-full h-full object-cover" />

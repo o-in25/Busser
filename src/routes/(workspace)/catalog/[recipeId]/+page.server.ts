@@ -31,9 +31,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	}
 
 	// Check if this recipe is favorited by the user
-	const isFavorite = userId
-		? await userRepo.isFavorite(userId, Number(recipeId))
-		: false;
+	const isFavorite = userId ? await userRepo.isFavorite(userId, Number(recipeId)) : false;
 
 	// Check if this recipe is featured in the workspace
 	const isFeatured = await catalogRepo.isFeatured(workspaceId, Number(recipeId));

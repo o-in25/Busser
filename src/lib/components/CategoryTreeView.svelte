@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		ChevronDown,
-		ChevronRight,
-		FolderOpen,
-		Package,
-		Pencil,
-		Trash2,
-	} from 'lucide-svelte';
+	import { ChevronDown, ChevronRight, FolderOpen, Package, Pencil, Trash2 } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 
 	import { Badge } from '$lib/components/ui/badge';
@@ -156,9 +149,7 @@
 				{#if expandedSubs.has(sub.categoryId)}
 					<div class="ml-6 border-l pl-2 mt-0.5" transition:slide={{ duration: 150 }}>
 						{#if subProducts.length === 0}
-							<div class="text-xs text-muted-foreground px-2 py-1.5 italic">
-								No products
-							</div>
+							<div class="text-xs text-muted-foreground px-2 py-1.5 italic">No products</div>
 						{:else}
 							{#each subProducts as product (product.productId)}
 								<div
@@ -205,11 +196,7 @@
 			</Dialog.Description>
 		</Dialog.Header>
 		<Dialog.Footer>
-			<Button
-				variant="outline"
-				onclick={() => (deleteDialogOpen = false)}
-				disabled={isDeleting}
-			>
+			<Button variant="outline" onclick={() => (deleteDialogOpen = false)} disabled={isDeleting}>
 				Cancel
 			</Button>
 			<Button variant="destructive" onclick={confirmDelete} disabled={isDeleting}>

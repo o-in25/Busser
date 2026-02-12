@@ -265,7 +265,11 @@
 		enctype="multipart/form-data"
 	>
 		<!-- Mobile Wizard View -->
-		<InventoryFormWizard steps={wizardSteps} bind:currentStep={currentWizardStep} canProceed={canProceedWizard}>
+		<InventoryFormWizard
+			steps={wizardSteps}
+			bind:currentStep={currentWizardStep}
+			canProceed={canProceedWizard}
+		>
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Basic Info Step -->
@@ -320,7 +324,9 @@
 									id="productPricePerUnit-mobile"
 									step="any"
 									required
-									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit ? 'border-destructive' : ''}"
+									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit
+										? 'border-destructive'
+										: ''}"
 									value={productPricePerUnit}
 									oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
 									onblur={() => (touched.productPricePerUnit = true)}
@@ -339,7 +345,10 @@
 									type="number"
 									id="productUnitSizeInMilliliters-mobile"
 									required
-									class="pr-10 {touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters ? 'border-destructive' : ''}"
+									class="pr-10 {touched.productUnitSizeInMilliliters &&
+									errors.productUnitSizeInMilliliters
+										? 'border-destructive'
+										: ''}"
 									value={productUnitSizeInMilliliters}
 									oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
 									onblur={() => (touched.productUnitSizeInMilliliters = true)}
@@ -528,7 +537,9 @@
 									name="productPricePerUnit"
 									step="any"
 									required
-									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit ? 'border-destructive' : ''}"
+									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit
+										? 'border-destructive'
+										: ''}"
 									value={productPricePerUnit}
 									oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
 									onblur={() => (touched.productPricePerUnit = true)}
@@ -548,7 +559,10 @@
 									id="productUnitSizeInMilliliters"
 									name="productUnitSizeInMilliliters"
 									required
-									class="pr-10 {touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters ? 'border-destructive' : ''}"
+									class="pr-10 {touched.productUnitSizeInMilliliters &&
+									errors.productUnitSizeInMilliliters
+										? 'border-destructive'
+										: ''}"
 									value={productUnitSizeInMilliliters}
 									oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
 									onblur={() => (touched.productUnitSizeInMilliliters = true)}
@@ -701,9 +715,7 @@
 		<!-- Submit buttons (desktop only - mobile uses wizard buttons) -->
 		<div class="hidden md:flex justify-end gap-3 mt-6">
 			{#if action === 'edit' && canModify}
-				<Button type="button" variant="destructive" onclick={openModal}>
-					Delete
-				</Button>
+				<Button type="button" variant="destructive" onclick={openModal}>Delete</Button>
 			{/if}
 			<Button type="submit" disabled={!isFormValid}>Save</Button>
 		</div>
@@ -712,12 +724,7 @@
 		{#if action === 'edit' && canModify}
 			<div class="md:hidden mt-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
 				<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
-				<Button
-					type="button"
-					variant="destructive"
-					class="w-full"
-					onclick={openModal}
-				>
+				<Button type="button" variant="destructive" class="w-full" onclick={openModal}>
 					Delete Item
 				</Button>
 			</div>

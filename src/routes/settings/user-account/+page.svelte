@@ -374,8 +374,8 @@
 								class="w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all {selectedWorkspaceId ===
 								workspace.workspaceId
 									? 'border-primary bg-primary/5'
-									: 'border-transparent bg-muted/30 hover:bg-muted/50'} {data.workspaces
-									.length === 1
+									: 'border-transparent bg-muted/30 hover:bg-muted/50'} {data.workspaces.length ===
+								1
 									? 'opacity-60 cursor-not-allowed'
 									: ''}"
 							>
@@ -476,9 +476,7 @@
 					</div>
 					<div>
 						<p class="font-medium">Sign Out</p>
-						<p class="text-sm text-muted-foreground">
-							Sign out of your account on this device
-						</p>
+						<p class="text-sm text-muted-foreground">Sign out of your account on this device</p>
 					</div>
 				</div>
 				<Button variant="outline" onclick={handleSignOut} disabled={isSigningOut}>
@@ -492,7 +490,9 @@
 
 			<!-- Delete Account (hidden for admins) -->
 			{#if !isAdmin}
-				<div class="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/20">
+				<div
+					class="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/20"
+				>
 					<div class="flex items-center gap-3">
 						<div class="p-2 rounded-lg bg-destructive/10">
 							<Trash2 class="h-4 w-4 text-destructive" />
@@ -506,9 +506,7 @@
 					</div>
 					<Dialog.Root bind:open={deleteDialogOpen}>
 						<Dialog.Trigger>
-							<Button variant="destructive">
-								Delete Account
-							</Button>
+							<Button variant="destructive">Delete Account</Button>
 						</Dialog.Trigger>
 						<Dialog.Content>
 							<Dialog.Header>
@@ -522,9 +520,7 @@
 								</Dialog.Description>
 							</Dialog.Header>
 							<Dialog.Footer>
-								<Button variant="outline" onclick={() => (deleteDialogOpen = false)}>
-									Cancel
-								</Button>
+								<Button variant="outline" onclick={() => (deleteDialogOpen = false)}>Cancel</Button>
 								<form
 									method="POST"
 									action="?/deleteAccount"

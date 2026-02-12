@@ -30,7 +30,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			const result = await generate('inventory-image', { subject, description, customPrompt });
 			return json(result);
 		} else {
-			const result = await generate('catalog-image', { subject, ingredients, technique, customPrompt });
+			const result = await generate('catalog-image', {
+				subject,
+				ingredients,
+				technique,
+				customPrompt,
+			});
 			return json(result);
 		}
 	} catch (err: unknown) {

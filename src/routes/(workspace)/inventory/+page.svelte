@@ -603,7 +603,9 @@
 {:else if viewMode === 'table'}
 	<!-- Bulk Action Bar -->
 	{#if canModify && selectedIds.length > 0}
-		<div class="sticky top-0 z-10 mb-4 flex items-center gap-3 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm">
+		<div
+			class="sticky top-0 z-10 mb-4 flex items-center gap-3 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm"
+		>
 			<span class="text-sm font-medium">{selectedIds.length} selected</span>
 			<div class="flex-1"></div>
 			<Button
@@ -742,11 +744,16 @@
 		<Dialog.Header>
 			<Dialog.Title>Delete {selectedIds.length} item(s)?</Dialog.Title>
 			<Dialog.Description>
-				This will permanently remove the selected products from your inventory. This action cannot be undone.
+				This will permanently remove the selected products from your inventory. This action cannot
+				be undone.
 			</Dialog.Description>
 		</Dialog.Header>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => (deleteDialogOpen = false)} disabled={bulkActionLoading}>
+			<Button
+				variant="outline"
+				onclick={() => (deleteDialogOpen = false)}
+				disabled={bulkActionLoading}
+			>
 				Cancel
 			</Button>
 			<Button variant="destructive" onclick={handleBulkDelete} disabled={bulkActionLoading}>

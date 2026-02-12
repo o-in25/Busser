@@ -106,7 +106,12 @@ export const actions: Actions = {
 			productDescription,
 		} as Product;
 
-		const result = await inventoryRepo.update(workspaceId, product, productImageUrl, productImageCleared);
+		const result = await inventoryRepo.update(
+			workspaceId,
+			product,
+			productImageUrl,
+			productImageCleared
+		);
 
 		if (result.status === 'error') {
 			return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: result.error });

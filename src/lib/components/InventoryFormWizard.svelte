@@ -116,7 +116,12 @@
 		</Button>
 
 		{#if currentStep < steps.length - 1}
-			<Button type="button" onclick={nextStep} disabled={!canProceed} class="flex items-center gap-2">
+			<Button
+				type="button"
+				onclick={nextStep}
+				disabled={!canProceed}
+				class="flex items-center gap-2"
+			>
 				Next
 				<ChevronRight class="h-4 w-4" />
 			</Button>

@@ -105,7 +105,6 @@
 
 			stopProgressAnimation();
 			updateValue(result.description);
-
 		} catch (error: unknown) {
 			console.error(error);
 			errorMessage = error instanceof Error ? error.message : 'Could not generate description.';
