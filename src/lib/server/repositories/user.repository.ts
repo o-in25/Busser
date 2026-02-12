@@ -620,6 +620,14 @@ export class UserRepository extends BaseRepository {
 					joinedDate: Logger.now(),
 				});
 
+				// add user to global catalog as viewer
+				await trx('workspaceUser').insert({
+					workspaceId: 'ws-global-catalog',
+					userId: user.userId,
+					workspaceRole: 'viewer',
+					joinedDate: Logger.now(),
+				});
+
 				// if invitation was for a specific workspace, add user to that workspace too
 				if (invitation?.workspaceId && invitation?.workspaceRole) {
 					await trx('workspaceUser').insert({
