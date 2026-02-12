@@ -572,6 +572,21 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
+	async getRecipesByIds(workspaceId: string, recipeIds: number[]): Promise<View.BasicRecipe[]> {
+		if (recipeIds.length === 0) return [];
+		try {
+			const dbResult = await this.db
+				.table('basicrecipe')
+				.where('WorkspaceId', workspaceId)
+				.whereIn('RecipeId', recipeIds)
+				.select();
+			return dbResult as View.BasicRecipe[];
+		} catch (error: any) {
+			console.error('Error getting recipes by ids:', error.message);
+			return [];
+		}
+	}
+
 	async reorderFeatured(workspaceId: string, orderedRecipeIds: number[]): Promise<QueryResult> {
 		try {
 			await this.db.query.transaction(async (trx) => {

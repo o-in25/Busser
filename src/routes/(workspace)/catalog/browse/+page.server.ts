@@ -1,5 +1,6 @@
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
+import { getFavoriteRecipes } from '$lib/server/user-settings';
 import { calculateOverallScore } from '$lib/math';
 import type { AdvancedFilter } from '$lib/types';
 
@@ -63,7 +64,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			),
 			catalogRepo.getSpirits(),
 			userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
-			userId ? userRepo.getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
+			userId ? getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
 			catalogRepo.getFeatured(workspaceId),
 			catalogRepo.getPreparationMethods(),
 			ingredient ? inventoryRepo.findById(workspaceId, parseInt(ingredient)) : Promise.resolve(null),
