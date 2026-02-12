@@ -223,7 +223,9 @@ export const actions: Actions = {
 		// verify owner
 		const isOwner = await isWorkspaceOwner(locals.user.userId, workspaceId);
 		if (!isOwner) {
-			return fail(StatusCodes.FORBIDDEN, { error: 'Only workspace owners can cancel invitations.' });
+			return fail(StatusCodes.FORBIDDEN, {
+				error: 'Only workspace owners can cancel invitations.',
+			});
 		}
 
 		const formData = await request.formData();

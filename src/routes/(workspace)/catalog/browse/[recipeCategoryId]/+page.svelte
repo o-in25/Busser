@@ -13,7 +13,7 @@
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -351,8 +351,9 @@
 					{#if searchInput}
 						No recipes match your search. Try adjusting your search terms.
 					{:else}
-						You haven't added any {(data.spirit.recipeCategoryDescription || 'spirit').toLowerCase()} cocktails
-						yet.
+						You haven't added any {(
+							data.spirit.recipeCategoryDescription || 'spirit'
+						).toLowerCase()} cocktails yet.
 					{/if}
 				</p>
 				{#if searchInput}

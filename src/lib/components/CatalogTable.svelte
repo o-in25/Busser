@@ -19,10 +19,7 @@
 			>
 				{#if recipe.recipeImageUrl}
 					<Avatar class="h-12 w-12 flex-shrink-0">
-						<AvatarImage
-							src={recipe.recipeImageUrl}
-							alt={recipe.recipeDescription || ''}
-						/>
+						<AvatarImage src={recipe.recipeImageUrl} alt={recipe.recipeDescription || ''} />
 						<AvatarFallback>{recipe.recipeName?.charAt(0) || 'R'}</AvatarFallback>
 					</Avatar>
 				{:else}

@@ -17,7 +17,8 @@ export const load = (async () => {
 	// Filter to alcoholic recipes only (those with at least one step with productProof > 0)
 	// Use type guard to ensure we have non-null results
 	const alcoholicRecipes = recipesWithSteps.filter(
-		(r): r is NonNullable<typeof r> => r != null && r.recipeSteps.some((step) => step.productProof > 0)
+		(r): r is NonNullable<typeof r> =>
+			r != null && r.recipeSteps.some((step) => step.productProof > 0)
 	);
 
 	return { bacCalculatorRecipes: alcoholicRecipes };

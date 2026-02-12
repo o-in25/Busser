@@ -1,17 +1,12 @@
 <script lang="ts">
-	import { X } from 'lucide-svelte';
-
 	import Autocomplete from '$lib/components/Autocomplete.svelte';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import Slider from '$lib/components/ui/slider/slider.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import type { PreparationMethod } from '$lib/types';
-
 	let {
 		open = $bindable(false),
 		preparationMethods = [],
@@ -54,7 +49,9 @@
 
 	const methodLabel = $derived.by(() => {
 		if (!selectedMethod) return 'Any method';
-		const m = preparationMethods.find((p) => String(p.recipeTechniqueDescriptionId) === selectedMethod);
+		const m = preparationMethods.find(
+			(p) => String(p.recipeTechniqueDescriptionId) === selectedMethod
+		);
 		return m?.recipeTechniqueDescriptionText || 'Any method';
 	});
 
@@ -91,9 +88,7 @@
 	<Dialog.Content class="sm:max-w-lg max-h-[85vh] overflow-y-auto">
 		<Dialog.Header>
 			<Dialog.Title>Advanced Search</Dialog.Title>
-			<Dialog.Description>
-				Narrow down recipes with detailed filters
-			</Dialog.Description>
+			<Dialog.Description>Narrow down recipes with detailed filters</Dialog.Description>
 		</Dialog.Header>
 
 		<div class="space-y-6 py-4">
@@ -101,7 +96,9 @@
 			<div class="flex items-center justify-between rounded-lg border p-4">
 				<div class="space-y-0.5">
 					<Label>Ready to Make</Label>
-					<p class="text-sm text-muted-foreground">Only show recipes you have all ingredients for</p>
+					<p class="text-sm text-muted-foreground">
+						Only show recipes you have all ingredients for
+					</p>
 				</div>
 				<Switch bind:checked={readyToMake} />
 			</div>
@@ -144,7 +141,9 @@
 			<div class="space-y-3">
 				<div class="flex items-center justify-between">
 					<Label>Number of Ingredients</Label>
-					<span class="text-sm text-muted-foreground">{ingredientCountMin} - {ingredientCountMax}</span>
+					<span class="text-sm text-muted-foreground"
+						>{ingredientCountMin} - {ingredientCountMax}</span
+					>
 				</div>
 				<div class="flex items-center gap-3">
 					<span class="text-xs text-muted-foreground w-4">0</span>
@@ -189,7 +188,9 @@
 			<div class="space-y-3">
 				<div class="flex items-center justify-between">
 					<Label>Overall Rating</Label>
-					<span class="text-sm text-muted-foreground">{ratingMin.toFixed(1)} - {ratingMax.toFixed(1)}</span>
+					<span class="text-sm text-muted-foreground"
+						>{ratingMin.toFixed(1)} - {ratingMax.toFixed(1)}</span
+					>
 				</div>
 				<div class="flex items-center gap-3">
 					<span class="text-xs text-muted-foreground w-4">0</span>

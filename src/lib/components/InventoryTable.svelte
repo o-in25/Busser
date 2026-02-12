@@ -30,9 +30,8 @@
 	const toggleSelection = (productId: number | null) => {
 		if (!productId) return;
 		const idx = selectedIds.indexOf(productId);
-		const next = idx >= 0
-			? selectedIds.filter((id) => id !== productId)
-			: [...selectedIds, productId];
+		const next =
+			idx >= 0 ? selectedIds.filter((id) => id !== productId) : [...selectedIds, productId];
 		selectedIds = next;
 		onSelectionChange?.(next);
 	};
@@ -164,7 +163,10 @@
 						{#if product.productId && recipeUsage[product.productId]}
 							<div class="flex justify-center">
 								<a href="/catalog/browse?ingredient={product.productId}">
-									<Badge variant="secondary" class="gap-1 hover:bg-secondary/80 transition-colors cursor-pointer">
+									<Badge
+										variant="secondary"
+										class="gap-1 hover:bg-secondary/80 transition-colors cursor-pointer"
+									>
 										<FlaskConical class="h-3 w-3" />
 										{recipeUsage[product.productId]}
 									</Badge>

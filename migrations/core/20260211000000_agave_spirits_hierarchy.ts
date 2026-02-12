@@ -46,12 +46,10 @@ export async function up(knex: Knex): Promise<void> {
 		.where('RecipeCategoryId', 7)
 		.update({ RecipeCategoryDescription: 'Tequila & Mezcal' });
 
-	await knex('recipecategorydescription')
-		.where('RecipeCategoryId', 7)
-		.update({
-			RecipeCategoryDescriptionText:
-				'Tequila and mezcal are agave-based spirits from Mexico. Tequila, made exclusively from blue Weber agave, is known for its clean, bright flavor. Mezcal, produced from a wider variety of agave plants, is distinguished by its smoky, complex character. Together they form the agave spirits family.',
-		});
+	await knex('recipecategorydescription').where('RecipeCategoryId', 7).update({
+		RecipeCategoryDescriptionText:
+			'Tequila and mezcal are agave-based spirits from Mexico. Tequila, made exclusively from blue Weber agave, is known for its clean, bright flavor. Mezcal, produced from a wider variety of agave plants, is distinguished by its smoky, complex character. Together they form the agave spirits family.',
+	});
 }
 
 export async function down(knex: Knex): Promise<void> {
@@ -82,9 +80,7 @@ export async function down(knex: Knex): Promise<void> {
 		}
 
 		// Delete Agave Spirits
-		await knex('category')
-			.where('CategoryId', agaveSpirits.CategoryId)
-			.del();
+		await knex('category').where('CategoryId', agaveSpirits.CategoryId).del();
 	}
 
 	// Revert recipecategory
@@ -92,10 +88,8 @@ export async function down(knex: Knex): Promise<void> {
 		.where('RecipeCategoryId', 7)
 		.update({ RecipeCategoryDescription: 'Tequila' });
 
-	await knex('recipecategorydescription')
-		.where('RecipeCategoryId', 7)
-		.update({
-			RecipeCategoryDescriptionText:
-				'Tequila is a distilled alcoholic beverage made primarily from the blue agave plant, native to the area surrounding the city of Tequila in the Mexican state of Jalisco. It is a type of mezcal, but with stricter production regulations and specific plant requirements.',
-		});
+	await knex('recipecategorydescription').where('RecipeCategoryId', 7).update({
+		RecipeCategoryDescriptionText:
+			'Tequila is a distilled alcoholic beverage made primarily from the blue agave plant, native to the area surrounding the city of Tequila in the Mexican state of Jalisco. It is a type of mezcal, but with stricter production regulations and specific plant requirements.',
+	});
 }

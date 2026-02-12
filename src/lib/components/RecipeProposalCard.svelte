@@ -111,7 +111,9 @@
 		</Button>
 		<Button size="sm" onclick={onconfirm} disabled={isConfirming}>
 			{#if isConfirming}
-				<span class="inline-block w-3.5 h-3.5 mr-1 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+				<span
+					class="inline-block w-3.5 h-3.5 mr-1 border-2 border-current border-t-transparent rounded-full animate-spin"
+				></span>
 				Creating...
 			{:else}
 				<Check class="h-3.5 w-3.5 mr-1" />

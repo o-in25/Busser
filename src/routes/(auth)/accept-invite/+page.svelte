@@ -42,7 +42,9 @@
 <div class="min-h-screen flex items-center justify-center p-4">
 	<Card.Root class="w-full max-w-md">
 		<Card.Header class="text-center">
-			<div class="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+			<div
+				class="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center"
+			>
 				<Building2 class="h-6 w-6 text-primary" />
 			</div>
 			<Card.Title class="text-2xl">Workspace Invitation</Card.Title>
@@ -51,7 +53,9 @@
 			{#if data.error}
 				<!-- Error state -->
 				<div class="text-center space-y-4">
-					<div class="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
+					<div
+						class="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center"
+					>
 						<AlertCircle class="h-6 w-6 text-destructive" />
 					</div>
 					<p class="text-muted-foreground">{data.error}</p>

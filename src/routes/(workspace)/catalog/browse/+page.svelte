@@ -18,8 +18,8 @@
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
-	import { enhance } from '$app/forms';
-	import { goto, invalidateAll } from '$app/navigation';
+
+	import { goto } from '$app/navigation';
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
@@ -49,7 +49,17 @@
 
 	// Advanced search
 	let advancedSearchOpen = $state(false);
-	const advancedParamKeys = ['readyToMake', 'ingredient', 'strengthMin', 'strengthMax', 'ingredientCountMin', 'ingredientCountMax', 'method', 'ratingMin', 'ratingMax'] as const;
+	const advancedParamKeys = [
+		'readyToMake',
+		'ingredient',
+		'strengthMin',
+		'strengthMax',
+		'ingredientCountMin',
+		'ingredientCountMax',
+		'method',
+		'ratingMin',
+		'ratingMax',
+	] as const;
 	const advancedFilterCount = $derived(advancedParamKeys.filter((k) => !!data.filters[k]).length);
 
 	// Track favorites/featured for optimistic updates
@@ -426,7 +436,10 @@
 			{#if data.filters.readyToMake}
 				<Badge variant="secondary" class="gap-1">
 					Ready to Make
-					<button onclick={() => clearAdvancedFilter('readyToMake')} class="ml-1 hover:text-destructive">
+					<button
+						onclick={() => clearAdvancedFilter('readyToMake')}
+						class="ml-1 hover:text-destructive"
+					>
 						<X class="h-3 w-3" />
 					</button>
 				</Badge>
@@ -434,7 +447,10 @@
 			{#if data.filters.ingredient}
 				<Badge variant="secondary" class="gap-1">
 					Ingredient: {data.filters.ingredientName || data.filters.ingredient}
-					<button onclick={() => clearAdvancedFilter('ingredient')} class="ml-1 hover:text-destructive">
+					<button
+						onclick={() => clearAdvancedFilter('ingredient')}
+						class="ml-1 hover:text-destructive"
+					>
 						<X class="h-3 w-3" />
 					</button>
 				</Badge>
@@ -442,21 +458,30 @@
 			{#if data.filters.strengthMin || data.filters.strengthMax}
 				<Badge variant="secondary" class="gap-1">
 					Strength: {data.filters.strengthMin || '0'}-{data.filters.strengthMax || '10'}
-					<button onclick={() => clearAdvancedFilter('strengthMin', 'strengthMax')} class="ml-1 hover:text-destructive">
+					<button
+						onclick={() => clearAdvancedFilter('strengthMin', 'strengthMax')}
+						class="ml-1 hover:text-destructive"
+					>
 						<X class="h-3 w-3" />
 					</button>
 				</Badge>
 			{/if}
 			{#if data.filters.ingredientCountMin || data.filters.ingredientCountMax}
 				<Badge variant="secondary" class="gap-1">
-					Ingredients: {data.filters.ingredientCountMin || '0'}-{data.filters.ingredientCountMax || '15'}
-					<button onclick={() => clearAdvancedFilter('ingredientCountMin', 'ingredientCountMax')} class="ml-1 hover:text-destructive">
+					Ingredients: {data.filters.ingredientCountMin || '0'}-{data.filters.ingredientCountMax ||
+						'15'}
+					<button
+						onclick={() => clearAdvancedFilter('ingredientCountMin', 'ingredientCountMax')}
+						class="ml-1 hover:text-destructive"
+					>
 						<X class="h-3 w-3" />
 					</button>
 				</Badge>
 			{/if}
 			{#if data.filters.method}
-				{@const pm = data.preparationMethods.find((p) => String(p.recipeTechniqueDescriptionId) === data.filters.method)}
+				{@const pm = data.preparationMethods.find(
+					(p) => String(p.recipeTechniqueDescriptionId) === data.filters.method
+				)}
 				<Badge variant="secondary" class="gap-1">
 					Method: {pm?.recipeTechniqueDescriptionText || data.filters.method}
 					<button onclick={() => clearAdvancedFilter('method')} class="ml-1 hover:text-destructive">
@@ -467,14 +492,15 @@
 			{#if data.filters.ratingMin || data.filters.ratingMax}
 				<Badge variant="secondary" class="gap-1">
 					Rating: {data.filters.ratingMin || '0'}-{data.filters.ratingMax || '10'}
-					<button onclick={() => clearAdvancedFilter('ratingMin', 'ratingMax')} class="ml-1 hover:text-destructive">
+					<button
+						onclick={() => clearAdvancedFilter('ratingMin', 'ratingMax')}
+						class="ml-1 hover:text-destructive"
+					>
 						<X class="h-3 w-3" />
 					</button>
 				</Badge>
 			{/if}
-			<Button variant="ghost" size="sm" onclick={clearAllAdvancedFilters}>
-				Clear all
-			</Button>
+			<Button variant="ghost" size="sm" onclick={clearAllAdvancedFilters}>Clear all</Button>
 		</div>
 	{/if}
 
@@ -499,7 +525,9 @@
 							<Button variant="outline" onclick={clearSearch}>Clear Search</Button>
 						{/if}
 						{#if advancedFilterCount > 0}
-							<Button variant="outline" onclick={clearAllAdvancedFilters}>Clear Advanced Filters</Button>
+							<Button variant="outline" onclick={clearAllAdvancedFilters}
+								>Clear Advanced Filters</Button
+							>
 						{/if}
 					</div>
 				{:else}

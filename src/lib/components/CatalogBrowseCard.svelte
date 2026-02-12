@@ -118,7 +118,9 @@
 			<!-- Content -->
 			<Card.Content class="p-4">
 				<a href="/catalog/{recipe.recipeId}" class="block min-w-0">
-					<h3 class="font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-1">
+					<h3
+						class="font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-1"
+					>
 						{recipe.recipeName}
 					</h3>
 					<p class="text-sm text-muted-foreground line-clamp-2">
@@ -220,7 +222,10 @@
 		<Card.Root class="hover:shadow-md transition-all duration-200">
 			<div class="flex items-center gap-4 p-3">
 				<!-- Thumbnail -->
-				<a href="/catalog/{recipe.recipeId}" class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
+				<a
+					href="/catalog/{recipe.recipeId}"
+					class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden"
+				>
 					{#if recipe.recipeImageUrl}
 						<img
 							src={recipe.recipeImageUrl}

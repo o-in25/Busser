@@ -108,8 +108,7 @@
 							messages[assistantIndex].proposal = event.data as RecipeProposal;
 							scrollToBottom();
 						} else if (event.type === 'error') {
-							messages[assistantIndex].content =
-								'Sorry, something went wrong. Please try again.';
+							messages[assistantIndex].content = 'Sorry, something went wrong. Please try again.';
 						}
 					} catch {
 						// invalid JSON line, skip
@@ -117,8 +116,7 @@
 				}
 			}
 		} catch (err: any) {
-			messages[assistantIndex].content =
-				'Sorry, I encountered an error. Please try again.';
+			messages[assistantIndex].content = 'Sorry, I encountered an error. Please try again.';
 			console.error('Chat error:', err);
 		} finally {
 			isLoading = false;
@@ -195,26 +193,27 @@
 			<div class="flex flex-col items-center justify-center h-full text-center px-4">
 				<!-- Icon -->
 				<div class="relative mb-4">
-					<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
+					<div
+						class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20"
+					>
 						<Sparkles class="h-7 w-7 text-white" />
 					</div>
 				</div>
 
 				<!-- Headline -->
-				<h2 class="text-lg font-semibold bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+				<h2
+					class="text-lg font-semibold bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent"
+				>
 					What are we making?
 				</h2>
 				<p class="text-muted-foreground text-sm mt-1 max-w-xs">
-					Describe a cocktail and I'll build the recipe, check your inventory, and add it to your catalog.
+					Describe a cocktail and I'll build the recipe, check your inventory, and add it to your
+					catalog.
 				</p>
 
 				<!-- Prompt suggestions -->
 				<div class="mt-5 flex flex-col gap-2 w-full max-w-sm">
-					{#each [
-						{ label: 'Classic Negroni', prompt: 'Add a recipe for a Negroni' },
-						{ label: 'Margarita with a specific tequila', prompt: 'Add a Margarita using Codigo 1530 Blanco' },
-						{ label: 'Custom recipe from ingredients', prompt: 'Add this recipe: 2oz bourbon, 1oz sweet vermouth, 2 dashes Angostura bitters' },
-					] as suggestion}
+					{#each [{ label: 'Classic Negroni', prompt: 'Add a recipe for a Negroni' }, { label: 'Margarita with a specific tequila', prompt: 'Add a Margarita using Codigo 1530 Blanco' }, { label: 'Custom recipe from ingredients', prompt: 'Add this recipe: 2oz bourbon, 1oz sweet vermouth, 2 dashes Angostura bitters' }] as suggestion}
 						<button
 							class="group flex items-center gap-3 text-left px-4 py-2.5 rounded-xl border border-border/50 hover:border-violet-500/30 hover:bg-violet-500/5 transition-all cursor-pointer"
 							onclick={() => {
@@ -222,8 +221,13 @@
 								sendMessage();
 							}}
 						>
-							<span class="flex-1 text-sm text-muted-foreground group-hover:text-foreground transition-colors">{suggestion.label}</span>
-							<ArrowRight class="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-violet-500 transition-colors" />
+							<span
+								class="flex-1 text-sm text-muted-foreground group-hover:text-foreground transition-colors"
+								>{suggestion.label}</span
+							>
+							<ArrowRight
+								class="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-violet-500 transition-colors"
+							/>
 						</button>
 					{/each}
 				</div>
@@ -253,14 +257,22 @@
 		<!-- Typing indicator -->
 		{#if isLoading && messages[messages.length - 1]?.content === '' && messages[messages.length - 1]?.role === 'assistant'}
 			<div class="flex gap-3">
-				<div class="flex-shrink-0 w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center">
+				<div
+					class="flex-shrink-0 w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center"
+				>
 					<Bot class="h-4 w-4 text-violet-500" />
 				</div>
 				<div class="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
 					<div class="flex gap-1 items-center">
-						<span class="w-2 h-2 rounded-full bg-muted-foreground/40 animate-[typing_1.4s_ease-in-out_infinite]"></span>
-						<span class="w-2 h-2 rounded-full bg-muted-foreground/40 animate-[typing_1.4s_ease-in-out_0.2s_infinite]"></span>
-						<span class="w-2 h-2 rounded-full bg-muted-foreground/40 animate-[typing_1.4s_ease-in-out_0.4s_infinite]"></span>
+						<span
+							class="w-2 h-2 rounded-full bg-muted-foreground/40 animate-[typing_1.4s_ease-in-out_infinite]"
+						></span>
+						<span
+							class="w-2 h-2 rounded-full bg-muted-foreground/40 animate-[typing_1.4s_ease-in-out_0.2s_infinite]"
+						></span>
+						<span
+							class="w-2 h-2 rounded-full bg-muted-foreground/40 animate-[typing_1.4s_ease-in-out_0.4s_infinite]"
+						></span>
 					</div>
 				</div>
 			</div>
@@ -269,7 +281,13 @@
 
 	<!-- Input -->
 	<div class="border-t p-3">
-		<form class="flex gap-2 items-end" onsubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+		<form
+			class="flex gap-2 items-end"
+			onsubmit={(e) => {
+				e.preventDefault();
+				sendMessage();
+			}}
+		>
 			<textarea
 				bind:this={textareaEl}
 				bind:value={input}
@@ -289,7 +307,9 @@
 
 <style>
 	@keyframes typing {
-		0%, 60%, 100% {
+		0%,
+		60%,
+		100% {
 			opacity: 0.3;
 			transform: scale(0.8);
 		}

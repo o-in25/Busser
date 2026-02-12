@@ -532,7 +532,9 @@
 		<div class="pt-4 border-t space-y-4">
 			<!-- BAC Result -->
 			<div
-				class="p-6 rounded-lg border {colorClasses[impairment.color]} flex flex-col items-center text-center"
+				class="p-6 rounded-lg border {colorClasses[
+					impairment.color
+				]} flex flex-col items-center text-center"
 			>
 				<p class="text-sm font-medium uppercase tracking-wide opacity-75">
 					Estimated Blood Alcohol Content
@@ -544,7 +546,9 @@
 
 			<!-- Time Until Sober -->
 			{#if bacResult > 0}
-				<div class="flex items-center gap-3 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+				<div
+					class="flex items-center gap-3 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20"
+				>
 					<Clock class="h-5 w-5 text-blue-500 shrink-0" />
 					<div class="flex-1">
 						<p class="text-xs text-muted-foreground">Estimated Time Until Sober</p>
@@ -573,8 +577,8 @@
 					<TriangleAlert class="h-4 w-4" />
 					<Alert.Title>Above Legal Limit</Alert.Title>
 					<Alert.Description class="text-sm">
-						Your estimated BAC is at or above the legal driving limit (0.08%) in most U.S. states. Do
-						not drive. Use a designated driver or rideshare service.
+						Your estimated BAC is at or above the legal driving limit (0.08%) in most U.S. states.
+						Do not drive. Use a designated driver or rideshare service.
 					</Alert.Description>
 				</Alert.Root>
 			{/if}

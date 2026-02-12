@@ -240,9 +240,15 @@
 				<div class="space-y-2">
 					<Label class="text-sm">Ingredient Matching</Label>
 					<RadioGroup.Root bind:value={matchMode} class="gap-0.5">
-						<RadioGroup.Item value="EXACT_PRODUCT" class="px-2 py-1.5 text-xs">Exact</RadioGroup.Item>
-						<RadioGroup.Item value="ANY_IN_CATEGORY" class="px-2 py-1.5 text-xs truncate">Any {categoryDisplayName}</RadioGroup.Item>
-						<RadioGroup.Item value="ANY_IN_PARENT_CATEGORY" class="px-2 py-1.5 text-xs truncate">Any {parentCategoryDisplayName}</RadioGroup.Item>
+						<RadioGroup.Item value="EXACT_PRODUCT" class="px-2 py-1.5 text-xs"
+							>Exact</RadioGroup.Item
+						>
+						<RadioGroup.Item value="ANY_IN_CATEGORY" class="px-2 py-1.5 text-xs truncate"
+							>Any {categoryDisplayName}</RadioGroup.Item
+						>
+						<RadioGroup.Item value="ANY_IN_PARENT_CATEGORY" class="px-2 py-1.5 text-xs truncate"
+							>Any {parentCategoryDisplayName}</RadioGroup.Item
+						>
 					</RadioGroup.Root>
 					<p class="text-xs text-muted-foreground">
 						{#if matchMode === 'EXACT_PRODUCT'}

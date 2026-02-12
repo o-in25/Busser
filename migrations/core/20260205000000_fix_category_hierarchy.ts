@@ -11,15 +11,7 @@ import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
 	// Get parent category IDs by name
-	const parentsToUnlink = [
-		'Juice',
-		'Syrup',
-		'Soda',
-		'Bitters',
-		'Vermouth',
-		'Liqueur',
-		'Cream',
-	];
+	const parentsToUnlink = ['Juice', 'Syrup', 'Soda', 'Bitters', 'Vermouth', 'Liqueur', 'Cream'];
 
 	// Set ParentCategoryId = NULL for all children of these categories
 	for (const parentName of parentsToUnlink) {
@@ -50,15 +42,13 @@ export async function up(knex: Knex): Promise<void> {
 				.first();
 
 			if (Number(productCount?.count) === 0) {
-				await knex('category')
-					.where('CategoryId', parent.CategoryId)
-					.del();
+				await knex('category').where('CategoryId', parent.CategoryId).del();
 			}
 		}
 	}
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(_: Knex): Promise<void> {
 	// This is a data correction migration - down would need to recreate
 	// the parent categories and re-link children, which is complex.
 	// For safety, we'll just note that this can't be easily reversed.

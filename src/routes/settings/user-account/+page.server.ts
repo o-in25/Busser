@@ -2,7 +2,12 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
 import { getUserWorkspaces } from '$lib/server/auth';
-import { deleteUser, getPreferredWorkspaceId, getUser, setPreferredWorkspaceId } from '$lib/server/user';
+import {
+	deleteUser,
+	getPreferredWorkspaceId,
+	getUser,
+	setPreferredWorkspaceId,
+} from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -76,7 +81,9 @@ export const actions: Actions = {
 		// prevent admins from deleting their own account
 		const isAdmin = locals.user.roles?.some((r) => r.roleName === 'ADMIN');
 		if (isAdmin) {
-			return fail(StatusCodes.FORBIDDEN, { error: 'Administrators cannot delete their own account' });
+			return fail(StatusCodes.FORBIDDEN, {
+				error: 'Administrators cannot delete their own account',
+			});
 		}
 
 		const result = await deleteUser(locals.user.userId);

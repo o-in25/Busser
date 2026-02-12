@@ -54,8 +54,8 @@ export class InventoryRepository extends BaseRepository {
 			const sortMap: Record<string, { column: string; order: 'asc' | 'desc' }> = {
 				'name-asc': { column: 'productName', order: 'asc' },
 				'name-desc': { column: 'productName', order: 'desc' },
-				'newest': { column: 'productId', order: 'desc' },
-				'oldest': { column: 'productId', order: 'asc' },
+				newest: { column: 'productId', order: 'desc' },
+				oldest: { column: 'productId', order: 'asc' },
 			};
 			const { column, order } = sortMap[sort] || sortMap['name-asc'];
 

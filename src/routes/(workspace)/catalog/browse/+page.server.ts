@@ -53,25 +53,33 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const hasAdvancedFilter = Object.keys(advancedFilter).length > 0;
 
 	// Get recipes, spirits, favorites, featured, preparation methods, and ingredient name in parallel
-	const [catalogResult, spirits, userFavorites, favoriteRecipes, featuredRecipes, prepMethodsResult, ingredientProduct] =
-		await Promise.all([
-			catalogRepo.findAll(
-				workspaceId,
-				page,
-				perPage,
-				Object.keys(filter).length > 0 ? filter : null,
-				hasAdvancedFilter ? advancedFilter : null
-			),
-			catalogRepo.getSpirits(),
-			userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
-			userId ? getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
-			catalogRepo.getFeatured(workspaceId),
-			catalogRepo.getPreparationMethods(),
-			ingredient ? inventoryRepo.findById(workspaceId, parseInt(ingredient)) : Promise.resolve(null),
-		]);
+	const [
+		catalogResult,
+		spirits,
+		userFavorites,
+		favoriteRecipes,
+		featuredRecipes,
+		prepMethodsResult,
+		ingredientProduct,
+	] = await Promise.all([
+		catalogRepo.findAll(
+			workspaceId,
+			page,
+			perPage,
+			Object.keys(filter).length > 0 ? filter : null,
+			hasAdvancedFilter ? advancedFilter : null
+		),
+		catalogRepo.getSpirits(),
+		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
+		userId ? getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
+		catalogRepo.getFeatured(workspaceId),
+		catalogRepo.getPreparationMethods(),
+		ingredient ? inventoryRepo.findById(workspaceId, parseInt(ingredient)) : Promise.resolve(null),
+	]);
 
 	let { data, pagination } = catalogResult;
-	const preparationMethods = prepMethodsResult.status === 'success' ? (prepMethodsResult.data ?? []) : [];
+	const preparationMethods =
+		prepMethodsResult.status === 'success' ? (prepMethodsResult.data ?? []) : [];
 
 	// Build sets for quick lookup
 	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));

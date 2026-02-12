@@ -37,7 +37,13 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 
 	// Fetch all data in parallel
 	const [inventoryResult, stats, categories] = await Promise.all([
-		inventoryRepo.findAll(workspaceId, page, 20, Object.keys(filter).length > 0 ? filter : null, sort),
+		inventoryRepo.findAll(
+			workspaceId,
+			page,
+			20,
+			Object.keys(filter).length > 0 ? filter : null,
+			sort
+		),
 		inventoryRepo.getStats(workspaceId),
 		inventoryRepo.getCategoryBreakdown(workspaceId),
 	]);

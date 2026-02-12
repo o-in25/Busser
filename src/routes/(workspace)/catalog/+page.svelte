@@ -317,7 +317,9 @@
 						<button
 							type="submit"
 							class="p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-							title={favorites.has(featuredCocktail.recipeId) ? 'Remove from favorites' : 'Add to favorites'}
+							title={favorites.has(featuredCocktail.recipeId)
+								? 'Remove from favorites'
+								: 'Add to favorites'}
 						>
 							<Heart
 								class={cn(
@@ -366,7 +368,10 @@
 						<div
 							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
 						>
-							<a href="/catalog/{cocktail.recipeId}" class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
+							<a
+								href="/catalog/{cocktail.recipeId}"
+								class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted"
+							>
 								{#if cocktail.recipeImageUrl}
 									<img
 										src={cocktail.recipeImageUrl}
@@ -380,10 +385,14 @@
 								{/if}
 							</a>
 							<a href="/catalog/{cocktail.recipeId}" class="flex-1 min-w-0">
-								<p class="font-medium truncate group-hover:text-accent-foreground transition-colors">
+								<p
+									class="font-medium truncate group-hover:text-accent-foreground transition-colors"
+								>
 									{cocktail.recipeName}
 								</p>
-								<p class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors">
+								<p
+									class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors"
+								>
 									{cocktail.recipeCategoryDescription}
 								</p>
 							</a>
@@ -413,7 +422,9 @@
 									<button
 										type="submit"
 										class="p-1.5 rounded-md hover:bg-background/50 transition-colors"
-										title={favorites.has(cocktail.recipeId) ? 'Remove from favorites' : 'Add to favorites'}
+										title={favorites.has(cocktail.recipeId)
+											? 'Remove from favorites'
+											: 'Add to favorites'}
 									>
 										<Heart
 											class={cn(
@@ -451,7 +462,9 @@
 										<button
 											type="submit"
 											class="p-1.5 rounded-md hover:bg-background/50 transition-colors"
-											title={featured.has(cocktail.recipeId) ? 'Remove from featured' : 'Add to featured'}
+											title={featured.has(cocktail.recipeId)
+												? 'Remove from featured'
+												: 'Add to featured'}
 										>
 											<Star
 												class={cn(
@@ -494,9 +507,7 @@
 			<p class="text-xs text-muted-foreground/70 italic">
 				— {currentTip.source}
 			</p>
-			<p class="text-xs text-amber-600/50 dark:text-amber-400/50 mt-3">
-				Click for another tip
-			</p>
+			<p class="text-xs text-amber-600/50 dark:text-amber-400/50 mt-3">Click for another tip</p>
 		</Card.Content>
 	</Card.Root>
 

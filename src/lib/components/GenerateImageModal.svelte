@@ -61,7 +61,8 @@
 			<!-- auto-generate option -->
 			<button
 				type="button"
-				class="w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left {mode === 'auto'
+				class="w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left {mode ===
+				'auto'
 					? 'border-primary bg-primary/5'
 					: 'border-input hover:border-primary/50 hover:bg-muted/50'}"
 				onclick={() => (mode = 'auto')}
@@ -85,7 +86,8 @@
 					{/if}
 				</div>
 				<div
-					class="shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center {mode === 'auto'
+					class="shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center {mode ===
+					'auto'
 						? 'border-primary'
 						: 'border-muted-foreground/30'}"
 				>
@@ -98,7 +100,8 @@
 			<!-- custom prompt option -->
 			<button
 				type="button"
-				class="w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left {mode === 'custom'
+				class="w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left {mode ===
+				'custom'
 					? 'border-primary bg-primary/5'
 					: 'border-input hover:border-primary/50 hover:bg-muted/50'}"
 				onclick={() => (mode = 'custom')}
@@ -117,7 +120,8 @@
 					</p>
 				</div>
 				<div
-					class="shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center {mode === 'custom'
+					class="shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center {mode ===
+					'custom'
 						? 'border-primary'
 						: 'border-muted-foreground/30'}"
 				>
@@ -140,7 +144,8 @@
 						onkeydown={handleKeydown}
 					/>
 					<p class="text-xs text-muted-foreground">
-						Describe the subject only. Studio lighting and white background will be added automatically.
+						Describe the subject only. Studio lighting and white background will be added
+						automatically.
 					</p>
 				</div>
 			{/if}

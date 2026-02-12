@@ -14,7 +14,10 @@
 		const path = $page.url.pathname;
 		if (href === '/inventory') {
 			// Products tab: active only for /inventory or /inventory/add or /inventory/[id]/edit
-			return path === '/inventory' || (path.startsWith('/inventory/') && !path.startsWith('/inventory/category'));
+			return (
+				path === '/inventory' ||
+				(path.startsWith('/inventory/') && !path.startsWith('/inventory/category'))
+			);
 		}
 		// Categories tab: active for anything starting with /inventory/category
 		return path.startsWith(href);
@@ -22,7 +25,9 @@
 </script>
 
 <nav class="mb-6">
-	<div class="flex md:inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+	<div
+		class="flex md:inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground"
+	>
 		{#each tabs as tab}
 			<a
 				href={tab.href}

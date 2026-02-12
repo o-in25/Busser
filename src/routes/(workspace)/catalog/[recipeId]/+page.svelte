@@ -35,7 +35,12 @@
 <div class="container mx-auto max-w-6xl px-4">
 	<!-- Back navigation + action buttons -->
 	<div class="mb-4 mt-4 flex items-center justify-between">
-		<BackButton href="/catalog/browse" label="Back to Catalog" size="sm" class="max-sm:[&>span]:hidden max-sm:gap-0" />
+		<BackButton
+			href="/catalog/browse"
+			label="Back to Catalog"
+			size="sm"
+			class="max-sm:[&>span]:hidden max-sm:gap-0"
+		/>
 
 		<div class="flex items-center gap-1 sm:gap-2">
 			<!-- Favorite button -->
@@ -86,7 +91,10 @@
 						type="submit"
 						variant={isFeatured ? 'default' : 'outline'}
 						size="sm"
-						class={cn('max-sm:px-2', isFeatured && 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-black')}
+						class={cn(
+							'max-sm:px-2',
+							isFeatured && 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-black'
+						)}
 					>
 						<Star class={cn('h-4 w-4 sm:mr-2', isFeatured && 'fill-current')} />
 						<span class="hidden sm:inline">{isFeatured ? 'Featured' : 'Feature'}</span>
