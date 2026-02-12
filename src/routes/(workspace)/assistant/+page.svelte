@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>Busser AI</title>
+	<title>Busser AI - Busser</title>
 </svelte:head>
 
 <div class="space-y-6 max-w-2xl mx-auto">

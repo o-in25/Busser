@@ -258,9 +258,9 @@
 	<!-- Toolbar -->
 	<div class="flex flex-col gap-3 mb-6">
 		<!-- Row 1: Search, Spirit Filter, Sort (+ action buttons on large screens) -->
-		<div class="flex flex-col sm:flex-row gap-3 lg:items-center">
+		<div class="flex flex-wrap gap-3 items-center">
 			<!-- Search -->
-			<form onsubmit={handleSearch} class="flex-1">
+			<form onsubmit={handleSearch} class="w-full sm:flex-1 sm:min-w-[200px]">
 				<div class="relative">
 					<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 					<Input
@@ -282,11 +282,7 @@
 			</form>
 
 			<!-- Advanced Search Button -->
-			<Button
-				variant="outline"
-				class="w-full sm:w-auto relative"
-				onclick={() => (advancedSearchOpen = true)}
-			>
+			<Button variant="outline" class="w-auto relative" onclick={() => (advancedSearchOpen = true)}>
 				<SlidersHorizontal class="h-4 w-4 mr-2" />
 				Advanced
 				{#if advancedFilterCount > 0}
@@ -302,7 +298,7 @@
 				value={selectedSpirit}
 				onValueChange={(v) => handleSpiritChange(v ?? 'all')}
 			>
-				<Select.Trigger class="w-full sm:w-[180px]">
+				<Select.Trigger class="w-[180px]">
 					<GlassWater class="h-4 w-4 mr-2" />
 					<Select.Value placeholder="All Spirits">{spiritLabel}</Select.Value>
 				</Select.Trigger>
@@ -326,7 +322,7 @@
 				value={selectedShowFilter}
 				onValueChange={(v) => handleShowFilterChange(v ?? 'all')}
 			>
-				<Select.Trigger class="w-full sm:w-[160px]">
+				<Select.Trigger class="w-[160px]">
 					<Filter class="h-4 w-4 mr-2" />
 					<Select.Value placeholder="All Recipes">{showFilterLabel}</Select.Value>
 				</Select.Trigger>
@@ -343,7 +339,7 @@
 				value={selectedSort}
 				onValueChange={(v) => handleSortChange(v ?? 'name-asc')}
 			>
-				<Select.Trigger class="w-full sm:w-[160px]">
+				<Select.Trigger class="w-[160px]">
 					<ArrowUpDown class="h-4 w-4 mr-2" />
 					<Select.Value placeholder="Sort by">{sortLabel}</Select.Value>
 				</Select.Trigger>

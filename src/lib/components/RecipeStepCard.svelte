@@ -70,9 +70,9 @@
 		step.parentCategoryId !== null && step.parentCategoryId !== undefined
 	);
 
-	// Reset to EXACT_PRODUCT if category has no parent and a flexible mode was selected
+	// Reset to EXACT_PRODUCT if parent category mode was selected but no parent exists
 	$effect(() => {
-		if (!hasParentCategory && matchMode !== 'EXACT_PRODUCT') {
+		if (!hasParentCategory && matchMode === 'ANY_IN_PARENT_CATEGORY') {
 			matchMode = 'EXACT_PRODUCT';
 		}
 	});
@@ -235,8 +235,8 @@
 				/>
 			</div>
 
-			<!-- Match mode selector (only show for categories in a hierarchy) -->
-			{#if step.productId && hasParentCategory}
+			<!-- Match mode selector -->
+			{#if step.productId}
 				<div class="space-y-2">
 					<Label class="text-sm">Ingredient Matching</Label>
 					<RadioGroup.Root bind:value={matchMode} class="gap-0.5">
@@ -246,9 +246,11 @@
 						<RadioGroup.Item value="ANY_IN_CATEGORY" class="px-2 py-1.5 text-xs truncate"
 							>Any {categoryDisplayName}</RadioGroup.Item
 						>
-						<RadioGroup.Item value="ANY_IN_PARENT_CATEGORY" class="px-2 py-1.5 text-xs truncate"
-							>Any {parentCategoryDisplayName}</RadioGroup.Item
-						>
+						{#if hasParentCategory}
+							<RadioGroup.Item value="ANY_IN_PARENT_CATEGORY" class="px-2 py-1.5 text-xs truncate"
+								>Any {parentCategoryDisplayName}</RadioGroup.Item
+							>
+						{/if}
 					</RadioGroup.Root>
 					<p class="text-xs text-muted-foreground">
 						{#if matchMode === 'EXACT_PRODUCT'}

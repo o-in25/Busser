@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { TriangleAlert, CircleCheck, FlaskConical, CircleX } from 'lucide-svelte';
 
+	import { goto } from '$app/navigation';
 	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
@@ -99,14 +100,13 @@
 
 				<!-- Recipe usage indicator -->
 				{#if recipeCount > 0}
-					<a
-						href="/catalog/browse?ingredient={product.productId}"
+					<button
 						class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-						onclick={(e) => e.stopPropagation()}
+						onclick={(e) => { e.preventDefault(); e.stopPropagation(); goto(`/catalog/browse?ingredient=${product.productId}`); }}
 					>
 						<FlaskConical class="h-3.5 w-3.5" />
 						<span>Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span>
-					</a>
+					</button>
 				{/if}
 			</Card.Content>
 		</Card.Root>
@@ -154,14 +154,13 @@
 					<!-- Meta info -->
 					<div class="flex items-center gap-3 mt-2">
 						{#if recipeCount > 0}
-							<a
-								href="/catalog/browse?ingredient={product.productId}"
+							<button
 								class="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-								onclick={(e) => e.stopPropagation()}
+								onclick={(e) => { e.preventDefault(); e.stopPropagation(); goto(`/catalog/browse?ingredient=${product.productId}`); }}
 							>
 								<FlaskConical class="h-3.5 w-3.5" />
 								Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}
-							</a>
+							</button>
 						{/if}
 						{#if product.productProof > 0}
 							<span class="text-xs text-muted-foreground">

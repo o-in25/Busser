@@ -436,15 +436,9 @@ export class InventoryRepository extends BaseRepository {
 
 	async getCategoryOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
-			// Only show leaf categories (those that have no children)
 			let result = await this.db
 				.table('category as c')
 				.where('c.workspaceId', workspaceId)
-				.whereNotExists(function () {
-					this.select('*')
-						.from('category as child')
-						.whereRaw('child.ParentCategoryId = c.CategoryId');
-				})
 				.select('c.CategoryId', 'c.CategoryName')
 				.orderBy('c.CategoryName');
 			let categories = result as Category[];
