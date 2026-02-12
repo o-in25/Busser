@@ -27,10 +27,12 @@
 	import { Label } from '$lib/components/ui/label';
 	import { QuickSelect } from '$lib/components/ui/quick-select';
 	import { Switch } from '$lib/components/ui/switch';
-	import type { ComponentAction, Product } from '$lib/types';
+	import type { ComponentAction, Product, SelectOption } from '$lib/types';
+	import type { BottleScanOutput } from '$lib/types/generators';
 
 	import { notificationStore } from '../../stores';
 	import Autocomplete from './Autocomplete.svelte';
+	import BottleScan from './BottleScan.svelte';
 	import FormDraftManager from './FormDraftManager.svelte';
 	import ImagePrompt from './ImagePrompt.svelte';
 	import InventoryFormWizard from './InventoryFormWizard.svelte';
@@ -87,6 +89,32 @@
 	let modalOpen = $state(false);
 	let draftManager = $state<FormDraftManager>();
 	let currentWizardStep = $state(0);
+
+	// bottle scan state
+	let scanCategories = $state<SelectOption[]>([]);
+
+	$effect(() => {
+		if (action === 'add') {
+			fetch('/api/select/categories')
+				.then((r) => r.json())
+				.then((data) => (scanCategories = data));
+		}
+	});
+
+	function handleBottleScan(result: BottleScanOutput) {
+		productName = result.productName;
+		productProof = String(result.proof);
+		productUnitSizeInMilliliters = String(result.sizeInMilliliters);
+		productDescription = result.description;
+
+		// match category by name (case-insensitive)
+		const match = scanCategories.find(
+			(c) => c.name.toLowerCase() === result.category.toLowerCase()
+		);
+		if (match) {
+			categoryId = String(match.value);
+		}
+	}
 
 	// Calculated fields
 	let pricePerOunce = $derived(() => {
@@ -274,6 +302,9 @@
 				{#if step === 0}
 					<!-- Basic Info Step -->
 					<div class="space-y-4">
+						{#if action === 'add'}
+							<BottleScan onscan={handleBottleScan} categories={scanCategories} />
+						{/if}
 						<div>
 							<Label for="productName" class="mb-2">
 								Name <span class="text-destructive">*</span>
@@ -469,10 +500,15 @@
 			<!-- Basic Information Card -->
 			<Card.Root class="relative z-10">
 				<Card.Header class="pb-4">
-					<Card.Title class="flex items-center gap-2 text-lg">
-						<Package class="h-5 w-5 text-primary" />
-						Basic Information
-					</Card.Title>
+					<div class="flex items-center justify-between">
+						<Card.Title class="flex items-center gap-2 text-lg">
+							<Package class="h-5 w-5 text-primary" />
+							Basic Information
+						</Card.Title>
+						{#if action === 'add'}
+							<BottleScan onscan={handleBottleScan} categories={scanCategories} />
+						{/if}
+					</div>
 				</Card.Header>
 				<Card.Content class="space-y-4">
 					<div class="grid gap-6 md:grid-cols-2">
