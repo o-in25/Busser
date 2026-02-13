@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertTriangle, CheckCircle2, Package, XCircle } from 'lucide-svelte';
+	import { CheckCircle2, Package, XCircle } from 'lucide-svelte';
 
 	import { goto } from '$app/navigation';
 	import type { InventoryStats } from '$lib/types';
@@ -32,7 +32,7 @@
 			</div>
 
 			<!-- Quick Stats -->
-			<div class="grid grid-cols-2 md:flex gap-3">
+			<div class="grid grid-cols-3 md:flex gap-3">
 				<!-- Total -->
 				<button
 					onclick={() => applyFilter('all')}
@@ -81,22 +81,7 @@
 					</div>
 				</button>
 
-				<!-- Low Stock -->
-				<button
-					onclick={() => applyFilter('low-stock')}
-					class={cn(
-						'flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
-						'hover:border-yellow-500/50 hover:bg-background transition-colors cursor-pointer',
-						'min-w-[120px]'
-					)}
-				>
-					<AlertTriangle class="h-5 w-5 text-yellow-500 shrink-0" />
-					<div class="text-left">
-						<p class="text-xl font-bold">{stats.lowStock}</p>
-						<p class="text-xs text-muted-foreground">Low Stock</p>
-					</div>
-				</button>
-			</div>
+				</div>
 		</div>
 	</div>
 </div>

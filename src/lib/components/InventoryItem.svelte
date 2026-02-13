@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		AlertTriangle,
 		ArrowRight,
 		Beaker,
 		Calculator,
@@ -29,12 +28,10 @@
 
 	let {
 		product,
-		isBaseSpirit,
 		recipeCount = 0,
 		onStockChange = null,
 	}: {
 		product: Product;
-		isBaseSpirit: boolean;
 		recipeCount?: number;
 		onStockChange?: ((productId: number, inStock: boolean) => void) | null;
 	} = $props();
@@ -70,15 +67,6 @@
 				icon: XCircle,
 				color: 'text-red-500',
 				bgColor: 'bg-red-500/10',
-			};
-		}
-		if (product.productInStockQuantity === 1) {
-			return {
-				label: 'Low Stock',
-				variant: 'secondary' as const,
-				icon: AlertTriangle,
-				color: 'text-yellow-500',
-				bgColor: 'bg-yellow-500/10',
 			};
 		}
 		return {
@@ -185,7 +173,7 @@
 			{:else}
 				<ImagePlaceholder variant="product" class="w-20 h-20" />
 			{/if}
-			{#if isBaseSpirit && hasFlavorProfile}
+			{#if hasFlavorProfile}
 				<div class="absolute bottom-3 right-3">
 					<span
 						class="text-sm font-bold px-3 py-1.5 rounded-lg text-white shadow-lg {overallRating.style}"
@@ -228,8 +216,8 @@
 						</div>
 					</Popover.Content>
 				</Popover.Root>
-				{#if isBaseSpirit}
-					<Badge variant="secondary" class="text-xs">Base Spirit</Badge>
+				{#if product.categoryGroupName}
+					<Badge variant="outline" class="text-xs">{product.categoryGroupName}</Badge>
 				{/if}
 			</div>
 		</div>

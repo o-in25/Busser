@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { TriangleAlert, CircleCheck, FlaskConical, CircleX } from 'lucide-svelte';
+	import { CircleCheck, FlaskConical, CircleX } from 'lucide-svelte';
 
 	import { goto } from '$app/navigation';
 	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
@@ -34,14 +34,6 @@
 				variant: 'destructive' as const,
 				icon: CircleX,
 				color: 'text-red-500',
-			};
-		}
-		if (product.productInStockQuantity === 1) {
-			return {
-				label: 'Low Stock',
-				variant: 'secondary' as const,
-				icon: TriangleAlert,
-				color: 'text-yellow-500',
 			};
 		}
 		return {

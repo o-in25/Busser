@@ -19,7 +19,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	page = Number(page);
 
 	const productName = url.searchParams.get('productName') || '';
-	const categoryId = url.searchParams.get('categoryId') || '';
+	const categoryGroupId = url.searchParams.get('categoryGroupId') || '';
 	const stockFilter = url.searchParams.get('stockFilter') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 
@@ -28,8 +28,8 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	if (productName) {
 		filter.productName = productName;
 	}
-	if (categoryId) {
-		filter.categoryId = Number(categoryId);
+	if (categoryGroupId) {
+		filter.categoryGroupId = Number(categoryGroupId);
 	}
 	if (stockFilter) {
 		filter.stockFilter = stockFilter;
@@ -60,9 +60,8 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		recipeUsage[productId] = count;
 	});
 
-	// Get out-of-stock and low-stock items for alerts (limit to 10 each)
+	// Get out-of-stock items for alerts
 	const outOfStockItems = data.filter((p) => p.productInStockQuantity === 0).slice(0, 5);
-	const lowStockItems = data.filter((p) => p.productInStockQuantity === 1).slice(0, 5);
 
 	// Get recently added items (highest productId = most recent)
 	const recentlyAdded = [...data]
@@ -76,11 +75,10 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		categories,
 		recipeUsage,
 		outOfStockItems,
-		lowStockItems,
 		recentlyAdded,
 		filters: {
 			search: productName,
-			categoryId,
+			categoryGroupId,
 			stockFilter,
 			sort,
 			page,

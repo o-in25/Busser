@@ -50,7 +50,7 @@ export type ProductDetail = {
 	productStrengthRating?: number;
 };
 
-// inventory view (product + productdetail + category joined)
+// inventory view (product + productdetail + category + categorygroup joined)
 // this is what most code expects when using "Product"
 export type Product = {
 	productId: number | null;
@@ -61,6 +61,10 @@ export type Product = {
 	productDescription: string;
 	categoryName: string;
 	categoryDescription: string;
+	parentCategoryId: number | null;
+	parentCategoryName: string | null;
+	categoryGroupId: number | null;
+	categoryGroupName: string | null;
 	productInStockQuantity: number;
 	productPricePerUnit: number;
 	productUnitSizeInMilliliters: number;
@@ -77,19 +81,18 @@ export type InventoryStats = {
 	total: number;
 	inStock: number;
 	outOfStock: number;
-	lowStock: number;
-	categoryBreakdown: CategoryCount[];
+	categoryBreakdown: CategoryGroupCount[];
 };
 
-export type CategoryCount = {
-	categoryId: number;
-	categoryName: string;
+export type CategoryGroupCount = {
+	categoryGroupId: number;
+	categoryGroupName: string;
 	count: number;
 };
 
 export type InventoryFilters = {
 	search: string;
-	categoryId: string;
+	categoryGroupId: string;
 	stockFilter: string;
 	page: number;
 };

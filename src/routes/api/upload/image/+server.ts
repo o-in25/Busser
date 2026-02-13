@@ -4,6 +4,10 @@ import { StatusCodes } from 'http-status-codes';
 import type { RequestHandler } from './$types';
 import { getSignedUrl } from '$lib/server/storage';
 
+export const config = {
+	body: { maxSize: '1mb' },
+};
+
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.activeWorkspaceId) {
 		error(StatusCodes.UNAUTHORIZED, {

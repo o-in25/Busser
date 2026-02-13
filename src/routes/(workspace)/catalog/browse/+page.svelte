@@ -357,7 +357,7 @@
 					<button
 						class={cn(
 							'h-10 w-10 flex items-center justify-center transition-colors',
-							viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+							viewMode === 'grid' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
 						)}
 						onclick={() => setViewMode('grid')}
 						aria-label="Grid view"
@@ -367,7 +367,7 @@
 					<button
 						class={cn(
 							'h-10 w-10 flex items-center justify-center transition-colors',
-							viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+							viewMode === 'list' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
 						)}
 						onclick={() => setViewMode('list')}
 						aria-label="List view"

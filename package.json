@@ -20,6 +20,8 @@
 		"migrate:status:core": "tsx node_modules/knex/bin/cli.js migrate:status --knexfile knexfile.ts --env core",
 		"migrate:status:user": "tsx node_modules/knex/bin/cli.js migrate:status --knexfile knexfile.ts --env user",
 		"seed:core": "tsx node_modules/knex/bin/cli.js seed:run --knexfile knexfile.ts --env core",
+		"unseed:core": "tsx scripts/unseed-catalog.ts",
+		"seed:images": "tsx scripts/seed-catalog-images.ts",
 		"seed:user": "tsx node_modules/knex/bin/cli.js seed:run --knexfile knexfile.ts --env user",
 		"test": "vitest run",
 		"test:watch": "vitest"

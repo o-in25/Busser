@@ -595,6 +595,42 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
+	async getHighestImpactIngredients(
+		workspaceId: string
+	): Promise<{ ingredientName: string; unlockableRecipes: number }[]> {
+		try {
+			const result = await this.db
+				.table('basicrecipestep as rs')
+				.select(
+					this.db.query.raw(
+						"CASE WHEN rs.MatchMode != 'EXACT_PRODUCT' THEN rs.CategoryName ELSE rs.ProductName END as ingredientName"
+					)
+				)
+				.count('* as unlockableRecipes')
+				.where('rs.WorkspaceId', workspaceId)
+				.where('rs.EffectiveInStock', 0)
+				.whereIn('rs.RecipeId', function () {
+					this.select('sub.RecipeId')
+						.from('basicrecipestep as sub')
+						.where('sub.WorkspaceId', workspaceId)
+						.groupBy('sub.RecipeId')
+						.havingRaw('SUM(CASE WHEN sub.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
+						.havingRaw('COUNT(sub.RecipeStepId) > 1');
+				})
+				.groupBy('ingredientName')
+				.orderBy('unlockableRecipes', 'desc')
+				.limit(3);
+
+			return (result as any[]).map((row) => ({
+				ingredientName: row.ingredientName,
+				unlockableRecipes: Number(row.unlockableRecipes),
+			}));
+		} catch (e) {
+			console.error('Failed to get highest impact ingredients:', e);
+			return [];
+		}
+	}
+
 	async reorderFeatured(workspaceId: string, orderedRecipeIds: number[]): Promise<QueryResult> {
 		try {
 			await this.db.query.transaction(async (trx) => {

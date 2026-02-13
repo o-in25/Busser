@@ -51,6 +51,9 @@ export const load = (async ({ locals }) => {
 		topSpirit: Awaited<ReturnType<typeof catalogRepo.getSpirits>>[0] | null;
 		userName: string;
 		workspaceRole: string | null;
+		highImpactIngredients: { ingredientName: string; unlockableRecipes: number }[];
+		barBreakdown: Awaited<ReturnType<typeof inventoryRepo.getCategoryBreakdown>>;
+		catalogCoverage: number;
 	} | null = null;
 
 	if (user && locals.activeWorkspaceId) {
@@ -90,6 +93,15 @@ export const load = (async ({ locals }) => {
 			}
 		}
 
+		// Get highest impact ingredients
+		const highImpactIngredients = await catalogRepo.getHighestImpactIngredients(workspaceId);
+
+		// Get inventory category breakdown
+		const barBreakdown = await inventoryRepo.getCategoryBreakdown(workspaceId);
+
+		// Catalog coverage: what % of recipes can you make
+		const catalogCoverage = totalRecipes > 0 ? recipes.length / totalRecipes : 0;
+
 		// Get user display name
 		const userName = user.username || user.email?.split('@')[0] || 'there';
 
@@ -103,6 +115,9 @@ export const load = (async ({ locals }) => {
 			topSpirit,
 			userName,
 			workspaceRole,
+			highImpactIngredients,
+			barBreakdown,
+			catalogCoverage,
 		};
 	}
 

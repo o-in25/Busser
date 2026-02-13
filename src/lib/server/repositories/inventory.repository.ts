@@ -1,7 +1,7 @@
 // inventory domain repository
 import type {
 	Category,
-	CategoryCount,
+	CategoryGroupCount,
 	InventoryStats,
 	PaginationResult,
 	Product,
@@ -35,17 +35,15 @@ export class InventoryRepository extends BaseRepository {
 				query = query.andWhere('productName', 'like', `%${filter.productName}%`);
 			}
 
-			if (filter?.categoryId) {
-				query = query.andWhere('categoryId', '=', filter.categoryId);
+			if (filter?.categoryGroupId) {
+				query = query.andWhere('categoryGroupId', '=', filter.categoryGroupId);
 			}
 
 			if (filter?.stockFilter) {
 				if (filter.stockFilter === 'out-of-stock') {
 					query = query.andWhere('productInStockQuantity', '=', 0);
-				} else if (filter.stockFilter === 'low-stock') {
-					query = query.andWhere('productInStockQuantity', '=', 1);
 				} else if (filter.stockFilter === 'in-stock') {
-					query = query.andWhere('productInStockQuantity', '>', 1);
+					query = query.andWhere('productInStockQuantity', '>', 0);
 				}
 			} else if (typeof filter?.productInStockQuantity !== 'undefined') {
 				query = query.andWhere('productInStockQuantity', '=', filter.productInStockQuantity);
@@ -322,18 +320,15 @@ export class InventoryRepository extends BaseRepository {
 				.select(
 					this.db.query.raw('COUNT(*) as total'),
 					this.db.query.raw(
-						'SUM(CASE WHEN productInStockQuantity > 1 THEN 1 ELSE 0 END) as inStock'
+						'SUM(CASE WHEN productInStockQuantity > 0 THEN 1 ELSE 0 END) as inStock'
 					),
 					this.db.query.raw(
 						'SUM(CASE WHEN productInStockQuantity = 0 THEN 1 ELSE 0 END) as outOfStock'
-					),
-					this.db.query.raw(
-						'SUM(CASE WHEN productInStockQuantity = 1 THEN 1 ELSE 0 END) as lowStock'
 					)
 				);
 
 			const stats = statsResult[0] as unknown as
-				| { total: number; inStock: number; outOfStock: number; lowStock: number }
+				| { total: number; inStock: number; outOfStock: number }
 				| undefined;
 			const breakdown = await this.getCategoryBreakdown(workspaceId);
 
@@ -341,32 +336,32 @@ export class InventoryRepository extends BaseRepository {
 				total: Number(stats?.total) || 0,
 				inStock: Number(stats?.inStock) || 0,
 				outOfStock: Number(stats?.outOfStock) || 0,
-				lowStock: Number(stats?.lowStock) || 0,
 				categoryBreakdown: breakdown,
 			};
 		} catch (error: any) {
 			console.error('Failed to get inventory stats:', error);
-			return { total: 0, inStock: 0, outOfStock: 0, lowStock: 0, categoryBreakdown: [] };
+			return { total: 0, inStock: 0, outOfStock: 0, categoryBreakdown: [] };
 		}
 	}
 
-	async getCategoryBreakdown(workspaceId: string): Promise<CategoryCount[]> {
+	async getCategoryBreakdown(workspaceId: string): Promise<CategoryGroupCount[]> {
 		try {
 			const result = await this.db
 				.table('inventory')
 				.where('workspaceId', workspaceId)
-				.select('CategoryId', 'CategoryName')
+				.whereNotNull('CategoryGroupId')
+				.select('CategoryGroupId', 'CategoryGroupName')
 				.count('* as count')
-				.groupBy('CategoryId', 'CategoryName')
-				.orderBy('CategoryName');
+				.groupBy('CategoryGroupId', 'CategoryGroupName')
+				.orderBy('CategoryGroupName');
 
 			return (result as any[]).map((row) => ({
-				categoryId: row.categoryId,
-				categoryName: row.categoryName,
+				categoryGroupId: row.categoryGroupId,
+				categoryGroupName: row.categoryGroupName,
 				count: Number(row.count),
 			}));
 		} catch (error: any) {
-			console.error('Failed to get product categories:', error);
+			console.error('Failed to get category groups:', error);
 			return [];
 		}
 	}

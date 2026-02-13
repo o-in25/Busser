@@ -46,7 +46,7 @@
 			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz white rum" },
 			{ "category": "Lime Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lime juice" },
 			{ "category": "Simple Syrup", "qty": 20, "unit": "ml", "desc": "Add 0.75oz simple syrup" },
-			{ "category": "Mint", "qty": 6, "unit": "leaves", "desc": "Muddle 6 mint leaves" },
+			{ "category": "Mint", "qty": 6, "unit": "barspoon", "desc": "Muddle 6 mint leaves" },
 			{ "category": "Soda Water", "qty": 60, "unit": "ml", "desc": "Top with soda water" }
 		]
 	},
@@ -125,6 +125,513 @@
 			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz white rum" },
 			{ "category": "Coconut Cream", "qty": 45, "unit": "ml", "desc": "Add 1.5oz coconut cream" },
 			{ "category": "Pineapple Juice", "qty": 90, "unit": "ml", "desc": "Add 3oz pineapple juice" }
+		]
+	},
+	{
+		"name": "Boulevardier",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A whiskey riff on the Negroni. Bold and bittersweet with bourbon replacing gin, served over a large ice cube.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 7.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 45, "unit": "ml", "desc": "Add 1.5oz bourbon" },
+			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
+			{ "category": "Amaro", "qty": 30, "unit": "ml", "desc": "Add 1oz Campari" }
+		]
+	},
+	{
+		"name": "Penicillin",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A modern classic by Sam Ross. Smoky scotch balanced by honey and ginger with a citrus backbone.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 60, "unit": "ml", "desc": "Add 2oz blended scotch" },
+			{ "category": "Lemon Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lemon juice" },
+			{ "category": "Honey Syrup", "qty": 22, "unit": "ml", "desc": "Add 0.75oz honey syrup" },
+			{ "category": "Syrup", "qty": 8, "unit": "ml", "desc": "Add 0.25oz ginger syrup" }
+		]
+	},
+	{
+		"name": "Mint Julep",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "The iconic Kentucky Derby cocktail. Bourbon and fresh mint over crushed ice, traditionally in a silver cup.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz bourbon" },
+			{ "category": "Simple Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz simple syrup" },
+			{ "category": "Mint", "qty": 8, "unit": "barspoon", "desc": "Muddle 8 mint leaves" }
+		]
+	},
+	{
+		"name": "Martinez",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "Considered the grandfather of the Martini. A rich, sweet, and complex gin cocktail from the 1880s.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Old Tom Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz Old Tom gin" },
+			{ "category": "Sweet Vermouth", "qty": 45, "unit": "ml", "desc": "Add 1.5oz sweet vermouth" },
+			{ "category": "Maraschino Liqueur", "qty": 7, "unit": "ml", "desc": "Add 1 barspoon maraschino liqueur" },
+			{ "category": "Orange Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes orange bitters" }
+		]
+	},
+	{
+		"name": "Aviation",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A pre-Prohibition classic with a distinctive violet hue. Floral, tart, and delicate.",
+		"ratings": { "sweetness": 3.0, "dryness": 5.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Maraschino Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz maraschino liqueur" },
+			{ "category": "Crème de Violette", "qty": 7, "unit": "ml", "desc": "Add 0.25oz crème de violette" },
+			{ "category": "Lemon Juice", "qty": 15, "unit": "ml", "desc": "Add 0.5oz lemon juice" }
+		]
+	},
+	{
+		"name": "Hemingway Daiquiri",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "Also called Papa Doble. A drier, more citrus-forward daiquiri with grapefruit and maraschino.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz white rum" },
+			{ "category": "Lime Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lime juice" },
+			{ "category": "Grapefruit Juice", "qty": 15, "unit": "ml", "desc": "Add 0.5oz grapefruit juice" },
+			{ "category": "Maraschino Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz maraschino liqueur" }
+		]
+	},
+	{
+		"name": "White Russian",
+		"spirit": "Vodka",
+		"technique": "Stirred",
+		"description": "A decadent after-dinner cocktail. Vodka and coffee liqueur mellowed with cream, served over ice.",
+		"ratings": { "sweetness": 6.0, "dryness": 2.0, "strength": 4.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 45, "unit": "ml", "desc": "Add 1.5oz vodka" },
+			{ "category": "Coffee Liquor", "qty": 30, "unit": "ml", "desc": "Add 1oz coffee liqueur" },
+			{ "category": "Cream", "qty": 30, "unit": "ml", "desc": "Float 1oz heavy cream" }
+		]
+	},
+	{
+		"name": "Tequila Sunrise",
+		"spirit": "Tequila & Mezcal",
+		"technique": "Shaken",
+		"description": "A colorful, fruity tequila highball with a sunrise gradient of orange and red.",
+		"ratings": { "sweetness": 6.0, "dryness": 2.0, "strength": 3.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Blanco Tequila", "qty": 45, "unit": "ml", "desc": "Add 1.5oz tequila" },
+			{ "category": "Orange Juice", "qty": 90, "unit": "ml", "desc": "Add 3oz orange juice" },
+			{ "category": "Grenadine", "qty": 15, "unit": "ml", "desc": "Slowly pour 0.5oz grenadine to sink" }
+		]
+	},
+	{
+		"name": "Caipirinha",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "Brazil's national cocktail. Cachaça with muddled lime and sugar, rustic and refreshing.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Cachaça", "qty": 60, "unit": "ml", "desc": "Add 2oz cachaça" },
+			{ "category": "Lime Juice", "qty": 30, "unit": "ml", "desc": "Muddle half a lime" },
+			{ "category": "Sugar", "qty": 10, "unit": "tsp", "desc": "Add 2 teaspoons sugar" }
+		]
+	},
+	{
+		"name": "Pisco Sour",
+		"spirit": "Brandy",
+		"technique": "Shaken",
+		"description": "Peru's signature cocktail. A frothy, citrus-forward sour with pisco and egg white, finished with bitters.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Pisco", "qty": 60, "unit": "ml", "desc": "Add 2oz pisco" },
+			{ "category": "Lime Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lime juice" },
+			{ "category": "Simple Syrup", "qty": 22, "unit": "ml", "desc": "Add 0.75oz simple syrup" },
+			{ "category": "Eggs", "qty": 30, "unit": "ml", "desc": "Add 1 egg white" },
+			{ "category": "Bitters", "qty": 3, "unit": "dash", "desc": "Dash Angostura bitters on top" }
+		]
+	},
+	{
+		"name": "Corpse Reviver No. 2",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A hair-of-the-dog classic from the Savoy. Equal parts gin, Cointreau, Lillet Blanc, and lemon with an absinthe rinse.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 6.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 22, "unit": "ml", "desc": "Add 0.75oz gin" },
+			{ "category": "Orange Liqueur", "qty": 22, "unit": "ml", "desc": "Add 0.75oz Cointreau" },
+			{ "category": "Lillet Blanc", "qty": 22, "unit": "ml", "desc": "Add 0.75oz Lillet Blanc" },
+			{ "category": "Lemon Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lemon juice" },
+			{ "category": "Absinthe", "qty": 2, "unit": "ml", "desc": "Rinse coupe with absinthe" }
+		]
+	},
+	{
+		"name": "Amaretto Sour",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A nutty, balanced sour elevated with bourbon for backbone. Silky with egg white and bright with citrus.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 4.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Amaretto", "qty": 45, "unit": "ml", "desc": "Add 1.5oz amaretto" },
+			{ "category": "Bourbon Whiskey", "qty": 22, "unit": "ml", "desc": "Add 0.75oz bourbon" },
+			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
+			{ "category": "Simple Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz simple syrup" },
+			{ "category": "Eggs", "qty": 30, "unit": "ml", "desc": "Add 1 egg white" }
+		]
+	},
+	{
+		"name": "Gold Rush",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A modern bourbon sour from Milk & Honey. Honey syrup replaces simple for a richer, rounder sweetness.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz bourbon" },
+			{ "category": "Lemon Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lemon juice" },
+			{ "category": "Honey Syrup", "qty": 22, "unit": "ml", "desc": "Add 0.75oz honey syrup" }
+		]
+	},
+	{
+		"name": "Vesper",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "James Bond's martini from Casino Royale. A potent blend of gin, vodka, and Lillet Blanc, shaken ice cold.",
+		"ratings": { "sweetness": 2.0, "dryness": 8.0, "strength": 9.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Plain Vodka", "qty": 15, "unit": "ml", "desc": "Add 0.5oz vodka" },
+			{ "category": "Lillet Blanc", "qty": 7, "unit": "ml", "desc": "Add 0.25oz Lillet Blanc" }
+		]
+	},
+	{
+		"name": "Blood and Sand",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A 1920s scotch cocktail named after the Valentino film. Equal parts with Cherry Heering and orange juice.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 5.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 22, "unit": "ml", "desc": "Add 0.75oz scotch" },
+			{ "category": "Sweet Vermouth", "qty": 22, "unit": "ml", "desc": "Add 0.75oz sweet vermouth" },
+			{ "category": "Cherry Heering", "qty": 22, "unit": "ml", "desc": "Add 0.75oz Cherry Heering" },
+			{ "category": "Orange Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz orange juice" }
+		]
+	},
+	{
+		"name": "Gin Fizz",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A light, effervescent gin sour topped with soda water. Bright, citrusy, and refreshing.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 4.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
+			{ "category": "Simple Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz simple syrup" },
+			{ "category": "Soda Water", "qty": 60, "unit": "ml", "desc": "Top with soda water" }
+		]
+	},
+	{
+		"name": "Black Russian",
+		"spirit": "Vodka",
+		"technique": "Stirred",
+		"description": "A simple two-ingredient cocktail. Vodka and coffee liqueur over ice, rich and bittersweet.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 45, "unit": "ml", "desc": "Add 1.5oz vodka" },
+			{ "category": "Coffee Liquor", "qty": 30, "unit": "ml", "desc": "Add 1oz coffee liqueur" }
+		]
+	},
+	{
+		"name": "Cuba Libre",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "More than just rum and coke. Fresh lime juice makes this Cuban highball bright and balanced.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 3.0, "versatility": 9.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz white rum" },
+			{ "category": "Lime Juice", "qty": 15, "unit": "ml", "desc": "Add 0.5oz lime juice" },
+			{ "category": "Cola", "qty": 120, "unit": "ml", "desc": "Top with cola" }
+		]
+	},
+	{
+		"name": "Naked and Famous",
+		"spirit": "Tequila & Mezcal",
+		"technique": "Shaken",
+		"description": "A modern equal-parts classic by Joaquín Simó. Smoky mezcal with Aperol, Chartreuse, and lime.",
+		"ratings": { "sweetness": 3.0, "dryness": 5.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Mezcal", "qty": 22, "unit": "ml", "desc": "Add 0.75oz mezcal" },
+			{ "category": "Aperol", "qty": 22, "unit": "ml", "desc": "Add 0.75oz Aperol" },
+			{ "category": "Yellow Chartreuse", "qty": 22, "unit": "ml", "desc": "Add 0.75oz yellow Chartreuse" },
+			{ "category": "Lime Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lime juice" }
+		]
+	},
+	{
+		"name": "Jack Rose",
+		"spirit": "Brandy",
+		"technique": "Shaken",
+		"description": "A pre-Prohibition apple brandy sour. Tart, fruity, and rosy from grenadine.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Apple Brandy", "qty": 60, "unit": "ml", "desc": "Add 2oz applejack or apple brandy" },
+			{ "category": "Lime Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lime juice" },
+			{ "category": "Grenadine", "qty": 15, "unit": "ml", "desc": "Add 0.5oz grenadine" }
+		]
+	},
+	{
+		"name": "Vieux Carré",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A New Orleans classic from the Hotel Monteleone. A complex blend of rye, cognac, sweet vermouth, and Bénédictine.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 8.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Rye Whiskey", "qty": 30, "unit": "ml", "desc": "Add 1oz rye whiskey" },
+			{ "category": "Cognac", "qty": 30, "unit": "ml", "desc": "Add 1oz cognac" },
+			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
+			{ "category": "Herbal Liqueur", "qty": 7, "unit": "ml", "desc": "Add 1 barspoon Bénédictine" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes Peychaud's bitters" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes Angostura bitters" }
+		]
+	},
+	{
+		"name": "Paper Plane",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "An equal-parts modern classic by Sam Ross. Bourbon balanced by Amaro Nonino, Aperol, and fresh lemon.",
+		"ratings": { "sweetness": 3.0, "dryness": 5.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 22, "unit": "ml", "desc": "Add 0.75oz bourbon" },
+			{ "category": "Amaro", "qty": 22, "unit": "ml", "desc": "Add 0.75oz Amaro Nonino" },
+			{ "category": "Aperol", "qty": 22, "unit": "ml", "desc": "Add 0.75oz Aperol" },
+			{ "category": "Lemon Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lemon juice" }
+		]
+	},
+	{
+		"name": "Rob Roy",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "The scotch Manhattan. Named after the Scottish folk hero, rich and malty with sweet vermouth.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 60, "unit": "ml", "desc": "Add 2oz scotch" },
+			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes Angostura bitters" }
+		]
+	},
+	{
+		"name": "Toronto",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A potent rye cocktail with a touch of Fernet. Bold, bitter, and bracing.",
+		"ratings": { "sweetness": 2.0, "dryness": 7.0, "strength": 8.0, "versatility": 4.0 },
+		"steps": [
+			{ "category": "Rye Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz rye whiskey" },
+			{ "category": "Amaro", "qty": 7, "unit": "ml", "desc": "Add 0.25oz Fernet Branca" },
+			{ "category": "Simple Syrup", "qty": 7, "unit": "ml", "desc": "Add 0.25oz simple syrup" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes Angostura bitters" }
+		]
+	},
+	{
+		"name": "Brown Derby",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "Named after the famous LA restaurant. Bourbon brightened with grapefruit and honey.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 45, "unit": "ml", "desc": "Add 1.5oz bourbon" },
+			{ "category": "Grapefruit Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz grapefruit juice" },
+			{ "category": "Honey Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz honey syrup" }
+		]
+	},
+	{
+		"name": "Rusty Nail",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A simple Rat Pack era classic. Scotch and honey-herbal Drambuie, served over ice.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 8.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 45, "unit": "ml", "desc": "Add 1.5oz scotch" },
+			{ "category": "Drambuie", "qty": 22, "unit": "ml", "desc": "Add 0.75oz Drambuie" }
+		]
+	},
+	{
+		"name": "Hanky Panky",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "Created by Ada Coleman at the Savoy in 1903. Gin and sweet vermouth with a distinctive Fernet edge.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Sweet Vermouth", "qty": 45, "unit": "ml", "desc": "Add 1.5oz sweet vermouth" },
+			{ "category": "Amaro", "qty": 7, "unit": "ml", "desc": "Add 2 dashes Fernet Branca" }
+		]
+	},
+	{
+		"name": "Bijou",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A jewel of a cocktail: gin, vermouth, and Chartreuse representing diamond, ruby, and emerald.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 30, "unit": "ml", "desc": "Add 1oz gin" },
+			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
+			{ "category": "Green Chartreuse", "qty": 30, "unit": "ml", "desc": "Add 1oz green Chartreuse" },
+			{ "category": "Orange Bitters", "qty": 1, "unit": "dash", "desc": "Add 1 dash orange bitters" }
+		]
+	},
+	{
+		"name": "Southside",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A gin mojito from Prohibition-era Chicago. Bright, minty, and refreshing, served up.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Lime Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lime juice" },
+			{ "category": "Simple Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz simple syrup" },
+			{ "category": "Mint", "qty": 6, "unit": "barspoon", "desc": "Add 6 mint leaves" }
+		]
+	},
+	{
+		"name": "Casino",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A classic from the Old Waldorf bar. Bright, tart, and subtly sweet from maraschino.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Maraschino Liqueur", "qty": 7, "unit": "ml", "desc": "Add 0.25oz maraschino liqueur" },
+			{ "category": "Lemon Juice", "qty": 7, "unit": "ml", "desc": "Add 0.25oz lemon juice" },
+			{ "category": "Orange Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes orange bitters" }
+		]
+	},
+	{
+		"name": "Lemon Drop",
+		"spirit": "Vodka",
+		"technique": "Shaken",
+		"description": "A sweet-tart vodka cocktail served in a sugar-rimmed glass. Bright and citrus-forward.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 45, "unit": "ml", "desc": "Add 1.5oz vodka" },
+			{ "category": "Orange Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz triple sec" },
+			{ "category": "Lemon Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lemon juice" },
+			{ "category": "Simple Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz simple syrup" }
+		]
+	},
+	{
+		"name": "Tommy's Margarita",
+		"spirit": "Tequila & Mezcal",
+		"technique": "Shaken",
+		"description": "Julio Bermejo's simplified margarita from Tommy's Mexican Restaurant. Agave syrup replaces orange liqueur.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 6.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Blanco Tequila", "qty": 60, "unit": "ml", "desc": "Add 2oz blanco tequila" },
+			{ "category": "Lime Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lime juice" },
+			{ "category": "Agave Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz agave syrup" }
+		]
+	},
+	{
+		"name": "Oaxaca Old Fashioned",
+		"spirit": "Tequila & Mezcal",
+		"technique": "Stirred",
+		"description": "Phil Ward's smoky twist on the Old Fashioned. Reposado tequila and mezcal with agave and bitters.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 8.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Reposado Tequila", "qty": 30, "unit": "ml", "desc": "Add 1oz reposado tequila" },
+			{ "category": "Mezcal", "qty": 15, "unit": "ml", "desc": "Add 0.5oz mezcal" },
+			{ "category": "Agave Syrup", "qty": 7, "unit": "ml", "desc": "Add 1 barspoon agave syrup" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes Angostura bitters" }
+		]
+	},
+	{
+		"name": "Planter's Punch",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A Caribbean classic following the old rhyme: one sour, two sweet, three strong, four weak.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Dark Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz dark Jamaican rum" },
+			{ "category": "Lime Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lime juice" },
+			{ "category": "Simple Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz simple syrup" },
+			{ "category": "Grenadine", "qty": 7, "unit": "ml", "desc": "Add 0.25oz grenadine" },
+			{ "category": "Bitters", "qty": 3, "unit": "dash", "desc": "Add 3 dashes Angostura bitters" }
+		]
+	},
+	{
+		"name": "Mary Pickford",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "Named after the silent film star. A sweet, fruity rum cocktail from 1920s Havana.",
+		"ratings": { "sweetness": 6.0, "dryness": 2.0, "strength": 4.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz white rum" },
+			{ "category": "Pineapple Juice", "qty": 45, "unit": "ml", "desc": "Add 1.5oz pineapple juice" },
+			{ "category": "Grenadine", "qty": 7, "unit": "ml", "desc": "Add 0.25oz grenadine" },
+			{ "category": "Maraschino Liqueur", "qty": 7, "unit": "ml", "desc": "Add 0.25oz maraschino liqueur" }
+		]
+	},
+	{
+		"name": "El Presidente",
+		"spirit": "Rum",
+		"technique": "Stirred",
+		"description": "A Cuban classic from the 1920s. Elegant rum with dry vermouth and a touch of curaçao.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz white rum" },
+			{ "category": "Dry Vermouth", "qty": 22, "unit": "ml", "desc": "Add 0.75oz dry vermouth" },
+			{ "category": "Curaçao", "qty": 7, "unit": "ml", "desc": "Add 0.25oz curaçao" },
+			{ "category": "Grenadine", "qty": 3, "unit": "ml", "desc": "Add 1 barspoon grenadine" }
+		]
+	},
+	{
+		"name": "Ti' Punch",
+		"spirit": "Rum",
+		"technique": "Stirred",
+		"description": "The quintessential Martinique cocktail. Rhum agricole with a coin of lime and cane sugar, served neat.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 9.0, "versatility": 4.0 },
+		"steps": [
+			{ "category": "Rhum Agricole (white)", "qty": 60, "unit": "ml", "desc": "Add 2oz rhum agricole" },
+			{ "category": "Lime Juice", "qty": 10, "unit": "ml", "desc": "Squeeze a lime disc" },
+			{ "category": "Simple Syrup", "qty": 10, "unit": "ml", "desc": "Add 1 barspoon cane syrup" }
+		]
+	},
+	{
+		"name": "Between the Sheets",
+		"spirit": "Brandy",
+		"technique": "Shaken",
+		"description": "A potent Prohibition-era cocktail. Cognac and rum with orange liqueur and lemon, served up.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Cognac", "qty": 30, "unit": "ml", "desc": "Add 1oz cognac" },
+			{ "category": "White Rum", "qty": 30, "unit": "ml", "desc": "Add 1oz white rum" },
+			{ "category": "Orange Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz triple sec" },
+			{ "category": "Lemon Juice", "qty": 15, "unit": "ml", "desc": "Add 0.5oz lemon juice" }
+		]
+	},
+	{
+		"name": "Brandy Alexander",
+		"spirit": "Brandy",
+		"technique": "Shaken",
+		"description": "A rich, dessert-like after-dinner classic. Cognac with chocolate liqueur and cream.",
+		"ratings": { "sweetness": 7.0, "dryness": 1.0, "strength": 4.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Cognac", "qty": 30, "unit": "ml", "desc": "Add 1oz cognac" },
+			{ "category": "Crème de Cacao", "qty": 30, "unit": "ml", "desc": "Add 1oz crème de cacao" },
+			{ "category": "Cream", "qty": 30, "unit": "ml", "desc": "Add 1oz heavy cream" }
+		]
+	},
+	{
+		"name": "Champagne Cocktail",
+		"spirit": "Brandy",
+		"technique": "Stirred",
+		"description": "The original celebratory cocktail. A sugar cube soaked in bitters topped with champagne and a float of cognac.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 4.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Champagne", "qty": 120, "unit": "ml", "desc": "Top with champagne" },
+			{ "category": "Cognac", "qty": 7, "unit": "ml", "desc": "Float 0.25oz cognac" },
+			{ "category": "Sugar", "qty": 5, "unit": "cube", "desc": "Place 1 sugar cube in glass" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Soak sugar cube with 2 dashes Angostura bitters" }
 		]
 	}
 ]
