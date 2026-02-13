@@ -31,6 +31,13 @@ export class DbProvider {
 				user: DB_USER,
 				password: DB_PASSWORD,
 				database,
+				typeCast: function (field: any, next: () => any) {
+					if (field.type === 'NEWDECIMAL') {
+						const val = field.string();
+						return val === null ? null : Number(val);
+					}
+					return next();
+				},
 			},
 			pool: { min: 0, max: 10 },
 			postProcessResponse: (result) => {
