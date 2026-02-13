@@ -10,14 +10,29 @@ export async function up(knex: Knex): Promise<void> {
 
 	// seed groups
 	await knex('categorygroup').insert([
-		{ CategoryGroupName: 'Spirits', CategoryGroupDescription: 'Base spirits and distilled liquors' },
+		{
+			CategoryGroupName: 'Spirits',
+			CategoryGroupDescription: 'Base spirits and distilled liquors',
+		},
 		{ CategoryGroupName: 'Liqueurs', CategoryGroupDescription: 'Sweet, flavored spirits' },
-		{ CategoryGroupName: 'Fortified & Aromatized', CategoryGroupDescription: 'Fortified wines and vermouths' },
+		{
+			CategoryGroupName: 'Fortified & Aromatized',
+			CategoryGroupDescription: 'Fortified wines and vermouths',
+		},
 		{ CategoryGroupName: 'Bitters', CategoryGroupDescription: 'Bitters and amari' },
-		{ CategoryGroupName: 'Sweeteners', CategoryGroupDescription: 'Syrups, sugars, and sweetening agents' },
+		{
+			CategoryGroupName: 'Sweeteners',
+			CategoryGroupDescription: 'Syrups, sugars, and sweetening agents',
+		},
 		{ CategoryGroupName: 'Juices', CategoryGroupDescription: 'Fresh citrus and fruit juices' },
-		{ CategoryGroupName: 'Mixers & Sodas', CategoryGroupDescription: 'Carbonated and non-alcoholic mixers' },
-		{ CategoryGroupName: 'Other', CategoryGroupDescription: 'Dairy, eggs, and miscellaneous ingredients' },
+		{
+			CategoryGroupName: 'Mixers & Sodas',
+			CategoryGroupDescription: 'Carbonated and non-alcoholic mixers',
+		},
+		{
+			CategoryGroupName: 'Other',
+			CategoryGroupDescription: 'Dairy, eggs, and miscellaneous ingredients',
+		},
 	]);
 
 	// add FK column on category
@@ -46,26 +61,54 @@ export async function up(knex: Knex): Promise<void> {
 	// backfill helper
 	const setGroup = async (groupId: number, names: string[]) => {
 		for (const name of names) {
-			await knex('category')
-				.where({ CategoryName: name })
-				.update({ CategoryGroupId: groupId });
+			await knex('category').where({ CategoryName: name }).update({ CategoryGroupId: groupId });
 		}
 	};
 
 	await setGroup(spiritsId, [
-		'Rum', 'White Rum', 'Dark Rum', 'Gold Rum', 'Overproof Rum',
-		'Jamaican Rum', 'Rhum Agricole (white)', 'Navy Rum', '151 Rum', 'Aged Rum',
-		'Gin', 'London Dry Gin', 'Plymouth Gin', 'Old Tom Gin', 'Genever Gin',
-		'Barrel Aged Gin', 'Beefeater Gin',
-		'Whiskey', 'Bourbon Whiskey', 'Rye Whiskey',
-		'Vodka', 'Plain Vodka', 'Flavored Vodka', 'Infused Vodka',
-		'Agave Spirits', 'Tequila', 'Blanco Tequila', 'Reposado Tequila', 'Mezcal',
-		'Brandy', 'Cognac', 'Absinthe',
+		'Rum',
+		'White Rum',
+		'Dark Rum',
+		'Gold Rum',
+		'Overproof Rum',
+		'Jamaican Rum',
+		'Rhum Agricole (white)',
+		'Navy Rum',
+		'151 Rum',
+		'Aged Rum',
+		'Gin',
+		'London Dry Gin',
+		'Plymouth Gin',
+		'Old Tom Gin',
+		'Genever Gin',
+		'Barrel Aged Gin',
+		'Beefeater Gin',
+		'Whiskey',
+		'Bourbon Whiskey',
+		'Rye Whiskey',
+		'Vodka',
+		'Plain Vodka',
+		'Flavored Vodka',
+		'Infused Vodka',
+		'Agave Spirits',
+		'Tequila',
+		'Blanco Tequila',
+		'Reposado Tequila',
+		'Mezcal',
+		'Brandy',
+		'Cognac',
+		'Absinthe',
 	]);
 
 	await setGroup(liqueursId, [
-		'Orange Liqueur', 'Herbal Liqueur', 'Coffee Liquor', 'Blackcurrant Liqueur',
-		'Curaçao', 'Cherry Heering', 'Velvet Falernum', 'Liqueur',
+		'Orange Liqueur',
+		'Herbal Liqueur',
+		'Coffee Liquor',
+		'Blackcurrant Liqueur',
+		'Curaçao',
+		'Cherry Heering',
+		'Velvet Falernum',
+		'Liqueur',
 	]);
 
 	await setGroup(fortifiedId, ['Fortified wine', 'Dry Vermouth', 'Sweet Vermouth']);
@@ -73,13 +116,17 @@ export async function up(knex: Knex): Promise<void> {
 	await setGroup(bittersId, ['Bitters', 'Orange Bitters', 'Amaro']);
 
 	await setGroup(sweetenersId, [
-		'Syrup', 'Simple Syrup', 'Honey Syrup', 'Orgeat Syrup',
-		'Agave Syrup', 'Cinnamon Simple Syrup', 'Grenadine', 'Sugar',
+		'Syrup',
+		'Simple Syrup',
+		'Honey Syrup',
+		'Orgeat Syrup',
+		'Agave Syrup',
+		'Cinnamon Simple Syrup',
+		'Grenadine',
+		'Sugar',
 	]);
 
-	await setGroup(juicesId, [
-		'Lemon Juice', 'Lime Juice', 'Pineapple Juice', 'Grapefruit Juice',
-	]);
+	await setGroup(juicesId, ['Lemon Juice', 'Lime Juice', 'Pineapple Juice', 'Grapefruit Juice']);
 
 	await setGroup(mixersId, ['Soda Water', 'Soda', 'Ginger Beer', 'Tonic Water']);
 
