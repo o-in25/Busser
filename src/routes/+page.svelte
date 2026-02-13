@@ -23,6 +23,7 @@
 		Star,
 		TrendingUp,
 		Users,
+		BarChart3,
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -840,6 +841,99 @@
 				</Card.Root>
 			</section>
 		{/if}
+
+		<!-- Dashboard Widgets -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+			<!-- Highest Impact Purchases -->
+			{#if dashboardData.highImpactIngredients && dashboardData.highImpactIngredients.length > 0}
+				<Card.Root>
+					<Card.Header class="pb-3">
+						<div class="flex items-center gap-2">
+							<div class="p-2 rounded-lg bg-amber-500/10">
+								<ShoppingCart class="h-5 w-5 text-amber-500" />
+							</div>
+							<div>
+								<Card.Title class="text-lg">Highest Impact Purchases</Card.Title>
+								<p class="text-xs text-muted-foreground">Buy these to unlock the most cocktails</p>
+							</div>
+						</div>
+					</Card.Header>
+					<Card.Content class="space-y-3">
+						{#each dashboardData.highImpactIngredients as ingredient, i}
+							<div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50">
+								<div class="flex items-center gap-3 min-w-0">
+									<span class="text-lg font-bold text-muted-foreground/60 w-5 text-center shrink-0">
+										{i + 1}
+									</span>
+									<p class="font-medium truncate">{ingredient.ingredientName}</p>
+								</div>
+								<Badge variant="secondary" class="shrink-0">
+									<Sparkles class="h-3 w-3 mr-1" />
+									unlocks {ingredient.unlockableRecipes}
+								</Badge>
+							</div>
+						{/each}
+					</Card.Content>
+				</Card.Root>
+			{/if}
+
+			<!-- Your Bar at a Glance -->
+			{#if dashboardData.barBreakdown && dashboardData.barBreakdown.length > 0}
+				{@const totalItems = dashboardData.barBreakdown.reduce((sum, g) => sum + g.count, 0)}
+				<Card.Root class="md:col-span-2">
+					<Card.Header class="pb-3">
+						<div class="flex items-center gap-2">
+							<div class="p-2 rounded-lg bg-primary/10">
+								<BarChart3 class="h-5 w-5 text-primary" />
+							</div>
+							<div>
+								<Card.Title class="text-lg">Your Bar at a Glance</Card.Title>
+								<p class="text-xs text-muted-foreground">{dashboardData.inventoryCount} items across {dashboardData.barBreakdown.length} categories</p>
+							</div>
+						</div>
+					</Card.Header>
+					<Card.Content class="space-y-4">
+						<!-- Catalog Coverage -->
+						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+							<p class="text-sm text-muted-foreground">Catalog Coverage</p>
+							<p class="text-2xl font-bold">{Math.round(dashboardData.catalogCoverage * 100)}%</p>
+						</div>
+
+						<!-- Category Breakdown Bar -->
+						{@const barColors = [
+							'bg-primary',
+							'bg-amber-500',
+							'bg-green-500',
+							'bg-violet-500',
+							'bg-pink-500',
+							'bg-sky-500',
+							'bg-orange-500',
+							'bg-emerald-500',
+						]}
+						<div class="space-y-2">
+							<div class="flex h-3 w-full rounded-full overflow-hidden">
+								{#each dashboardData.barBreakdown as group, i}
+									<div
+										class="{barColors[i % barColors.length]} transition-all"
+										style="width: {(group.count / totalItems) * 100}%"
+										title="{group.categoryGroupName}: {group.count}"
+									></div>
+								{/each}
+							</div>
+							<div class="flex flex-wrap gap-x-4 gap-y-1">
+								{#each dashboardData.barBreakdown as group, i}
+									<div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+										<span class="w-2.5 h-2.5 rounded-full {barColors[i % barColors.length]} shrink-0"></span>
+										{group.categoryGroupName}
+										<span class="font-medium text-foreground">{group.count}</span>
+									</div>
+								{/each}
+							</div>
+						</div>
+					</Card.Content>
+				</Card.Root>
+			{/if}
+		</div>
 	{/if}
 {/if}
 

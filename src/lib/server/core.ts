@@ -46,3 +46,4 @@ export const getSpirit = catalogRepo.getSpiritById.bind(catalogRepo);
 export const getPreparationMethods = catalogRepo.getPreparationMethods.bind(catalogRepo);
 export const updateCatalog = catalogRepo.save.bind(catalogRepo);
 export const deleteCatalogItem = catalogRepo.delete.bind(catalogRepo);
+export const getHighestImpactIngredients = catalogRepo.getHighestImpactIngredients.bind(catalogRepo);
