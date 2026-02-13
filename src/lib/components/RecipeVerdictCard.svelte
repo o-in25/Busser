@@ -115,7 +115,7 @@
 							<span class="text-sm font-medium">{item.label}</span>
 						</div>
 						<span class="text-sm font-semibold text-muted-foreground">
-							{item.value?.toFixed(1)}
+							{item.value.toFixed(1)}
 						</span>
 					</div>
 					<div class="h-2 bg-muted rounded-full overflow-hidden">
