@@ -25,6 +25,7 @@
 		action="edit"
 		category={data.category}
 		parentCategories={data.parentCategories}
+		categoryGroups={data.categoryGroups}
 		productCount={data.productCount}
 	/>
 </div>

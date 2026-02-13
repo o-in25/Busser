@@ -21,5 +21,5 @@
 		</div>
 	</div>
 
-	<CategoryForm action="add" parentCategories={data.parentCategories} />
+	<CategoryForm action="add" parentCategories={data.parentCategories} categoryGroups={data.categoryGroups} />
 </div>

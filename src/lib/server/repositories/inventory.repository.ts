@@ -8,6 +8,7 @@ import type {
 	QueryResult,
 	SelectOption,
 	Table,
+	CategoryGroup,
 } from '$lib/types';
 
 import { DbProvider } from '../db';
@@ -452,6 +453,22 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
+	async getCategoryGroupOptions(): Promise<SelectOption[]> {
+		try {
+			const result = await this.db
+				.table('categorygroup')
+				.select('CategoryGroupId', 'CategoryGroupName')
+				.orderBy('CategoryGroupName');
+			return (result as CategoryGroup[]).map(({ categoryGroupId, categoryGroupName }) => ({
+				name: categoryGroupName,
+				value: categoryGroupId,
+			}));
+		} catch (error: any) {
+			console.error(error);
+			return [];
+		}
+	}
+
 	// category CRUD
 	async findCategoryById(
 		workspaceId: string,
@@ -462,6 +479,7 @@ export class InventoryRepository extends BaseRepository {
 				.table('category')
 				.where('categoryId', categoryId)
 				.where('workspaceId', workspaceId)
+				.select('CategoryId', 'CategoryName', 'CategoryDescription', 'ParentCategoryId', 'CategoryGroupId')
 				.first();
 
 			if (!dbResult) throw new Error('No category found for given ID.');
@@ -478,14 +496,26 @@ export class InventoryRepository extends BaseRepository {
 		workspaceId: string,
 		categoryName: string,
 		categoryDescription: string | null,
-		parentCategoryId: number | null = null
+		parentCategoryId: number | null = null,
+		categoryGroupId: number | null = null
 	): Promise<QueryResult<number>> {
 		try {
+			// auto-inherit group from parent when not explicitly set
+			if (parentCategoryId && !categoryGroupId) {
+				const parent = await this.db
+					.table('category')
+					.where({ CategoryId: parentCategoryId, workspaceId })
+					.select('CategoryGroupId')
+					.first();
+				if (parent?.categoryGroupId) categoryGroupId = parent.categoryGroupId;
+			}
+
 			const [categoryId] = await this.db.table('category').insert({
 				workspaceId,
 				CategoryName: titleCase(categoryName.trim()),
 				CategoryDescription: categoryDescription,
 				ParentCategoryId: parentCategoryId,
+				CategoryGroupId: categoryGroupId,
 			});
 			return { status: 'success', data: categoryId };
 		} catch (error: any) {
@@ -503,6 +533,17 @@ export class InventoryRepository extends BaseRepository {
 			let dbResult: any;
 			let key = category.categoryId;
 			const { categoryName, categoryDescription, parentCategoryId } = category;
+			let { categoryGroupId } = category;
+
+			// auto-inherit group from parent when not explicitly set
+			if (parentCategoryId && !categoryGroupId) {
+				const parent = await this.db
+					.table('category')
+					.where({ CategoryId: parentCategoryId, workspaceId })
+					.select('CategoryGroupId')
+					.first();
+				if (parent?.categoryGroupId) categoryGroupId = parent.categoryGroupId;
+			}
 
 			if (!key) {
 				[dbResult] = await this.db.table('category').insert({
@@ -510,6 +551,7 @@ export class InventoryRepository extends BaseRepository {
 					CategoryName: categoryName,
 					CategoryDescription: categoryDescription,
 					ParentCategoryId: parentCategoryId,
+					CategoryGroupId: categoryGroupId || null,
 				});
 				if (!dbResult) throw new Error('Could not create new category.');
 				key = dbResult;
@@ -524,6 +566,7 @@ export class InventoryRepository extends BaseRepository {
 						CategoryName: categoryName,
 						CategoryDescription: categoryDescription,
 						ParentCategoryId: parentCategoryId,
+						CategoryGroupId: categoryGroupId || null,
 					})
 					.where('categoryId', key)
 					.where('workspaceId', workspaceId);
@@ -552,7 +595,7 @@ export class InventoryRepository extends BaseRepository {
 		currentPage: number = 1,
 		perPage: number = 10,
 		search: string | null = null
-	): Promise<PaginationResult<(Category & { productCount: number })[]>> {
+	): Promise<PaginationResult<(Category & { productCount: number; categoryGroupName: string | null })[]>> {
 		try {
 			let query = this.db
 				.table('category')
@@ -564,18 +607,23 @@ export class InventoryRepository extends BaseRepository {
 						'product.workspaceId'
 					);
 				})
+				.leftJoin('categorygroup', 'category.CategoryGroupId', 'categorygroup.CategoryGroupId')
 				.select(
 					'category.CategoryId',
 					'category.CategoryName',
 					'category.CategoryDescription',
 					'category.ParentCategoryId',
+					'category.CategoryGroupId',
+					'categorygroup.CategoryGroupName',
 					this.db.query.raw('COUNT(product.ProductId) as productCount')
 				)
 				.groupBy(
 					'category.CategoryId',
 					'category.CategoryName',
 					'category.CategoryDescription',
-					'category.ParentCategoryId'
+					'category.ParentCategoryId',
+					'category.CategoryGroupId',
+					'categorygroup.CategoryGroupName'
 				)
 				.orderBy('category.CategoryName');
 
@@ -594,6 +642,8 @@ export class InventoryRepository extends BaseRepository {
 				categoryName: row.categoryName,
 				categoryDescription: row.categoryDescription,
 				parentCategoryId: row.parentCategoryId,
+				categoryGroupId: row.categoryGroupId ?? null,
+				categoryGroupName: row.categoryGroupName ?? null,
 				productCount: Number(row.productCount),
 			}));
 
