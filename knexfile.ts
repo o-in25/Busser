@@ -11,7 +11,7 @@ const connection = {
 const config: Record<string, Knex.Config> = {
 	// user database: auth, roles, permissions, workspaces, invitations
 	user: {
-		client: 'mysql',
+		client: 'mysql2',
 		connection: { ...connection, database: 'user_d' },
 		migrations: {
 			directory: './migrations/user',
@@ -25,7 +25,7 @@ const config: Record<string, Knex.Config> = {
 
 	// core database: inventory, catalog, recipes
 	core: {
-		client: 'mysql',
+		client: 'mysql2',
 		connection: { ...connection, database: 'app_d' },
 		migrations: {
 			directory: './migrations/core',

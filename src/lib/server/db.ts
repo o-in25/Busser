@@ -24,7 +24,7 @@ export class DbProvider {
 
 	constructor(database: string) {
 		this.knex = knex({
-			client: 'mysql',
+			client: 'mysql2',
 			connection: {
 				host: DB_HOSTNAME,
 				port: Number(DB_PORT),

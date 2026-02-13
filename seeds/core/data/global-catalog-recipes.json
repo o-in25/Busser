@@ -1,0 +1,130 @@
+[
+	{
+		"name": "Negroni",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "Equal parts gin, sweet vermouth, and Campari. A bitter, complex aperitivo served over ice with an orange peel.",
+		"ratings": { "sweetness": 3.0, "dryness": 7.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 30, "unit": "ml", "desc": "Add 1oz gin" },
+			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
+			{ "category": "Amaro", "qty": 30, "unit": "ml", "desc": "Add 1oz Campari" }
+		]
+	},
+	{
+		"name": "Whiskey Sour",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A balanced whiskey cocktail with citrus and sweetness. Optionally finished with egg white for a silky texture.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 5.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 45, "unit": "ml", "desc": "Add 1.5oz bourbon" },
+			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
+			{ "category": "Simple Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz simple syrup" },
+			{ "category": "Eggs", "qty": 30, "unit": "ml", "desc": "Add 1 egg white (optional)" }
+		]
+	},
+	{
+		"name": "Gimlet",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A crisp, refreshing gin cocktail with lime. Simple and elegant, served up in a coupe.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Lime Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lime juice" },
+			{ "category": "Simple Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz simple syrup" }
+		]
+	},
+	{
+		"name": "Mojito",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A refreshing Cuban highball with muddled mint, lime, and rum. Light and perfect for warm weather.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 4.0, "versatility": 9.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz white rum" },
+			{ "category": "Lime Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lime juice" },
+			{ "category": "Simple Syrup", "qty": 20, "unit": "ml", "desc": "Add 0.75oz simple syrup" },
+			{ "category": "Mint", "qty": 6, "unit": "leaves", "desc": "Muddle 6 mint leaves" },
+			{ "category": "Soda Water", "qty": 60, "unit": "ml", "desc": "Top with soda water" }
+		]
+	},
+	{
+		"name": "Sazerac",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A bold New Orleans classic with rye whiskey, bitters, and an absinthe-rinsed glass. Rich and spirit-forward.",
+		"ratings": { "sweetness": 2.0, "dryness": 7.0, "strength": 8.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Rye Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz rye whiskey" },
+			{ "category": "Simple Syrup", "qty": 10, "unit": "ml", "desc": "Add 1 sugar cube (or barspoon of simple syrup)" },
+			{ "category": "Bitters", "qty": 3, "unit": "dash", "desc": "Add 3 dashes Peychaud's bitters" },
+			{ "category": "Absinthe", "qty": 5, "unit": "ml", "desc": "Rinse chilled glass with absinthe" }
+		]
+	},
+	{
+		"name": "French 75",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "An elegant sparkling cocktail combining gin and lemon with champagne. Effervescent and celebratory.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 5.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 30, "unit": "ml", "desc": "Add 1oz gin" },
+			{ "category": "Lemon Juice", "qty": 15, "unit": "ml", "desc": "Add 0.5oz lemon juice" },
+			{ "category": "Simple Syrup", "qty": 10, "unit": "ml", "desc": "Add 2 dashes simple syrup" },
+			{ "category": "Champagne", "qty": 60, "unit": "ml", "desc": "Top with champagne" }
+		]
+	},
+	{
+		"name": "Cosmopolitan",
+		"spirit": "Vodka",
+		"technique": "Shaken",
+		"description": "A stylish, citrus-forward vodka cocktail with cranberry and orange liqueur. Tart, fruity, and vibrant pink.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Flavored Vodka", "qty": 40, "unit": "ml", "desc": "Add 1.5oz citrus vodka" },
+			{ "category": "Orange Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz Cointreau" },
+			{ "category": "Lime Juice", "qty": 15, "unit": "ml", "desc": "Add 0.5oz lime juice" },
+			{ "category": "Cranberry Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz cranberry juice" }
+		]
+	},
+	{
+		"name": "Last Word",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A Prohibition-era equal-parts cocktail with gin, green Chartreuse, maraschino liqueur, and lime. Herbal and complex.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 22, "unit": "ml", "desc": "Add 0.75oz gin" },
+			{ "category": "Green Chartreuse", "qty": 22, "unit": "ml", "desc": "Add 0.75oz green Chartreuse" },
+			{ "category": "Maraschino Liqueur", "qty": 22, "unit": "ml", "desc": "Add 0.75oz maraschino liqueur" },
+			{ "category": "Lime Juice", "qty": 22, "unit": "ml", "desc": "Add 0.75oz lime juice" }
+		]
+	},
+	{
+		"name": "Clover Club",
+		"spirit": "Gin",
+		"technique": "Dry Shaken",
+		"description": "A pre-Prohibition gin sour with raspberry syrup and egg white. Silky, tart, and a beautiful pink color.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Lemon Juice", "qty": 15, "unit": "ml", "desc": "Add 0.5oz lemon juice" },
+			{ "category": "Raspberry Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz raspberry syrup" },
+			{ "category": "Eggs", "qty": 30, "unit": "ml", "desc": "Add 1 egg white" }
+		]
+	},
+	{
+		"name": "Piña Colada",
+		"spirit": "Rum",
+		"technique": "Blended",
+		"description": "A tropical blended cocktail with rum, coconut cream, and pineapple juice. Sweet, creamy, and iconic.",
+		"ratings": { "sweetness": 8.0, "dryness": 1.0, "strength": 4.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz white rum" },
+			{ "category": "Coconut Cream", "qty": 45, "unit": "ml", "desc": "Add 1.5oz coconut cream" },
+			{ "category": "Pineapple Juice", "qty": 90, "unit": "ml", "desc": "Add 3oz pineapple juice" }
+		]
+	}
+]
