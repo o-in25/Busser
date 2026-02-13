@@ -31,7 +31,8 @@ Service account credentials are required to authenticate with the
 [Cloud SQL Auth Proxy](https://cloud.google.com/sql/docs/mysql/connect-auth-proxy#troubleshooting).
 
 1. Set credentials: `gcloud auth activate-service-account --key-file=service-account.json`
-2. Start proxy: `./cloud-sql-proxy $INSTANCE_CONNECTION_NAME --health-check`
+2. Start proxy:
+   `./cloud-sql-proxy $INSTANCE_CONNECTION_NAME --health-check --credentials-file=service-account.json`
 
 ### Running the App
 

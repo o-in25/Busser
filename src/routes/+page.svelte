@@ -200,7 +200,7 @@
 						<div class="flex flex-wrap gap-2">
 							<Badge variant="outline" class="text-xs">
 								<Bell class="h-3 w-3 mr-1" />
-								Low Stock Alerts
+								Stock Alerts
 							</Badge>
 							<Badge variant="outline" class="text-xs">
 								<Search class="h-3 w-3 mr-1" />

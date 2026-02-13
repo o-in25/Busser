@@ -52,7 +52,7 @@
 	// Local state (Svelte 5 runes)
 	let viewMode = $state<'grid' | 'list' | 'table'>('table');
 	let searchInput = $state(data.filters?.search || '');
-	let selectedCategory = $state(data.filters?.categoryId || 'all');
+	let selectedCategory = $state(data.filters?.categoryGroupId || 'all');
 	let stockFilter = $state(data.filters?.stockFilter || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
 
@@ -194,14 +194,15 @@
 		const params = new URLSearchParams();
 
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
-		const category = overrides.categoryId !== undefined ? overrides.categoryId : selectedCategory;
+		const category =
+			overrides.categoryGroupId !== undefined ? overrides.categoryGroupId : selectedCategory;
 		const stock = overrides.stockFilter !== undefined ? overrides.stockFilter : stockFilter;
 		const sort = overrides.sort !== undefined ? overrides.sort : sortOption;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 
 		params.set('page', String(pageNum));
 		if (search) params.set('productName', String(search));
-		if (category && category !== 'all') params.set('categoryId', String(category));
+		if (category && category !== 'all') params.set('categoryGroupId', String(category));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
 
@@ -219,10 +220,10 @@
 		applyFilters();
 	}
 
-	// Handle category filter
-	function handleCategoryChange(categoryId: string) {
-		selectedCategory = categoryId;
-		goto(buildUrl({ categoryId, page: 1 }), { keepFocus: true });
+	// Handle category group filter
+	function handleCategoryChange(categoryGroupId: string) {
+		selectedCategory = categoryGroupId;
+		goto(buildUrl({ categoryGroupId, page: 1 }), { keepFocus: true });
 	}
 
 	// Handle stock filter change
@@ -245,7 +246,7 @@
 
 	function clearCategory() {
 		selectedCategory = 'all';
-		goto(buildUrl({ categoryId: 'all' }), { keepFocus: true });
+		goto(buildUrl({ categoryGroupId: 'all' }), { keepFocus: true });
 	}
 
 	function clearStockFilter() {
@@ -265,7 +266,6 @@
 	const stockFilterOptions = [
 		{ value: 'all', label: 'All Stock Levels' },
 		{ value: 'in-stock', label: 'In Stock' },
-		{ value: 'low-stock', label: 'Low Stock' },
 		{ value: 'out-of-stock', label: 'Out of Stock' },
 	];
 
@@ -304,8 +304,8 @@
 	// Compute display labels for select dropdowns
 	const categoryLabel = $derived.by(() => {
 		if (!selectedCategory || selectedCategory === 'all') return 'All Categories';
-		const cat = data.categories.find((c) => String(c.categoryId) === selectedCategory);
-		return cat ? `${cat.categoryName} (${cat.count})` : 'All Categories';
+		const cat = data.categories.find((c) => String(c.categoryGroupId) === selectedCategory);
+		return cat ? `${cat.categoryGroupName} (${cat.count})` : 'All Categories';
 	});
 
 	const stockFilterLabel = $derived.by(() => {
@@ -321,7 +321,7 @@
 	// Update local state when page data changes (for SSR navigation)
 	$effect(() => {
 		searchInput = data.filters?.search || '';
-		selectedCategory = data.filters?.categoryId || 'all';
+		selectedCategory = data.filters?.categoryGroupId || 'all';
 		stockFilter = data.filters?.stockFilter || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
 	});
@@ -338,7 +338,7 @@
 <InventoryDashboard stats={data.stats} />
 
 <!-- Stock Alerts -->
-<StockAlerts outOfStockItems={data.outOfStockItems} lowStockItems={data.lowStockItems} />
+<StockAlerts outOfStockItems={data.outOfStockItems} />
 
 <!-- Toolbar -->
 <div class="flex flex-col gap-3 mb-6">
@@ -368,7 +368,7 @@
 
 		<!-- Filters (stacked on mobile, row on sm+) -->
 		<div class="flex flex-col sm:flex-row gap-3">
-			<!-- Category Filter Select -->
+			<!-- Category Group Filter Select -->
 			<Select.Root
 				type="single"
 				value={selectedCategory}
@@ -385,8 +385,8 @@
 					{/if}
 					{#each data.categories as category}
 						<Select.Item
-							value={String(category.categoryId)}
-							label="{category.categoryName} ({category.count})"
+							value={String(category.categoryGroupId)}
+							label="{category.categoryGroupName} ({category.count})"
 						/>
 					{/each}
 					<Select.Separator />
@@ -442,7 +442,7 @@
 				<button
 					class={cn(
 						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+						viewMode === 'table' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('table')}
 					aria-label="Table view"
@@ -452,7 +452,7 @@
 				<button
 					class={cn(
 						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+						viewMode === 'grid' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('grid')}
 					aria-label="Grid view"
@@ -462,7 +462,7 @@
 				<button
 					class={cn(
 						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+						viewMode === 'list' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('list')}
 					aria-label="List view"
@@ -499,7 +499,7 @@
 			<button
 				class={cn(
 					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+					viewMode === 'table' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('table')}
 				aria-label="Table view"
@@ -509,7 +509,7 @@
 			<button
 				class={cn(
 					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+					viewMode === 'grid' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('grid')}
 				aria-label="Grid view"
@@ -519,7 +519,7 @@
 			<button
 				class={cn(
 					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+					viewMode === 'list' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('list')}
 				aria-label="List view"
@@ -544,7 +544,7 @@
 
 		<!-- Add Product Button -->
 		{#if canModify}
-			<a href="{basePath}/add" class={cn(buttonVariants(), 'shrink-0')}>
+			<a href="{basePath}/add" class={cn(buttonVariants({ variant: 'secondary' }), 'shrink-0')}>
 				<Plus class="h-4 w-4 mr-2" />
 				<span>Add Product</span>
 			</a>
@@ -555,7 +555,7 @@
 <!-- Active Filters Display -->
 <ActiveFiltersDisplay
 	search={searchInput}
-	categoryId={selectedCategory}
+	categoryGroupId={selectedCategory}
 	{stockFilter}
 	categories={data.categories}
 	onClearSearch={clearSearch}

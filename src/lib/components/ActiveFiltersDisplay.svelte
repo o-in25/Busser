@@ -2,11 +2,11 @@
 	import { X } from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
-	import type { CategoryCount } from '$lib/types';
+	import type { CategoryGroupCount } from '$lib/types';
 
 	let {
 		search,
-		categoryId,
+		categoryGroupId,
 		stockFilter,
 		categories,
 		onClearSearch,
@@ -15,9 +15,9 @@
 		onClearAll,
 	}: {
 		search: string;
-		categoryId: string;
+		categoryGroupId: string;
 		stockFilter: string;
-		categories: CategoryCount[];
+		categories: CategoryGroupCount[];
 		onClearSearch: () => void;
 		onClearCategory: () => void;
 		onClearStockFilter: () => void;
@@ -25,20 +25,20 @@
 	} = $props();
 
 	const hasSearch = $derived(!!search);
-	const hasCategory = $derived(!!categoryId && categoryId !== 'all');
+	const hasCategory = $derived(!!categoryGroupId && categoryGroupId !== 'all');
 	const hasStockFilter = $derived(!!stockFilter && stockFilter !== 'all');
 	const hasActiveFilters = $derived(hasSearch || hasCategory || hasStockFilter);
 
 	const categoryName = $derived(
 		hasCategory
-			? categories.find((c) => String(c.categoryId) === categoryId)?.categoryName || categoryId
+			? categories.find((c) => String(c.categoryGroupId) === categoryGroupId)
+					?.categoryGroupName || categoryGroupId
 			: ''
 	);
 
 	const stockFilterLabels: Record<string, string> = {
 		'in-stock': 'In Stock',
 		'out-of-stock': 'Out of Stock',
-		'low-stock': 'Low Stock',
 	};
 </script>
 

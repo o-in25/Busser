@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Sheet from '$lib/components/ui/sheet';
-	import type { Product, Spirit } from '$lib/types';
+	import type { Product } from '$lib/types';
 
 	import InventoryItem from './InventoryItem.svelte';
 
@@ -8,28 +8,13 @@
 		open = $bindable(false),
 		product,
 		recipeCount = 0,
-		tableData = [],
 		onStockChange = null,
 	}: {
 		open?: boolean;
 		product: Product | null;
 		recipeCount?: number;
-		tableData?: Spirit[];
 		onStockChange?: ((productId: number, inStock: boolean) => void) | null;
 	} = $props();
-
-	// Check if product is a base spirit
-	const isBaseSpirit = $derived.by(() => {
-		if (!product || !tableData.length) return false;
-		const regex = new RegExp(
-			`\\b(${tableData
-				.map(({ recipeCategoryDescription }) => recipeCategoryDescription?.toLowerCase() ?? '')
-				.filter(Boolean)
-				.join('|')})\\b`,
-			'i'
-		);
-		return regex.test(product.categoryName);
-	});
 </script>
 
 <Sheet.Root bind:open>
@@ -42,7 +27,7 @@
 
 		<div class="py-6">
 			{#if product}
-				<InventoryItem {product} {isBaseSpirit} {recipeCount} {onStockChange} />
+				<InventoryItem {product} {recipeCount} {onStockChange} />
 			{:else}
 				<div class="flex items-center justify-center h-32 text-muted-foreground">
 					No product selected

@@ -844,11 +844,11 @@
 			<!-- Action buttons (desktop only) -->
 			<div class="flex justify-end gap-3">
 				{#if recipe.recipeId && canModify}
-					<Button type="button" variant="destructive" onclick={() => (modalOpen = true)}>
-						Delete
-					</Button>
+					<Button type="button" variant="destructive" onclick={() => (modalOpen = true)}
+						>Delete</Button
+					>
 				{/if}
-				<Button type="submit" disabled={disabled || !isFormValid}>Save Recipe</Button>
+				<Button type="submit" disabled={disabled || !isFormValid}>Save</Button>
 			</div>
 		</div>
 	</form>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, ChevronLeft, ChevronRight, FlaskConical, Info } from 'lucide-svelte';
+	import { ChevronLeft, ChevronRight, FlaskConical, Info } from 'lucide-svelte';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -9,12 +9,11 @@
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Indicator } from '$lib/components/ui/indicator';
 	import * as Table from '$lib/components/ui/table';
-	import type { PaginationData, Product, Spirit } from '$lib/types';
+	import type { PaginationData, Product } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	export let products: Product[];
 	export let paginationData: PaginationData;
-	export let tableData: Spirit[] = [];
 	export let recipeUsage: Record<number, number> = {};
 	export let onRowClick: ((product: Product) => void) | null = null;
 	export let selectable: boolean = false;
@@ -70,14 +69,6 @@
 
 	$: urlParams_$ = $page.url.searchParams;
 
-	const regex = new RegExp(
-		`\\b(${tableData
-			.map(({ recipeCategoryDescription }) => recipeCategoryDescription?.toLowerCase() ?? '')
-			.filter(Boolean)
-			.join('|')})\\b`,
-		'i'
-	);
-
 	$: {
 		if (!activeUrl) {
 			const [first] = pages;
@@ -105,7 +96,6 @@
 		goto(`/${route}?${urlParams.toString()}`);
 	};
 
-	const isBaseSpirit = (categoryName: string) => regex.test(categoryName);
 </script>
 
 <!-- table -->
@@ -126,7 +116,7 @@
 				<Table.Head class="hidden sm:table-cell">Category</Table.Head>
 				<Table.Head class="hidden sm:table-cell">Status</Table.Head>
 				<Table.Head class="hidden sm:table-cell text-center">Used In</Table.Head>
-				<Table.Head class="hidden sm:table-cell text-center">Base Spirit</Table.Head>
+				<Table.Head class="hidden sm:table-cell">Group</Table.Head>
 			</Table.Row>
 		</Table.Header>
 		<Table.Body>
@@ -152,8 +142,6 @@
 						<span class="flex items-center">
 							{#if product.productInStockQuantity === 0}
 								<Indicator color="red" class="me-1.5" />Out of stock
-							{:else if product.productInStockQuantity === 1}
-								<Indicator color="yellow" class="me-1.5" />Low stock
 							{:else}
 								<Indicator color="green" class="me-1.5" />In stock
 							{/if}
@@ -179,13 +167,10 @@
 						{/if}
 					</Table.Cell>
 					<Table.Cell class="hidden sm:table-cell">
-						{#if isBaseSpirit(product.categoryName)}
-							<div class="flex">
-								<Badge variant="secondary" class="!p-1 !font-semibold !mx-auto">
-									<Check class="h-3 w-3" />
-									<span class="sr-only">Base Spirit</span>
-								</Badge>
-							</div>
+						{#if product.categoryGroupName}
+							<Badge variant="outline">{product.categoryGroupName}</Badge>
+						{:else}
+							<span class="text-muted-foreground text-sm">-</span>
 						{/if}
 					</Table.Cell>
 				</Table.Row>

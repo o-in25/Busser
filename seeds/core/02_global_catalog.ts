@@ -8,7 +8,18 @@ const SUPPLIER_ID = 1;
 const PARENT_CATEGORY_MAP: Record<string, string> = {
 	'Maraschino Liqueur': 'Liqueur',
 	'Green Chartreuse': 'Herbal Liqueur',
+	'Yellow Chartreuse': 'Herbal Liqueur',
 	'Raspberry Syrup': 'Syrup',
+	'Scotch Whisky': 'Whiskey',
+	'Cachaça': 'Rum',
+	'Pisco': 'Brandy',
+	'Apple Brandy': 'Brandy',
+	'Lillet Blanc': 'Fortified wine',
+	'Amaretto': 'Liqueur',
+	'Aperol': 'Liqueur',
+	'Drambuie': 'Liqueur',
+	'Crème de Violette': 'Liqueur',
+	'Crème de Cacao': 'Liqueur',
 };
 
 interface RecipeData {

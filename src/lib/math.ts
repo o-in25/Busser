@@ -309,8 +309,8 @@ export const getDilutionInfo = (
 	};
 };
 
-export const convertToMl = (unit: string, value: number) => value * units[unit].toMl;
-export const convertFromMl = (unit: string, value: number) => units[unit].fromMl(value);
+export const convertToMl = (unit: string, value: number) => (units[unit]?.toMl ?? 1) * value;
+export const convertFromMl = (unit: string, value: number) => units[unit]?.fromMl(value) ?? value;
 export const getUnits = () => units;
 export const getUnitLabel = (unit: string) => units[unit]?.label || unit;
 export const getUnitOptions = () =>
