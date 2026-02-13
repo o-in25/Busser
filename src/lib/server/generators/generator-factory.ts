@@ -1,4 +1,4 @@
-import { generateImage, generateText } from '../ai';
+import { generateImage, generateText, generateTextFromImage } from '../ai';
 import { z } from 'zod';
 import prompts from './prompts.json';
 import type {
@@ -15,6 +15,8 @@ import type {
 	RecipeRatingsOutput,
 	CategoryDescriptionInput,
 	CategoryDescriptionOutput,
+	BottleScanInput,
+	BottleScanOutput,
 	GeneratorMap,
 	GeneratorType,
 } from '$lib/types/generators';
@@ -31,6 +33,13 @@ type ImageGeneratorConfig<TInput> = {
 	prompt: string;
 	negativePrompt: string;
 	buildPrompt: (base: string, input: TInput) => string;
+};
+
+type VisionGeneratorConfig<TInput, TOutput> = {
+	type: 'vision';
+	schema: z.ZodType<TOutput>;
+	buildPrompt: (input: TInput) => string;
+	getImage: (input: TInput) => string;
 };
 
 // zod schemas for validation
@@ -89,12 +98,23 @@ const categoryDescriptionSchema: z.ZodType<CategoryDescriptionOutput> = z.object
 	description: z.string(),
 });
 
-// generator configurations
-const generators: {
-	[T in GeneratorType]: GeneratorMap[T]['output'] extends ImageResult
-		? ImageGeneratorConfig<GeneratorMap[T]['input']>
+const bottleScanSchema: z.ZodType<BottleScanOutput> = z.object({
+	productName: z.string(),
+	category: z.string(),
+	proof: z.number(),
+	sizeInMilliliters: z.number(),
+	description: z.string(),
+});
+
+// config type for each generator
+type GeneratorConfig<T extends GeneratorType> = GeneratorMap[T]['output'] extends ImageResult
+	? ImageGeneratorConfig<GeneratorMap[T]['input']>
+	: T extends 'bottle-scan'
+		? VisionGeneratorConfig<GeneratorMap[T]['input'], GeneratorMap[T]['output']>
 		: TextGeneratorConfig<GeneratorMap[T]['input'], GeneratorMap[T]['output']>;
-} = {
+
+// generator configurations
+const generators: { [T in GeneratorType]: GeneratorConfig<T> } = {
 	'inventory-description': {
 		type: 'text',
 		schema: inventoryDescriptionSchema,
@@ -170,6 +190,14 @@ const generators: {
 		buildPrompt: (input: CategoryDescriptionInput) =>
 			prompts.categoryDescription.replace('[NAME]', input.name),
 	},
+
+	'bottle-scan': {
+		type: 'vision',
+		schema: bottleScanSchema,
+		buildPrompt: (input: BottleScanInput) =>
+			prompts.bottleScan.replace('[CATEGORIES]', input.categories.join(', ')),
+		getImage: (input: BottleScanInput) => input.image,
+	},
 };
 
 // the factory function
@@ -179,7 +207,15 @@ export async function generate<T extends GeneratorType>(
 ): Promise<GeneratorMap[T]['output']> {
 	const config = generators[type];
 
-	if (config.type === 'text') {
+	if (config.type === 'vision') {
+		const visionConfig = config as VisionGeneratorConfig<
+			GeneratorMap[T]['input'],
+			GeneratorMap[T]['output']
+		>;
+		const prompt = visionConfig.buildPrompt(input);
+		const imageDataUri = visionConfig.getImage(input);
+		return generateTextFromImage(prompt, imageDataUri, visionConfig.schema);
+	} else if (config.type === 'text') {
 		const textConfig = config as TextGeneratorConfig<
 			GeneratorMap[T]['input'],
 			GeneratorMap[T]['output']

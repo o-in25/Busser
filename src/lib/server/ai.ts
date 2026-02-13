@@ -60,6 +60,29 @@ export async function generateText<T>(prompt: string, schema: ZodSchema<T>): Pro
 	return completion.choices[0].message.parsed as T;
 }
 
+// text generation from image using openai gpt-4o-mini with structured output
+export async function generateTextFromImage<T>(
+	prompt: string,
+	imageDataUri: string,
+	schema: ZodSchema<T>
+): Promise<T> {
+	const client = getOpenAI();
+	const completion = await client.beta.chat.completions.parse({
+		model: 'gpt-4o-mini',
+		messages: [
+			{
+				role: 'user',
+				content: [
+					{ type: 'text', text: prompt },
+					{ type: 'image_url', image_url: { url: imageDataUri } },
+				],
+			},
+		],
+		response_format: zodResponseFormat(schema, 'text'),
+	});
+	return completion.choices[0].message.parsed as T;
+}
+
 // streaming chat with tool calling for ai assistant
 // onToolCall: executes tool and returns result string for OpenAI
 // onEmit: optional callback to push custom SSE events to the stream (e.g. proposals)

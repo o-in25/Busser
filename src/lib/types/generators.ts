@@ -69,6 +69,19 @@ export type CategoryDescriptionOutput = {
 	description: string;
 };
 
+export type BottleScanInput = {
+	image: string;
+	categories: string[];
+};
+
+export type BottleScanOutput = {
+	productName: string;
+	category: string;
+	proof: number;
+	sizeInMilliliters: number;
+	description: string;
+};
+
 // generator type mapping
 export type GeneratorMap = {
 	'inventory-description': { input: InventoryDescriptionInput; output: InventoryDescriptionOutput };
@@ -78,6 +91,7 @@ export type GeneratorMap = {
 	'recipe-insights': { input: RecipeInsightsInput; output: RecipeInsightsOutput };
 	'recipe-ratings': { input: RecipeRatingsInput; output: RecipeRatingsOutput };
 	'category-description': { input: CategoryDescriptionInput; output: CategoryDescriptionOutput };
+	'bottle-scan': { input: BottleScanInput; output: BottleScanOutput };
 };
 
 export type GeneratorType = keyof GeneratorMap;

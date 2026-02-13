@@ -196,6 +196,7 @@
 				<Table.Header>
 					<Table.Row>
 						<Table.Head>Name</Table.Head>
+						<Table.Head class="hidden sm:table-cell">Group</Table.Head>
 						<Table.Head>Description</Table.Head>
 						<Table.Head class="text-center">Products</Table.Head>
 						<Table.Head class="text-right">Actions</Table.Head>
@@ -205,6 +206,9 @@
 					{#each data.categories as category (category.categoryId)}
 						<Table.Row class="cursor-pointer" onclick={() => openDrawer(category)}>
 							<Table.Cell class="font-medium">{category.categoryName}</Table.Cell>
+							<Table.Cell class="hidden sm:table-cell text-muted-foreground">
+								{category.categoryGroupName || '—'}
+							</Table.Cell>
 							<Table.Cell class="text-muted-foreground max-w-md truncate">
 								{category.categoryDescription || '—'}
 							</Table.Cell>

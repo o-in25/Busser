@@ -2,12 +2,20 @@
 // tables: product, productdetail, category, supplier
 // views: inventory
 
+// categorygroup table (broad display groupings like spirits, liqueurs)
+export type CategoryGroup = {
+	categoryGroupId: number;
+	categoryGroupName: string;
+	categoryGroupDescription: string | null;
+};
+
 // category table (product categories like vodka, gin, bourbon)
 export type Category = {
 	categoryId: number;
 	categoryName: string;
 	categoryDescription: string | null;
 	parentCategoryId: number | null;
+	categoryGroupId: number | null;
 };
 
 // supplier table

@@ -61,6 +61,22 @@ pnpm test:watch     # Run tests in watch mode
 | `OPENAI_API_KEY`           | OpenAI API key          |
 | `MAILGUN_KEY`              | Mailgun API key         |
 
+### Migrations
+
+Two separate migration directories match the two databases.
+
+```bash
+pnpm migrate:core              # Run pending migrations on app_d (inventory, catalog, recipes)
+pnpm migrate:user              # Run pending migrations on user_d (auth, roles, workspaces)
+pnpm migrate:rollback:core     # Rollback last batch on app_d
+pnpm migrate:rollback:user     # Rollback last batch on user_d
+pnpm migrate:status:core       # Show migration status for app_d
+pnpm migrate:status:user       # Show migration status for user_d
+```
+
+Migration files live in `migrations/core/` and `migrations/user/`, named with a
+`YYYYMMDD000000_description.ts` timestamp convention.
+
 ## Deployment
 
 Deploy to [Fly.io](https://fly.io):

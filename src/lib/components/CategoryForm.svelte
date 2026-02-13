@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GitBranch, Tags } from 'lucide-svelte';
+	import { GitBranch, Layers, Tags } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { applyAction, enhance } from '$app/forms';
@@ -11,7 +11,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
-	import type { ComponentAction, Table } from '$lib/types';
+	import type { ComponentAction, SelectOption, Table } from '$lib/types';
 
 	import { notificationStore } from '../../stores';
 	import Prompt from './Prompt.svelte';
@@ -20,11 +20,13 @@
 		action = 'add',
 		category = {} as Table.Category,
 		parentCategories = [],
+		categoryGroups = [],
 		productCount = 0,
 	}: {
 		action?: ComponentAction;
 		category?: Table.Category;
 		parentCategories?: Table.Category[];
+		categoryGroups?: SelectOption[];
 		productCount?: number;
 	} = $props();
 
@@ -37,6 +39,9 @@
 	let categoryDescription = $state(category.categoryDescription ?? '');
 	let parentCategoryId = $state<string>(
 		category.parentCategoryId ? String(category.parentCategoryId) : ''
+	);
+	let categoryGroupId = $state<string>(
+		category.categoryGroupId ? String(category.categoryGroupId) : ''
 	);
 	let isSubmitting = $state(false);
 	let modalOpen = $state(false);
@@ -53,6 +58,13 @@
 		if (!parentCategoryId) return 'None (top-level category)';
 		const parent = parentCategories.find((c) => c.categoryId === Number(parentCategoryId));
 		return parent?.categoryName || 'None';
+	});
+
+	// Get display name for selected group
+	const selectedGroupLabel = $derived(() => {
+		if (!categoryGroupId) return 'None';
+		const group = categoryGroups.find((g) => g.value === Number(categoryGroupId));
+		return group?.name || 'None';
 	});
 
 	// Delete handler
@@ -130,6 +142,31 @@
 						<Helper color="red">{errors.categoryName}</Helper>
 					{/if}
 				</div>
+
+				<!-- Category Group Selector (hidden when parent is set — auto-inherits) -->
+				<input type="hidden" name="categoryGroupId" value={categoryGroupId} />
+				{#if categoryGroups.length > 0 && !parentCategoryId}
+					<div>
+						<Label for="categoryGroupId" class="mb-2 flex items-center gap-1.5">
+							<Layers class="h-4 w-4" />
+							Category Group
+						</Label>
+						<p class="text-xs text-muted-foreground mb-2">
+							Broad grouping for filtering (e.g., "Spirits", "Juices")
+						</p>
+						<Select.Root type="single" bind:value={categoryGroupId}>
+							<Select.Trigger class="w-full">
+								{selectedGroupLabel()}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="" label="None" />
+								{#each categoryGroups as group}
+									<Select.Item value={String(group.value)} label={group.name} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</div>
+				{/if}
 
 				<!-- Parent Category Selector -->
 				{#if parentCategories.length > 0}

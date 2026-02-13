@@ -39,9 +39,10 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	}
 
 	// Get all categories for parent selection (excluding current category)
-	const [{ data: categories }, { pagination }] = await Promise.all([
+	const [{ data: categories }, { pagination }, categoryGroups] = await Promise.all([
 		inventoryRepo.findAllCategories(workspaceId, 1, 1000, null),
 		inventoryRepo.findAll(workspaceId, 1, 1, { categoryId: Number(id) }),
+		inventoryRepo.getCategoryGroupOptions(),
 	]);
 	const parentCategories = (categories || []).filter(
 		(c) => c.categoryId !== Number(id) && !c.parentCategoryId
@@ -50,6 +51,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	return {
 		category: result.data,
 		parentCategories,
+		categoryGroups,
 		productCount: pagination.total || 0,
 	};
 };
@@ -75,6 +77,8 @@ export const actions: Actions = {
 		const categoryDescription = (formData.get('categoryDescription') as string) || '';
 		const parentCategoryIdRaw = formData.get('parentCategoryId') as string;
 		const parentCategoryId = parentCategoryIdRaw ? Number(parentCategoryIdRaw) : null;
+		const categoryGroupIdRaw = formData.get('categoryGroupId') as string;
+		const categoryGroupId = categoryGroupIdRaw ? Number(categoryGroupIdRaw) : null;
 
 		if (!categoryName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Category name is required.' });
@@ -85,6 +89,7 @@ export const actions: Actions = {
 			categoryName,
 			categoryDescription,
 			parentCategoryId,
+			categoryGroupId,
 		};
 
 		const result = await inventoryRepo.updateCategory(workspaceId, category);

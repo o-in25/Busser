@@ -207,6 +207,7 @@ export namespace Table {
 		categoryName: string;
 		categoryDescription: string | null;
 		parentCategoryId?: number | null;
+		categoryGroupId?: number | null;
 	};
 }
 
