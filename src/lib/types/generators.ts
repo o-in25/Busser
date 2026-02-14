@@ -69,6 +69,10 @@ export type CategoryDescriptionOutput = {
 	description: string;
 };
 
+export type CatalogVisualDescription = {
+	visualDescription: string;
+};
+
 export type BottleScanInput = {
 	image: string;
 	categories: string[];

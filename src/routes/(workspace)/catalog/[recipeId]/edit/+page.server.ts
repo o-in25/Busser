@@ -6,6 +6,10 @@ import { catalogRepo, inventoryRepo } from '$lib/server/core';
 
 import type { Actions, PageServerLoad } from './$types';
 
+export const config = {
+	body: { maxSize: '1mb' },
+};
+
 export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
