@@ -170,9 +170,9 @@
 
 				<!-- Expand indicator -->
 				<div
-					class="absolute top-4 right-4 p-2 rounded-full bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+					class="absolute top-4 right-4 p-2 rounded-full bg-white/30 dark:bg-black/30 backdrop-blur-md border border-white/40 dark:border-white/20 text-white shadow-lg hover:!bg-black/80 hover:!border-black/80 hover:!backdrop-blur-none active:!bg-black transition-all duration-200"
 				>
-					<Expand class="w-5 h-5 text-foreground" />
+					<Expand class="w-5 h-5 drop-shadow" />
 				</div>
 			</button>
 		{:else}

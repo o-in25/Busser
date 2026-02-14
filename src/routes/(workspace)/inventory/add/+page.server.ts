@@ -7,6 +7,10 @@ import type { Product } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
 
+export const config = {
+	body: { maxSize: '1mb' },
+};
+
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { Expand, ImagePlus, Loader2, Sparkles, Upload, Wand2, X } from 'lucide-svelte';
-	import { cubicOut } from 'svelte/easing';
-	import { fade, fly, scale } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
+	import { mount, unmount } from 'svelte';
 
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import GenerateImageModal from './GenerateImageModal.svelte';
+	import Lightbox from './Lightbox.svelte';
 
 	let {
 		name = 'image',
@@ -156,19 +157,34 @@
 		}
 	};
 
+	let lightboxInstance: Record<string, unknown> | null = null;
+	let lightboxTarget: HTMLDivElement | null = null;
+
 	function openLightbox() {
+		if (lightboxInstance) return;
 		lightboxOpen = true;
 		document.body.style.overflow = 'hidden';
+		lightboxTarget = document.createElement('div');
+		document.body.appendChild(lightboxTarget);
+		lightboxInstance = mount(Lightbox, {
+			target: lightboxTarget,
+			props: {
+				src,
+				onclose: closeLightbox,
+			},
+		});
 	}
 
 	function closeLightbox() {
 		lightboxOpen = false;
 		document.body.style.overflow = '';
-	}
-
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape' && lightboxOpen) {
-			closeLightbox();
+		if (lightboxInstance) {
+			unmount(lightboxInstance);
+			lightboxInstance = null;
+		}
+		if (lightboxTarget) {
+			lightboxTarget.remove();
+			lightboxTarget = null;
 		}
 	}
 
@@ -180,8 +196,6 @@
 		generateModalOpen = true;
 	}
 </script>
-
-<svelte:window onkeydown={handleKeydown} />
 
 <div class="space-y-4">
 	<Label class="text-base font-medium">{label}</Label>
@@ -245,24 +259,22 @@
 						/>
 					</button>
 					<!-- action buttons overlay -->
-					<div
-						class="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200"
-					>
+					<div class="absolute top-2 right-2 flex gap-1.5">
 						<button
 							type="button"
 							onclick={openLightbox}
-							class="p-1.5 rounded-lg bg-black/50 hover:bg-black/70 text-white"
+							class="p-2 rounded-full bg-white/30 dark:bg-black/30 backdrop-blur-md border border-white/40 dark:border-white/20 text-white shadow-lg hover:!bg-black/80 hover:!border-black/80 hover:!backdrop-blur-none active:!bg-black transition-all duration-200"
 							title="Full screen preview"
 						>
-							<Expand class="w-4 h-4" />
+							<Expand class="w-4 h-4 drop-shadow" />
 						</button>
 						<button
 							type="button"
 							onclick={clearAll}
-							class="p-1.5 rounded-lg bg-black/50 hover:bg-black/70 text-white"
+							class="p-2 rounded-full bg-red-500/40 backdrop-blur-md border border-red-300/40 dark:border-red-400/30 text-white shadow-lg hover:bg-red-600 hover:backdrop-blur-none hover:border-red-600 active:bg-red-700 transition-all duration-200"
 							title="Remove image"
 						>
-							<X class="w-4 h-4" />
+							<X class="w-4 h-4 drop-shadow" />
 						</button>
 					</div>
 				{:else if !isGenerating}
@@ -340,47 +352,6 @@
 		</p>
 	{/if}
 </div>
-
-<!-- Lightbox Overlay -->
-{#if lightboxOpen}
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center"
-		role="dialog"
-		aria-modal="true"
-		aria-label="Image lightbox"
-	>
-		<button
-			type="button"
-			class="absolute inset-0 bg-background/95 backdrop-blur-md cursor-zoom-out"
-			onclick={closeLightbox}
-			aria-label="Close lightbox"
-			transition:fade={{ duration: 200 }}
-		></button>
-
-		<button
-			type="button"
-			class="absolute top-4 right-4 z-10 p-3 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors"
-			onclick={closeLightbox}
-			aria-label="Close"
-			transition:fade={{ duration: 200, delay: 100 }}
-		>
-			<X class="w-6 h-6" />
-		</button>
-
-		<div
-			class="relative max-w-[90vw] max-h-[85vh] cursor-zoom-out"
-			transition:scale={{ duration: 300, easing: cubicOut, start: 0.9 }}
-		>
-			<button type="button" onclick={closeLightbox} class="block" aria-label="Close lightbox">
-				<img
-					class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-					{src}
-					alt="Full preview"
-				/>
-			</button>
-		</div>
-	</div>
-{/if}
 
 <!-- Generate Image Modal -->
 <GenerateImageModal

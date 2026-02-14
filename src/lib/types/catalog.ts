@@ -5,7 +5,9 @@
 
 export type AdvancedFilter = {
 	readyToMake?: boolean;
-	ingredientProductId?: number;
+	ingredientInclude?: number[];
+	ingredientAny?: number[];
+	ingredientExclude?: number[];
 	strengthMin?: number;
 	strengthMax?: number;
 	ingredientCountMin?: number;

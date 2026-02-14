@@ -9,6 +9,7 @@ import type {
 	CatalogDescriptionInput,
 	CatalogDescriptionOutput,
 	CatalogImageInput,
+	CatalogVisualDescription,
 	RecipeInsightsInput,
 	RecipeInsightsOutput,
 	RecipeRatingsInput,
@@ -96,6 +97,10 @@ const recipeRatingsSchema: z.ZodType<RecipeRatingsOutput> = z.object({
 
 const categoryDescriptionSchema: z.ZodType<CategoryDescriptionOutput> = z.object({
 	description: z.string(),
+});
+
+const catalogVisualSchema: z.ZodType<CatalogVisualDescription> = z.object({
+	visualDescription: z.string(),
 });
 
 const bottleScanSchema: z.ZodType<BottleScanOutput> = z.object({
@@ -231,6 +236,21 @@ export async function generate<T extends GeneratorType>(
 		let prompt: string;
 		if (imageInput.customPrompt) {
 			prompt = prompts.customImage.prompt.replace('[SUBJECT]', imageInput.customPrompt);
+		} else if (type === 'catalog-image') {
+			// two-step pipeline: ask gpt to describe the cocktail visually, then feed to imagen
+			const catalogInput = input as CatalogImageInput;
+			let enhancedPrompt = imageConfig.buildPrompt(imageConfig.prompt, input);
+			try {
+				const visualPrompt = prompts.catalogImageVisual
+					.replace('[NAME]', catalogInput.subject)
+					.replace('[INGREDIENTS]', catalogInput.ingredients?.join(', ') || 'unknown')
+					.replace('[TECHNIQUE]', catalogInput.technique || 'unknown');
+				const { visualDescription } = await generateText(visualPrompt, catalogVisualSchema);
+				enhancedPrompt = imageConfig.prompt.replace('[SUBJECT]', visualDescription);
+			} catch {
+				// fall back to standard prompt if gpt fails
+			}
+			prompt = enhancedPrompt;
 		} else {
 			prompt = imageConfig.buildPrompt(imageConfig.prompt, input);
 		}
