@@ -69,13 +69,38 @@ export class CatalogRepository extends BaseRepository {
 					);
 				}
 
-				if (advancedFilter.ingredientProductId) {
+				// AND: recipe must contain ALL of these ingredients
+				if (advancedFilter.ingredientInclude?.length) {
+					for (const productId of advancedFilter.ingredientInclude) {
+						query = query.whereIn(
+							'r.RecipeId',
+							this.db
+								.table('basicrecipestep as rs')
+								.select('rs.RecipeId')
+								.where('rs.ProductId', productId)
+						);
+					}
+				}
+
+				// OR: recipe must contain at least one of these ingredients
+				if (advancedFilter.ingredientAny?.length) {
 					query = query.whereIn(
 						'r.RecipeId',
 						this.db
 							.table('basicrecipestep as rs')
 							.select('rs.RecipeId')
-							.where('rs.ProductId', advancedFilter.ingredientProductId)
+							.whereIn('rs.ProductId', advancedFilter.ingredientAny)
+					);
+				}
+
+				// NOT: recipe must NOT contain any of these ingredients
+				if (advancedFilter.ingredientExclude?.length) {
+					query = query.whereNotIn(
+						'r.RecipeId',
+						this.db
+							.table('basicrecipestep as rs')
+							.select('rs.RecipeId')
+							.whereIn('rs.ProductId', advancedFilter.ingredientExclude)
 					);
 				}
 
@@ -134,6 +159,20 @@ export class CatalogRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error(error);
 			return { data: [], pagination: emptyPagination };
+		}
+	}
+
+	async getRecipeCount(workspaceId: string): Promise<number> {
+		try {
+			const result = (await this.db
+				.table('basicrecipe')
+				.where('workspaceId', workspaceId)
+				.count('* as count')
+				.first()) as { count: number } | undefined;
+			return Number(result?.count) || 0;
+		} catch (error: any) {
+			console.error('Failed to get recipe count:', error.message);
+			return 0;
 		}
 	}
 

@@ -51,7 +51,9 @@
 	let advancedSearchOpen = $state(false);
 	const advancedParamKeys = [
 		'readyToMake',
-		'ingredient',
+		'ingredientInclude',
+		'ingredientAny',
+		'ingredientExclude',
 		'strengthMin',
 		'strengthMax',
 		'ingredientCountMin',
@@ -440,12 +442,40 @@
 					</button>
 				</Badge>
 			{/if}
-			{#if data.filters.ingredient}
+			{#if data.filters.ingredientInclude}
+				{@const names = data.filters.ingredientNames || {}}
+				{@const ids = data.filters.ingredientInclude.split(',').map(Number)}
 				<Badge variant="secondary" class="gap-1">
-					Ingredient: {data.filters.ingredientName || data.filters.ingredient}
+					Must include: {ids.map((id) => names[id] || id).join(', ')}
 					<button
-						onclick={() => clearAdvancedFilter('ingredient')}
+						onclick={() => clearAdvancedFilter('ingredientInclude')}
 						class="ml-1 hover:text-destructive"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			{#if data.filters.ingredientAny}
+				{@const names = data.filters.ingredientNames || {}}
+				{@const ids = data.filters.ingredientAny.split(',').map(Number)}
+				<Badge variant="secondary" class="gap-1">
+					Any of: {ids.map((id) => names[id] || id).join(', ')}
+					<button
+						onclick={() => clearAdvancedFilter('ingredientAny')}
+						class="ml-1 hover:text-destructive"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			{#if data.filters.ingredientExclude}
+				{@const names = data.filters.ingredientNames || {}}
+				{@const ids = data.filters.ingredientExclude.split(',').map(Number)}
+				<Badge variant="destructive" class="gap-1">
+					Excludes: {ids.map((id) => names[id] || id).join(', ')}
+					<button
+						onclick={() => clearAdvancedFilter('ingredientExclude')}
+						class="ml-1 hover:text-destructive-foreground"
 					>
 						<X class="h-3 w-3" />
 					</button>

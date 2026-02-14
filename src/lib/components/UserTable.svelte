@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertCircle, CheckCircle2, Mail, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
+	import { AlertCircle, CheckCircle2, Eye, Mail, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
 	import moment from 'moment';
 
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
@@ -120,6 +120,16 @@
 						</Table.Cell>
 						<Table.Cell class="text-right pr-6">
 							<div class="flex items-center justify-end gap-2">
+								<a
+									class={cn(
+										buttonVariants({ variant: 'outline', size: 'icon' }),
+										'h-8 w-8 bg-cyan-500/20 border-cyan-500/50 text-cyan-400 hover:bg-cyan-500 hover:text-white'
+									)}
+									href="/settings/users/{user.userId}"
+									title="View user"
+								>
+									<Eye class="w-4 h-4" />
+								</a>
 								<a
 									class={cn(
 										buttonVariants({ variant: 'outline', size: 'icon' }),

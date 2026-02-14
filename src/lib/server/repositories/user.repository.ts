@@ -48,7 +48,7 @@ export class UserRepository extends BaseRepository {
 		try {
 			const user: User = await this.db.query.transaction(async (trx) => {
 				let dbResult: any = await trx('user')
-					.select('UserId', 'Email', 'Username', 'LastActivityDate', 'AvatarImageUrl')
+					.select('UserId', 'Email', 'Username', 'LastActivityDate', 'AvatarImageUrl', 'Verified')
 					.first()
 					.where({ userId });
 

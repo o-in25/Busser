@@ -20,7 +20,9 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 
 	// advanced search params
 	const readyToMake = url.searchParams.get('readyToMake') || '';
-	const ingredient = url.searchParams.get('ingredient') || '';
+	const ingredientInclude = url.searchParams.get('ingredientInclude') || '';
+	const ingredientAny = url.searchParams.get('ingredientAny') || '';
+	const ingredientExclude = url.searchParams.get('ingredientExclude') || '';
 	const strengthMin = url.searchParams.get('strengthMin') || '';
 	const strengthMax = url.searchParams.get('strengthMax') || '';
 	const ingredientCountMin = url.searchParams.get('ingredientCountMin') || '';
@@ -28,6 +30,12 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const method = url.searchParams.get('method') || '';
 	const ratingMin = url.searchParams.get('ratingMin') || '';
 	const ratingMax = url.searchParams.get('ratingMax') || '';
+
+	// parse comma-separated ingredient ID lists
+	const parseIds = (s: string) => s ? s.split(',').map(Number).filter((n) => !isNaN(n) && n > 0) : [];
+	const includeIds = parseIds(ingredientInclude);
+	const anyIds = parseIds(ingredientAny);
+	const excludeIds = parseIds(ingredientExclude);
 
 	// Build filter
 	const filter: Record<string, any> = {};
@@ -41,7 +49,9 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	// build advanced filter
 	const advancedFilter: AdvancedFilter = {};
 	if (readyToMake === '1') advancedFilter.readyToMake = true;
-	if (ingredient) advancedFilter.ingredientProductId = parseInt(ingredient);
+	if (includeIds.length) advancedFilter.ingredientInclude = includeIds;
+	if (anyIds.length) advancedFilter.ingredientAny = anyIds;
+	if (excludeIds.length) advancedFilter.ingredientExclude = excludeIds;
 	if (strengthMin) advancedFilter.strengthMin = parseInt(strengthMin);
 	if (strengthMax) advancedFilter.strengthMax = parseInt(strengthMax);
 	if (ingredientCountMin) advancedFilter.ingredientCountMin = parseInt(ingredientCountMin);
@@ -52,7 +62,13 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 
 	const hasAdvancedFilter = Object.keys(advancedFilter).length > 0;
 
-	// Get recipes, spirits, favorites, featured, preparation methods, and ingredient name in parallel
+	// look up product names for all referenced ingredient IDs
+	const allIngredientIds = [...new Set([...includeIds, ...anyIds, ...excludeIds])];
+	const ingredientNameLookups = allIngredientIds.map((id) =>
+		inventoryRepo.findById(workspaceId, id).then((p) => [id, p?.productName || String(id)] as const)
+	);
+
+	// Get recipes, spirits, favorites, featured, preparation methods, and ingredient names in parallel
 	const [
 		catalogResult,
 		spirits,
@@ -60,7 +76,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		favoriteRecipes,
 		featuredRecipes,
 		prepMethodsResult,
-		ingredientProduct,
+		...ingredientEntries
 	] = await Promise.all([
 		catalogRepo.findAll(
 			workspaceId,
@@ -74,8 +90,10 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		userId ? getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
 		catalogRepo.getFeatured(workspaceId),
 		catalogRepo.getPreparationMethods(),
-		ingredient ? inventoryRepo.findById(workspaceId, parseInt(ingredient)) : Promise.resolve(null),
+		...ingredientNameLookups,
 	]);
+
+	const ingredientNames = Object.fromEntries(ingredientEntries) as Record<number, string>;
 
 	let { data, pagination } = catalogResult;
 	const preparationMethods =
@@ -173,8 +191,10 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			showFilter,
 			page,
 			readyToMake,
-			ingredient,
-			ingredientName: ingredientProduct?.productName || '',
+			ingredientInclude,
+			ingredientAny,
+			ingredientExclude,
+			ingredientNames,
 			strengthMin,
 			strengthMax,
 			ingredientCountMin,
