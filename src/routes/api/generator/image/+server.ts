@@ -40,7 +40,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 	} catch (err: unknown) {
 		console.error('Image generation error:', err);
-		const message = err instanceof Error ? err.message : 'Failed to generate image';
+		const raw = err instanceof Error ? err.message : '';
+		const isQuota = raw.includes('RESOURCE_EXHAUSTED') || raw.includes('quota');
+		const message = isQuota
+			? 'Image generation is temporarily unavailable due to high demand. Please try again later.'
+			: 'Something went wrong while generating the image. Please try again.';
 		error(StatusCodes.INTERNAL_SERVER_ERROR, {
 			reason: 'Internal Server Error',
 			code: StatusCodes.INTERNAL_SERVER_ERROR,

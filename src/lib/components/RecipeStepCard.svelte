@@ -302,7 +302,6 @@
 					<!-- Quantity + Unit inputs -->
 					<div class="flex gap-2">
 						<Input
-							name="productIdQuantityInMilliliters"
 							type="number"
 							class="flex-1"
 							placeholder="0"
