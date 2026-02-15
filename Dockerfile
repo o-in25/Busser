@@ -25,6 +25,7 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
+ENV BODY_SIZE_LIMIT="10M"
 
 # Install pnpm
 ARG PNPM_VERSION=8.15.6
