@@ -127,7 +127,7 @@ describe('image generation endpoint', async () => {
 		expect(input.customPrompt).toBe('A red cocktail in a rocks glass');
 	});
 
-	it('throws 500 when generator throws an error', async () => {
+	it('throws 500 with friendly message when generator throws an error', async () => {
 		vi.mocked(generate).mockRejectedValue(new Error('Vertex API limit exceeded'));
 
 		try {
@@ -139,7 +139,27 @@ describe('image generation endpoint', async () => {
 		} catch (err) {
 			if (isHttpError(err)) {
 				expect(err.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-				expect(err.body.message).toBe('Vertex API limit exceeded');
+				expect(err.body.message).not.toContain('Vertex');
+				expect(err.body.message).toContain('Something went wrong');
+			} else {
+				throw err;
+			}
+		}
+	});
+
+	it('returns quota-specific message for RESOURCE_EXHAUSTED errors', async () => {
+		vi.mocked(generate).mockRejectedValue(new Error('8 RESOURCE_EXHAUSTED: Quota exceeded'));
+
+		try {
+			await POST({
+				request: makeJsonRequest({ subject: 'Mojito', type: 'cocktail' }),
+				locals: { activeWorkspaceId: 'ws-1' },
+			} as any);
+			expect.fail('should have thrown');
+		} catch (err) {
+			if (isHttpError(err)) {
+				expect(err.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
+				expect(err.body.message).toContain('temporarily unavailable');
 			} else {
 				throw err;
 			}
