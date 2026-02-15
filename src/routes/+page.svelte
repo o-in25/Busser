@@ -39,6 +39,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import { reveal } from '$lib/reveal';
 	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
@@ -115,22 +116,33 @@
 </svelte:head>
 
 {#if !$page.data.user}
-	<!-- ==================== UNAUTHENTICATED LANDING PAGE ==================== -->
-
 	<!-- Hero Section -->
 	<section class="relative overflow-hidden py-12 md:py-18 rounded-2xl mt-4">
-		<!-- Background gradient -->
-		<div
-			class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-orange-500/10 -z-10 rounded-2xl"
-		></div>
+		<!-- Animated background gradient -->
+		<div class="absolute inset-0 hero-gradient-bg -z-10 rounded-2xl"></div>
 		<div class="absolute inset-0 bg-grid-pattern opacity-5 -z-10"></div>
+
+		<!-- Floating orbs -->
+		<div class="hero-orbs-layer">
+			<div class="hero-orb hero-orb-purple"></div>
+			<div class="hero-orb hero-orb-pink"></div>
+			<div class="hero-orb hero-orb-orange"></div>
+		</div>
 
 		<div class="max-w-4xl mx-auto text-center px-4">
 			<!-- Logo -->
-			<img src={logo} alt="Busser" class="h-40 md:h-52 lg:h-60 mx-auto mb-8" />
+			<img
+				src={logo}
+				alt="Busser"
+				class="h-40 md:h-52 lg:h-60 mx-auto mb-8 hero-enter-glow"
+				style="--delay: 0ms"
+			/>
 
 			<!-- Headline -->
-			<h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
+			<h1
+				class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight hero-enter"
+				style="--delay: 200ms"
+			>
 				From Shelf To
 				<span
 					class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500"
@@ -140,12 +152,15 @@
 			</h1>
 
 			<!-- Subheadline -->
-			<p class="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+			<p
+				class="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto hero-enter"
+				style="--delay: 400ms"
+			>
 				Busser finds recipes that match your on-hand ingredients, no guesswork needed.
 			</p>
 
 			<!-- CTAs -->
-			<div class="flex flex-col sm:flex-row justify-center gap-4">
+			<div class="flex flex-col sm:flex-row justify-center gap-4 hero-enter" style="--delay: 600ms">
 				<a
 					class={cn(
 						buttonVariants({ size: 'lg' }),
@@ -164,13 +179,60 @@
 					Log In
 				</a>
 			</div>
+
+			<!-- App Preview Mockup -->
+			{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
+				<div class="mt-12 mx-auto max-w-3xl hero-enter" style="--delay: 800ms">
+					<div
+						class="app-preview-frame rounded-xl overflow-hidden shadow-2xl shadow-pink-500/20"
+					>
+						<!-- Browser chrome bar -->
+						<div class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 dark:bg-zinc-950">
+							<div class="flex gap-1.5">
+								<span class="w-3 h-3 rounded-full bg-red-500"></span>
+								<span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+								<span class="w-3 h-3 rounded-full bg-green-500"></span>
+							</div>
+							<div
+								class="flex-1 mx-2 px-3 py-1 rounded-md bg-zinc-700 dark:bg-zinc-800 text-xs text-zinc-400 truncate"
+							>
+								busserapp.com/catalog
+							</div>
+						</div>
+						<!-- Content area -->
+						<div class="bg-background/95 p-4">
+							<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+								{#each landingData.featuredRecipes as recipe}
+									<div class="rounded-lg overflow-hidden bg-muted/50 border border-border/50">
+										<div class="aspect-square relative">
+											<img
+												src={recipe.recipeImageUrl}
+												alt={recipe.recipeName}
+												class="w-full h-full object-cover"
+											/>
+											<div
+												class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"
+											></div>
+											<p
+												class="absolute bottom-1.5 left-2 right-2 text-xs font-semibold text-foreground truncate"
+											>
+												{recipe.recipeName}
+											</p>
+										</div>
+									</div>
+								{/each}
+							</div>
+						</div>
+					</div>
+				</div>
+			{/if}
 		</div>
 	</section>
 
 	<!-- Features Section -->
 	<section class="py-16 px-4">
 		<div class="max-w-6xl mx-auto">
-			<div class="text-center mb-12">
+			<div class="text-center mb-12 reveal-on-scroll" use:reveal>
 				<h2 class="text-3xl md:text-4xl font-bold mb-4">Features</h2>
 				<p class="text-muted-foreground text-lg max-w-2xl mx-auto">
 					Tools to help you manage your home bar.
@@ -179,157 +241,255 @@
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 				<!-- Inventory Management -->
-				<Card.Root
-					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-				>
-					<div
-						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-2xl"
-					></div>
-					<Card.Header class="pb-2">
+				<div class="reveal-on-scroll" use:reveal={{ delay: 0 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+					>
 						<div
-							class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
-						>
-							<Package class="h-6 w-6 text-primary" />
-						</div>
-						<Card.Title class="text-lg">Inventory Management</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<p class="text-sm text-muted-foreground mb-3">
-							Track your spirits, liqueurs, mixers, and ingredients in one place. Organize by
-							category and never lose track of what you have.
-						</p>
-						<div class="flex flex-wrap gap-2">
-							<Badge variant="outline" class="text-xs">
-								<Bell class="h-3 w-3 mr-1" />
-								Stock Alerts
-							</Badge>
-							<Badge variant="outline" class="text-xs">
-								<Search class="h-3 w-3 mr-1" />
-								Quick Search
-							</Badge>
-						</div>
-					</Card.Content>
-				</Card.Root>
+							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-2xl"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
+								<Package class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">Inventory Management</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground mb-3">
+								Track your spirits, liqueurs, mixers, and ingredients in one place. Organize by
+								category and never lose track of what you have.
+							</p>
+							<div class="flex flex-wrap gap-2">
+								<Badge variant="outline" class="text-xs">
+									<Bell class="h-3 w-3 mr-1" />
+									Stock Alerts
+								</Badge>
+								<Badge variant="outline" class="text-xs">
+									<Search class="h-3 w-3 mr-1" />
+									Quick Search
+								</Badge>
+							</div>
+						</Card.Content>
+					</Card.Root>
+				</div>
 
 				<!-- Recipe Catalog -->
-				<Card.Root
-					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-				>
-					<div
-						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-amber-500/10 blur-2xl"
-					></div>
-					<Card.Header class="pb-2">
+				<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+					>
 						<div
-							class="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors"
-						>
-							<BookOpen class="h-6 w-6 text-amber-600 dark:text-amber-400" />
-						</div>
-						<Card.Title class="text-lg">Recipe Catalog</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<p class="text-sm text-muted-foreground mb-3">
-							Browse a curated collection of classic and modern cocktails. Each recipe includes
-							detailed ingredients and step-by-step instructions.
-						</p>
-						<div class="flex flex-wrap gap-2">
-							<Badge variant="outline" class="text-xs">
-								<FlaskConical class="h-3 w-3 mr-1" />
-								Classic Cocktails
-							</Badge>
-							<Badge variant="outline" class="text-xs">
-								<Star class="h-3 w-3 mr-1" />
-								Modern Recipes
-							</Badge>
-						</div>
-					</Card.Content>
-				</Card.Root>
+							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-amber-500/10 blur-2xl"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors"
+							>
+								<BookOpen class="h-6 w-6 text-amber-600 dark:text-amber-400" />
+							</div>
+							<Card.Title class="text-lg">Recipe Catalog</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground mb-3">
+								Browse a curated collection of classic and modern cocktails. Each recipe includes
+								detailed ingredients and step-by-step instructions.
+							</p>
+							<div class="flex flex-wrap gap-2">
+								<Badge variant="outline" class="text-xs">
+									<FlaskConical class="h-3 w-3 mr-1" />
+									Classic Cocktails
+								</Badge>
+								<Badge variant="outline" class="text-xs">
+									<Star class="h-3 w-3 mr-1" />
+									Modern Recipes
+								</Badge>
+							</div>
+						</Card.Content>
+					</Card.Root>
+				</div>
 
 				<!-- Smart Matching -->
-				<Card.Root
-					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-				>
-					<div
-						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-green-500/10 blur-2xl"
-					></div>
-					<Card.Header class="pb-2">
+				<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+					>
 						<div
-							class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors"
-						>
-							<ChefHat class="h-6 w-6 text-green-600 dark:text-green-400" />
-						</div>
-						<Card.Title class="text-lg">Smart Matching</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<p class="text-sm text-muted-foreground mb-3">
-							Discover which cocktails you can make right now based on your current inventory. No
-							more guessing or missing ingredients.
-						</p>
-						<div class="flex flex-wrap gap-2">
-							<Badge variant="outline" class="text-xs">
-								<Sparkles class="h-3 w-3 mr-1" />
-								Instant Results
-							</Badge>
-							<Badge variant="outline" class="text-xs">
-								<GlassWater class="h-3 w-3 mr-1" />
-								Make Tonight
-							</Badge>
-						</div>
-					</Card.Content>
-				</Card.Root>
+							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-green-500/10 blur-2xl"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors"
+							>
+								<ChefHat class="h-6 w-6 text-green-600 dark:text-green-400" />
+							</div>
+							<Card.Title class="text-lg">Smart Matching</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground mb-3">
+								Discover which cocktails you can make right now based on your current inventory. No
+								more guessing or missing ingredients.
+							</p>
+							<div class="flex flex-wrap gap-2">
+								<Badge variant="outline" class="text-xs">
+									<Sparkles class="h-3 w-3 mr-1" />
+									Instant Results
+								</Badge>
+								<Badge variant="outline" class="text-xs">
+									<GlassWater class="h-3 w-3 mr-1" />
+									Make Tonight
+								</Badge>
+							</div>
+						</Card.Content>
+					</Card.Root>
+				</div>
 
 				<!-- AI-Powered -->
-				<Card.Root
-					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-				>
-					<div
-						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-violet-500/10 blur-2xl"
-					></div>
-					<Card.Header class="pb-2">
+				<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+					>
 						<div
-							class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center mb-3 group-hover:bg-violet-500/20 transition-colors"
+							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-violet-500/10 blur-2xl"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center mb-3 group-hover:bg-violet-500/20 transition-colors"
+							>
+								<Sparkles class="h-6 w-6 text-violet-600 dark:text-violet-400" />
+							</div>
+							<Card.Title class="text-lg">AI-Powered Tools</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground mb-3">
+								Leverage intelligent features to generate recipe suggestions and get personalized
+								recommendations based on your preferences.
+							</p>
+							<div class="flex flex-wrap gap-2">
+								<Badge variant="outline" class="text-xs">
+									<Lightbulb class="h-3 w-3 mr-1" />
+									Smart Suggestions
+								</Badge>
+								<Badge variant="outline" class="text-xs">
+									<Star class="h-3 w-3 mr-1" />
+									Personalized
+								</Badge>
+							</div>
+						</Card.Content>
+					</Card.Root>
+				</div>
+			</div>
+
+			<!-- Workspace Feature -->
+			<div class="reveal-on-scroll" use:reveal={{ delay: 400 }}>
+				<Card.Root
+					class="bg-gradient-to-br from-primary/5 via-background to-primary/5 border-primary/20"
+				>
+					<Card.Content class="flex flex-col md:flex-row items-center gap-6 py-6">
+						<div
+							class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
 						>
-							<Sparkles class="h-6 w-6 text-violet-600 dark:text-violet-400" />
+							<Users class="h-8 w-8 text-primary" />
 						</div>
-						<Card.Title class="text-lg">AI-Powered Tools</Card.Title>
-					</Card.Header>
-					<Card.Content>
-						<p class="text-sm text-muted-foreground mb-3">
-							Leverage intelligent features to generate recipe suggestions and get personalized
-							recommendations based on your preferences.
-						</p>
-						<div class="flex flex-wrap gap-2">
-							<Badge variant="outline" class="text-xs">
-								<Lightbulb class="h-3 w-3 mr-1" />
-								Smart Suggestions
-							</Badge>
-							<Badge variant="outline" class="text-xs">
-								<Star class="h-3 w-3 mr-1" />
-								Personalized
-							</Badge>
+						<div class="text-center md:text-left">
+							<h3 class="text-lg font-semibold mb-2">Workspace Collaboration</h3>
+							<p class="text-sm text-muted-foreground">
+								Create shared workspaces to manage your bar with friends, family, or colleagues.
+								Perfect for home bars, small events, or collaborative cocktail exploration.
+							</p>
 						</div>
 					</Card.Content>
 				</Card.Root>
 			</div>
+		</div>
+	</section>
 
-			<!-- Workspace Feature -->
-			<Card.Root
-				class="bg-gradient-to-br from-primary/5 via-background to-primary/5 border-primary/20"
-			>
-				<Card.Content class="flex flex-col md:flex-row items-center gap-6 py-6">
+	<!-- How It Works Section -->
+	<section class="py-16 px-4">
+		<div class="max-w-4xl mx-auto">
+			<div class="text-center mb-12 reveal-on-scroll" use:reveal>
+				<h2 class="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+				<p class="text-muted-foreground text-lg">Three steps to your next cocktail</p>
+			</div>
+
+			<div class="relative">
+				<!-- connecting line (desktop only) -->
+				<div
+					class="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-pink-500 via-amber-500 to-green-500 opacity-30"
+				></div>
+
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
+					<!-- step 1 -->
 					<div
-						class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
+						class="reveal-on-scroll flex flex-col items-center text-center relative z-10"
+						use:reveal={{ delay: 0 }}
 					>
-						<Users class="h-8 w-8 text-primary" />
-					</div>
-					<div class="text-center md:text-left">
-						<h3 class="text-lg font-semibold mb-2">Workspace Collaboration</h3>
+						<div class="relative mb-4">
+							<div class="rounded-full bg-background">
+								<div class="w-24 h-24 rounded-full bg-pink-500/10 flex items-center justify-center">
+									<Package class="h-10 w-10 text-pink-500" />
+								</div>
+							</div>
+							<span
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-pink-500 text-white text-xs font-bold flex items-center justify-center"
+							>
+								1
+							</span>
+						</div>
+						<h3 class="text-lg font-semibold mb-2">Add Your Bottles</h3>
 						<p class="text-sm text-muted-foreground">
-							Create shared workspaces to manage your bar with friends, family, or colleagues.
-							Perfect for home bars, small events, or collaborative cocktail exploration.
+							Log the spirits, liqueurs, and mixers you already own.
 						</p>
 					</div>
-				</Card.Content>
-			</Card.Root>
+
+					<!-- step 2 -->
+					<div
+						class="reveal-on-scroll flex flex-col items-center text-center relative z-10"
+						use:reveal={{ delay: 150 }}
+					>
+						<div class="relative mb-4">
+							<div class="rounded-full bg-background">
+								<div class="w-24 h-24 rounded-full bg-amber-500/10 flex items-center justify-center">
+									<Sparkles class="h-10 w-10 text-amber-500" />
+								</div>
+							</div>
+							<span
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center"
+							>
+								2
+							</span>
+						</div>
+						<h3 class="text-lg font-semibold mb-2">Get Matched Recipes</h3>
+						<p class="text-sm text-muted-foreground">
+							Busser finds every cocktail you can make right now.
+						</p>
+					</div>
+
+					<!-- step 3 -->
+					<div
+						class="reveal-on-scroll flex flex-col items-center text-center relative z-10"
+						use:reveal={{ delay: 300 }}
+					>
+						<div class="relative mb-4">
+							<div class="rounded-full bg-background">
+								<div class="w-24 h-24 rounded-full bg-green-500/10 flex items-center justify-center">
+									<GlassWater class="h-10 w-10 text-green-500" />
+								</div>
+							</div>
+							<span
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center"
+							>
+								3
+							</span>
+						</div>
+						<h3 class="text-lg font-semibold mb-2">Start Mixing</h3>
+						<p class="text-sm text-muted-foreground">
+							Follow step-by-step instructions and enjoy your drink.
+						</p>
+					</div>
+				</div>
+			</div>
 		</div>
 	</section>
 
@@ -337,29 +497,31 @@
 	{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
 		<section class="py-16 px-4">
 			<div class="max-w-6xl mx-auto">
-				<div class="text-center mb-12">
+				<div class="text-center mb-12 reveal-on-scroll" use:reveal>
 					<h2 class="text-3xl md:text-4xl font-bold mb-4">Sample Recipes</h2>
 					<p class="text-muted-foreground text-lg">A few cocktails from the catalog</p>
 				</div>
 
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-					{#each landingData.featuredRecipes as recipe}
-						<Card.Root class="overflow-hidden group">
-							<div class="relative aspect-square">
-								<img
-									src={recipe.recipeImageUrl}
-									alt={recipe.recipeName}
-									class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-								/>
-								<div
-									class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
-								></div>
-								<div class="absolute bottom-0 left-0 right-0 p-4">
-									<p class="font-bold text-foreground">{recipe.recipeName}</p>
-									<p class="text-xs text-muted-foreground">{recipe.recipeCategoryDescription}</p>
+					{#each landingData.featuredRecipes as recipe, i}
+						<div class="reveal-scale" use:reveal={{ delay: i * 100 }}>
+							<Card.Root class="overflow-hidden group">
+								<div class="relative aspect-square">
+									<img
+										src={recipe.recipeImageUrl}
+										alt={recipe.recipeName}
+										class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+									/>
+									<div
+										class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
+									></div>
+									<div class="absolute bottom-0 left-0 right-0 p-4">
+										<p class="font-bold text-foreground">{recipe.recipeName}</p>
+										<p class="text-xs text-muted-foreground">{recipe.recipeCategoryDescription}</p>
+									</div>
 								</div>
-							</div>
-						</Card.Root>
+							</Card.Root>
+						</div>
 					{/each}
 				</div>
 			</div>
@@ -367,7 +529,7 @@
 	{/if}
 
 	<!-- Final CTA Section -->
-	<section class="py-16 px-4">
+	<section class="py-16 px-4 reveal-on-scroll" use:reveal>
 		<div class="max-w-3xl mx-auto text-center">
 			<div
 				class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-8 md:p-12"
@@ -888,7 +1050,9 @@
 							</div>
 							<div>
 								<Card.Title class="text-lg">Your Bar at a Glance</Card.Title>
-								<p class="text-xs text-muted-foreground">{dashboardData.inventoryCount} items across {dashboardData.barBreakdown.length} categories</p>
+								<p class="text-xs text-muted-foreground">
+									{dashboardData.inventoryCount} items across {dashboardData.barBreakdown.length} categories
+								</p>
 							</div>
 						</div>
 					</Card.Header>
@@ -923,7 +1087,9 @@
 							<div class="flex flex-wrap gap-x-4 gap-y-1">
 								{#each dashboardData.barBreakdown as group, i}
 									<div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-										<span class="w-2.5 h-2.5 rounded-full {barColors[i % barColors.length]} shrink-0"></span>
+										<span
+											class="w-2.5 h-2.5 rounded-full {barColors[i % barColors.length]} shrink-0"
+										></span>
 										{group.categoryGroupName}
 										<span class="font-medium text-foreground">{group.count}</span>
 									</div>
@@ -941,5 +1107,184 @@
 	.bg-grid-pattern {
 		background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
 		background-size: 24px 24px;
+	}
+
+	/* logo glow pulse */
+	.animate-glow {
+		animation: glow 3s ease-in-out infinite;
+	}
+
+	@keyframes glow {
+		0%,
+		100% {
+			filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
+		}
+		50% {
+			filter: drop-shadow(0 0 24px rgba(236, 72, 153, 0.5));
+		}
+	}
+
+	/* logo: entrance + glow combined so neither overrides the other */
+	.hero-enter-glow {
+		opacity: 0;
+		animation:
+			hero-fade-up 0.7s ease-out forwards,
+			glow 3s ease-in-out infinite;
+		animation-delay: var(--delay, 0ms), var(--delay, 0ms);
+	}
+
+	/* staggered entrance animation */
+	.hero-enter {
+		opacity: 0;
+		animation: hero-fade-up 0.7s ease-out forwards;
+		animation-delay: var(--delay, 0ms);
+	}
+
+	@keyframes hero-fade-up {
+		from {
+			opacity: 0;
+			translate: 0 20px;
+		}
+		to {
+			opacity: 1;
+			translate: 0 0;
+		}
+	}
+
+	/* animated background gradient */
+	.hero-gradient-bg {
+		background: linear-gradient(
+			135deg,
+			rgba(168, 85, 247, 0.1),
+			rgba(236, 72, 153, 0.05),
+			rgba(249, 115, 22, 0.1),
+			rgba(168, 85, 247, 0.08)
+		);
+		background-size: 200% 200%;
+		animation: gradient-shift 8s ease infinite;
+	}
+
+	@keyframes gradient-shift {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+
+	/* floating orbs */
+	.hero-orbs-layer {
+		position: absolute;
+		inset: 0;
+		z-index: -5;
+		pointer-events: none;
+	}
+
+	.hero-orb {
+		position: absolute;
+		width: 16rem;
+		height: 16rem;
+		border-radius: 9999px;
+		opacity: 0.2;
+		filter: blur(48px);
+	}
+
+	.hero-orb-purple {
+		top: 5%;
+		left: 10%;
+		background: rgba(168, 85, 247, 0.6);
+		animation: float-1 12s ease-in-out infinite;
+	}
+
+	.hero-orb-pink {
+		top: 30%;
+		right: 10%;
+		background: rgba(236, 72, 153, 0.6);
+		animation: float-2 16s ease-in-out infinite;
+	}
+
+	.hero-orb-orange {
+		bottom: 10%;
+		left: 20%;
+		background: rgba(249, 115, 22, 0.6);
+		animation: float-3 14s ease-in-out infinite;
+	}
+
+	@keyframes float-1 {
+		0%,
+		100% {
+			transform: translate(0, 0);
+		}
+		33% {
+			transform: translate(30px, -20px);
+		}
+		66% {
+			transform: translate(-20px, 15px);
+		}
+	}
+
+	@keyframes float-2 {
+		0%,
+		100% {
+			transform: translate(0, 0);
+		}
+		33% {
+			transform: translate(-25px, 20px);
+		}
+		66% {
+			transform: translate(15px, -25px);
+		}
+	}
+
+	@keyframes float-3 {
+		0%,
+		100% {
+			transform: translate(0, 0);
+		}
+		33% {
+			transform: translate(20px, 15px);
+		}
+		66% {
+			transform: translate(-30px, -10px);
+		}
+	}
+
+	/* app preview mockup */
+	.app-preview-frame {
+		transform: perspective(1200px) rotateX(4deg) rotateY(-2deg);
+		transition: transform 0.4s ease-out;
+	}
+
+	.app-preview-frame:hover {
+		transform: perspective(1200px) rotateX(1deg) rotateY(-0.5deg);
+	}
+
+	/* reduced motion: disable all hero animations */
+	@media (prefers-reduced-motion: reduce) {
+		.hero-enter,
+		.hero-enter-glow {
+			animation: none;
+			opacity: 1;
+		}
+
+		.hero-gradient-bg {
+			animation: none;
+		}
+
+		.hero-orb {
+			animation-play-state: paused;
+		}
+
+		.app-preview-frame {
+			transform: none;
+		}
+
+		.app-preview-frame:hover {
+			transform: none;
+		}
 	}
 </style>

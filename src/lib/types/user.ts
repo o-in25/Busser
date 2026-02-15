@@ -81,3 +81,8 @@ export type AppSetting = {
 	settingKey: string;
 	settingValue: string | null;
 };
+
+export interface RevealParams {
+	delay?: number;
+	threshold?: number;
+}

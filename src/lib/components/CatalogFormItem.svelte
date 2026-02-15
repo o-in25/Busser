@@ -49,7 +49,6 @@
 			<Label for="recipeStepDescription" class="mb-2">Amount</Label>
 			<div class="flex">
 				<Input
-					name="productIdQuantityInMilliliters"
 					type="number"
 					class="rounded-r-none"
 					value={String(step.productIdQuantityInMilliliters)}

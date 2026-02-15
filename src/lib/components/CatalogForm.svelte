@@ -187,7 +187,6 @@
 			items,
 			flipDurationMs: 200,
 			transformDraggedElement,
-			dragHandleSelector: '.drag-handle',
 			dropTargetStyle: {},
 			dragDisabled: disabled,
 		}) as any;
