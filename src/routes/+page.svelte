@@ -127,7 +127,7 @@
 
 		<div class="max-w-4xl mx-auto text-center px-4">
 			<!-- Logo -->
-			<img src={logo} alt="Busser" class="h-40 md:h-52 lg:h-60 mx-auto mb-8" />
+			<img src={logo} alt="Busser" class="h-40 md:h-52 lg:h-60 mx-auto mb-8 animate-glow" />
 
 			<!-- Headline -->
 			<h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
@@ -941,5 +941,19 @@
 	.bg-grid-pattern {
 		background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
 		background-size: 24px 24px;
+	}
+
+	.animate-glow {
+		animation: glow 3s ease-in-out infinite;
+	}
+
+	@keyframes glow {
+		0%,
+		100% {
+			filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
+		}
+		50% {
+			filter: drop-shadow(0 0 24px rgba(236, 72, 153, 0.5));
+		}
 	}
 </style>
