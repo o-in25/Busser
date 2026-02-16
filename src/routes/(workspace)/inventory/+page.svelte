@@ -442,7 +442,7 @@
 				<button
 					class={cn(
 						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'table' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
+						viewMode === 'table' ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('table')}
 					aria-label="Table view"
@@ -452,7 +452,7 @@
 				<button
 					class={cn(
 						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'grid' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
+						viewMode === 'grid' ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('grid')}
 					aria-label="Grid view"
@@ -462,7 +462,7 @@
 				<button
 					class={cn(
 						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'list' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
+						viewMode === 'list' ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('list')}
 					aria-label="List view"
@@ -499,7 +499,7 @@
 			<button
 				class={cn(
 					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'table' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
+					viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('table')}
 				aria-label="Table view"
@@ -509,7 +509,7 @@
 			<button
 				class={cn(
 					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'grid' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
+					viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('grid')}
 				aria-label="Grid view"
@@ -519,7 +519,7 @@
 			<button
 				class={cn(
 					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'list' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
+					viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 				)}
 				onclick={() => setViewMode('list')}
 				aria-label="List view"
@@ -544,7 +544,7 @@
 
 		<!-- Add Product Button -->
 		{#if canModify}
-			<a href="{basePath}/add" class={cn(buttonVariants({ variant: 'secondary' }), 'shrink-0')}>
+			<a href="{basePath}/add" class={cn(buttonVariants({ variant: 'default' }), 'shrink-0')}>
 				<Plus class="h-4 w-4 mr-2" />
 				<span>Add Product</span>
 			</a>

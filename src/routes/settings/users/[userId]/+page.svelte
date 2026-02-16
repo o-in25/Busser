@@ -2,6 +2,7 @@
 	import {
 		ArrowLeft,
 		BookOpen,
+		Calendar,
 		CheckCircle2,
 		Clock,
 		Mail,
@@ -121,7 +122,7 @@
 				</Card.Title>
 			</Card.Header>
 			<Card.Content>
-				<div class="grid gap-4 sm:grid-cols-3">
+				<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 					<div class="p-4 rounded-lg bg-muted/30">
 						<div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
 							{#if user.verified === 1}
@@ -134,6 +135,18 @@
 						<p class="font-semibold">
 							{user.verified === 1 ? 'Verified' : 'Unverified'}
 						</p>
+					</div>
+					<div class="p-4 rounded-lg bg-muted/30">
+						<div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+							<Calendar class="h-4 w-4" />
+							Member Since
+						</div>
+						<p class="font-semibold">{formatRelative(user.createdDate)}</p>
+						{#if user.createdDate}
+							<p class="text-xs text-muted-foreground mt-0.5">
+								{formatDate(user.createdDate)}
+							</p>
+						{/if}
 					</div>
 					<div class="p-4 rounded-lg bg-muted/30">
 						<div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">

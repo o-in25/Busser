@@ -41,6 +41,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Verify Email - Busser</title>
+</svelte:head>
+
 <div>
 	<CheckCircle2 class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
 	<h4 class="text-xl font-semibold mb-2">Check your email</h4>

@@ -19,3 +19,4 @@ startup-dev.sh
 /.claude
 CLAUDE.md
 .mcp.json
+templates

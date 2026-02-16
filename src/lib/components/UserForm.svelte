@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { Circle, CircleCheck } from 'lucide-svelte';
 
 	import { Button } from '$lib/components/ui/button';
 	import { Helper } from '$lib/components/ui/helper';
@@ -48,6 +49,23 @@
 			message: '',
 		},
 	};
+
+	const needsPasswordCheck = action === 'add' || action === 'register';
+
+	const rules = [
+		{ label: 'At least 8 characters', test: (pw: string) => pw.length >= 8 },
+		{ label: 'One uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
+		{ label: 'One lowercase letter', test: (pw: string) => /[a-z]/.test(pw) },
+		{ label: 'One number', test: (pw: string) => /\d/.test(pw) },
+		{ label: 'One special character', test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]\/`~;']/.test(pw) },
+	];
+
+	let passwordTouched = false;
+
+	$: ruleResults = rules.map((rule) => ({ ...rule, met: rule.test(password) }));
+	$: allRulesMet = ruleResults.every((r) => r.met);
+	$: passwordsMatch = password === passwordConfirm && password.length > 0;
+	$: submitDisabled = needsPasswordCheck && (!allRulesMet || !passwordsMatch);
 
 	function toggleRole(roleId: string) {
 		if (selected.includes(roleId)) {
@@ -142,11 +160,27 @@
 			name="password"
 			class={errors?.password?.hasError ? 'border-destructive' : ''}
 			bind:value={password}
+			oninput={() => (passwordTouched = true)}
 		/>
 		{#if errors?.password.hasError}
 			<Helper color="red">
 				{errors?.password.message}
 			</Helper>
+		{/if}
+		{#if needsPasswordCheck && passwordTouched}
+			<div class="rounded-lg bg-muted/30 p-3 space-y-1.5">
+				{#each ruleResults as rule}
+					<div class="flex items-center gap-2 text-sm">
+						{#if rule.met}
+							<CircleCheck class="h-4 w-4 text-green-500 shrink-0" />
+							<span class="text-green-600 dark:text-green-400">{rule.label}</span>
+						{:else}
+							<Circle class="h-4 w-4 text-muted-foreground shrink-0" />
+							<span class="text-muted-foreground">{rule.label}</span>
+						{/if}
+					</div>
+				{/each}
+			</div>
 		{/if}
 		{#if action === 'login'}
 			<div class="text-left">
@@ -218,13 +252,14 @@
 	<Button
 		type="submit"
 		size="lg"
-		class="w-full bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500"
+		class="w-full"
+		disabled={submitDisabled}
 	>
 		{action === 'register' ? 'Sign up' : 'Log in'}
 	</Button>
 {:else}
 	<div class="md:flex justify-end">
-		<Button class="w-full md:w-32" type="submit" size="lg">Save</Button>
+		<Button class="w-full md:w-32" type="submit" size="lg" disabled={submitDisabled}>Save</Button>
 	</div>
 {/if}
 

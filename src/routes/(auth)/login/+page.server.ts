@@ -88,7 +88,7 @@ export const actions = {
 			cookies.set('userToken', userToken, {
 				path: '/',
 				httpOnly: true,
-				sameSite: 'strict',
+				sameSite: 'lax',
 				secure: !dev,
 				maxAge: 60 * 60 * 24 * 7,
 			});

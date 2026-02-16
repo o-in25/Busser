@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { Info } from 'lucide-svelte';
+	import { ArrowLeft, Info } from 'lucide-svelte';
 
 	import { page } from '$app/state';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
 	import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
 	export let form: ActionData;
@@ -20,7 +22,16 @@
 	<BreadcrumbItem name="Edit User" href="/settings/users/{userId}/edit"></BreadcrumbItem>
 	<BreadcrumbItem name="Reset Password"></BreadcrumbItem>
 </Breadcrumb>
-<div class="px-4 pb-4 mt-3 flex justify-left items-center">
+<div class="px-4 pb-4 mt-3">
+	<div class="flex justify-end mb-4">
+		<a
+			class={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+			href="/settings/users/{userId}"
+		>
+			<ArrowLeft class="h-4 w-4 mr-2" />
+			Back
+		</a>
+	</div>
 	<div class="grow">
 		{#if form?.error || form?.success}
 			<Alert
@@ -33,6 +44,6 @@
 				</AlertDescription>
 			</Alert>
 		{/if}
-		<ResetPasswordForm></ResetPasswordForm>
+		<ResetPasswordForm canForceReset={data.canForceReset}></ResetPasswordForm>
 	</div>
 </div>

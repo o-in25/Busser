@@ -16,6 +16,7 @@ export const getUsersInOwnedWorkspaces = userRepo.getUsersInOwnedWorkspaces.bind
 export const getInvitableUsers = userRepo.getInvitableUsers.bind(userRepo);
 
 // role management (delegate to repository)
+export const createRole = userRepo.createRole.bind(userRepo);
 export const roleSelect = userRepo.getRoleOptions.bind(userRepo);
 export const getGrants = userRepo.getGrants.bind(userRepo);
 export const updateGrants = userRepo.updateGrants.bind(userRepo);

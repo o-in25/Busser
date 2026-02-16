@@ -17,6 +17,10 @@
 	let formRef: any;
 </script>
 
+<svelte:head>
+	<title>Sign Up - Busser</title>
+</svelte:head>
+
 <div class="flex flex-col space-y-6">
 	<h3 class="text-xl font-medium">Sign up</h3>
 	{#if form?.message}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UserPlus, Users } from 'lucide-svelte';
+	import { Plus, Users } from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
@@ -29,7 +29,7 @@
 			<p class="text-sm text-muted-foreground mt-1">Manage user accounts and access</p>
 		</div>
 		<a class={cn(buttonVariants({ variant: 'default' }))} href="/settings/users/add">
-			<UserPlus class="h-4 w-4 mr-2" />
+			<Plus class="h-4 w-4 mr-2" />
 			Add User
 		</a>
 	</div>

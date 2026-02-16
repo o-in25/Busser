@@ -112,7 +112,7 @@
 </script>
 
 <svelte:head>
-	<title>Home - Busser</title>
+	<title>Busser - Home Bar Management</title>
 </svelte:head>
 
 {#if !$page.data.user}
@@ -162,10 +162,7 @@
 			<!-- CTAs -->
 			<div class="flex flex-col sm:flex-row justify-center gap-4 hero-enter" style="--delay: 600ms">
 				<a
-					class={cn(
-						buttonVariants({ size: 'lg' }),
-						'bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white border-0 text-lg px-8'
-					)}
+					class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')}
 					href="/signup"
 				>
 					<Mail class="w-5 h-5 mr-2" />
@@ -184,7 +181,7 @@
 			{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
 				<div class="mt-12 mx-auto max-w-3xl hero-enter" style="--delay: 800ms">
 					<div
-						class="app-preview-frame rounded-xl overflow-hidden shadow-2xl shadow-pink-500/20"
+						class="app-preview-frame rounded-xl overflow-hidden shadow-2xl shadow-primary/20"
 					>
 						<!-- Browser chrome bar -->
 						<div class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 dark:bg-zinc-950">
@@ -384,13 +381,16 @@
 			<!-- Workspace Feature -->
 			<div class="reveal-on-scroll" use:reveal={{ delay: 400 }}>
 				<Card.Root
-					class="bg-gradient-to-br from-primary/5 via-background to-primary/5 border-primary/20"
+					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 				>
+					<div
+						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-2xl"
+					></div>
 					<Card.Content class="flex flex-col md:flex-row items-center gap-6 py-6">
 						<div
-							class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
+							class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors"
 						>
-							<Users class="h-8 w-8 text-primary" />
+							<Users class="h-6 w-6 text-primary" />
 						</div>
 						<div class="text-center md:text-left">
 							<h3 class="text-lg font-semibold mb-2">Workspace Collaboration</h3>
@@ -493,76 +493,36 @@
 		</div>
 	</section>
 
-	<!-- Preview Gallery Section -->
-	{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
-		<section class="py-16 px-4">
-			<div class="max-w-6xl mx-auto">
-				<div class="text-center mb-12 reveal-on-scroll" use:reveal>
-					<h2 class="text-3xl md:text-4xl font-bold mb-4">Sample Recipes</h2>
-					<p class="text-muted-foreground text-lg">A few cocktails from the catalog</p>
-				</div>
-
-				<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-					{#each landingData.featuredRecipes as recipe, i}
-						<div class="reveal-scale" use:reveal={{ delay: i * 100 }}>
-							<Card.Root class="overflow-hidden group">
-								<div class="relative aspect-square">
-									<img
-										src={recipe.recipeImageUrl}
-										alt={recipe.recipeName}
-										class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-									/>
-									<div
-										class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
-									></div>
-									<div class="absolute bottom-0 left-0 right-0 p-4">
-										<p class="font-bold text-foreground">{recipe.recipeName}</p>
-										<p class="text-xs text-muted-foreground">{recipe.recipeCategoryDescription}</p>
-									</div>
-								</div>
-							</Card.Root>
-						</div>
-					{/each}
-				</div>
-			</div>
-		</section>
-	{/if}
-
 	<!-- Final CTA Section -->
 	<section class="py-16 px-4 reveal-on-scroll" use:reveal>
 		<div class="max-w-3xl mx-auto text-center">
 			<div
-				class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-8 md:p-12"
+				class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-primary/5 border border-primary/20 p-8 md:p-12"
 			>
-				<div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+				<div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
 				<div class="relative">
-					<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Get Started</h2>
-					<p class="text-white/80 text-lg mb-8">Create an account to start tracking your bar.</p>
+					<h2 class="text-3xl md:text-4xl font-bold mb-4">Get Started</h2>
+					<p class="text-muted-foreground text-lg mb-4">
+						Create an account to start tracking your bar.
+					</p>
+					<p class="text-muted-foreground/60 text-sm mb-8">
+						Busser is currently invitation-only while we're in early development.
+						<button
+							type="button"
+							onclick={() => (requestModalOpen = true)}
+							class="text-primary hover:underline"
+						>
+							Request an invite.
+						</button>
+					</p>
 					<a
 						href="/signup"
-						class={cn(
-							buttonVariants({ size: 'lg' }),
-							'bg-white text-purple-600 hover:bg-white/90 text-lg px-8'
-						)}
+						class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')}
 					>
 						Sign Up
 						<ArrowRight class="ml-2 h-5 w-5" />
 					</a>
 				</div>
-			</div>
-
-			<!-- Invitation notice with request option -->
-			<div class="mt-6 space-y-2">
-				<p class="text-muted-foreground text-sm">
-					Busser is currently invitation-only while we're in early development.
-				</p>
-				<button
-					type="button"
-					onclick={() => (requestModalOpen = true)}
-					class="text-sm text-primary hover:underline"
-				>
-					Don't have an invite? Request one here.
-				</button>
 			</div>
 		</div>
 	</section>
@@ -1107,11 +1067,6 @@
 	.bg-grid-pattern {
 		background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
 		background-size: 24px 24px;
-	}
-
-	/* logo glow pulse */
-	.animate-glow {
-		animation: glow 3s ease-in-out infinite;
 	}
 
 	@keyframes glow {

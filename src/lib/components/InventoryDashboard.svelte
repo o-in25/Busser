@@ -32,20 +32,20 @@
 			</div>
 
 			<!-- Quick Stats -->
-			<div class="grid grid-cols-3 md:flex gap-3">
+			<div class="grid grid-cols-3 md:flex gap-2 md:gap-3">
 				<!-- Total -->
 				<button
 					onclick={() => applyFilter('all')}
 					class={cn(
-						'flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
+						'flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
 						'hover:border-primary/50 hover:bg-background transition-colors cursor-pointer',
-						'min-w-[120px]'
+						'md:min-w-[120px]'
 					)}
 				>
-					<Package class="h-5 w-5 text-primary shrink-0" />
+					<Package class="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
 					<div class="text-left">
-						<p class="text-xl font-bold">{stats.total}</p>
-						<p class="text-xs text-muted-foreground">Total</p>
+						<p class="text-lg md:text-xl font-bold">{stats.total}</p>
+						<p class="text-[10px] md:text-xs text-muted-foreground">Total</p>
 					</div>
 				</button>
 
@@ -53,15 +53,15 @@
 				<button
 					onclick={() => applyFilter('in-stock')}
 					class={cn(
-						'flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
+						'flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
 						'hover:border-green-500/50 hover:bg-background transition-colors cursor-pointer',
-						'min-w-[120px]'
+						'md:min-w-[120px]'
 					)}
 				>
-					<CheckCircle2 class="h-5 w-5 text-green-500 shrink-0" />
+					<CheckCircle2 class="h-4 w-4 md:h-5 md:w-5 text-green-500 shrink-0" />
 					<div class="text-left">
-						<p class="text-xl font-bold">{stats.inStock}</p>
-						<p class="text-xs text-muted-foreground">In Stock</p>
+						<p class="text-lg md:text-xl font-bold">{stats.inStock}</p>
+						<p class="text-[10px] md:text-xs text-muted-foreground">In Stock</p>
 					</div>
 				</button>
 
@@ -69,15 +69,15 @@
 				<button
 					onclick={() => applyFilter('out-of-stock')}
 					class={cn(
-						'flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
+						'flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
 						'hover:border-red-500/50 hover:bg-background transition-colors cursor-pointer',
-						'min-w-[120px]'
+						'md:min-w-[120px]'
 					)}
 				>
-					<XCircle class="h-5 w-5 text-red-500 shrink-0" />
+					<XCircle class="h-4 w-4 md:h-5 md:w-5 text-red-500 shrink-0" />
 					<div class="text-left">
-						<p class="text-xl font-bold">{stats.outOfStock}</p>
-						<p class="text-xs text-muted-foreground">Out of Stock</p>
+						<p class="text-lg md:text-xl font-bold">{stats.outOfStock}</p>
+						<p class="text-[10px] md:text-xs text-muted-foreground">Out of Stock</p>
 					</div>
 				</button>
 

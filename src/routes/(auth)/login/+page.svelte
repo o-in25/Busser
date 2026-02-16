@@ -110,8 +110,10 @@
 			return async ({ result }) => {
 				if (result.type === 'failure') {
 					formRef.clearSensitiveFields();
+					await applyAction(result);
+				} else if (result.type === 'redirect') {
+					window.location.href = result.location;
 				}
-				await applyAction(result);
 			};
 		}}
 	>

@@ -1,5 +1,5 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import { StatusCodes } from 'http-status-codes';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { getUserWorkspaces } from '$lib/server/auth';
 import {
@@ -15,7 +15,11 @@ export const load = (async ({ locals, url }) => {
 	const userId = locals.user?.userId || '';
 	const queryResult = await getUser(userId);
 	if (queryResult.status === 'error') {
-		return error(StatusCodes.NOT_FOUND);
+		return error(StatusCodes.NOT_FOUND, {
+			reason: getReasonPhrase(StatusCodes.NOT_FOUND),
+			code: StatusCodes.NOT_FOUND,
+			message: 'User not found.',
+		});
 	}
 
 	const user = queryResult.data;
@@ -79,15 +83,17 @@ export const actions: Actions = {
 		}
 
 		// prevent admins from deleting their own account
-		const isAdmin = locals.user.roles?.some((r) => r.roleName === 'ADMIN');
+		const isAdmin = locals.user.roles?.some(
+			(r) => r.roleName === 'ADMIN' || r.roleName === 'OWNER'
+		);
 		if (isAdmin) {
 			return fail(StatusCodes.FORBIDDEN, {
 				error: 'Administrators cannot delete their own account',
 			});
 		}
 
-		const result = await deleteUser(locals.user.userId);
-		if (result.status === 'error') {
+		const result = await deleteUser(locals.user.userId, locals.user.userId);
+		if (result.error) {
 			return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'Failed to delete account' });
 		}
 

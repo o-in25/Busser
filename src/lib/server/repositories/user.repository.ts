@@ -48,7 +48,7 @@ export class UserRepository extends BaseRepository {
 		try {
 			const user: User = await this.db.query.transaction(async (trx) => {
 				let dbResult: any = await trx('user')
-					.select('UserId', 'Email', 'Username', 'LastActivityDate', 'AvatarImageUrl', 'Verified')
+					.select('UserId', 'Email', 'Username', 'CreatedDate', 'LastActivityDate', 'AvatarImageUrl', 'Verified')
 					.first()
 					.where({ userId });
 
@@ -94,7 +94,7 @@ export class UserRepository extends BaseRepository {
 			let userId: string | undefined;
 
 			await this.db.query.transaction(async (trx) => {
-				await trx('user').insert({ username, email, password: hashedPassword });
+				await trx('user').insert({ username, email, password: hashedPassword, createdDate: Logger.now() });
 
 				let dbResult: any = await trx('user')
 					.select('userId')
@@ -169,6 +169,20 @@ export class UserRepository extends BaseRepository {
 	}
 
 	// role management
+	async createRole(roleName: string): Promise<QueryResult<Role>> {
+		try {
+			const roleId = crypto.randomUUID();
+			await this.db.table('role').insert({ roleId, roleName });
+			return { status: 'success', data: { roleId, roleName } as Role };
+		} catch (error: any) {
+			if (error.code === 'ER_DUP_ENTRY') {
+				return { status: 'error', error: 'A role with this name already exists.' };
+			}
+			console.error(error);
+			return { status: 'error', error: error.message };
+		}
+	}
+
 	async getRoleOptions(): Promise<SelectOption[]> {
 		try {
 			let result = await this.db.table('role').select();
@@ -568,7 +582,7 @@ export class UserRepository extends BaseRepository {
 
 				// create user
 				const hashedPassword = await this.authRepo.hashPassword(password);
-				await trx('user').insert({ username, email, password: hashedPassword, verified: 0 });
+				await trx('user').insert({ username, email, password: hashedPassword, verified: 0, createdDate: Logger.now() });
 
 				dbResult = await trx('user')
 					.select('userId', 'username', 'email')

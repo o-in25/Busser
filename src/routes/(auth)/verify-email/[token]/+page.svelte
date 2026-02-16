@@ -38,6 +38,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Verify Email - Busser</title>
+</svelte:head>
+
 <div>
 	{#if data.status === 'success'}
 		<CheckCircle2 class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
@@ -82,7 +86,7 @@
 			{/if}
 		</Button>
 		{#if resendStatus === 'error'}
-			<p class="mt-2 text-sm text-red-500 dark:text-red-400">
+			<p class="mt-2 text-sm text-destructive">
 				Failed to resend email. Please try again.
 			</p>
 		{/if}

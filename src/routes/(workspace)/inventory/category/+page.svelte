@@ -145,7 +145,7 @@
 					</button>
 				{/if}
 			</div>
-			<Button type="submit" variant="secondary">Search</Button>
+			<Button type="submit" variant="outline">Search</Button>
 		</form>
 	</div>
 
