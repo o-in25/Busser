@@ -2,7 +2,8 @@ import { type Handle, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 import micromatch from 'micromatch';
 
-import { authenticate, getUserWorkspaces, hasWorkspaceAccess } from '$lib/server/auth';
+import { authenticate, getUserWorkspaces, hasGlobalPermission, hasWorkspaceAccess } from '$lib/server/auth';
+import { checkRateLimit, type RateLimitConfig } from '$lib/server/rate-limit';
 import { getPreferredWorkspaceId } from '$lib/server/user';
 
 const publicRoutes = [
@@ -29,6 +30,27 @@ const workspaceExemptRoutes = [
 	'/workspace-selector',
 	'/settings/**',
 	'/api/**',
+];
+
+const HOUR = 60 * 60 * 1000;
+
+const rateLimitTiers: Record<string, RateLimitConfig> = {
+	'image-gen': { maxRequests: 5, windowMs: HOUR },
+	'ai-chat': { maxRequests: 15, windowMs: HOUR },
+	'text-gen': { maxRequests: 30, windowMs: HOUR },
+	upload: { maxRequests: 20, windowMs: HOUR },
+};
+
+const rateLimitRoutes: Array<{ path: string; tier: string }> = [
+	{ path: '/api/generator/image', tier: 'image-gen' },
+	{ path: '/api/assistant/chat', tier: 'ai-chat' },
+	{ path: '/api/inventory/scan', tier: 'ai-chat' },
+	{ path: '/api/generator/recipe', tier: 'text-gen' },
+	{ path: '/api/generator/catalog', tier: 'text-gen' },
+	{ path: '/api/generator/inventory', tier: 'text-gen' },
+	{ path: '/api/generator/category', tier: 'text-gen' },
+	{ path: '/api/generator/rating', tier: 'text-gen' },
+	{ path: '/api/upload/image', tier: 'upload' },
 ];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
@@ -59,6 +81,27 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		const isWorkspaceExempt = micromatch.isMatch(slug, workspaceExemptRoutes);
 		if (!activeWorkspaceId && !isWorkspaceExempt) {
 			return redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace-selector');
+		}
+	}
+
+	// rate limit AI and upload endpoints for non-admin users
+	if (event.locals.user && event.request.method === 'POST') {
+		const match = rateLimitRoutes.find((r) => slug === r.path);
+		if (match && !hasGlobalPermission(event.locals.user, 'edit_admin')) {
+			const key = `rate:${event.locals.user.userId}:${match.tier}`;
+			const result = checkRateLimit(key, rateLimitTiers[match.tier]);
+			if (!result.allowed) {
+				return new Response(
+					JSON.stringify({
+						error: 'Rate limit exceeded',
+						retryAfterMs: result.retryAfterMs,
+					}),
+					{
+						status: 429,
+						headers: { 'Content-Type': 'application/json' },
+					}
+				);
+			}
 		}
 	}
 
