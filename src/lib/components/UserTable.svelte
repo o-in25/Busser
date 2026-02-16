@@ -70,6 +70,7 @@
 				<Table.Row class="hover:bg-transparent">
 					<Table.Head class="pl-6">User</Table.Head>
 					<Table.Head class="hidden sm:table-cell">Email</Table.Head>
+					<Table.Head class="hidden lg:table-cell">Joined</Table.Head>
 					<Table.Head class="hidden md:table-cell">Last Activity</Table.Head>
 					<Table.Head class="text-right pr-6">Actions</Table.Head>
 				</Table.Row>
@@ -105,6 +106,11 @@
 								<Mail class="h-4 w-4 shrink-0" />
 								<span class="truncate">{user.email}</span>
 							</div>
+						</Table.Cell>
+						<Table.Cell class="hidden lg:table-cell">
+							<span class="text-sm text-muted-foreground">
+								{formatRelativeTime(user.createdDate)}
+							</span>
 						</Table.Cell>
 						<Table.Cell class="hidden md:table-cell">
 							<div class="flex items-center gap-2">

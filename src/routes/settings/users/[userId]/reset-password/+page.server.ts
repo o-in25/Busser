@@ -1,7 +1,7 @@
 import { type Actions, error } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { resetPassword } from '$lib/server/auth';
+import { forceResetPassword, hasGlobalPermission, resetPassword } from '$lib/server/auth';
 
 import type { PageServerLoad } from './$types';
 
@@ -15,6 +15,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 			message: 'You do not have permission to access this resource.',
 		});
 	}
+
+	const canForceReset = hasGlobalPermission(locals.user, 'force_reset_password');
+
+	return { canForceReset };
 };
 
 export const actions = {
@@ -44,11 +48,22 @@ export const actions = {
 			};
 		}
 
-		const changed = await resetPassword(userId, oldPassword, newPassword);
-		if (!changed) {
-			return {
-				error: { message: "Old password isn't correct." },
-			};
+		const canForceReset = hasGlobalPermission(locals.user, 'force_reset_password');
+
+		if (canForceReset && !oldPassword) {
+			const changed = await forceResetPassword(userId, newPassword);
+			if (!changed) {
+				return {
+					error: { message: 'Failed to reset password.' },
+				};
+			}
+		} else {
+			const changed = await resetPassword(userId, oldPassword, newPassword);
+			if (!changed) {
+				return {
+					error: { message: "Old password isn't correct." },
+				};
+			}
 		}
 
 		return {

@@ -45,7 +45,7 @@
 	const roles: string[] = getContext('roles') || [];
 
 	// check if user is admin (cannot delete their own account)
-	const isAdmin = roles.includes('ADMIN');
+	const isAdmin = roles.includes('ADMIN') || roles.includes('OWNER');
 
 	async function handleSignOut() {
 		isSigningOut = true;

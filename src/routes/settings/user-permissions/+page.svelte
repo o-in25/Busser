@@ -2,7 +2,7 @@
 	import { AlertCircle, KeyRound, Plus, Save, Shield, Trash2, Users } from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -19,6 +19,8 @@
 	let role = $derived(data.roles.find(({ value }) => value === selected));
 	let formDataInput: HTMLInputElement;
 	let newPermissionInput = $state('');
+	let newRoleName = $state('');
+	let isCreatingRole = $state(false);
 
 	let modalState = $state({
 		open: false,
@@ -127,6 +129,63 @@
 			</Select.Root>
 		</Card.Content>
 	</Card.Root>
+
+	<!-- Create New Role Card -->
+	{#if data.canCreateRole}
+		<Card.Root>
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2">
+					<Plus class="h-5 w-5" />
+					Create New Role
+				</Card.Title>
+				<Card.Description>Add a new system-level role</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<form
+					action="?/createRole"
+					method="POST"
+					use:enhance={() => {
+						isCreatingRole = true;
+						return async ({ result }) => {
+							isCreatingRole = false;
+							await applyAction(result);
+							if (result.type === 'failure') {
+								$notificationStore.error = {
+									message: result?.data?.error?.toString() || 'Failed to create role.',
+								};
+							}
+							if (result.type === 'success') {
+								$notificationStore.success = {
+									message: `Role "${result?.data?.roleName}" created.`,
+								};
+								newRoleName = '';
+								await invalidateAll();
+							}
+						};
+					}}
+				>
+					<div class="flex gap-2">
+						<div class="flex-1">
+							<Input
+								type="text"
+								name="roleName"
+								placeholder="Role name (e.g., MODERATOR)"
+								bind:value={newRoleName}
+								maxlength={10}
+							/>
+						</div>
+						<Button type="submit" disabled={!newRoleName.trim() || isCreatingRole}>
+							<Plus class="h-4 w-4 mr-2" />
+							{isCreatingRole ? 'Creating...' : 'Create'}
+						</Button>
+					</div>
+					<p class="text-xs text-muted-foreground mt-2">
+						Uppercase letters and underscores only, max 10 characters.
+					</p>
+				</form>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 
 	<!-- Permissions Card -->
 	{#if selected && role}

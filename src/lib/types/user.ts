@@ -4,6 +4,7 @@ export type User = {
 	userId: string;
 	username: string;
 	email: string;
+	createdDate?: Date | string;
 	lastActivityDate?: Date | string;
 	roles: Role[];
 	permissions: Permission[];

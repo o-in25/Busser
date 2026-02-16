@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { KeyRound, Save, User } from 'lucide-svelte';
+	import { ArrowLeft, KeyRound, Save, User } from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
+	import { cn } from '$lib/utils';
 
 	import { notificationStore } from '../../../../../stores';
 	import type { ActionData, PageData } from './$types';
@@ -42,11 +43,20 @@
 
 <div class="space-y-6 mt-3">
 	<!-- Header -->
-	<div>
-		<h1 class="text-2xl font-bold">Edit User</h1>
-		<p class="text-sm text-muted-foreground mt-1">
-			Update account details for {data.user?.username || 'this user'}
-		</p>
+	<div class="flex items-center justify-between">
+		<div>
+			<h1 class="text-2xl font-bold">Edit User</h1>
+			<p class="text-sm text-muted-foreground mt-1">
+				Update account details for {data.user?.username || 'this user'}
+			</p>
+		</div>
+		<a
+			class={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+			href="/settings/users/{data.user?.userId}"
+		>
+			<ArrowLeft class="h-4 w-4 mr-2" />
+			Back
+		</a>
 	</div>
 
 	<form
@@ -91,7 +101,7 @@
 		</Card.Root>
 
 		<!-- Roles Card (admin only) -->
-		{#if isAdmin && data.roles?.length}
+		{#if isAdmin && data.roles?.length && data.user?.userId !== data.currentUser}
 			<Card.Root>
 				<Card.Header>
 					<Card.Title class="flex items-center gap-2">

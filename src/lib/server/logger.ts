@@ -36,6 +36,6 @@ export class Logger {
 	}
 
 	static now() {
-		return moment().format('YYYY-MM-DD HH:MM:ss');
+		return moment().format('YYYY-MM-DD HH:mm:ss');
 	}
 }

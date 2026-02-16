@@ -27,6 +27,7 @@ export const verifyRegistrationToken = authRepo.verifyRegistrationToken.bind(aut
 export const verifyPasswordResetToken = authRepo.verifyPasswordResetToken.bind(authRepo);
 export const resetPasswordWithToken = authRepo.resetPasswordWithToken.bind(authRepo);
 export const resetPassword = authRepo.resetPassword.bind(authRepo);
+export const forceResetPassword = authRepo.forceResetPassword.bind(authRepo);
 
 // login needs getUser, so we wrap it
 export async function login(username: string, password: string) {

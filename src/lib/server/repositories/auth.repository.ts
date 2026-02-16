@@ -198,6 +198,22 @@ export class AuthRepository extends BaseRepository {
 		}
 	}
 
+	// force reset password (no old password required, owner-only)
+	async forceResetPassword(userId: string, newPassword: string): Promise<boolean> {
+		try {
+			const newHashedPassword = await this.hashPassword(newPassword);
+			const result = await this.db
+				.table('user')
+				.where({ userId })
+				.update({ password: newHashedPassword });
+
+			return result === 1;
+		} catch (error: any) {
+			console.error(error);
+			return false;
+		}
+	}
+
 	// legacy reset password (compare old password)
 	async resetPassword(userId: string, oldPassword: string, newPassword: string): Promise<boolean> {
 		try {

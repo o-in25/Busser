@@ -301,7 +301,7 @@
 				<button
 					class={cn(
 						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'list' ? 'bg-secondary text-primary-foreground' : 'hover:bg-muted'
+						viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
 					)}
 					onclick={() => setViewMode('list')}
 					aria-label="List view"

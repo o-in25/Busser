@@ -70,7 +70,8 @@ const actions = {
 
 		let roleIds: string[] = [];
 		if (
-			locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin')
+			locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin') &&
+			userId !== locals.user?.userId
 		) {
 			roleIds = roles?.split(',') || [];
 		}

@@ -196,12 +196,7 @@
 									}}
 								>
 									<input type="hidden" name="requestId" value={request.invitationRequestId} />
-									<Button
-										variant="outline"
-										size="sm"
-										type="submit"
-										class="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-									>
+									<Button variant="outline" size="sm" type="submit">
 										<X class="h-4 w-4 mr-1" />
 										Reject
 									</Button>

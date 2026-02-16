@@ -254,30 +254,24 @@
 
 				<!-- Content -->
 				<a href="/catalog/{recipe.recipeId}" class="flex-1 min-w-0">
-					<!-- Row 1: Recipe Name (Category) -->
-					<div class="flex items-center gap-2">
-						<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
-							{recipe.recipeName}
-						</h3>
-						<Badge variant="secondary" class="shrink-0 text-xs">
-							{recipe.recipeCategoryDescription}
-						</Badge>
-					</div>
-
-					<!-- Row 2: Description -->
+					<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
+						{recipe.recipeName}
+					</h3>
 					<p class="text-sm text-muted-foreground line-clamp-1">
 						{recipe.recipeDescription || 'A delicious cocktail recipe'}
 					</p>
-
-					<!-- Row 3: Prep Method -->
-					{#if recipe.recipeTechniqueDescriptionText}
-						<div class="flex items-center gap-2 mt-1">
-							<span class="flex items-center gap-1 text-xs text-muted-foreground">
-								<TechniqueIcon class="h-3.5 w-3.5" />
+					<div class="flex items-center gap-2 mt-1">
+						<span class="text-xs text-muted-foreground/70">
+							{recipe.recipeCategoryDescription}
+						</span>
+						{#if recipe.recipeTechniqueDescriptionText}
+							<span class="text-xs text-muted-foreground/40">&middot;</span>
+							<span class="flex items-center gap-1 text-xs text-muted-foreground/70">
+								<TechniqueIcon class="h-3 w-3" />
 								{recipe.recipeTechniqueDescriptionText}
 							</span>
-						</div>
-					{/if}
+						{/if}
+					</div>
 				</a>
 
 				<!-- Action buttons and rating -->
