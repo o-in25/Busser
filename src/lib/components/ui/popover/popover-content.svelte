@@ -16,7 +16,10 @@
 	{align}
 	{sideOffset}
 	class={cn(
-		'z-50 w-72 rounded-xl border border-white/30 dark:border-zinc-700/40 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl p-4 text-popover-foreground shadow-2xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+		'z-50 w-72 rounded-xl border border-white/30 dark:border-zinc-700/40 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 p-4 text-popover-foreground shadow-2xl outline-none',
+		'origin-[var(--bits-popover-content-transform-origin)]',
+		'data-[state=open]:animate-glass-open data-[state=closed]:animate-glass-close',
+		'after:pointer-events-none after:absolute after:inset-0 after:rounded-xl after:bg-gradient-to-br after:from-white/10 after:via-transparent after:to-white/5 after:opacity-0 data-[state=open]:after:animate-glass-shimmer after:bg-[length:200%_100%]',
 		className
 	)}
 	{...restProps}

@@ -90,6 +90,43 @@ export default {
 				sans: ['Inter', ...fontFamily.sans],
 			},
 			keyframes: {
+				'glass-open': {
+					'0%': {
+						opacity: '0',
+						transform: 'scale(0.85)',
+						'backdrop-filter': 'blur(0px) saturate(1)',
+					},
+					'50%': {
+						opacity: '1',
+						transform: 'scale(1.02)',
+						'backdrop-filter': 'blur(12px) saturate(1.3)',
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'scale(1)',
+						'backdrop-filter': 'blur(16px) saturate(1.5)',
+					},
+				},
+				'glass-close': {
+					'0%': {
+						opacity: '1',
+						transform: 'scale(1)',
+						'backdrop-filter': 'blur(16px) saturate(1.5)',
+					},
+					'100%': {
+						opacity: '0',
+						transform: 'scale(0.9)',
+						'backdrop-filter': 'blur(0px) saturate(1)',
+					},
+				},
+				'glass-item': {
+					'0%': { opacity: '0', transform: 'translateY(4px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' },
+				},
+				'glass-shimmer': {
+					'0%': { 'background-position': '-200% 0' },
+					'100%': { 'background-position': '200% 0' },
+				},
 				'accordion-down': {
 					from: { height: '0' },
 					to: { height: 'var(--bits-accordion-content-height)' },
@@ -146,8 +183,30 @@ export default {
 					from: { transform: 'scale(1)', opacity: '1' },
 					to: { transform: 'scale(0.95)', opacity: '0' },
 				},
+				// ios-style chat animations
+				'chat-bubble': {
+					'0%': { opacity: '0', transform: 'translateY(12px) scale(0.98)' },
+					'100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+				},
+				'chat-card': {
+					'0%': { opacity: '0', transform: 'translateY(20px) scale(0.96)' },
+					'60%': { opacity: '1', transform: 'translateY(-2px) scale(1.005)' },
+					'100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+				},
+				'chat-fade-up': {
+					'0%': { opacity: '0', transform: 'translateY(8px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' },
+				},
+				'typing-dot': {
+					'0%, 100%': { opacity: '0.25', transform: 'scale(0.85)' },
+					'50%': { opacity: '0.8', transform: 'scale(1)' },
+				},
 			},
 			animation: {
+				'glass-open': 'glass-open 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+				'glass-close': 'glass-close 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+				'glass-item': 'glass-item 0.25s ease-out both',
+				'glass-shimmer': 'glass-shimmer 1.5s ease-out',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'slide-in-from-left': 'slide-in-from-left 0.2s ease-out',
@@ -162,6 +221,11 @@ export default {
 				'fade-out': 'fade-out 0.1s ease-in',
 				'zoom-in': 'zoom-in 0.2s ease-out',
 				'zoom-out': 'zoom-out 0.2s ease-out',
+				// ios-style chat animations (damped spring, no bounce)
+				'chat-bubble': 'chat-bubble 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) both',
+				'chat-card': 'chat-card 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) both',
+				'chat-fade-up': 'chat-fade-up 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both',
+				'typing-dot': 'typing-dot 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 			},
 		},
 	},

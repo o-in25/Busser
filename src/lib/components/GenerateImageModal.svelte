@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Sparkles, PenLine } from 'lucide-svelte';
 
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Label } from '$lib/components/ui/label';
@@ -51,7 +52,10 @@
 <Dialog.Root bind:open>
 	<Dialog.Content class="sm:max-w-md">
 		<Dialog.Header>
-			<Dialog.Title>Generate Image</Dialog.Title>
+			<Dialog.Title class="flex items-center gap-2">
+				Generate Image
+				<Badge variant="secondary" class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0">Beta</Badge>
+			</Dialog.Title>
 			<Dialog.Description>
 				Choose how to generate the image for "{trigger}"
 			</Dialog.Description>

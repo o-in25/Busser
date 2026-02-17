@@ -13,7 +13,8 @@
 
 <DropdownMenuPrimitive.Item
 	class={cn(
-		'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+		'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 transition-colors data-[highlighted]:bg-accent/15 data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+		'animate-glass-item',
 		inset && 'pl-8',
 		className
 	)}
