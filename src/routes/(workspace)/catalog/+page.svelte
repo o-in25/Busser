@@ -161,35 +161,35 @@
 		</div>
 
 		<!-- Quick stats -->
-		<div class="flex flex-wrap gap-4 mt-8">
+		<div class="grid grid-cols-3 gap-2 sm:gap-4 mt-8">
 			<a
 				href="/catalog/browse"
-				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
+				class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 			>
-				<FlaskConical class="h-5 w-5 text-primary" />
-				<div>
-					<p class="text-2xl font-bold">{totalRecipes}</p>
-					<p class="text-xs text-muted-foreground">Total Recipes</p>
+				<FlaskConical class="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+				<div class="min-w-0">
+					<p class="text-lg sm:text-2xl font-bold">{totalRecipes}</p>
+					<p class="text-[10px] sm:text-xs text-muted-foreground">Total Recipes</p>
 				</div>
 			</a>
 			<div
-				class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
+				class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
 			>
-				<GlassWater class="h-5 w-5 text-primary" />
-				<div>
-					<p class="text-2xl font-bold">{spirits.length}</p>
-					<p class="text-xs text-muted-foreground">Spirit Categories</p>
+				<GlassWater class="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+				<div class="min-w-0">
+					<p class="text-lg sm:text-2xl font-bold">{spirits.length}</p>
+					<p class="text-[10px] sm:text-xs text-muted-foreground">Spirit Categories</p>
 				</div>
 			</div>
 			{#if popularSpirit}
 				<a
 					href="/catalog/browse/{popularSpirit.recipeCategoryId}"
-					class="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
+					class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 				>
-					<TrendingUp class="h-5 w-5 text-primary" />
-					<div>
-						<p class="text-2xl font-bold">{popularSpirit.recipeCategoryDescription}</p>
-						<p class="text-xs text-muted-foreground">Most Popular</p>
+					<TrendingUp class="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+					<div class="min-w-0">
+						<p class="text-lg sm:text-2xl font-bold truncate">{popularSpirit.recipeCategoryDescription}</p>
+						<p class="text-[10px] sm:text-xs text-muted-foreground">Most Popular</p>
 					</div>
 				</a>
 			{/if}

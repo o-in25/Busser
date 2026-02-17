@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { createInvitationRequest, hasWorkspaceAccess } from '$lib/server/auth';
+import { createInvitationRequest, hasWorkspaceAccess, isInviteOnly } from '$lib/server/auth';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import type { View } from '$lib/types';
@@ -126,6 +126,7 @@ export const load = (async ({ locals }) => {
 		totalRecipes: number;
 		spiritCount: number;
 		featuredRecipes: View.BasicRecipe[];
+		inviteOnly: boolean;
 	} | null = null;
 
 	if (!user) {
@@ -140,10 +141,13 @@ export const load = (async ({ locals }) => {
 		const featuredResult = await catalogRepo.findAll(GLOBAL_WORKSPACE_ID, 1, 6);
 		const featuredRecipes = featuredResult.data.filter((r) => r.recipeImageUrl).slice(0, 4);
 
+		const inviteOnly = await isInviteOnly();
+
 		landingData = {
 			totalRecipes,
 			spiritCount: allSpirits.length,
 			featuredRecipes,
+			inviteOnly,
 		};
 	}
 

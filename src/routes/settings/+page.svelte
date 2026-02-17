@@ -1,15 +1,22 @@
 <script lang="ts">
-	import { Dices, Info, Palette, Save, Upload, User, X } from 'lucide-svelte';
+	import { Dices, Info, Mail, MailX, Palette, Save, ShieldCheck, Upload, User, X } from 'lucide-svelte';
+	import { getContext } from 'svelte';
 
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import { Switch } from '$lib/components/ui/switch';
 	import ThemeMixer from '$lib/components/ThemeMixer.svelte';
 	import { generateRandomAvatarDataUri } from '$lib/utils/avatar';
+	import { notificationStore } from '../../stores';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	const permissions: string[] = getContext('permissions') || [];
+	let inviteOnly = $state(data.inviteOnly);
+	let toggleFormRef: HTMLFormElement;
 
 	let currentAvatarUrl = $state(data.avatarImageUrl || '');
 	let pendingAvatarDataUri = $state<string | null>(null);
@@ -118,7 +125,7 @@
 						</p>
 					{/if}
 
-					<div class="flex flex-wrap gap-2">
+					<div class="grid grid-cols-2 sm:flex gap-2">
 						{#if hasPendingChange}
 							<!-- Save/Cancel buttons when there's a pending change -->
 							<form
@@ -155,8 +162,8 @@
 							</Button>
 						{:else}
 							<!-- Generate/Upload buttons when no pending change -->
-							<Button type="button" variant="outline" size="sm" onclick={generateRandom}>
-								<Dices class="h-4 w-4 mr-2" />
+							<Button type="button" variant="outline" size="sm" class="whitespace-nowrap" onclick={generateRandom}>
+								<Dices class="h-4 w-4 mr-2 shrink-0" />
 								Generate Random
 							</Button>
 
@@ -168,8 +175,8 @@
 								class="hidden"
 								onchange={handleFileSelect}
 							/>
-							<Button type="button" variant="outline" size="sm" onclick={() => fileInput.click()}>
-								<Upload class="h-4 w-4 mr-2" />
+							<Button type="button" variant="outline" size="sm" class="whitespace-nowrap" onclick={() => fileInput.click()}>
+								<Upload class="h-4 w-4 mr-2 shrink-0" />
 								Upload Image
 							</Button>
 						{/if}
@@ -202,6 +209,64 @@
 			</div>
 		</Card.Content>
 	</Card.Root>
+
+	<!-- Registration Mode Toggle (admin only) -->
+	{#if permissions.includes('edit_admin')}
+		<Card.Root>
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2">
+					<ShieldCheck class="h-5 w-5" />
+					Registration Mode
+				</Card.Title>
+				<Card.Description>Control how new users can sign up</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<div class="flex items-center justify-between gap-4 p-4 rounded-lg bg-muted/30">
+					<div class="space-y-1">
+						<p class="font-medium">Invite-Only Mode</p>
+						<p class="text-sm text-muted-foreground">
+							{inviteOnly ? 'Users must have a valid invitation code to register' : 'Anyone can register without an invitation'}
+						</p>
+					</div>
+					<form
+						bind:this={toggleFormRef}
+						method="POST"
+						action="?/toggleInviteOnly"
+						use:enhance={() => {
+							return async ({ result, update }) => {
+								if (result.type === 'success') {
+									$notificationStore.success = {
+										message: inviteOnly ? 'Invite-only mode enabled.' : 'Open registration enabled.',
+									};
+								} else if (result.type === 'failure') {
+									inviteOnly = !inviteOnly;
+									$notificationStore.error = {
+										message: 'Failed to update registration mode.',
+									};
+								}
+								await update();
+							};
+						}}
+					>
+						<input type="hidden" name="enabled" value={inviteOnly} />
+						<div class="flex items-center gap-3">
+							<MailX class="h-4 w-4 text-red-500" />
+							<Switch
+								checked={inviteOnly}
+								onCheckedChange={(checked) => {
+									inviteOnly = checked;
+									const input = toggleFormRef.querySelector<HTMLInputElement>('input[name="enabled"]');
+									if (input) input.value = String(checked);
+									toggleFormRef.requestSubmit();
+								}}
+							/>
+							<Mail class="h-4 w-4 text-green-500" />
+						</div>
+					</form>
+				</div>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 
 	<!-- App Info Card -->
 	<Card.Root>

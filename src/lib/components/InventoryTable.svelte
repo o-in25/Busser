@@ -98,10 +98,22 @@
 
 </script>
 
+<!-- mobile select-all -->
+{#if selectable}
+	<div class="flex sm:hidden items-center gap-2 px-3 py-2 mb-1">
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div onclick={(e) => e.stopPropagation()}>
+			<Checkbox checked={allSelected} onchange={toggleAll} />
+		</div>
+		<span class="text-sm text-muted-foreground">Select all</span>
+	</div>
+{/if}
+
 <!-- table -->
 <div class="glass-table overflow-x-auto">
 	<Table.Root>
-		<Table.Header class="glass-table-header">
+		<Table.Header class="glass-table-header hidden sm:table-header-group">
 			<Table.Row>
 				{#if selectable}
 					<Table.Head class="w-10">

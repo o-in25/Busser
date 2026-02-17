@@ -505,16 +505,18 @@
 					<p class="text-muted-foreground text-lg mb-4">
 						Create an account to start tracking your bar.
 					</p>
-					<p class="text-muted-foreground/60 text-sm mb-8">
-						Busser is currently invitation-only while we're in early development.
-						<button
-							type="button"
-							onclick={() => (requestModalOpen = true)}
-							class="text-primary hover:underline"
-						>
-							Request an invite.
-						</button>
-					</p>
+					{#if landingData?.inviteOnly}
+						<p class="text-muted-foreground/60 text-sm mb-8">
+							Busser is currently invitation-only while we're in early development.
+							<button
+								type="button"
+								onclick={() => (requestModalOpen = true)}
+								class="text-primary hover:underline"
+							>
+								Request an invite.
+							</button>
+						</p>
+					{/if}
 					<a
 						href="/signup"
 						class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')}
@@ -528,6 +530,7 @@
 	</section>
 
 	<!-- Request Invite Modal -->
+	{#if landingData?.inviteOnly}
 	<Dialog.Root bind:open={requestModalOpen}>
 		<Dialog.Content class="sm:max-w-md">
 			<Dialog.Header>
@@ -631,6 +634,7 @@
 			{/if}
 		</Dialog.Content>
 	</Dialog.Root>
+	{/if}
 {:else}
 	<!-- ==================== AUTHENTICATED DASHBOARD ==================== -->
 

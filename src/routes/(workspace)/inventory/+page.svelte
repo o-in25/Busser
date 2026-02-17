@@ -55,6 +55,7 @@
 	let selectedCategory = $state(data.filters?.categoryGroupId || 'all');
 	let stockFilter = $state(data.filters?.stockFilter || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
+	let perPage = $state(String(data.filters?.perPage || 20));
 
 	// Drawer state
 	let drawerOpen = $state(false);
@@ -199,12 +200,14 @@
 		const stock = overrides.stockFilter !== undefined ? overrides.stockFilter : stockFilter;
 		const sort = overrides.sort !== undefined ? overrides.sort : sortOption;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
+		const pp = overrides.perPage !== undefined ? overrides.perPage : perPage;
 
 		params.set('page', String(pageNum));
 		if (search) params.set('productName', String(search));
 		if (category && category !== 'all') params.set('categoryGroupId', String(category));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
+		if (pp && String(pp) !== '20') params.set('perPage', String(pp));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -236,6 +239,12 @@
 	function handleSortChange(value: string) {
 		sortOption = value;
 		goto(buildUrl({ sort: value, page: 1 }), { keepFocus: true });
+	}
+
+	// Handle per-page change
+	function handlePerPageChange(value: string) {
+		perPage = value;
+		goto(buildUrl({ perPage: value, page: 1 }), { keepFocus: true });
 	}
 
 	// Clear functions
@@ -275,6 +284,13 @@
 		{ value: 'name-desc', label: 'Name (Z-A)' },
 		{ value: 'newest', label: 'Newest First' },
 		{ value: 'oldest', label: 'Oldest First' },
+	];
+
+	// Per-page options
+	const perPageOptions = [
+		{ value: '20', label: '20 per page' },
+		{ value: '50', label: '50 per page' },
+		{ value: '100', label: '100 per page' },
 	];
 
 	// Pagination navigation
@@ -318,12 +334,18 @@
 		return option?.label || 'Name (A-Z)';
 	});
 
+	const perPageLabel = $derived.by(() => {
+		const option = perPageOptions.find((o) => o.value === perPage);
+		return option?.label || '20 per page';
+	});
+
 	// Update local state when page data changes (for SSR navigation)
 	$effect(() => {
 		searchInput = data.filters?.search || '';
 		selectedCategory = data.filters?.categoryGroupId || 'all';
 		stockFilter = data.filters?.stockFilter || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
+		perPage = String(data.filters?.perPage || 20);
 	});
 </script>
 
@@ -429,6 +451,23 @@
 				</Select.Trigger>
 				<Select.Content>
 					{#each sortOptions as option}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+
+			<!-- Per Page Select -->
+			<Select.Root
+				type="single"
+				value={perPage}
+				onValueChange={(v) => handlePerPageChange(v ?? '20')}
+			>
+				<Select.Trigger class="w-full sm:w-[150px]">
+					<List class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="20 per page">{perPageLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					{#each perPageOptions as option}
 						<Select.Item value={option.value} label={option.label} />
 					{/each}
 				</Select.Content>
@@ -604,41 +643,47 @@
 	<!-- Bulk Action Bar -->
 	{#if canModify && selectedIds.length > 0}
 		<div
-			class="sticky top-0 z-10 mb-4 flex items-center gap-3 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm"
+			class="sticky top-0 z-10 mb-4 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm"
 		>
-			<span class="text-sm font-medium">{selectedIds.length} selected</span>
-			<div class="flex-1"></div>
-			<Button
-				variant="outline"
-				size="sm"
-				onclick={() => handleBulkSetStock(true)}
-				disabled={bulkActionLoading}
-			>
-				<PackageCheck class="h-4 w-4 mr-1.5" />
-				Mark In Stock
-			</Button>
-			<Button
-				variant="outline"
-				size="sm"
-				onclick={() => handleBulkSetStock(false)}
-				disabled={bulkActionLoading}
-			>
-				<PackageX class="h-4 w-4 mr-1.5" />
-				Mark Out of Stock
-			</Button>
-			<Button
-				variant="destructive"
-				size="sm"
-				onclick={() => (deleteDialogOpen = true)}
-				disabled={bulkActionLoading}
-			>
-				<Trash2 class="h-4 w-4 mr-1.5" />
-				Delete
-			</Button>
-			<Button variant="ghost" size="sm" onclick={clearSelection}>
-				<X class="h-4 w-4 mr-1.5" />
-				Clear
-			</Button>
+			<div class="flex items-center justify-between mb-2 sm:mb-0">
+				<span class="text-sm font-medium">{selectedIds.length} selected</span>
+				<Button variant="ghost" size="sm" onclick={clearSelection}>
+					<X class="h-4 w-4 mr-1.5" />
+					Clear
+				</Button>
+			</div>
+			<div class="flex items-center gap-2 sm:mt-0">
+				<Button
+					variant="outline"
+					size="sm"
+					class="flex-1 sm:flex-none"
+					onclick={() => handleBulkSetStock(true)}
+					disabled={bulkActionLoading}
+				>
+					<PackageCheck class="h-4 w-4 sm:mr-1.5" />
+					<span class="hidden sm:inline">Mark</span> In Stock
+				</Button>
+				<Button
+					variant="outline"
+					size="sm"
+					class="flex-1 sm:flex-none"
+					onclick={() => handleBulkSetStock(false)}
+					disabled={bulkActionLoading}
+				>
+					<PackageX class="h-4 w-4 sm:mr-1.5" />
+					<span class="hidden sm:inline">Mark</span> Out of Stock
+				</Button>
+				<Button
+					variant="destructive"
+					size="sm"
+					class="flex-1 sm:flex-none"
+					onclick={() => (deleteDialogOpen = true)}
+					disabled={bulkActionLoading}
+				>
+					<Trash2 class="h-4 w-4 sm:mr-1.5" />
+					Delete
+				</Button>
+			</div>
 		</div>
 	{/if}
 

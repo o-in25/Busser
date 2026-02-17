@@ -6,9 +6,7 @@ import {
 	fulfillInvitationRequest,
 	getInvitationRequests,
 	getInvitations,
-	isInviteOnly,
 	rejectInvitationRequest,
-	setAppSetting,
 } from '$lib/server/auth';
 import type { Invitation, InvitationRequest } from '$lib/types/auth';
 
@@ -29,12 +27,9 @@ export const load = (async () => {
 		pendingRequests = requestsResult.data || [];
 	}
 
-	const inviteOnly = await isInviteOnly();
-
 	return {
 		invitations,
 		pendingRequests,
-		inviteOnly,
 	};
 }) satisfies PageServerLoad;
 
@@ -102,10 +97,4 @@ export const actions: Actions = {
 		return { success: true, rejected: true };
 	},
 
-	toggleInviteOnly: async ({ request }) => {
-		const formData = await request.formData();
-		const enabled = formData.get('enabled') as string;
-		await setAppSetting('invite_only_mode', enabled === 'true' ? 'true' : 'false');
-		return { success: true };
-	},
 };

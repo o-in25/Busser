@@ -75,13 +75,12 @@
 					)}
 				>
 					<XCircle class="h-4 w-4 md:h-5 md:w-5 text-red-500 shrink-0" />
-					<div class="text-left">
+					<div class="text-left min-w-0">
 						<p class="text-lg md:text-xl font-bold">{stats.outOfStock}</p>
-						<p class="text-[10px] md:text-xs text-muted-foreground">Out of Stock</p>
+						<p class="text-[10px] md:text-xs text-muted-foreground truncate">Out of Stock</p>
 					</div>
 				</button>
-
-				</div>
+			</div>
 		</div>
 	</div>
 </div>
