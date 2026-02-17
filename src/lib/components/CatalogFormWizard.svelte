@@ -12,6 +12,7 @@
 	import type { Snippet } from 'svelte';
 
 	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
 	import { cn } from '$lib/utils';
 
 	type Step = {
@@ -23,14 +24,12 @@
 		class: className,
 		currentStep = $bindable(0),
 		children,
-		footer,
 		onfinish,
 		canProceed = true,
 	}: {
 		class?: string;
 		currentStep?: number;
 		children?: Snippet<[{ step: number; isActive: boolean }]>;
-		footer?: Snippet;
 		onfinish?: () => void;
 		canProceed?: boolean;
 	} = $props();
@@ -63,93 +62,89 @@
 </script>
 
 <div class={cn('md:hidden', className)}>
-	<!-- Progress bar -->
-	<div class="mb-4">
-		<div class="flex items-center justify-between mb-2">
-			<span class="text-sm font-medium text-foreground">
-				Step {currentStep + 1} of {steps.length}
-			</span>
-			<span class="text-sm text-muted-foreground">
-				{steps[currentStep]?.title}
-			</span>
-		</div>
-		<div class="w-full h-2 bg-secondary/30 rounded-full overflow-hidden">
-			<div
-				class="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300 ease-out"
-				style="width: {progress}%"
-			></div>
-		</div>
-	</div>
-
-	<!-- Step indicators -->
-	<div class="flex justify-center gap-2 mb-6">
-		{#each steps as step, index}
-			{@const StepIcon = step.icon}
-			<button
-				type="button"
-				class={cn(
-					'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200',
-					index === currentStep
-						? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
-						: index < currentStep
-							? 'bg-primary/20 text-primary'
-							: 'bg-secondary/30 text-muted-foreground'
-				)}
-				onclick={() => goToStep(index)}
-			>
-				{#if index < currentStep}
-					<Check class="h-4 w-4" />
-				{:else}
-					<StepIcon class="h-4 w-4" />
-				{/if}
-			</button>
-		{/each}
-	</div>
-
 	<!-- Content slot for each step -->
 	<div class="min-h-[350px]">
 		{#if children}
-			{#each steps as _, index}
+			{#each steps as step, index}
 				<div class={cn(index === currentStep ? 'block' : 'hidden')}>
-					{@render children({ step: index, isActive: index === currentStep })}
+					<Card.Root>
+						<Card.Header class="pb-3">
+							<div class="flex items-center justify-between mb-1">
+								<Card.Title class="flex items-center gap-2 text-base">
+									{@const StepIcon = step.icon}
+									<StepIcon class="h-4 w-4 text-primary" />
+									{step.title}
+								</Card.Title>
+								<span class="text-xs text-muted-foreground">
+									Step {currentStep + 1} of {steps.length}
+								</span>
+							</div>
+							<div class="w-full h-1.5 bg-secondary/30 rounded-full overflow-hidden">
+								<div
+									class="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300 ease-out"
+									style="width: {progress}%"
+								></div>
+							</div>
+							<div class="flex justify-center gap-2 pt-3">
+								{#each steps as s, i}
+									{@const SIcon = s.icon}
+									<button
+										type="button"
+										class={cn(
+											'w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 text-xs',
+											i === currentStep
+												? 'bg-primary text-primary-foreground ring-2 ring-primary/20'
+												: i < currentStep
+													? 'bg-primary/20 text-primary'
+													: 'bg-secondary/30 text-muted-foreground'
+										)}
+										onclick={() => goToStep(i)}
+									>
+										{#if i < currentStep}
+											<Check class="h-3 w-3" />
+										{:else}
+											<SIcon class="h-3 w-3" />
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</Card.Header>
+						<Card.Content>
+							{@render children({ step: index, isActive: index === currentStep })}
+						</Card.Content>
+						<Card.Footer class="flex justify-between pt-4 border-t">
+							<Button
+								type="button"
+								variant="outline"
+								onclick={prevStep}
+								disabled={currentStep === 0}
+								class="flex items-center gap-2"
+							>
+								<ChevronLeft class="h-4 w-4" />
+								Previous
+							</Button>
+
+							{#if currentStep < steps.length - 1}
+								<Button
+									type="button"
+									onclick={nextStep}
+									disabled={!canProceed}
+									class="flex items-center gap-2"
+								>
+									Next
+									<ChevronRight class="h-4 w-4" />
+								</Button>
+							{:else}
+								<Button type="submit" disabled={!canProceed} class="flex items-center gap-2">
+									Save
+									<Check class="h-4 w-4" />
+								</Button>
+							{/if}
+						</Card.Footer>
+					</Card.Root>
 				</div>
 			{/each}
 		{/if}
 	</div>
 
-	<!-- Navigation buttons -->
-	<div class="flex justify-between mt-6 pt-4 border-t">
-		<Button
-			type="button"
-			variant="outline"
-			onclick={prevStep}
-			disabled={currentStep === 0}
-			class="flex items-center gap-2"
-		>
-			<ChevronLeft class="h-4 w-4" />
-			Previous
-		</Button>
-
-		{#if currentStep < steps.length - 1}
-			<Button
-				type="button"
-				onclick={nextStep}
-				disabled={!canProceed}
-				class="flex items-center gap-2"
-			>
-				Next
-				<ChevronRight class="h-4 w-4" />
-			</Button>
-		{:else}
-			<Button type="submit" disabled={!canProceed} class="flex items-center gap-2">
-				Save
-				<Check class="h-4 w-4" />
-			</Button>
-		{/if}
-	</div>
-
-	<!-- Footer slot (for danger zone, etc.) -->
-	{#if footer}
-		{@render footer()}
-	{/if}
 </div>

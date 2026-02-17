@@ -1,31 +1,21 @@
 <script lang="ts">
-	import {
-		ChevronLeft,
-		ChevronRight,
-		Layers,
-		List,
-		Package,
-		Pencil,
-		Plus,
-		Search,
-		TableIcon,
-		Tags,
-		Trash2,
-		X,
-	} from 'lucide-svelte';
+	import { Layers, Package, Pencil, Plus, Search, Tags, Trash2, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
 	import CategoryDetailDrawer from '$lib/components/CategoryDetailDrawer.svelte';
+	import CategoryFilterPanel from '$lib/components/CategoryFilterPanel.svelte';
+	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
+	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
 	import type { Category } from '$lib/types';
 	import { cn } from '$lib/utils';
@@ -102,7 +92,14 @@
 		activeGroup = null;
 	});
 
-	const perPageOptions = [10, 25, 50, 100];
+	// active filter count for badge
+	const activeFilterCount = $derived(
+		(data.pagination.perPage !== 50 ? 1 : 0) + (activeGroup !== null ? 1 : 0)
+	);
+
+	async function handleRefresh() {
+		await invalidateAll();
+	}
 
 	// Build URL with current filters
 	function buildUrl(overrides: Record<string, string | number | null> = {}) {
@@ -136,16 +133,6 @@
 		goto(buildUrl({ page: pageNum }));
 	}
 
-	// Generate page numbers
-	const pages = $derived.by(() => {
-		const { total, perPage, currentPage } = data.pagination;
-		const totalPages = Math.ceil(total / perPage);
-		return Array.from({ length: totalPages }, (_, i) => ({
-			number: i + 1,
-			active: i + 1 === currentPage,
-		}));
-	});
-
 	// Delete handlers
 	function openDeleteDialog(id: number, name: string) {
 		categoryToDelete = { id, name };
@@ -178,13 +165,6 @@
 					Organize your inventory with categories and groups.
 				</p>
 			</div>
-
-			{#if canModify}
-				<a href="/inventory/category/add" class={cn(buttonVariants(), 'shrink-0')}>
-					<Plus class="h-4 w-4 mr-2" />
-					Add Category
-				</a>
-			{/if}
 		</div>
 
 		<!-- Stat Cards -->
@@ -229,9 +209,9 @@
 </div>
 
 <!-- Search Bar & Filters -->
-<div class="flex flex-col sm:flex-row gap-3 mb-6">
-	<form onsubmit={handleSearch} class="flex gap-2 flex-1">
-		<div class="relative flex-1 max-w-sm">
+<div class="flex items-center gap-2 mb-6">
+	<form onsubmit={handleSearch} class="flex-1 min-w-0">
+		<div class="relative">
 			<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 			<Input
 				type="text"
@@ -249,50 +229,36 @@
 				</button>
 			{/if}
 		</div>
-		<Button type="submit" variant="outline">Search</Button>
 	</form>
 
-	<Select.Root
-		type="single"
-		value={String(data.pagination.perPage)}
-		onValueChange={(v) => {
-			if (v) goto(buildUrl({ perPage: Number(v), page: 1 }));
-		}}
+	<FilterButton
+		activeCount={activeFilterCount}
+		viewModes={['table', 'list']}
+		activeView={viewMode}
+		onViewChange={(mode) => setViewMode(mode)}
+		onRefresh={handleRefresh}
 	>
-		<Select.Trigger class="w-full sm:w-[180px]">
-			<Package class="h-4 w-4 mr-2" />
-			<Select.Value placeholder="50 per page">{data.pagination.perPage} per page</Select.Value>
-		</Select.Trigger>
-		<Select.Content>
-			{#each perPageOptions as opt}
-				<Select.Item value={String(opt)} label="{opt} per page" />
-			{/each}
-		</Select.Content>
-	</Select.Root>
+		<CategoryFilterPanel
+			{categoryGroups}
+			{activeGroup}
+			perPage={data.pagination.perPage}
+			onGroupChange={(v) => (activeGroup = v)}
+			onPerPageChange={(v) => goto(buildUrl({ perPage: v, page: 1 }))}
+			onReset={() => {
+				activeGroup = null;
+				goto(buildUrl({ perPage: 50, page: 1 }));
+			}}
+		/>
+	</FilterButton>
 
-	<!-- View Toggle -->
-	<div class="flex items-center border border-input/50 rounded-lg overflow-hidden shrink-0 w-fit">
-		<button
-			class={cn(
-				'h-10 w-10 flex items-center justify-center transition-colors',
-				viewMode === 'table' ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
-			)}
-			onclick={() => setViewMode('table')}
-			aria-label="Table view"
-		>
-			<TableIcon class="h-4 w-4" />
-		</button>
-		<button
-			class={cn(
-				'h-10 w-10 flex items-center justify-center transition-colors',
-				viewMode === 'list' ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
-			)}
-			onclick={() => setViewMode('list')}
-			aria-label="List view"
-		>
-			<List class="h-4 w-4" />
-		</button>
-	</div>
+	<ViewToggle modes={['table', 'list']} active={viewMode} onchange={(mode) => setViewMode(mode)} />
+
+	{#if canModify}
+		<a href="/inventory/category/add" class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}>
+			<Plus class="h-4 w-4 sm:mr-2" />
+			<span class="hidden sm:inline">Add Category</span>
+		</a>
+	{/if}
 </div>
 
 <!-- Results info -->
@@ -300,30 +266,6 @@
 	<p class="text-sm text-muted-foreground mb-4">
 		Showing results for "<span class="font-medium">{data.filters.search}</span>"
 	</p>
-{/if}
-
-<!-- Group Filter Chips -->
-{#if categoryGroups.length >= 2}
-	<div class="flex flex-wrap gap-2 mb-6">
-		<Button
-			variant={activeGroup === null ? 'default' : 'outline'}
-			class="rounded-full"
-			size="sm"
-			onclick={() => (activeGroup = null)}
-		>
-			All ({data.categories.length})
-		</Button>
-		{#each categoryGroups as group}
-			<Button
-				variant={activeGroup === group.name ? 'default' : 'outline'}
-				class="rounded-full"
-				size="sm"
-				onclick={() => (activeGroup = group.name)}
-			>
-				{group.name} ({group.count})
-			</Button>
-		{/each}
-	</div>
 {/if}
 
 <!-- Results Count -->
@@ -492,21 +434,19 @@
 			>
 				<Card.Root class="hover:border-primary/30 transition-colors">
 					<Card.Content class="p-4">
-						<div class="flex items-start justify-between gap-3">
-							<div class="flex-1 min-w-0">
-								<div class="flex items-center gap-2 mb-1">
-									<h3 class="font-medium truncate">{category.categoryName}</h3>
-									{#if category.categoryGroupName}
-										<Badge variant="outline" class="shrink-0">{category.categoryGroupName}</Badge>
-									{/if}
-								</div>
-								{#if category.categoryDescription}
-									<p class="text-sm text-muted-foreground line-clamp-2">
-										{category.categoryDescription}
-									</p>
+						<div class="flex flex-col gap-2">
+							<div class="flex items-center gap-2">
+								<h3 class="font-medium truncate">{category.categoryName}</h3>
+								{#if category.categoryGroupName}
+									<Badge variant="outline" class="shrink-0">{category.categoryGroupName}</Badge>
 								{/if}
 							</div>
-							<div class="flex items-center gap-2 shrink-0">
+							{#if category.categoryDescription}
+								<p class="text-sm text-muted-foreground line-clamp-2">
+									{category.categoryDescription}
+								</p>
+							{/if}
+							<div class="flex items-center justify-between gap-2 mt-1">
 								<span
 									class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium"
 								>
@@ -553,44 +493,11 @@
 {/if}
 
 {#if data.categories.length > 0 && filteredCategories.length > 0}
-	<!-- Pagination -->
-	<div class="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
-		<div class="text-sm text-muted-foreground">
-			<span class="font-semibold">{data.pagination.total}</span>
-			{data.pagination.total === 1 ? 'category' : 'categories'} total
-		</div>
-
-		{#if data.pagination.total > data.pagination.perPage}
-			<div class="flex items-center gap-2">
-				<span class="text-sm text-muted-foreground">
-					Page {data.pagination.currentPage}
-					of {Math.ceil(data.pagination.total / data.pagination.perPage)}
-				</span>
-				<nav class="flex items-center gap-1">
-					<Button
-						variant="outline"
-						size="icon"
-						class="h-8 w-8"
-						onclick={() => navigatePage(data.pagination.prevPage || data.pagination.currentPage)}
-						disabled={!data.pagination.prevPage}
-					>
-						<span class="sr-only">Previous</span>
-						<ChevronLeft class="w-4 h-4" />
-					</Button>
-					<Button
-						variant="outline"
-						size="icon"
-						class="h-8 w-8"
-						onclick={() => navigatePage(data.pagination.nextPage || data.pagination.currentPage)}
-						disabled={!data.pagination.nextPage}
-					>
-						<span class="sr-only">Next</span>
-						<ChevronRight class="w-4 h-4" />
-					</Button>
-				</nav>
-			</div>
-		{/if}
-	</div>
+	<Pagination
+		pagination={data.pagination}
+		itemLabel={data.pagination.total === 1 ? 'category' : 'categories'}
+		onNavigate={navigatePage}
+	/>
 {/if}
 
 <!-- Category Detail Drawer -->

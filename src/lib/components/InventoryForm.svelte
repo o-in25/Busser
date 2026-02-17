@@ -38,7 +38,11 @@
 	import InventoryFormWizard from './InventoryFormWizard.svelte';
 	import Prompt from './Prompt.svelte';
 
-	let { action, product = null }: { action: ComponentAction; product?: Product | null } = $props();
+	let {
+		action,
+		product = null,
+		modalOpen = $bindable(false),
+	}: { action: ComponentAction; product?: Product | null; modalOpen?: boolean } = $props();
 
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
@@ -86,7 +90,6 @@
 
 	// Use a derived value so it always reflects the latest product
 	let productDetailId = $derived(() => product?.productDetailId);
-	let modalOpen = $state(false);
 	let draftManager = $state<FormDraftManager>();
 	let currentWizardStep = $state(0);
 
@@ -202,10 +205,6 @@
 		} else {
 			$notificationStore.error = { message: result.message || result.error };
 		}
-	};
-
-	const openModal = () => {
-		modalOpen = true;
 	};
 
 	// Validation state
@@ -750,21 +749,9 @@
 
 		<!-- Submit buttons (desktop only - mobile uses wizard buttons) -->
 		<div class="hidden md:flex justify-end gap-3 mt-6">
-			{#if action === 'edit' && canModify}
-				<Button type="button" variant="destructive" onclick={openModal}>Delete</Button>
-			{/if}
 			<Button type="submit" disabled={!isFormValid}>Save</Button>
 		</div>
 
-		<!-- Mobile delete section -->
-		{#if action === 'edit' && canModify}
-			<div class="md:hidden mt-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-				<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
-				<Button type="button" variant="destructive" class="w-full" onclick={openModal}>
-					Delete Item
-				</Button>
-			</div>
-		{/if}
 	</form>
 
 	<Dialog.Root bind:open={modalOpen}>

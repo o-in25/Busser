@@ -2,7 +2,6 @@
 	import {
 		ArrowUpDown,
 		ChevronLeft,
-		ChevronRight,
 		FlaskConical,
 		LayoutGrid,
 		List,
@@ -15,6 +14,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -100,16 +100,6 @@
 	function navigatePage(pageNum: number) {
 		goto(buildUrl({ page: pageNum }));
 	}
-
-	// Generate page links
-	const pages = $derived.by(() => {
-		const { total, perPage, currentPage } = data.pagination;
-		const totalPages = Math.ceil(total / perPage);
-		return Array.from({ length: totalPages }, (_, i) => ({
-			number: i + 1,
-			active: i + 1 === currentPage,
-		}));
-	});
 
 	// Update local state when page data changes
 	$effect(() => {
@@ -387,42 +377,10 @@
 		</div>
 
 		<!-- Pagination -->
-		{#if pages.length > 1}
-			<div class="flex flex-col items-center justify-center gap-2 py-8">
-				<div class="text-sm text-muted-foreground">
-					Page <span class="font-semibold">{data.pagination.currentPage}</span>
-					of <span class="font-semibold">{pages.length}</span>
-				</div>
-				<nav class="flex items-center gap-1">
-					<Button
-						variant="outline"
-						size="icon"
-						onclick={() => navigatePage(data.pagination.prevPage || data.pagination.currentPage)}
-						disabled={!data.pagination.prevPage}
-					>
-						<span class="sr-only">Previous</span>
-						<ChevronLeft class="w-5 h-5" />
-					</Button>
-					{#each pages as p}
-						<Button
-							variant={p.active ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => navigatePage(p.number)}
-						>
-							{p.number}
-						</Button>
-					{/each}
-					<Button
-						variant="outline"
-						size="icon"
-						onclick={() => navigatePage(data.pagination.nextPage || data.pagination.currentPage)}
-						disabled={!data.pagination.nextPage}
-					>
-						<span class="sr-only">Next</span>
-						<ChevronRight class="w-5 h-5" />
-					</Button>
-				</nav>
-			</div>
-		{/if}
+		<Pagination
+			pagination={data.pagination}
+			itemLabel="recipes"
+			onNavigate={navigatePage}
+		/>
 	{/if}
 </div>
