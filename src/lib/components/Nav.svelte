@@ -17,6 +17,7 @@
 	} from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
+	import logo from '$lib/assets/logo.png';
 	import logoNav from '$lib/assets/logo-nav.png';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sheet from '$lib/components/ui/sheet';
@@ -96,6 +97,13 @@
 				<Menu class="h-5 w-5 text-muted-foreground" />
 			</Sheet.Trigger>
 			<Sheet.Content side="left" class="flex flex-col">
+				<!-- glowing app logo -->
+				<div class="flex justify-center py-4">
+					<img src={logo} alt="Busser" class="h-16 scale-150 drawer-logo-glow" />
+				</div>
+
+				<div class="h-px bg-border mb-4"></div>
+
 				<Sheet.Header class="text-left">
 					<div class="flex items-center gap-3">
 						<div class="w-10 h-10 rounded-full flex-shrink-0">
@@ -509,5 +517,26 @@
 
 	.desktop-avatar-button:hover {
 		opacity: 0.8;
+	}
+
+	/* drawer logo glow (matches home page hero) */
+	.drawer-logo-glow {
+		animation: drawer-glow 3s ease-in-out infinite;
+	}
+
+	@keyframes drawer-glow {
+		0%, 100% {
+			filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
+		}
+		50% {
+			filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.5));
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.drawer-logo-glow {
+			animation: none;
+			filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
+		}
 	}
 </style>

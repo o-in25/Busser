@@ -1,33 +1,21 @@
 <script lang="ts">
-	import {
-		ArrowUpDown,
-		ChevronLeft,
-		ChevronRight,
-		Filter,
-		FlaskConical,
-		GlassWater,
-		Heart,
-		LayoutGrid,
-		List,
-		Plus,
-		Search,
-		SlidersHorizontal,
-		Star,
-		X,
-	} from 'lucide-svelte';
+	import { FlaskConical, Plus, Search, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
+	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
+	import FilterButton from '$lib/components/FilterButton.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
+	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
@@ -46,6 +34,18 @@
 	let selectedSort = $state(data.filters.sort || 'name-asc');
 	let selectedSpirit = $state(data.filters.spiritId || 'all');
 	let selectedShowFilter = $state(data.filters.showFilter || 'all');
+
+	// Filter panel state
+	let filterOpen = $state(false);
+
+	// count of non-default filters behind the filter panel
+	const activeFilterCount = $derived.by(() => {
+		let count = 0;
+		if (selectedSpirit && selectedSpirit !== 'all') count++;
+		if (selectedShowFilter && selectedShowFilter !== 'all') count++;
+		if (selectedSort !== 'name-asc') count++;
+		return count;
+	});
 
 	// Advanced search
 	let advancedSearchOpen = $state(false);
@@ -68,21 +68,13 @@
 	let favorites = $state(new Set(data.favoriteRecipeIds));
 	let featured = $state(new Set(data.featuredRecipeIds));
 
-	// Sort options
-	const sortOptions = [
-		{ value: 'name-asc', label: 'Name (A-Z)' },
-		{ value: 'name-desc', label: 'Name (Z-A)' },
-		{ value: 'top-rated', label: 'Top Rated' },
-		{ value: 'newest', label: 'Newest First' },
-		{ value: 'oldest', label: 'Oldest First' },
-	];
-
-	// Show filter options
-	const showFilterOptions = [
-		{ value: 'all', label: 'All Recipes', icon: FlaskConical },
-		{ value: 'favorites', label: 'My Favorites', icon: Heart },
-		{ value: 'featured', label: 'Featured', icon: Star },
-	];
+	// reset filters behind the panel (spirit, show, sort)
+	function resetPanelFilters() {
+		selectedSpirit = 'all';
+		selectedShowFilter = 'all';
+		selectedSort = 'name-asc';
+		goto(buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', page: 1 }), { keepFocus: true });
+	}
 
 	// Restore view mode from localStorage
 	onMount(() => {
@@ -182,16 +174,6 @@
 		goto(buildUrl({ page: pageNum }));
 	}
 
-	// Generate page links
-	const pages = $derived.by(() => {
-		const { total, perPage, currentPage } = data.pagination;
-		const totalPages = Math.ceil(total / perPage);
-		return Array.from({ length: totalPages }, (_, i) => ({
-			number: i + 1,
-			active: i + 1 === currentPage,
-		}));
-	});
-
 	// Update local state when page data changes
 	$effect(() => {
 		searchInput = data.filters.search || '';
@@ -200,23 +182,6 @@
 		selectedShowFilter = data.filters.showFilter || 'all';
 		favorites = new Set(data.favoriteRecipeIds);
 		featured = new Set(data.featuredRecipeIds);
-	});
-
-	// Compute display labels for dropdowns
-	const sortLabel = $derived.by(() => {
-		const option = sortOptions.find((o) => o.value === selectedSort);
-		return option?.label || 'Name (A-Z)';
-	});
-
-	const spiritLabel = $derived.by(() => {
-		if (!selectedSpirit || selectedSpirit === 'all') return 'All Spirits';
-		const spirit = data.spirits.find((s) => String(s.recipeCategoryId) === selectedSpirit);
-		return spirit?.recipeCategoryDescription || 'All Spirits';
-	});
-
-	const showFilterLabel = $derived.by(() => {
-		const option = showFilterOptions.find((o) => o.value === selectedShowFilter);
-		return option?.label || 'All Recipes';
 	});
 
 	function handleToggleFavorite(id: number) {
@@ -259,10 +224,9 @@
 
 	<!-- Toolbar -->
 	<div class="flex flex-col gap-3 mb-6">
-		<!-- Row 1: Search, Spirit Filter, Sort (+ action buttons on large screens) -->
-		<div class="flex flex-wrap gap-3 items-center">
+		<div class="flex items-center gap-2">
 			<!-- Search -->
-			<form onsubmit={handleSearch} class="w-full sm:flex-1 sm:min-w-[200px]">
+			<form onsubmit={handleSearch} class="flex-1 min-w-0">
 				<div class="relative">
 					<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 					<Input
@@ -283,145 +247,33 @@
 				</div>
 			</form>
 
-			<!-- Advanced Search Button -->
-			<Button variant="outline" class="w-auto relative" onclick={() => (advancedSearchOpen = true)}>
-				<SlidersHorizontal class="h-4 w-4 mr-2" />
-				Advanced
-				{#if advancedFilterCount > 0}
-					<Badge class="ml-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-						{advancedFilterCount}
-					</Badge>
-				{/if}
-			</Button>
+			<!-- Filters -->
+			<FilterButton bind:open={filterOpen} activeCount={activeFilterCount + advancedFilterCount} viewModes={['grid', 'list']} activeView={viewMode} onViewChange={setViewMode} onRefresh={invalidateAll}>
+				<CatalogFilterPanel
+					spirits={data.spirits}
+					{selectedSpirit}
+					{selectedShowFilter}
+					sortOption={selectedSort}
+					{advancedFilterCount}
+					onSpiritChange={handleSpiritChange}
+					onShowFilterChange={handleShowFilterChange}
+					onSortChange={handleSortChange}
+					onReset={resetPanelFilters}
+					onAdvancedClick={() => {
+						filterOpen = false;
+						advancedSearchOpen = true;
+					}}
+				/>
+			</FilterButton>
 
-			<!-- Spirit Filter Select -->
-			<Select.Root
-				type="single"
-				value={selectedSpirit}
-				onValueChange={(v) => handleSpiritChange(v ?? 'all')}
-			>
-				<Select.Trigger class="w-[180px]">
-					<GlassWater class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="All Spirits">{spiritLabel}</Select.Value>
-				</Select.Trigger>
-				<Select.Content>
-					<Select.Item value="all" label="All Spirits" />
-					{#if data.spirits.length > 0}
-						<Select.Separator />
-					{/if}
-					{#each data.spirits as spirit}
-						<Select.Item
-							value={String(spirit.recipeCategoryId)}
-							label={spirit.recipeCategoryDescription ?? undefined}
-						/>
-					{/each}
-				</Select.Content>
-			</Select.Root>
+			<!-- View toggle -->
+			<ViewToggle modes={['grid', 'list']} active={viewMode} onchange={setViewMode} />
 
-			<!-- Show Filter Select (Favorites/Featured) -->
-			<Select.Root
-				type="single"
-				value={selectedShowFilter}
-				onValueChange={(v) => handleShowFilterChange(v ?? 'all')}
-			>
-				<Select.Trigger class="w-[160px]">
-					<Filter class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="All Recipes">{showFilterLabel}</Select.Value>
-				</Select.Trigger>
-				<Select.Content>
-					{#each showFilterOptions as option}
-						<Select.Item value={option.value} label={option.label} />
-					{/each}
-				</Select.Content>
-			</Select.Root>
-
-			<!-- Sort Select -->
-			<Select.Root
-				type="single"
-				value={selectedSort}
-				onValueChange={(v) => handleSortChange(v ?? 'name-asc')}
-			>
-				<Select.Trigger class="w-[160px]">
-					<ArrowUpDown class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="Sort by">{sortLabel}</Select.Value>
-				</Select.Trigger>
-				<Select.Content>
-					{#each sortOptions as option}
-						<Select.Item value={option.value} label={option.label} />
-					{/each}
-				</Select.Content>
-			</Select.Root>
-
-			<!-- Action buttons (large screens only - inline with filters) -->
-			<div class="hidden lg:flex items-center gap-2">
-				<!-- View Toggle -->
-				<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
-					<button
-						class={cn(
-							'h-10 w-10 flex items-center justify-center transition-colors',
-							viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-						)}
-						onclick={() => setViewMode('grid')}
-						aria-label="Grid view"
-					>
-						<LayoutGrid class="h-4 w-4" />
-					</button>
-					<button
-						class={cn(
-							'h-10 w-10 flex items-center justify-center transition-colors',
-							viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-						)}
-						onclick={() => setViewMode('list')}
-						aria-label="List view"
-					>
-						<List class="h-4 w-4" />
-					</button>
-				</div>
-
-				<!-- Add Recipe Button -->
-				{#if canModify}
-					<a href="/catalog/add" class={cn(buttonVariants(), 'shrink-0')}>
-						<Plus class="h-4 w-4 mr-2" />
-						<span>Add Recipe</span>
-					</a>
-				{/if}
-			</div>
-		</div>
-
-		<!-- Row 2: Action buttons (small/medium screens only) -->
-		<div class="flex items-center gap-2 lg:hidden">
-			<!-- View Toggle -->
-			<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
-				<button
-					class={cn(
-						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-					)}
-					onclick={() => setViewMode('grid')}
-					aria-label="Grid view"
-				>
-					<LayoutGrid class="h-4 w-4" />
-				</button>
-				<button
-					class={cn(
-						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-					)}
-					onclick={() => setViewMode('list')}
-					aria-label="List view"
-				>
-					<List class="h-4 w-4" />
-				</button>
-			</div>
-
-			<!-- Spacer -->
-			<div class="flex-1"></div>
-
-			<!-- Add Recipe Button -->
+			<!-- Add Recipe -->
 			{#if canModify}
-				<a href="/catalog/add" class={cn(buttonVariants(), 'shrink-0')}>
-					<Plus class="h-4 w-4 mr-2" />
-					<span>Add Recipe</span>
+				<a href="/catalog/add" class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}>
+					<Plus class="h-4 w-4 sm:mr-2" />
+					<span class="hidden sm:inline">Add Recipe</span>
 				</a>
 			{/if}
 		</div>
@@ -585,43 +437,11 @@
 		</div>
 
 		<!-- Pagination -->
-		{#if pages.length > 1}
-			<div class="flex flex-col items-center justify-center gap-2 py-8">
-				<div class="text-sm text-muted-foreground">
-					Page <span class="font-semibold">{data.pagination.currentPage}</span>
-					of <span class="font-semibold">{pages.length}</span>
-				</div>
-				<nav class="flex items-center gap-1">
-					<Button
-						variant="outline"
-						size="icon"
-						onclick={() => navigatePage(data.pagination.prevPage || data.pagination.currentPage)}
-						disabled={!data.pagination.prevPage}
-					>
-						<span class="sr-only">Previous</span>
-						<ChevronLeft class="w-5 h-5" />
-					</Button>
-					{#each pages as p}
-						<Button
-							variant={p.active ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => navigatePage(p.number)}
-						>
-							{p.number}
-						</Button>
-					{/each}
-					<Button
-						variant="outline"
-						size="icon"
-						onclick={() => navigatePage(data.pagination.nextPage || data.pagination.currentPage)}
-						disabled={!data.pagination.nextPage}
-					>
-						<span class="sr-only">Next</span>
-						<ChevronRight class="w-5 h-5" />
-					</Button>
-				</nav>
-			</div>
-		{/if}
+		<Pagination
+			pagination={data.pagination}
+			itemLabel="recipes"
+			onNavigate={navigatePage}
+		/>
 	{/if}
 </div>
 

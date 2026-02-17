@@ -1,39 +1,25 @@
 <script lang="ts">
-	import {
-		ArrowUpDown,
-		ChevronLeft,
-		ChevronRight,
-		LayoutGrid,
-		List,
-		Package,
-		Plus,
-		RefreshCw,
-		Search,
-		Settings2,
-		TableIcon,
-		Tags,
-		Trash2,
-		PackageCheck,
-		PackageX,
-		X,
-	} from 'lucide-svelte';
+	import { Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
+	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
 	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
 	import InventoryDetailDrawer from '$lib/components/InventoryDetailDrawer.svelte';
+	import InventoryFilterPanel from '$lib/components/InventoryFilterPanel.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 	import StockAlerts from '$lib/components/StockAlerts.svelte';
+	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select';
 	import type { Product } from '$lib/types';
 	import { cn } from '$lib/utils';
 
@@ -55,13 +41,24 @@
 	let selectedCategory = $state(data.filters?.categoryGroupId || 'all');
 	let stockFilter = $state(data.filters?.stockFilter || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
+	let perPage = $state(String(data.filters?.perPage || 20));
 
 	// Drawer state
 	let drawerOpen = $state(false);
 	let selectedProduct = $state<Product | null>(null);
 
-	// Refresh state
-	let isRefreshing = $state(false);
+	// Filter panel state
+	let filterOpen = $state(false);
+
+	// count of non-default filters behind the filter panel
+	const activeFilterCount = $derived.by(() => {
+		let count = 0;
+		if (selectedCategory && selectedCategory !== 'all') count++;
+		if (stockFilter && stockFilter !== 'all') count++;
+		if (sortOption !== 'name-asc') count++;
+		if (perPage !== '20') count++;
+		return count;
+	});
 
 	// Bulk selection state (use array instead of Set for Svelte 5 reactivity)
 	let selectedIds = $state<number[]>([]);
@@ -130,9 +127,7 @@
 
 	// Handle refresh
 	async function handleRefresh() {
-		isRefreshing = true;
 		await invalidateAll();
-		isRefreshing = false;
 	}
 
 	// Handle card click to open drawer
@@ -199,12 +194,14 @@
 		const stock = overrides.stockFilter !== undefined ? overrides.stockFilter : stockFilter;
 		const sort = overrides.sort !== undefined ? overrides.sort : sortOption;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
+		const pp = overrides.perPage !== undefined ? overrides.perPage : perPage;
 
 		params.set('page', String(pageNum));
 		if (search) params.set('productName', String(search));
 		if (category && category !== 'all') params.set('categoryGroupId', String(category));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
+		if (pp && String(pp) !== '20') params.set('perPage', String(pp));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -238,6 +235,12 @@
 		goto(buildUrl({ sort: value, page: 1 }), { keepFocus: true });
 	}
 
+	// Handle per-page change
+	function handlePerPageChange(value: string) {
+		perPage = value;
+		goto(buildUrl({ perPage: value, page: 1 }), { keepFocus: true });
+	}
+
 	// Clear functions
 	function clearSearch() {
 		searchInput = '';
@@ -262,20 +265,14 @@
 		goto(`${basePath}?page=1`);
 	}
 
-	// Stock filter options
-	const stockFilterOptions = [
-		{ value: 'all', label: 'All Stock Levels' },
-		{ value: 'in-stock', label: 'In Stock' },
-		{ value: 'out-of-stock', label: 'Out of Stock' },
-	];
-
-	// Sort options
-	const sortOptions = [
-		{ value: 'name-asc', label: 'Name (A-Z)' },
-		{ value: 'name-desc', label: 'Name (Z-A)' },
-		{ value: 'newest', label: 'Newest First' },
-		{ value: 'oldest', label: 'Oldest First' },
-	];
+	// reset filters behind the panel (category, stock, sort, perPage)
+	function resetPanelFilters() {
+		selectedCategory = 'all';
+		stockFilter = 'all';
+		sortOption = 'name-asc';
+		perPage = '20';
+		goto(buildUrl({ categoryGroupId: 'all', stockFilter: 'all', sort: 'name-asc', perPage: '20', page: 1 }));
+	}
 
 	// Pagination navigation
 	function navigatePage(pageNum: number) {
@@ -284,16 +281,6 @@
 		goto(`${basePath}?${params.toString()}`);
 	}
 
-	// Generate page links
-	const pages = $derived.by(() => {
-		const { total, perPage, currentPage } = data.pagination;
-		const totalPages = Math.ceil(total / perPage);
-		return Array.from({ length: totalPages }, (_, i) => ({
-			number: i + 1,
-			active: i + 1 === currentPage,
-		}));
-	});
-
 	// Check if any filters are active
 	const hasActiveFilters = $derived(
 		!!searchInput ||
@@ -301,29 +288,13 @@
 			(stockFilter && stockFilter !== 'all')
 	);
 
-	// Compute display labels for select dropdowns
-	const categoryLabel = $derived.by(() => {
-		if (!selectedCategory || selectedCategory === 'all') return 'All Categories';
-		const cat = data.categories.find((c) => String(c.categoryGroupId) === selectedCategory);
-		return cat ? `${cat.categoryGroupName} (${cat.count})` : 'All Categories';
-	});
-
-	const stockFilterLabel = $derived.by(() => {
-		const option = stockFilterOptions.find((o) => o.value === stockFilter);
-		return option?.label || 'All Stock Levels';
-	});
-
-	const sortLabel = $derived.by(() => {
-		const option = sortOptions.find((o) => o.value === sortOption);
-		return option?.label || 'Name (A-Z)';
-	});
-
 	// Update local state when page data changes (for SSR navigation)
 	$effect(() => {
 		searchInput = data.filters?.search || '';
 		selectedCategory = data.filters?.categoryGroupId || 'all';
 		stockFilter = data.filters?.stockFilter || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
+		perPage = String(data.filters?.perPage || 20);
 	});
 </script>
 
@@ -342,10 +313,9 @@
 
 <!-- Toolbar -->
 <div class="flex flex-col gap-3 mb-6">
-	<!-- Row 1: Search, Categories, Stock Filter (+ action buttons on large screens) -->
-	<div class="flex flex-col lg:flex-row gap-3 lg:items-center">
-		<!-- Search (full width on mobile/tablet, flex-1 on desktop) -->
-		<form onsubmit={handleSearch} class="lg:flex-1">
+	<div class="flex items-center gap-2">
+		<!-- Search -->
+		<form onsubmit={handleSearch} class="flex-1 min-w-0">
 			<div class="relative">
 				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 				<Input
@@ -366,187 +336,31 @@
 			</div>
 		</form>
 
-		<!-- Filters (stacked on mobile, row on sm+) -->
-		<div class="flex flex-col sm:flex-row gap-3">
-			<!-- Category Group Filter Select -->
-			<Select.Root
-				type="single"
-				value={selectedCategory}
-				onValueChange={(v) => handleCategoryChange(v ?? '')}
-			>
-				<Select.Trigger class="w-full sm:w-[180px]">
-					<Tags class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="All Categories">{categoryLabel}</Select.Value>
-				</Select.Trigger>
-				<Select.Content>
-					<Select.Item value="all" label="All Categories" />
-					{#if data.categories.length > 0}
-						<Select.Separator />
-					{/if}
-					{#each data.categories as category}
-						<Select.Item
-							value={String(category.categoryGroupId)}
-							label="{category.categoryGroupName} ({category.count})"
-						/>
-					{/each}
-					<Select.Separator />
-					<a
-						href="{basePath}/category"
-						class="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
-					>
-						<Settings2 class="h-4 w-4" />
-						Manage Categories
-					</a>
-				</Select.Content>
-			</Select.Root>
+		<!-- Filters -->
+		<FilterButton bind:open={filterOpen} activeCount={activeFilterCount} viewModes={['table', 'grid', 'list']} activeView={viewMode} onViewChange={setViewMode} onRefresh={handleRefresh}>
+			<InventoryFilterPanel
+				categories={data.categories}
+				{selectedCategory}
+				{stockFilter}
+				{sortOption}
+				{perPage}
+				{basePath}
+				onCategoryChange={handleCategoryChange}
+				onStockFilterChange={handleStockFilterChange}
+				onSortChange={handleSortChange}
+				onPerPageChange={handlePerPageChange}
+				onReset={resetPanelFilters}
+			/>
+		</FilterButton>
 
-			<!-- Stock Filter Select -->
-			<Select.Root
-				type="single"
-				value={stockFilter}
-				onValueChange={(v) => handleStockFilterChange(v ?? '')}
-			>
-				<Select.Trigger class="w-full sm:w-[180px]">
-					<Package class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="All Stock Levels">{stockFilterLabel}</Select.Value>
-				</Select.Trigger>
-				<Select.Content>
-					{#each stockFilterOptions as option}
-						<Select.Item value={option.value} label={option.label} />
-					{/each}
-				</Select.Content>
-			</Select.Root>
+		<!-- View toggle -->
+		<ViewToggle modes={['table', 'grid', 'list']} active={viewMode} onchange={setViewMode} />
 
-			<!-- Sort Select -->
-			<Select.Root
-				type="single"
-				value={sortOption}
-				onValueChange={(v) => handleSortChange(v ?? 'name-asc')}
-			>
-				<Select.Trigger class="w-full sm:w-[180px]">
-					<ArrowUpDown class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="Name (A-Z)">{sortLabel}</Select.Value>
-				</Select.Trigger>
-				<Select.Content>
-					{#each sortOptions as option}
-						<Select.Item value={option.value} label={option.label} />
-					{/each}
-				</Select.Content>
-			</Select.Root>
-		</div>
-
-		<!-- Action buttons (large screens only - inline with filters) -->
-		<div class="hidden lg:flex items-center gap-2">
-			<!-- View Toggle -->
-			<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
-				<button
-					class={cn(
-						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'table' ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
-					)}
-					onclick={() => setViewMode('table')}
-					aria-label="Table view"
-				>
-					<TableIcon class="h-4 w-4" />
-				</button>
-				<button
-					class={cn(
-						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'grid' ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
-					)}
-					onclick={() => setViewMode('grid')}
-					aria-label="Grid view"
-				>
-					<LayoutGrid class="h-4 w-4" />
-				</button>
-				<button
-					class={cn(
-						'h-10 w-10 flex items-center justify-center transition-colors',
-						viewMode === 'list' ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
-					)}
-					onclick={() => setViewMode('list')}
-					aria-label="List view"
-				>
-					<List class="h-4 w-4" />
-				</button>
-			</div>
-
-			<!-- Refresh Button -->
-			<Button
-				variant="outline"
-				size="icon"
-				onclick={handleRefresh}
-				disabled={isRefreshing}
-				aria-label="Refresh inventory"
-			>
-				<RefreshCw class={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
-			</Button>
-
-			<!-- Add Product Button -->
-			{#if canModify}
-				<a href="{basePath}/add" class={cn(buttonVariants(), 'shrink-0')}>
-					<Plus class="h-4 w-4 mr-2" />
-					<span>Add Product</span>
-				</a>
-			{/if}
-		</div>
-	</div>
-
-	<!-- Row 2: Action buttons (small/medium screens only) -->
-	<div class="flex items-center gap-2 lg:hidden">
-		<!-- View Toggle -->
-		<div class="flex items-center border border-input/50 rounded-lg overflow-hidden">
-			<button
-				class={cn(
-					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-				)}
-				onclick={() => setViewMode('table')}
-				aria-label="Table view"
-			>
-				<TableIcon class="h-4 w-4" />
-			</button>
-			<button
-				class={cn(
-					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-				)}
-				onclick={() => setViewMode('grid')}
-				aria-label="Grid view"
-			>
-				<LayoutGrid class="h-4 w-4" />
-			</button>
-			<button
-				class={cn(
-					'h-10 w-10 flex items-center justify-center transition-colors',
-					viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-				)}
-				onclick={() => setViewMode('list')}
-				aria-label="List view"
-			>
-				<List class="h-4 w-4" />
-			</button>
-		</div>
-
-		<!-- Refresh Button -->
-		<Button
-			variant="outline"
-			size="icon"
-			onclick={handleRefresh}
-			disabled={isRefreshing}
-			aria-label="Refresh inventory"
-		>
-			<RefreshCw class={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
-		</Button>
-
-		<!-- Spacer -->
-		<div class="flex-1"></div>
-
-		<!-- Add Product Button -->
+		<!-- Add Product -->
 		{#if canModify}
-			<a href="{basePath}/add" class={cn(buttonVariants({ variant: 'default' }), 'shrink-0')}>
-				<Plus class="h-4 w-4 mr-2" />
-				<span>Add Product</span>
+			<a href="{basePath}/add" class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}>
+				<Plus class="h-4 w-4 sm:mr-2" />
+				<span class="hidden sm:inline">Add Product</span>
 			</a>
 		{/if}
 	</div>
@@ -604,41 +418,47 @@
 	<!-- Bulk Action Bar -->
 	{#if canModify && selectedIds.length > 0}
 		<div
-			class="sticky top-0 z-10 mb-4 flex items-center gap-3 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm"
+			class="sticky top-0 z-10 mb-4 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm"
 		>
-			<span class="text-sm font-medium">{selectedIds.length} selected</span>
-			<div class="flex-1"></div>
-			<Button
-				variant="outline"
-				size="sm"
-				onclick={() => handleBulkSetStock(true)}
-				disabled={bulkActionLoading}
-			>
-				<PackageCheck class="h-4 w-4 mr-1.5" />
-				Mark In Stock
-			</Button>
-			<Button
-				variant="outline"
-				size="sm"
-				onclick={() => handleBulkSetStock(false)}
-				disabled={bulkActionLoading}
-			>
-				<PackageX class="h-4 w-4 mr-1.5" />
-				Mark Out of Stock
-			</Button>
-			<Button
-				variant="destructive"
-				size="sm"
-				onclick={() => (deleteDialogOpen = true)}
-				disabled={bulkActionLoading}
-			>
-				<Trash2 class="h-4 w-4 mr-1.5" />
-				Delete
-			</Button>
-			<Button variant="ghost" size="sm" onclick={clearSelection}>
-				<X class="h-4 w-4 mr-1.5" />
-				Clear
-			</Button>
+			<div class="flex items-center justify-between mb-2 sm:mb-0">
+				<span class="text-sm font-medium">{selectedIds.length} selected</span>
+				<Button variant="ghost" size="sm" onclick={clearSelection}>
+					<X class="h-4 w-4 mr-1.5" />
+					Clear
+				</Button>
+			</div>
+			<div class="flex items-center gap-2 sm:mt-0">
+				<Button
+					variant="outline"
+					size="sm"
+					class="flex-1 sm:flex-none"
+					onclick={() => handleBulkSetStock(true)}
+					disabled={bulkActionLoading}
+				>
+					<PackageCheck class="h-4 w-4 sm:mr-1.5" />
+					<span class="hidden sm:inline">Mark</span> In Stock
+				</Button>
+				<Button
+					variant="outline"
+					size="sm"
+					class="flex-1 sm:flex-none"
+					onclick={() => handleBulkSetStock(false)}
+					disabled={bulkActionLoading}
+				>
+					<PackageX class="h-4 w-4 sm:mr-1.5" />
+					<span class="hidden sm:inline">Mark</span> Out of Stock
+				</Button>
+				<Button
+					variant="destructive"
+					size="sm"
+					class="flex-1 sm:flex-none"
+					onclick={() => (deleteDialogOpen = true)}
+					disabled={bulkActionLoading}
+				>
+					<Trash2 class="h-4 w-4 sm:mr-1.5" />
+					Delete
+				</Button>
+			</div>
 		</div>
 	{/if}
 
@@ -673,51 +493,11 @@
 
 	<!-- Pagination for Grid/List views -->
 	{#if data.data.length > 0}
-		<div class="flex flex-col items-center justify-center gap-2 p-7">
-			<div class="text-sm text-gray-700 dark:text-gray-400">
-				Page <span class="font-semibold text-gray-900 dark:text-white">
-					{data.pagination.currentPage}
-				</span>
-				of
-				<span class="font-semibold text-gray-900 dark:text-white">
-					{Math.ceil(data.pagination.total / data.pagination.perPage)}
-				</span>
-				out of
-				<span class="font-semibold text-gray-900 dark:text-white">
-					{data.pagination.total}
-				</span>
-				items
-			</div>
-			<nav class="flex items-center gap-1">
-				<Button
-					variant="outline"
-					size="icon"
-					onclick={() => navigatePage(data.pagination.prevPage || data.pagination.currentPage)}
-					disabled={!data.pagination.prevPage}
-				>
-					<span class="sr-only">Previous</span>
-					<ChevronLeft class="w-5 h-5" />
-				</Button>
-				{#each pages as p}
-					<Button
-						variant={p.active ? 'default' : 'outline'}
-						size="sm"
-						onclick={() => navigatePage(p.number)}
-					>
-						{p.number}
-					</Button>
-				{/each}
-				<Button
-					variant="outline"
-					size="icon"
-					onclick={() => navigatePage(data.pagination.nextPage || data.pagination.currentPage)}
-					disabled={!data.pagination.nextPage}
-				>
-					<span class="sr-only">Next</span>
-					<ChevronRight class="w-5 h-5" />
-				</Button>
-			</nav>
-		</div>
+		<Pagination
+			pagination={data.pagination}
+			itemLabel="products"
+			onNavigate={navigatePage}
+		/>
 	{/if}
 {/if}
 

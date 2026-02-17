@@ -103,14 +103,14 @@
 
 <div class="space-y-6">
 	<!-- Header -->
-	<div class="flex items-center justify-between">
+	<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold">Workspace Management</h1>
 			<p class="text-sm text-muted-foreground mt-1">
 				Create and manage workspaces for organizing content
 			</p>
 		</div>
-		<Button onclick={() => (createDialogOpen = true)}>
+		<Button onclick={() => (createDialogOpen = true)} class="w-fit">
 			<Plus class="h-4 w-4 mr-2" />
 			Create Workspace
 		</Button>

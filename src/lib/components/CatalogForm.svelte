@@ -46,11 +46,13 @@
 		preparationMethods,
 		recipe: initialRecipe = {} as View.BasicRecipe,
 		recipeSteps: initialRecipeSteps = [],
+		modalOpen = $bindable(false),
 	}: {
 		spirits: Spirit[];
 		preparationMethods: PreparationMethod[];
 		recipe?: View.BasicRecipe;
 		recipeSteps?: View.BasicRecipeStep[];
+		modalOpen?: boolean;
 	} = $props();
 
 	// Make recipe deeply reactive for two-way binding on properties
@@ -315,7 +317,6 @@
 
 	// Form state
 	let disabled = $state(false);
-	let modalOpen = $state(false);
 	let wizardStep = $state(0);
 	let reorderMode = $state(false);
 
@@ -436,21 +437,6 @@
 	>
 		<!-- Mobile wizard view -->
 		<CatalogFormWizard bind:currentStep={wizardStep} canProceed={canProceedWizard}>
-			{#snippet footer()}
-				{#if recipe.recipeId && canModify}
-					<div class="mt-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-						<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
-						<Button
-							type="button"
-							variant="destructive"
-							class="w-full"
-							onclick={() => (modalOpen = true)}
-						>
-							Delete Recipe
-						</Button>
-					</div>
-				{/if}
-			{/snippet}
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Step 1: Details (Name + Spirit Category) -->
@@ -842,11 +828,6 @@
 
 			<!-- Action buttons (desktop only) -->
 			<div class="flex justify-end gap-3">
-				{#if recipe.recipeId && canModify}
-					<Button type="button" variant="destructive" onclick={() => (modalOpen = true)}
-						>Delete</Button
-					>
-				{/if}
 				<Button type="submit" disabled={disabled || !isFormValid}>Save</Button>
 			</div>
 		</div>

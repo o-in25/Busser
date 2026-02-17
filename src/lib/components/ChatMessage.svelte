@@ -22,15 +22,15 @@
 				</div>
 			{/if}
 		{:else}
-			<div class="w-full h-full bg-violet-500/10 flex items-center justify-center">
-				<Bot class="h-4 w-4 text-violet-500" />
+			<div class="w-full h-full bg-secondary/10 flex items-center justify-center">
+				<Bot class="h-4 w-4 text-secondary" />
 			</div>
 		{/if}
 	</div>
 	<div
 		class="flex-1 max-w-[85%] rounded-2xl px-4 py-2.5 text-sm {role === 'user'
 			? 'bg-primary text-primary-foreground rounded-br-md'
-			: 'bg-muted rounded-bl-md'}"
+			: 'glass-surface rounded-bl-md'}"
 	>
 		<p class="whitespace-pre-wrap">
 			{content}{#if isStreaming}<span

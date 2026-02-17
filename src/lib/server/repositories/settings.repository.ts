@@ -25,6 +25,6 @@ export class SettingsRepository extends BaseRepository {
 
 	async isInviteOnly(): Promise<boolean> {
 		const value = await this.get('invite_only_mode');
-		return value !== 'false';
+		return value === 'true';
 	}
 }

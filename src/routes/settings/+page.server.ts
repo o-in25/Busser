@@ -1,19 +1,21 @@
 import { fail } from '@sveltejs/kit';
 
 import { APP_VERSION } from '$env/static/private';
-import { userRepo } from '$lib/server/auth';
+import { isInviteOnly, setAppSetting, userRepo } from '$lib/server/auth';
 import { uploadAvatarBuffer } from '$lib/server/storage';
 
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const userId = locals.user?.userId || '';
-	if (!userId) return { avatarImageUrl: null, appVersion: APP_VERSION || 'dev' };
+	if (!userId) return { avatarImageUrl: null, appVersion: APP_VERSION || 'dev', inviteOnly: false };
 
 	const result = await userRepo.findById(userId);
+	const inviteOnly = await isInviteOnly();
 	return {
 		avatarImageUrl: result.status === 'success' ? result.data?.avatarImageUrl : null,
 		appVersion: APP_VERSION || 'dev',
+		inviteOnly,
 	};
 };
 
@@ -76,5 +78,12 @@ export const actions: Actions = {
 			console.error('Error saving avatar:', error);
 			return fail(500, { error: 'Failed to save avatar' });
 		}
+	},
+
+	toggleInviteOnly: async ({ request }) => {
+		const formData = await request.formData();
+		const enabled = formData.get('enabled') as string;
+		await setAppSetting('invite_only_mode', enabled === 'true' ? 'true' : 'false');
+		return { success: true };
 	},
 };

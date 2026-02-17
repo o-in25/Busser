@@ -18,20 +18,21 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	let page: string | number = url.searchParams.get('page') || '1';
 	page = Number(page);
 	const search = url.searchParams.get('search') || '';
+	const perPage = Math.min(Math.max(Number(url.searchParams.get('perPage')) || 50, 10), 100);
 
-	const { data: categories, pagination } = await inventoryRepo.findAllCategories(
-		workspaceId,
-		page,
-		10,
-		search || null
-	);
+	const [{ data: categories, pagination }, stats] = await Promise.all([
+		inventoryRepo.findAllCategories(workspaceId, page, perPage, search || null),
+		inventoryRepo.getStats(workspaceId),
+	]);
 
 	return {
 		categories,
 		pagination,
+		totalProducts: stats.total,
 		filters: {
 			search,
 			page,
+			perPage,
 		},
 	};
 };

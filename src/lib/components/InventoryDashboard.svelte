@@ -3,7 +3,6 @@
 
 	import { goto } from '$app/navigation';
 	import type { InventoryStats } from '$lib/types';
-	import { cn } from '$lib/utils';
 
 	let { stats }: { stats: InventoryStats } = $props();
 
@@ -30,58 +29,48 @@
 					Manage your {stats.total} products across {stats.categoryBreakdown.length} categories.
 				</p>
 			</div>
+		</div>
 
-			<!-- Quick Stats -->
-			<div class="grid grid-cols-3 md:flex gap-2 md:gap-3">
-				<!-- Total -->
-				<button
-					onclick={() => applyFilter('all')}
-					class={cn(
-						'flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
-						'hover:border-primary/50 hover:bg-background transition-colors cursor-pointer',
-						'md:min-w-[120px]'
-					)}
-				>
-					<Package class="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
-					<div class="text-left">
-						<p class="text-lg md:text-xl font-bold">{stats.total}</p>
-						<p class="text-[10px] md:text-xs text-muted-foreground">Total</p>
-					</div>
-				</button>
-
-				<!-- In Stock -->
-				<button
-					onclick={() => applyFilter('in-stock')}
-					class={cn(
-						'flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
-						'hover:border-green-500/50 hover:bg-background transition-colors cursor-pointer',
-						'md:min-w-[120px]'
-					)}
-				>
-					<CheckCircle2 class="h-4 w-4 md:h-5 md:w-5 text-green-500 shrink-0" />
-					<div class="text-left">
-						<p class="text-lg md:text-xl font-bold">{stats.inStock}</p>
-						<p class="text-[10px] md:text-xs text-muted-foreground">In Stock</p>
-					</div>
-				</button>
-
-				<!-- Out of Stock -->
-				<button
-					onclick={() => applyFilter('out-of-stock')}
-					class={cn(
-						'flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border',
-						'hover:border-red-500/50 hover:bg-background transition-colors cursor-pointer',
-						'md:min-w-[120px]'
-					)}
-				>
-					<XCircle class="h-4 w-4 md:h-5 md:w-5 text-red-500 shrink-0" />
-					<div class="text-left">
-						<p class="text-lg md:text-xl font-bold">{stats.outOfStock}</p>
-						<p class="text-[10px] md:text-xs text-muted-foreground">Out of Stock</p>
-					</div>
-				</button>
-
+		<!-- Quick Stats -->
+		<div class="grid grid-cols-3 gap-2 md:gap-3 mt-6">
+			<button
+				onclick={() => applyFilter('all')}
+				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors cursor-pointer"
+			>
+				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 shrink-0">
+					<Package class="h-4 w-4 md:h-5 md:w-5 text-primary" />
 				</div>
+				<div class="text-center md:text-left">
+					<p class="text-lg md:text-xl font-bold">{stats.total}</p>
+					<p class="text-[10px] md:text-xs text-muted-foreground">Total</p>
+				</div>
+			</button>
+
+			<button
+				onclick={() => applyFilter('in-stock')}
+				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-green-500/50 hover:bg-background transition-colors cursor-pointer"
+			>
+				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-green-500/10 shrink-0">
+					<CheckCircle2 class="h-4 w-4 md:h-5 md:w-5 text-green-500" />
+				</div>
+				<div class="text-center md:text-left">
+					<p class="text-lg md:text-xl font-bold">{stats.inStock}</p>
+					<p class="text-[10px] md:text-xs text-muted-foreground">In Stock</p>
+				</div>
+			</button>
+
+			<button
+				onclick={() => applyFilter('out-of-stock')}
+				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-red-500/50 hover:bg-background transition-colors cursor-pointer"
+			>
+				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-red-500/10 shrink-0">
+					<XCircle class="h-4 w-4 md:h-5 md:w-5 text-red-500" />
+				</div>
+				<div class="text-center md:text-left">
+					<p class="text-lg md:text-xl font-bold">{stats.outOfStock}</p>
+					<p class="text-[10px] md:text-xs text-muted-foreground">Out of Stock</p>
+				</div>
+			</button>
 		</div>
 	</div>
 </div>

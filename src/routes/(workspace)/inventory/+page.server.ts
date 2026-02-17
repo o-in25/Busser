@@ -23,6 +23,10 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	const stockFilter = url.searchParams.get('stockFilter') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 
+	const allowedPerPage = [20, 50, 100];
+	let perPage = Number(url.searchParams.get('perPage')) || 20;
+	if (!allowedPerPage.includes(perPage)) perPage = 20;
+
 	// Build filter object
 	let filter: Record<string, any> = {};
 	if (productName) {
@@ -40,7 +44,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		inventoryRepo.findAll(
 			workspaceId,
 			page,
-			20,
+			perPage,
 			Object.keys(filter).length > 0 ? filter : null,
 			sort
 		),
@@ -82,6 +86,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 			stockFilter,
 			sort,
 			page,
+			perPage,
 		},
 	};
 };

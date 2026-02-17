@@ -3,6 +3,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import { mount, unmount } from 'svelte';
 
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import GenerateImageModal from './GenerateImageModal.svelte';
@@ -308,6 +309,7 @@
 			{:else}
 				<Sparkles class="w-4 h-4" />
 				Generate with AI
+				<Badge variant="secondary" class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0 ml-1">Beta</Badge>
 			{/if}
 		</Button>
 

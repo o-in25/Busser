@@ -101,13 +101,13 @@
 
 <div class="space-y-6">
 	<!-- Header -->
-	<div class="flex items-center justify-between">
+	<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold">Account Settings</h1>
 			<p class="text-sm text-muted-foreground mt-1">View your account details and permissions</p>
 		</div>
 		<a
-			class={cn(buttonVariants({ variant: 'default' }))}
+			class={cn(buttonVariants({ variant: 'default' }), 'w-fit')}
 			href="/settings/users/{data.user?.userId}/edit"
 		>
 			<Pencil class="h-4 w-4 mr-2" />

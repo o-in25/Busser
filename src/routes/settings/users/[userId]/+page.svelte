@@ -60,7 +60,7 @@
 {#if user}
 	<div class="space-y-6 mt-3">
 		<!-- Header -->
-		<div class="flex items-center justify-between">
+		<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 			<div class="flex items-center gap-4">
 				<div class="relative">
 					<div
@@ -95,11 +95,8 @@
 					</div>
 				</div>
 			</div>
-			<div class="flex items-center gap-2">
-				<a
-					class={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-					href="/settings/users"
-				>
+			<div class="grid grid-cols-2 sm:flex gap-2">
+				<a class={cn(buttonVariants({ variant: 'outline', size: 'sm' }))} href="/settings/users">
 					<ArrowLeft class="h-4 w-4 mr-2" />
 					Back
 				</a>
@@ -226,11 +223,7 @@
 											</Badge>
 										</Table.Cell>
 										<Table.Cell>
-											<Badge
-												variant={ws.workspaceRole === 'owner'
-													? 'default'
-													: 'secondary'}
-											>
+											<Badge variant={ws.workspaceRole === 'owner' ? 'default' : 'secondary'}>
 												{ws.workspaceRole}
 											</Badge>
 										</Table.Cell>

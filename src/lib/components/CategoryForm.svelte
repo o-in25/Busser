@@ -22,12 +22,14 @@
 		parentCategories = [],
 		categoryGroups = [],
 		productCount = 0,
+		modalOpen = $bindable(false),
 	}: {
 		action?: ComponentAction;
 		category?: Table.Category;
 		parentCategories?: Table.Category[];
 		categoryGroups?: SelectOption[];
 		productCount?: number;
+		modalOpen?: boolean;
 	} = $props();
 
 	// get workspace role for permission checks
@@ -44,7 +46,6 @@
 		category.categoryGroupId ? String(category.categoryGroupId) : ''
 	);
 	let isSubmitting = $state(false);
-	let modalOpen = $state(false);
 
 	// Validation state
 	let touched = $state({ categoryName: false });
@@ -207,48 +208,11 @@
 
 		<!-- Action buttons -->
 		<div class="flex justify-end gap-3">
-			{#if action === 'edit' && canModify}
-				<div class="hidden md:flex flex-col items-start gap-1">
-					<Button
-						type="button"
-						variant="destructive"
-						onclick={() => (modalOpen = true)}
-						disabled={productCount > 0}
-					>
-						Delete
-					</Button>
-					{#if productCount > 0}
-						<span class="text-xs text-muted-foreground">
-							Remove {productCount} product{productCount !== 1 ? 's' : ''} first
-						</span>
-					{/if}
-				</div>
-			{/if}
 			<Button type="submit" disabled={isSubmitting || !isValid}>
 				{isSubmitting ? 'Saving...' : action === 'add' ? 'Create Category' : 'Save Changes'}
 			</Button>
 		</div>
 
-		<!-- Mobile delete section -->
-		{#if action === 'edit' && canModify}
-			<div class="md:hidden mt-6 p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-				<p class="text-sm text-muted-foreground mb-3">Danger Zone</p>
-				<Button
-					type="button"
-					variant="destructive"
-					class="w-full"
-					onclick={() => (modalOpen = true)}
-					disabled={productCount > 0}
-				>
-					Delete Category
-				</Button>
-				{#if productCount > 0}
-					<p class="text-xs text-muted-foreground mt-2 text-center">
-						Remove {productCount} product{productCount !== 1 ? 's' : ''} first
-					</p>
-				{/if}
-			</div>
-		{/if}
 	</form>
 
 	<!-- Delete confirmation dialog -->
