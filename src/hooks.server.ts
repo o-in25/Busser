@@ -16,6 +16,7 @@ const publicRoutes = [
 	'/reset-password/**',
 	'/workspace-selector',
 	'/api/mail/user-registration',
+	'/auth/**',
 ];
 
 // Routes that don't require workspace selection (for authenticated users)
@@ -30,6 +31,7 @@ const workspaceExemptRoutes = [
 	'/workspace-selector',
 	'/settings/**',
 	'/api/**',
+	'/auth/**',
 ];
 
 const HOUR = 60 * 60 * 1000;

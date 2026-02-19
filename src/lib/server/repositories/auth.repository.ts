@@ -85,8 +85,12 @@ export class AuthRepository extends BaseRepository {
 			}
 
 			const { userId, email, verified, password: hashedPassword } = userRecord;
-			if (!userId || !hashedPassword) {
+			if (!userId) {
 				throw new Error('User not found');
+			}
+
+			if (!hashedPassword) {
+				throw new Error('OAuth account');
 			}
 
 			const isValid = await this.comparePassword(password, hashedPassword);
@@ -125,6 +129,7 @@ export class AuthRepository extends BaseRepository {
 				const messages: Record<string, string> = {
 					'User not found': 'Invalid username or password.',
 					'Incorrect password': 'Invalid username or password.',
+					'OAuth account': 'This account uses Google sign-in. Please use that method to log in.',
 				};
 
 				if (messages[message]) return messages[message];

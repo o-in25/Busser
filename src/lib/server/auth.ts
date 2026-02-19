@@ -81,6 +81,9 @@ export async function isWorkspaceOwner(userId: string, workspaceId: string): Pro
 export const isInviteOnly = settingsRepo.isInviteOnly.bind(settingsRepo);
 export const setAppSetting = settingsRepo.set.bind(settingsRepo);
 
+// oauth (delegate to oauth module)
+export { oauthRepo, handleOAuthCallback, resolvePostLoginRedirect } from './oauth';
+
 // check if user has a global permission
 export function hasGlobalPermission(
 	user: { permissions?: Array<{ permissionName: string }> } | undefined,

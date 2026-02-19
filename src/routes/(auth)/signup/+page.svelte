@@ -3,6 +3,7 @@
 
 	import { enhance } from '$app/forms';
 	import * as Alert from '$lib/components/ui/alert';
+	import GoogleIcon from '$lib/components/icons/GoogleIcon.svelte';
 	import UserForm from '$lib/components/UserForm.svelte';
 
 	import type { ActionData, PageData } from './$types';
@@ -40,4 +41,21 @@
 			inviteOnly={data.inviteOnly}
 		/>
 	</form>
+
+	<div class="relative">
+		<div class="absolute inset-0 flex items-center">
+			<span class="w-full border-t border-border"></span>
+		</div>
+		<div class="relative flex justify-center text-xs uppercase">
+			<span class="bg-card px-2 text-muted-foreground">or continue with</span>
+		</div>
+	</div>
+
+	<a
+		href="/auth/google"
+		class="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+	>
+		<GoogleIcon class="h-5 w-5" />
+		Google
+	</a>
 </div>
