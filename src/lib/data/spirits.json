@@ -1,0 +1,521 @@
+{
+	"whiskey": {
+		"slug": "whiskey",
+		"recipeCategoryId": 4,
+		"displayName": "Whiskey",
+		"accentColor": {
+			"bg": "bg-amber-500",
+			"text": "text-amber-500",
+			"border": "border-amber-500",
+			"gradient": "from-amber-500/20 to-amber-600/10",
+			"hex": "#f59e0b"
+		},
+		"overview": {
+			"intro": "Born from grain, water, and time, whiskey is one of the most diverse and storied spirits in the world. From smoky Scottish malts to smooth Kentucky bourbons, it rewards patience and craftsmanship in equal measure.",
+			"history": "The origins of whiskey trace back to medieval monasteries in Ireland and Scotland, where monks distilled grain mash into a fiery spirit they called \"uisce beatha\" — the water of life. By the 15th century, distillation had spread beyond the monasteries and into the hands of farmers and merchants across the British Isles.\n\nAs Scots and Irish immigrants settled in North America during the 18th and 19th centuries, they brought their distilling traditions with them. The abundance of corn in Kentucky and rye in Pennsylvania gave rise to distinctly American styles — bourbon and rye whiskey — that would eventually become global icons.\n\nThe 20th century brought both devastation and reinvention. Prohibition nearly destroyed the American whiskey industry, while global wars disrupted Scotch production. Yet whiskey endured, and the late 20th and early 21st centuries ushered in a remarkable renaissance, with craft distilleries emerging worldwide and Japanese whisky earning international acclaim.",
+			"production": "All whiskey begins with a grain bill — a recipe of cereal grains such as barley, corn, rye, or wheat. The grains are milled and combined with hot water in a process called mashing, which converts starches into fermentable sugars. Yeast is then added to the resulting liquid, known as the wash or wort, and fermentation produces a low-alcohol beer-like liquid.\n\nThis liquid is distilled, typically in copper pot stills or column stills, to concentrate the alcohol and refine the flavor. The choice of still type and the number of distillation runs vary by tradition and style, with pot stills favoring richer, heavier spirits and column stills producing lighter, cleaner profiles.\n\nThe distillate is then placed into wooden casks — most commonly charred American oak — for aging. Time in the barrel is where whiskey develops its color, complexity, and character. During maturation, the spirit expands and contracts with seasonal temperature changes, drawing flavor compounds from the wood. The length of aging, the type of barrel, and the warehouse conditions all contribute to the final product."
+		},
+		"subcategories": [
+			{
+				"name": "Bourbon",
+				"description": "An American whiskey made from at least 51% corn, aged in new charred oak barrels. Known for its sweet, full-bodied profile with notes of vanilla, caramel, and oak.",
+				"examples": ["Maker's Mark", "Buffalo Trace", "Woodford Reserve", "Wild Turkey 101"]
+			},
+			{
+				"name": "Rye",
+				"description": "Made from at least 51% rye grain, delivering a spicier, drier character than bourbon. A staple of classic cocktails like the Manhattan and Sazerac.",
+				"examples": ["Rittenhouse", "Bulleit Rye", "WhistlePig 10", "Sazerac Rye"]
+			},
+			{
+				"name": "Scotch",
+				"description": "Whisky distilled and matured in Scotland for a minimum of three years. Ranges from light and floral Lowland styles to intensely smoky Islay malts.",
+				"examples": ["Glenfiddich 12", "Laphroaig 10", "Macallan 12", "Johnnie Walker Black"]
+			},
+			{
+				"name": "Irish",
+				"description": "Triple-distilled for exceptional smoothness, Irish whiskey is approachable and versatile. Typically lighter and less smoky than its Scottish counterpart.",
+				"examples": ["Jameson", "Redbreast 12", "Green Spot", "Tullamore D.E.W."]
+			},
+			{
+				"name": "Japanese",
+				"description": "Inspired by Scotch traditions but refined with meticulous Japanese craftsmanship. Known for balance, elegance, and subtle complexity.",
+				"examples": ["Yamazaki 12", "Nikka Coffey Grain", "Hibiki Harmony", "Hakushu 12"]
+			}
+		],
+		"regions": [
+			{
+				"name": "Kentucky, USA",
+				"description": "The heartland of bourbon production, where limestone-filtered water and seasonal temperature swings create ideal conditions for aging whiskey.",
+				"countryCode": "US",
+				"highlights": ["95% of world bourbon production", "Kentucky Bourbon Trail", "Charred new oak barrel requirement"]
+			},
+			{
+				"name": "Scotland",
+				"description": "Home to five distinct whisky regions — Speyside, Highland, Lowland, Islay, and Campbeltown — each with its own character defined by climate, water sources, and tradition.",
+				"countryCode": "GB",
+				"highlights": ["Over 130 active distilleries", "Peat-smoked malt tradition", "Protected Scotch Whisky designation"]
+			},
+			{
+				"name": "Ireland",
+				"description": "One of the oldest whiskey-producing nations, Ireland has experienced a dramatic revival with dozens of new distilleries opening since the early 2000s.",
+				"countryCode": "IE",
+				"highlights": ["Triple distillation tradition", "Pot still whiskey unique to Ireland", "Fastest-growing whiskey category globally"]
+			},
+			{
+				"name": "Japan",
+				"description": "Japanese whisky emerged in the 1920s when Masataka Taketsuru brought Scotch-making techniques home from Scotland. It has since developed its own identity rooted in precision and harmony.",
+				"countryCode": "JP",
+				"highlights": ["Multiple award-winning distilleries", "Mizunara oak aging", "Blend-focused philosophy"]
+			}
+		],
+		"funFact": "The word \"whiskey\" comes from the Gaelic \"uisce beatha,\" meaning \"water of life.\" The spelling varies by region — \"whiskey\" with an \"e\" is used in Ireland and the United States, while \"whisky\" without the \"e\" is the convention in Scotland, Canada, and Japan.",
+		"sources": [
+			{
+				"title": "The Oxford Companion to Spirits and Cocktails",
+				"url": "https://example.com/oxford-spirits-cocktails",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "Whisky Advocate: The Complete Guide to Whiskey",
+				"url": "https://example.com/whisky-advocate-guide",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "Scotch Whisky Association: History of Scotch",
+				"url": "https://example.com/scotch-whisky-history",
+				"accessedDate": "2025-12-15"
+			}
+		]
+	},
+
+	"gin": {
+		"slug": "gin",
+		"recipeCategoryId": 5,
+		"displayName": "Gin",
+		"accentColor": {
+			"bg": "bg-emerald-500",
+			"text": "text-emerald-500",
+			"border": "border-emerald-500",
+			"gradient": "from-emerald-500/20 to-emerald-600/10",
+			"hex": "#10b981"
+		},
+		"overview": {
+			"intro": "Gin is the botanical spirit — a canvas of juniper, herbs, and spices that has anchored cocktail culture for centuries. From the classic Martini to the modern gin and tonic revival, it remains one of the most versatile spirits behind the bar.",
+			"history": "Gin traces its roots to jenever, a juniper-flavored malt spirit produced in the Low Countries as early as the 16th century. Dutch soldiers drank it for courage before battle — a practice English soldiers observed during the Thirty Years War, giving rise to the phrase \"Dutch courage.\" When William of Orange took the English throne in 1689, he brought a taste for jenever with him, and gin production in England exploded.\n\nThe early 18th century saw the infamous Gin Craze in London, when cheap, unregulated gin flooded the city and became a public health crisis. Parliament passed a series of Gin Acts to curb consumption, and over time the spirit evolved from a rough, sweetened drink into the refined, dry style that defines London Dry gin today.\n\nThe 19th century cemented gin as the backbone of cocktail culture. British colonials mixed it with quinine tonic to ward off malaria, giving birth to the gin and tonic. The Martini, the Negroni, and countless other classics followed. After decades of playing second fiddle to vodka, gin has experienced a remarkable global renaissance since the early 2010s, with hundreds of craft distilleries pushing the boundaries of botanical creativity.",
+			"production": "Gin starts with a neutral base spirit, typically distilled from grain, though some producers use grape or other bases. The defining step is redistillation or infusion with botanicals, and juniper berries must be the dominant flavor for a spirit to be legally classified as gin.\n\nIn the London Dry method — considered the gold standard — the neutral spirit is redistilled in a copper pot still with a selection of dried botanicals placed in the still or in a basket above it. As alcohol vapors pass through the botanicals, they extract essential oils and flavors. No artificial flavors or sweeteners may be added after distillation.\n\nOther methods include compound gin, where botanicals are simply steeped in the base spirit without redistillation, and vacuum distillation, which operates at lower temperatures to preserve delicate aromatic compounds. The choice of botanicals beyond juniper — coriander, angelica root, citrus peel, orris root, cardamom, and dozens more — is what gives each gin its unique fingerprint."
+		},
+		"subcategories": [
+			{
+				"name": "London Dry",
+				"description": "The benchmark style of gin, defined by its crisp juniper-forward character and bone-dry finish. Despite its name, London Dry is a method of production, not a geographic designation.",
+				"examples": ["Beefeater", "Tanqueray", "Sipsmith", "Ford's"]
+			},
+			{
+				"name": "Plymouth",
+				"description": "A slightly softer, earthier style of gin with protected geographic status — it can only be produced in Plymouth, England. Rounder and less juniper-dominant than London Dry.",
+				"examples": ["Plymouth Gin", "Plymouth Navy Strength"]
+			},
+			{
+				"name": "Old Tom",
+				"description": "A lightly sweetened style that bridges the gap between London Dry and jenever. Popular in the 18th century, it has seen a revival among cocktail enthusiasts for its role in classics like the Tom Collins.",
+				"examples": ["Hayman's Old Tom", "Ransom Old Tom", "Both's Old Tom"]
+			},
+			{
+				"name": "Genever (Jenever)",
+				"description": "The Dutch and Belgian ancestor of modern gin. Made with a malt wine base, genever has a richer, more whiskey-like body than its London counterparts.",
+				"examples": ["Bols Genever", "Rutte Celery Genever", "Bobby's Schiedam Genever"]
+			},
+			{
+				"name": "Contemporary / New Western",
+				"description": "A modern category where juniper shares the stage with other botanicals. Floral, citrus-forward, or spice-driven expressions that push the boundaries of what gin can be.",
+				"examples": ["Hendrick's", "The Botanist", "Monkey 47", "Roku"]
+			}
+		],
+		"regions": [
+			{
+				"name": "England",
+				"description": "The birthplace of London Dry gin, England remains the spiritual home of the spirit. From historic brands to a thriving craft scene, English gin sets the global standard.",
+				"countryCode": "GB",
+				"highlights": ["Over 800 gin brands", "London Dry as a global benchmark", "Plymouth GI protection"]
+			},
+			{
+				"name": "Netherlands",
+				"description": "The ancestral home of genever, the Dutch spirit that gave gin its name. Schiedam was once the distilling capital of Europe, with hundreds of distilleries lining its canals.",
+				"countryCode": "NL",
+				"highlights": ["Genever tradition dating to 16th century", "Schiedam distilling heritage", "Malt wine base spirit"]
+			},
+			{
+				"name": "Spain",
+				"description": "Spain ignited the modern gin and tonic craze with its elaborate \"gin-tonica\" culture, serving oversized copa glasses filled with premium gin, artisanal tonics, and carefully chosen garnishes.",
+				"countryCode": "ES",
+				"highlights": ["Gin-tonica culture", "Largest gin consumer in Europe", "Copa glass serving style"]
+			},
+			{
+				"name": "Japan",
+				"description": "Japanese distillers have brought their signature precision to gin, incorporating native botanicals like yuzu, sansho pepper, cherry blossom, and gyokuro tea.",
+				"countryCode": "JP",
+				"highlights": ["Roku and Ki No Bi leading the category", "Japanese botanical innovation", "Seasonal production philosophy"]
+			}
+		],
+		"funFact": "During the London Gin Craze of the 1730s, the average Londoner was consuming over 10 liters of gin per year. The crisis became so severe that Parliament passed five major legislative acts between 1729 and 1751 to curb gin consumption and regulate its production.",
+		"sources": [
+			{
+				"title": "Difford's Guide: History of Gin",
+				"url": "https://example.com/diffords-gin-history",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "The Gin Dictionary by David T. Smith",
+				"url": "https://example.com/gin-dictionary",
+				"accessedDate": "2025-12-15"
+			}
+		]
+	},
+
+	"vodka": {
+		"slug": "vodka",
+		"recipeCategoryId": 6,
+		"displayName": "Vodka",
+		"accentColor": {
+			"bg": "bg-sky-500",
+			"text": "text-sky-500",
+			"border": "border-sky-500",
+			"gradient": "from-sky-500/20 to-sky-600/10",
+			"hex": "#0ea5e9"
+		},
+		"overview": {
+			"intro": "Vodka is the world's most consumed spirit — prized for its purity, neutrality, and remarkable versatility. Whether sipped ice-cold from a frozen glass or anchoring a cocktail, vodka is the quiet workhorse of the spirits world.",
+			"history": "The origins of vodka are fiercely debated between Poland and Russia, both of which claim to have produced the spirit first. Polish records reference \"gorzalka\" (a grain-based distillate) as early as the 8th century, while Russian documents mention vodka production in the 14th century. What is clear is that by the 15th and 16th centuries, vodka distillation was widespread across Eastern Europe and Scandinavia.\n\nFor centuries, vodka was a rough, unrefined spirit consumed primarily for its intoxicating effects. The invention of the continuous column still in the 19th century transformed vodka into the clean, neutral spirit we know today. Pyotr Smirnov pioneered charcoal filtration in Moscow in the 1860s, setting a new standard for purity.\n\nVodka's global breakthrough came in the mid-20th century when Smirnoff (the brand's anglicized name) was marketed to American consumers with the tagline \"It leaves you breathless.\" The Moscow Mule, the Vodka Martini, and the Cosmopolitan each propelled vodka to new heights, and by the 1970s it had overtaken whiskey as America's best-selling spirit — a position it has held ever since.",
+			"production": "Vodka can be distilled from virtually any fermentable material, though grain (wheat, rye, corn) and potatoes are the most traditional bases. Some producers use grapes, sugar beets, or even milk whey. The base ingredient is mashed, fermented, and then distilled to a high proof — often 95% ABV or higher — to strip away most congeners and flavor compounds.\n\nThe distillate is then diluted with water, and many producers employ additional filtration through activated charcoal, quartz, or other materials to achieve maximum smoothness and neutrality. The quality of the water used for dilution is considered just as important as the distillation itself, with many brands emphasizing their water sources.\n\nWhile the legal definition in most countries requires vodka to be a neutral spirit \"without distinctive character, aroma, taste, or color,\" experienced tasters can detect subtle differences based on the base ingredient, water source, distillation method, and number of distillation passes. Wheat-based vodkas tend to be light and crisp, rye-based versions can have a slight spice, and potato vodkas often carry a creamier texture."
+		},
+		"subcategories": [
+			{
+				"name": "Grain Vodka",
+				"description": "The most common category, distilled from wheat, rye, or corn. Grain-based vodkas are prized for their clean, crisp profiles and are the standard for most premium brands.",
+				"examples": ["Belvedere (rye)", "Grey Goose (wheat)", "Tito's (corn)", "Absolut (winter wheat)"]
+			},
+			{
+				"name": "Potato Vodka",
+				"description": "Distilled from potatoes, yielding a fuller-bodied, slightly creamier spirit. Historically associated with Polish tradition and often preferred by those who appreciate a richer mouthfeel.",
+				"examples": ["Chopin", "Luksusowa", "Karlsson's Gold"]
+			},
+			{
+				"name": "Flavored Vodka",
+				"description": "Vodka infused with natural or artificial flavors after distillation. Ranges from traditional Eastern European infusions like bison grass and honey-pepper to modern fruit and dessert flavors.",
+				"examples": ["Zubrowka Bison Grass", "Stolichnaya Razberi", "Ketel One Botanical"]
+			},
+			{
+				"name": "Craft / Small Batch",
+				"description": "Produced by independent distilleries that emphasize local ingredients, unique base materials, and artisanal production methods. Part of a growing movement to give vodka more character and terroir.",
+				"examples": ["St. George All Purpose", "Reyka (Icelandic)", "Crystal Head"]
+			}
+		],
+		"regions": [
+			{
+				"name": "Poland",
+				"description": "One of the two ancestral homes of vodka, Poland has a distilling tradition stretching back centuries. Polish vodka received EU geographic indication protection in 2013, requiring it to be made from traditional Polish grains or potatoes.",
+				"countryCode": "PL",
+				"highlights": ["EU protected geographic indication", "Strong potato vodka tradition", "Zubrowka bison grass heritage"]
+			},
+			{
+				"name": "Russia",
+				"description": "Vodka is inseparable from Russian cultural identity. Russian distillers pioneered charcoal filtration and helped define the clean, neutral style that became the global standard.",
+				"countryCode": "RU",
+				"highlights": ["Charcoal filtration innovation", "State monopoly history", "Traditional frozen serving style"]
+			},
+			{
+				"name": "Sweden",
+				"description": "Sweden has a long tradition of brannvin (aquavit) and vodka production. Absolut, launched in 1879, became one of the most iconic vodka brands in the world and helped establish Sweden as a premium vodka producer.",
+				"countryCode": "SE",
+				"highlights": ["Absolut global brand recognition", "Single-source winter wheat tradition", "Continuous distillation expertise"]
+			},
+			{
+				"name": "United States",
+				"description": "American craft distillers have embraced vodka with characteristic innovation, using diverse base ingredients from corn to grapes and emphasizing local sourcing and small-batch production.",
+				"countryCode": "US",
+				"highlights": ["Largest vodka market by volume", "Craft distillery boom", "Diverse base ingredient experimentation"]
+			}
+		],
+		"funFact": "In 2006, the European Union spent two years debating the legal definition of vodka. The so-called \"vodka war\" pitted traditional grain-and-potato producers in Poland and the Nordic countries against Western European distillers who wanted to use grapes and sugar beets. The compromise allowed any base ingredient but required non-traditional bases to be labeled on the bottle.",
+		"sources": [
+			{
+				"title": "A History of Vodka by William Pokhlyobkin",
+				"url": "https://example.com/history-of-vodka",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "The Spirits Business: Vodka Category Report",
+				"url": "https://example.com/spirits-business-vodka",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "EU Regulation on Spirit Drinks: Vodka Definition",
+				"url": "https://example.com/eu-vodka-regulation",
+				"accessedDate": "2025-12-15"
+			}
+		]
+	},
+
+	"tequila": {
+		"slug": "tequila",
+		"recipeCategoryId": 7,
+		"displayName": "Tequila",
+		"accentColor": {
+			"bg": "bg-lime-500",
+			"text": "text-lime-500",
+			"border": "border-lime-500",
+			"gradient": "from-lime-500/20 to-lime-600/10",
+			"hex": "#84cc16"
+		},
+		"overview": {
+			"intro": "Tequila is Mexico's most famous spirit — distilled from the blue Weber agave plant and steeped in centuries of tradition. Far from its reputation as a party shot, great tequila is a complex sipping spirit with terroir as nuanced as fine wine.",
+			"history": "Long before Spanish conquistadors arrived, the indigenous peoples of Mexico were fermenting agave sap into a milky, mildly alcoholic drink called pulque. When the Spaniards introduced copper-pot distillation in the 16th century, locals began distilling agave to create mezcal — the broad category of agave spirits from which tequila would eventually emerge.\n\nThe town of Tequila in the state of Jalisco became the center of production, and by the late 1700s, the Cuervo and Sauza families had established the first commercial distilleries. Mexico granted tequila a denomination of origin in 1974, restricting production to specific regions — primarily Jalisco — and mandating the use of blue Weber agave.\n\nTequila's international popularity surged in the latter half of the 20th century, driven by the Margarita and the rise of Mexican cuisine worldwide. The early 2000s brought a premium tequila revolution, with aged expressions and single-estate bottlings earning critical acclaim. Today, tequila is one of the fastest-growing spirits categories globally, with celebrity-backed brands and artisanal producers competing for attention.",
+			"production": "Tequila production begins in the agave fields, where blue Weber agave plants are cultivated for 6 to 8 years before harvest. Skilled workers called jimadores use a sharp, flat-bladed tool called a coa to strip the spiny leaves from the plant, revealing the pina — the dense, starchy heart that can weigh 40 to 90 kilograms.\n\nThe pinas are slowly roasted in traditional brick ovens (hornos) or modern autoclaves to convert their complex starches into fermentable sugars. The cooked agave is then crushed to extract the sweet juice, or aguamiel, which is fermented with yeast in large tanks for several days.\n\nThe fermented liquid is distilled twice in copper pot stills or stainless steel column stills. The resulting spirit is either bottled as blanco (unaged) or placed into oak barrels for aging. Reposado rests for two to twelve months, anejo for one to three years, and extra anejo for more than three years. The type of barrel, the aging environment, and the specific terroir of the agave fields all contribute to the final character of the tequila."
+		},
+		"subcategories": [
+			{
+				"name": "Blanco (Silver)",
+				"description": "Unaged or aged less than two months, blanco tequila showcases the purest expression of agave flavor. Bright, crisp, and herbaceous, it is the backbone of most tequila cocktails.",
+				"examples": ["Fortaleza Blanco", "El Tesoro Platinum", "Siete Leguas Blanco", "Tapatio Blanco"]
+			},
+			{
+				"name": "Reposado",
+				"description": "Rested in oak barrels for two to twelve months, reposado strikes a balance between fresh agave character and the vanilla, caramel, and spice notes imparted by the wood.",
+				"examples": ["Fortaleza Reposado", "Siembra Valles Reposado", "Ocho Reposado"]
+			},
+			{
+				"name": "Anejo",
+				"description": "Aged for one to three years in oak barrels, anejo tequila develops rich, complex flavors reminiscent of fine whiskey — dried fruit, chocolate, tobacco, and toasted oak.",
+				"examples": ["Don Julio 1942", "El Tesoro Anejo", "Fortaleza Anejo"]
+			},
+			{
+				"name": "Extra Anejo",
+				"description": "Aged for more than three years, extra anejo is the most mature and complex category of tequila. Deep amber in color with layers of oak, dried fruit, and baking spice.",
+				"examples": ["Jose Cuervo Reserva de la Familia", "Tears of Llorona", "El Tesoro Paradiso"]
+			},
+			{
+				"name": "Cristalino",
+				"description": "A modern style where aged tequila is charcoal-filtered to remove its color while retaining the smoothness and complexity gained from barrel aging. Divisive among purists but increasingly popular.",
+				"examples": ["Don Julio 70", "Clase Azul Gold", "Maestro Dobel Diamante"]
+			}
+		],
+		"regions": [
+			{
+				"name": "Jalisco Highlands (Los Altos)",
+				"description": "The red, iron-rich volcanic soil of the highlands produces larger agave plants with higher sugar content, yielding tequilas that tend to be sweeter, fruitier, and more floral.",
+				"countryCode": "MX",
+				"highlights": ["Higher altitude growing conditions", "Sweeter agave profiles", "Red volcanic soil terroir"]
+			},
+			{
+				"name": "Jalisco Lowlands (El Valle)",
+				"description": "The valley surrounding the town of Tequila features darker volcanic soil and a warmer climate. Lowland agave produces tequilas with more earthy, mineral, and herbaceous characteristics.",
+				"countryCode": "MX",
+				"highlights": ["Historic town of Tequila", "Earthy mineral-driven profiles", "Oldest distilling traditions"]
+			},
+			{
+				"name": "Jalisco (Broader)",
+				"description": "Beyond the highlands and lowlands, the broader state of Jalisco encompasses the vast majority of tequila production. The denomination of origin also extends to parts of four other Mexican states.",
+				"countryCode": "MX",
+				"highlights": ["Over 150 registered distilleries", "UNESCO World Heritage agave landscape", "Denomination of origin since 1974"]
+			}
+		],
+		"funFact": "A single blue Weber agave plant takes 6 to 8 years to mature before it can be harvested for tequila production. Each plant produces enough sugar for roughly 5 liters of tequila. A jimador — the skilled agave harvester — can trim up to 100 plants per day using nothing but a coa, a flat-bladed tool that has remained virtually unchanged for centuries.",
+		"sources": [
+			{
+				"title": "Consejo Regulador del Tequila (CRT): Standards and Production",
+				"url": "https://example.com/crt-tequila-standards",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "How the Gringos Stole Tequila by Chantal Martineau",
+				"url": "https://example.com/gringos-stole-tequila",
+				"accessedDate": "2025-12-15"
+			}
+		]
+	},
+
+	"rum": {
+		"slug": "rum",
+		"recipeCategoryId": 8,
+		"displayName": "Rum",
+		"accentColor": {
+			"bg": "bg-orange-500",
+			"text": "text-orange-500",
+			"border": "border-orange-500",
+			"gradient": "from-orange-500/20 to-orange-600/10",
+			"hex": "#f97316"
+		},
+		"overview": {
+			"intro": "Rum is the spirit of the tropics — born from sugarcane in the Caribbean and shaped by colonialism, piracy, and island culture. Its incredible range spans from crystal-clear mixing rums to dark, brooding sippers aged for decades.",
+			"history": "Rum's story begins with sugarcane, which was brought to the Caribbean by Christopher Columbus on his second voyage in 1493. By the early 1600s, enslaved workers on sugar plantations discovered that molasses — a byproduct of sugar refining — could be fermented and distilled into a potent spirit. The first recorded mention of \"rumbullion\" appeared in Barbados around 1650.\n\nRum quickly became the economic engine of the colonial Caribbean and a key commodity in the triangular trade. It was the daily ration of the British Royal Navy from the 17th century until 1970, when the tradition was finally discontinued. In colonial America, rum was more popular than whiskey, and New England rum distilleries were among the most profitable enterprises in the colonies.\n\nThe 20th century saw rum evolve from a rough, utilitarian spirit into a diverse and sophisticated category. Cuban-style light rum fueled the cocktail culture of Havana in the 1920s and 30s, giving birth to the Daiquiri and the Mojito. Today, rum is experiencing a golden age, with premium aged expressions, single-estate bottlings, and agricultural rums from Martinique and Guadeloupe earning recognition alongside the finest spirits in the world.",
+			"production": "Rum is made from sugarcane in one of two forms: molasses (the thick, dark syrup left after sugar crystals are extracted) or fresh-pressed sugarcane juice. The vast majority of the world's rum is molasses-based, while rhum agricole from the French Caribbean uses fresh cane juice, producing a grassier, more vegetal spirit.\n\nThe fermentation process varies widely — some producers use fast-acting commercial yeasts for a clean, neutral fermentation, while others rely on wild yeasts or proprietary strains that develop complex esters and flavors over longer fermentation periods. Jamaican pot-still rums, for example, are famous for their intensely funky, ester-rich character.\n\nDistillation takes place in column stills (for lighter rums), pot stills (for heavier, more flavorful rums), or a combination of both. After distillation, white rum may be filtered and bottled immediately, while aged rums spend time in oak barrels — often used bourbon barrels — where the tropical climate accelerates maturation. A rum aged five years in the Caribbean may develop the complexity of a spirit aged twice as long in a cooler climate."
+		},
+		"subcategories": [
+			{
+				"name": "White / Light Rum",
+				"description": "Clear, clean, and typically unaged or lightly aged and then filtered. The workhorse of tropical cocktails — Daiquiris, Mojitos, and Pina Coladas all depend on a quality white rum.",
+				"examples": ["Probitas", "Havana Club 3", "Banks 5 Island", "Plantation 3 Stars"]
+			},
+			{
+				"name": "Gold / Aged Rum",
+				"description": "Amber-colored rum aged in oak barrels for a period of years, developing notes of vanilla, toffee, tropical fruit, and baking spice. Versatile for both sipping and cocktails.",
+				"examples": ["Appleton Estate 8", "Mount Gay Eclipse", "El Dorado 12", "Doorly's XO"]
+			},
+			{
+				"name": "Dark / Black Rum",
+				"description": "Full-bodied and richly flavored, often from pot-still distillation and extended aging. Deep molasses, burnt sugar, and dried fruit notes make these rums ideal for robust cocktails and sipping.",
+				"examples": ["Goslings Black Seal", "Cruzan Black Strap", "Smith & Cross"]
+			},
+			{
+				"name": "Rhum Agricole",
+				"description": "Made from fresh sugarcane juice rather than molasses, primarily in the French Caribbean. Protected by AOC designation in Martinique, agricole rums are grassy, floral, and terroir-driven.",
+				"examples": ["Rhum J.M. VSOP", "Clement VSOP", "Neisson Blanc", "La Favorite Coeur de Canne"]
+			},
+			{
+				"name": "Overproof / Navy Strength",
+				"description": "Bottled at higher than standard proof, typically 57% ABV or above. Historically linked to the Royal Navy's requirement that rum be strong enough to still ignite gunpowder if spilled on it.",
+				"examples": ["Wray & Nephew", "Smith & Cross", "Plantation OFTD", "Rum Fire"]
+			}
+		],
+		"regions": [
+			{
+				"name": "Jamaica",
+				"description": "Jamaica is renowned for its bold, ester-rich pot-still rums. The island's long fermentation times and traditional methods produce some of the most characterful rums in the world.",
+				"countryCode": "JM",
+				"highlights": ["High-ester pot-still tradition", "Appleton Estate heritage", "Dunder pit fermentation"]
+			},
+			{
+				"name": "Barbados",
+				"description": "Widely regarded as the birthplace of rum, Barbados produces elegant, balanced rums using both pot and column stills. Mount Gay, established in 1703, is the oldest documented rum brand.",
+				"countryCode": "BB",
+				"highlights": ["Oldest documented rum distillery", "Blend of pot and column stills", "Geographic indication protected"]
+			},
+			{
+				"name": "Cuba",
+				"description": "Cuban rum is defined by its light, clean, and refined style. Havana was the cocktail capital of the Americas in the 1920s, and Cuban light rum was the foundation of that golden era.",
+				"countryCode": "CU",
+				"highlights": ["Light column-still style", "Birthplace of the Daiquiri and Mojito", "Havana Club heritage"]
+			},
+			{
+				"name": "Guyana",
+				"description": "Home to the last remaining distillery in Demerara — the famous Diamond Distillery — Guyana produces rich, heavy rums using historic wooden stills that exist nowhere else in the world.",
+				"countryCode": "GY",
+				"highlights": ["Historic wooden Coffey still", "El Dorado premium range", "Demerara sugar heritage"]
+			},
+			{
+				"name": "Trinidad",
+				"description": "Trinidad produces smooth, refined rums primarily from column stills. Angostura, famous for its bitters, is also one of the Caribbean's largest and most respected rum producers.",
+				"countryCode": "TT",
+				"highlights": ["Angostura distillery", "Column-still refinement", "Blending expertise"]
+			}
+		],
+		"funFact": "The British Royal Navy issued a daily rum ration to every sailor from the 1650s until July 31, 1970 — a day known in naval history as \"Black Tot Day.\" Officers wore black armbands, and some sailors held mock funerals for the tradition. The last barrels of official Navy rum were sealed and stored, and bottles from that final batch now sell for thousands of pounds at auction.",
+		"sources": [
+			{
+				"title": "Rum: The Complete Guide to the World of Rum by Dave Broom",
+				"url": "https://example.com/rum-complete-guide",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "Ministry of Rum: Rum History and Culture",
+				"url": "https://example.com/ministry-of-rum",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "AOC Martinique Rhum Agricole Standards",
+				"url": "https://example.com/aoc-martinique-rhum",
+				"accessedDate": "2025-12-15"
+			}
+		]
+	},
+
+	"brandy": {
+		"slug": "brandy",
+		"recipeCategoryId": 9,
+		"displayName": "Brandy",
+		"accentColor": {
+			"bg": "bg-rose-500",
+			"text": "text-rose-500",
+			"border": "border-rose-500",
+			"gradient": "from-rose-500/20 to-rose-600/10",
+			"hex": "#f43f5e"
+		},
+		"overview": {
+			"intro": "Brandy is the refined elder statesman of the spirits world — distilled from wine or fruit and aged to silky perfection. From the grand houses of Cognac to the grape-rich valleys of Peru, brandy rewards those who appreciate depth and elegance.",
+			"history": "Brandy's origins lie in the medieval wine trade. Dutch merchants in the 16th century began distilling wine to preserve it for long sea voyages — they called the result \"brandewijn\" (burnt wine), which was eventually shortened to brandy. What began as a practical preservation method soon became an art form in its own right.\n\nThe Cognac region of France emerged as the epicenter of brandy production by the 17th century. Its unique terroir — chalky soils, maritime climate, and Ugni Blanc grapes — proved ideal for producing distillates that blossomed with extended barrel aging. The great Cognac houses like Hennessy, Remy Martin, and Courvoisier were established during the 18th and 19th centuries, selling their spirits to aristocrats and royalty across Europe.\n\nBeyond France, brandy traditions developed around the world. Spanish brandy de Jerez, aged using the solera system in sherry casks, became enormously popular. South American pisco developed its own identity in Peru and Chile. Armenian brandy impressed even Winston Churchill, who reportedly received an annual shipment of Dvin brandy from Stalin. Today, brandy encompasses an extraordinarily diverse range of styles, from delicate eau-de-vie to robust grape brandies and fruit brandies.",
+			"production": "Brandy begins as wine. The base wine is typically made from high-acid, low-alcohol grape varieties — Ugni Blanc is the standard in Cognac, while Airen and Palomino are common in Spain. The wine is intentionally thin and sharp, as it is destined for distillation rather than drinking.\n\nCognac and many traditional brandies are distilled twice in small copper pot stills called alembics. The distiller carefully separates the heads, hearts, and tails of each distillation run, keeping only the purest middle portion. Armagnac, by contrast, traditionally uses a single continuous distillation in a column alembic, producing a more robust and characterful spirit.\n\nAging is where brandy truly comes into its own. The clear distillate is placed into oak barrels — Limousin and Troncais oak are prized in Cognac — where it slowly develops color, complexity, and roundness over years or decades. Brandy is classified by age: VS (Very Special, minimum 2 years), VSOP (Very Superior Old Pale, minimum 4 years), and XO (Extra Old, minimum 10 years in Cognac). Master blenders at the great houses maintain consistency by marrying spirits of different ages and vineyard origins."
+		},
+		"subcategories": [
+			{
+				"name": "Cognac",
+				"description": "The most prestigious brandy in the world, produced exclusively in the Cognac region of France. Double-distilled in copper pot stills and aged in French oak, Cognac is the benchmark for grape brandy quality.",
+				"examples": ["Remy Martin VSOP", "Hennessy XO", "Pierre Ferrand 1840", "Hine Rare VSOP"]
+			},
+			{
+				"name": "Armagnac",
+				"description": "France's oldest brandy, from Gascony. Typically single-distilled for a more rustic, characterful profile than Cognac. Armagnac often offers better value and more personality at comparable age statements.",
+				"examples": ["Darroze Les Grands Assemblages", "Marie Duffau Napoleon", "Chateau de Laubade VSOP"]
+			},
+			{
+				"name": "Pisco",
+				"description": "A clear, unaged grape brandy from Peru and Chile. Peruvian pisco must be single-distilled to proof and cannot be diluted with water, while Chilean pisco follows different regulations.",
+				"examples": ["Barsol Quebranta", "Macchu Pisco", "Waqar (Chilean)", "La Caravedo Torontel"]
+			},
+			{
+				"name": "Brandy de Jerez",
+				"description": "Spanish brandy aged in the sherry-producing region of Jerez using the solera system — a fractional blending method that produces remarkably smooth, complex spirits with sherry-influenced character.",
+				"examples": ["Cardenal Mendoza", "Gran Duque de Alba", "Lepanto", "Torres 10"]
+			},
+			{
+				"name": "Eau-de-Vie",
+				"description": "Clear, unaged fruit brandies that capture the pure essence of their source fruit. Common varieties include kirsch (cherry), framboise (raspberry), and poire Williams (pear).",
+				"examples": ["Clear Creek Pear Brandy", "Massenez Kirsch", "St. George Raspberry"]
+			}
+		],
+		"regions": [
+			{
+				"name": "Cognac, France",
+				"description": "The world's most famous brandy region, located in southwestern France. Six crus (growing areas) produce brandies of varying character, with Grande Champagne and Petite Champagne considered the finest.",
+				"countryCode": "FR",
+				"highlights": ["Six designated crus", "Double distillation in copper alembics", "Strict AOC regulations"]
+			},
+			{
+				"name": "Jerez, Spain",
+				"description": "The sherry triangle of Jerez de la Frontera, El Puerto de Santa Maria, and Sanlucar de Barrameda is also home to Spain's finest brandies, aged using the solera system in seasoned sherry casks.",
+				"countryCode": "ES",
+				"highlights": ["Solera aging system", "Sherry cask influence", "Denominacion Especifica protection"]
+			},
+			{
+				"name": "Peru",
+				"description": "Peru claims pisco as its national spirit, with production centered in the coastal valleys of Ica, Lima, Arequipa, Moquegua, and Tacna. Peruvian pisco regulations are among the strictest for any spirit.",
+				"countryCode": "PE",
+				"highlights": ["Must be distilled to proof", "Eight approved grape varieties", "No aging, dilution, or additives"]
+			},
+			{
+				"name": "Gascony, France",
+				"description": "The Armagnac region in Gascony predates Cognac as a brandy-producing area by roughly 200 years. Three sub-regions — Bas-Armagnac, Armagnac-Tenareze, and Haut-Armagnac — each contribute distinct character.",
+				"countryCode": "FR",
+				"highlights": ["Oldest French brandy tradition", "Single continuous distillation", "Vintage-dated bottles common"]
+			},
+			{
+				"name": "Italy",
+				"description": "Italian grappa — distilled from grape pomace (the skins, seeds, and stems left after winemaking) — has evolved from a rough farmhouse spirit into a refined category with premium single-varietal expressions.",
+				"countryCode": "IT",
+				"highlights": ["Pomace-based tradition", "Single-varietal grappa", "Protected EU designation"]
+			}
+		],
+		"funFact": "Cognac warehouses lose an estimated 2% of their aging stock to evaporation each year — a phenomenon poetically known as \"the angel's share.\" This amounts to roughly 22 million bottles of Cognac vanishing into the air annually. The evaporating alcohol feeds a black fungus called Baudoinia compniacensis that covers the walls and roofs of buildings near the aging cellars, making Cognac warehouses instantly recognizable.",
+		"sources": [
+			{
+				"title": "Bureau National Interprofessionnel du Cognac (BNIC)",
+				"url": "https://example.com/bnic-cognac",
+				"accessedDate": "2025-12-15"
+			},
+			{
+				"title": "Brandy: A Global History by Becky Sue Epstein",
+				"url": "https://example.com/brandy-global-history",
+				"accessedDate": "2025-12-15"
+			}
+		]
+	}
+}

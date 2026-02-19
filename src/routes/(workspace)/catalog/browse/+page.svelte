@@ -212,7 +212,7 @@
 <div class="container mx-auto px-4 mt-4">
 	<!-- Header -->
 	<div class="flex items-center gap-4 mb-6">
-		<BackButton fallback="/catalog" />
+		<BackButton href="/catalog" />
 		<div>
 			<h1 class="text-2xl font-bold">Browse Catalog</h1>
 			<p class="text-muted-foreground">
@@ -248,7 +248,14 @@
 			</form>
 
 			<!-- Filters -->
-			<FilterButton bind:open={filterOpen} activeCount={activeFilterCount + advancedFilterCount} viewModes={['grid', 'list']} activeView={viewMode} onViewChange={setViewMode} onRefresh={invalidateAll}>
+			<FilterButton
+				bind:open={filterOpen}
+				activeCount={activeFilterCount + advancedFilterCount}
+				viewModes={['grid', 'list']}
+				activeView={viewMode}
+				onViewChange={setViewMode}
+				onRefresh={invalidateAll}
+			>
 				<CatalogFilterPanel
 					spirits={data.spirits}
 					{selectedSpirit}
@@ -437,11 +444,7 @@
 		</div>
 
 		<!-- Pagination -->
-		<Pagination
-			pagination={data.pagination}
-			itemLabel="recipes"
-			onNavigate={navigatePage}
-		/>
+		<Pagination pagination={data.pagination} itemLabel="recipes" onNavigate={navigatePage} />
 	{/if}
 </div>
 

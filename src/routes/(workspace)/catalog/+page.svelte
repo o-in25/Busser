@@ -20,6 +20,7 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
+	import { idToSlug } from '$lib/spirits';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
@@ -183,7 +184,7 @@
 			</div>
 			{#if popularSpirit}
 				<a
-					href="/catalog/browse/{popularSpirit.recipeCategoryId}"
+					href="/catalog/browse/{idToSlug[popularSpirit.recipeCategoryId] ?? popularSpirit.recipeCategoryId}"
 					class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
 				>
 					<TrendingUp class="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
@@ -216,7 +217,7 @@
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 		{#each spirits as spirit}
 			{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
-			<a href="/catalog/browse/{spirit.recipeCategoryId}" class="block group">
+			<a href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ?? spirit.recipeCategoryId}" class="block group">
 				<Card.Root
 					class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300"
 				>

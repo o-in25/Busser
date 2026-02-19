@@ -1,49 +1,45 @@
 import { error } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
+import { spirits, slugToId } from '$lib/spirits';
 import { catalogRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
-import type { View } from '$lib/types';
+import type { View, SpiritSlug } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
-	const { recipeCategoryId } = params;
+	const slug = params.spirit as SpiritSlug;
 	const userId = locals.user?.userId;
 
-	if (!recipeCategoryId || isNaN(Number(recipeCategoryId))) {
-		error(StatusCodes.BAD_REQUEST, {
-			reason: getReasonPhrase(StatusCodes.BAD_REQUEST),
-			code: StatusCodes.BAD_REQUEST,
-			message: 'Invalid category ID.',
-		});
-	}
+	const recipeCategoryId = slugToId[slug];
+	const spiritContent = spirits[slug];
 
-	// Parse query params
+	// parse query params
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const perPage = parseInt(url.searchParams.get('perPage') || '24');
 	const search = url.searchParams.get('search') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 
-	// Build filter - always include the spirit category
+	// build filter - always include the spirit category
 	const filter: Record<string, any> = {
-		recipeCategoryId: parseInt(recipeCategoryId),
+		recipeCategoryId,
 	};
 	if (search) {
 		filter.recipeName = search;
 	}
 
-	// Get spirits, recipes, favorites, and featured in parallel
-	const [spirits, catalogResult, userFavorites, featuredRecipes] = await Promise.all([
+	// get spirits, recipes, favorites, and featured in parallel
+	const [allSpirits, catalogResult, userFavorites, featuredRecipes] = await Promise.all([
 		catalogRepo.getSpirits(),
 		catalogRepo.findAll(workspaceId, page, perPage, filter),
 		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
 		catalogRepo.getFeatured(workspaceId),
 	]);
 
-	const spirit = spirits.find((s) => s.recipeCategoryId === Number(recipeCategoryId));
+	const spirit = allSpirits.find((s) => s.recipeCategoryId === recipeCategoryId);
 
 	if (!spirit) {
 		error(StatusCodes.NOT_FOUND, {
@@ -55,11 +51,11 @@ export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
 
 	let { data, pagination } = catalogResult;
 
-	// Build sets for quick lookup
+	// build sets for quick lookup
 	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
 	const featuredRecipeIds = new Set(featuredRecipes.map((f) => f.recipeId));
 
-	// Apply client-side sorting
+	// apply client-side sorting
 	switch (sort) {
 		case 'name-asc':
 			data.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
@@ -75,16 +71,16 @@ export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
 			break;
 	}
 
-	// Cast to View.BasicRecipe since the basicrecipe view returns all fields
 	const recipes = data as View.BasicRecipe[];
 
 	return {
 		spirit,
-		spirits,
+		spirits: allSpirits,
 		recipes,
 		pagination,
 		favoriteRecipeIds: [...favoriteRecipeIds],
 		featuredRecipeIds: [...featuredRecipeIds],
+		spiritContent,
 		filters: {
 			search,
 			sort,

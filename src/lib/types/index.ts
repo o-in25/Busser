@@ -5,4 +5,5 @@ export * from './catalog';
 export * from './generators';
 export * from './inventory';
 export * from './shared';
+export * from './spirits';
 export * from './user';
