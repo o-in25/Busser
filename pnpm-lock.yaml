@@ -4,6 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  minimatch@<3.0.5: 3.1.2
+  ajv@<6.12.3: 6.12.6
+  fast-xml-parser@<4.4.1: 4.5.1
+  tar@<6.2.1: 6.2.1
+  diff@<5.2.0: 5.2.0
+  multer@<1.4.5-lts.2: 1.4.5-lts.2
+  cookie@<0.7.0: 0.7.2
+
 importers:
 
   .:
@@ -2085,8 +2094,8 @@ packages:
   console-control-strings@1.1.0:
     resolution: {integrity: sha512-ty/fTekppD2fIwRvnZAVdeOiGd1c7YXEixbgJTNzqcxJWKQnjJ/V1bNEEE6hygpM3WjwHFUVK6HTjWSzV4a8sQ==}
 
-  cookie@0.6.0:
-    resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
+  cookie@0.7.2:
+    resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
 
   cross-env@10.1.0:
@@ -5086,7 +5095,7 @@ snapshots:
       '@sveltejs/vite-plugin-svelte': 5.1.1(svelte@5.50.3)(vite@6.4.1(@types/node@25.2.3)(jiti@1.21.7)(sass@1.97.3)(tsx@4.21.0))
       '@types/cookie': 0.6.0
       acorn: 8.15.0
-      cookie: 0.6.0
+      cookie: 0.7.2
       devalue: 5.6.2
       esm-env: 1.2.2
       kleur: 4.1.5
@@ -5617,7 +5626,7 @@ snapshots:
 
   console-control-strings@1.1.0: {}
 
-  cookie@0.6.0: {}
+  cookie@0.7.2: {}
 
   cross-env@10.1.0:
     dependencies:
