@@ -39,6 +39,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import { idToSlug } from '$lib/spirits';
 	import { reveal } from '$lib/reveal';
 	import { cn } from '$lib/utils';
 
@@ -956,7 +957,7 @@
 								with your {dashboardData.topSpirit.recipeCategoryDescription?.toLowerCase() ?? ''} collection.
 							</p>
 							<a
-								href="/catalog/browse/{dashboardData.topSpirit.recipeCategoryId}"
+								href="/catalog/browse/{idToSlug[dashboardData.topSpirit.recipeCategoryId] ?? dashboardData.topSpirit.recipeCategoryId}"
 								class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-fit')}
 							>
 								Explore {dashboardData.topSpirit.recipeCategoryDescription} Cocktails

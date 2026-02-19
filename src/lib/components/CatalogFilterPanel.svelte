@@ -10,6 +10,7 @@
 		selectedShowFilter,
 		sortOption,
 		advancedFilterCount = 0,
+		hideSpirit = false,
 		onSpiritChange,
 		onShowFilterChange,
 		onSortChange,
@@ -21,6 +22,7 @@
 		selectedShowFilter: string;
 		sortOption: string;
 		advancedFilterCount?: number;
+		hideSpirit?: boolean;
 		onSpiritChange: (value: string) => void;
 		onShowFilterChange: (value: string) => void;
 		onSortChange: (value: string) => void;
@@ -67,31 +69,33 @@
 
 <div class="flex flex-col gap-4">
 	<!-- spirit -->
-	<div class="flex flex-col gap-1.5">
-		<span class="text-sm font-medium text-muted-foreground">Spirit</span>
-		<Select.Root
-			type="single"
-			value={selectedSpirit}
-			onValueChange={(v) => onSpiritChange(v ?? 'all')}
-		>
-			<Select.Trigger class="w-full">
-				<GlassWater class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="All Spirits">{spiritLabel}</Select.Value>
-			</Select.Trigger>
-			<Select.Content>
-				<Select.Item value="all" label="All Spirits" />
-				{#if spirits.length > 0}
-					<Select.Separator />
-				{/if}
-				{#each spirits as spirit}
-					<Select.Item
-						value={String(spirit.recipeCategoryId)}
-						label={spirit.recipeCategoryDescription ?? undefined}
-					/>
-				{/each}
-			</Select.Content>
-		</Select.Root>
-	</div>
+	{#if !hideSpirit}
+		<div class="flex flex-col gap-1.5">
+			<span class="text-sm font-medium text-muted-foreground">Spirit</span>
+			<Select.Root
+				type="single"
+				value={selectedSpirit}
+				onValueChange={(v) => onSpiritChange(v ?? 'all')}
+			>
+				<Select.Trigger class="w-full">
+					<GlassWater class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="All Spirits">{spiritLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Item value="all" label="All Spirits" />
+					{#if spirits.length > 0}
+						<Select.Separator />
+					{/if}
+					{#each spirits as spirit}
+						<Select.Item
+							value={String(spirit.recipeCategoryId)}
+							label={spirit.recipeCategoryDescription ?? undefined}
+						/>
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
+	{/if}
 
 	<!-- show filter -->
 	<div class="flex flex-col gap-1.5">
