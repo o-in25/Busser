@@ -162,6 +162,17 @@ export class OAuthRepository extends BaseRepository {
 
 				// set username and clear onboarding flag
 				await trx('user').where({ userId }).update({ username, needsOnboarding: 0 });
+
+				// rename personal workspace to match new username
+				const personalWorkspace = await trx('workspace')
+					.where({ createdBy: userId, workspaceType: 'personal' })
+					.first();
+
+				if (personalWorkspace) {
+					await trx('workspace')
+						.where({ workspaceId: personalWorkspace.workspaceId })
+						.update({ workspaceName: `${username}'s Workspace` });
+				}
 			});
 
 			return { status: 'success' };

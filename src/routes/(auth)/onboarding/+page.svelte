@@ -17,6 +17,7 @@
 
 	let errors = $derived(form?.errors);
 
+	let username = $state('');
 	let tosAccepted = $state(false);
 	let tosDialogOpen = $state(false);
 </script>
@@ -70,6 +71,7 @@
 				type="text"
 				id="username"
 				name="username"
+				bind:value={username}
 				class={errors?.username?.hasError ? 'border-destructive' : ''}
 			/>
 			{#if errors?.username?.hasError}
@@ -117,7 +119,7 @@
 			</Dialog.Content>
 		</Dialog.Root>
 
-		<Button type="submit" size="lg" class="w-full" disabled={!tosAccepted}>
+		<Button type="submit" size="lg" class="w-full" disabled={!tosAccepted || !username.trim()}>
 			Get Started
 		</Button>
 	</form>
