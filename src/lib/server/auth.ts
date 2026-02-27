@@ -5,6 +5,7 @@ import { DbProvider } from './db';
 import { AuthRepository } from './repositories/auth.repository';
 import { SettingsRepository } from './repositories/settings.repository';
 import { UserRepository } from './repositories/user.repository';
+import { OAuthRepository } from './repositories/oauth.repository';
 import { WorkspaceRepository } from './repositories/workspace.repository';
 const { USER_TABLE } = process.env;
 
@@ -14,9 +15,10 @@ const authRepo = new AuthRepository(db);
 const userRepo = new UserRepository(db, authRepo);
 const workspaceRepo = new WorkspaceRepository(db);
 const settingsRepo = new SettingsRepository(db);
+const oauthRepo = new OAuthRepository(db, userRepo);
 
 // export repositories for direct access
-export { authRepo, userRepo, workspaceRepo, settingsRepo };
+export { authRepo, userRepo, workspaceRepo, settingsRepo, oauthRepo };
 
 // auth functions (delegate to repository)
 export const verifyToken = authRepo.verifyToken.bind(authRepo);

@@ -16,11 +16,18 @@ const publicRoutes = [
 	'/reset-password/**',
 	'/workspace-selector',
 	'/api/mail/user-registration',
+	'/api/oauth/**',
+];
+
+// routes accessible during onboarding (before user completes profile)
+const onboardingAllowedRoutes = [
+	'/onboarding',
+	'/logout',
+	'/api/oauth/**',
 ];
 
 // Routes that don't require workspace selection (for authenticated users)
 const workspaceExemptRoutes = [
-	'/',
 	'/login',
 	'/logout',
 	'/signup',
@@ -28,6 +35,7 @@ const workspaceExemptRoutes = [
 	'/forgot-password',
 	'/reset-password/**',
 	'/workspace-selector',
+	'/onboarding',
 	'/settings/**',
 	'/api/**',
 ];
@@ -70,6 +78,14 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 
 	if (!event.locals.user && !isPublicRoute) {
 		return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
+	}
+
+	// gate incomplete oauth users to onboarding
+	if (event.locals.user?.needsOnboarding === 1) {
+		const isOnboardingAllowed = micromatch.isMatch(slug, onboardingAllowedRoutes);
+		if (!isOnboardingAllowed) {
+			return redirect(StatusCodes.TEMPORARY_REDIRECT, '/onboarding');
+		}
 	}
 
 	// If user is authenticated, resolve active workspace

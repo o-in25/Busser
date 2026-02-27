@@ -9,6 +9,7 @@ export type User = {
 	roles: Role[];
 	permissions: Permission[];
 	verified: number;
+	needsOnboarding: number;
 	avatarImageUrl?: string;
 };
 

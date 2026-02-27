@@ -35,6 +35,7 @@
 	let isSigningOut = $state(false);
 	let isDeleting = $state(false);
 	let deleteDialogOpen = $state(false);
+	let deleteError = $state('');
 
 	// Update selected when data changes
 	$effect(() => {
@@ -44,8 +45,8 @@
 	const permissions: string[] = getContext('permissions') || [];
 	const roles: string[] = getContext('roles') || [];
 
-	// check if user is admin (cannot delete their own account)
-	const isAdmin = roles.includes('ADMIN') || roles.includes('OWNER');
+	// users with delete_admin permission cannot delete their own account
+	const isAdmin = permissions.includes('delete_admin');
 
 	async function handleSignOut() {
 		isSigningOut = true;
@@ -313,10 +314,10 @@
 				<!-- Role Legend -->
 				<div class="p-4 rounded-lg border border-dashed mb-6">
 					<h4 class="text-sm font-medium mb-3">Role Permissions</h4>
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
 						{#each Object.entries(roleDescriptions) as [role, info]}
-							<div class="flex items-start gap-2">
-								<Badge class="{info.bg} {info.color} border-0 shrink-0">
+							<div class="flex flex-col gap-1.5">
+								<Badge class="{info.bg} {info.color} border-0 w-fit">
 									{#if role === 'owner'}
 										<Crown class="h-3 w-3 mr-1" />
 									{/if}
@@ -418,7 +419,7 @@
 
 					<input type="hidden" name="workspaceId" value={selectedWorkspaceId} />
 
-					<div class="flex items-center justify-between">
+					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
 						{#if form?.success}
 							<p class="text-sm text-green-600 flex items-center gap-1">
 								<Check class="h-4 w-4" />
@@ -431,6 +432,7 @@
 						{/if}
 						<Button
 							type="submit"
+							class="w-full sm:w-auto"
 							disabled={!selectedWorkspaceId ||
 								selectedWorkspaceId === data.preferredWorkspaceId ||
 								isSubmitting ||
@@ -469,9 +471,11 @@
 		</Card.Header>
 		<Card.Content class="space-y-4">
 			<!-- Sign Out -->
-			<div class="flex items-center justify-between p-4 rounded-lg bg-muted/30">
+			<div
+				class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-muted/30"
+			>
 				<div class="flex items-center gap-3">
-					<div class="p-2 rounded-lg bg-muted">
+					<div class="p-2 rounded-lg bg-muted shrink-0">
 						<LogOut class="h-4 w-4 text-muted-foreground" />
 					</div>
 					<div>
@@ -479,7 +483,12 @@
 						<p class="text-sm text-muted-foreground">Sign out of your account on this device</p>
 					</div>
 				</div>
-				<Button variant="outline" onclick={handleSignOut} disabled={isSigningOut}>
+				<Button
+					variant="outline"
+					class="shrink-0 sm:w-auto w-full"
+					onclick={handleSignOut}
+					disabled={isSigningOut}
+				>
 					{#if isSigningOut}
 						Signing out...
 					{:else}
@@ -491,10 +500,10 @@
 			<!-- Delete Account (hidden for admins) -->
 			{#if !isAdmin}
 				<div
-					class="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/20"
+					class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-destructive/5 border border-destructive/20"
 				>
 					<div class="flex items-center gap-3">
-						<div class="p-2 rounded-lg bg-destructive/10">
+						<div class="p-2 rounded-lg bg-destructive/10 shrink-0">
 							<Trash2 class="h-4 w-4 text-destructive" />
 						</div>
 						<div>
@@ -506,7 +515,8 @@
 					</div>
 					<Dialog.Root bind:open={deleteDialogOpen}>
 						<Dialog.Trigger>
-							<Button variant="destructive">Delete Account</Button>
+							<Button variant="destructive" class="shrink-0 sm:w-auto w-full">Delete Account</Button
+							>
 						</Dialog.Trigger>
 						<Dialog.Content>
 							<Dialog.Header>
@@ -519,18 +529,24 @@
 									you from all workspaces, and delete all your personal data.
 								</Dialog.Description>
 							</Dialog.Header>
+							{#if deleteError}
+								<p class="text-sm text-destructive">{deleteError}</p>
+							{/if}
 							<Dialog.Footer>
-								<Button variant="outline" onclick={() => (deleteDialogOpen = false)}>Cancel</Button>
+								<Button variant="outline" onclick={() => { deleteDialogOpen = false; deleteError = ''; }}>Cancel</Button>
 								<form
 									method="POST"
 									action="?/deleteAccount"
 									use:enhance={() => {
 										isDeleting = true;
+										deleteError = '';
 										return async ({ result }) => {
 											isDeleting = false;
 											if (result.type === 'redirect') {
-												deleteDialogOpen = false;
-												await goto(result.location);
+												window.location.href = result.location;
+												return;
+											} else if (result.type === 'failure') {
+												deleteError = String(result.data?.error || 'Failed to delete account');
 											}
 										};
 									}}

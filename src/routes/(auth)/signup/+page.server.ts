@@ -13,18 +13,19 @@ export const load = (async ({ url, locals }) => {
 	}
 
 	const code = url.searchParams.get('code');
+	const error = url.searchParams.get('error');
 	const inviteOnly = await isInviteOnly();
 
 	// if no code, just show the signup page
 	if (!code) {
-		return { invitationCode: null, existingUserEmail: null, inviteOnly };
+		return { invitationCode: null, inviteOnly, oauthError: error };
 	}
 
 	// look up the invitation
 	const invitationResult = await getInvitationByCode(code);
 
 	if (invitationResult.status === 'error' || !invitationResult.data) {
-		return { invitationCode: code, existingUserEmail: null, inviteOnly };
+		return { invitationCode: code, inviteOnly, oauthError: error };
 	}
 
 	const invitation = invitationResult.data;
@@ -34,7 +35,7 @@ export const load = (async ({ url, locals }) => {
 		redirect(StatusCodes.TEMPORARY_REDIRECT, `/accept-invite?code=${code}`);
 	}
 
-	return { invitationCode: code, existingUserEmail: null, inviteOnly };
+	return { invitationCode: code, inviteOnly, oauthError: error };
 }) satisfies PageServerLoad;
 
 export const actions = {

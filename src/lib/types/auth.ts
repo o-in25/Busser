@@ -1,13 +1,7 @@
 // authentication types
-import type { CookieSerializeOptions } from 'cookie';
 
 // re-export user types for backwards compatibility
 export * from './user';
-
-export type Session = {
-	userId?: string;
-	opts: CookieSerializeOptions & { path: string };
-};
 
 export type RegistrationToken = {
 	userId: string;

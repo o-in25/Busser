@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { getUserWorkspaces } from '$lib/server/auth';
+import { getUserWorkspaces, hasGlobalPermission } from '$lib/server/auth';
 import {
 	deleteUser,
 	getPreferredWorkspaceId,
@@ -82,17 +82,14 @@ export const actions: Actions = {
 			return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authenticated' });
 		}
 
-		// prevent admins from deleting their own account
-		const isAdmin = locals.user.roles?.some(
-			(r) => r.roleName === 'ADMIN' || r.roleName === 'OWNER'
-		);
-		if (isAdmin) {
+		// prevent users with admin permissions from deleting their own account
+		if (hasGlobalPermission(locals.user, 'delete_admin')) {
 			return fail(StatusCodes.FORBIDDEN, {
 				error: 'Administrators cannot delete their own account',
 			});
 		}
 
-		const result = await deleteUser(locals.user.userId, locals.user.userId);
+		const result = await deleteUser(locals.user.userId);
 		if (result.error) {
 			return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'Failed to delete account' });
 		}
