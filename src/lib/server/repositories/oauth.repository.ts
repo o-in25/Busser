@@ -72,6 +72,7 @@ export class OAuthRepository extends BaseRepository {
 					password: null,
 					verified: 1,
 					needsOnboarding: 1,
+					avatarUrl: profile.avatarUrl,
 				});
 
 				// create oauth link

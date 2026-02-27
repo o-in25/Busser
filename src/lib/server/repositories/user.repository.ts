@@ -551,9 +551,10 @@ export class UserRepository extends BaseRepository {
 			password: string | null;
 			verified: number;
 			needsOnboarding: number;
+			avatarUrl?: string | null;
 		}
 	): Promise<Pick<User, 'userId' | 'username' | 'email'>> {
-		const { username, email, password, verified, needsOnboarding } = opts;
+		const { username, email, password, verified, needsOnboarding, avatarUrl } = opts;
 
 		// check username/email uniqueness
 		let dbResult: any = await trx('user').select('username').where({ username }).first();
@@ -569,6 +570,7 @@ export class UserRepository extends BaseRepository {
 			password,
 			verified,
 			needsOnboarding,
+			...(avatarUrl ? { avatarImageUrl: avatarUrl } : {}),
 			createdDate: Logger.now(),
 		});
 
@@ -621,10 +623,12 @@ export class UserRepository extends BaseRepository {
 			joinedDate: Logger.now(),
 		});
 
-		// generate avatar (non-blocking)
-		this.generateAndUploadAvatar(user.userId).catch((err) => {
-			console.error('Failed to generate avatar for new user:', err);
-		});
+		// generate random avatar if no provider avatar was supplied
+		if (!avatarUrl) {
+			this.generateAndUploadAvatar(user.userId).catch((err) => {
+				console.error('Failed to generate avatar for new user:', err);
+			});
+		}
 
 		return user;
 	}
