@@ -139,7 +139,7 @@
 </script>
 
 <Dialog.Root bind:open>
-	<Dialog.Content class="sm:max-w-lg max-h-[85vh] overflow-y-auto hide-scrollbar">
+	<Dialog.Content class="sm:max-w-lg max-h-[85vh] overflow-y-auto custom-scrollbar">
 		<Dialog.Header>
 			<Dialog.Title>Advanced Search</Dialog.Title>
 			<Dialog.Description>Narrow down recipes with detailed filters</Dialog.Description>
@@ -330,12 +330,3 @@
 	</Dialog.Content>
 </Dialog.Root>
 
-<style>
-	:global(.hide-scrollbar) {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
-	}
-	:global(.hide-scrollbar::-webkit-scrollbar) {
-		display: none;
-	}
-</style>

@@ -3,9 +3,12 @@
 	import { Circle, CircleCheck } from 'lucide-svelte';
 
 	import { Button } from '$lib/components/ui/button';
+	import { Checkbox } from '$lib/components/ui/checkbox';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import TermsContent from '$lib/components/TermsContent.svelte';
 	import type { SelectOption } from '$lib/types';
 	import type { User } from '$lib/types/auth';
 
@@ -61,11 +64,15 @@
 	];
 
 	let passwordTouched = false;
+	let tosAccepted = false;
+	let tosDialogOpen = false;
 
 	$: ruleResults = rules.map((rule) => ({ ...rule, met: rule.test(password) }));
 	$: allRulesMet = ruleResults.every((r) => r.met);
 	$: passwordsMatch = password === passwordConfirm && password.length > 0;
-	$: submitDisabled = needsPasswordCheck && (!allRulesMet || !passwordsMatch);
+	$: submitDisabled =
+		(needsPasswordCheck && (!allRulesMet || !passwordsMatch)) ||
+		(action === 'register' && !tosAccepted);
 
 	function toggleRole(roleId: string) {
 		if (selected.includes(roleId)) {
@@ -245,6 +252,47 @@
 			</div>
 		</fieldset>
 	{/if}
+{/if}
+
+{#if action === 'register'}
+	<div class="flex items-start gap-3">
+		<Checkbox bind:checked={tosAccepted} />
+		<label class="text-sm text-muted-foreground leading-tight">
+			I agree to the
+			<button
+				type="button"
+				class="text-primary hover:underline underline-offset-4"
+				onclick={() => (tosDialogOpen = true)}
+			>
+				Terms of Service
+			</button>
+		</label>
+	</div>
+
+	<Dialog.Root bind:open={tosDialogOpen}>
+		<Dialog.Content class="sm:max-w-2xl max-h-[85vh] flex flex-col">
+			<Dialog.Header>
+				<Dialog.Title>Terms of Service</Dialog.Title>
+			</Dialog.Header>
+			<div class="overflow-y-auto flex-1 custom-scrollbar">
+				<TermsContent />
+			</div>
+			<Dialog.Footer class="pt-4 border-t border-border">
+				<Button variant="outline" type="button" onclick={() => (tosDialogOpen = false)}>
+					Close
+				</Button>
+				<Button
+					type="button"
+					onclick={() => {
+						tosAccepted = true;
+						tosDialogOpen = false;
+					}}
+				>
+					Accept
+				</Button>
+			</Dialog.Footer>
+		</Dialog.Content>
+	</Dialog.Root>
 {/if}
 
 <!-- submit -->
