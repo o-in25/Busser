@@ -442,6 +442,44 @@
 	background-color: hsl(var(--muted-foreground));
 }
 
+/* view transitions — directional page slides */
+@keyframes slide-out-left {
+	to { transform: translateX(-25%); opacity: 0; }
+}
+@keyframes slide-in-from-right {
+	from { transform: translateX(25%); opacity: 0; }
+}
+@keyframes slide-out-right {
+	to { transform: translateX(25%); opacity: 0; }
+}
+@keyframes slide-in-from-left {
+	from { transform: translateX(-25%); opacity: 0; }
+}
+
+/* forward navigation */
+html[data-nav-direction="forward"]::view-transition-old(root) {
+	animation: slide-out-left 0.25s ease both;
+}
+html[data-nav-direction="forward"]::view-transition-new(root) {
+	animation: slide-in-from-right 0.25s ease both;
+}
+
+/* back navigation */
+html[data-nav-direction="back"]::view-transition-old(root) {
+	animation: slide-out-right 0.25s ease both;
+}
+html[data-nav-direction="back"]::view-transition-new(root) {
+	animation: slide-in-from-left 0.25s ease both;
+}
+
+/* respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation: none !important;
+	}
+}
+
 input[type='range']::-webkit-slider-thumb {
 	background-color: #e5195f; /* primary-600 */
 }

@@ -79,7 +79,7 @@ EXPOSE 3000
 
 # Set up service account key storage
 COPY startup.sh /startup.sh
-RUN chmod +x /startup.sh
+RUN sed -i 's/\r$//' /startup.sh && chmod +x /startup.sh
 
 # Set environment variable for the service account key location
 ENV GOOGLE_APPLICATION_CREDENTIALS="/secrets/service-account.json"

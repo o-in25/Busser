@@ -4,6 +4,7 @@
 	import { ProgressBar } from '@prgm/sveltekit-progress-bar';
 	import { setContext } from 'svelte';
 
+	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Footer from '$lib/components/Footer.svelte';
 	import Nav from '$lib/components/Nav.svelte';
@@ -13,6 +14,51 @@
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
+
+	// route order for directional transitions (lower index = further "left")
+	const routeOrder: Record<string, number> = {
+		'/': 0,
+		'/inventory': 1,
+		'/catalog': 2,
+		'/assistant': 3,
+		'/tools': 4,
+		'/settings': 5,
+	};
+
+	function getRouteKey(pathname: string): string {
+		// match top-level route segment (e.g. /catalog/123 -> /catalog)
+		const match = pathname.match(/^\/[^/]*/);
+		return match?.[0] || '/';
+	}
+
+	// directional view transitions
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		let direction = 'forward';
+
+		if (navigation.type === 'popstate') {
+			direction = 'back';
+		} else {
+			const fromKey = getRouteKey($page.url.pathname);
+			const toKey = getRouteKey(navigation.to?.url.pathname ?? '/');
+			const fromIndex = routeOrder[fromKey] ?? -1;
+			const toIndex = routeOrder[toKey] ?? -1;
+
+			if (fromIndex !== -1 && toIndex !== -1) {
+				direction = toIndex >= fromIndex ? 'forward' : 'back';
+			}
+		}
+
+		document.documentElement.setAttribute('data-nav-direction', direction);
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	// Auth routes where we don't show the navbar
 	const authRoutes = [

@@ -198,6 +198,9 @@ importers:
       sass:
         specifier: ^1.97.3
         version: 1.97.3
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
       svelte:
         specifier: ^5.50.3
         version: 5.50.3

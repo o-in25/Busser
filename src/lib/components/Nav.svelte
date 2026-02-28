@@ -299,7 +299,7 @@
 		z-index: 50;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.75rem 1.25rem;
+		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
 		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
