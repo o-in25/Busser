@@ -29,7 +29,8 @@
 
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
+	import DashboardSkeleton from '$lib/components/skeletons/DashboardSkeleton.svelte';
 	import logo from '$lib/assets/logo.png';
 	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -116,7 +117,9 @@
 	<title>Busser - Home Bar Management</title>
 </svelte:head>
 
-{#if !$page.data.user}
+{#if $navigating?.to?.url.pathname === '/' && $page.data.user}
+	<DashboardSkeleton />
+{:else if !$page.data.user}
 	<!-- Hero Section -->
 	<section class="relative overflow-hidden py-12 md:py-18 rounded-2xl mt-4">
 		<!-- Animated background gradient -->

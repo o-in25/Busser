@@ -3,6 +3,7 @@
 
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { haptics } from '$lib/haptics';
 	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
@@ -147,6 +148,7 @@
 									method="POST"
 									action="{actionPath}/toggleFavorite"
 									use:enhance={() => {
+										haptics.light();
 										onToggleFavorite?.(recipe.recipeId);
 										return async ({ result }) => {
 											if (result.type === 'failure') invalidateAll();
@@ -174,6 +176,7 @@
 										method="POST"
 										action="{actionPath}/toggleFeatured"
 										use:enhance={() => {
+											haptics.light();
 											onToggleFeatured?.(recipe.recipeId);
 											return async ({ result }) => {
 												if (result.type === 'failure') invalidateAll();
@@ -283,6 +286,7 @@
 									method="POST"
 									action="{actionPath}/toggleFavorite"
 									use:enhance={() => {
+										haptics.light();
 										onToggleFavorite?.(recipe.recipeId);
 										return async ({ result }) => {
 											if (result.type === 'failure') invalidateAll();
@@ -311,6 +315,7 @@
 										method="POST"
 										action="{actionPath}/toggleFeatured"
 										use:enhance={() => {
+											haptics.light();
 											onToggleFeatured?.(recipe.recipeId);
 											return async ({ result }) => {
 												if (result.type === 'failure') invalidateAll();

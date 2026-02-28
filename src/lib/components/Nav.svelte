@@ -18,6 +18,7 @@
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import logoNav from '$lib/assets/logo-nav.png';
+	import { haptics } from '$lib/haptics';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
@@ -120,7 +121,7 @@
 					<!-- Main -->
 					<div class="flex flex-col gap-1">
 						<button
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
 							onclick={() => {
 								mobileMenuOpen = false;
 								goto('/settings');
@@ -143,7 +144,7 @@
 							onclick={() => {
 								mobileMenuOpen = false;
 							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<Shield class="h-4 w-4 text-muted-foreground" />
 							Privacy Policy
@@ -153,7 +154,7 @@
 							onclick={() => {
 								mobileMenuOpen = false;
 							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<FileText class="h-4 w-4 text-muted-foreground" />
 							Terms of Service
@@ -163,7 +164,7 @@
 							onclick={() => {
 								mobileMenuOpen = false;
 							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<Cookie class="h-4 w-4 text-muted-foreground" />
 							Cookie Policy
@@ -182,7 +183,7 @@
 							onclick={() => {
 								mobileMenuOpen = false;
 							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<Info class="h-4 w-4 text-muted-foreground" />
 							About
@@ -191,7 +192,7 @@
 							href="https://github.com/o-in25/Busser"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<Github class="h-4 w-4 text-muted-foreground" />
 							GitHub
@@ -203,7 +204,7 @@
 				<!-- sign out pinned to bottom -->
 				<div class="shrink-0 pt-4 border-t border-border">
 					<button
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left"
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
 						onclick={() => {
 							mobileMenuOpen = false;
 							logout();
@@ -227,7 +228,7 @@
 	<nav class="mobile-nav-container flex md:hidden">
 		<div class="mobile-nav-pill">
 			{#each navItems as item}
-				<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}">
+				<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
 					<item.icon class="h-5 w-5" />
 					<span class="mobile-nav-label">{item.label}</span>
 				</a>

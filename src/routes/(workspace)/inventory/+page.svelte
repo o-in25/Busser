@@ -4,7 +4,9 @@
 
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { haptics } from '$lib/haptics';
+	import { navigating, page } from '$app/stores';
+	import InventorySkeleton from '$lib/components/skeletons/InventorySkeleton.svelte';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
@@ -75,6 +77,7 @@
 
 	async function handleBulkSetStock(inStock: boolean) {
 		if (selectedIds.length === 0) return;
+		haptics.medium();
 		bulkActionLoading = true;
 		try {
 			const res = await fetch('/api/inventory/bulk/stock', {
@@ -138,6 +141,7 @@
 
 	// Handle stock change from drawer
 	async function handleStockChange(productId: number, inStock: boolean) {
+		haptics.medium();
 		// Optimistically update local data
 		const productIndex = data.data.findIndex((p) => p.productId === productId);
 		if (productIndex !== -1) {
@@ -301,6 +305,10 @@
 <svelte:head>
 	<title>Inventory - Busser</title>
 </svelte:head>
+
+{#if $navigating?.to?.url.pathname.startsWith('/inventory') && !$navigating?.to?.url.pathname.startsWith($page.url.pathname)}
+	<InventorySkeleton />
+{:else}
 
 <!-- Inventory Section Navigation -->
 <InventoryNav />
@@ -554,3 +562,5 @@
 	recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
 	onStockChange={handleStockChange}
 />
+
+{/if}

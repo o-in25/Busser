@@ -480,6 +480,50 @@ html[data-nav-direction="back"]::view-transition-new(root) {
 	}
 }
 
+/* pull-to-refresh indicator */
+.ptr-indicator {
+	position: absolute;
+	top: -3rem;
+	left: 50%;
+	translate: -50% 0;
+	z-index: 40;
+	opacity: 0;
+	transition: transform 0.2s ease, opacity 0.2s ease;
+	pointer-events: none;
+}
+
+.ptr-spinner {
+	width: 2rem;
+	height: 2rem;
+	border: 3px solid hsl(var(--muted));
+	border-top-color: hsl(var(--primary));
+	border-radius: 9999px;
+	transition: transform 0.1s linear;
+}
+
+.ptr-refreshing .ptr-spinner {
+	animation: ptr-spin 0.6s linear infinite;
+}
+
+@keyframes ptr-spin {
+	to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ptr-refreshing .ptr-spinner {
+		animation: none;
+		border-top-color: hsl(var(--primary));
+		opacity: 0.7;
+	}
+}
+
+/* lift toasts above mobile bottom nav */
+@media (max-width: 767px) {
+	[data-sonner-toaster] {
+		bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
+	}
+}
+
 input[type='range']::-webkit-slider-thumb {
 	background-color: #e5195f; /* primary-600 */
 }

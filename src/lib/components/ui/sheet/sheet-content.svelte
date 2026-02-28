@@ -33,13 +33,15 @@
 			sideClasses[side],
 			className
 		)}
+		style="padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));"
 		{...restProps}
 	>
 		{#if children}
 			{@render children()}
 		{/if}
 		<SheetPrimitive.Close
-			class="absolute right-4 top-5 z-10 p-2 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+			class="absolute right-4 z-10 p-2 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+			style="top: calc(1.25rem + env(safe-area-inset-top, 0px));"
 		>
 			<X class="h-5 w-5" />
 			<span class="sr-only">Close</span>
