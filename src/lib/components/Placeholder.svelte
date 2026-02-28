@@ -25,7 +25,7 @@
 	]} overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600"
 >
 	{#if src}
-		<img {src} alt="Avatar" class="w-full h-full object-cover" />
+		<img {src} alt="Avatar" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
 	{:else}
 		<svg
 			class="absolute {iconSizeClasses[size]} text-gray-400 -left-1"

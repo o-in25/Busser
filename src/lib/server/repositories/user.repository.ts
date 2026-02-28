@@ -44,11 +44,21 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
+	async findByEmail(email: string): Promise<QueryResult<User>> {
+		try {
+			const row = await this.db.table('user').select('userId').where({ email }).first();
+			if (!row) return { status: 'error', error: 'User not found.' };
+			return this.findById(row.userId);
+		} catch (error: any) {
+			return { status: 'error', error: error.message };
+		}
+	}
+
 	async findById(userId: string): Promise<QueryResult<User>> {
 		try {
 			const user: User = await this.db.query.transaction(async (trx) => {
 				let dbResult: any = await trx('user')
-					.select('UserId', 'Email', 'Username', 'CreatedDate', 'LastActivityDate', 'AvatarImageUrl', 'Verified')
+					.select('UserId', 'Email', 'Username', 'CreatedDate', 'LastActivityDate', 'AvatarImageUrl', 'Verified', 'NeedsOnboarding')
 					.first()
 					.where({ userId });
 
@@ -148,11 +158,11 @@ export class UserRepository extends BaseRepository {
 
 	async delete(
 		userId: string,
-		currentUserId: string
+		currentUserId?: string
 	): Promise<{ error?: string; refresh: User[] }> {
 		let response: { error?: string; refresh: User[] } = { refresh: [] };
 		try {
-			if (userId === currentUserId) {
+			if (currentUserId && userId === currentUserId) {
 				throw new Error('Invalid user ID to delete.');
 			}
 			const result = await this.db.table('user').where({ userId }).del();
@@ -531,8 +541,100 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
-	// registration flow
+	// shared registration core: creates user, assigns role, sets up workspaces
+	// callers (registerUser, registerOAuth) handle their own concerns before/after
 	async register(
+		trx: any,
+		opts: {
+			username: string;
+			email: string;
+			password: string | null;
+			verified: number;
+			needsOnboarding: number;
+			avatarUrl?: string | null;
+		}
+	): Promise<Pick<User, 'userId' | 'username' | 'email'>> {
+		const { username, email, password, verified, needsOnboarding, avatarUrl } = opts;
+
+		// check username/email uniqueness
+		let dbResult: any = await trx('user').select('username').where({ username }).first();
+		if (dbResult) throw new Error('Username already taken.');
+
+		dbResult = await trx('user').select('email').where({ email }).first();
+		if (dbResult) throw new Error('Email already taken.');
+
+		// create user
+		await trx('user').insert({
+			username,
+			email,
+			password,
+			verified,
+			needsOnboarding,
+			...(avatarUrl ? { avatarImageUrl: avatarUrl } : {}),
+			createdDate: Logger.now(),
+		});
+
+		dbResult = await trx('user')
+			.select('userId', 'username', 'email')
+			.where({ username, email })
+			.first();
+
+		const user = dbResult as Pick<User, 'userId' | 'username' | 'email'>;
+
+		if (!user.userId || !user.username || !user.email) {
+			throw new Error('Could not create user.');
+		}
+
+		// assign default role
+		dbResult = await trx('role').select('roleId').where('roleName', 'USER').first();
+		if (!dbResult?.roleId) throw new Error('Could not register user for default role.');
+		await trx('userRole').insert({ userId: user.userId, roleId: dbResult.roleId });
+
+		// create personal workspace
+		const slug = user.username
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-|-$/g, '')
+			.substring(0, 40);
+		const suffix = Math.random().toString(36).substring(2, 10);
+		const workspaceId = `${slug}-${suffix}`;
+		const workspaceName = `${user.username}'s Workspace`;
+
+		await trx('workspace').insert({
+			workspaceId,
+			workspaceName,
+			workspaceType: 'personal',
+			createdDate: Logger.now(),
+			createdBy: user.userId,
+		});
+
+		await trx('workspaceUser').insert({
+			workspaceId,
+			userId: user.userId,
+			workspaceRole: 'owner',
+			joinedDate: Logger.now(),
+		});
+
+		// add to global catalog as viewer
+		await trx('workspaceUser').insert({
+			workspaceId: 'ws-global-catalog',
+			userId: user.userId,
+			workspaceRole: 'viewer',
+			joinedDate: Logger.now(),
+		});
+
+		// generate random avatar if no provider avatar was supplied
+		if (!avatarUrl) {
+			this.generateAndUploadAvatar(user.userId).catch((err) => {
+				console.error('Failed to generate avatar for new user:', err);
+			});
+		}
+
+		return user;
+	}
+
+	// traditional registration: validates invitation, hashes password, sends verification email
+	async registerUser(
 		username: string,
 		email: string,
 		password: string,
@@ -540,7 +642,6 @@ export class UserRepository extends BaseRepository {
 	): Promise<QueryResult> {
 		try {
 			const { user } = await this.db.query.transaction(async (trx) => {
-				let user: Pick<User, 'userId' | 'username' | 'email'>;
 				let invitation: Pick<
 					Invitation,
 					'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
@@ -573,34 +674,15 @@ export class UserRepository extends BaseRepository {
 					}
 				}
 
-				// check username/email
-				let dbResult: any = await trx('user').select('username').where({ username }).first();
-				if (dbResult) throw new Error('Username already taken.');
-
-				dbResult = await trx('user').select('email').where({ email }).first();
-				if (dbResult) throw new Error('Email already taken.');
-
-				// create user
 				const hashedPassword = await this.authRepo.hashPassword(password);
-				await trx('user').insert({ username, email, password: hashedPassword, verified: 0, createdDate: Logger.now() });
 
-				dbResult = await trx('user')
-					.select('userId', 'username', 'email')
-					.where({ username, email, password: hashedPassword })
-					.first();
-
-				user = dbResult as Pick<User, 'userId' | 'username' | 'email'>;
-
-				if (!user.userId || !user.username || !user.email) {
-					throw new Error('Could not create user.');
-				}
-
-				// assign default role
-				dbResult = await trx('role').select('roleId').where('roleName', 'USER').first();
-
-				if (!dbResult?.roleId) throw new Error('Could not register user for default role.');
-
-				await trx('userRole').insert({ userId: user.userId, roleId: dbResult.roleId });
+				const user = await this.register(trx, {
+					username,
+					email,
+					password: hashedPassword,
+					verified: 0,
+					needsOnboarding: 0,
+				});
 
 				// mark invitation as used
 				if (invitation) {
@@ -609,40 +691,7 @@ export class UserRepository extends BaseRepository {
 						.where({ invitationId: invitation.invitationId });
 				}
 
-				// create default personal workspace for user
-				const slug = user.username
-					.toLowerCase()
-					.replace(/[^a-z0-9]+/g, '-')
-					.replace(/^-|-$/g, '')
-					.substring(0, 40);
-				const suffix = Math.random().toString(36).substring(2, 10);
-				const workspaceId = `${slug}-${suffix}`;
-				const workspaceName = `${user.username}'s Workspace`;
-
-				await trx('workspace').insert({
-					workspaceId,
-					workspaceName,
-					workspaceType: 'personal',
-					createdDate: Logger.now(),
-					createdBy: user.userId,
-				});
-
-				await trx('workspaceUser').insert({
-					workspaceId,
-					userId: user.userId,
-					workspaceRole: 'owner',
-					joinedDate: Logger.now(),
-				});
-
-				// add user to global catalog as viewer
-				await trx('workspaceUser').insert({
-					workspaceId: 'ws-global-catalog',
-					userId: user.userId,
-					workspaceRole: 'viewer',
-					joinedDate: Logger.now(),
-				});
-
-				// if invitation was for a specific workspace, add user to that workspace too
+				// if invitation was for a specific workspace, add user to that workspace
 				if (invitation?.workspaceId && invitation?.workspaceRole) {
 					await trx('workspaceUser').insert({
 						workspaceId: invitation.workspaceId,
@@ -653,11 +702,6 @@ export class UserRepository extends BaseRepository {
 				}
 
 				return { user };
-			});
-
-			// generate avatar for new user (non-blocking)
-			this.generateAndUploadAvatar(user.userId).catch((err) => {
-				console.error('Failed to generate avatar for new user:', err);
 			});
 
 			// send verification email

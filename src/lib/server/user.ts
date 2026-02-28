@@ -22,7 +22,7 @@ export const getGrants = userRepo.getGrants.bind(userRepo);
 export const updateGrants = userRepo.updateGrants.bind(userRepo);
 
 // registration flow (delegate to repository)
-export const registerUser = userRepo.register.bind(userRepo);
+export const registerUser = userRepo.registerUser.bind(userRepo);
 export const verifyUser = userRepo.verify.bind(userRepo);
 export const resendVerificationEmail = userRepo.resendVerificationEmail.bind(userRepo);
 export const resendVerificationEmailByEmail =

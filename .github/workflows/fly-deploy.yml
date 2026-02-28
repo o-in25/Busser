@@ -65,7 +65,9 @@ jobs:
             --build-arg MAILGUN_KEY=${{secrets.MAILGUN_KEY}} \
             --build-arg INSTANCE_CONNECTION_NAME=${{secrets.INSTANCE_CONNECTION_NAME}} \
             --build-arg APP_URL=${{secrets.APP_URL}} \
-            --build-arg APP_VERSION=${{ steps.tag_version.outputs.new_tag }}
+            --build-arg APP_VERSION=${{ steps.tag_version.outputs.new_tag }} \
+            --build-arg GOOGLE_OAUTH_CLIENT_ID=${{secrets.GOOGLE_OAUTH_CLIENT_ID}} \
+            --build-arg GOOGLE_OAUTH_CLIENT_SECRET=${{secrets.GOOGLE_OAUTH_CLIENT_SECRET}}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 

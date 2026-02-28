@@ -16,6 +16,7 @@ can make with what you have, and share your bar with friends and family.
 - **Workspaces** - Create dedicated spaces for your bar with their own inventory and recipes
 - **Collaboration** - Invite others to your workspace as owners, editors, or viewers
 - **AI-Powered** - Generate cocktail images and get recipe suggestions
+- **OAuth Login** - Sign in with Google (or email/password)
 
 ## Development
 
@@ -61,6 +62,9 @@ pnpm test:watch     # Run tests in watch mode
 | `INSTANCE_CONNECTION_NAME` | Cloud SQL instance      |
 | `OPENAI_API_KEY`           | OpenAI API key          |
 | `MAILGUN_KEY`              | Mailgun API key         |
+| `APP_URL`                  | Public app URL          |
+| `GOOGLE_OAUTH_CLIENT_ID`     | Google OAuth client ID  |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth secret     |
 
 ### Migrations
 

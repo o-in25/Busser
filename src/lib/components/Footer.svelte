@@ -97,21 +97,21 @@
 
 			<div class="flex gap-4">
 				<a
-					href="https://instagram.com"
+					href="https://instagram.com/busserapp"
 					class="text-muted-foreground hover:text-foreground transition-colors"
 					aria-label="Instagram"
 				>
 					<Instagram class="w-5 h-5" />
 				</a>
 				<a
-					href="https://facebook.com"
+					href="https://www.facebook.com/profile.php?id=61588019103189"
 					class="text-muted-foreground hover:text-foreground transition-colors"
 					aria-label="Facebook"
 				>
 					<Facebook class="w-5 h-5" />
 				</a>
 				<a
-					href="https://twitter.com"
+					href="https://x.com/busserapp"
 					class="text-muted-foreground hover:text-foreground transition-colors"
 					aria-label="Twitter"
 				>
