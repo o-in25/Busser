@@ -1,6 +1,7 @@
 import { type Actions, error, fail } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
+import { forceResetPassword, oauthRepo } from '$lib/server/auth';
 import { editUser, getUser, roleSelect } from '$lib/server/user';
 
 import type { PageServerLoad } from './$types';
@@ -31,7 +32,8 @@ const load: PageServerLoad = async ({ params, locals }) => {
 	const queryResult = await getUser(userId);
 	const roles = await roleSelect();
 	if ('data' in queryResult) {
-		return { user: queryResult.data, roles, currentUser: locals.user?.userId };
+		const hasPassword = await oauthRepo.hasPassword(userId);
+		return { user: queryResult.data, roles, currentUser: locals.user?.userId, hasPassword };
 	}
 
 	return error(StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -82,6 +84,39 @@ const actions = {
 				user: queryResult.data,
 			};
 		}
+	},
+
+	setPassword: async ({ request, params, locals }) => {
+		const { userId } = params;
+
+		if (!locals.user || !userId || locals.user.userId !== userId) {
+			return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authorized.' });
+		}
+
+		// only allow setting password for users who don't have one
+		const hasPassword = await oauthRepo.hasPassword(userId);
+		if (hasPassword) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'You already have a password set.' });
+		}
+
+		const formData = await request.formData();
+		const newPassword = formData.get('newPassword')?.toString() || '';
+		const confirmPassword = formData.get('confirmPassword')?.toString() || '';
+
+		if (!newPassword || newPassword.length < 8) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Password must be at least 8 characters.' });
+		}
+
+		if (newPassword !== confirmPassword) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Passwords do not match.' });
+		}
+
+		const success = await forceResetPassword(userId, newPassword);
+		if (!success) {
+			return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'Failed to set password.' });
+		}
+
+		return { passwordSet: true };
 	},
 } satisfies Actions;
 

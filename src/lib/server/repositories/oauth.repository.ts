@@ -2,6 +2,7 @@
 import moment from 'moment';
 
 import type { Invitation, OAuthProfile, QueryResult, User } from '$lib/types';
+import type { LinkedOAuthAccount } from '$lib/types/oauth';
 
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
@@ -147,6 +148,58 @@ export class OAuthRepository extends BaseRepository {
 					? error.message
 					: 'An error occurred during registration.',
 			};
+		}
+	}
+
+	// check if a user has a password set
+	async hasPassword(userId: string): Promise<boolean> {
+		try {
+			const user = await this.db.table('user').select('password').where({ userId }).first();
+			return !!user?.password;
+		} catch (error: any) {
+			console.error('Failed to check password:', error.message);
+			return false;
+		}
+	}
+
+	// get all linked oauth accounts for a user
+	async getLinkedAccounts(userId: string): Promise<QueryResult<LinkedOAuthAccount[]>> {
+		try {
+			const rows = await this.db
+				.table('oauthUser')
+				.select('provider', 'createdAt')
+				.where({ userId });
+
+			return { status: 'success', data: rows as LinkedOAuthAccount[] };
+		} catch (error: any) {
+			console.error('Failed to get linked accounts:', error.message);
+			return { status: 'error', error: error.message };
+		}
+	}
+
+	// unlink an oauth provider from a user (with safety check)
+	async unlinkOAuthAccount(userId: string, provider: string): Promise<QueryResult> {
+		try {
+			const user = await this.db.table('user').select('password').where({ userId }).first();
+			const linkedAccounts = await this.db.table('oauthUser').where({ userId });
+
+			if (!user?.password && linkedAccounts.length <= 1) {
+				return {
+					status: 'error',
+					error: 'Cannot unlink your only login method. Set a password first.',
+				};
+			}
+
+			const deleted = await this.db.table('oauthUser').where({ userId, provider }).del();
+
+			if (!deleted) {
+				return { status: 'error', error: 'Linked account not found.' };
+			}
+
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error('Failed to unlink OAuth account:', error.message);
+			return { status: 'error', error: error.message };
 		}
 	}
 

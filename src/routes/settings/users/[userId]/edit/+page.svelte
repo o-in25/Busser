@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { ArrowLeft, KeyRound, Save, User } from 'lucide-svelte';
+	import { ArrowLeft, KeyRound, Lock, Save, User } from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
@@ -15,12 +16,16 @@
 	import { notificationStore } from '../../../../../stores';
 	import type { ActionData, PageData } from './$types';
 
-	export let form: ActionData;
-	export let data: PageData;
+	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const permissions: string[] = getContext('permissions') || [];
 	const isAdmin = permissions.includes('edit_admin');
 
 	let selected = data.user?.roles.map(({ roleId }) => roleId) || [];
+	let setPasswordOpen = $state(false);
+	let isSettingPassword = $state(false);
+	let passwordError = $state('');
+
+	const isSelf = data.user?.userId === data.currentUser;
 
 	function toggleRole(roleId: string) {
 		if (selected.includes(roleId)) {
@@ -52,7 +57,7 @@
 		</div>
 		<a
 			class={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-			href="/settings/users/{data.user?.userId}"
+			href={isAdmin ? `/settings/users/${data.user?.userId}` : '/settings/user-account'}
 		>
 			<ArrowLeft class="h-4 w-4 mr-2" />
 			Back
@@ -97,6 +102,33 @@
 					<Label for="email">Email</Label>
 					<Input type="email" id="email" name="email" value={data.user?.email || ''} />
 				</div>
+				<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+					<div class="flex items-center gap-4">
+						{#if data.hasPassword && isAdmin}
+							<a
+								href="/settings/users/{data.user?.userId}/reset-password"
+								class="text-sm text-primary hover:underline"
+							>
+								Reset Password...
+							</a>
+						{/if}
+						{#if isSelf && !data.hasPassword}
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								onclick={() => { setPasswordOpen = true; passwordError = ''; }}
+							>
+								<Lock class="h-4 w-4 mr-2" />
+								Set Password
+							</Button>
+						{/if}
+					</div>
+					<Button type="submit" class="w-full sm:w-auto">
+						<Save class="h-4 w-4 mr-2" />
+						Save Changes
+					</Button>
+				</div>
 			</Card.Content>
 		</Card.Root>
 
@@ -129,26 +161,60 @@
 				</Card.Content>
 			</Card.Root>
 		{/if}
-
-		<!-- Actions Card -->
-		<Card.Root>
-			<Card.Header>
-				<Card.Title>Actions</Card.Title>
-			</Card.Header>
-			<Card.Content>
-				<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-					<a
-						href="/settings/users/{data.user?.userId}/reset-password"
-						class="text-sm text-primary hover:underline"
-					>
-						Reset Password...
-					</a>
-					<Button type="submit" class="w-full sm:w-auto">
-						<Save class="h-4 w-4 mr-2" />
-						Save Changes
-					</Button>
-				</div>
-			</Card.Content>
-		</Card.Root>
 	</form>
+
+	<!-- Set Password Dialog -->
+	<Dialog.Root bind:open={setPasswordOpen}>
+		<Dialog.Content>
+			<Dialog.Header>
+				<Dialog.Title class="flex items-center gap-2">
+					<Lock class="h-5 w-5" />
+					Set Password
+				</Dialog.Title>
+				<Dialog.Description>
+					Add a password so you can sign in without an OAuth provider
+				</Dialog.Description>
+			</Dialog.Header>
+			<form
+				method="POST"
+				action="?/setPassword"
+				class="space-y-4"
+				use:enhance={() => {
+					isSettingPassword = true;
+					passwordError = '';
+					return async ({ result }) => {
+						isSettingPassword = false;
+						if (result.type === 'success') {
+							setPasswordOpen = false;
+							$notificationStore.success = { message: 'Password set successfully.' };
+						} else if (result.type === 'failure') {
+							passwordError = result.data?.error?.toString() || 'Failed to set password.';
+						}
+					};
+				}}
+			>
+				<div class="space-y-2">
+					<Label for="newPassword">New Password</Label>
+					<Input type="password" id="newPassword" name="newPassword" placeholder="Min. 8 characters" />
+				</div>
+				<div class="space-y-2">
+					<Label for="confirmPassword">Confirm Password</Label>
+					<Input type="password" id="confirmPassword" name="confirmPassword" />
+				</div>
+				{#if passwordError}
+					<p class="text-sm text-destructive">{passwordError}</p>
+				{/if}
+				<Dialog.Footer>
+					<Button variant="outline" type="button" onclick={() => { setPasswordOpen = false; passwordError = ''; }}>Cancel</Button>
+					<Button type="submit" disabled={isSettingPassword}>
+						{#if isSettingPassword}
+							Setting password...
+						{:else}
+							Set Password
+						{/if}
+					</Button>
+				</Dialog.Footer>
+			</form>
+		</Dialog.Content>
+	</Dialog.Root>
 </div>

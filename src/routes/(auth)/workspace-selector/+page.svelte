@@ -5,6 +5,7 @@
 		Building2,
 		Crown,
 		Globe,
+		HelpCircle,
 		LogOut,
 		User,
 		Users,
@@ -16,6 +17,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Label } from '$lib/components/ui/label';
+	import * as Popover from '$lib/components/ui/popover';
 
 	import type { ActionData, PageData } from './$types';
 
@@ -56,7 +58,50 @@
 
 <!-- Header -->
 <div class="text-center mb-6">
-	<h1 class="text-xl font-bold">Select a Workspace</h1>
+	<div class="flex items-center justify-center gap-1.5">
+		<h1 class="text-xl font-bold">Select Workspace</h1>
+		<Popover.Root>
+			<Popover.Trigger
+				class="text-muted-foreground hover:text-foreground transition-colors rounded-full"
+			>
+				<HelpCircle class="h-4 w-4" />
+				<span class="sr-only">What are Workspaces?</span>
+			</Popover.Trigger>
+			<Popover.Content class="w-72 text-sm text-left" align="center">
+				<p class="font-semibold mb-2">What are Workspaces?</p>
+				<p class="text-muted-foreground mb-3">
+					Workspaces let you organize your bar separately, each with its own inventory, recipes, and
+					catalog.
+				</p>
+				<div class="space-y-2 mb-3">
+					<div class="flex items-start gap-2">
+						<Globe class="h-3.5 w-3.5 text-blue-500 mt-1 shrink-0" />
+						<p class="text-muted-foreground">
+							<span class="text-foreground font-medium">Global</span> &mdash; a shared, read-only
+							catalog of every recipe and ingredient available to all Busser users.
+						</p>
+					</div>
+					<div class="flex items-start gap-2">
+						<User class="h-3.5 w-3.5 text-purple-500 mt-1 shrink-0" />
+						<p class="text-muted-foreground">
+							<span class="text-foreground font-medium">Personal</span> &mdash; your private Workspace
+							with full control over your own catalog and inventory.
+						</p>
+					</div>
+					<div class="flex items-start gap-2">
+						<Users class="h-3.5 w-3.5 text-green-500 mt-1 shrink-0" />
+						<p class="text-muted-foreground">
+							<span class="text-foreground font-medium">Shared</span> &mdash; a collaborative Workspace
+							where multiple users manage a shared catalog and inventory.
+						</p>
+					</div>
+				</div>
+				<p class="text-muted-foreground text-xs border-t border-border/50 pt-2">
+					Owners can invite members and manage settings from Workspace Settings.
+				</p>
+			</Popover.Content>
+		</Popover.Root>
+	</div>
 	<p class="text-muted-foreground text-sm mt-1">Choose which workspace you'd like to work in</p>
 </div>
 

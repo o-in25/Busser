@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { getUserWorkspaces, hasGlobalPermission } from '$lib/server/auth';
+import { getUserWorkspaces, hasGlobalPermission, oauthRepo } from '$lib/server/auth';
 import {
 	deleteUser,
 	getPreferredWorkspaceId,
@@ -37,7 +37,11 @@ export const load = (async ({ locals, url }) => {
 	// get preferred workspace ID from DB
 	const preferredWorkspaceId = await getPreferredWorkspaceId(userId);
 
-	return { user, workspaces, currentWorkspace, preferredWorkspaceId };
+	// load linked oauth accounts
+	const linkedAccountsResult = await oauthRepo.getLinkedAccounts(userId);
+	const linkedAccounts = linkedAccountsResult.status === 'success' ? linkedAccountsResult.data || [] : [];
+
+	return { user, workspaces, currentWorkspace, preferredWorkspaceId, linkedAccounts };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
@@ -75,6 +79,27 @@ export const actions: Actions = {
 		});
 
 		return { success: true };
+	},
+
+	unlinkAccount: async ({ locals, request }) => {
+		if (!locals.user) {
+			return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authenticated' });
+		}
+
+		const formData = await request.formData();
+		const provider = formData.get('provider')?.toString();
+
+		if (!provider) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Provider is required' });
+		}
+
+		const result = await oauthRepo.unlinkOAuthAccount(locals.user.userId, provider);
+
+		if (result.status === 'error') {
+			return fail(StatusCodes.BAD_REQUEST, { error: result.error });
+		}
+
+		return { success: true, unlinked: provider };
 	},
 
 	deleteAccount: async ({ locals, cookies }) => {

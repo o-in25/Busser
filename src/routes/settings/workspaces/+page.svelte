@@ -1,10 +1,12 @@
 <script lang="ts">
 	import {
 		Building2,
+		Crown,
 		Globe,
 		Lock,
 		Pencil,
 		Plus,
+		Shield,
 		Trash2,
 		User,
 		UserCog,
@@ -85,6 +87,28 @@
 		newWorkspaceName = '';
 		newWorkspaceType = 'shared';
 	}
+
+	// role descriptions
+	const roleDescriptions: Record<string, { label: string; description: string; color: string; bg: string }> = {
+		owner: {
+			label: 'Owner',
+			description: 'Full access. Can manage members, settings, and all content.',
+			color: 'text-amber-500',
+			bg: 'bg-amber-500/10',
+		},
+		editor: {
+			label: 'Editor',
+			description: 'Can create, edit, and delete recipes and inventory.',
+			color: 'text-blue-500',
+			bg: 'bg-blue-500/10',
+		},
+		viewer: {
+			label: 'Viewer',
+			description: 'Read-only access. Can view but not modify content.',
+			color: 'text-emerald-500',
+			bg: 'bg-emerald-500/10',
+		},
+	};
 
 	// Format date
 	function formatDate(date: Date | string): string {
@@ -287,6 +311,34 @@
 					</p>
 				</div>
 			{/if}
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Role Legend -->
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="flex items-center gap-2 text-base">
+				<Shield class="h-5 w-5" />
+				Role Permissions
+			</Card.Title>
+			<Card.Description>
+				Your access level in each Workspace determines what you can do with recipes and inventory
+			</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+				{#each Object.entries(roleDescriptions) as [role, info]}
+					<div class="flex flex-col gap-1.5">
+						<Badge class="{info.bg} {info.color} border-0 w-fit">
+							{#if role === 'owner'}
+								<Crown class="h-3 w-3 mr-1" />
+							{/if}
+							{info.label}
+						</Badge>
+						<span class="text-muted-foreground text-xs">{info.description}</span>
+					</div>
+				{/each}
+			</div>
 		</Card.Content>
 	</Card.Root>
 </div>

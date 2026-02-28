@@ -7,11 +7,14 @@
 		Crown,
 		Globe,
 		KeyRound,
+		Link2,
+		Lock,
 		LogOut,
 		Mail,
 		Pencil,
 		Shield,
 		Trash2,
+		Unlink,
 		User,
 		Users,
 	} from 'lucide-svelte';
@@ -36,6 +39,10 @@
 	let isDeleting = $state(false);
 	let deleteDialogOpen = $state(false);
 	let deleteError = $state('');
+	let unlinkDialogOpen = $state(false);
+	let unlinkProvider = $state('');
+	let isUnlinking = $state(false);
+	let unlinkError = $state('');
 
 	// Update selected when data changes
 	$effect(() => {
@@ -63,37 +70,31 @@
 	// filter to only admin-related permissions (system-level access)
 	const adminPermissions = permissions.filter((p) => p.includes('admin'));
 
-	// workspace role descriptions
-	const roleDescriptions: Record<
-		string,
-		{ label: string; description: string; color: string; bg: string }
-	> = {
-		owner: {
-			label: 'Owner',
-			description: 'Full access. Can manage members, settings, and all content.',
-			color: 'text-amber-500',
-			bg: 'bg-amber-500/10',
-		},
-		editor: {
-			label: 'Editor',
-			description: 'Can create, edit, and delete recipes and inventory.',
-			color: 'text-blue-500',
-			bg: 'bg-blue-500/10',
-		},
-		viewer: {
-			label: 'Viewer',
-			description: 'Read-only access. Can view but not modify content.',
-			color: 'text-emerald-500',
-			bg: 'bg-emerald-500/10',
-		},
-	};
-
 	// admin permission descriptions
 	const adminPermissionDescriptions: Record<string, string> = {
 		view_admin: 'View admin settings and user list',
 		edit_admin: 'Manage users and workspace settings',
 		delete_admin: 'Delete users from the system',
 	};
+
+	const providerLabels: Record<string, string> = {
+		google: 'Google',
+		apple: 'Apple',
+	};
+
+	function formatLinkedDate(date: string | Date): string {
+		return new Date(date).toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+		});
+	}
+
+	function openUnlinkDialog(provider: string) {
+		unlinkProvider = provider;
+		unlinkError = '';
+		unlinkDialogOpen = true;
+	}
 </script>
 
 <svelte:head>
@@ -209,17 +210,17 @@
 		</Card.Content>
 	</Card.Root>
 
-	<!-- System Access Card (Admin Permissions) -->
-	<Card.Root>
-		<Card.Header>
-			<Card.Title class="flex items-center gap-2">
-				<Shield class="h-5 w-5" />
-				System Access
-			</Card.Title>
-			<Card.Description>Your administrative permissions for system-level features</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			{#if adminPermissions.length > 0}
+	<!-- System Access Card (only shown for users with admin permissions) -->
+	{#if adminPermissions.length > 0}
+		<Card.Root>
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2">
+					<Shield class="h-5 w-5" />
+					System Access
+				</Card.Title>
+				<Card.Description>Your administrative permissions for system-level features</Card.Description>
+			</Card.Header>
+			<Card.Content>
 				<div class="space-y-3">
 					{#each adminPermissions as permission}
 						<div class="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
@@ -237,106 +238,142 @@
 						</div>
 					{/each}
 				</div>
-			{:else}
-				<div class="text-center py-8">
-					<div
-						class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
-					>
-						<Shield class="h-8 w-8 text-muted-foreground/50" />
-					</div>
-					<h3 class="font-semibold mb-1">Standard User</h3>
-					<p class="text-sm text-muted-foreground">
-						You have standard user access. Your permissions for recipes and inventory are determined
-						by your role in each workspace.
-					</p>
-				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 
-	<!-- Workspace Access Card -->
+	<!-- Connected Accounts Card -->
 	<Card.Root>
 		<Card.Header>
 			<Card.Title class="flex items-center gap-2">
-				<Building2 class="h-5 w-5" />
-				Workspace Access
+				<Link2 class="h-5 w-5" />
+				Connected Accounts
 			</Card.Title>
-			<Card.Description>
-				Your access level in each workspace determines what you can do with recipes and inventory
-			</Card.Description>
+			<Card.Description>OAuth providers linked to your account</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			{#if data.workspaces && data.workspaces.length > 0}
-				<div class="space-y-3 mb-6">
-					{#each data.workspaces as workspace (workspace.workspaceId)}
-						{@const roleInfo = roleDescriptions[workspace.workspaceRole]}
-						<div class="p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-							<div class="flex items-center justify-between mb-2">
-								<div class="flex items-center gap-3">
-									<div
-										class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
-											? 'bg-blue-500/10'
-											: workspace.workspaceType === 'personal'
-												? 'bg-purple-500/10'
-												: 'bg-green-500/10'}"
-									>
-										{#if workspace.workspaceId === 'ws-global-catalog'}
-											<Globe class="h-4 w-4 text-blue-500" />
-										{:else if workspace.workspaceType === 'personal'}
-											<User class="h-4 w-4 text-purple-500" />
-										{:else}
-											<Users class="h-4 w-4 text-green-500" />
-										{/if}
-									</div>
-									<div>
-										<div class="font-medium flex items-center gap-2">
-											{workspace.workspaceName}
-											{#if workspace.workspaceId === 'ws-global-catalog'}
-												<Badge variant="outline" class="text-xs">Global</Badge>
-											{/if}
-										</div>
-									</div>
-								</div>
-								<Badge class="{roleInfo.bg} {roleInfo.color} border-0">
-									{#if workspace.workspaceRole === 'owner'}
-										<Crown class="h-3 w-3 mr-1" />
+			{#if data.linkedAccounts && data.linkedAccounts.length > 0}
+				<div class="space-y-3">
+					{#each data.linkedAccounts as account}
+						<div
+							class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-muted/30"
+						>
+							<div class="flex items-center gap-3">
+								<div class="p-2 rounded-lg bg-muted shrink-0">
+									{#if account.provider === 'google'}
+										<svg class="h-4 w-4" viewBox="0 0 24 24">
+											<path
+												fill="#4285F4"
+												d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+											/>
+											<path
+												fill="#34A853"
+												d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+											/>
+											<path
+												fill="#FBBC05"
+												d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+											/>
+											<path
+												fill="#EA4335"
+												d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+											/>
+										</svg>
+									{:else}
+										<Link2 class="h-4 w-4 text-muted-foreground" />
 									{/if}
-									{roleInfo.label}
-								</Badge>
+								</div>
+								<div>
+									<p class="font-medium">{providerLabels[account.provider] || account.provider}</p>
+									<p class="text-sm text-muted-foreground">
+										Linked {formatLinkedDate(account.createdAt)}
+									</p>
+								</div>
 							</div>
-							<p class="text-sm text-muted-foreground ml-11">
-								{roleInfo.description}
-							</p>
+							<Button
+								variant="outline"
+								size="sm"
+								class="shrink-0 sm:w-auto w-full"
+								onclick={() => openUnlinkDialog(account.provider)}
+							>
+								<Unlink class="h-4 w-4 mr-2" />
+								Unlink
+							</Button>
 						</div>
 					{/each}
 				</div>
 
-				<!-- Role Legend -->
-				<div class="p-4 rounded-lg border border-dashed mb-6">
-					<h4 class="text-sm font-medium mb-3">Role Permissions</h4>
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-						{#each Object.entries(roleDescriptions) as [role, info]}
-							<div class="flex flex-col gap-1.5">
-								<Badge class="{info.bg} {info.color} border-0 w-fit">
-									{#if role === 'owner'}
-										<Crown class="h-3 w-3 mr-1" />
-									{/if}
-									{info.label}
-								</Badge>
-								<span class="text-muted-foreground text-xs">{info.description}</span>
-							</div>
-						{/each}
-					</div>
-				</div>
+				<!-- Unlink confirmation dialog -->
+				<Dialog.Root bind:open={unlinkDialogOpen}>
+					<Dialog.Content>
+						<Dialog.Header>
+							<Dialog.Title class="flex items-center gap-2">
+								<Unlink class="h-5 w-5" />
+								Unlink {providerLabels[unlinkProvider] || unlinkProvider}
+							</Dialog.Title>
+							<Dialog.Description>
+								This will remove {providerLabels[unlinkProvider] || unlinkProvider} as a login method.
+								You will no longer be able to sign in with this provider.
+							</Dialog.Description>
+						</Dialog.Header>
+						<Dialog.Footer>
+							{#if unlinkError}
+								<div class="w-full space-y-3">
+									<p class="text-sm text-destructive">{unlinkError}</p>
+									<div class="flex justify-end gap-2">
+										<Button variant="outline" onclick={() => { unlinkDialogOpen = false; unlinkError = ''; }}>Cancel</Button>
+										<a
+											href="/settings/users/{data.user?.userId}/edit"
+											class={cn(buttonVariants({ variant: 'default' }))}
+										>
+											<Lock class="h-4 w-4 mr-2" />
+											Set a Password
+										</a>
+									</div>
+								</div>
+							{:else}
+								<Button variant="outline" onclick={() => { unlinkDialogOpen = false; unlinkError = ''; }}>Cancel</Button>
+								<form
+									method="POST"
+									action="?/unlinkAccount"
+									use:enhance={() => {
+										isUnlinking = true;
+										unlinkError = '';
+										return async ({ result, update }) => {
+											isUnlinking = false;
+											if (result.type === 'success') {
+												unlinkDialogOpen = false;
+												await update();
+											} else if (result.type === 'failure') {
+												unlinkError = String(result.data?.error || 'Failed to unlink account');
+											}
+										};
+									}}
+								>
+									<input type="hidden" name="provider" value={unlinkProvider} />
+									<Button type="submit" variant="destructive" disabled={isUnlinking}>
+										{#if isUnlinking}
+											Unlinking...
+										{:else}
+											Yes, Unlink Account
+										{/if}
+									</Button>
+								</form>
+							{/if}
+						</Dialog.Footer>
+					</Dialog.Content>
+				</Dialog.Root>
 			{:else}
 				<div class="text-center py-8">
 					<div
 						class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
 					>
-						<Building2 class="h-8 w-8 text-muted-foreground/50" />
+						<Link2 class="h-8 w-8 text-muted-foreground/50" />
 					</div>
-					<h3 class="font-semibold mb-1">No Workspaces</h3>
-					<p class="text-sm text-muted-foreground">You don't belong to any workspaces yet.</p>
+					<h3 class="font-semibold mb-1">No Connected Accounts</h3>
+					<p class="text-sm text-muted-foreground">
+						You don't have any OAuth providers linked to your account.
+					</p>
 				</div>
 			{/if}
 		</Card.Content>

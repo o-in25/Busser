@@ -14,3 +14,8 @@ export type OAuthState = {
 	token: string;
 	inviteCode: string | null;
 };
+
+export type LinkedOAuthAccount = {
+	provider: OAuthProvider;
+	createdAt: string | Date;
+};

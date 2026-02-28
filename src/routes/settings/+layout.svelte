@@ -6,6 +6,11 @@
 
 	$: activeUrl$ = $page.url.pathname;
 	const permissions: string[] = getContext('permissions') || [];
+	const isAdmin = permissions.includes('view_admin');
+
+	// for non-admin users, /settings/users/{id}/edit is reached from Account
+	$: isAccountActive =
+		activeUrl$.includes('account') || (!isAdmin && activeUrl$.includes('/users/'));
 
 	let activeClass =
 		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed p-4 text-primary-600 bg-white/60 dark:bg-zinc-800/50 backdrop-blur-sm rounded-t-lg dark:text-primary-500';
@@ -31,7 +36,7 @@
 			href="/settings/user-account"
 			type="button"
 			role="tab"
-			class={activeUrl$.includes('account') ? activeClass : defaultClass}
+			class={isAccountActive ? activeClass : defaultClass}
 		>
 			<div class="flex items-center justify-center gap-2">
 				<UserCog class="h-5 w-5" /><span class="hidden md:inline-block">Account</span>
