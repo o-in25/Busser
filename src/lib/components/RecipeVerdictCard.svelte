@@ -23,11 +23,11 @@
 		{ max: 0, label: 'No Rating', color: 'bg-gray-500', textColor: 'text-gray-500' },
 		{ max: 1, label: 'Swill', color: 'bg-red-600', textColor: 'text-red-600' },
 		{ max: 2, label: 'Forgettable', color: 'bg-red-500', textColor: 'text-red-500' },
-		{ max: 3, label: 'Bottom Shelf', color: 'bg-orange-500', textColor: 'text-orange-500' },
-		{ max: 4, label: 'Decent', color: 'bg-yellow-500', textColor: 'text-yellow-500' },
-		{ max: 5, label: 'Standard Pour', color: 'bg-yellow-400', textColor: 'text-yellow-500' },
+		{ max: 3, label: 'Bottom Shelf', color: 'bg-neon-amber-500', textColor: 'text-neon-amber-500' },
+		{ max: 4, label: 'Decent', color: 'bg-neon-yellow-500', textColor: 'text-neon-yellow-500' },
+		{ max: 5, label: 'Standard Pour', color: 'bg-neon-yellow-400', textColor: 'text-neon-yellow-500' },
 		{ max: 6, label: 'Good Stuff', color: 'bg-lime-500', textColor: 'text-lime-500' },
-		{ max: 7, label: 'Top Shelf', color: 'bg-green-500', textColor: 'text-green-500' },
+		{ max: 7, label: 'Top Shelf', color: 'bg-neon-green-500', textColor: 'text-neon-green-500' },
 		{
 			max: 8,
 			label: "Connoisseur's Choice",
@@ -35,7 +35,7 @@
 			textColor: 'text-emerald-500',
 		},
 		{ max: 9, label: "Bartender's Favorite", color: 'bg-blue-500', textColor: 'text-blue-500' },
-		{ max: 10, label: 'Best in House', color: 'bg-violet-500', textColor: 'text-violet-500' },
+		{ max: 10, label: 'Best in House', color: 'bg-secondary-500', textColor: 'text-secondary-500' },
 	];
 
 	// Calculate score
@@ -65,10 +65,10 @@
 	];
 
 	const colorClasses: Record<string, { bar: string; icon: string }> = {
-		pink: { bar: 'bg-pink-500', icon: 'text-pink-500' },
-		amber: { bar: 'bg-amber-500', icon: 'text-amber-500' },
-		purple: { bar: 'bg-purple-500', icon: 'text-purple-500' },
-		orange: { bar: 'bg-orange-500', icon: 'text-orange-500' },
+		pink: { bar: 'bg-primary-500', icon: 'text-primary-500' },
+		amber: { bar: 'bg-neon-amber-500', icon: 'text-neon-amber-500' },
+		purple: { bar: 'bg-secondary-500', icon: 'text-secondary-500' },
+		orange: { bar: 'bg-neon-amber-500', icon: 'text-neon-amber-500' },
 	};
 </script>
 

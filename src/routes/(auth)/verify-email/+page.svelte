@@ -46,7 +46,7 @@
 </svelte:head>
 
 <div>
-	<CheckCircle2 class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
+	<CheckCircle2 class="w-8 h-8 mb-3 text-neon-green-500 dark:text-neon-green-400" />
 	<h4 class="text-xl font-semibold mb-2">Check your email</h4>
 	<p class="mb-3 font-normal text-muted-foreground">
 		Thanks for signing up! We've sent a confirmation link to
@@ -64,7 +64,7 @@
 		</p>
 
 		{#if resendStatus === 'success'}
-			<p class="text-sm text-green-600 dark:text-green-400">
+			<p class="text-sm text-neon-green-600 dark:text-neon-green-400">
 				<Mail class="w-4 h-4 inline-block mr-1" />
 				Verification email sent! Please check your inbox.
 			</p>

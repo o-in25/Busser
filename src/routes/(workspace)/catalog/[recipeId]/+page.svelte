@@ -63,7 +63,7 @@
 					type="submit"
 					variant={isFavorite ? 'default' : 'outline'}
 					size="sm"
-					class={cn('max-sm:px-2', isFavorite && 'bg-red-500 hover:bg-red-600 border-red-500')}
+					class={cn('max-sm:px-2', isFavorite && 'bg-red-500 hover:bg-red-600 border-red-500 dark:shadow-glow-pink')}
 				>
 					<Heart class={cn('h-4 w-4 sm:mr-2', isFavorite && 'fill-current')} />
 					<span class="hidden sm:inline">{isFavorite ? 'Favorited' : 'Favorite'}</span>
@@ -93,7 +93,7 @@
 						size="sm"
 						class={cn(
 							'max-sm:px-2',
-							isFeatured && 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-black'
+							isFeatured && 'bg-neon-yellow-500 hover:bg-neon-yellow-600 border-neon-yellow-500 text-black dark:shadow-glow-yellow'
 						)}
 					>
 						<Star class={cn('h-4 w-4 sm:mr-2', isFeatured && 'fill-current')} />

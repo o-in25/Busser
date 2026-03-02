@@ -760,7 +760,7 @@
 				<Dialog.Title>Confirm Delete</Dialog.Title>
 				<Dialog.Description>
 					Delete <span class="font-semibold">{product?.productName}</span> from inventory?
-					<p class="text-destructive font-bold mt-2">Once deleted, it can't be recovered.</p>
+					<p class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20">Once deleted, it can't be recovered.</p>
 				</Dialog.Description>
 			</Dialog.Header>
 			<Dialog.Footer>

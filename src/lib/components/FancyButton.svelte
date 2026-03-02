@@ -11,9 +11,9 @@
 
 	const colors = {
 		purpleToBlue:
-			'p-1 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-blue-300 dark:focus:ring-blue-800 rounded-lg',
+			'p-1 text-white bg-gradient-to-br from-secondary-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-blue-300 dark:focus:ring-blue-800 rounded-lg',
 		orangeToRed:
-			'p-1 text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-pink-200 dark:focus:ring-pink-800 rounded-lg',
+			'p-1 text-white bg-gradient-to-br from-primary-500 to-neon-amber-400 hover:bg-gradient-to-bl focus:ring-primary-200 dark:focus:ring-primary-800 rounded-lg',
 	};
 
 	const onClick = ({ target }) => dispatch('clicked', target);

@@ -309,7 +309,7 @@
 						{/if}
 						{#if hasParentCategoryMatch}
 							<span class="flex items-center gap-1">
-								<Sparkles class="w-3 h-3 text-amber-500" />
+								<Sparkles class="w-3 h-3 text-neon-amber-500" />
 								Any in parent category
 							</span>
 						{/if}

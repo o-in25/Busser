@@ -246,10 +246,10 @@
 	const ratingsMap = [
 		{ max: 0, label: 'No Rating', bg: 'bg-gray-500' },
 		{ max: 2, label: 'Needs Work', bg: 'bg-red-500' },
-		{ max: 4, label: 'Below Average', bg: 'bg-orange-500' },
-		{ max: 5, label: 'Average', bg: 'bg-yellow-500' },
+		{ max: 4, label: 'Below Average', bg: 'bg-neon-amber-500' },
+		{ max: 5, label: 'Average', bg: 'bg-neon-yellow-500' },
 		{ max: 6, label: 'Good', bg: 'bg-lime-500' },
-		{ max: 7, label: 'Great', bg: 'bg-green-500' },
+		{ max: 7, label: 'Great', bg: 'bg-neon-green-500' },
 		{ max: 8, label: 'Excellent', bg: 'bg-emerald-500' },
 		{ max: 10, label: 'Outstanding', bg: 'bg-teal-500' },
 	];
@@ -841,7 +841,7 @@
 					<Dialog.Title>Confirm Delete</Dialog.Title>
 					<Dialog.Description>
 						Delete <span class="font-semibold">{recipe?.recipeName}</span> from catalog?
-						<p class="text-destructive font-bold mt-2">Once deleted, it can't be recovered.</p>
+						<p class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20">Once deleted, it can't be recovered.</p>
 					</Dialog.Description>
 				</Dialog.Header>
 				<Dialog.Footer>

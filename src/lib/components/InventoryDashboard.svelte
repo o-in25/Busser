@@ -48,10 +48,10 @@
 
 			<button
 				onclick={() => applyFilter('in-stock')}
-				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-green-500/50 hover:bg-background transition-colors cursor-pointer"
+				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-neon-green-500/50 hover:bg-background transition-colors cursor-pointer"
 			>
-				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-green-500/10 shrink-0">
-					<CheckCircle2 class="h-4 w-4 md:h-5 md:w-5 text-green-500" />
+				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-neon-green-500/10 shrink-0">
+					<CheckCircle2 class="h-4 w-4 md:h-5 md:w-5 text-neon-green-500" />
 				</div>
 				<div class="text-center md:text-left">
 					<p class="text-lg md:text-xl font-bold">{stats.inStock}</p>

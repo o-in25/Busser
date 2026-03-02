@@ -18,8 +18,8 @@
 	const colorClasses: Record<string, string> = {
 		default: 'text-muted-foreground',
 		red: 'text-red-600 dark:text-red-400',
-		green: 'text-green-600 dark:text-green-400',
-		yellow: 'text-yellow-600 dark:text-yellow-400',
+		green: 'text-neon-green-600 dark:text-neon-green-400',
+		yellow: 'text-neon-yellow-600 dark:text-neon-yellow-400',
 	};
 </script>
 

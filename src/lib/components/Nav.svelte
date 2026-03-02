@@ -397,9 +397,13 @@
 	}
 
 	:global(.dark) .mobile-nav-item.active {
-		background: linear-gradient(135deg, rgba(248, 78, 128, 0.2) 0%, rgba(165, 125, 213, 0.2) 100%);
+		background: linear-gradient(135deg, rgba(248, 78, 128, 0.06) 0%, rgba(165, 125, 213, 0.06) 100%);
+		border: 1px solid rgba(248, 78, 128, 0.15);
 		color: rgba(248, 78, 128, 1);
-		box-shadow: 0 2px 8px rgba(248, 78, 128, 0.25);
+		box-shadow:
+			0 0 8px rgba(248, 78, 128, 0.35),
+			0 0 24px rgba(248, 78, 128, 0.15),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
 	}
 
 	.mobile-nav-label {
@@ -496,11 +500,15 @@
 	:global(.dark) .desktop-nav-item.active {
 		background: linear-gradient(
 			135deg,
-			rgba(248, 78, 128, 0.18) 0%,
-			rgba(165, 125, 213, 0.18) 100%
+			rgba(248, 78, 128, 0.06) 0%,
+			rgba(165, 125, 213, 0.06) 100%
 		);
+		border: 1px solid rgba(248, 78, 128, 0.15);
 		color: rgba(248, 78, 128, 1);
-		box-shadow: 0 2px 8px rgba(248, 78, 128, 0.2);
+		box-shadow:
+			0 0 8px rgba(248, 78, 128, 0.35),
+			0 0 24px rgba(248, 78, 128, 0.15),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
 	}
 
 	/* desktop avatar button */
@@ -521,17 +529,17 @@
 
 	@keyframes drawer-glow {
 		0%, 100% {
-			filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
+			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
 		}
 		50% {
-			filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.5));
+			filter: drop-shadow(0 0 20px rgba(248, 78, 128, 0.5));
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
 		.drawer-logo-glow {
 			animation: none;
-			filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
+			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
 		}
 	}
 </style>
