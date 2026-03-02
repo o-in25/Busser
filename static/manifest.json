@@ -38,5 +38,25 @@
 			"sizes": "180x180",
 			"type": "image/png"
 		}
+	],
+	"shortcuts": [
+		{
+			"name": "Inventory",
+			"short_name": "Inventory",
+			"url": "/inventory",
+			"icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Catalog",
+			"short_name": "Catalog",
+			"url": "/catalog",
+			"icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Busser AI",
+			"short_name": "Busser AI",
+			"url": "/assistant",
+			"icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+		}
 	]
 }

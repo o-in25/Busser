@@ -24,6 +24,8 @@
 		TrendingUp,
 		Users,
 		BarChart3,
+		DollarSign,
+		X,
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -33,6 +35,10 @@
 	import DashboardSkeleton from '$lib/components/skeletons/DashboardSkeleton.svelte';
 	import logo from '$lib/assets/logo.png';
 	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
+	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
+	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
+	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
+	import TopSpirit from '$lib/components/TopSpirit.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -40,8 +46,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { idToSlug } from '$lib/spirits';
-	import { reveal } from '$lib/reveal';
+	import { reveal } from '$lib/actions/reveal';
 	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
@@ -77,6 +82,10 @@
 				recipeId,
 				recipeCategoryId,
 				recipeDescription,
+				recipeSweetnessRating,
+				recipeDrynessRating,
+				recipeStrengthRating,
+				recipeVersatilityRating,
 			}) => ({
 				src: recipeImageUrl || '',
 				alt: recipeName,
@@ -86,6 +95,10 @@
 					recipeId,
 					recipeCategoryId,
 					recipeDescription,
+					recipeSweetnessRating,
+					recipeDrynessRating,
+					recipeStrengthRating,
+					recipeVersatilityRating,
 				},
 			})
 		) || []
@@ -93,11 +106,65 @@
 
 	// Filter state for gallery
 	let sortBy: string | number = $state('all');
-	let filter = $derived(
-		sortBy === 'all'
-			? gallery
-			: gallery.filter((item: any) => item.data.recipeCategoryId === sortBy)
-	);
+	let activeMood: string | null = $state(null);
+
+	// mood definitions
+	const moods = [
+		{
+			id: 'strong-dry',
+			label: 'Strong & Dry',
+			test: (d: (typeof gallery)[0]['data']) =>
+				d.recipeStrengthRating >= 6 && d.recipeDrynessRating >= 6,
+		},
+		{
+			id: 'sweet-easy',
+			label: 'Sweet & Easy',
+			test: (d: (typeof gallery)[0]['data']) =>
+				d.recipeSweetnessRating >= 6 && d.recipeStrengthRating <= 5,
+		},
+		{
+			id: 'balanced',
+			label: 'Balanced',
+			test: (d: (typeof gallery)[0]['data']) => {
+				const vals = [
+					d.recipeSweetnessRating,
+					d.recipeDrynessRating,
+					d.recipeStrengthRating,
+					d.recipeVersatilityRating,
+				];
+				const mean = vals.reduce((a, b) => a + b, 0) / 4;
+				return vals.every((v) => Math.abs(v - mean) <= 2.5);
+			},
+		},
+		{
+			id: 'bold-complex',
+			label: 'Bold & Complex',
+			test: (d: (typeof gallery)[0]['data']) =>
+				d.recipeStrengthRating >= 6 && d.recipeVersatilityRating >= 6,
+		},
+	];
+
+	// compose spirit + mood filters
+	let filter = $derived.by(() => {
+		let result =
+			sortBy === 'all' ? gallery : gallery.filter((item) => item.data.recipeCategoryId === sortBy);
+		if (activeMood) {
+			const mood = moods.find((m) => m.id === activeMood);
+			if (mood) result = result.filter((item) => mood.test(item.data));
+		}
+		return result;
+	});
+
+	// mood counts (computed against spirit-filtered list)
+	const moodCounts = $derived.by(() => {
+		const spiritFiltered =
+			sortBy === 'all' ? gallery : gallery.filter((item) => item.data.recipeCategoryId === sortBy);
+		const counts: Record<string, number> = {};
+		for (const mood of moods) {
+			counts[mood.id] = spiritFiltered.filter((item) => mood.test(item.data)).length;
+		}
+		return counts;
+	});
 
 	const setFilterType = (type: any) => {
 		if (type !== sortBy) {
@@ -165,10 +232,7 @@
 
 			<!-- CTAs -->
 			<div class="flex flex-col sm:flex-row justify-center gap-4 hero-enter" style="--delay: 600ms">
-				<a
-					class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')}
-					href="/signup"
-				>
+				<a class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')} href="/signup">
 					<Mail class="w-5 h-5 mr-2" />
 					Sign Up
 				</a>
@@ -184,9 +248,7 @@
 			<!-- App Preview Mockup -->
 			{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
 				<div class="mt-12 mx-auto max-w-3xl hero-enter" style="--delay: 800ms">
-					<div
-						class="app-preview-frame rounded-xl overflow-hidden shadow-2xl shadow-primary/20"
-					>
+					<div class="app-preview-frame rounded-xl overflow-hidden shadow-2xl shadow-primary/20">
 						<!-- Browser chrome bar -->
 						<div class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 dark:bg-zinc-950">
 							<div class="flex gap-1.5">
@@ -431,7 +493,9 @@
 					>
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
-								<div class="w-24 h-24 rounded-full bg-primary-500/10 flex items-center justify-center">
+								<div
+									class="w-24 h-24 rounded-full bg-primary-500/10 flex items-center justify-center"
+								>
 									<Package class="h-10 w-10 text-primary-500" />
 								</div>
 							</div>
@@ -454,7 +518,9 @@
 					>
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
-								<div class="w-24 h-24 rounded-full bg-neon-amber-500/10 flex items-center justify-center">
+								<div
+									class="w-24 h-24 rounded-full bg-neon-amber-500/10 flex items-center justify-center"
+								>
 									<Sparkles class="h-10 w-10 text-neon-amber-500" />
 								</div>
 							</div>
@@ -477,7 +543,9 @@
 					>
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
-								<div class="w-24 h-24 rounded-full bg-neon-green-500/10 flex items-center justify-center">
+								<div
+									class="w-24 h-24 rounded-full bg-neon-green-500/10 flex items-center justify-center"
+								>
 									<GlassWater class="h-10 w-10 text-neon-green-500" />
 								</div>
 							</div>
@@ -521,10 +589,7 @@
 							</button>
 						</p>
 					{/if}
-					<a
-						href="/signup"
-						class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')}
-					>
+					<a href="/signup" class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')}>
 						Sign Up
 						<ArrowRight class="ml-2 h-5 w-5" />
 					</a>
@@ -535,109 +600,109 @@
 
 	<!-- Request Invite Modal -->
 	{#if landingData?.inviteOnly}
-	<Dialog.Root bind:open={requestModalOpen}>
-		<Dialog.Content class="sm:max-w-md">
-			<Dialog.Header>
-				<Dialog.Title>Request an Invitation</Dialog.Title>
-				<Dialog.Description>
-					Enter your email and we'll notify an admin to review your request.
-				</Dialog.Description>
-			</Dialog.Header>
+		<Dialog.Root bind:open={requestModalOpen}>
+			<Dialog.Content class="sm:max-w-md">
+				<Dialog.Header>
+					<Dialog.Title>Request an Invitation</Dialog.Title>
+					<Dialog.Description>
+						Enter your email and we'll notify an admin to review your request.
+					</Dialog.Description>
+				</Dialog.Header>
 
-			{#if requestSuccess}
-				<!-- Success State -->
-				<div class="py-6 text-center">
-					<div
-						class="w-16 h-16 rounded-full bg-neon-green-500/10 flex items-center justify-center mx-auto mb-4"
-					>
-						<CheckCircle2 class="h-8 w-8 text-neon-green-500" />
+				{#if requestSuccess}
+					<!-- Success State -->
+					<div class="py-6 text-center">
+						<div
+							class="w-16 h-16 rounded-full bg-neon-green-500/10 flex items-center justify-center mx-auto mb-4"
+						>
+							<CheckCircle2 class="h-8 w-8 text-neon-green-500" />
+						</div>
+						<h3 class="text-lg font-semibold mb-2">Request Submitted!</h3>
+						<p class="text-muted-foreground text-sm mb-4">
+							We'll review your request and get back to you soon.
+						</p>
+						<Button
+							onclick={() => {
+								requestModalOpen = false;
+								requestSuccess = false;
+							}}
+						>
+							Got it
+						</Button>
 					</div>
-					<h3 class="text-lg font-semibold mb-2">Request Submitted!</h3>
-					<p class="text-muted-foreground text-sm mb-4">
-						We'll review your request and get back to you soon.
-					</p>
-					<Button
-						onclick={() => {
-							requestModalOpen = false;
-							requestSuccess = false;
+				{:else}
+					<!-- Request Form -->
+					<form
+						method="POST"
+						action="?/requestInvite"
+						class="space-y-4"
+						use:enhance={() => {
+							isSubmitting = true;
+							return async ({ result, update }) => {
+								isSubmitting = false;
+								if (result.type === 'success') {
+									requestSuccess = true;
+								}
+								await update();
+							};
 						}}
 					>
-						Got it
-					</Button>
-				</div>
-			{:else}
-				<!-- Request Form -->
-				<form
-					method="POST"
-					action="?/requestInvite"
-					class="space-y-4"
-					use:enhance={() => {
-						isSubmitting = true;
-						return async ({ result, update }) => {
-							isSubmitting = false;
-							if (result.type === 'success') {
-								requestSuccess = true;
-							}
-							await update();
-						};
-					}}
-				>
-					<div class="space-y-2">
-						<Label for="request-email">Email address</Label>
-						<Input
-							type="email"
-							id="request-email"
-							name="email"
-							placeholder="you@example.com"
-							value={requestInviteForm?.email || ''}
-							required
-						/>
-					</div>
-
-					<div class="space-y-2">
-						<Label for="request-message">
-							Why do you want to join? <span class="text-muted-foreground font-normal"
-								>(optional)</span
-							>
-						</Label>
-						<Textarea
-							id="request-message"
-							name="message"
-							placeholder="I'm a home bartender looking to organize my bar..."
-							rows={3}
-							value={requestInviteForm?.message || ''}
-						/>
-					</div>
-
-					{#if requestInviteForm?.error}
-						<div class="text-sm text-destructive bg-destructive/10 rounded-md p-3">
-							{requestInviteForm.error}
+						<div class="space-y-2">
+							<Label for="request-email">Email address</Label>
+							<Input
+								type="email"
+								id="request-email"
+								name="email"
+								placeholder="you@example.com"
+								value={requestInviteForm?.email || ''}
+								required
+							/>
 						</div>
-					{/if}
 
-					<Dialog.Footer class="flex-col sm:flex-row gap-2">
-						<Button
-							type="button"
-							variant="outline"
-							onclick={() => (requestModalOpen = false)}
-							class="w-full sm:w-auto"
-						>
-							Cancel
-						</Button>
-						<Button type="submit" class="w-full sm:w-auto" disabled={isSubmitting}>
-							{#if isSubmitting}
-								<Loader2 class="h-4 w-4 mr-2 animate-spin" />
-								Submitting...
-							{:else}
-								<Send class="h-4 w-4 mr-2" />
-								Submit Request
-							{/if}
-						</Button>
-					</Dialog.Footer>
-				</form>
-			{/if}
-		</Dialog.Content>
-	</Dialog.Root>
+						<div class="space-y-2">
+							<Label for="request-message">
+								Why do you want to join? <span class="text-muted-foreground font-normal"
+									>(optional)</span
+								>
+							</Label>
+							<Textarea
+								id="request-message"
+								name="message"
+								placeholder="I'm a home bartender looking to organize my bar..."
+								rows={3}
+								value={requestInviteForm?.message || ''}
+							/>
+						</div>
+
+						{#if requestInviteForm?.error}
+							<div class="text-sm text-destructive bg-destructive/10 rounded-md p-3">
+								{requestInviteForm.error}
+							</div>
+						{/if}
+
+						<Dialog.Footer class="flex-col sm:flex-row gap-2">
+							<Button
+								type="button"
+								variant="outline"
+								onclick={() => (requestModalOpen = false)}
+								class="w-full sm:w-auto"
+							>
+								Cancel
+							</Button>
+							<Button type="submit" class="w-full sm:w-auto" disabled={isSubmitting}>
+								{#if isSubmitting}
+									<Loader2 class="h-4 w-4 mr-2 animate-spin" />
+									Submitting...
+								{:else}
+									<Send class="h-4 w-4 mr-2" />
+									Submit Request
+								{/if}
+							</Button>
+						</Dialog.Footer>
+					</form>
+				{/if}
+			</Dialog.Content>
+		</Dialog.Root>
 	{/if}
 {:else}
 	<!-- ==================== AUTHENTICATED DASHBOARD ==================== -->
@@ -654,26 +719,26 @@
 				</div>
 
 				<!-- Quick Stats Cards -->
-				<div class="grid grid-cols-2 gap-3 w-full md:w-auto md:flex">
-					<Card.Root class="px-4 py-3">
+				<div class="grid grid-cols-2 gap-3 w-full md:w-auto">
+					<Card.Root class="px-4 py-3 md:min-w-[180px]">
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-full bg-neon-green-500/10">
 								<CheckCircle2 class="h-5 w-5 text-neon-green-500" />
 							</div>
 							<div>
 								<p class="text-2xl font-bold">{dashboardData.availableCount}</p>
-								<p class="text-xs text-muted-foreground">Ready to Make</p>
+								<p class="text-xs text-muted-foreground">Recipes Ready</p>
 							</div>
 						</div>
 					</Card.Root>
-					<Card.Root class="px-4 py-3">
+					<Card.Root class="px-4 py-3 md:min-w-[180px]">
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-full bg-primary/10">
 								<Package class="h-5 w-5 text-primary" />
 							</div>
 							<div>
 								<p class="text-2xl font-bold">{dashboardData.inventoryCount}</p>
-								<p class="text-xs text-muted-foreground">In Inventory</p>
+								<p class="text-xs text-muted-foreground">Bottles in Stock</p>
 							</div>
 						</div>
 					</Card.Root>
@@ -684,24 +749,6 @@
 		<!-- Quick Actions -->
 		<section class="mb-8">
 			<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-				{#if canModify}
-					<a href="/inventory/add" class="block">
-						<Card.Root
-							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
-						>
-							<div class="flex items-center gap-3">
-								<div class="p-2 rounded-lg bg-primary/10">
-									<Plus class="h-5 w-5 text-primary" />
-								</div>
-								<div>
-									<p class="font-medium">Add Ingredient</p>
-									<p class="text-xs text-muted-foreground">Update inventory</p>
-								</div>
-							</div>
-						</Card.Root>
-					</a>
-				{/if}
-
 				<a href="/catalog/browse" class="block">
 					<Card.Root
 						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
@@ -718,10 +765,44 @@
 					</Card.Root>
 				</a>
 
+				<a href="/inventory?page=1&stockFilter=out-of-stock" class="block">
+					<Card.Root
+						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
+					>
+						<div class="flex items-center gap-3">
+							<div class="p-2 rounded-lg bg-primary/10">
+								<ShoppingCart class="h-5 w-5 text-primary" />
+							</div>
+							<div>
+								<p class="font-medium">Shopping List</p>
+								<p class="text-xs text-muted-foreground">What you need</p>
+							</div>
+						</div>
+					</Card.Root>
+				</a>
+
+				{#if canModify}
+					<a href="/inventory/add" class="block">
+						<Card.Root
+							class="p-4 hover:shadow-md transition-shadow hover:border-neon-green-500/50 cursor-pointer h-full dark:hover:shadow-glow-green"
+						>
+							<div class="flex items-center gap-3">
+								<div class="p-2 rounded-lg bg-neon-green-500/10">
+									<Plus class="h-5 w-5 text-neon-green-500" />
+								</div>
+								<div>
+									<p class="font-medium">Add Ingredient</p>
+									<p class="text-xs text-muted-foreground">Update inventory</p>
+								</div>
+							</div>
+						</Card.Root>
+					</a>
+				{/if}
+
 				{#if gallery.length > 0}
 					<button onclick={surpriseMe} class="block text-left w-full">
 						<Card.Root
-							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-amber"
+							class="p-4 hover:shadow-md transition-shadow hover:border-neon-amber-500/50 cursor-pointer h-full dark:hover:shadow-glow-amber"
 						>
 							<div class="flex items-center gap-3">
 								<div class="p-2 rounded-lg bg-neon-amber-500/10">
@@ -735,22 +816,6 @@
 						</Card.Root>
 					</button>
 				{/if}
-
-				<a href="/inventory" class="block">
-					<Card.Root
-						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
-					>
-						<div class="flex items-center gap-3">
-							<div class="p-2 rounded-lg bg-primary/10">
-								<Package class="h-5 w-5 text-primary" />
-							</div>
-							<div>
-								<p class="font-medium">View Inventory</p>
-								<p class="text-xs text-muted-foreground">{dashboardData.inventoryCount} items</p>
-							</div>
-						</div>
-					</Card.Root>
-				</a>
 			</div>
 		</section>
 
@@ -775,31 +840,74 @@
 				</a>
 			</div>
 
+			<!-- Mood Filter Chips -->
+			{#if gallery.length > 0}
+				<div class="flex items-center gap-2 mb-2">
+					<span
+						class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0 hidden sm:block"
+						>Mood</span
+					>
+					<div class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mb-1">
+						{#each moods as mood}
+							{#if moodCounts[mood.id] > 0}
+								<Button
+									variant={activeMood === mood.id ? 'default' : 'outline'}
+									class="rounded-full border-dashed shrink-0 h-7 text-xs px-3"
+									size="sm"
+									onclick={() => (activeMood = activeMood === mood.id ? null : mood.id)}
+								>
+									{mood.label}
+									<span class="text-[10px] opacity-60 ml-1">{moodCounts[mood.id]}</span>
+								</Button>
+							{/if}
+						{/each}
+						{#if activeMood}
+							<Button
+								variant="ghost"
+								size="sm"
+								class="rounded-full text-muted-foreground shrink-0 h-7 text-xs px-2"
+								onclick={() => (activeMood = null)}
+							>
+								<X class="h-3 w-3" />
+							</Button>
+						{/if}
+					</div>
+				</div>
+			{/if}
+
 			<!-- Spirit Filter Chips -->
-			<div class="flex flex-wrap gap-2 mb-4">
-				<Button
-					variant={sortBy === 'all' ? 'default' : 'outline'}
-					class="rounded-full"
-					size="sm"
-					onclick={() => setFilterType('all')}
+			<div class="flex items-center gap-2 mb-4">
+				<span
+					class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0 hidden sm:block"
+					>Spirit</span
 				>
-					All ({gallery.length})
-				</Button>
-				{#each spirits as spirit}
-					{@const count = gallery.filter(
-						(g) => g.data.recipeCategoryId === spirit.recipeCategoryId
-					).length}
-					{#if count > 0}
-						<Button
-							variant={sortBy === spirit.recipeCategoryId ? 'default' : 'outline'}
-							class="rounded-full"
-							size="sm"
-							onclick={() => setFilterType(spirit.recipeCategoryId)}
-						>
-							{spirit.recipeCategoryDescription} ({count})
-						</Button>
-					{/if}
-				{/each}
+				<div class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mb-1">
+					<Button
+						variant={sortBy === 'all' ? 'default' : 'outline'}
+						class="rounded-full shrink-0 h-7 text-xs px-3"
+						size="sm"
+						onclick={() => setFilterType('all')}
+					>
+						All
+						<span class="text-[10px] opacity-60 ml-1">{gallery.length}</span>
+					</Button>
+					{#each spirits as spirit}
+						{@const count = gallery.filter(
+							(g) => g.data.recipeCategoryId === spirit.recipeCategoryId
+						).length}
+						{#if count > 0}
+							<Button
+								variant={sortBy === spirit.recipeCategoryId ? 'default' : 'outline'}
+								class="rounded-full shrink-0 h-7 text-xs px-3"
+								size="sm"
+								onclick={() => setFilterType(spirit.recipeCategoryId)}
+							>
+								{spirit.recipeCategoryDescription}
+								<span class="text-[10px] opacity-60 ml-1">{count}</span>
+							</Button>
+						{/if}
+					{/each}
+				</div>
 			</div>
 
 			{#if gallery.length === 0}
@@ -874,6 +982,41 @@
 			{/if}
 		</section>
 
+		<!-- Cocktail of the Day + Top Spirit Row -->
+		{#if dashboardData.cocktailOfTheDay || (dashboardData.topSpirit && dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId] > 0)}
+			<section class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+				{#if dashboardData.cocktailOfTheDay}
+					<CocktailOfTheDay recipe={dashboardData.cocktailOfTheDay} />
+				{/if}
+
+				{#if dashboardData.topSpirit && dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId] > 0}
+					<Card.Root>
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-neon-cyan-500/10">
+									<TrendingUp class="h-5 w-5 text-neon-cyan-500" />
+								</div>
+								<div>
+									<Card.Title class="text-lg">Your Top Spirit</Card.Title>
+									<p class="text-xs text-muted-foreground">
+										{dashboardData.topSpirit.recipeCategoryDescription} leads your collection
+									</p>
+								</div>
+							</div>
+						</Card.Header>
+						<Card.Content>
+							<TopSpirit
+								topSpirit={dashboardData.topSpirit}
+								spiritCounts={dashboardData.spiritCounts}
+								availableCount={dashboardData.availableCount}
+								allSpirits={dashboardData.allSpirits}
+							/>
+						</Card.Content>
+					</Card.Root>
+				{/if}
+			</section>
+		{/if}
+
 		<!-- Almost There Section -->
 		{#if dashboardData.almostThereRecipes && dashboardData.almostThereRecipes.length > 0}
 			<section class="mb-8">
@@ -932,46 +1075,6 @@
 			</section>
 		{/if}
 
-		<!-- Top Spirit Section -->
-		{#if dashboardData.topSpirit && dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId] > 0}
-			<section class="mb-8">
-				<Card.Root class="overflow-hidden">
-					<div class="flex flex-col md:flex-row">
-						<div class="relative w-full md:w-48 h-32 md:h-auto shrink-0">
-							<img
-								src={dashboardData.topSpirit.recipeCategoryDescriptionImageUrl}
-								alt={dashboardData.topSpirit.recipeCategoryDescription}
-								class="w-full h-full object-cover"
-							/>
-							<div
-								class="absolute inset-0 bg-gradient-to-r from-transparent to-background md:bg-gradient-to-t md:from-transparent md:to-background"
-							></div>
-						</div>
-						<Card.Content class="flex-1 flex flex-col justify-center p-6">
-							<Badge variant="secondary" class="w-fit mb-2">
-								<TrendingUp class="h-3 w-3 mr-1" />
-								Your Top Spirit
-							</Badge>
-							<h3 class="text-xl font-bold mb-1">
-								{dashboardData.topSpirit.recipeCategoryDescription}
-							</h3>
-							<p class="text-muted-foreground text-sm mb-3">
-								You can make {dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId]} cocktails
-								with your {dashboardData.topSpirit.recipeCategoryDescription?.toLowerCase() ?? ''} collection.
-							</p>
-							<a
-								href="/catalog/browse/{idToSlug[dashboardData.topSpirit.recipeCategoryId] ?? dashboardData.topSpirit.recipeCategoryId}"
-								class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-fit')}
-							>
-								Explore {dashboardData.topSpirit.recipeCategoryDescription} Cocktails
-								<ArrowRight class="ml-2 h-4 w-4" />
-							</a>
-						</Card.Content>
-					</div>
-				</Card.Root>
-			</section>
-		{/if}
-
 		<!-- Dashboard Widgets -->
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 			<!-- Highest Impact Purchases -->
@@ -1007,63 +1110,46 @@
 				</Card.Root>
 			{/if}
 
-			<!-- Your Bar at a Glance -->
-			{#if dashboardData.barBreakdown && dashboardData.barBreakdown.length > 0}
-				{@const totalItems = dashboardData.barBreakdown.reduce((sum, g) => sum + g.count, 0)}
-				<Card.Root class="md:col-span-2">
+			<!-- Taste Profile -->
+			{#if dashboardData.tasteProfile}
+				<Card.Root>
 					<Card.Header class="pb-3">
 						<div class="flex items-center gap-2">
 							<div class="p-2 rounded-lg bg-primary/10">
 								<BarChart3 class="h-5 w-5 text-primary" />
 							</div>
 							<div>
-								<Card.Title class="text-lg">Your Bar at a Glance</Card.Title>
+								<Card.Title class="text-lg">Taste Profile</Card.Title>
 								<p class="text-xs text-muted-foreground">
-									{dashboardData.inventoryCount} items across {dashboardData.barBreakdown.length} categories
+									Average flavor profile across {dashboardData.availableCount} recipes
 								</p>
 							</div>
 						</div>
 					</Card.Header>
-					<Card.Content class="space-y-4">
-						<!-- Catalog Coverage -->
-						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-							<p class="text-sm text-muted-foreground">Catalog Coverage</p>
-							<p class="text-2xl font-bold">{Math.round(dashboardData.catalogCoverage * 100)}%</p>
-						</div>
+					<Card.Content>
+						<TasteProfileChart {...dashboardData.tasteProfile} />
+					</Card.Content>
+				</Card.Root>
+			{/if}
 
-						<!-- Category Breakdown Bar -->
-						{@const barColors = [
-							'bg-primary',
-							'bg-neon-amber-500',
-							'bg-neon-green-500',
-							'bg-secondary-500',
-							'bg-primary-500',
-							'bg-sky-500',
-							'bg-neon-amber-500',
-							'bg-emerald-500',
-						]}
-						<div class="space-y-2">
-							<div class="flex h-3 w-full rounded-full overflow-hidden">
-								{#each dashboardData.barBreakdown as group, i}
-									<div
-										class="{barColors[i % barColors.length]} transition-all"
-										style="width: {(group.count / totalItems) * 100}%"
-										title="{group.categoryGroupName}: {group.count}"
-									></div>
-								{/each}
+			<!-- Cost Breakdown -->
+			{#if dashboardData.costBreakdown}
+				<Card.Root>
+					<Card.Header class="pb-3">
+						<div class="flex items-center gap-2">
+							<div class="p-2 rounded-lg bg-neon-green-500/10">
+								<DollarSign class="h-5 w-5 text-neon-green-500" />
 							</div>
-							<div class="flex flex-wrap gap-x-4 gap-y-1">
-								{#each dashboardData.barBreakdown as group, i}
-									<div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-										<span
-											class="w-2.5 h-2.5 rounded-full {barColors[i % barColors.length]} shrink-0"
-										></span>
-										{group.categoryGroupName}
-										<span class="font-medium text-foreground">{group.count}</span>
-									</div>
-								{/each}
+							<div>
+								<Card.Title class="text-lg">Cost Breakdown</Card.Title>
+								<p class="text-xs text-muted-foreground">
+									Estimated costs across your available recipes
+								</p>
 							</div>
 						</div>
+					</Card.Header>
+					<Card.Content>
+						<CostBreakdown costBreakdown={dashboardData.costBreakdown} />
 					</Card.Content>
 				</Card.Root>
 			{/if}

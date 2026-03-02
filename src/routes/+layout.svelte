@@ -10,8 +10,8 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import Notification from '$lib/components/Notification.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
-	import { pullToRefresh } from '$lib/pull-to-refresh';
-	import { swipeNav } from '$lib/swipe-nav';
+	import { refresh } from '$lib/actions/refresh';
+	import { swipe } from '$lib/actions/swipe';
 
 	import type { LayoutData } from './$types';
 
@@ -37,9 +37,15 @@
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
 
+		// BackButton sets this override before navigation fires
+		const override = document.documentElement.dataset.navOverride;
+		delete document.documentElement.dataset.navOverride;
+
 		let direction = 'forward';
 
-		if (navigation.type === 'popstate') {
+		if (override) {
+			direction = override;
+		} else if (navigation.type === 'popstate') {
 			direction = 'back';
 		} else {
 			const fromKey = getRouteKey($page.url.pathname);
@@ -97,7 +103,20 @@
 		isMobile = mql.matches;
 		const handler = (e: MediaQueryListEvent) => (isMobile = e.matches);
 		mql.addEventListener('change', handler);
-		return () => mql.removeEventListener('change', handler);
+
+		// dismiss keyboard on scroll
+		function handleScroll() {
+			const el = document.activeElement;
+			if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+				(el as HTMLElement).blur();
+			}
+		}
+		window.addEventListener('scroll', handleScroll, { passive: true });
+
+		return () => {
+			mql.removeEventListener('change', handler);
+			window.removeEventListener('scroll', handleScroll);
+		};
 	});
 
 	$: activeUrl = getActiveUrl($page.url.pathname);
@@ -121,7 +140,7 @@
 	<ProgressBar color="#f84e80" zIndex={50} />
 
 	<!-- page content with bottom padding on mobile for fixed nav -->
-	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}" use:pullToRefresh use:swipeNav={{ currentPath: activeUrl }}>
+	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}" use:refresh use:swipe={{ currentPath: activeUrl }}>
 		<slot />
 	</div>
 

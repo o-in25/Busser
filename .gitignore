@@ -20,3 +20,4 @@ startup-dev.sh
 CLAUDE.md
 .mcp.json
 templates
+deploy.ps1

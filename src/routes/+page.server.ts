@@ -54,6 +54,20 @@ export const load = (async ({ locals }) => {
 		highImpactIngredients: { ingredientName: string; unlockableRecipes: number }[];
 		barBreakdown: Awaited<ReturnType<typeof inventoryRepo.getCategoryBreakdown>>;
 		catalogCoverage: number;
+		tasteProfile: {
+			sweetness: number;
+			dryness: number;
+			strength: number;
+			versatility: number;
+		} | null;
+		cocktailOfTheDay: View.BasicRecipe | null;
+		costBreakdown: {
+			averageCost: number;
+			cheapest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
+			priciest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
+			barValue: number;
+			barValueByCategory: { groupName: string; value: number }[];
+		} | null;
 	} | null = null;
 
 	if (user && locals.activeWorkspaceId) {
@@ -105,6 +119,64 @@ export const load = (async ({ locals }) => {
 		// Get user display name
 		const userName = user.username || user.email?.split('@')[0] || 'there';
 
+		// taste profile: average ratings across available recipes
+		const tasteProfile = recipes.length > 0 ? {
+			sweetness: recipes.reduce((s, r) => s + r.recipeSweetnessRating, 0) / recipes.length,
+			dryness: recipes.reduce((s, r) => s + r.recipeDrynessRating, 0) / recipes.length,
+			strength: recipes.reduce((s, r) => s + r.recipeStrengthRating, 0) / recipes.length,
+			versatility: recipes.reduce((s, r) => s + r.recipeVersatilityRating, 0) / recipes.length,
+		} : null;
+
+		// cost breakdown from available recipe steps
+		const recipeCosts = await catalogRepo.getRecipeCosts(workspaceId);
+		const pricedRecipes = recipeCosts.filter((r) => r.estimatedCost > 0);
+		let costBreakdown: {
+			averageCost: number;
+			cheapest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
+			priciest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
+			barValue: number;
+			barValueByCategory: { groupName: string; value: number }[];
+		} | null = null;
+		if (pricedRecipes.length > 0) {
+			const totalCost = pricedRecipes.reduce((s, r) => s + r.estimatedCost, 0);
+			const cheapest = pricedRecipes[0];
+			const priciest = pricedRecipes[pricedRecipes.length - 1];
+
+			// total bar value + per-category breakdown
+			const barValueResult = await inventoryRepo.findAll(workspaceId, 1, 9999);
+			let barValue = 0;
+			const categoryMap: Record<string, number> = {};
+			for (const p of barValueResult.data) {
+				const pv = (p.productPricePerUnit || 0) * (p.productInStockQuantity || 0);
+				barValue += pv;
+				if (pv > 0) {
+					const group = p.categoryGroupName || 'Other';
+					categoryMap[group] = (categoryMap[group] || 0) + pv;
+				}
+			}
+			const barValueByCategory = Object.entries(categoryMap)
+				.map(([groupName, value]) => ({ groupName, value }))
+				.sort((a, b) => b.value - a.value);
+
+			costBreakdown = {
+				averageCost: totalCost / pricedRecipes.length,
+				cheapest: { recipeName: cheapest.recipeName, recipeId: cheapest.recipeId, recipeImageUrl: cheapest.recipeImageUrl, cost: cheapest.estimatedCost },
+				priciest: { recipeName: priciest.recipeName, recipeId: priciest.recipeId, recipeImageUrl: priciest.recipeImageUrl, cost: priciest.estimatedCost },
+				barValue,
+				barValueByCategory,
+			};
+		}
+
+		// deterministic daily pick using date as seed
+		let cocktailOfTheDay: View.BasicRecipe | null = null;
+		if (recipes.length > 0) {
+			const d = new Date();
+			const seed = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+			let hash = 0;
+			for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+			cocktailOfTheDay = recipes[Math.abs(hash) % recipes.length];
+		}
+
 		dashboardData = {
 			inventoryCount,
 			totalRecipes,
@@ -118,6 +190,9 @@ export const load = (async ({ locals }) => {
 			highImpactIngredients,
 			barBreakdown,
 			catalogCoverage,
+			tasteProfile,
+			cocktailOfTheDay,
+			costBreakdown,
 		};
 	}
 

@@ -23,7 +23,7 @@ function isTopLevelTab(pathname: string): boolean {
 	return segments.length <= 1;
 }
 
-export const swipeNav: Action<HTMLElement, SwipeNavParams> = (node, params) => {
+export const swipe: Action<HTMLElement, SwipeNavParams> = (node, params) => {
 	let currentPath = params?.currentPath ?? '/';
 	let startX = 0;
 	let startY = 0;

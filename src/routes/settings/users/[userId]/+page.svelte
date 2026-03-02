@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		ArrowLeft,
 		BookOpen,
 		Calendar,
 		CheckCircle2,
@@ -14,6 +13,7 @@
 	} from 'lucide-svelte';
 	import moment from 'moment';
 
+	import BackButton from '$lib/components/BackButton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -96,10 +96,7 @@
 				</div>
 			</div>
 			<div class="grid grid-cols-2 sm:flex gap-2">
-				<a class={cn(buttonVariants({ variant: 'outline', size: 'sm' }))} href="/settings/users">
-					<ArrowLeft class="h-4 w-4 mr-2" />
-					Back
-				</a>
+				<BackButton fallback="/settings/users" label="Back" variant="outline" size="sm" />
 				<a
 					class={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
 					href="/settings/users/{user.userId}/edit"

@@ -5,7 +5,7 @@
 		ExternalLink,
 		FileText,
 		Github,
-		Home,
+		House,
 		Info,
 		LayoutGrid,
 		LogOut,
@@ -18,7 +18,7 @@
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import logoNav from '$lib/assets/logo-nav.png';
-	import { haptics } from '$lib/haptics';
+	import { haptics } from '$lib/utils/haptics';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
@@ -81,7 +81,7 @@
 	}
 
 	const navItems = [
-		{ href: '/', icon: Home, label: 'Home' },
+		{ href: '/', icon: House, label: 'Home' },
 		{ href: '/inventory', icon: ClipboardList, label: 'Inventory' },
 		{ href: '/catalog', icon: LayoutGrid, label: 'Catalog' },
 		{ href: '/assistant', icon: Sparkles, label: 'Busser AI' },
@@ -371,7 +371,9 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 0.375rem 0.25rem;
+		padding: 0.5rem 0.375rem;
+		min-height: 44px;
+		min-width: 44px;
 		border-radius: 9999px;
 		color: rgba(113, 113, 122, 1);
 		transition: all 0.2s ease;
@@ -381,6 +383,11 @@
 
 	.mobile-nav-item:hover {
 		color: rgba(63, 63, 70, 1);
+	}
+
+	.mobile-nav-item:active {
+		opacity: 0.7;
+		transform: scale(0.95);
 	}
 
 	.mobile-nav-item.active {
@@ -408,7 +415,7 @@
 	}
 
 	.mobile-nav-label {
-		font-size: 0.625rem;
+		font-size: 0.6875rem;
 		font-weight: 500;
 		margin-top: 0.125rem;
 		white-space: nowrap;

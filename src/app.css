@@ -372,6 +372,19 @@
 			@apply bg-white/75 dark:bg-zinc-800/55 shadow-xl;
 		}
 	}
+
+	@media (hover: none) {
+		&:active {
+			transform: scale(0.97);
+			transition: transform 0.1s ease;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&:active {
+			transform: none;
+		}
+	}
 }
 
 @utility glass-nav {
@@ -410,6 +423,18 @@
 	@media (hover: hover) {
 		&:hover {
 			@apply bg-white/40 dark:bg-zinc-700/30;
+		}
+	}
+
+	@media (hover: none) {
+		&:active {
+			background: theme(--color-zinc-200/0.3);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&:active {
+			background: initial;
 		}
 	}
 }
@@ -583,6 +608,19 @@ html[data-nav-direction="back"]::view-transition-new(root) {
 @media (max-width: 767px) {
 	[data-sonner-toaster] {
 		bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
+	}
+}
+
+@utility scrollbar-none {
+	&::-webkit-scrollbar { display: none; }
+	scrollbar-width: none;
+}
+
+/* 44px minimum tap targets on touch devices */
+@media (pointer: coarse) {
+	button, a[role="button"], [role="button"] {
+		min-height: 44px;
+		min-width: 44px;
 	}
 }
 

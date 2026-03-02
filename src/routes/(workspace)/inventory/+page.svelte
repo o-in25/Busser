@@ -4,7 +4,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
-	import { haptics } from '$lib/haptics';
+	import { haptics } from '$lib/utils/haptics';
 	import { navigating, page } from '$app/stores';
 	import InventorySkeleton from '$lib/components/skeletons/InventorySkeleton.svelte';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';

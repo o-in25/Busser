@@ -1,11 +1,11 @@
 import { invalidateAll } from '$app/navigation';
-import { haptics } from '$lib/haptics';
+import { haptics } from '$lib/utils/haptics';
 import type { Action } from 'svelte/action';
 
 const THRESHOLD = 80;
 const MAX_PULL = 140;
 
-export const pullToRefresh: Action<HTMLElement> = (node) => {
+export const refresh: Action<HTMLElement> = (node) => {
 	const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	const indicator = document.createElement('div');

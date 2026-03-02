@@ -3,7 +3,7 @@
 
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import { haptics } from '$lib/haptics';
+	import { haptics } from '$lib/utils/haptics';
 	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';

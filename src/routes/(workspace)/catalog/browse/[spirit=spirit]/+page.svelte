@@ -18,7 +18,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { idToSlug } from '$lib/spirits';
-	import { reveal } from '$lib/reveal';
+	import { reveal } from '$lib/actions/reveal';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 

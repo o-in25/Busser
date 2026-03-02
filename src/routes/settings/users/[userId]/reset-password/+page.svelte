@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { ArrowLeft, Info } from 'lucide-svelte';
+	import { Info } from 'lucide-svelte';
 
 	import { page } from '$app/state';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
 	import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
-	import { buttonVariants } from '$lib/components/ui/button';
-	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
 	export let form: ActionData;
@@ -24,13 +23,7 @@
 </Breadcrumb>
 <div class="px-4 pb-4 mt-3">
 	<div class="flex justify-end mb-4">
-		<a
-			class={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-			href="/settings/users/{userId}"
-		>
-			<ArrowLeft class="h-4 w-4 mr-2" />
-			Back
-		</a>
+		<BackButton fallback="/settings/users/{userId}" label="Back" variant="outline" size="sm" />
 	</div>
 	<div class="grow">
 		{#if form?.error || form?.success}
