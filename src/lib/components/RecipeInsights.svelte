@@ -13,6 +13,7 @@
 	} from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { CollapsibleSection } from '$lib/components/ui/collapsible';
 	import { Skeleton } from '$lib/components/ui/skeleton';
@@ -21,9 +22,15 @@
 	let {
 		content,
 		loading = false,
+		cached = false,
+		regenerating = false,
+		onregenerate,
 	}: {
 		content: RecipeInsightsOutput | null;
 		loading?: boolean;
+		cached?: boolean;
+		regenerating?: boolean;
+		onregenerate?: () => void;
 	} = $props();
 </script>
 
@@ -39,6 +46,22 @@
 	</div>
 {:else if content}
 	<div class="space-y-4">
+		<!-- Regenerate button when cached -->
+		{#if cached && onregenerate}
+			<div class="flex justify-end">
+				<Button
+					variant="ghost"
+					size="sm"
+					onclick={onregenerate}
+					disabled={regenerating}
+					class="text-muted-foreground"
+				>
+					<RefreshCw class="w-4 h-4 mr-1.5 {regenerating ? 'animate-spin' : ''}" />
+					{regenerating ? 'Regenerating...' : 'Regenerate'}
+				</Button>
+			</div>
+		{/if}
+
 		<!-- History & Origin -->
 		<CollapsibleSection title="History & Origin" icon={BookOpen} open={true}>
 			<p class="text-muted-foreground leading-relaxed">{content.history}</p>
