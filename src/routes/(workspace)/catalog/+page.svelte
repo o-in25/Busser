@@ -471,8 +471,8 @@
 												class={cn(
 													'h-4 w-4 transition-colors group-hover:text-accent-foreground',
 													featured.has(cocktail.recipeId)
-														? 'fill-yellow-500 text-yellow-500 group-hover:fill-accent-foreground'
-														: 'text-muted-foreground hover:text-yellow-500'
+														? 'fill-neon-yellow-500 text-neon-yellow-500 group-hover:fill-accent-foreground'
+														: 'text-muted-foreground hover:text-neon-yellow-500'
 												)}
 											/>
 										</button>
@@ -491,11 +491,11 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 	<!-- Bartender Tip -->
 	<Card.Root
-		class="bg-gradient-to-br from-amber-500/10 to-orange-500/5 border-amber-500/20 cursor-pointer hover:border-amber-500/40 transition-colors"
+		class="bg-gradient-to-br from-neon-amber-500/10 to-neon-amber-500/5 border-neon-amber-500/20 cursor-pointer hover:border-neon-amber-500/40 transition-colors"
 		onclick={showNewTip}
 	>
 		<Card.Header>
-			<Card.Title class="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+			<Card.Title class="flex items-center gap-2 text-neon-amber-600 dark:text-neon-amber-400">
 				<Lightbulb class="h-5 w-5" />
 				Bartender's Tip
 			</Card.Title>
@@ -508,7 +508,7 @@
 			<p class="text-xs text-muted-foreground/70 italic">
 				— {currentTip.source}
 			</p>
-			<p class="text-xs text-amber-600/50 dark:text-amber-400/50 mt-3">Click for another tip</p>
+			<p class="text-xs text-neon-amber-600/50 dark:text-neon-amber-400/50 mt-3">Click for another tip</p>
 		</Card.Content>
 	</Card.Root>
 

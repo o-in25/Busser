@@ -163,9 +163,9 @@
 			<div class="grid gap-3 sm:grid-cols-2">
 				<!-- Citric Acid -->
 				<div
-					class="flex items-center gap-3 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20"
+					class="flex items-center gap-3 p-4 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20"
 				>
-					<FlaskConical class="h-5 w-5 text-amber-500 shrink-0" />
+					<FlaskConical class="h-5 w-5 text-neon-amber-500 shrink-0" />
 					<div class="flex-1 min-w-0">
 						<p class="text-xs text-muted-foreground">Citric Acid</p>
 						<p class="text-lg font-bold">
@@ -178,12 +178,12 @@
 				<!-- Malic Acid -->
 				<div
 					class="flex items-center gap-3 p-4 rounded-lg {results.malicEnabled
-						? 'bg-pink-500/10 border border-pink-500/20'
+						? 'bg-primary-500/10 border border-primary-500/20'
 						: 'bg-muted/30 border border-muted'}"
 				>
 					<FlaskConical
 						class="h-5 w-5 {results.malicEnabled
-							? 'text-pink-500'
+							? 'text-primary-500'
 							: 'text-muted-foreground/50'} shrink-0"
 					/>
 					<div class="flex-1 min-w-0">
@@ -202,12 +202,12 @@
 				<!-- MSG -->
 				<div
 					class="flex items-center gap-3 p-4 rounded-lg {results.msgEnabled
-						? 'bg-purple-500/10 border border-purple-500/20'
+						? 'bg-secondary-500/10 border border-secondary-500/20'
 						: 'bg-muted/30 border border-muted'}"
 				>
 					<Sparkles
 						class="h-5 w-5 {results.msgEnabled
-							? 'text-purple-500'
+							? 'text-secondary-500'
 							: 'text-muted-foreground/50'} shrink-0"
 					/>
 					<div class="flex-1 min-w-0">

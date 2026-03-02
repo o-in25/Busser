@@ -58,9 +58,9 @@
 					{#if isGlobalWorkspace(currentWorkspace.workspaceId)}
 						<Globe class="h-4 w-4 text-blue-500" />
 					{:else if currentWorkspace.workspaceType === 'personal'}
-						<User class="h-4 w-4 text-purple-500" />
+						<User class="h-4 w-4 text-secondary-500" />
 					{:else}
-						<Users class="h-4 w-4 text-green-500" />
+						<Users class="h-4 w-4 text-neon-green-500" />
 					{/if}
 					<span class="max-w-[120px] truncate">{currentWorkspace.workspaceName}</span>
 				{:else}
@@ -87,13 +87,13 @@
 							{#if isGlobalWorkspace(workspace.workspaceId)}
 								<Globe class="h-4 w-4 text-blue-500 shrink-0" />
 							{:else if workspace.workspaceType === 'personal'}
-								<User class="h-4 w-4 text-purple-500 shrink-0" />
+								<User class="h-4 w-4 text-secondary-500 shrink-0" />
 							{:else}
-								<Users class="h-4 w-4 text-green-500 shrink-0" />
+								<Users class="h-4 w-4 text-neon-green-500 shrink-0" />
 							{/if}
 							<span class="truncate">{workspace.workspaceName}</span>
 							{#if workspace.workspaceRole === 'owner'}
-								<Crown class="h-3 w-3 text-amber-500 shrink-0" />
+								<Crown class="h-3 w-3 text-neon-amber-500 shrink-0" />
 							{/if}
 						</div>
 						{#if currentWorkspace?.workspaceId === workspace.workspaceId}

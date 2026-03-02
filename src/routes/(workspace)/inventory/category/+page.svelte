@@ -397,7 +397,7 @@
 												href="/inventory/category/{category.categoryId}/edit"
 												class={cn(
 													buttonVariants({ variant: 'outline', size: 'icon' }),
-													'h-8 w-8 bg-violet-500/20 border-violet-500/50 text-violet-400 hover:bg-violet-500 hover:text-white'
+													'h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white'
 												)}
 												title="Edit category"
 											>
@@ -464,7 +464,7 @@
 											href="/inventory/category/{category.categoryId}/edit"
 											class={cn(
 												buttonVariants({ variant: 'outline', size: 'icon' }),
-												'h-8 w-8 bg-violet-500/20 border-violet-500/50 text-violet-400 hover:bg-violet-500 hover:text-white'
+												'h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white'
 											)}
 											title="Edit category"
 										>

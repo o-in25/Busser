@@ -270,7 +270,7 @@
 														ID: {grant.permissionId}
 													</p>
 												{:else}
-													<p class="text-xs text-amber-500">New (unsaved)</p>
+													<p class="text-xs text-neon-amber-500">New (unsaved)</p>
 												{/if}
 											</div>
 										</div>

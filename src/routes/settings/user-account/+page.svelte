@@ -178,15 +178,15 @@
 								class="p-2 rounded-lg {data.currentWorkspace.workspaceId === 'ws-global-catalog'
 									? 'bg-blue-500/10'
 									: data.currentWorkspace.workspaceType === 'personal'
-										? 'bg-purple-500/10'
-										: 'bg-green-500/10'}"
+										? 'bg-secondary-500/10'
+										: 'bg-neon-green-500/10'}"
 							>
 								{#if data.currentWorkspace.workspaceId === 'ws-global-catalog'}
 									<Globe class="h-4 w-4 text-blue-500" />
 								{:else if data.currentWorkspace.workspaceType === 'personal'}
-									<User class="h-4 w-4 text-purple-500" />
+									<User class="h-4 w-4 text-secondary-500" />
 								{:else}
-									<Users class="h-4 w-4 text-green-500" />
+									<Users class="h-4 w-4 text-neon-green-500" />
 								{/if}
 							</div>
 							<div>
@@ -422,15 +422,15 @@
 										class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
 											? 'bg-blue-500/10'
 											: workspace.workspaceType === 'personal'
-												? 'bg-purple-500/10'
-												: 'bg-green-500/10'}"
+												? 'bg-secondary-500/10'
+												: 'bg-neon-green-500/10'}"
 									>
 										{#if workspace.workspaceId === 'ws-global-catalog'}
 											<Globe class="h-4 w-4 text-blue-500" />
 										{:else if workspace.workspaceType === 'personal'}
-											<User class="h-4 w-4 text-purple-500" />
+											<User class="h-4 w-4 text-secondary-500" />
 										{:else}
-											<Users class="h-4 w-4 text-green-500" />
+											<Users class="h-4 w-4 text-neon-green-500" />
 										{/if}
 									</div>
 									<div class="text-left">
@@ -458,7 +458,7 @@
 
 					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
 						{#if form?.success}
-							<p class="text-sm text-green-600 flex items-center gap-1">
+							<p class="text-sm text-neon-green-600 flex items-center gap-1">
 								<Check class="h-4 w-4" />
 								Preference saved
 							</p>

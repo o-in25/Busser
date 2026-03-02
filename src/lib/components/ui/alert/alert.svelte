@@ -17,11 +17,11 @@
 		default:
 			'bg-white/50 dark:bg-zinc-900/50 border-white/30 dark:border-zinc-700/40 text-foreground',
 		destructive:
-			'bg-destructive/10 dark:bg-destructive/20 border-destructive/30 dark:border-destructive/40 text-destructive dark:text-red-400 [&>svg]:text-destructive dark:[&>svg]:text-red-400',
+			'bg-destructive/10 dark:bg-destructive/20 border-destructive/30 dark:border-destructive/40 text-destructive dark:text-red-400 [&>svg]:text-destructive dark:[&>svg]:text-red-400 dark:shadow-glow-pink',
 		success:
-			'bg-green-500/10 dark:bg-green-500/20 border-green-500/30 dark:border-green-500/40 text-green-700 dark:text-green-400 [&>svg]:text-green-600 dark:[&>svg]:text-green-400',
+			'bg-neon-green-500/10 dark:bg-neon-green-500/20 border-neon-green-500/30 dark:border-neon-green-500/40 text-neon-green-700 dark:text-neon-green-400 [&>svg]:text-neon-green-600 dark:[&>svg]:text-neon-green-400 dark:shadow-glow-green',
 		warning:
-			'bg-yellow-500/10 dark:bg-yellow-500/20 border-yellow-500/30 dark:border-yellow-500/40 text-yellow-700 dark:text-yellow-400 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400',
+			'bg-neon-yellow-500/10 dark:bg-neon-yellow-500/20 border-neon-yellow-500/30 dark:border-neon-yellow-500/40 text-neon-yellow-700 dark:text-neon-yellow-400 [&>svg]:text-neon-yellow-600 dark:[&>svg]:text-neon-yellow-400 dark:shadow-glow-amber',
 	};
 </script>
 

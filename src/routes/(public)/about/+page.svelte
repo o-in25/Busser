@@ -104,17 +104,17 @@
 
 		<!-- Step 2: Inventory -->
 		<Card.Root class="relative overflow-hidden">
-			<div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>
+			<div class="absolute left-0 top-0 bottom-0 w-1 bg-neon-amber-500"></div>
 			<Card.Content class="py-5 pl-6">
 				<div class="flex items-start gap-4">
 					<div
-						class="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 font-bold"
+						class="w-10 h-10 rounded-full bg-neon-amber-500 text-white flex items-center justify-center shrink-0 font-bold"
 					>
 						2
 					</div>
 					<div class="flex-1">
 						<h3 class="text-lg font-semibold flex items-center gap-2 mb-2">
-							<Package class="h-5 w-5 text-amber-500" />
+							<Package class="h-5 w-5 text-neon-amber-500" />
 							Stock Your Inventory
 						</h3>
 						<p class="text-sm text-muted-foreground mb-3">
@@ -151,17 +151,17 @@
 
 		<!-- Step 3: Catalog -->
 		<Card.Root class="relative overflow-hidden">
-			<div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+			<div class="absolute left-0 top-0 bottom-0 w-1 bg-neon-green-500"></div>
 			<Card.Content class="py-5 pl-6">
 				<div class="flex items-start gap-4">
 					<div
-						class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0 font-bold"
+						class="w-10 h-10 rounded-full bg-neon-green-500 text-white flex items-center justify-center shrink-0 font-bold"
 					>
 						3
 					</div>
 					<div class="flex-1">
 						<h3 class="text-lg font-semibold flex items-center gap-2 mb-2">
-							<ListPlus class="h-5 w-5 text-green-500" />
+							<ListPlus class="h-5 w-5 text-neon-green-500" />
 							Build Your Cocktail Catalog
 						</h3>
 						<p class="text-sm text-muted-foreground mb-3">
@@ -176,21 +176,21 @@
 							</p>
 							<ul class="text-muted-foreground space-y-1">
 								<li class="flex items-start gap-2">
-									<CircleCheck class="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+									<CircleCheck class="h-4 w-4 mt-0.5 text-neon-green-500 shrink-0" />
 									<span
 										><strong>Ingredients</strong> - Specify exact quantities in oz, ml, dashes, or other
 										units</span
 									>
 								</li>
 								<li class="flex items-start gap-2">
-									<CircleCheck class="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+									<CircleCheck class="h-4 w-4 mt-0.5 text-neon-green-500 shrink-0" />
 									<span
 										><strong>Technique</strong> - Stirred, shaken, built, or blended - affects dilution
 										calculations</span
 									>
 								</li>
 								<li class="flex items-start gap-2">
-									<CircleCheck class="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+									<CircleCheck class="h-4 w-4 mt-0.5 text-neon-green-500 shrink-0" />
 									<span
 										><strong>Flexible Matching</strong> - Allow substitutions like "any bourbon" instead
 										of a specific brand</span
@@ -216,17 +216,17 @@
 
 		<!-- Step 4: Discover -->
 		<Card.Root class="relative overflow-hidden">
-			<div class="absolute left-0 top-0 bottom-0 w-1 bg-violet-500"></div>
+			<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary-500"></div>
 			<Card.Content class="py-5 pl-6">
 				<div class="flex items-start gap-4">
 					<div
-						class="w-10 h-10 rounded-full bg-violet-500 text-white flex items-center justify-center shrink-0 font-bold"
+						class="w-10 h-10 rounded-full bg-secondary-500 text-white flex items-center justify-center shrink-0 font-bold"
 					>
 						4
 					</div>
 					<div class="flex-1">
 						<h3 class="text-lg font-semibold flex items-center gap-2 mb-2">
-							<GlassWater class="h-5 w-5 text-violet-500" />
+							<GlassWater class="h-5 w-5 text-secondary-500" />
 							Discover & Enjoy
 						</h3>
 						<p class="text-sm text-muted-foreground mb-3">
@@ -236,7 +236,7 @@
 						</p>
 						<div class="flex flex-wrap gap-2">
 							<Badge variant="secondary" class="text-xs">
-								<CircleCheck class="h-3 w-3 mr-1 text-green-500" />
+								<CircleCheck class="h-3 w-3 mr-1 text-neon-green-500" />
 								Available Now
 							</Badge>
 							<Badge variant="secondary" class="text-xs">

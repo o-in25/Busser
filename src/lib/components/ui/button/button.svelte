@@ -6,7 +6,7 @@
 		variants: {
 			variant: {
 				default:
-					'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:from-primary/90 hover:to-primary/70',
+					'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:from-primary/90 hover:to-primary/70 dark:hover:shadow-glow-pink',
 				destructive:
 					'bg-gradient-to-r from-destructive to-destructive/80 text-destructive-foreground shadow-md shadow-destructive/25 hover:shadow-lg hover:shadow-destructive/30',
 				outline:
@@ -15,7 +15,7 @@
 				ghost: 'hover:bg-accent/50 hover:text-accent-foreground',
 				link: 'text-primary underline-offset-4 hover:underline',
 				gradient:
-					'bg-gradient-to-r from-pink-500 via-primary to-secondary text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:brightness-110',
+					'bg-gradient-to-r from-primary-500 via-primary to-secondary text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:brightness-110 dark:hover:shadow-glow-pink',
 			},
 			size: {
 				default: 'h-10 px-5 py-2',

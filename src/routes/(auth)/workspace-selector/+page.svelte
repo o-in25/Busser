@@ -82,14 +82,14 @@
 						</p>
 					</div>
 					<div class="flex items-start gap-2">
-						<User class="h-3.5 w-3.5 text-purple-500 mt-1 shrink-0" />
+						<User class="h-3.5 w-3.5 text-secondary-500 mt-1 shrink-0" />
 						<p class="text-muted-foreground">
 							<span class="text-foreground font-medium">Personal</span> &mdash; your private Workspace
 							with full control over your own catalog and inventory.
 						</p>
 					</div>
 					<div class="flex items-start gap-2">
-						<Users class="h-3.5 w-3.5 text-green-500 mt-1 shrink-0" />
+						<Users class="h-3.5 w-3.5 text-neon-green-500 mt-1 shrink-0" />
 						<p class="text-muted-foreground">
 							<span class="text-foreground font-medium">Shared</span> &mdash; a collaborative Workspace
 							where multiple users manage a shared catalog and inventory.
@@ -143,15 +143,15 @@
 						class="p-2 rounded-lg {isGlobalWorkspace(workspace.workspaceId)
 							? 'bg-blue-500/10'
 							: workspace.workspaceType === 'personal'
-								? 'bg-purple-500/10'
-								: 'bg-green-500/10'}"
+								? 'bg-secondary-500/10'
+								: 'bg-neon-green-500/10'}"
 					>
 						{#if isGlobalWorkspace(workspace.workspaceId)}
 							<Globe class="h-4 w-4 text-blue-500" />
 						{:else if workspace.workspaceType === 'personal'}
-							<User class="h-4 w-4 text-purple-500" />
+							<User class="h-4 w-4 text-secondary-500" />
 						{:else}
-							<Users class="h-4 w-4 text-green-500" />
+							<Users class="h-4 w-4 text-neon-green-500" />
 						{/if}
 					</div>
 					<div class="text-left">

@@ -45,6 +45,8 @@
 
 	let content: RecipeInsightsOutput | null = $state(null);
 	let contentLoading = $state(true);
+	let contentCached = $state(false);
+	let regenerating = $state(false);
 
 	// steps with checked state
 	let steps = $derived(initialRecipeSteps.map((step) => ({ ...step, checked: false })));
@@ -109,22 +111,40 @@
 		servingMethodIcons[recipe.recipeTechniqueDescriptionText || ''] || GlassWater
 	);
 
-	// fetch generator content
-	onMount(async () => {
+	async function fetchInsights(regenerate = false) {
 		try {
 			const result = await fetch(`/api/generator/recipe`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ trigger: recipe.recipeName }),
+				body: JSON.stringify({
+					trigger: recipe.recipeName,
+					recipeId: recipe.recipeId,
+					regenerate,
+				}),
 			});
 			const response = await result.json();
 			content = response;
+			contentCached = response.cached ?? false;
 		} catch (e) {
-			console.error('Failed to load recipe history:', e);
-		} finally {
-			contentLoading = false;
+			console.error('Failed to load recipe insights:', e);
 		}
+	}
+
+	// fetch generator content
+	onMount(async () => {
+		if (!recipe.insightsEnabled) {
+			contentLoading = false;
+			return;
+		}
+		await fetchInsights();
+		contentLoading = false;
 	});
+
+	async function regenerateInsights() {
+		regenerating = true;
+		await fetchInsights(true);
+		regenerating = false;
+	}
 
 	function openLightbox() {
 		if (!recipe.recipeImageUrl) return;
@@ -309,7 +329,7 @@
 						{/if}
 						{#if hasParentCategoryMatch}
 							<span class="flex items-center gap-1">
-								<Sparkles class="w-3 h-3 text-amber-500" />
+								<Sparkles class="w-3 h-3 text-neon-amber-500" />
 								Any in parent category
 							</span>
 						{/if}
@@ -440,5 +460,13 @@
 	</div>
 
 	<!-- Row 4: Cocktail Insights -->
-	<RecipeInsights {content} loading={contentLoading} />
+	{#if recipe.insightsEnabled}
+		<RecipeInsights
+			{content}
+			loading={contentLoading}
+			cached={contentCached}
+			{regenerating}
+			onregenerate={regenerateInsights}
+		/>
+	{/if}
 </section>

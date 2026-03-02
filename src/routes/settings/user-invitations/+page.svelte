@@ -81,17 +81,17 @@
 
 	<!-- Pending Requests Section -->
 	{#if data.pendingRequests && data.pendingRequests.length > 0}
-		<Card.Root class="border-amber-500/30">
+		<Card.Root class="border-neon-amber-500/30">
 			<Card.Header>
 				<div class="flex items-center justify-between">
 					<div>
 						<Card.Title class="flex items-center gap-2">
-							<AlertCircle class="h-5 w-5 text-amber-500" />
+							<AlertCircle class="h-5 w-5 text-neon-amber-500" />
 							Pending Requests
 						</Card.Title>
 						<Card.Description>Users requesting access to the system</Card.Description>
 					</div>
-					<Badge variant="secondary" class="text-sm bg-amber-500/10 text-amber-600">
+					<Badge variant="secondary" class="text-sm bg-neon-amber-500/10 text-neon-amber-600">
 						{pendingCount}
 					</Badge>
 				</div>
@@ -100,7 +100,7 @@
 				<div class="grid gap-3">
 					{#each data.pendingRequests as request}
 						<div
-							class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg bg-amber-500/5"
+							class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg bg-neon-amber-500/5"
 						>
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2 mb-1">
@@ -214,7 +214,7 @@
 									{:else}
 										<Badge
 											variant="outline"
-											class="text-green-600 border-green-300 bg-green-50 dark:bg-green-950/30"
+											class="text-neon-green-600 border-neon-green-300 bg-neon-green-50 dark:bg-neon-green-950/30"
 											>Available</Badge
 										>
 									{/if}

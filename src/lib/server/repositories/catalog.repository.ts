@@ -12,6 +12,7 @@ import type {
 } from '$lib/types';
 
 import { DbProvider } from '../db';
+import { deleteCachedContent } from '../generators/cache';
 import { Logger } from '../logger';
 import { deleteSignedUrl } from '../storage';
 import { BaseRepository, emptyPagination } from './base.repository';
@@ -389,6 +390,7 @@ export class CatalogRepository extends BaseRepository {
 						RecipeDescriptionId: keys.recipeDescriptionId,
 						RecipeName: recipe.recipeName,
 						RecipeImageUrl: recipeImageUrl,
+						InsightsEnabled: recipe.insightsEnabled ?? true,
 					});
 
 					if (!dbResult) throw new Error('Cannot create recipe.');
@@ -432,6 +434,7 @@ export class CatalogRepository extends BaseRepository {
 						RecipeCategoryId: recipe.recipeCategoryId,
 						RecipeDescriptionId: keys.recipeDescriptionId,
 						RecipeName: recipe.recipeName,
+						InsightsEnabled: recipe.insightsEnabled ?? true,
 					};
 
 					if (recipeImageUrl !== null || imageCleared) {
@@ -517,6 +520,11 @@ export class CatalogRepository extends BaseRepository {
 			if (recipeImageUrl) {
 				await deleteSignedUrl(recipeImageUrl);
 			}
+
+			// clean up cached generated content
+			deleteCachedContent('recipe-insights', recipeId).catch((err) =>
+				console.error('failed to clean up cached content:', err)
+			);
 
 			return { status: 'success', data: deletedRows };
 		} catch (error: any) {

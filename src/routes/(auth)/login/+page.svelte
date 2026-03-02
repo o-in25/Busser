@@ -68,7 +68,7 @@
 				<p>{form?.error}</p>
 				<div class="mt-3">
 					{#if resendStatus === 'success'}
-						<p class="text-sm text-green-600 dark:text-green-400">
+						<p class="text-sm text-neon-green-600 dark:text-neon-green-400">
 							<Mail class="w-4 h-4 inline-block mr-1" />
 							Verification email sent! Please check your inbox.
 						</p>
@@ -76,7 +76,7 @@
 						<Button
 							variant="outline"
 							size="sm"
-							class="border-yellow-500/50 hover:bg-yellow-500/20 hover:border-yellow-500 hover:text-yellow-700 dark:hover:text-yellow-400 focus-visible:ring-yellow-500"
+							class="border-neon-yellow-500/50 hover:bg-neon-yellow-500/20 hover:border-neon-yellow-500 hover:text-neon-yellow-700 dark:hover:text-neon-yellow-400 focus-visible:ring-neon-yellow-500"
 							onclick={resendVerificationEmail}
 							disabled={isResending}
 						>

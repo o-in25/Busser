@@ -73,8 +73,8 @@
 			label: 'In Stock',
 			variant: 'default' as const,
 			icon: CheckCircle2,
-			color: 'text-green-500',
-			bgColor: 'bg-green-500/10',
+			color: 'text-neon-green-500',
+			bgColor: 'bg-neon-green-500/10',
 		};
 	});
 
@@ -86,25 +86,25 @@
 			label: 'Sweetness',
 			value: product.productSweetnessRating || 0,
 			icon: Candy,
-			color: 'bg-pink-500',
+			color: 'bg-primary-500',
 		},
 		{
 			label: 'Dryness',
 			value: product.productDrynessRating || 0,
 			icon: Wind,
-			color: 'bg-amber-500',
+			color: 'bg-neon-amber-500',
 		},
 		{
 			label: 'Versatility',
 			value: product.productVersatilityRating || 0,
 			icon: Sparkles,
-			color: 'bg-purple-500',
+			color: 'bg-secondary-500',
 		},
 		{
 			label: 'Strength',
 			value: product.productStrengthRating || 0,
 			icon: Flame,
-			color: 'bg-orange-500',
+			color: 'bg-neon-amber-500',
 		},
 	]);
 
@@ -128,11 +128,11 @@
 			{ max: 1, desc2: 'Swill', style: 'bg-red-500' },
 			{ max: 2, desc2: 'Forgettable', style: 'bg-red-500' },
 			{ max: 3, desc2: 'Bottom Shelf', style: 'bg-red-500' },
-			{ max: 4, desc2: 'Decent', style: 'bg-yellow-500' },
-			{ max: 5, desc2: 'Standard Pour', style: 'bg-yellow-500' },
-			{ max: 6, desc2: 'Good Stuff', style: 'bg-green-500' },
-			{ max: 7, desc2: 'Top Shelf', style: 'bg-green-500' },
-			{ max: 8, desc2: "Connoisseur's Choice", style: 'bg-green-500' },
+			{ max: 4, desc2: 'Decent', style: 'bg-neon-yellow-500' },
+			{ max: 5, desc2: 'Standard Pour', style: 'bg-neon-yellow-500' },
+			{ max: 6, desc2: 'Good Stuff', style: 'bg-neon-green-500' },
+			{ max: 7, desc2: 'Top Shelf', style: 'bg-neon-green-500' },
+			{ max: 8, desc2: "Connoisseur's Choice", style: 'bg-neon-green-500' },
 			{ max: 9, desc2: "Bartender's Favorite", style: 'bg-blue-500' },
 		];
 
@@ -140,7 +140,7 @@
 		vec = weightedMean(vec, [6.5, 3.5, 0.95, 11.5]);
 		const { desc2, style } = ratingsMap.find(({ max }) => vec <= max) || {
 			desc2: 'Best in House',
-			style: 'bg-violet-500',
+			style: 'bg-secondary-500',
 		};
 		return {
 			score: vec.toFixed(1),
@@ -242,7 +242,7 @@
 		<div class="grid grid-cols-2 gap-3">
 			{#if product.productPricePerUnit}
 				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-					<DollarSign class="h-5 w-5 text-green-500 shrink-0" />
+					<DollarSign class="h-5 w-5 text-neon-green-500 shrink-0" />
 					<div>
 						<p class="text-xs text-muted-foreground">Price</p>
 						<p class="font-semibold">${product.productPricePerUnit.toFixed(2)}</p>
@@ -260,7 +260,7 @@
 			{/if}
 			{#if product.productProof}
 				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-					<Flame class="h-5 w-5 text-orange-500 shrink-0" />
+					<Flame class="h-5 w-5 text-neon-amber-500 shrink-0" />
 					<div>
 						<p class="text-xs text-muted-foreground">Proof / ABV</p>
 						<p class="font-semibold">
@@ -273,7 +273,7 @@
 			{/if}
 			{#if pricePerOunce}
 				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-					<Calculator class="h-5 w-5 text-purple-500 shrink-0" />
+					<Calculator class="h-5 w-5 text-secondary-500 shrink-0" />
 					<div>
 						<p class="text-xs text-muted-foreground">Price/oz</p>
 						<p class="font-semibold">${pricePerOunce}</p>

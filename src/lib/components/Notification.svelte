@@ -47,7 +47,7 @@
 			<div
 				class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg {color ===
 				'green'
-					? 'text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200'
+					? 'text-neon-green-500 bg-neon-green-100 dark:bg-neon-green-800 dark:text-neon-green-200'
 					: color === 'red'
 						? 'text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200'
 						: 'text-primary-500 bg-primary-100 dark:bg-primary-800 dark:text-primary-200'}"

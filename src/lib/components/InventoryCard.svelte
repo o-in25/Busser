@@ -5,6 +5,7 @@
 	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
+	import { cn } from '$lib/utils';
 	import type { Product } from '$lib/types';
 
 	let {
@@ -40,7 +41,7 @@
 			label: 'In Stock',
 			variant: 'default' as const,
 			icon: CircleCheck,
-			color: 'text-green-500',
+			color: 'text-neon-green-500',
 		};
 	});
 
@@ -50,7 +51,7 @@
 {#if viewMode === 'grid'}
 	<!-- Grid View Card -->
 	<a href="/inventory/{product.productId}/edit" class="block group" onclick={handleClick}>
-		<Card.Root class="overflow-hidden hover:shadow-lg transition-all duration-300 h-full">
+		<Card.Root class="overflow-hidden hover:shadow-lg transition-all duration-300 h-full dark:hover:shadow-glow-purple">
 			<!-- Image -->
 			<div class="relative h-44 overflow-hidden">
 				{#if product.productImageUrl}
@@ -74,7 +75,7 @@
 
 				<!-- Stock status badge -->
 				<div class="absolute top-3 right-3">
-					<Badge variant={stockStatus.variant} class="bg-background/80 backdrop-blur-sm">
+					<Badge variant={stockStatus.variant} class={cn('bg-background/80 backdrop-blur-sm', stockStatus.variant === 'default' && 'dark:shadow-glow-green')}>
 						<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
 						{stockStatus.label}
 					</Badge>
@@ -106,7 +107,7 @@
 {:else}
 	<!-- List View Card -->
 	<a href="/inventory/{product.productId}/edit" class="block group" onclick={handleClick}>
-		<Card.Root class="hover:shadow-md transition-all duration-200">
+		<Card.Root class="hover:shadow-md transition-all duration-200 dark:hover:shadow-glow-purple">
 			<div class="flex items-center gap-4 p-3">
 				<!-- Thumbnail -->
 				<div class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">

@@ -7,7 +7,7 @@
 		{
 			title: 'Hey, I just wanna make some good drinks',
 			date: 'Beginner',
-			color: 'bg-green-500',
+			color: 'bg-neon-green-500',
 			items: [
 				'Good jigger set',
 				'Hawthorn strainer',
@@ -21,7 +21,7 @@
 		{
 			title: 'I wanna act like a fancy pro without breaking the bank',
 			date: 'Beginner',
-			color: 'bg-green-500',
+			color: 'bg-neon-green-500',
 			items: [
 				'Bar mat',
 				'Ice pick',
@@ -38,13 +38,13 @@
 		{
 			title: 'This is good for my kitchen too',
 			date: 'Intermediate',
-			color: 'bg-yellow-500',
+			color: 'bg-neon-yellow-500',
 			items: ['High-speed blender,', 'Whipped cream siphon', 'Champion juicer'],
 		},
 		{
 			title: "I'm gonna make some recipes that require accuracy",
 			date: 'Intermediate',
-			color: 'bg-yellow-500',
+			color: 'bg-neon-yellow-500',
 			items: [
 				'Drug scale: 250 grams by the 1/10 gram',
 				'Kitchen scale: 5 kilos by the gram',
@@ -55,7 +55,7 @@
 		{
 			title: 'Bubbles',
 			date: 'Advanced',
-			color: 'bg-orange-500',
+			color: 'bg-neon-amber-500',
 			items: [
 				'5- or 20-pound CO2 tank',
 				'Regulator, hose, ball-lock connector',
@@ -65,7 +65,7 @@
 		{
 			title: "I'm an experimenter or a stickler for accuracy",
 			date: 'Advanced',
-			color: 'bg-orange-500',
+			color: 'bg-neon-amber-500',
 			items: ['Refractometer', 'Micropipette'],
 		},
 		{
@@ -180,7 +180,7 @@
 		</p>
 		<p class="mb-3 font-light text-muted-foreground">
 			Why? Water <span
-				class="ps-1 font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-400"
+				class="ps-1 font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-yellow-400 to-red-400"
 			>
 				heats up
 			</span> as ice is formed because freezing ice gives off heat—a counterintuitive fact. Water freezing

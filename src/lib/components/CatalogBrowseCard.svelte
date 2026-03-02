@@ -57,14 +57,14 @@
 	const ratingsMap = [
 		{ max: 0, label: 'No Rating', bg: 'bg-gray-500' },
 		{ max: 2, label: 'Needs Work', bg: 'bg-red-500' },
-		{ max: 3, label: 'Bottom Shelf', bg: 'bg-orange-500' },
-		{ max: 4, label: 'Decent', bg: 'bg-yellow-500' },
-		{ max: 5, label: 'Standard', bg: 'bg-yellow-400' },
+		{ max: 3, label: 'Bottom Shelf', bg: 'bg-neon-amber-500' },
+		{ max: 4, label: 'Decent', bg: 'bg-neon-yellow-500' },
+		{ max: 5, label: 'Standard', bg: 'bg-neon-yellow-400' },
 		{ max: 6, label: 'Good', bg: 'bg-lime-500' },
-		{ max: 7, label: 'Top Shelf', bg: 'bg-green-500' },
+		{ max: 7, label: 'Top Shelf', bg: 'bg-neon-green-500' },
 		{ max: 8, label: "Connoisseur's Choice", bg: 'bg-emerald-500' },
 		{ max: 9, label: 'Favorite', bg: 'bg-blue-500' },
-		{ max: 10, label: 'Best in House', bg: 'bg-violet-500' },
+		{ max: 10, label: 'Best in House', bg: 'bg-secondary-500' },
 	];
 
 	const rating = $derived(
@@ -103,7 +103,7 @@
 				{#if isFavorite || isFeatured}
 					<div class="absolute bottom-3 right-3 flex items-center gap-1">
 						{#if isFeatured}
-							<div class="p-1 rounded-full bg-yellow-500/90 backdrop-blur-sm">
+							<div class="p-1 rounded-full bg-neon-yellow-500/90 backdrop-blur-sm">
 								<Star class="h-3 w-3 fill-current text-white" />
 							</div>
 						{/if}
@@ -190,7 +190,7 @@
 											class={cn(
 												'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors',
 												isFeatured
-													? 'bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20'
+													? 'bg-neon-yellow-500/10 text-neon-yellow-600 hover:bg-neon-yellow-500/20'
 													: 'hover:bg-muted text-muted-foreground hover:text-foreground'
 											)}
 											title={isFeatured ? 'Remove from featured' : 'Add to featured'}
@@ -242,7 +242,7 @@
 					{#if isFavorite || isFeatured}
 						<div class="absolute bottom-1 right-1 flex items-center gap-0.5">
 							{#if isFeatured}
-								<div class="p-0.5 rounded-full bg-yellow-500/90">
+								<div class="p-0.5 rounded-full bg-neon-yellow-500/90">
 									<Star class="h-2.5 w-2.5 fill-current text-white" />
 								</div>
 							{/if}
@@ -333,8 +333,8 @@
 												class={cn(
 													'h-4 w-4 transition-colors',
 													isFeatured
-														? 'fill-yellow-500 text-yellow-500'
-														: 'text-muted-foreground hover:text-yellow-500'
+														? 'fill-neon-yellow-500 text-neon-yellow-500'
+														: 'text-muted-foreground hover:text-neon-yellow-500'
 												)}
 											/>
 										</button>

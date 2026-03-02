@@ -80,7 +80,7 @@
 					</div>
 					{#if user.verified === 1}
 						<div
-							class="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full p-0.5"
+							class="absolute -bottom-0.5 -right-0.5 bg-neon-green-500 rounded-full p-0.5"
 							title="Verified"
 						>
 							<CheckCircle2 class="w-3.5 h-3.5 text-white" />
@@ -123,7 +123,7 @@
 					<div class="p-4 rounded-lg bg-muted/30">
 						<div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
 							{#if user.verified === 1}
-								<CheckCircle2 class="h-4 w-4 text-green-500" />
+								<CheckCircle2 class="h-4 w-4 text-neon-green-500" />
 							{:else}
 								<XCircle class="h-4 w-4 text-destructive" />
 							{/if}

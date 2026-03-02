@@ -21,7 +21,7 @@
 <div class="flex flex-col space-y-6">
 	{#if (form as any)?.success}
 		<div>
-			<CheckCircle2 class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
+			<CheckCircle2 class="w-8 h-8 mb-3 text-neon-green-500 dark:text-neon-green-400" />
 			<h4 class="text-xl font-semibold mb-2">Check your email</h4>
 			<p class="mb-3 font-normal text-muted-foreground">
 				If an account exists for <span class="font-medium text-foreground"

@@ -93,8 +93,8 @@
 		owner: {
 			label: 'Owner',
 			description: 'Full access. Can manage members, settings, and all content.',
-			color: 'text-amber-500',
-			bg: 'bg-amber-500/10',
+			color: 'text-neon-amber-500',
+			bg: 'bg-neon-amber-500/10',
 		},
 		editor: {
 			label: 'Editor',
@@ -149,7 +149,7 @@
 
 	<!-- Success Message -->
 	{#if form?.success}
-		<div class="bg-green-500/10 text-green-600 dark:text-green-400 px-4 py-3 rounded-md text-sm">
+		<div class="bg-neon-green-500/10 text-neon-green-600 dark:text-neon-green-400 px-4 py-3 rounded-md text-sm">
 			Operation completed successfully.
 		</div>
 	{/if}
@@ -192,9 +192,9 @@
 										{#if isGlobalWorkspace(workspace)}
 											<Globe class="h-4 w-4 text-blue-500 shrink-0" />
 										{:else if workspace.workspaceType === 'personal'}
-											<User class="h-4 w-4 text-purple-500 shrink-0" />
+											<User class="h-4 w-4 text-secondary-500 shrink-0" />
 										{:else}
-											<Users class="h-4 w-4 text-green-500 shrink-0" />
+											<Users class="h-4 w-4 text-neon-green-500 shrink-0" />
 										{/if}
 										<span class="truncate">{workspace.workspaceName}</span>
 										{#if isGlobalWorkspace(workspace)}
@@ -278,7 +278,7 @@
 											<Button
 												variant="outline"
 												size="icon"
-												class="h-8 w-8 bg-violet-500/20 border-violet-500/50 text-violet-400 hover:bg-violet-500 hover:text-white"
+												class="h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white"
 												onclick={() => openEditDialog(workspace)}
 												title="Edit workspace"
 											>
