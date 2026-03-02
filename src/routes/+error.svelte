@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Home, ArrowLeft } from 'lucide-svelte';
+	import { House } from 'lucide-svelte';
 
 	// Map common status codes to user-friendly titles
 	const statusTitles: Record<number, string> = {
@@ -57,12 +58,9 @@
 				</p>
 			{/if}
 			<div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-				<Button variant="outline" onclick={() => history.back()}>
-					<ArrowLeft class="h-4 w-4 mr-2" />
-					Go Back
-				</Button>
+				<BackButton fallback="/" label="Go Back" variant="outline" size="sm" />
 				<Button href="/">
-					<Home class="h-4 w-4 mr-2" />
+					<House class="h-4 w-4 mr-2" />
 					Go Home
 				</Button>
 			</div>

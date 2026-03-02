@@ -5,6 +5,8 @@
 	import { browser } from '$app/environment';
 
 	import { goto, invalidateAll } from '$app/navigation';
+	import { navigating, page } from '$app/stores';
+	import CatalogBrowseSkeleton from '$lib/components/skeletons/CatalogBrowseSkeleton.svelte';
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
@@ -208,6 +210,10 @@
 <svelte:head>
 	<title>Browse Catalog - Busser</title>
 </svelte:head>
+
+{#if $navigating?.to?.url.pathname.startsWith('/catalog/browse') && !$navigating?.to?.url.pathname.startsWith($page.url.pathname)}
+	<CatalogBrowseSkeleton />
+{:else}
 
 <div class="container mx-auto px-4 mt-4">
 	<!-- Header -->
@@ -454,3 +460,5 @@
 	filters={data.filters}
 	onsearch={handleAdvancedSearch}
 />
+
+{/if}

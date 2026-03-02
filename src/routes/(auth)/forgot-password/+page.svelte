@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { AlertCircle, ArrowLeft, CheckCircle2, Loader2, Mail } from 'lucide-svelte';
+	import { AlertCircle, CheckCircle2, Loader2, Mail } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import * as Alert from '$lib/components/ui/alert';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { cn } from '$lib/utils';
+
 
 	import type { ActionData } from './$types';
 
@@ -32,10 +33,7 @@
 				Didn't receive the email? Check your spam folder or try again.
 			</p>
 			<div class="flex gap-3">
-				<a href="/login" class={cn(buttonVariants({ variant: 'outline' }))}>
-					<ArrowLeft class="w-4 h-4 mr-2" />
-					Back to login
-				</a>
+				<BackButton fallback="/login" label="Back to login" variant="outline" size="sm" />
 			</div>
 		</div>
 	{:else}
@@ -88,10 +86,7 @@
 					{/if}
 				</Button>
 
-				<a href="/login" class={cn(buttonVariants({ variant: 'ghost' }))}>
-					<ArrowLeft class="w-4 h-4 mr-2" />
-					Back to login
-				</a>
+				<BackButton fallback="/login" label="Back to login" variant="ghost" size="sm" />
 			</div>
 		</form>
 	{/if}

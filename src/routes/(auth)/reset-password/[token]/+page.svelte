@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { AlertCircle, ArrowLeft, Loader2, Lock, XCircle } from 'lucide-svelte';
+	import { AlertCircle, Loader2, Lock, XCircle } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import * as Alert from '$lib/components/ui/alert';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -110,10 +111,7 @@
 					{/if}
 				</Button>
 
-				<a href="/login" class={cn(buttonVariants({ variant: 'ghost' }))}>
-					<ArrowLeft class="w-4 h-4 mr-2" />
-					Back to login
-				</a>
+				<BackButton fallback="/login" label="Back to login" variant="ghost" size="sm" />
 			</div>
 		</form>
 	{/if}

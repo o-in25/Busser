@@ -1,5 +1,9 @@
 import type { Action } from 'svelte/action';
-import type { RevealParams } from './types';
+
+interface RevealParams {
+	delay?: number;
+	threshold?: number;
+}
 
 export const reveal: Action<HTMLElement, RevealParams | undefined> = (node, params) => {
 	const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

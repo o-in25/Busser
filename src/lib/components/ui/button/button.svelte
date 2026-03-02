@@ -38,30 +38,35 @@
 		variant?: ButtonVariant;
 		size?: ButtonSize;
 		class?: string;
+		href?: string;
 	} & Partial<HTMLButtonElement>;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import type { HTMLButtonAttributes, HTMLAnchorAttributes } from 'svelte/elements';
 
 	import { cn } from '$lib/utils';
+
+	type Props = {
+		variant?: ButtonVariant;
+		size?: ButtonSize;
+		children?: Snippet;
+		href?: string;
+	} & (HTMLButtonAttributes & HTMLAnchorAttributes);
 
 	let {
 		class: className,
 		variant = 'default',
 		size = 'default',
+		href,
 		children,
 		...restProps
-	}: HTMLButtonAttributes & {
-		variant?: ButtonVariant;
-		size?: ButtonSize;
-		children?: Snippet;
-	} = $props();
+	}: Props = $props();
 </script>
 
-<button class={cn(buttonVariants({ variant, size }), className)} {...restProps}>
+<svelte:element this={href ? 'a' : 'button'} {href} class={cn(buttonVariants({ variant, size }), className)} {...restProps}>
 	{#if children}
 		{@render children()}
 	{/if}
-</button>
+</svelte:element>

@@ -6,8 +6,47 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta
 			name="viewport"
-			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
 		/>
+		<meta name="description" content="Manage your home bar — track inventory, discover cocktails, and collaborate with friends." />
+
+		<!-- PWA -->
+		<link rel="manifest" href="/manifest.json" />
+		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+
+		<!-- iOS standalone -->
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Busser" />
+		<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+		<!-- iOS splash screens (portrait) -->
+		<!-- iPhone 16 Pro Max (440x956 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone 16 Pro (402x874 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone 16 Plus / 15 Plus / 14 Pro Max (430x932 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone 16 / 15 / 15 Pro / 14 Pro (393x852 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone 14 / 13 / 13 Pro / 12 / 12 Pro (390x844 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone 14 Plus / 13 Pro Max / 12 Pro Max (428x926 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone 13 mini / 12 mini / 11 Pro / X / XS (375x812 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone 11 Pro Max / XS Max (414x896 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone 11 / XR (414x896 @2x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+		<!-- iPhone SE 3/2 / 8 / 7 / 6s (375x667 @2x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+		<!-- iPhone 8 Plus / 7 Plus (414x736 @3x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<!-- iPhone SE 1st (320x568 @2x) -->
+		<link rel="apple-touch-startup-image" href="/icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+
 		<!-- Inter Font -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,6 +78,18 @@
 					radial-gradient(ellipse 60% 40% at 80% 20%, rgba(111, 65, 150, 0.12) 0%, transparent 50%),
 					radial-gradient(ellipse 50% 50% at 50% 80%, rgba(193, 15, 80, 0.1) 0%, transparent 50%),
 					#08080f;
+			}
+			/* native feel */
+			body {
+				overscroll-behavior-y: contain;
+				-webkit-tap-highlight-color: transparent;
+				touch-action: manipulation;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+			}
+			button, a, [role="button"] {
+				-webkit-touch-callout: none;
+				user-select: none;
 			}
 		</style>
 		<!-- OG Meta Tags -->

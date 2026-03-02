@@ -5,7 +5,7 @@
 		ExternalLink,
 		FileText,
 		Github,
-		Home,
+		House,
 		Info,
 		LayoutGrid,
 		LogOut,
@@ -18,6 +18,7 @@
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import logoNav from '$lib/assets/logo-nav.png';
+	import { haptics } from '$lib/utils/haptics';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
@@ -80,7 +81,7 @@
 	}
 
 	const navItems = [
-		{ href: '/', icon: Home, label: 'Home' },
+		{ href: '/', icon: House, label: 'Home' },
 		{ href: '/inventory', icon: ClipboardList, label: 'Inventory' },
 		{ href: '/catalog', icon: LayoutGrid, label: 'Catalog' },
 		{ href: '/assistant', icon: Sparkles, label: 'Busser AI' },
@@ -120,7 +121,7 @@
 					<!-- Main -->
 					<div class="flex flex-col gap-1">
 						<button
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
 							onclick={() => {
 								mobileMenuOpen = false;
 								goto('/settings');
@@ -143,7 +144,7 @@
 							onclick={() => {
 								mobileMenuOpen = false;
 							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<Shield class="h-4 w-4 text-muted-foreground" />
 							Privacy Policy
@@ -153,7 +154,7 @@
 							onclick={() => {
 								mobileMenuOpen = false;
 							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<FileText class="h-4 w-4 text-muted-foreground" />
 							Terms of Service
@@ -163,7 +164,7 @@
 							onclick={() => {
 								mobileMenuOpen = false;
 							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<Cookie class="h-4 w-4 text-muted-foreground" />
 							Cookie Policy
@@ -182,7 +183,7 @@
 							onclick={() => {
 								mobileMenuOpen = false;
 							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<Info class="h-4 w-4 text-muted-foreground" />
 							About
@@ -191,7 +192,7 @@
 							href="https://github.com/o-in25/Busser"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
 						>
 							<Github class="h-4 w-4 text-muted-foreground" />
 							GitHub
@@ -203,7 +204,7 @@
 				<!-- sign out pinned to bottom -->
 				<div class="shrink-0 pt-4 border-t border-border">
 					<button
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left"
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
 						onclick={() => {
 							mobileMenuOpen = false;
 							logout();
@@ -227,7 +228,7 @@
 	<nav class="mobile-nav-container flex md:hidden">
 		<div class="mobile-nav-pill">
 			{#each navItems as item}
-				<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}">
+				<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
 					<item.icon class="h-5 w-5" />
 					<span class="mobile-nav-label">{item.label}</span>
 				</a>
@@ -299,7 +300,7 @@
 		z-index: 50;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.75rem 1.25rem;
+		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
 		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
@@ -370,7 +371,9 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 0.375rem 0.25rem;
+		padding: 0.5rem 0.375rem;
+		min-height: 44px;
+		min-width: 44px;
 		border-radius: 9999px;
 		color: rgba(113, 113, 122, 1);
 		transition: all 0.2s ease;
@@ -380,6 +383,11 @@
 
 	.mobile-nav-item:hover {
 		color: rgba(63, 63, 70, 1);
+	}
+
+	.mobile-nav-item:active {
+		opacity: 0.7;
+		transform: scale(0.95);
 	}
 
 	.mobile-nav-item.active {
@@ -407,7 +415,7 @@
 	}
 
 	.mobile-nav-label {
-		font-size: 0.625rem;
+		font-size: 0.6875rem;
 		font-weight: 500;
 		margin-top: 0.125rem;
 		white-space: nowrap;

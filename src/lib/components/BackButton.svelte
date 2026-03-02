@@ -24,7 +24,12 @@
 		class: className,
 	}: Props = $props();
 
+	function signalBack() {
+		document.documentElement.dataset.navOverride = 'back';
+	}
+
 	function handleBack() {
+		signalBack();
 		if (browser && window.history.length > 1) {
 			history.back();
 		} else {
@@ -38,7 +43,7 @@
 </script>
 
 {#if href}
-	<a {href} class={buttonClass}>
+	<a {href} class={buttonClass} onclick={signalBack}>
 		<ArrowLeft class={label && size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
 		{#if label}
 			<span>{label}</span>

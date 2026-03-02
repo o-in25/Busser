@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { ArrowLeft, KeyRound, Lock, Save, User } from 'lucide-svelte';
+	import { KeyRound, Lock, Save, User } from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -9,6 +9,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
 	import { cn } from '$lib/utils';
@@ -55,13 +56,12 @@
 				Update account details for {data.user?.username || 'this user'}
 			</p>
 		</div>
-		<a
-			class={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-			href={isAdmin ? `/settings/users/${data.user?.userId}` : '/settings/user-account'}
-		>
-			<ArrowLeft class="h-4 w-4 mr-2" />
-			Back
-		</a>
+		<BackButton
+			fallback={isAdmin ? `/settings/users/${data.user?.userId}` : '/settings/user-account'}
+			label="Back"
+			variant="outline"
+			size="sm"
+		/>
 	</div>
 
 	<form

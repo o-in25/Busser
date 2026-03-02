@@ -24,5 +24,5 @@
 </script>
 
 <div class={divStyle}>
-	<img class={imgStyle} {src} {alt} />
+	<img class={imgStyle} {src} {alt} loading="lazy" />
 </div>

@@ -678,6 +678,50 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
+	// batch compute estimated cost per available recipe in one query
+	async getRecipeCosts(
+		workspaceId: string
+	): Promise<{ recipeId: number; recipeName: string; recipeImageUrl: string | null; estimatedCost: number }[]> {
+		try {
+			const result = await this.db
+				.table('basicrecipestep as rs')
+				.join('basicrecipe as r', function () {
+					this.on('rs.RecipeId', '=', 'r.RecipeId').andOn('rs.WorkspaceId', '=', 'r.WorkspaceId');
+				})
+				.where('rs.WorkspaceId', workspaceId)
+				.whereIn('rs.RecipeId', function () {
+					this.select('RecipeId')
+						.from('availablerecipes')
+						.where('WorkspaceId', workspaceId)
+						.groupBy('RecipeId');
+				})
+				.select(
+					'rs.RecipeId',
+					'r.RecipeName',
+					'r.RecipeImageUrl',
+					this.db.query.raw(
+						`SUM(CASE
+							WHEN rs.ProductUnitSizeInMilliliters > 0 AND rs.ProductPricePerUnit > 0
+							THEN (rs.ProductPricePerUnit / rs.ProductUnitSizeInMilliliters) * rs.ProductIdQuantityInMilliliters
+							ELSE 0
+						END) as estimatedCost`
+					)
+				)
+				.groupBy('rs.RecipeId', 'r.RecipeName', 'r.RecipeImageUrl')
+				.orderBy('estimatedCost', 'asc');
+
+			return (result as any[]).map((row) => ({
+				recipeId: Number(row.recipeId),
+				recipeName: row.recipeName,
+				recipeImageUrl: row.recipeImageUrl || null,
+				estimatedCost: Number(row.estimatedCost) || 0,
+			}));
+		} catch (e) {
+			console.error('Failed to get recipe costs:', e);
+			return [];
+		}
+	}
+
 	async reorderFeatured(workspaceId: string, orderedRecipeIds: number[]): Promise<QueryResult> {
 		try {
 			await this.db.query.transaction(async (trx) => {
