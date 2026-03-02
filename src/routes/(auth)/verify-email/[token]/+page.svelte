@@ -44,7 +44,7 @@
 
 <div>
 	{#if data.status === 'success'}
-		<CheckCircle2 class="w-8 h-8 mb-3 text-green-500 dark:text-green-400" />
+		<CheckCircle2 class="w-8 h-8 mb-3 text-neon-green-500 dark:text-neon-green-400" />
 	{:else}
 		<XCircle class="w-8 h-8 mb-3 text-red-500 dark:text-red-400" />
 	{/if}
@@ -68,7 +68,7 @@
 			<ArrowRight class="ms-2 h-5 w-5" />
 		</a>
 	{:else if resendStatus === 'success'}
-		<p class="mt-4 text-sm text-green-500 dark:text-green-400">
+		<p class="mt-4 text-sm text-neon-green-500 dark:text-neon-green-400">
 			Verification email sent! Please check your inbox.
 		</p>
 	{:else}

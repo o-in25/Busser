@@ -68,6 +68,7 @@ export const actions: Actions = {
 		const recipeStepsJson = formData.get('recipeSteps') as string;
 		const recipeImageUrl = (formData.get('recipeImageUrl') as string) || '';
 		const recipeImageCleared = formData.get('recipeImageCleared') === 'true';
+		const insightsEnabled = formData.get('insightsEnabled') !== 'false';
 
 		if (!recipeName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Recipe name is required.' });
@@ -89,6 +90,7 @@ export const actions: Actions = {
 			recipeDrynessRating,
 			recipeStrengthRating,
 			recipeVersatilityRating,
+			insightsEnabled,
 		};
 
 		const result = await catalogRepo.save(

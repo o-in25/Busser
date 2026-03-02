@@ -115,7 +115,7 @@
 						<Table.Cell class="hidden md:table-cell">
 							<div class="flex items-center gap-2">
 								{#if isRecentlyActive(user.lastActivityDate)}
-									<div class="w-2 h-2 rounded-full bg-green-500"></div>
+									<div class="w-2 h-2 rounded-full bg-neon-green-500"></div>
 								{:else}
 									<div class="w-2 h-2 rounded-full bg-muted-foreground/30"></div>
 								{/if}
@@ -139,7 +139,7 @@
 								<a
 									class={cn(
 										buttonVariants({ variant: 'outline', size: 'icon' }),
-										'h-8 w-8 bg-violet-500/20 border-violet-500/50 text-violet-400 hover:bg-violet-500 hover:text-white'
+										'h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white'
 									)}
 									href="/settings/users/{user.userId}/edit"
 									title="Edit user"

@@ -251,9 +251,9 @@
 	}
 
 	const colorClasses = {
-		green: 'bg-green-500/10 border-green-500/20 text-green-600',
-		yellow: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-600',
-		orange: 'bg-orange-500/10 border-orange-500/20 text-orange-600',
+		green: 'bg-neon-green-500/10 border-neon-green-500/20 text-neon-green-600',
+		yellow: 'bg-neon-yellow-500/10 border-neon-yellow-500/20 text-neon-yellow-600',
+		orange: 'bg-neon-amber-500/10 border-neon-amber-500/20 text-neon-amber-600',
 		red: 'bg-rose-500/10 border-rose-500/20 text-rose-600',
 	};
 </script>
@@ -562,10 +562,10 @@
 
 			<!-- Warnings -->
 			{#if bacResult >= 0.05 && bacResult < 0.08}
-				<Alert.Root class="border-yellow-500/50 bg-yellow-500/10">
-					<TriangleAlert class="h-4 w-4 text-yellow-600" />
-					<Alert.Title class="text-yellow-600">Approaching Legal Limit</Alert.Title>
-					<Alert.Description class="text-sm text-yellow-600/90">
+				<Alert.Root class="border-neon-yellow-500/50 bg-neon-yellow-500/10">
+					<TriangleAlert class="h-4 w-4 text-neon-yellow-600" />
+					<Alert.Title class="text-neon-yellow-600">Approaching Legal Limit</Alert.Title>
+					<Alert.Description class="text-sm text-neon-yellow-600/90">
 						You are approaching the legal driving limit in most jurisdictions. Consider stopping and
 						waiting before driving.
 					</Alert.Description>

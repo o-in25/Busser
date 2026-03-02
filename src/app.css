@@ -51,6 +51,54 @@
 	--color-secondary-900: #5c377b;
 	--color-secondary-950: #3a2253;
 
+	--color-neon-yellow-50: #fffbeb;
+	--color-neon-yellow-100: #fef3c7;
+	--color-neon-yellow-200: #fde68a;
+	--color-neon-yellow-300: #fbd54b;
+	--color-neon-yellow-400: #f8cc30;
+	--color-neon-yellow-500: #f5c542;
+	--color-neon-yellow-600: #d9a00e;
+	--color-neon-yellow-700: #a87712;
+	--color-neon-yellow-800: #8a5f17;
+	--color-neon-yellow-900: #734e1a;
+	--color-neon-yellow-950: #432b0b;
+
+	--color-neon-cyan-50: #ecfeff;
+	--color-neon-cyan-100: #cffafe;
+	--color-neon-cyan-200: #a5f3fc;
+	--color-neon-cyan-300: #67e8f9;
+	--color-neon-cyan-400: #34d8ed;
+	--color-neon-cyan-500: #22d3ee;
+	--color-neon-cyan-600: #0bb1cc;
+	--color-neon-cyan-700: #108da5;
+	--color-neon-cyan-800: #157186;
+	--color-neon-cyan-900: #175e6f;
+	--color-neon-cyan-950: #093e4b;
+
+	--color-neon-green-50: #edfdf6;
+	--color-neon-green-100: #d2fae9;
+	--color-neon-green-200: #a9f3d5;
+	--color-neon-green-300: #72e6ba;
+	--color-neon-green-400: #3ad29c;
+	--color-neon-green-500: #1cba8a;
+	--color-neon-green-600: #129770;
+	--color-neon-green-700: #10795b;
+	--color-neon-green-800: #116049;
+	--color-neon-green-900: #0e503d;
+	--color-neon-green-950: #052d22;
+
+	--color-neon-amber-50: #fffaec;
+	--color-neon-amber-100: #fff1c6;
+	--color-neon-amber-200: #ffe088;
+	--color-neon-amber-300: #ffcb4a;
+	--color-neon-amber-400: #f8b820;
+	--color-neon-amber-500: #e8a30f;
+	--color-neon-amber-600: #c47e07;
+	--color-neon-amber-700: #9c5b0d;
+	--color-neon-amber-800: #804a13;
+	--color-neon-amber-900: #6a3d14;
+	--color-neon-amber-950: #3e2008;
+
 	--color-destructive: hsl(var(--destructive));
 	--color-destructive-foreground: hsl(var(--destructive-foreground));
 
@@ -72,6 +120,13 @@
 
 	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
 		'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+	--shadow-glow-pink: 0 0 20px rgba(248, 78, 128, 0.4);
+	--shadow-glow-yellow: 0 0 20px rgba(245, 197, 66, 0.3);
+	--shadow-glow-cyan: 0 0 20px rgba(34, 211, 238, 0.25);
+	--shadow-glow-purple: 0 0 30px rgba(165, 125, 213, 0.2);
+	--shadow-glow-green: 0 0 20px rgba(28, 186, 138, 0.3);
+	--shadow-glow-amber: 0 0 20px rgba(232, 163, 15, 0.3);
 
 	--backdrop-blur-3xl: 64px;
 	--backdrop-saturate-125: 1.25;
@@ -258,25 +313,32 @@
 	}
 
 	.dark {
-		--background: 240 10% 3.9%;
+		--background: 240 33% 3.5%;
 		--foreground: 0 0% 98%;
-		--card: 240 10% 3.9%;
+		--card: 240 33% 6.5%;
 		--card-foreground: 0 0% 98%;
-		--popover: 240 10% 3.9%;
+		--popover: 240 33% 6.5%;
 		--popover-foreground: 0 0% 98%;
 		--primary: 340 87% 60%;
 		--primary-foreground: 0 0% 98%;
 		--secondary: 270 45% 65%;
 		--secondary-foreground: 0 0% 98%;
-		--muted: 240 3.7% 15.9%;
+		--muted: 240 28% 14%;
 		--muted-foreground: 240 5% 64.9%;
 		--accent: 340 87% 60%;
 		--accent-foreground: 0 0% 98%;
 		--destructive: 0 72% 51%;
 		--destructive-foreground: 0 0% 98%;
-		--border: 240 3.7% 15.9%;
-		--input: 240 3.7% 15.9%;
+		--border: 240 20% 16%;
+		--input: 240 20% 16%;
 		--ring: 340 87% 60%;
+
+		--glow-pink: 0 0 20px rgba(248, 78, 128, 0.4);
+		--glow-yellow: 0 0 20px rgba(245, 197, 66, 0.3);
+		--glow-cyan: 0 0 20px rgba(34, 211, 238, 0.25);
+		--glow-purple: 0 0 30px rgba(165, 125, 213, 0.2);
+		--glow-green: 0 0 20px rgba(28, 186, 138, 0.3);
+		--glow-amber: 0 0 20px rgba(232, 163, 15, 0.3);
 	}
 }
 

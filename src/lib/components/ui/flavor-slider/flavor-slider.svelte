@@ -39,10 +39,10 @@
 
 	// Color mappings for gradients
 	const colorMap = {
-		pink: { from: '336 80% 58%', to: '340 87% 45%' },
-		amber: { from: '38 92% 50%', to: '32 95% 44%' },
-		purple: { from: '271 76% 53%', to: '280 85% 45%' },
-		orange: { from: '24 95% 53%', to: '17 88% 40%' },
+		pink: { from: '340 93% 64%', to: '340 87% 45%' },
+		amber: { from: '40 92% 48%', to: '35 95% 40%' },
+		purple: { from: '270 45% 65%', to: '270 45% 50%' },
+		orange: { from: '40 92% 48%', to: '35 88% 38%' },
 		primary: { from: 'var(--primary)', to: '340 87% 45%' },
 	};
 

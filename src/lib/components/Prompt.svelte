@@ -207,7 +207,7 @@
 				<!-- character count -->
 				{#if hasContent && !isGenerating}
 					<div
-						class="absolute bottom-2 right-3 text-xs text-muted-foreground/60"
+						class="absolute bottom-2 right-3 text-xs text-muted-foreground/60 bg-background/80 dark:bg-zinc-800/80 backdrop-blur-sm rounded px-1.5 py-0.5"
 						transition:fade={{ duration: 150 }}
 					>
 						{internalValue.length} chars

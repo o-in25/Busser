@@ -18,7 +18,7 @@
 </script>
 
 <div class="flex items-center gap-3">
-	<Sun class="h-4 w-4 text-amber-500" />
+	<Sun class="h-4 w-4 text-neon-amber-500" />
 	<Switch checked={currentTheme === 'dark'} onCheckedChange={toggleTheme} />
 	<Moon class="h-4 w-4 text-blue-400" />
 </div>

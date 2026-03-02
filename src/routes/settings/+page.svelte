@@ -260,7 +260,7 @@
 									toggleFormRef.requestSubmit();
 								}}
 							/>
-							<Mail class="h-4 w-4 text-green-500" />
+							<Mail class="h-4 w-4 text-neon-green-500" />
 						</div>
 					</form>
 				</div>

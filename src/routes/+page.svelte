@@ -146,7 +146,7 @@
 			>
 				From Shelf To
 				<span
-					class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500"
+					class="text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
 				>
 					Shaker
 				</span>
@@ -188,8 +188,8 @@
 						<div class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 dark:bg-zinc-950">
 							<div class="flex gap-1.5">
 								<span class="w-3 h-3 rounded-full bg-red-500"></span>
-								<span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-								<span class="w-3 h-3 rounded-full bg-green-500"></span>
+								<span class="w-3 h-3 rounded-full bg-neon-yellow-500"></span>
+								<span class="w-3 h-3 rounded-full bg-neon-green-500"></span>
 							</div>
 							<div
 								class="flex-1 mx-2 px-3 py-1 rounded-md bg-zinc-700 dark:bg-zinc-800 text-xs text-zinc-400 truncate"
@@ -279,13 +279,13 @@
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
 						<div
-							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-amber-500/10 blur-2xl"
+							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-neon-amber-500/10 blur-2xl"
 						></div>
 						<Card.Header class="pb-2">
 							<div
-								class="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors"
+								class="w-12 h-12 rounded-lg bg-neon-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-neon-amber-500/20 transition-colors"
 							>
-								<BookOpen class="h-6 w-6 text-amber-600 dark:text-amber-400" />
+								<BookOpen class="h-6 w-6 text-neon-amber-600 dark:text-neon-amber-400" />
 							</div>
 							<Card.Title class="text-lg">Recipe Catalog</Card.Title>
 						</Card.Header>
@@ -314,13 +314,13 @@
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
 						<div
-							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-green-500/10 blur-2xl"
+							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-neon-green-500/10 blur-2xl"
 						></div>
 						<Card.Header class="pb-2">
 							<div
-								class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors"
+								class="w-12 h-12 rounded-lg bg-neon-green-500/10 flex items-center justify-center mb-3 group-hover:bg-neon-green-500/20 transition-colors"
 							>
-								<ChefHat class="h-6 w-6 text-green-600 dark:text-green-400" />
+								<ChefHat class="h-6 w-6 text-neon-green-600 dark:text-neon-green-400" />
 							</div>
 							<Card.Title class="text-lg">Smart Matching</Card.Title>
 						</Card.Header>
@@ -349,13 +349,13 @@
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
 						<div
-							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-violet-500/10 blur-2xl"
+							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-secondary-500/10 blur-2xl"
 						></div>
 						<Card.Header class="pb-2">
 							<div
-								class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center mb-3 group-hover:bg-violet-500/20 transition-colors"
+								class="w-12 h-12 rounded-lg bg-secondary-500/10 flex items-center justify-center mb-3 group-hover:bg-secondary-500/20 transition-colors"
 							>
-								<Sparkles class="h-6 w-6 text-violet-600 dark:text-violet-400" />
+								<Sparkles class="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
 							</div>
 							<Card.Title class="text-lg">AI-Powered Tools</Card.Title>
 						</Card.Header>
@@ -417,7 +417,7 @@
 			<div class="relative">
 				<!-- connecting line (desktop only) -->
 				<div
-					class="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-pink-500 via-amber-500 to-green-500 opacity-30"
+					class="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-primary-500 via-neon-amber-500 to-neon-green-500 opacity-30"
 				></div>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
@@ -428,12 +428,12 @@
 					>
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
-								<div class="w-24 h-24 rounded-full bg-pink-500/10 flex items-center justify-center">
-									<Package class="h-10 w-10 text-pink-500" />
+								<div class="w-24 h-24 rounded-full bg-primary-500/10 flex items-center justify-center">
+									<Package class="h-10 w-10 text-primary-500" />
 								</div>
 							</div>
 							<span
-								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-pink-500 text-white text-xs font-bold flex items-center justify-center"
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center"
 							>
 								1
 							</span>
@@ -451,12 +451,12 @@
 					>
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
-								<div class="w-24 h-24 rounded-full bg-amber-500/10 flex items-center justify-center">
-									<Sparkles class="h-10 w-10 text-amber-500" />
+								<div class="w-24 h-24 rounded-full bg-neon-amber-500/10 flex items-center justify-center">
+									<Sparkles class="h-10 w-10 text-neon-amber-500" />
 								</div>
 							</div>
 							<span
-								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center"
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-neon-amber-500 text-white text-xs font-bold flex items-center justify-center"
 							>
 								2
 							</span>
@@ -474,12 +474,12 @@
 					>
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
-								<div class="w-24 h-24 rounded-full bg-green-500/10 flex items-center justify-center">
-									<GlassWater class="h-10 w-10 text-green-500" />
+								<div class="w-24 h-24 rounded-full bg-neon-green-500/10 flex items-center justify-center">
+									<GlassWater class="h-10 w-10 text-neon-green-500" />
 								</div>
 							</div>
 							<span
-								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center"
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-neon-green-500 text-white text-xs font-bold flex items-center justify-center"
 							>
 								3
 							</span>
@@ -545,9 +545,9 @@
 				<!-- Success State -->
 				<div class="py-6 text-center">
 					<div
-						class="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4"
+						class="w-16 h-16 rounded-full bg-neon-green-500/10 flex items-center justify-center mx-auto mb-4"
 					>
-						<CheckCircle2 class="h-8 w-8 text-green-500" />
+						<CheckCircle2 class="h-8 w-8 text-neon-green-500" />
 					</div>
 					<h3 class="text-lg font-semibold mb-2">Request Submitted!</h3>
 					<p class="text-muted-foreground text-sm mb-4">
@@ -654,8 +654,8 @@
 				<div class="grid grid-cols-2 gap-3 w-full md:w-auto md:flex">
 					<Card.Root class="px-4 py-3">
 						<div class="flex items-center gap-3">
-							<div class="p-2 rounded-full bg-green-500/10">
-								<CheckCircle2 class="h-5 w-5 text-green-500" />
+							<div class="p-2 rounded-full bg-neon-green-500/10">
+								<CheckCircle2 class="h-5 w-5 text-neon-green-500" />
 							</div>
 							<div>
 								<p class="text-2xl font-bold">{dashboardData.availableCount}</p>
@@ -684,7 +684,7 @@
 				{#if canModify}
 					<a href="/inventory/add" class="block">
 						<Card.Root
-							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full"
+							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
 						>
 							<div class="flex items-center gap-3">
 								<div class="p-2 rounded-lg bg-primary/10">
@@ -701,7 +701,7 @@
 
 				<a href="/catalog/browse" class="block">
 					<Card.Root
-						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full"
+						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
 					>
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-lg bg-primary/10">
@@ -718,11 +718,11 @@
 				{#if gallery.length > 0}
 					<button onclick={surpriseMe} class="block text-left w-full">
 						<Card.Root
-							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full"
+							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-amber"
 						>
 							<div class="flex items-center gap-3">
-								<div class="p-2 rounded-lg bg-amber-500/10">
-									<Shuffle class="h-5 w-5 text-amber-500" />
+								<div class="p-2 rounded-lg bg-neon-amber-500/10">
+									<Shuffle class="h-5 w-5 text-neon-amber-500" />
 								</div>
 								<div>
 									<p class="font-medium">Surprise Me!</p>
@@ -735,7 +735,7 @@
 
 				<a href="/inventory" class="block">
 					<Card.Root
-						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full"
+						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
 					>
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-lg bg-primary/10">
@@ -756,7 +756,7 @@
 			<div class="flex items-center justify-between mb-4">
 				<div>
 					<h2 class="text-2xl font-bold flex items-center gap-2">
-						<CheckCircle2 class="h-6 w-6 text-green-500" />
+						<CheckCircle2 class="h-6 w-6 text-neon-green-500" />
 						Ready to Make
 					</h2>
 					<p class="text-sm text-muted-foreground">
@@ -824,7 +824,7 @@
 					{#each filter.slice(0, 8) as item (item.data.recipeId)}
 						<a href="/catalog/{item.data.recipeId}" class="block group" in:fade={{ duration: 200 }}>
 							<Card.Root
-								class="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105"
+								class="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105 dark:hover:shadow-glow-purple"
 							>
 								<div class="relative aspect-square">
 									{#if item.hasImage}
@@ -877,7 +877,7 @@
 				<div class="flex items-center justify-between mb-4">
 					<div>
 						<h2 class="text-2xl font-bold flex items-center gap-2">
-							<AlertCircle class="h-6 w-6 text-amber-500" />
+							<AlertCircle class="h-6 w-6 text-neon-amber-500" />
 							Almost There
 						</h2>
 						<p class="text-sm text-muted-foreground">
@@ -909,7 +909,7 @@
 									{#if recipe.missingIngredient}
 										<Badge
 											variant="outline"
-											class="mt-1 text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30"
+											class="mt-1 text-neon-amber-600 border-neon-amber-300 bg-neon-amber-50 dark:bg-neon-amber-950/30"
 										>
 											<ShoppingCart class="h-3 w-3 mr-1" />
 											Need: {recipe.missingIngredient}
@@ -976,8 +976,8 @@
 				<Card.Root>
 					<Card.Header class="pb-3">
 						<div class="flex items-center gap-2">
-							<div class="p-2 rounded-lg bg-amber-500/10">
-								<ShoppingCart class="h-5 w-5 text-amber-500" />
+							<div class="p-2 rounded-lg bg-neon-amber-500/10">
+								<ShoppingCart class="h-5 w-5 text-neon-amber-500" />
 							</div>
 							<div>
 								<Card.Title class="text-lg">Highest Impact Purchases</Card.Title>
@@ -1031,12 +1031,12 @@
 						<!-- Category Breakdown Bar -->
 						{@const barColors = [
 							'bg-primary',
-							'bg-amber-500',
-							'bg-green-500',
-							'bg-violet-500',
-							'bg-pink-500',
+							'bg-neon-amber-500',
+							'bg-neon-green-500',
+							'bg-secondary-500',
+							'bg-primary-500',
 							'bg-sky-500',
-							'bg-orange-500',
+							'bg-neon-amber-500',
 							'bg-emerald-500',
 						]}
 						<div class="space-y-2">
@@ -1077,10 +1077,10 @@
 	@keyframes glow {
 		0%,
 		100% {
-			filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));
+			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
 		}
 		50% {
-			filter: drop-shadow(0 0 24px rgba(236, 72, 153, 0.5));
+			filter: drop-shadow(0 0 24px rgba(248, 78, 128, 0.5));
 		}
 	}
 
@@ -1115,10 +1115,10 @@
 	.hero-gradient-bg {
 		background: linear-gradient(
 			135deg,
-			rgba(168, 85, 247, 0.1),
-			rgba(236, 72, 153, 0.05),
-			rgba(249, 115, 22, 0.1),
-			rgba(168, 85, 247, 0.08)
+			rgba(165, 125, 213, 0.1),
+			rgba(248, 78, 128, 0.05),
+			rgba(232, 163, 15, 0.1),
+			rgba(165, 125, 213, 0.08)
 		);
 		background-size: 200% 200%;
 		animation: gradient-shift 8s ease infinite;
@@ -1156,21 +1156,21 @@
 	.hero-orb-purple {
 		top: 5%;
 		left: 10%;
-		background: rgba(168, 85, 247, 0.6);
+		background: rgba(165, 125, 213, 0.6);
 		animation: float-1 12s ease-in-out infinite;
 	}
 
 	.hero-orb-pink {
 		top: 30%;
 		right: 10%;
-		background: rgba(236, 72, 153, 0.6);
+		background: rgba(248, 78, 128, 0.6);
 		animation: float-2 16s ease-in-out infinite;
 	}
 
 	.hero-orb-orange {
 		bottom: 10%;
 		left: 20%;
-		background: rgba(249, 115, 22, 0.6);
+		background: rgba(232, 163, 15, 0.6);
 		animation: float-3 14s ease-in-out infinite;
 	}
 

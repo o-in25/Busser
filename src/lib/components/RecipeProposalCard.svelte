@@ -67,7 +67,7 @@
 			<ul class="space-y-1.5">
 				{#each proposal.ingredients as ingredient}
 					<li class="flex items-center gap-2 text-sm">
-						<Check class="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+						<Check class="h-3.5 w-3.5 text-neon-green-500 flex-shrink-0" />
 						<span class="flex-1">{ingredient.description}</span>
 						<Badge variant="outline" class="text-xs"
 							>{ingredient.matchMode === 'EXACT_PRODUCT'
@@ -85,14 +85,14 @@
 	<!-- missing ingredients -->
 	{#if proposal.missingIngredients.length > 0}
 		<div class="space-y-2">
-			<h5 class="text-sm font-medium flex items-center gap-1.5 text-amber-600">
+			<h5 class="text-sm font-medium flex items-center gap-1.5 text-neon-amber-600">
 				<Plus class="h-3.5 w-3.5" />
 				Will be added to inventory
 			</h5>
 			<ul class="space-y-1.5">
 				{#each proposal.missingIngredients as ingredient}
 					<li class="flex items-center gap-2 text-sm">
-						<Plus class="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+						<Plus class="h-3.5 w-3.5 text-neon-amber-500 flex-shrink-0" />
 						<span class="flex-1">{ingredient.description}</span>
 						<Badge variant="secondary" class="text-xs">{ingredient.categoryName}</Badge>
 					</li>

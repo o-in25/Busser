@@ -108,7 +108,7 @@
 
 	<!-- Success Message -->
 	{#if form?.success}
-		<div class="bg-green-500/10 text-green-600 dark:text-green-400 px-4 py-3 rounded-md text-sm">
+		<div class="bg-neon-green-500/10 text-neon-green-600 dark:text-neon-green-400 px-4 py-3 rounded-md text-sm">
 			{#if form.action === 'update'}
 				Member role updated successfully.
 			{:else if form.action === 'remove'}

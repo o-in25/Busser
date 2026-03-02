@@ -116,7 +116,7 @@
 		{#if isFlexible && flexibleLabel}
 			<div class="flex items-center gap-1.5 mt-0.5">
 				{#if matchMode === 'ANY_IN_PARENT_CATEGORY'}
-					<Sparkles class="w-3 h-3 text-amber-500" />
+					<Sparkles class="w-3 h-3 text-neon-amber-500" />
 				{:else}
 					<Layers class="w-3 h-3 text-blue-500" />
 				{/if}

@@ -120,6 +120,7 @@ export type BasicRecipe = {
 	recipeDrynessRating: number;
 	recipeStrengthRating: number;
 	recipeVersatilityRating: number;
+	insightsEnabled: boolean;
 };
 
 // basicrecipestep view
@@ -231,6 +232,7 @@ export namespace View {
 		recipeDrynessRating: number;
 		recipeStrengthRating: number;
 		recipeVersatilityRating: number;
+		insightsEnabled: boolean;
 		workspaceId: string;
 	};
 
@@ -278,6 +280,7 @@ export namespace QueryRequest {
 		recipeDrynessRating: number;
 		recipeStrengthRating: number;
 		recipeVersatilityRating: number;
+		insightsEnabled?: boolean;
 	};
 
 	export type RecipeSteps = {

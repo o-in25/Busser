@@ -14,7 +14,7 @@
 	{#each list as item}
 		<li class="flex items-center">
 			{#if type === 'success'}
-				<CircleCheck class="w-5 h-5 me-2 text-green-500 dark:text-green-400" />
+				<CircleCheck class="w-5 h-5 me-2 text-neon-green-500 dark:text-neon-green-400" />
 			{:else if type === 'error'}
 				<CircleX class="w-5 h-5 me-2 text-red-500 dark:text-red-400" />
 			{/if}

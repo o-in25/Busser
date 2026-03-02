@@ -179,8 +179,8 @@
 				{#each ruleResults as rule}
 					<div class="flex items-center gap-2 text-sm">
 						{#if rule.met}
-							<CircleCheck class="h-4 w-4 text-green-500 shrink-0" />
-							<span class="text-green-600 dark:text-green-400">{rule.label}</span>
+							<CircleCheck class="h-4 w-4 text-neon-green-500 shrink-0" />
+							<span class="text-neon-green-600 dark:text-neon-green-400">{rule.label}</span>
 						{:else}
 							<Circle class="h-4 w-4 text-muted-foreground shrink-0" />
 							<span class="text-muted-foreground">{rule.label}</span>

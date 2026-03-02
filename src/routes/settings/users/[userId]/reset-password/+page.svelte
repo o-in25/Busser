@@ -36,7 +36,7 @@
 		{#if form?.error || form?.success}
 			<Alert
 				variant={form.error ? 'destructive' : 'default'}
-				class="mb-4 {form.error ? '' : 'border-green-500 text-green-700 dark:text-green-400'}"
+				class="mb-4 {form.error ? '' : 'border-neon-green-500 text-neon-green-700 dark:text-neon-green-400'}"
 			>
 				<Info class="w-5 h-5" />
 				<AlertDescription>

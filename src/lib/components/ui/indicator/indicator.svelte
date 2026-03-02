@@ -16,12 +16,12 @@
 	const colorClasses: Record<string, string> = {
 		gray: 'bg-gray-400',
 		red: 'bg-red-500',
-		yellow: 'bg-yellow-400',
-		green: 'bg-green-500',
+		yellow: 'bg-neon-yellow-400',
+		green: 'bg-neon-green-500',
 		blue: 'bg-blue-500',
 		indigo: 'bg-indigo-500',
-		purple: 'bg-purple-500',
-		pink: 'bg-pink-500',
+		purple: 'bg-secondary-500',
+		pink: 'bg-primary-500',
 	};
 
 	const sizeClasses: Record<string, string> = {

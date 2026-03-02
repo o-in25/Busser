@@ -29,6 +29,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { ServingMethodToggle } from '$lib/components/ui/serving-method';
 	import { SpiritCard } from '$lib/components/ui/spirit-card';
+	import { Switch } from '$lib/components/ui/switch';
 	import { calculateOverallScore, convertFromMl, convertToMl } from '$lib/math';
 	import type { PreparationMethod, Spirit, View } from '$lib/types';
 
@@ -246,10 +247,10 @@
 	const ratingsMap = [
 		{ max: 0, label: 'No Rating', bg: 'bg-gray-500' },
 		{ max: 2, label: 'Needs Work', bg: 'bg-red-500' },
-		{ max: 4, label: 'Below Average', bg: 'bg-orange-500' },
-		{ max: 5, label: 'Average', bg: 'bg-yellow-500' },
+		{ max: 4, label: 'Below Average', bg: 'bg-neon-amber-500' },
+		{ max: 5, label: 'Average', bg: 'bg-neon-yellow-500' },
 		{ max: 6, label: 'Good', bg: 'bg-lime-500' },
-		{ max: 7, label: 'Great', bg: 'bg-green-500' },
+		{ max: 7, label: 'Great', bg: 'bg-neon-green-500' },
 		{ max: 8, label: 'Excellent', bg: 'bg-emerald-500' },
 		{ max: 10, label: 'Outstanding', bg: 'bg-teal-500' },
 	];
@@ -310,6 +311,9 @@
 	// Pending image state (held in memory until form save)
 	let pendingImageFile = $state<File | null>(null);
 	let imageCleared = $state(false);
+
+	// AI insights toggle
+	let insightsEnabled = $state(initialRecipe.insightsEnabled ?? true);
 
 	// Collapsible state - closed by default in add mode
 	let descriptionOpen = $state(!isAddMode);
@@ -472,6 +476,20 @@
 									/>
 								{/each}
 							</div>
+						</div>
+						<!-- AI Insights toggle -->
+						<div class="flex items-center justify-between rounded-lg border p-3">
+							<div class="space-y-0.5">
+								<Label class="text-sm font-medium flex items-center gap-1.5">
+									<Sparkles class="w-4 h-4 text-primary" />
+									AI Insights
+								</Label>
+								<p class="text-xs text-muted-foreground">
+									generate cocktail history, tips, and pairings with AI
+								</p>
+							</div>
+							<Switch bind:checked={insightsEnabled} />
+							<input type="hidden" name="insightsEnabled" value={String(insightsEnabled)} />
 						</div>
 					</div>
 				{:else if step === 1}
@@ -692,6 +710,21 @@
 				</div>
 			</CollapsibleSection>
 
+			<!-- AI Insights toggle -->
+			<div class="flex items-center justify-between rounded-lg border p-4">
+				<div class="space-y-0.5">
+					<Label class="text-sm font-medium flex items-center gap-1.5">
+						<Sparkles class="w-4 h-4 text-primary" />
+						AI Insights
+					</Label>
+					<p class="text-xs text-muted-foreground">
+						generate cocktail history, tips, and pairings with AI
+					</p>
+				</div>
+				<Switch bind:checked={insightsEnabled} />
+				<input type="hidden" name="insightsEnabled" value={String(insightsEnabled)} />
+			</div>
+
 			<!-- Section 3: Flavor Profile (collapsible) -->
 			<CollapsibleSection title="Flavor Profile" icon={Gauge} bind:open={ratingsOpen}>
 				<div class="space-y-4">
@@ -841,7 +874,11 @@
 					<Dialog.Title>Confirm Delete</Dialog.Title>
 					<Dialog.Description>
 						Delete <span class="font-semibold">{recipe?.recipeName}</span> from catalog?
-						<p class="text-destructive font-bold mt-2">Once deleted, it can't be recovered.</p>
+						<p
+							class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
+						>
+							Once deleted, it can't be recovered.
+						</p>
 					</Dialog.Description>
 				</Dialog.Header>
 				<Dialog.Footer>

@@ -670,13 +670,15 @@ export class InventoryRepository extends BaseRepository {
 					'category.CategoryName',
 					'category.CategoryDescription',
 					'category.ParentCategoryId',
+					'category.CategoryGroupId',
 					this.db.query.raw('COUNT(product.ProductId) as productCount')
 				)
 				.groupBy(
 					'category.CategoryId',
 					'category.CategoryName',
 					'category.CategoryDescription',
-					'category.ParentCategoryId'
+					'category.ParentCategoryId',
+					'category.CategoryGroupId'
 				)
 				.orderBy('category.CategoryName');
 
@@ -685,6 +687,7 @@ export class InventoryRepository extends BaseRepository {
 				categoryName: row.categoryName,
 				categoryDescription: row.categoryDescription,
 				parentCategoryId: row.parentCategoryId,
+				categoryGroupId: row.categoryGroupId ?? null,
 				productCount: Number(row.productCount),
 			}));
 		} catch (error: any) {
