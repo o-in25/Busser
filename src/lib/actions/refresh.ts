@@ -42,8 +42,12 @@ export const refresh: Action<HTMLElement> = (node) => {
 		indicator.classList.remove('ptr-releasing', 'ptr-completing');
 	}
 
+	function isScrolledDown() {
+		return (window.scrollY || document.body.scrollTop || document.documentElement.scrollTop) > 0;
+	}
+
 	function onTouchStart(e: TouchEvent) {
-		if (state !== 'idle' || window.scrollY > 0) return;
+		if (state !== 'idle' || isScrolledDown()) return;
 		startY = e.touches[0].clientY;
 		state = 'pulling';
 		wasReady = false;

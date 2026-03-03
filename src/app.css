@@ -567,6 +567,18 @@ html[data-nav-direction="back"]::view-transition-new(root) {
 	}
 }
 
+/* skeleton with delayed pulse — avoids flash during view transitions */
+.skeleton-delayed {
+	animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	animation-delay: 0.3s;
+	opacity: 0.5;
+}
+
+@keyframes skeleton-pulse {
+	0%, 100% { opacity: 0.5; }
+	50% { opacity: 1; }
+}
+
 /* lift toasts above mobile bottom nav */
 @media (max-width: 767px) {
 	[data-sonner-toaster] {

@@ -18,11 +18,17 @@
 
 	let loaded = $state(false);
 	let errored = $state(false);
+	let prevSrc: string | null | undefined = undefined;
 
 	// preload image off-screen so the browser fully decodes it
 	// before we ever add an <img> to the DOM
 	$effect(() => {
 		if (!src) return;
+
+		// only reset when src actually changes to a different url
+		if (src === prevSrc) return;
+		prevSrc = src;
+
 		loaded = false;
 		errored = false;
 
@@ -37,7 +43,7 @@
 
 <div class={cn('relative overflow-hidden', className)}>
 	{#if showImage && !loaded}
-		<div class="absolute inset-0 animate-pulse bg-muted"></div>
+		<div class="absolute inset-0 bg-muted skeleton-delayed"></div>
 	{/if}
 
 	{#if showImage && loaded}
