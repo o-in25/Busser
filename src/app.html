@@ -19,9 +19,10 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="Busser" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-dark.png" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" media="(prefers-color-scheme: light)" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-dark.png" media="(prefers-color-scheme: dark)" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180-dark.png">
+		<link rel="apple-touch-icon" sizes="167x167" href="/icons/apple-touch-icon-167x167-dark.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152-dark.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120-dark.png">
 
 		<!-- Inter Font -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -105,6 +106,23 @@
 			}
 		</script>
 		<script>
+			// dynamically swap apple-touch-icons based on color scheme
+			(function() {
+				function updateAppleTouchIcons() {
+					var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+					var theme = isDark ? 'dark' : 'light';
+					document.querySelectorAll('link[rel="apple-touch-icon"]').forEach(function(link) {
+						var href = link.getAttribute('href');
+						if (href) link.setAttribute('href', href.replace(/(light|dark)/, theme));
+					});
+				}
+				updateAppleTouchIcons();
+				if (window.matchMedia) {
+					window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateAppleTouchIcons);
+				}
+			})();
+		</script>
+		<script>
 			// generate iOS splash screen at runtime via canvas
 			if (/iP(hone|od|ad)/.test(navigator.userAgent)) {
 				(function () {
@@ -113,7 +131,7 @@
 					var h = screen.height * dpr;
 					var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 					var bg = dark ? '#08080f' : '#fafafa';
-					var icon = dark ? '/icons/icon-512x512-dark.png' : '/icons/icon-512x512.png';
+					var icon = dark ? '/icons/icon-512x512-dark.png' : '/icons/icon-512x512-light.png';
 					var c = document.createElement('canvas');
 					c.width = w;
 					c.height = h;
@@ -142,7 +160,7 @@
 			@media (prefers-color-scheme:dark) { #app-splash { background:#08080f } }
 		</style>
 		<div id="app-splash">
-			<img src="/icons/icon-512x512.png" alt="" width="120" height="120" />
+			<img src="/icons/icon-512x512-dark.png" alt="" width="120" height="120" />
 		</div>
 		<div style="display: contents" class="flex min-h-full flex-col">%sveltekit.body%</div>
 		<script>

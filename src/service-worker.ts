@@ -9,7 +9,14 @@ const sw = self as unknown as ServiceWorkerGlobalScope;
 const CACHE_NAME = `busser-${version}`;
 
 // app shell assets to pre-cache on install
-const PRECACHE_ASSETS = [...build, '/offline.html', '/icons/icon-192x192.png', '/icons/icon-512x512.png'];
+const PRECACHE_ASSETS = [
+	...build,
+	'/offline.html',
+	'/icons/icon-192x192-light.png',
+	'/icons/icon-192x192-dark.png',
+	'/icons/icon-512x512-light.png',
+	'/icons/icon-512x512-dark.png',
+];
 
 sw.addEventListener('install', (event) => {
 	event.waitUntil(

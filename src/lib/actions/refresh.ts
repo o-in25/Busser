@@ -60,7 +60,13 @@ export const refresh: Action<HTMLElement> = (node) => {
 	function onTouchMove(e: TouchEvent) {
 		if (state !== 'pulling') return;
 		const rawDy = e.touches[0].clientY - startY;
-		if (rawDy < 0) return;
+		if (rawDy < 0) {
+			// finger moved up — user is scrolling down, abort pull
+			state = 'idle';
+			node.style.transition = '';
+			indicator.style.transition = '';
+			return;
+		}
 
 		if (rawDy > 10) e.preventDefault();
 
@@ -137,6 +143,10 @@ export const refresh: Action<HTMLElement> = (node) => {
 		} else {
 			// snap back — below threshold
 			state = 'idle';
+
+			// nothing was displaced, no DOM cleanup needed
+			if (currentDy === 0) return;
+
 			node.classList.add('ptr-releasing');
 			indicator.classList.add('ptr-releasing');
 			applyTransform(0);
