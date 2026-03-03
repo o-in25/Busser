@@ -4,7 +4,7 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { haptics } from '$lib/utils/haptics';
-	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
+	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { calculateOverallScore } from '$lib/math';
@@ -80,15 +80,13 @@
 		<Card.Root class="overflow-hidden hover:shadow-lg transition-all duration-300 h-full">
 			<!-- Image -->
 			<a href="/catalog/{recipe.recipeId}" class="relative h-44 overflow-hidden block">
-				{#if recipe.recipeImageUrl}
-					<img
-						src={recipe.recipeImageUrl}
-						alt={recipe.recipeName}
-						class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-					/>
-				{:else}
-					<ImagePlaceholder variant="recipe" class="w-20 h-20" />
-				{/if}
+				<SkeletonImage
+					src={recipe.recipeImageUrl}
+					alt={recipe.recipeName}
+					variant="recipe"
+					class="h-full w-full"
+					imgClass="transition-transform duration-300 group-hover:scale-110"
+				/>
 				<!-- Gradient overlay on hover -->
 				<div
 					class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
@@ -229,15 +227,12 @@
 					href="/catalog/{recipe.recipeId}"
 					class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden"
 				>
-					{#if recipe.recipeImageUrl}
-						<img
-							src={recipe.recipeImageUrl}
-							alt={recipe.recipeName}
-							class="w-full h-full object-cover"
-						/>
-					{:else}
-						<ImagePlaceholder variant="recipe" class="w-10 h-10" />
-					{/if}
+					<SkeletonImage
+						src={recipe.recipeImageUrl}
+						alt={recipe.recipeName}
+						variant="recipe"
+						class="h-full w-full"
+					/>
 					<!-- Favorite/Featured indicators -->
 					{#if isFavorite || isFeatured}
 						<div class="absolute bottom-1 right-1 flex items-center gap-0.5">

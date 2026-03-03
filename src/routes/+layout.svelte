@@ -1,14 +1,17 @@
 <script lang="ts">
 	import '../app.css';
 
-	import { ProgressBar } from '@prgm/sveltekit-progress-bar';
+
 	import { onMount, setContext } from 'svelte';
 
 	import { onNavigate } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
 	import Footer from '$lib/components/Footer.svelte';
 	import Nav from '$lib/components/Nav.svelte';
 	import Notification from '$lib/components/Notification.svelte';
+	import CatalogBrowseSkeleton from '$lib/components/skeletons/CatalogBrowseSkeleton.svelte';
+	import DashboardSkeleton from '$lib/components/skeletons/DashboardSkeleton.svelte';
+	import InventorySkeleton from '$lib/components/skeletons/InventorySkeleton.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { refresh } from '$lib/actions/refresh';
 	import { swipe } from '$lib/actions/swipe';
@@ -130,18 +133,28 @@
 	}
 </script>
 
-<div class="flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen" style:padding-top={showNav ? undefined : 'env(safe-area-inset-top, 0px)'} use:refresh>
 	<!-- nav (only show when logged in and not on auth routes) -->
 	{#if showNav}
 		<Nav {activeUrl} {user} {workspaceName} />
 	{/if}
 
-	<!-- loading bar -->
-	<ProgressBar color="#f84e80" zIndex={50} />
-
 	<!-- page content with bottom padding on mobile for fixed nav -->
-	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}" use:refresh use:swipe={{ currentPath: activeUrl }}>
-		<slot />
+	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}" use:swipe={{ currentPath: activeUrl }}>
+		{#if $navigating && showNav}
+			{@const target = $navigating.to?.url.pathname || ''}
+			{#if target === '/' || target === ''}
+				<DashboardSkeleton />
+			{:else if target.startsWith('/inventory')}
+				<InventorySkeleton />
+			{:else if target.startsWith('/catalog')}
+				<CatalogBrowseSkeleton />
+			{:else}
+				<slot />
+			{/if}
+		{:else}
+			<slot />
+		{/if}
 	</div>
 
 	<!-- toast -->

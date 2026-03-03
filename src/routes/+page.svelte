@@ -31,10 +31,9 @@
 
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { navigating, page } from '$app/stores';
-	import DashboardSkeleton from '$lib/components/skeletons/DashboardSkeleton.svelte';
+	import { page } from '$app/stores';
 	import logo from '$lib/assets/logo.png';
-	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
+	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
@@ -184,9 +183,7 @@
 	<title>Busser - Home Bar Management</title>
 </svelte:head>
 
-{#if $navigating?.to?.url.pathname === '/' && $page.data.user}
-	<DashboardSkeleton />
-{:else if !$page.data.user}
+{#if !$page.data.user}
 	<!-- Hero Section -->
 	<section class="relative overflow-hidden py-12 md:py-18 rounded-2xl mt-4">
 		<!-- Animated background gradient -->
@@ -268,10 +265,11 @@
 								{#each landingData.featuredRecipes as recipe}
 									<div class="rounded-lg overflow-hidden bg-muted/50 border border-border/50">
 										<div class="aspect-square relative">
-											<img
+											<SkeletonImage
 												src={recipe.recipeImageUrl}
 												alt={recipe.recipeName}
-												class="w-full h-full object-cover"
+												variant="recipe"
+												class="h-full w-full"
 											/>
 											<div
 												class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"
@@ -938,16 +936,12 @@
 								class="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105 dark:hover:shadow-glow-purple"
 							>
 								<div class="relative aspect-square">
-									{#if item.hasImage}
-										<img
-											src={item.src}
-											alt={item.alt}
-											class="h-full w-full object-cover"
-											loading="lazy"
-										/>
-									{:else}
-										<ImagePlaceholder variant="recipe" class="w-12 h-12" />
-									{/if}
+									<SkeletonImage
+										src={item.hasImage ? item.src : null}
+										alt={item.alt}
+										variant="recipe"
+										class="h-full w-full"
+									/>
 									<div
 										class="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
 									></div>
@@ -1036,19 +1030,12 @@
 					{#each dashboardData.almostThereRecipes.slice(0, 6) as recipe}
 						<Card.Root class="overflow-hidden hover:shadow-md transition-shadow">
 							<div class="flex items-center gap-4 p-4">
-								<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-muted">
-									{#if recipe.recipeImageUrl}
-										<img
-											src={recipe.recipeImageUrl}
-											alt={recipe.recipeName}
-											class="w-full h-full object-cover"
-										/>
-									{:else}
-										<div class="w-full h-full flex items-center justify-center">
-											<GlassWater class="h-6 w-6 text-muted-foreground" />
-										</div>
-									{/if}
-								</div>
+								<SkeletonImage
+									src={recipe.recipeImageUrl}
+									alt={recipe.recipeName}
+									variant="recipe"
+									class="w-16 h-16 rounded-lg shrink-0"
+								/>
 								<div class="flex-1 min-w-0">
 									<p class="font-bold truncate">{recipe.recipeName}</p>
 									<p class="text-xs text-muted-foreground">{recipe.recipeCategoryDescription}</p>

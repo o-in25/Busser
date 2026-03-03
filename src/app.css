@@ -567,43 +567,6 @@ html[data-nav-direction="back"]::view-transition-new(root) {
 	}
 }
 
-/* pull-to-refresh indicator */
-.ptr-indicator {
-	position: absolute;
-	top: -3rem;
-	left: 50%;
-	translate: -50% 0;
-	z-index: 40;
-	opacity: 0;
-	transition: transform 0.2s ease, opacity 0.2s ease;
-	pointer-events: none;
-}
-
-.ptr-spinner {
-	width: 2rem;
-	height: 2rem;
-	border: 3px solid hsl(var(--muted));
-	border-top-color: hsl(var(--primary));
-	border-radius: 9999px;
-	transition: transform 0.1s linear;
-}
-
-.ptr-refreshing .ptr-spinner {
-	animation: ptr-spin 0.6s linear infinite;
-}
-
-@keyframes ptr-spin {
-	to { transform: rotate(360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.ptr-refreshing .ptr-spinner {
-		animation: none;
-		border-top-color: hsl(var(--primary));
-		opacity: 0.7;
-	}
-}
-
 /* lift toasts above mobile bottom nav */
 @media (max-width: 767px) {
 	[data-sonner-toaster] {
@@ -619,6 +582,25 @@ html[data-nav-direction="back"]::view-transition-new(root) {
 /* 44px minimum tap targets on touch devices */
 @media (pointer: coarse) {
 	button, a[role="button"], [role="button"] {
+		min-height: 44px;
+		min-width: 44px;
+	}
+
+	/* checkboxes and switches keep their visual size small
+	   but use a pseudo-element to extend the tap target to 44px */
+	button[role="checkbox"],
+	button[role="switch"] {
+		min-height: unset;
+		min-width: unset;
+		position: relative;
+	}
+
+	button[role="checkbox"]::before,
+	button[role="switch"]::before {
+		content: '';
+		position: absolute;
+		inset: 50% auto auto 50%;
+		transform: translate(-50%, -50%);
 		min-height: 44px;
 		min-width: 44px;
 	}
@@ -639,5 +621,89 @@ input[type='range']::-moz-range-thumb {
 
 	input[type='range']:hover::-moz-range-thumb {
 		background-color: #c10f50; /* primary-700 */
+	}
+}
+
+/* pull-to-refresh indicator */
+.ptr-indicator {
+	position: fixed;
+	top: env(safe-area-inset-top, 0px);
+	left: 50%;
+	transform: translateX(-50%) translateY(-28px);
+	z-index: 9998;
+	opacity: 0;
+	pointer-events: none;
+	will-change: transform, opacity;
+}
+
+.ptr-spinner {
+	width: 1.75rem;
+	height: 1.75rem;
+	position: relative;
+}
+
+.ptr-tick {
+	position: absolute;
+	width: 2.5px;
+	height: 7px;
+	border-radius: 1.25px;
+	background: var(--color-muted-foreground);
+	left: 50%;
+	top: 50%;
+	transform-origin: 50% 50%;
+	transform: translate(-50%, -50%) rotate(calc(var(--tick-index) * 30deg)) translateY(-9px);
+	opacity: calc(0.15 + var(--tick-index) * 0.071);
+}
+
+.ptr-ready .ptr-tick {
+	background: var(--color-primary);
+	opacity: 1;
+}
+
+.ptr-refreshing .ptr-spinner {
+	animation: ptr-spin 1s steps(12) infinite;
+}
+
+.ptr-refreshing .ptr-tick {
+	background: var(--color-primary);
+	opacity: calc(0.15 + var(--tick-index) * 0.071);
+}
+
+@keyframes ptr-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* spring snap-back / snap to refresh position */
+.ptr-releasing {
+	transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.4, 1),
+		opacity 0.4s cubic-bezier(0.2, 0.8, 0.4, 1);
+}
+
+/* fade out after refresh completes */
+.ptr-completing {
+	transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* content node — enable will-change during pull */
+div.ptr-releasing,
+div.ptr-completing {
+	will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ptr-refreshing .ptr-spinner {
+		animation: ptr-pulse 1.2s ease-in-out infinite;
+	}
+
+	@keyframes ptr-pulse {
+		0%,
+		100% {
+			opacity: 0.4;
+		}
+		50% {
+			opacity: 1;
+		}
 	}
 }

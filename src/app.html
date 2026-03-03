@@ -19,33 +19,9 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="Busser" />
-		<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-
-		<!-- iOS splash screens (portrait) -->
-		<!-- iPhone 16 Pro Max (440x956 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone 16 Pro (402x874 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone 16 Plus / 15 Plus / 14 Pro Max (430x932 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone 16 / 15 / 15 Pro / 14 Pro (393x852 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone 14 / 13 / 13 Pro / 12 / 12 Pro (390x844 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone 14 Plus / 13 Pro Max / 12 Pro Max (428x926 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone 13 mini / 12 mini / 11 Pro / X / XS (375x812 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone 11 Pro Max / XS Max (414x896 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone 11 / XR (414x896 @2x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-		<!-- iPhone SE 3/2 / 8 / 7 / 6s (375x667 @2x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-		<!-- iPhone 8 Plus / 7 Plus (414x736 @3x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<!-- iPhone SE 1st (320x568 @2x) -->
-		<link rel="apple-touch-startup-image" href="/icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-dark.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" media="(prefers-color-scheme: light)" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-dark.png" media="(prefers-color-scheme: dark)" />
 
 		<!-- Inter Font -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -79,13 +55,25 @@
 					radial-gradient(ellipse 50% 50% at 50% 80%, rgba(193, 15, 80, 0.1) 0%, transparent 50%),
 					#08080f;
 			}
-			/* native feel */
-			body {
-				overscroll-behavior-y: contain;
+			/* baseline — safe for all contexts */
+			html, body {
+				overscroll-behavior: none;
 				-webkit-tap-highlight-color: transparent;
-				touch-action: manipulation;
 				-webkit-font-smoothing: antialiased;
 				-moz-osx-font-smoothing: grayscale;
+				touch-action: manipulation;
+			}
+			/* single scroll container — standalone PWA only */
+			@media (display-mode: standalone) {
+				html {
+					height: 100%;
+					overflow: hidden;
+				}
+				body {
+					height: 100%;
+					overflow-y: auto;
+					-webkit-overflow-scrolling: touch;
+				}
 			}
 			button, a, [role="button"] {
 				-webkit-touch-callout: none;
@@ -116,9 +104,68 @@
 					window.document.documentElement.classList.remove('dark');
 			}
 		</script>
+		<script>
+			// generate iOS splash screen at runtime via canvas
+			if (/iP(hone|od|ad)/.test(navigator.userAgent)) {
+				(function () {
+					var dpr = window.devicePixelRatio || 1;
+					var w = screen.width * dpr;
+					var h = screen.height * dpr;
+					var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+					var bg = dark ? '#08080f' : '#fafafa';
+					var icon = dark ? '/icons/icon-512x512-dark.png' : '/icons/icon-512x512.png';
+					var c = document.createElement('canvas');
+					c.width = w;
+					c.height = h;
+					var ctx = c.getContext('2d');
+					ctx.fillStyle = bg;
+					ctx.fillRect(0, 0, w, h);
+					var img = new Image();
+					img.onload = function () {
+						var s = Math.round(w * 0.25);
+						ctx.drawImage(img, (w - s) / 2, (h - s) / 2, s, s);
+						var link = document.createElement('link');
+						link.rel = 'apple-touch-startup-image';
+						link.href = c.toDataURL('image/png');
+						document.head.appendChild(link);
+					};
+					img.src = icon;
+				})();
+			}
+		</script>
 	</head>
 
 	<body data-sveltekit-preload-data="hover" class="flex flex-col min-h-screen">
+		<!-- inline splash screen — visible until sveltekit hydrates -->
+		<style>
+			#app-splash { position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#fafafa;transition:opacity .3s ease }
+			@media (prefers-color-scheme:dark) { #app-splash { background:#08080f } }
+		</style>
+		<div id="app-splash">
+			<img src="/icons/icon-512x512.png" alt="" width="120" height="120" />
+		</div>
 		<div style="display: contents" class="flex min-h-full flex-col">%sveltekit.body%</div>
+		<script>
+			// hide splash once sveltekit has rendered
+			function removeSplash() {
+				const el = document.getElementById('app-splash');
+				if (!el) return;
+				el.style.opacity = '0';
+				setTimeout(() => el.remove(), 300);
+			}
+			// sveltekit replaces body content on hydration — detect it via mutation
+			if (document.querySelector('[data-sveltekit-hydrate]')) {
+				removeSplash();
+			} else {
+				const obs = new MutationObserver(() => {
+					if (!document.getElementById('app-splash')) return;
+					removeSplash();
+					obs.disconnect();
+				});
+				obs.observe(document.body, { childList: true, subtree: true });
+				// safety fallback
+				setTimeout(removeSplash, 5000);
+			}
+		</script>
 	</body>
 </html>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { GlassWater, Wallet } from 'lucide-svelte';
 	import { Badge } from '$lib/components/ui/badge';
+	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 
 	const { costBreakdown }: {
 		costBreakdown: {
@@ -66,18 +67,13 @@
 		<div class="grid grid-cols-2 gap-2">
 			<a href="/catalog/{costBreakdown.cheapest.recipeId}" class="group rounded-lg overflow-hidden bg-muted/50 hover:bg-muted transition-colors">
 				<div class="relative h-20">
-					{#if costBreakdown.cheapest.recipeImageUrl}
-						<img
-							src={costBreakdown.cheapest.recipeImageUrl}
-							alt={costBreakdown.cheapest.recipeName}
-							class="w-full h-full object-cover"
-						/>
-						<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
-					{:else}
-						<div class="w-full h-full flex items-center justify-center bg-neon-green-500/5">
-							<GlassWater class="h-6 w-6 text-muted-foreground/30" />
-						</div>
-					{/if}
+					<SkeletonImage
+						src={costBreakdown.cheapest.recipeImageUrl}
+						alt={costBreakdown.cheapest.recipeName}
+						variant="recipe"
+						class="h-full w-full"
+					/>
+					<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
 					<Badge class="absolute top-1.5 right-1.5 bg-neon-green-500/90 text-white text-[10px] px-1.5 py-0">
 						{fmt(costBreakdown.cheapest.cost)}
 					</Badge>
@@ -90,18 +86,13 @@
 
 			<a href="/catalog/{costBreakdown.priciest.recipeId}" class="group rounded-lg overflow-hidden bg-muted/50 hover:bg-muted transition-colors">
 				<div class="relative h-20">
-					{#if costBreakdown.priciest.recipeImageUrl}
-						<img
-							src={costBreakdown.priciest.recipeImageUrl}
-							alt={costBreakdown.priciest.recipeName}
-							class="w-full h-full object-cover"
-						/>
-						<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
-					{:else}
-						<div class="w-full h-full flex items-center justify-center bg-neon-amber-500/5">
-							<GlassWater class="h-6 w-6 text-muted-foreground/30" />
-						</div>
-					{/if}
+					<SkeletonImage
+						src={costBreakdown.priciest.recipeImageUrl}
+						alt={costBreakdown.priciest.recipeName}
+						variant="recipe"
+						class="h-full w-full"
+					/>
+					<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
 					<Badge class="absolute top-1.5 right-1.5 bg-neon-amber-500/90 text-white text-[10px] px-1.5 py-0">
 						{fmt(costBreakdown.priciest.cost)}
 					</Badge>

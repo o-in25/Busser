@@ -17,7 +17,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
 
-	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
+	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -178,10 +178,12 @@
 				onclick={openLightbox}
 				aria-label="View full image"
 			>
-				<img
-					class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+				<SkeletonImage
 					src={recipe.recipeImageUrl}
 					alt={recipe.recipeName}
+					variant="recipe"
+					class="h-full w-full"
+					imgClass="transition-transform duration-300 group-hover:scale-105"
 				/>
 				<!-- Gradient overlay -->
 				<div
@@ -197,7 +199,12 @@
 			</button>
 		{:else}
 			<div class="absolute inset-0 w-full">
-				<ImagePlaceholder variant="recipe" class="w-20 h-20" />
+				<SkeletonImage
+					src={null}
+					alt={recipe.recipeName}
+					variant="recipe"
+					class="h-full w-full"
+				/>
 				<div
 					class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"
 				></div>

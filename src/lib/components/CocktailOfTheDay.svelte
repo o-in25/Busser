@@ -3,7 +3,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
+	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { cn } from '$lib/utils';
 	import type { View } from '$lib/types';
 
@@ -25,17 +25,13 @@
 	<a href="/catalog/{recipe.recipeId}" class="group block h-full">
 		<div class="relative h-full">
 			<!-- background image -->
-			{#if recipe.recipeImageUrl}
-				<img
-					src={recipe.recipeImageUrl}
-					alt={recipe.recipeName}
-					class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-				/>
-			{:else}
-				<div class="absolute inset-0 bg-muted flex items-center justify-center">
-					<ImagePlaceholder variant="recipe" class="w-16 h-16" />
-				</div>
-			{/if}
+			<SkeletonImage
+				src={recipe.recipeImageUrl}
+				alt={recipe.recipeName}
+				variant="recipe"
+				class="absolute inset-0 w-full h-full"
+				imgClass="transition-transform duration-500 group-hover:scale-105"
+			/>
 
 			<!-- gradient overlay -->
 			<div class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/30"></div>

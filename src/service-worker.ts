@@ -9,7 +9,7 @@ const sw = self as unknown as ServiceWorkerGlobalScope;
 const CACHE_NAME = `busser-${version}`;
 
 // app shell assets to pre-cache on install
-const PRECACHE_ASSETS = [...build, '/offline.html', '/icons/icon-192x192.png'];
+const PRECACHE_ASSETS = [...build, '/offline.html', '/icons/icon-192x192.png', '/icons/icon-512x512.png'];
 
 sw.addEventListener('install', (event) => {
 	event.waitUntil(
@@ -55,19 +55,18 @@ sw.addEventListener('fetch', (event) => {
 		return;
 	}
 
-	// api requests — network only, no caching
-	if (url.pathname.startsWith('/api/')) return;
-
-	// static assets — cache first, fall back to network
-	event.respondWith(
-		caches.match(request).then(
-			(cached) =>
-				cached ||
-				fetch(request).then((response) => {
-					const clone = response.clone();
-					caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-					return response;
-				}),
-		),
-	);
+	// build assets are hashed and immutable — serve from cache first
+	if (PRECACHE_ASSETS.includes(url.pathname)) {
+		event.respondWith(
+			caches.match(request).then(
+				(cached) =>
+					cached ||
+					fetch(request).then((response) => {
+						const clone = response.clone();
+						caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+						return response;
+					}),
+			),
+		);
+	}
 });
