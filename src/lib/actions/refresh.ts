@@ -11,15 +11,15 @@ type State = 'idle' | 'pulling' | 'refreshing' | 'completing';
 export const refresh: Action<HTMLElement> = (node) => {
 	if (!(navigator as any).standalone) return;
 
-	const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 	const indicator = document.createElement('div');
 	indicator.className = 'ptr-indicator';
-	const ticks = Array.from(
-		{ length: 12 },
-		(_, i) => `<div class="ptr-tick" style="--tick-index:${i}"></div>`
-	).join('');
-	indicator.innerHTML = `<div class="ptr-spinner">${ticks}</div>`;
+	indicator.innerHTML = `
+		<div class="ptr-liquid">
+			<div class="ptr-blob"></div>
+			<div class="ptr-sat ptr-sat-l"></div>
+			<div class="ptr-sat ptr-sat-r"></div>
+		</div>
+	`;
 	document.body.appendChild(indicator);
 
 	let startY = 0;
@@ -55,13 +55,13 @@ export const refresh: Action<HTMLElement> = (node) => {
 		clearTransitions();
 		node.style.transition = 'none';
 		indicator.style.transition = 'none';
+		indicator.style.setProperty('--ptr-progress', '0');
 	}
 
 	function onTouchMove(e: TouchEvent) {
 		if (state !== 'pulling') return;
 		const rawDy = e.touches[0].clientY - startY;
 		if (rawDy < 0) {
-			// finger moved up — user is scrolling down, abort pull
 			state = 'idle';
 			node.style.transition = '';
 			indicator.style.transition = '';
@@ -76,11 +76,7 @@ export const refresh: Action<HTMLElement> = (node) => {
 
 		applyTransform(dy);
 		indicator.style.opacity = String(Math.min(progress * 1.2, 1));
-
-		const spinner = indicator.firstElementChild as HTMLElement;
-		if (spinner && !prefersReduced) {
-			spinner.style.transform = `rotate(${dy * 3}deg)`;
-		}
+		indicator.style.setProperty('--ptr-progress', String(progress));
 
 		if (isReady && !wasReady) {
 			haptics.light();
@@ -95,12 +91,10 @@ export const refresh: Action<HTMLElement> = (node) => {
 	function onTouchEnd() {
 		if (state !== 'pulling') return;
 
-		// remove inline no-transition overrides
 		node.style.transition = '';
 		indicator.style.transition = '';
 
 		if (wasReady) {
-			// snap to refresh hold position
 			haptics.medium();
 			state = 'refreshing';
 			indicator.classList.remove('ptr-ready');
@@ -111,14 +105,10 @@ export const refresh: Action<HTMLElement> = (node) => {
 			applyTransform(REFRESH_HOLD);
 			indicator.style.opacity = '1';
 
-			const spinner = indicator.firstElementChild as HTMLElement;
-			if (spinner) spinner.style.transform = '';
-
 			invalidateAll().finally(() => {
 				state = 'completing';
 				indicator.classList.remove('ptr-refreshing');
 
-				// remove releasing, add completing for fade-out
 				node.classList.remove('ptr-releasing');
 				indicator.classList.remove('ptr-releasing');
 				node.classList.add('ptr-completing');
@@ -136,15 +126,10 @@ export const refresh: Action<HTMLElement> = (node) => {
 					state = 'idle';
 				}
 				node.addEventListener('transitionend', onDone, { once: true });
-
-				// safety fallback if transitionend doesn't fire
 				setTimeout(onDone, 400);
 			});
 		} else {
-			// snap back — below threshold
 			state = 'idle';
-
-			// nothing was displaced, no DOM cleanup needed
 			if (currentDy === 0) return;
 
 			node.classList.add('ptr-releasing');

@@ -7,15 +7,13 @@ import { build, version } from '$service-worker';
 
 const sw = self as unknown as ServiceWorkerGlobalScope;
 const CACHE_NAME = `busser-${version}`;
+const IMAGE_CACHE = 'busser-images';
+const MAX_CACHED_IMAGES = 200;
 
 // app shell assets to pre-cache on install
 const PRECACHE_ASSETS = [
 	...build,
 	'/offline.html',
-	'/icons/icon-192x192-light.png',
-	'/icons/icon-192x192-dark.png',
-	'/icons/icon-512x512-light.png',
-	'/icons/icon-512x512-dark.png',
 ];
 
 sw.addEventListener('install', (event) => {
@@ -31,10 +29,23 @@ sw.addEventListener('activate', (event) => {
 	event.waitUntil(
 		caches
 			.keys()
-			.then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+			.then((keys) =>
+				// keep the image cache across deploys, only purge old app caches
+				Promise.all(keys.filter((k) => k !== CACHE_NAME && k !== IMAGE_CACHE).map((k) => caches.delete(k))),
+			)
 			.then(() => sw.clients.claim()),
 	);
 });
+
+// trim image cache to stay under the size cap
+async function trimImageCache() {
+	const cache = await caches.open(IMAGE_CACHE);
+	const keys = await cache.keys();
+	if (keys.length > MAX_CACHED_IMAGES) {
+		const toDelete = keys.slice(0, keys.length - MAX_CACHED_IMAGES);
+		await Promise.all(toDelete.map((k) => cache.delete(k)));
+	}
+}
 
 sw.addEventListener('fetch', (event) => {
 	const { request } = event;
@@ -44,7 +55,28 @@ sw.addEventListener('fetch', (event) => {
 
 	const url = new URL(request.url);
 
-	// skip cross-origin requests
+	// gcs images — network-first, cache successful responses
+	if (url.hostname === 'storage.googleapis.com') {
+		event.respondWith(
+			fetch(request)
+				.then((response) => {
+					if (response.ok) {
+						const clone = response.clone();
+						caches.open(IMAGE_CACHE).then((cache) => {
+							cache.put(request, clone);
+							trimImageCache();
+						});
+					}
+					return response;
+				})
+				.catch(() =>
+					caches.match(request).then((cached) => cached || new Response('', { status: 504 })),
+				),
+		);
+		return;
+	}
+
+	// skip other cross-origin requests
 	if (url.origin !== location.origin) return;
 
 	// navigation requests — network first, fall back to offline page

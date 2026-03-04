@@ -6,12 +6,15 @@
 
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { ProgressBar } from '@prgm/sveltekit-progress-bar';
+	import { toast } from 'svelte-sonner';
+
 	import Footer from '$lib/components/Footer.svelte';
 	import Nav from '$lib/components/Nav.svelte';
-	import Notification from '$lib/components/Notification.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { refresh } from '$lib/actions/refresh';
 	import { swipe } from '$lib/actions/swipe';
+	import { notificationStore } from '../stores';
 
 	import type { LayoutData } from './$types';
 
@@ -104,17 +107,24 @@
 		const handler = (e: MediaQueryListEvent) => (isMobile = e.matches);
 		mql.addEventListener('change', handler);
 
-		// dismiss keyboard on scroll
+		// dismiss keyboard on scroll, but ignore viewport shifts from keyboard opening
+		let focusedAt = 0;
+		function handleFocusIn() {
+			focusedAt = Date.now();
+		}
 		function handleScroll() {
+			if (Date.now() - focusedAt < 500) return;
 			const el = document.activeElement;
 			if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
 				(el as HTMLElement).blur();
 			}
 		}
+		window.addEventListener('focusin', handleFocusIn, { passive: true });
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
 		return () => {
 			mql.removeEventListener('change', handler);
+			window.removeEventListener('focusin', handleFocusIn);
 			window.removeEventListener('scroll', handleScroll);
 		};
 	});
@@ -128,6 +138,16 @@
 		setContext('permissions', user?.permissions.map(({ permissionName }) => permissionName) || []);
 		setContext('roles', user?.roles.map(({ roleName }) => roleName) || []);
 	}
+
+	// bridge notificationStore to sonner toasts
+	$: if ($notificationStore.success?.message) {
+		toast.success($notificationStore.success.message);
+		$notificationStore.success = null;
+	}
+	$: if ($notificationStore.error?.message) {
+		toast.error($notificationStore.error.message);
+		$notificationStore.error = null;
+	}
 </script>
 
 <div class="flex flex-col min-h-screen" style:padding-top={showNav ? undefined : 'env(safe-area-inset-top, 0px)'} use:refresh>
@@ -136,14 +156,15 @@
 		<Nav {activeUrl} {user} {workspaceName} />
 	{/if}
 
+	<ProgressBar color="#e5195f" zIndex={49} />
+
 	<!-- page content with bottom padding on mobile for fixed nav -->
 	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}" use:swipe={{ currentPath: activeUrl }}>
 		<slot />
 	</div>
 
 	<!-- toast -->
-	<Notification />
-	<Toaster position={isMobile ? 'bottom-center' : 'bottom-right'} richColors />
+	<Toaster position={isMobile ? 'top-center' : 'top-right'} />
 
 	<!-- footer (hidden on mobile when nav shown, since bottom nav takes that space) -->
 	<div class="mt-auto {showNav ? 'hidden md:block' : ''}">

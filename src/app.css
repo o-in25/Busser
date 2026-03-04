@@ -579,11 +579,18 @@ html[data-nav-direction="back"]::view-transition-new(root) {
 	50% { opacity: 1; }
 }
 
-/* lift toasts above mobile bottom nav */
+/* position toasts below safe area on mobile */
 @media (max-width: 767px) {
 	[data-sonner-toaster] {
-		bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
+		top: env(safe-area-inset-top, 0px) !important;
 	}
+}
+
+/* glass-pill toast overrides */
+[data-sonner-toast] {
+	border-radius: 9999px !important;
+	--normal-bg: transparent !important;
+	--normal-border: transparent !important;
 }
 
 @utility scrollbar-none {
@@ -591,30 +598,22 @@ html[data-nav-direction="back"]::view-transition-new(root) {
 	scrollbar-width: none;
 }
 
-/* 44px minimum tap targets on touch devices */
-@media (pointer: coarse) {
-	button, a[role="button"], [role="button"] {
-		min-height: 44px;
-		min-width: 44px;
-	}
+/* 44px minimum tap targets on touch devices via invisible pseudo-element.
+   must live in @layer base so tailwind utilities (absolute, fixed) can override position */
+@layer base {
+	@media (pointer: coarse) {
+		button, a[role="button"], [role="button"] {
+			position: relative;
+		}
 
-	/* checkboxes and switches keep their visual size small
-	   but use a pseudo-element to extend the tap target to 44px */
-	button[role="checkbox"],
-	button[role="switch"] {
-		min-height: unset;
-		min-width: unset;
-		position: relative;
-	}
-
-	button[role="checkbox"]::before,
-	button[role="switch"]::before {
-		content: '';
-		position: absolute;
-		inset: 50% auto auto 50%;
-		transform: translate(-50%, -50%);
-		min-height: 44px;
-		min-width: 44px;
+		button::before, a[role="button"]::before, [role="button"]::before {
+			content: '';
+			position: absolute;
+			inset: 50% auto auto 50%;
+			transform: translate(-50%, -50%);
+			min-height: 44px;
+			min-width: 44px;
+		}
 	}
 }
 
@@ -638,6 +637,7 @@ input[type='range']::-moz-range-thumb {
 
 /* pull-to-refresh indicator */
 .ptr-indicator {
+	--ptr-progress: 0;
 	position: fixed;
 	top: env(safe-area-inset-top, 0px);
 	left: 50%;
@@ -648,42 +648,141 @@ input[type='range']::-moz-range-thumb {
 	will-change: transform, opacity;
 }
 
-.ptr-spinner {
-	width: 1.75rem;
-	height: 1.75rem;
+/* liquid glass container */
+.ptr-liquid {
+	width: 80px;
+	height: 32px;
 	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
-.ptr-tick {
+/* shared glass surface */
+.ptr-blob,
+.ptr-sat {
 	position: absolute;
-	width: 2.5px;
-	height: 7px;
-	border-radius: 1.25px;
-	background: var(--color-muted-foreground);
-	left: 50%;
-	top: 50%;
-	transform-origin: 50% 50%;
-	transform: translate(-50%, -50%) rotate(calc(var(--tick-index) * 30deg)) translateY(-9px);
-	opacity: calc(0.15 + var(--tick-index) * 0.071);
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.14);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.14),
+		inset 0 1px 2px rgba(255, 255, 255, 0.18);
 }
 
-.ptr-ready .ptr-tick {
-	background: var(--color-primary);
-	opacity: 1;
+/* main blob — scales with pull progress */
+.ptr-blob {
+	width: 24px;
+	height: 24px;
+	transform: scale(calc(0.3 + 0.7 * var(--ptr-progress)));
 }
 
-.ptr-refreshing .ptr-spinner {
-	animation: ptr-spin 1s steps(12) infinite;
+/* satellites — hidden until refreshing */
+.ptr-sat {
+	width: 11px;
+	height: 11px;
+	opacity: 0;
+	transform: scale(0);
 }
 
-.ptr-refreshing .ptr-tick {
-	background: var(--color-primary);
-	opacity: calc(0.15 + var(--tick-index) * 0.071);
+/* threshold crossed — blob glows */
+.ptr-ready .ptr-blob {
+	background: rgba(229, 25, 95, 0.2);
+	border-color: rgba(229, 25, 95, 0.4);
+	box-shadow:
+		0 0 12px rgba(229, 25, 95, 0.3),
+		inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
-@keyframes ptr-spin {
-	to {
-		transform: rotate(360deg);
+/* refreshing — blob wobbles, satellites fly */
+.ptr-refreshing .ptr-blob {
+	transform: scale(1);
+	animation: ptr-wobble 1.8s ease-in-out infinite;
+}
+
+.ptr-refreshing .ptr-sat-l {
+	animation: ptr-sat-l 1.8s ease-in-out infinite;
+}
+
+.ptr-refreshing .ptr-sat-r {
+	animation: ptr-sat-r 1.8s ease-in-out infinite;
+}
+
+/* blob reacts to mass leaving and returning */
+@keyframes ptr-wobble {
+	0% { transform: scale(1, 1); }
+	6% { transform: scale(0.72, 1.25); }
+	18% { transform: scale(0.88, 1.06); }
+	45% { transform: scale(1, 1); }
+	84% { transform: scale(1.08, 0.94); }
+	91% { transform: scale(1.3, 0.72); }
+	96% { transform: scale(0.9, 1.1); }
+	100% { transform: scale(1, 1); }
+}
+
+/* left satellite: emerge → fly out → pause → return → merge */
+@keyframes ptr-sat-l {
+	0% {
+		transform: translateX(0) scale(0.15);
+		opacity: 0;
+	}
+	8% {
+		transform: translateX(-8px) scale(0.9);
+		opacity: 1;
+	}
+	30% {
+		transform: translateX(-30px) scale(1);
+		opacity: 1;
+	}
+	46% {
+		transform: translateX(-33px) scale(0.88);
+		opacity: 0.85;
+	}
+	82% {
+		transform: translateX(-7px) scale(0.65);
+		opacity: 1;
+	}
+	93% {
+		transform: translateX(0) scale(0.15);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0) scale(0.15);
+		opacity: 0;
+	}
+}
+
+/* right satellite: mirror of left */
+@keyframes ptr-sat-r {
+	0% {
+		transform: translateX(0) scale(0.15);
+		opacity: 0;
+	}
+	8% {
+		transform: translateX(8px) scale(0.9);
+		opacity: 1;
+	}
+	30% {
+		transform: translateX(30px) scale(1);
+		opacity: 1;
+	}
+	46% {
+		transform: translateX(33px) scale(0.88);
+		opacity: 0.85;
+	}
+	82% {
+		transform: translateX(7px) scale(0.65);
+		opacity: 1;
+	}
+	93% {
+		transform: translateX(0) scale(0.15);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0) scale(0.15);
+		opacity: 0;
 	}
 }
 
@@ -705,17 +804,18 @@ div.ptr-completing {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.ptr-refreshing .ptr-spinner {
-		animation: ptr-pulse 1.2s ease-in-out infinite;
+	.ptr-refreshing .ptr-blob {
+		animation: ptr-breathe 1.6s ease-in-out infinite;
 	}
 
-	@keyframes ptr-pulse {
-		0%,
-		100% {
-			opacity: 0.4;
-		}
-		50% {
-			opacity: 1;
-		}
+	.ptr-refreshing .ptr-sat-l,
+	.ptr-refreshing .ptr-sat-r {
+		animation: none;
+		opacity: 0;
+	}
+
+	@keyframes ptr-breathe {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.15); }
 	}
 }

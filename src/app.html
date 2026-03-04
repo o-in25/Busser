@@ -19,10 +19,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="Busser" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180-dark.png">
-		<link rel="apple-touch-icon" sizes="167x167" href="/icons/apple-touch-icon-167x167-dark.png">
-		<link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152-dark.png">
-		<link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120-dark.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
 
 		<!-- Inter Font -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -58,7 +55,6 @@
 			}
 			/* baseline — safe for all contexts */
 			html, body {
-				overscroll-behavior: none;
 				-webkit-tap-highlight-color: transparent;
 				-webkit-font-smoothing: antialiased;
 				-moz-osx-font-smoothing: grayscale;
@@ -105,85 +101,9 @@
 					window.document.documentElement.classList.remove('dark');
 			}
 		</script>
-		<script>
-			// dynamically swap apple-touch-icons based on color scheme
-			(function() {
-				function updateAppleTouchIcons() {
-					var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-					var theme = isDark ? 'dark' : 'light';
-					document.querySelectorAll('link[rel="apple-touch-icon"]').forEach(function(link) {
-						var href = link.getAttribute('href');
-						if (href) link.setAttribute('href', href.replace(/(light|dark)/, theme));
-					});
-				}
-				updateAppleTouchIcons();
-				if (window.matchMedia) {
-					window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateAppleTouchIcons);
-				}
-			})();
-		</script>
-		<script>
-			// generate iOS splash screen at runtime via canvas
-			if (/iP(hone|od|ad)/.test(navigator.userAgent)) {
-				(function () {
-					var dpr = window.devicePixelRatio || 1;
-					var w = screen.width * dpr;
-					var h = screen.height * dpr;
-					var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-					var bg = dark ? '#08080f' : '#fafafa';
-					var icon = dark ? '/icons/icon-512x512-dark.png' : '/icons/icon-512x512-light.png';
-					var c = document.createElement('canvas');
-					c.width = w;
-					c.height = h;
-					var ctx = c.getContext('2d');
-					ctx.fillStyle = bg;
-					ctx.fillRect(0, 0, w, h);
-					var img = new Image();
-					img.onload = function () {
-						var s = Math.round(w * 0.25);
-						ctx.drawImage(img, (w - s) / 2, (h - s) / 2, s, s);
-						var link = document.createElement('link');
-						link.rel = 'apple-touch-startup-image';
-						link.href = c.toDataURL('image/png');
-						document.head.appendChild(link);
-					};
-					img.src = icon;
-				})();
-			}
-		</script>
 	</head>
 
 	<body data-sveltekit-preload-data="hover" class="flex flex-col min-h-screen">
-		<!-- inline splash screen — visible until sveltekit hydrates -->
-		<style>
-			#app-splash { position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#fafafa;transition:opacity .3s ease }
-			@media (prefers-color-scheme:dark) { #app-splash { background:#08080f } }
-		</style>
-		<div id="app-splash">
-			<img src="/icons/icon-512x512-dark.png" alt="" width="120" height="120" />
-		</div>
 		<div style="display: contents" class="flex min-h-full flex-col">%sveltekit.body%</div>
-		<script>
-			// hide splash once sveltekit has rendered
-			function removeSplash() {
-				const el = document.getElementById('app-splash');
-				if (!el) return;
-				el.style.opacity = '0';
-				setTimeout(() => el.remove(), 300);
-			}
-			// sveltekit replaces body content on hydration — detect it via mutation
-			if (document.querySelector('[data-sveltekit-hydrate]')) {
-				removeSplash();
-			} else {
-				const obs = new MutationObserver(() => {
-					if (!document.getElementById('app-splash')) return;
-					removeSplash();
-					obs.disconnect();
-				});
-				obs.observe(document.body, { childList: true, subtree: true });
-				// safety fallback
-				setTimeout(removeSplash, 5000);
-			}
-		</script>
 	</body>
 </html>

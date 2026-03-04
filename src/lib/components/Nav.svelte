@@ -93,7 +93,7 @@
 {#if user}
 	<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
 		<Sheet.Root bind:open={mobileMenuOpen}>
-			<Sheet.Trigger class="w-8 h-8 flex items-center justify-center" aria-label="Open menu">
+			<Sheet.Trigger class="mobile-header-left w-8 h-8 flex items-center justify-center" aria-label="Open menu">
 				<Menu class="h-5 w-5 text-muted-foreground" />
 			</Sheet.Trigger>
 			<Sheet.Content side="left" class="flex flex-col">
@@ -216,10 +216,9 @@
 				</div>
 			</Sheet.Content>
 		</Sheet.Root>
-		<a href="/">
+		<a href="/" class="mobile-header-logo">
 			<img src={logoNav} class="h-10" alt="Busser" />
 		</a>
-		<div class="w-8"></div>
 	</div>
 {/if}
 
@@ -298,7 +297,6 @@
 		position: sticky;
 		top: 0;
 		z-index: 50;
-		justify-content: space-between;
 		align-items: center;
 		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
 		backdrop-filter: blur(20px) saturate(1.5);
@@ -306,6 +304,17 @@
 		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 		transition: transform 0.3s ease;
+	}
+
+	.mobile-header-left {
+		position: relative;
+		z-index: 1;
+	}
+
+	.mobile-header-logo {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
 	}
 
 	.mobile-logo-header.header-hidden {
