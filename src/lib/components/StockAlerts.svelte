@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { ArrowRight, ChevronDown, XCircle } from 'lucide-svelte';
+	import { ArrowRight, ChevronDown } from 'lucide-svelte';
+	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { slide } from 'svelte/transition';
 
 	import type { Product } from '$lib/types';
@@ -50,17 +51,12 @@
 									class="flex items-center justify-between p-2 rounded-md bg-background/80 hover:bg-background transition-colors group"
 								>
 									<div class="flex items-center gap-3 min-w-0">
-										{#if item.productImageUrl}
-											<img
-												src={item.productImageUrl}
-												alt={item.productName}
-												class="w-8 h-8 rounded object-cover"
-											/>
-										{:else}
-											<div class="w-8 h-8 rounded bg-muted flex items-center justify-center">
-												<XCircle class="h-4 w-4 text-red-400" />
-											</div>
-										{/if}
+										<SkeletonImage
+											src={item.productImageUrl}
+											alt={item.productName}
+											variant="product"
+											class="w-8 h-8 rounded"
+										/>
 										<div class="min-w-0">
 											<p class="font-medium truncate group-hover:text-primary transition-colors">
 												{item.productName}

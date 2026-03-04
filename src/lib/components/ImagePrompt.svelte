@@ -260,7 +260,7 @@
 						/>
 					</button>
 					<!-- action buttons overlay -->
-					<div class="absolute top-2 right-2 flex gap-1.5">
+					<div class="absolute top-1/2 right-2 -translate-y-1/2 flex gap-1.5">
 						<button
 							type="button"
 							onclick={openLightbox}

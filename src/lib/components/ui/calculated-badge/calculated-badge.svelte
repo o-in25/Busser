@@ -20,16 +20,16 @@
 
 <div
 	class={cn(
-		'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg',
-		'bg-gradient-to-r from-primary/10 to-primary/5',
-		'border border-primary/20',
-		'text-sm',
+		'flex items-center gap-1.5 px-2 py-1 rounded-md',
+		'bg-gradient-to-r from-primary/8 to-primary/4',
+		'border border-primary/15',
+		'text-xs',
 		className
 	)}
 	{...restProps}
 >
 	{#if Icon}
-		<Icon class="h-3.5 w-3.5 text-primary/70" />
+		<Icon class="h-3 w-3 text-primary/60" />
 	{/if}
 	<span class="text-muted-foreground">{label}:</span>
 	<span class="font-semibold text-foreground">

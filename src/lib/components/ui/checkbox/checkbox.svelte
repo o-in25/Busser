@@ -30,7 +30,7 @@
 	aria-checked={checked}
 	{disabled}
 	class={cn(
-		'peer h-5 w-5 shrink-0 rounded-md border-2 ring-offset-background transition-all duration-150',
+		'peer inline-flex items-center justify-center h-4 w-4 p-0 shrink-0 rounded-md border-2 ring-offset-background transition-all duration-150',
 		'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
 		'disabled:cursor-not-allowed disabled:opacity-50',
 		checked
@@ -42,6 +42,6 @@
 	{...restProps}
 >
 	{#if checked}
-		<Check class="h-3.5 w-3.5" strokeWidth={3} />
+		<Check class="h-3 w-3" strokeWidth={3} />
 	{/if}
 </button>

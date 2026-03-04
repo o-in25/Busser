@@ -21,6 +21,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { idToSlug } from '$lib/spirits';
+	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
@@ -275,19 +276,12 @@
 	{#if featuredCocktail}
 		<Card.Root class="lg:col-span-1 overflow-hidden">
 			<div class="relative h-48">
-				{#if featuredCocktail.recipeImageUrl}
-					<img
-						src={featuredCocktail.recipeImageUrl}
-						alt={featuredCocktail.recipeName}
-						class="h-full w-full object-cover"
-					/>
-				{:else}
-					<div
-						class="h-full w-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
-					>
-						<Sparkles class="h-12 w-12 text-primary/40" />
-					</div>
-				{/if}
+				<SkeletonImage
+					src={featuredCocktail.recipeImageUrl}
+					alt={featuredCocktail.recipeName}
+					variant="recipe"
+					class="h-full w-full"
+				/>
 				<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
 				<Badge class="absolute top-3 left-3 bg-primary text-primary-foreground">
 					<Star class="h-3 w-3 mr-1" />
@@ -371,19 +365,14 @@
 						>
 							<a
 								href="/catalog/{cocktail.recipeId}"
-								class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted"
+								class="shrink-0"
 							>
-								{#if cocktail.recipeImageUrl}
-									<img
-										src={cocktail.recipeImageUrl}
-										alt={cocktail.recipeName}
-										class="w-full h-full object-cover"
-									/>
-								{:else}
-									<div class="w-full h-full flex items-center justify-center">
-										<GlassWater class="h-5 w-5 text-muted-foreground" />
-									</div>
-								{/if}
+								<SkeletonImage
+									src={cocktail.recipeImageUrl}
+									alt={cocktail.recipeName}
+									variant="recipe"
+									class="w-12 h-12 rounded-lg"
+								/>
 							</a>
 							<a href="/catalog/{cocktail.recipeId}" class="flex-1 min-w-0">
 								<p

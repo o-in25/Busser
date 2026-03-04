@@ -16,7 +16,7 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
-	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
+	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
@@ -39,10 +39,6 @@
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
-
-	// Image state
-	let imageError = $state(false);
-	let hasImage = $derived(!!product?.productImageUrl && !imageError);
 
 	// Calculated fields
 	const pricePerOunce = $derived.by(() => {
@@ -162,17 +158,13 @@
 {#if product}
 	<div class="space-y-6">
 		<!-- Hero Image -->
-		<div class="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-muted">
-			{#if hasImage}
-				<img
-					src={product.productImageUrl}
-					alt={product.productName}
-					class="w-full h-full object-cover"
-					onerror={() => (imageError = true)}
-				/>
-			{:else}
-				<ImagePlaceholder variant="product" class="w-20 h-20" />
-			{/if}
+		<div class="relative aspect-[4/3] w-full rounded-xl overflow-hidden">
+			<SkeletonImage
+				src={product.productImageUrl}
+				alt={product.productName}
+				variant="product"
+				class="h-full w-full"
+			/>
 			{#if hasFlavorProfile}
 				<div class="absolute bottom-3 right-3">
 					<span

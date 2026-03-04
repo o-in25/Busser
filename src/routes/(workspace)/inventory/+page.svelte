@@ -5,8 +5,7 @@
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { haptics } from '$lib/utils/haptics';
-	import { navigating, page } from '$app/stores';
-	import InventorySkeleton from '$lib/components/skeletons/InventorySkeleton.svelte';
+	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
@@ -306,10 +305,6 @@
 	<title>Inventory - Busser</title>
 </svelte:head>
 
-{#if $navigating?.to?.url.pathname.startsWith('/inventory') && !$navigating?.to?.url.pathname.startsWith($page.url.pathname)}
-	<InventorySkeleton />
-{:else}
-
 <!-- Inventory Section Navigation -->
 <InventoryNav />
 
@@ -562,5 +557,3 @@
 	recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
 	onStockChange={handleStockChange}
 />
-
-{/if}
