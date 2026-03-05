@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { runAssistantChat } from '$lib/server/ai';
 import { ToolExecutor } from '$lib/server/assistant';
+import { canModifyWorkspace } from '$lib/server/auth';
 import { assistantTools } from '$lib/types/assistant';
 
 import type { RequestHandler } from './$types';
@@ -67,12 +68,22 @@ DO NOT put an ingredient in ingredients with a null productId — always resolve
 DO NOT add to missingIngredients just because a name search returned no results — search by category instead.`;
 
 export const POST: RequestHandler = async ({ request, locals }) => {
+	const userId = locals.user?.userId;
 	const workspaceId = locals.activeWorkspaceId;
-	if (!workspaceId) {
+	if (!workspaceId || !userId) {
 		error(StatusCodes.UNAUTHORIZED, {
 			reason: 'Unauthorized',
 			code: StatusCodes.UNAUTHORIZED,
 			message: 'Workspace context required',
+		});
+	}
+
+	const canModify = await canModifyWorkspace(userId, workspaceId);
+	if (!canModify) {
+		error(StatusCodes.FORBIDDEN, {
+			reason: 'Forbidden',
+			code: StatusCodes.FORBIDDEN,
+			message: 'You do not have permission to modify this workspace',
 		});
 	}
 

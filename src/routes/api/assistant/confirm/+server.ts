@@ -1,17 +1,28 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
+import { canModifyWorkspace } from '$lib/server/auth';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
+	const userId = locals.user?.userId;
 	const workspaceId = locals.activeWorkspaceId;
-	if (!workspaceId) {
+	if (!workspaceId || !userId) {
 		error(StatusCodes.UNAUTHORIZED, {
 			reason: 'Unauthorized',
 			code: StatusCodes.UNAUTHORIZED,
 			message: 'Workspace context required',
+		});
+	}
+
+	const canModify = await canModifyWorkspace(userId, workspaceId);
+	if (!canModify) {
+		error(StatusCodes.FORBIDDEN, {
+			reason: 'Forbidden',
+			code: StatusCodes.FORBIDDEN,
+			message: 'You do not have permission to modify this workspace',
 		});
 	}
 

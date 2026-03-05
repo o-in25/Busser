@@ -13,7 +13,7 @@
 
 <div
 	class={cn(
-		'rounded-xl border border-white/20 dark:border-zinc-700/30 bg-white/65 dark:bg-zinc-800/45 backdrop-blur-xl text-card-foreground shadow-lg transition-all duration-300 hover:bg-white/75 dark:hover:bg-zinc-800/55 hover:shadow-xl',
+		'rounded-xl border border-white/20 dark:border-zinc-700/30 bg-white/65 dark:bg-zinc-800/45 backdrop-blur-xl text-card-foreground shadow-lg transition-all duration-300 hover:bg-white/75 dark:hover:bg-zinc-800/55 hover:shadow-xl isolate',
 		className
 	)}
 	{...restProps}

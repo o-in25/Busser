@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { catalogRepo } from '$lib/server/core';
-import { userRepo } from '$lib/server/auth';
+import { userRepo, canModifyWorkspace } from '$lib/server/auth';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -80,6 +80,11 @@ export const actions: Actions = {
 
 		if (!recipeId || !workspaceId) {
 			return { success: false, error: 'Missing required fields' };
+		}
+
+		const canModify = await canModifyWorkspace(userId, workspaceId);
+		if (!canModify) {
+			return { success: false, error: 'Only editors and owners can feature recipes' };
 		}
 
 		const result = await catalogRepo.toggleFeatured(workspaceId, recipeId);

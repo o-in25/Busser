@@ -35,6 +35,7 @@
 	let selectedSort = $state(data.filters.sort || 'name-asc');
 	let selectedSpirit = $state(data.filters.spiritId || 'all');
 	let selectedShowFilter = $state(data.filters.showFilter || 'all');
+	let perPage = $state(String(data.filters.perPage ?? 24));
 
 	// Filter panel state
 	let filterOpen = $state(false);
@@ -45,6 +46,7 @@
 		if (selectedSpirit && selectedSpirit !== 'all') count++;
 		if (selectedShowFilter && selectedShowFilter !== 'all') count++;
 		if (selectedSort !== 'name-asc') count++;
+		if (perPage !== '24') count++;
 		return count;
 	});
 
@@ -69,12 +71,13 @@
 	let favorites = $state(new Set(data.favoriteRecipeIds));
 	let featured = $state(new Set(data.featuredRecipeIds));
 
-	// reset filters behind the panel (spirit, show, sort)
+	// reset filters behind the panel (spirit, show, sort, perPage)
 	function resetPanelFilters() {
 		selectedSpirit = 'all';
 		selectedShowFilter = 'all';
 		selectedSort = 'name-asc';
-		goto(buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', page: 1 }), { keepFocus: true });
+		perPage = '24';
+		goto(buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', perPage: '24', page: 1 }), { keepFocus: true });
 	}
 
 	// Restore view mode from localStorage
@@ -99,6 +102,7 @@
 		const sort = overrides.sort !== undefined ? overrides.sort : selectedSort;
 		const spirit = overrides.spirit !== undefined ? overrides.spirit : selectedSpirit;
 		const show = overrides.show !== undefined ? overrides.show : selectedShowFilter;
+		const pp = overrides.perPage !== undefined ? overrides.perPage : perPage;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 
 		params.set('page', String(pageNum));
@@ -106,6 +110,7 @@
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
 		if (spirit && spirit !== 'all') params.set('spirit', String(spirit));
 		if (show && show !== 'all') params.set('show', String(show));
+		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
 
 		// preserve advanced filter params
 		for (const key of advancedParamKeys) {
@@ -135,6 +140,11 @@
 	function handleShowFilterChange(value: string) {
 		selectedShowFilter = value;
 		goto(buildUrl({ show: value, page: 1 }), { keepFocus: true });
+	}
+
+	function handlePerPageChange(value: string) {
+		perPage = value;
+		goto(buildUrl({ perPage: value, page: 1 }), { keepFocus: true });
 	}
 
 	function clearSearch() {
@@ -181,6 +191,7 @@
 		selectedSort = data.filters.sort || 'name-asc';
 		selectedSpirit = data.filters.spiritId || 'all';
 		selectedShowFilter = data.filters.showFilter || 'all';
+		perPage = String(data.filters.perPage ?? 24);
 		favorites = new Set(data.favoriteRecipeIds);
 		featured = new Set(data.featuredRecipeIds);
 	});
@@ -262,10 +273,12 @@
 					{selectedSpirit}
 					{selectedShowFilter}
 					sortOption={selectedSort}
+					{perPage}
 					{advancedFilterCount}
 					onSpiritChange={handleSpiritChange}
 					onShowFilterChange={handleShowFilterChange}
 					onSortChange={handleSortChange}
+					onPerPageChange={handlePerPageChange}
 					onReset={resetPanelFilters}
 					onAdvancedClick={() => {
 						filterOpen = false;

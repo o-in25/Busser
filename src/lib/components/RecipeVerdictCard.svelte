@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Award, Candy, Droplets, Gauge, Sparkles } from 'lucide-svelte';
+	import { Award, Candy, Droplets, Gauge, HelpCircle, Sparkles } from 'lucide-svelte';
 
 	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { calculateAbv, calculateOverallScore } from '$lib/math';
 	import type { View } from '$lib/types';
 	import { cn } from '$lib/utils';
@@ -53,15 +54,34 @@
 
 	// Rating items for display
 	const ratingItems = [
-		{ label: 'Sweetness', value: recipe.recipeSweetnessRating, icon: Candy, color: 'pink' },
-		{ label: 'Dryness', value: recipe.recipeDrynessRating, icon: Droplets, color: 'amber' },
+		{
+			label: 'Sweetness',
+			value: recipe.recipeSweetnessRating,
+			icon: Candy,
+			color: 'pink',
+			tooltip: 'Sweetness is a measure of the sugar presence in the drink. Balanced cocktails sit in the middle — too much and it\'s cloying, too little and the drink feels flat. Scores best around a 5.',
+		},
+		{
+			label: 'Dryness',
+			value: recipe.recipeDrynessRating,
+			icon: Droplets,
+			color: 'amber',
+			tooltip: 'Dryness is a measure of bitterness, tartness, and astringency. A good cocktail usually has some edge to it, but going overboard in either direction costs points. Scores best around a 5.',
+		},
 		{
 			label: 'Versatility',
 			value: recipe.recipeVersatilityRating,
 			icon: Sparkles,
 			color: 'purple',
+			tooltip: 'Versatility is a measure of how flexible a recipe is — can its ingredients be freely substituted, and does it lend itself to variations? This is the most important factor and the higher the better.',
 		},
-		{ label: 'Strength', value: recipe.recipeStrengthRating, icon: Gauge, color: 'orange' },
+		{
+			label: 'Strength',
+			value: recipe.recipeStrengthRating,
+			icon: Gauge,
+			color: 'orange',
+			tooltip: 'Strength is a measure of how well the alcohol integrates with the other flavors — not just how much is in the glass. The spirit should be present but never overpowering. Scores best around a 6.',
+		},
 	];
 
 	const colorClasses: Record<string, { bar: string; icon: string }> = {
@@ -72,11 +92,45 @@
 	};
 </script>
 
-<Card.Root class={cn('overflow-hidden', className)} {...restProps}>
+<Card.Root class={cn(className)} {...restProps}>
 	<Card.Header class="pb-3">
 		<Card.Title class="flex items-center gap-2 text-lg">
 			<Award class="h-5 w-5 text-primary" />
 			Verdict
+			<Dialog.Root>
+				<Dialog.Trigger class="text-muted-foreground hover:text-foreground transition-colors rounded-full">
+					<HelpCircle class="h-4 w-4" />
+					<span class="sr-only">How is the verdict calculated?</span>
+				</Dialog.Trigger>
+				<Dialog.Content>
+					<Dialog.Header>
+						<Dialog.Title class="flex items-center gap-2">
+							<Award class="h-5 w-5 text-primary" />
+							How the verdict works
+						</Dialog.Title>
+						<Dialog.Description class="text-muted-foreground">
+							The verdict is a 0–10 score that reflects how well-crafted and balanced a cocktail is.
+						</Dialog.Description>
+					</Dialog.Header>
+					<div class="space-y-4">
+						{#each ratingItems as item}
+							{@const colors = colorClasses[item.color]}
+							<div class="flex items-start gap-3">
+								<div class="mt-0.5 shrink-0">
+									<item.icon class={cn('h-4 w-4', colors.icon)} />
+								</div>
+								<div>
+									<p class="text-sm font-medium">{item.label}</p>
+									<p class="text-sm text-muted-foreground">{item.tooltip}</p>
+								</div>
+							</div>
+						{/each}
+					</div>
+					<p class="text-xs text-muted-foreground border-t border-border/50 pt-3 mt-4">
+						Cocktails with intentional sweet/dry contrast earn a bonus. One-dimensional or contradictory profiles lose points.
+					</p>
+				</Dialog.Content>
+			</Dialog.Root>
 		</Card.Title>
 	</Card.Header>
 	<Card.Content class="space-y-6">
