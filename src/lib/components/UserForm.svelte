@@ -8,52 +8,51 @@
 	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import * as Select from '$lib/components/ui/select';
 	import TermsContent from '$lib/components/TermsContent.svelte';
 	import type { SelectOption } from '$lib/types';
 	import type { User } from '$lib/types/auth';
 
-	export let user: User | null = null;
-	export let action: 'add' | 'edit' | 'register' | 'login';
-	export let roles: SelectOption[] = [];
+	const defaultErrors = {
+		username: { hasError: false, message: '' },
+		email: { hasError: false, message: '' },
+		password: { hasError: false, message: '' },
+		passwordConfirm: { hasError: false, message: '' },
+		invitationCode: { hasError: false, message: '' },
+	};
 
-	export let password = '';
-	export let passwordConfirm = '';
-	export let invitationCode = '';
-	export let inviteOnly: boolean = true;
+	let {
+		user = null,
+		action,
+		roles = [],
+		password = $bindable(''),
+		passwordConfirm = $bindable(''),
+		invitationCode = $bindable(''),
+		inviteOnly = true,
+		errors = defaultErrors,
+	}: {
+		user?: User | null;
+		action: 'add' | 'edit' | 'register' | 'login';
+		roles?: SelectOption[];
+		password?: string;
+		passwordConfirm?: string;
+		invitationCode?: string;
+		inviteOnly?: boolean;
+		errors?: typeof defaultErrors;
+	} = $props();
 
-	export const clearSensitiveFields = () => {
+	export function clearSensitiveFields() {
 		password = '';
 		passwordConfirm = '';
-	};
+	}
 
 	const permissions: string[] = getContext('permissions');
 
 	let selected = user?.roles.map(({ roleId }) => roleId) || [];
-
-	export let errors = {
-		username: {
-			hasError: false,
-			message: '',
-		},
-		email: {
-			hasError: false,
-			message: '',
-		},
-		password: {
-			hasError: false,
-			message: '',
-		},
-		passwordConfirm: {
-			hasError: false,
-			message: '',
-		},
-		invitationCode: {
-			hasError: false,
-			message: '',
-		},
-	};
+	let selectedRole = $state(selected.length ? String(selected[0]) : '');
 
 	const needsPasswordCheck = action === 'add' || action === 'register';
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 	const rules = [
 		{ label: 'At least 8 characters', test: (pw: string) => pw.length >= 8 },
@@ -63,35 +62,38 @@
 		{ label: 'One special character', test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]\/`~;']/.test(pw) },
 	];
 
-	let passwordTouched = false;
-	let tosAccepted = false;
-	let tosDialogOpen = false;
+	let passwordTouched = $state(false);
+	let passwordConfirmTouched = $state(false);
+	let emailTouched = $state(false);
+	let emailValue = $state(user?.email || '');
+	let tosAccepted = $state(false);
+	let tosDialogOpen = $state(false);
 
-	$: ruleResults = rules.map((rule) => ({ ...rule, met: rule.test(password) }));
-	$: allRulesMet = ruleResults.every((r) => r.met);
-	$: passwordsMatch = password === passwordConfirm && password.length > 0;
-	$: submitDisabled =
+	let ruleResults = $derived(rules.map((rule) => ({ ...rule, met: rule.test(password) })));
+	let allRulesMet = $derived(ruleResults.every((r) => r.met));
+	let passwordsMatch = $derived(password === passwordConfirm && password.length > 0);
+	let emailInvalid = $derived(emailTouched && emailValue.length > 0 && !emailRegex.test(emailValue));
+	let passwordMismatch = $derived(passwordConfirmTouched && passwordConfirm.length > 0 && password !== passwordConfirm);
+	let submitDisabled = $derived(
 		(needsPasswordCheck && (!allRulesMet || !passwordsMatch)) ||
-		(action === 'register' && !tosAccepted);
+		(action === 'register' && !tosAccepted)
+	);
 
-	function toggleRole(roleId: string) {
-		if (selected.includes(roleId)) {
-			selected = selected.filter((id) => id !== roleId);
-		} else {
-			selected = [...selected, roleId];
-		}
+	function handleRoleChange(value: string | undefined) {
+		selectedRole = value || '';
 	}
 </script>
 
 <!-- username -->
 <div class="space-y-2">
 	<Label for="username" class={errors?.username?.hasError ? 'text-destructive' : ''}>
-		Username
+		Username <span class="text-destructive">*</span>
 	</Label>
 	<Input
 		type="text"
 		id="username"
 		name="username"
+		required
 		class={errors?.username?.hasError ? 'border-destructive' : ''}
 		value={user?.username || ''}
 	/>
@@ -105,18 +107,24 @@
 <!-- email -->
 {#if action !== 'login'}
 	<div class="space-y-2">
-		<Label for="email" class={errors?.email?.hasError ? 'text-destructive' : ''}>Email</Label>
+		<Label for="email" class={errors?.email?.hasError || emailInvalid ? 'text-destructive' : ''}>
+			Email <span class="text-destructive">*</span>
+		</Label>
 		<Input
 			type="email"
 			id="email"
 			name="email"
-			class={errors?.email?.hasError ? 'border-destructive' : ''}
-			value={user?.email || ''}
+			required
+			class={errors?.email?.hasError || emailInvalid ? 'border-destructive' : ''}
+			bind:value={emailValue}
+			onblur={() => (emailTouched = true)}
 		/>
-		{#if errors?.email.hasError}
+		{#if errors?.email?.hasError}
 			<Helper color="red">
 				{errors?.email.message}
 			</Helper>
+		{:else if emailInvalid}
+			<Helper color="red">Please enter a valid email address.</Helper>
 		{/if}
 	</div>
 {/if}
@@ -124,34 +132,22 @@
 <!-- role (only show for admins) -->
 {#if (action === 'edit' || action === 'add') && permissions?.includes('edit_admin')}
 	<div class="space-y-2">
-		<Label>Role</Label>
-		<input class="hidden" name="roles" id="roles" bind:value={selected} />
-		<div class="flex flex-wrap gap-2">
-			{#each roles as role}
-				<button
-					type="button"
-					onclick={() => toggleRole(String(role.value))}
-					class="px-3 py-1.5 text-sm rounded-full border transition-colors
-						{selected.includes(String(role.value))
-						? 'bg-primary text-primary-foreground border-primary'
-						: 'bg-background border-input hover:bg-accent'}"
-				>
-					{role.name}
-				</button>
-			{/each}
-		</div>
-	</div>
-{/if}
-
-<!-- password reset -->
-{#if action === 'edit'}
-	<div class="flex items-start">
-		<a
-			href="/settings/users/{user?.userId}/reset-password"
-			class="text-sm text-primary hover:underline"
-		>
-			Reset Password...
-		</a>
+		<Label>Role <span class="text-destructive">*</span></Label>
+		<input class="hidden" name="roles" id="roles" bind:value={selectedRole} />
+		<Select.Root type="single" value={selectedRole} onValueChange={handleRoleChange}>
+			<Select.Trigger class="w-full">
+				<Select.Value placeholder="Select a role...">
+					{#if selectedRole}
+						{roles.find((r) => String(r.value) === selectedRole)?.name}
+					{/if}
+				</Select.Value>
+			</Select.Trigger>
+			<Select.Content>
+				{#each roles as role}
+					<Select.Item value={String(role.value)} label={role.name} />
+				{/each}
+			</Select.Content>
+		</Select.Root>
 	</div>
 {/if}
 
@@ -159,12 +155,13 @@
 	<!-- password -->
 	<div class="space-y-2">
 		<Label for="password" class={errors?.password?.hasError ? 'text-destructive' : ''}>
-			Password
+			Password <span class="text-destructive">*</span>
 		</Label>
 		<Input
 			type="password"
 			id="password"
 			name="password"
+			required
 			class={errors?.password?.hasError ? 'border-destructive' : ''}
 			bind:value={password}
 			oninput={() => (passwordTouched = true)}
@@ -206,21 +203,25 @@
 		<div class="space-y-2">
 			<Label
 				for="passwordConfirm"
-				class={errors?.passwordConfirm?.hasError ? 'text-destructive' : ''}
+				class={errors?.passwordConfirm?.hasError || passwordMismatch ? 'text-destructive' : ''}
 			>
-				Confirm Password
+				Confirm Password <span class="text-destructive">*</span>
 			</Label>
 			<Input
 				type="password"
 				id="passwordConfirm"
 				name="passwordConfirm"
-				class={errors?.passwordConfirm?.hasError ? 'border-destructive' : ''}
+				required
+				class={errors?.passwordConfirm?.hasError || passwordMismatch ? 'border-destructive' : ''}
 				bind:value={passwordConfirm}
+				onblur={() => (passwordConfirmTouched = true)}
 			/>
-			{#if errors?.passwordConfirm.hasError}
+			{#if errors?.passwordConfirm?.hasError}
 				<Helper color="red">
 					{errors?.passwordConfirm.message}
 				</Helper>
+			{:else if passwordMismatch}
+				<Helper color="red">Passwords do not match.</Helper>
 			{/if}
 		</div>
 	{/if}

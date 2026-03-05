@@ -11,7 +11,6 @@
 		Lock,
 		LogOut,
 		Mail,
-		Pencil,
 		Shield,
 		Trash2,
 		Unlink,
@@ -112,7 +111,6 @@
 			class={cn(buttonVariants({ variant: 'default' }), 'w-fit')}
 			href="/settings/users/{data.user?.userId}/edit"
 		>
-			<Pencil class="h-4 w-4 mr-2" />
 			Edit Account
 		</a>
 	</div>
@@ -126,86 +124,84 @@
 			</Card.Title>
 			<Card.Description>Your account details and assigned roles</Card.Description>
 		</Card.Header>
-		<Card.Content>
-			<div class="grid gap-6 sm:grid-cols-2">
-				<!-- Username -->
-				<div class="space-y-2">
-					<div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-						<User class="h-4 w-4" />
+		<Card.Content class="space-y-5">
+			<!-- Identity -->
+			<div class="grid gap-4 sm:grid-cols-2">
+				<div class="p-4 rounded-lg bg-muted/30 space-y-1">
+					<div class="flex items-center gap-2 text-sm text-muted-foreground">
+						<User class="h-3.5 w-3.5" />
 						Username
 					</div>
-					<p class="text-lg font-semibold">{data.user?.username}</p>
+					<p class="font-semibold">{data.user?.username}</p>
 				</div>
-
-				<!-- Email -->
-				<div class="space-y-2">
-					<div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-						<Mail class="h-4 w-4" />
+				<div class="p-4 rounded-lg bg-muted/30 space-y-1">
+					<div class="flex items-center gap-2 text-sm text-muted-foreground">
+						<Mail class="h-3.5 w-3.5" />
 						Email Address
 					</div>
-					<p class="text-lg font-semibold">{data.user?.email}</p>
+					<p class="font-semibold">{data.user?.email}</p>
 				</div>
+			</div>
 
-				<!-- Roles -->
-				<div class="space-y-2">
-					<div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-						<KeyRound class="h-4 w-4" />
-						Assigned Roles
-					</div>
-					<div class="flex flex-wrap gap-2">
-						{#if roles.length > 0}
-							{#each roles as role}
-								<Badge variant="secondary" class="text-sm px-3 py-1">
-									<Shield class="h-3.5 w-3.5 mr-1.5" />
-									{role}
-								</Badge>
-							{/each}
-						{:else}
-							<span class="text-muted-foreground text-sm">No roles assigned</span>
-						{/if}
-					</div>
+			<!-- Roles -->
+			<div class="p-4 rounded-lg bg-muted/30 space-y-2">
+				<div class="flex items-center gap-2 text-sm text-muted-foreground">
+					<KeyRound class="h-3.5 w-3.5" />
+					Assigned Roles
 				</div>
-
-				<!-- Current Workspace -->
-				<div class="space-y-2">
-					<div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-						<Building2 class="h-4 w-4" />
-						Current Workspace
-					</div>
-					{#if data.currentWorkspace}
-						<div class="flex items-center gap-3">
-							<div
-								class="p-2 rounded-lg {data.currentWorkspace.workspaceId === 'ws-global-catalog'
-									? 'bg-blue-500/10'
-									: data.currentWorkspace.workspaceType === 'personal'
-										? 'bg-secondary-500/10'
-										: 'bg-neon-green-500/10'}"
-							>
-								{#if data.currentWorkspace.workspaceId === 'ws-global-catalog'}
-									<Globe class="h-4 w-4 text-blue-500" />
-								{:else if data.currentWorkspace.workspaceType === 'personal'}
-									<User class="h-4 w-4 text-secondary-500" />
-								{:else}
-									<Users class="h-4 w-4 text-neon-green-500" />
-								{/if}
-							</div>
-							<div>
-								<p class="text-lg font-semibold">{data.currentWorkspace.workspaceName}</p>
-								<p class="text-sm text-muted-foreground capitalize">
-									{data.currentWorkspace.workspaceType} workspace
-								</p>
-							</div>
-							<Badge variant="secondary" class="ml-auto capitalize">
-								{#if data.currentWorkspace.workspaceRole === 'owner'}
-									<Crown class="h-3 w-3 mr-1" />
-								{/if}
-								{data.currentWorkspace.workspaceRole}
+				<div class="flex flex-wrap gap-2">
+					{#if roles.length > 0}
+						{#each roles as role}
+							<Badge variant="secondary" class="text-sm px-3 py-1">
+								<Shield class="h-3.5 w-3.5 mr-1.5" />
+								{role}
 							</Badge>
-						</div>
+						{/each}
 					{:else}
-						<p class="text-muted-foreground text-sm">No workspace currently selected</p>
+						<span class="text-muted-foreground text-sm">No roles assigned</span>
 					{/if}
 				</div>
+			</div>
+
+			<!-- Current Workspace -->
+			<div class="p-4 rounded-lg bg-muted/30 space-y-2">
+				<div class="flex items-center gap-2 text-sm text-muted-foreground">
+					<Building2 class="h-3.5 w-3.5" />
+					Current Workspace
+				</div>
+				{#if data.currentWorkspace}
+					<div class="flex items-center gap-3">
+						<div
+							class="p-2 rounded-lg {data.currentWorkspace.workspaceId === 'ws-global-catalog'
+								? 'bg-blue-500/10'
+								: data.currentWorkspace.workspaceType === 'personal'
+									? 'bg-secondary-500/10'
+									: 'bg-neon-green-500/10'}"
+						>
+							{#if data.currentWorkspace.workspaceId === 'ws-global-catalog'}
+								<Globe class="h-4 w-4 text-blue-500" />
+							{:else if data.currentWorkspace.workspaceType === 'personal'}
+								<User class="h-4 w-4 text-secondary-500" />
+							{:else}
+								<Users class="h-4 w-4 text-neon-green-500" />
+							{/if}
+						</div>
+						<div>
+							<p class="font-semibold">{data.currentWorkspace.workspaceName}</p>
+							<p class="text-sm text-muted-foreground capitalize">
+								{data.currentWorkspace.workspaceType} workspace
+							</p>
+						</div>
+						<Badge variant="secondary" class="ml-auto capitalize">
+							{#if data.currentWorkspace.workspaceRole === 'owner'}
+								<Crown class="h-3 w-3 mr-1" />
+							{/if}
+							{data.currentWorkspace.workspaceRole}
+						</Badge>
+					</div>
+				{:else}
+					<p class="text-muted-foreground text-sm">No workspace currently selected</p>
+				{/if}
 			</div>
 		</Card.Content>
 	</Card.Root>
@@ -296,7 +292,6 @@
 								class="shrink-0 sm:w-auto w-full"
 								onclick={() => openUnlinkDialog(account.provider)}
 							>
-								<Unlink class="h-4 w-4 mr-2" />
 								Unlink
 							</Button>
 						</div>
@@ -478,7 +473,7 @@
 							{#if isSubmitting}
 								Saving...
 							{:else}
-								Save Preference
+								Save
 							{/if}
 						</Button>
 					</div>

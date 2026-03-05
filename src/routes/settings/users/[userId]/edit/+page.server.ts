@@ -1,7 +1,12 @@
 import { type Actions, error, fail } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { forceResetPassword, oauthRepo } from '$lib/server/auth';
+import {
+	forceResetPassword,
+	hasGlobalPermission,
+	oauthRepo,
+	resetPassword,
+} from '$lib/server/auth';
 import { editUser, getUser, roleSelect } from '$lib/server/user';
 
 import type { PageServerLoad } from './$types';
@@ -27,13 +32,20 @@ const load: PageServerLoad = async ({ params, locals }) => {
 		});
 	}
 
-	// let user = await db.table<User>('user').where({ userId }).first();
-	// user = Object.assign({}, user);
 	const queryResult = await getUser(userId);
 	const roles = await roleSelect();
 	if ('data' in queryResult) {
 		const hasPassword = await oauthRepo.hasPassword(userId);
-		return { user: queryResult.data, roles, currentUser: locals.user?.userId, hasPassword };
+		const canForceReset = hasGlobalPermission(locals.user, 'force_reset_password');
+		const isSelf = locals.user?.userId === userId;
+		return {
+			user: queryResult.data,
+			roles,
+			currentUser: locals.user?.userId,
+			hasPassword,
+			canForceReset,
+			isSelf,
+		};
 	}
 
 	return error(StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -44,7 +56,7 @@ const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 const actions = {
-	default: async ({ request, params, locals }) => {
+	updateUser: async ({ request, params, locals }) => {
 		const { userId } = params;
 		const formData = await request.formData();
 		const username = formData.get('username')?.toString() || '';
@@ -70,6 +82,29 @@ const actions = {
 			});
 		}
 
+		const errors = {
+			username: { hasError: false, message: '' },
+			email: { hasError: false, message: '' },
+		};
+
+		if (!username.trim()) {
+			errors.username = { hasError: true, message: 'Username is required.' };
+		}
+
+		if (!email.trim()) {
+			errors.email = { hasError: true, message: 'Email is required.' };
+		} else {
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email)) {
+				errors.email = { hasError: true, message: 'Email is not valid.' };
+			}
+		}
+
+		const hasErrors = Object.values(errors).some((field) => field.hasError);
+		if (hasErrors) {
+			return fail(StatusCodes.BAD_REQUEST, { errors });
+		}
+
 		let roleIds: string[] = [];
 		if (
 			locals.user?.permissions.map(({ permissionName }) => permissionName).includes('edit_admin') &&
@@ -86,20 +121,25 @@ const actions = {
 		}
 	},
 
-	setPassword: async ({ request, params, locals }) => {
+	resetPassword: async ({ request, params, locals }) => {
 		const { userId } = params;
+		if (!userId) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'User not found.' });
+		}
 
-		if (!locals.user || !userId || locals.user.userId !== userId) {
+		const isSelf = locals.user?.userId === userId;
+		const isAdmin = locals.user?.permissions
+			?.map(({ permissionName }) => permissionName)
+			.includes('edit_admin');
+		const canForceReset = hasGlobalPermission(locals.user, 'force_reset_password');
+
+		// must be either self or admin
+		if (!isSelf && !isAdmin) {
 			return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authorized.' });
 		}
 
-		// only allow setting password for users who don't have one
-		const hasPassword = await oauthRepo.hasPassword(userId);
-		if (hasPassword) {
-			return fail(StatusCodes.BAD_REQUEST, { error: 'You already have a password set.' });
-		}
-
 		const formData = await request.formData();
+		const oldPassword = formData.get('oldPassword')?.toString() || '';
 		const newPassword = formData.get('newPassword')?.toString() || '';
 		const confirmPassword = formData.get('confirmPassword')?.toString() || '';
 
@@ -111,12 +151,31 @@ const actions = {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Passwords do not match.' });
 		}
 
-		const success = await forceResetPassword(userId, newPassword);
-		if (!success) {
-			return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'Failed to set password.' });
+		// admin force reset (no old password) or self with no existing password
+		const hasPassword = await oauthRepo.hasPassword(userId);
+		if (canForceReset && !isSelf) {
+			const success = await forceResetPassword(userId, newPassword);
+			if (!success) {
+				return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'Failed to reset password.' });
+			}
+		} else if (!hasPassword) {
+			// oauth user setting password for first time
+			const success = await forceResetPassword(userId, newPassword);
+			if (!success) {
+				return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: 'Failed to set password.' });
+			}
+		} else {
+			// self reset — requires old password
+			if (!oldPassword) {
+				return fail(StatusCodes.BAD_REQUEST, { error: 'Current password is required.' });
+			}
+			const success = await resetPassword(userId, oldPassword, newPassword);
+			if (!success) {
+				return fail(StatusCodes.BAD_REQUEST, { error: 'Current password is incorrect.' });
+			}
 		}
 
-		return { passwordSet: true };
+		return { passwordChanged: true };
 	},
 } satisfies Actions;
 

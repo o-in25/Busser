@@ -300,7 +300,7 @@
 		--primary-foreground: 0 0% 98%;
 		--secondary: 270 45% 65%;
 		--secondary-foreground: 240 5.9% 10%;
-		--muted: 240 4.8% 95.9%;
+		--muted: 240 6% 90%;
 		--muted-foreground: 240 3.8% 46.1%;
 		--accent: 340 82% 52%;
 		--accent-foreground: 240 5.9% 10%;
@@ -579,18 +579,74 @@ html[data-nav-direction="back"]::view-transition-new(root) {
 	50% { opacity: 1; }
 }
 
-/* position toasts below safe area on mobile */
+/* position toasts below safe area on mobile with breathing room */
 @media (max-width: 767px) {
 	[data-sonner-toaster] {
-		top: env(safe-area-inset-top, 0px) !important;
+		top: calc(env(safe-area-inset-top, 0px) + 0.75rem) !important;
 	}
 }
 
 /* glass-pill toast overrides */
 [data-sonner-toast] {
 	border-radius: 9999px !important;
-	--normal-bg: transparent !important;
-	--normal-border: transparent !important;
+	--normal-bg: rgba(255, 255, 255, 0.7) !important;
+	--normal-border: rgba(255, 255, 255, 0.3) !important;
+	--normal-text: hsl(var(--foreground)) !important;
+	backdrop-filter: blur(20px) saturate(1.5) !important;
+	-webkit-backdrop-filter: blur(20px) saturate(1.5) !important;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+:is(.dark) [data-sonner-toast] {
+	--normal-bg: rgba(24, 24, 27, 0.6) !important;
+	--normal-border: rgba(255, 255, 255, 0.1) !important;
+	--normal-text: hsl(var(--foreground)) !important;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* make toast a row so close button sits inline at the end */
+[data-sonner-toast] {
+	flex-direction: row !important;
+	align-items: center !important;
+	gap: 0.5rem !important;
+}
+
+/* inline ghost close button — right-justified inside the pill */
+[data-sonner-toast] [data-close-button] {
+	position: static !important;
+	transform: none !important;
+	order: 99;
+	flex-shrink: 0 !important;
+	margin-left: auto !important;
+	width: 1.25rem !important;
+	height: 1.25rem !important;
+	border: 1px solid hsl(var(--border)) !important;
+	background: transparent !important;
+	color: hsl(var(--muted-foreground)) !important;
+	border-radius: 9999px !important;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+	background: hsl(var(--muted)) !important;
+	color: hsl(var(--foreground)) !important;
+}
+
+/* type-colored icons using app palette */
+[data-sonner-toast][data-type='success'] [data-icon] {
+	color: var(--color-neon-green-500) !important;
+}
+
+[data-sonner-toast][data-type='error'] [data-icon] {
+	color: hsl(var(--destructive)) !important;
+}
+
+[data-sonner-toast][data-type='warning'] [data-icon] {
+	color: var(--color-neon-amber-500) !important;
+}
+
+[data-sonner-toast][data-type='info'] [data-icon] {
+	color: var(--color-neon-cyan-500) !important;
 }
 
 @utility scrollbar-none {

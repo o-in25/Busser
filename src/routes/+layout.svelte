@@ -13,7 +13,7 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { refresh } from '$lib/actions/refresh';
-	import { swipe } from '$lib/actions/swipe';
+
 	import { notificationStore } from '../stores';
 
 	import type { LayoutData } from './$types';
@@ -30,10 +30,26 @@
 		'/settings': 5,
 	};
 
+	// settings tab order for directional transitions within settings
+	const settingsOrder: Record<string, number> = {
+		'/settings': 0,
+		'/settings/user-account': 1,
+		'/settings/users': 2,
+		'/settings/user-permissions': 3,
+		'/settings/user-invitations': 4,
+		'/settings/workspaces': 5,
+	};
+
 	function getRouteKey(pathname: string): string {
 		// match top-level route segment (e.g. /catalog/123 -> /catalog)
 		const match = pathname.match(/^\/[^/]*/);
 		return match?.[0] || '/';
+	}
+
+	function getSettingsKey(pathname: string): string {
+		// match up to 2 segments (e.g. /settings/users/123 -> /settings/users)
+		const match = pathname.match(/^\/settings(?:\/[^/]+)?/);
+		return match?.[0] || '/settings';
 	}
 
 	// directional view transitions
@@ -51,13 +67,24 @@
 		} else if (navigation.type === 'popstate') {
 			direction = 'back';
 		} else {
-			const fromKey = getRouteKey($page.url.pathname);
-			const toKey = getRouteKey(navigation.to?.url.pathname ?? '/');
-			const fromIndex = routeOrder[fromKey] ?? -1;
-			const toIndex = routeOrder[toKey] ?? -1;
+			const fromPath = $page.url.pathname;
+			const toPath = navigation.to?.url.pathname ?? '/';
+			const fromKey = getRouteKey(fromPath);
+			const toKey = getRouteKey(toPath);
 
-			if (fromIndex !== -1 && toIndex !== -1) {
-				direction = toIndex >= fromIndex ? 'forward' : 'back';
+			// use settings sub-route order when navigating within settings
+			if (fromKey === '/settings' && toKey === '/settings') {
+				const fromIndex = settingsOrder[getSettingsKey(fromPath)] ?? -1;
+				const toIndex = settingsOrder[getSettingsKey(toPath)] ?? -1;
+				if (fromIndex !== -1 && toIndex !== -1) {
+					direction = toIndex >= fromIndex ? 'forward' : 'back';
+				}
+			} else {
+				const fromIndex = routeOrder[fromKey] ?? -1;
+				const toIndex = routeOrder[toKey] ?? -1;
+				if (fromIndex !== -1 && toIndex !== -1) {
+					direction = toIndex >= fromIndex ? 'forward' : 'back';
+				}
 			}
 		}
 
@@ -101,6 +128,7 @@
 	};
 
 	let isMobile = false;
+	let keyboardOpen = false;
 	onMount(() => {
 		const mql = window.matchMedia('(max-width: 767px)');
 		isMobile = mql.matches;
@@ -122,10 +150,33 @@
 		window.addEventListener('focusin', handleFocusIn, { passive: true });
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
+		// detect ios keyboard open/close via visualViewport
+		const initialHeight = window.visualViewport?.height ?? window.innerHeight;
+		let lastVpHeight = initialHeight;
+		function handleViewportResize() {
+			const vp = window.visualViewport;
+			if (!vp) return;
+
+			// keyboard is open when viewport shrinks significantly
+			keyboardOpen = vp.height < initialHeight - 100;
+
+			// keyboard dismissed (viewport grew back) — blur the active input
+			const grew = vp.height > lastVpHeight + 50;
+			lastVpHeight = vp.height;
+			if (grew) {
+				const el = document.activeElement;
+				if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+					(el as HTMLElement).blur();
+				}
+			}
+		}
+		window.visualViewport?.addEventListener('resize', handleViewportResize);
+
 		return () => {
 			mql.removeEventListener('change', handler);
 			window.removeEventListener('focusin', handleFocusIn);
 			window.removeEventListener('scroll', handleScroll);
+			window.visualViewport?.removeEventListener('resize', handleViewportResize);
 		};
 	});
 
@@ -153,18 +204,18 @@
 <div class="flex flex-col min-h-screen" style:padding-top={showNav ? undefined : 'env(safe-area-inset-top, 0px)'} use:refresh>
 	<!-- nav (only show when logged in and not on auth routes) -->
 	{#if showNav}
-		<Nav {activeUrl} {user} {workspaceName} />
+		<Nav {activeUrl} {user} {workspaceName} {keyboardOpen} />
 	{/if}
 
 	<ProgressBar color="#e5195f" zIndex={49} />
 
 	<!-- page content with bottom padding on mobile for fixed nav -->
-	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}" use:swipe={{ currentPath: activeUrl }}>
+	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}">
 		<slot />
 	</div>
 
 	<!-- toast -->
-	<Toaster position={isMobile ? 'top-center' : 'top-right'} />
+	<Toaster position={isMobile ? 'top-center' : 'top-right'} closeButton />
 
 	<!-- footer (hidden on mobile when nav shown, since bottom nav takes that space) -->
 	<div class="mt-auto {showNav ? 'hidden md:block' : ''}">

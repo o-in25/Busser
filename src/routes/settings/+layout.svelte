@@ -66,7 +66,7 @@
 				class={activeUrl$.includes('permissions') ? activeClass : defaultClass}
 			>
 				<div class="flex items-center justify-center gap-2">
-					<UsersRound class="h-5 w-5" /><span class="hidden md:inline-block">Grants & Roles</span>
+					<UsersRound class="h-5 w-5" /><span class="hidden md:inline-block">Permissions</span>
 				</div>
 			</a>
 		</li>

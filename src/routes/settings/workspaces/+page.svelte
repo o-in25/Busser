@@ -485,7 +485,7 @@
 				<Button type="button" variant="outline" onclick={() => (editDialogOpen = false)}>
 					Cancel
 				</Button>
-				<Button type="submit">Save Changes</Button>
+				<Button type="submit">Save</Button>
 			</Dialog.Footer>
 		</form>
 	</Dialog.Content>

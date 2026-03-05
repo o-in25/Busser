@@ -30,7 +30,8 @@
 		user,
 		activeUrl,
 		workspaceName,
-	}: { user: User | null; activeUrl: string; workspaceName?: string | null } = $props();
+		keyboardOpen = false,
+	}: { user: User | null; activeUrl: string; workspaceName?: string | null; keyboardOpen?: boolean } = $props();
 
 	// scroll direction tracking for mobile header
 	let lastScrollY = $state(0);
@@ -224,7 +225,7 @@
 
 <!-- Mobile Bottom Navigation (visible on small screens) -->
 {#if user}
-	<nav class="mobile-nav-container flex md:hidden">
+	<nav class="mobile-nav-container flex md:hidden" class:nav-hidden={keyboardOpen}>
 		<div class="mobile-nav-pill">
 			{#each navItems as item}
 				<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
@@ -336,6 +337,12 @@
 		padding: 0.5rem 0.75rem !important;
 		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 		justify-content: center;
+		transition: transform 0.25s ease;
+	}
+
+	.mobile-nav-container.nav-hidden {
+		transform: translateY(100%);
+		pointer-events: none;
 	}
 
 	/* mobile main nav pill */

@@ -1,39 +1,70 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { KeyRound, Lock, Save, User } from 'lucide-svelte';
+	import { Circle, CircleCheck, KeyRound, Lock, User } from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import * as Dialog from '$lib/components/ui/dialog';
+	import { CollapsibleSection } from '$lib/components/ui/collapsible';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import * as Select from '$lib/components/ui/select';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
-	import { cn } from '$lib/utils';
-
+	import { Helper } from '$lib/components/ui/helper';
 	import { notificationStore } from '../../../../../stores';
 	import type { ActionData, PageData } from './$types';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
+	let errors = $derived(form?.errors);
 	const permissions: string[] = getContext('permissions') || [];
 	const isAdmin = permissions.includes('edit_admin');
 
 	let selected = data.user?.roles.map(({ roleId }) => roleId) || [];
-	let setPasswordOpen = $state(false);
-	let isSettingPassword = $state(false);
+	let selectedRole = $state(selected.length ? String(selected[0]) : '');
+
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	let emailTouched = $state(false);
+	let emailValue = $state(data.user?.email || '');
+	let emailInvalid = $derived(emailTouched && emailValue.length > 0 && !emailRegex.test(emailValue));
+
+	const isSelf = data.isSelf;
+	const needsOldPassword = isSelf && data.hasPassword;
+
+	// password section
+	let passwordOpen = $state(false);
 	let passwordError = $state('');
+	let isSubmittingPassword = $state(false);
+	let newPassword = $state('');
+	let confirmPassword = $state('');
+	let passwordTouched = $state(false);
+	let confirmTouched = $state(false);
 
-	const isSelf = data.user?.userId === data.currentUser;
+	const rules = [
+		{ label: 'At least 8 characters', test: (pw: string) => pw.length >= 8 },
+		{ label: 'One uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
+		{ label: 'One lowercase letter', test: (pw: string) => /[a-z]/.test(pw) },
+		{ label: 'One number', test: (pw: string) => /\d/.test(pw) },
+		{ label: 'One special character', test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]\/`~;']/.test(pw) },
+	];
 
-	function toggleRole(roleId: string) {
-		if (selected.includes(roleId)) {
-			selected = selected.filter((id) => id !== roleId);
-		} else {
-			selected = [...selected, roleId];
-		}
+	let ruleResults = $derived(rules.map((rule) => ({ ...rule, met: rule.test(newPassword) })));
+	let allRulesMet = $derived(ruleResults.every((r) => r.met));
+	let passwordsMatch = $derived(newPassword === confirmPassword && newPassword.length > 0);
+	let passwordMismatch = $derived(confirmTouched && confirmPassword.length > 0 && newPassword !== confirmPassword);
+
+	function handleRoleChange(value: string | undefined) {
+		selectedRole = value || '';
+	}
+
+	function resetPasswordFields() {
+		newPassword = '';
+		confirmPassword = '';
+		passwordError = '';
+		passwordTouched = false;
+		confirmTouched = false;
 	}
 </script>
 
@@ -48,7 +79,7 @@
 {/if}
 
 <div class="space-y-6 mt-3">
-	<!-- Header -->
+	<!-- header -->
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-2xl font-bold">Edit User</h1>
@@ -67,24 +98,26 @@
 	<form
 		class="space-y-6"
 		method="POST"
-		action={`/settings/users/${data.user?.userId}/edit`}
+		action="?/updateUser"
 		use:enhance={() => {
 			return async ({ result }) => {
 				if (result.type === 'redirect') {
 					goto(result.location);
 				} else {
 					await applyAction(result);
-					if (result.type === 'failure')
-						$notificationStore.error = {
-							message: result?.data?.error?.toString() || '',
-						};
-					if (result.type === 'success')
+					if (result.type === 'failure') {
+						const msg = result?.data?.error?.toString() || '';
+						if (msg) $notificationStore.error = { message: msg };
+					} else if (result.type === 'error') {
+						$notificationStore.error = { message: 'Something went wrong. Please try again.' };
+					} else if (result.type === 'success') {
 						$notificationStore.success = { message: 'User updated.' };
+					}
 				}
 			};
 		}}
 	>
-		<!-- User Info Card -->
+		<!-- user info card -->
 		<Card.Root>
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2">
@@ -95,44 +128,44 @@
 			</Card.Header>
 			<Card.Content class="space-y-4">
 				<div class="space-y-2">
-					<Label for="username">Username</Label>
-					<Input type="text" id="username" name="username" value={data.user?.username || ''} />
+					<Label for="username" class={errors?.username?.hasError ? 'text-destructive' : ''}>
+						Username <span class="text-destructive">*</span>
+					</Label>
+					<Input
+						type="text"
+						id="username"
+						name="username"
+						required
+						class={errors?.username?.hasError ? 'border-destructive' : ''}
+						value={data.user?.username || ''}
+					/>
+					{#if errors?.username?.hasError}
+						<Helper color="red">{errors.username.message}</Helper>
+					{/if}
 				</div>
 				<div class="space-y-2">
-					<Label for="email">Email</Label>
-					<Input type="email" id="email" name="email" value={data.user?.email || ''} />
-				</div>
-				<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
-					<div class="flex items-center gap-4">
-						{#if data.hasPassword && isAdmin}
-							<a
-								href="/settings/users/{data.user?.userId}/reset-password"
-								class="text-sm text-primary hover:underline"
-							>
-								Reset Password...
-							</a>
-						{/if}
-						{#if isSelf && !data.hasPassword}
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-								onclick={() => { setPasswordOpen = true; passwordError = ''; }}
-							>
-								<Lock class="h-4 w-4 mr-2" />
-								Set Password
-							</Button>
-						{/if}
-					</div>
-					<Button type="submit" class="w-full sm:w-auto">
-						<Save class="h-4 w-4 mr-2" />
-						Save Changes
-					</Button>
+					<Label for="email" class={errors?.email?.hasError || emailInvalid ? 'text-destructive' : ''}>
+						Email <span class="text-destructive">*</span>
+					</Label>
+					<Input
+						type="email"
+						id="email"
+						name="email"
+						required
+						class={errors?.email?.hasError || emailInvalid ? 'border-destructive' : ''}
+						bind:value={emailValue}
+						onblur={() => (emailTouched = true)}
+					/>
+					{#if errors?.email?.hasError}
+						<Helper color="red">{errors.email.message}</Helper>
+					{:else if emailInvalid}
+						<Helper color="red">Please enter a valid email address.</Helper>
+					{/if}
 				</div>
 			</Card.Content>
 		</Card.Root>
 
-		<!-- Roles Card (admin only) -->
+		<!-- roles card (admin only) -->
 		{#if isAdmin && data.roles?.length && data.user?.userId !== data.currentUser}
 			<Card.Root>
 				<Card.Header>
@@ -143,78 +176,153 @@
 					<Card.Description>Assign system roles to this user</Card.Description>
 				</Card.Header>
 				<Card.Content>
-					<input class="hidden" name="roles" id="roles" bind:value={selected} />
-					<div class="flex flex-wrap gap-2">
-						{#each data.roles as role}
-							<button
-								type="button"
-								onclick={() => toggleRole(String(role.value))}
-								class="px-3 py-1.5 text-sm rounded-full border transition-colors
-									{selected.includes(String(role.value))
-									? 'bg-primary text-primary-foreground border-primary'
-									: 'bg-background border-input hover:bg-accent'}"
-							>
-								{role.name}
-							</button>
-						{/each}
+					<div class="space-y-2">
+						<Label>Role <span class="text-destructive">*</span></Label>
+						<input class="hidden" name="roles" id="roles" bind:value={selectedRole} />
+						<Select.Root type="single" value={selectedRole} onValueChange={handleRoleChange}>
+							<Select.Trigger class="w-full">
+								<Select.Value placeholder="Select a role...">
+									{#if selectedRole}
+										{data.roles.find((r) => String(r.value) === selectedRole)?.name}
+									{/if}
+								</Select.Value>
+							</Select.Trigger>
+							<Select.Content>
+								{#each data.roles as role}
+									<Select.Item value={String(role.value)} label={role.name} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
 					</div>
 				</Card.Content>
 			</Card.Root>
 		{/if}
+
+		<!-- save button -->
+		<div class="flex justify-end">
+			<Button type="submit" class="w-full sm:w-auto">
+				Save
+			</Button>
+		</div>
 	</form>
 
-	<!-- Set Password Dialog -->
-	<Dialog.Root bind:open={setPasswordOpen}>
-		<Dialog.Content>
-			<Dialog.Header>
-				<Dialog.Title class="flex items-center gap-2">
-					<Lock class="h-5 w-5" />
-					Set Password
-				</Dialog.Title>
-				<Dialog.Description>
-					Add a password so you can sign in without an OAuth provider
-				</Dialog.Description>
-			</Dialog.Header>
+	<!-- password section -->
+	{#if isSelf || isAdmin}
+		<CollapsibleSection
+			title={data.hasPassword ? 'Change Password' : 'Set Password'}
+			icon={Lock}
+			bind:open={passwordOpen}
+		>
 			<form
 				method="POST"
-				action="?/setPassword"
+				action="?/resetPassword"
 				class="space-y-4"
 				use:enhance={() => {
-					isSettingPassword = true;
+					isSubmittingPassword = true;
 					passwordError = '';
 					return async ({ result }) => {
-						isSettingPassword = false;
+						isSubmittingPassword = false;
 						if (result.type === 'success') {
-							setPasswordOpen = false;
-							$notificationStore.success = { message: 'Password set successfully.' };
+							resetPasswordFields();
+							passwordOpen = false;
+							$notificationStore.success = {
+								message: data.hasPassword ? 'Password changed.' : 'Password set.',
+							};
 						} else if (result.type === 'failure') {
-							passwordError = result.data?.error?.toString() || 'Failed to set password.';
+							passwordError = result.data?.error?.toString() || 'Failed to update password.';
+						} else if (result.type === 'error') {
+							$notificationStore.error = { message: 'Something went wrong. Please try again.' };
 						}
 					};
 				}}
 			>
+				{#if needsOldPassword}
+					<div class="space-y-2">
+						<Label for="oldPassword">
+							Current Password <span class="text-destructive">*</span>
+						</Label>
+						<Input
+							type="password"
+							id="oldPassword"
+							name="oldPassword"
+							required
+						/>
+					</div>
+				{/if}
+
 				<div class="space-y-2">
-					<Label for="newPassword">New Password</Label>
-					<Input type="password" id="newPassword" name="newPassword" placeholder="Min. 8 characters" />
+					<Label for="newPassword">
+						New Password <span class="text-destructive">*</span>
+					</Label>
+					<Input
+						type="password"
+						id="newPassword"
+						name="newPassword"
+						required
+						bind:value={newPassword}
+						oninput={() => (passwordTouched = true)}
+					/>
+					{#if passwordTouched}
+						<div class="rounded-lg bg-muted/30 p-3 space-y-1.5">
+							{#each ruleResults as rule}
+								<div class="flex items-center gap-2 text-sm">
+									{#if rule.met}
+										<CircleCheck class="h-4 w-4 text-neon-green-500 shrink-0" />
+										<span class="text-neon-green-600 dark:text-neon-green-400">{rule.label}</span>
+									{:else}
+										<Circle class="h-4 w-4 text-muted-foreground shrink-0" />
+										<span class="text-muted-foreground">{rule.label}</span>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
 				</div>
+
 				<div class="space-y-2">
-					<Label for="confirmPassword">Confirm Password</Label>
-					<Input type="password" id="confirmPassword" name="confirmPassword" />
+					<Label for="confirmPassword" class={passwordMismatch ? 'text-destructive' : ''}>
+						Confirm Password <span class="text-destructive">*</span>
+					</Label>
+					<Input
+						type="password"
+						id="confirmPassword"
+						name="confirmPassword"
+						required
+						class={passwordMismatch ? 'border-destructive' : ''}
+						bind:value={confirmPassword}
+						onblur={() => (confirmTouched = true)}
+					/>
+					{#if passwordMismatch}
+						<Helper color="red">Passwords do not match.</Helper>
+					{/if}
 				</div>
+
 				{#if passwordError}
 					<p class="text-sm text-destructive">{passwordError}</p>
 				{/if}
-				<Dialog.Footer>
-					<Button variant="outline" type="button" onclick={() => { setPasswordOpen = false; passwordError = ''; }}>Cancel</Button>
-					<Button type="submit" disabled={isSettingPassword}>
-						{#if isSettingPassword}
-							Setting password...
+
+				<div class="flex justify-end gap-2">
+					<Button
+						variant="outline"
+						type="button"
+						onclick={() => { passwordOpen = false; resetPasswordFields(); }}
+					>
+						Cancel
+					</Button>
+					<Button
+						type="submit"
+						disabled={isSubmittingPassword || !allRulesMet || !passwordsMatch}
+					>
+						{#if isSubmittingPassword}
+							Saving...
+						{:else if data.hasPassword}
+							Change Password
 						{:else}
 							Set Password
 						{/if}
 					</Button>
-				</Dialog.Footer>
+				</div>
 			</form>
-		</Dialog.Content>
-	</Dialog.Root>
+		</CollapsibleSection>
+	{/if}
 </div>

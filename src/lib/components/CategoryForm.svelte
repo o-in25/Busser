@@ -209,7 +209,7 @@
 		<!-- Action buttons -->
 		<div class="flex justify-end gap-3">
 			<Button type="submit" disabled={isSubmitting || !isValid}>
-				{isSubmitting ? 'Saving...' : action === 'add' ? 'Create Category' : 'Save Changes'}
+				{isSubmitting ? 'Saving...' : action === 'add' ? 'Create' : 'Save'}
 			</Button>
 		</div>
 

@@ -7,34 +7,31 @@ import type { Permission, Role } from '$lib/types/auth';
 
 import type { Actions, PageServerLoad } from './$types';
 
-export const load = (async ({ url, locals }) => {
-	const role = url.searchParams.get('role') || '';
+export const load = (async ({ locals }) => {
 	const roles = await roleSelect();
-	let grants: Array<Role & Permission> = [];
-	if (role) {
-		const queryResult = await getGrants(role);
-		if ('data' in queryResult) {
-			grants = queryResult.data || [];
-		}
+	let allGrants: Array<Role & Permission> = [];
+	const queryResult = await getGrants();
+	if ('data' in queryResult) {
+		allGrants = queryResult.data || [];
 	}
 
 	const canCreateRole = hasGlobalPermission(locals.user, 'create_role');
 
 	return {
 		roles,
-		grants,
+		allGrants,
 		canCreateRole,
 	};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-	default: async ({ request, url }) => {
-		const roleId = url.searchParams.get('role') || '';
+	default: async ({ request }) => {
+		const formData = await request.formData();
+		const roleId = formData.get('roleId')?.toString() || '';
 		if (!roleId) {
 			return fail(StatusCodes.NOT_FOUND, { error: 'Role not found' });
 		}
-		let formData: any = await request.formData();
-		const grants = JSON.parse(formData.get('formData'));
+		const grants = JSON.parse(formData.get('formData')?.toString() || '[]');
 		const permissions = grants.map(({ permissionName, permissionId }: Permission) => ({
 			permissionName,
 			permissionId,

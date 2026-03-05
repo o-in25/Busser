@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Clock, Crown, Eye, Mail, Pencil, Shield, Trash2, Users } from 'lucide-svelte';
+	import { Clock, Crown, Eye, Pencil, Shield, Trash2, Users } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
 	import BackButton from '$lib/components/BackButton.svelte';
@@ -94,7 +94,6 @@
 			</p>
 		</div>
 		<Button onclick={() => (inviteDialogOpen = true)}>
-			<Mail class="h-4 w-4 mr-2" />
 			Invite Member
 		</Button>
 	</div>
@@ -496,8 +495,7 @@
 					Cancel
 				</Button>
 				<Button type="submit" disabled={!inviteEmail}>
-					<Mail class="h-4 w-4 mr-2" />
-					Send Invitation
+					Send
 				</Button>
 			</Dialog.Footer>
 		</form>
