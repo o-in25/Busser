@@ -52,8 +52,8 @@
 					>
 				</div>
 				<p class="text-sm text-muted-foreground mt-0.5">
-					Describe a cocktail and the assistant will check your inventory, suggest ingredients, and
-					add it to your catalog.
+					Describe a cocktail and Busser AI will check your inventory, suggest ingredients, and add
+					it to your catalog.
 				</p>
 			</div>
 		</div>
@@ -77,8 +77,8 @@
 				<div>
 					<h2 class="text-lg font-semibold">View-only access</h2>
 					<p class="text-sm text-muted-foreground mt-1">
-						You need editor or owner access to use the AI assistant in this workspace. The
-						assistant modifies your catalog and inventory, which requires write permissions.
+						You need editor or owner access to use the AI assistant in this workspace. The assistant
+						modifies your catalog and inventory, which requires write permissions.
 					</p>
 				</div>
 
@@ -103,8 +103,8 @@
 					</div>
 				{:else}
 					<p class="text-sm text-muted-foreground">
-						You don't have editor or owner access to any workspace. Ask a workspace owner to
-						upgrade your role.
+						You don't have editor or owner access to any workspace. Ask a workspace owner to upgrade
+						your role.
 					</p>
 				{/if}
 			</div>

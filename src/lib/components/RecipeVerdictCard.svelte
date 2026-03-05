@@ -2,7 +2,7 @@
 	import { Award, Candy, Droplets, Gauge, HelpCircle, Sparkles } from 'lucide-svelte';
 
 	import * as Card from '$lib/components/ui/card';
-	import * as Popover from '$lib/components/ui/popover';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { calculateAbv, calculateOverallScore } from '$lib/math';
 	import type { View } from '$lib/types';
 	import { cn } from '$lib/utils';
@@ -92,30 +92,45 @@
 	};
 </script>
 
-<Card.Root class={cn('overflow-hidden', className)} {...restProps}>
+<Card.Root class={cn(className)} {...restProps}>
 	<Card.Header class="pb-3">
 		<Card.Title class="flex items-center gap-2 text-lg">
 			<Award class="h-5 w-5 text-primary" />
 			Verdict
-			<Popover.Root>
-				<Popover.Trigger class="text-muted-foreground hover:text-foreground transition-colors rounded-full">
+			<Dialog.Root>
+				<Dialog.Trigger class="text-muted-foreground hover:text-foreground transition-colors rounded-full">
 					<HelpCircle class="h-4 w-4" />
 					<span class="sr-only">How is the verdict calculated?</span>
-				</Popover.Trigger>
-				<Popover.Content class="w-72 text-sm text-left" align="center">
-					<p class="font-semibold mb-2">How the score works</p>
-					<p class="text-muted-foreground mb-2">
-						The verdict is a 0–10 score based on how well-rounded and approachable a cocktail is.
+				</Dialog.Trigger>
+				<Dialog.Content>
+					<Dialog.Header>
+						<Dialog.Title class="flex items-center gap-2">
+							<Award class="h-5 w-5 text-primary" />
+							How the verdict works
+						</Dialog.Title>
+						<Dialog.Description class="text-muted-foreground">
+							The verdict is a 0–10 score that reflects how well-crafted and balanced a cocktail is.
+						</Dialog.Description>
+					</Dialog.Header>
+					<div class="space-y-4">
+						{#each ratingItems as item}
+							{@const colors = colorClasses[item.color]}
+							<div class="flex items-start gap-3">
+								<div class="mt-0.5 shrink-0">
+									<item.icon class={cn('h-4 w-4', colors.icon)} />
+								</div>
+								<div>
+									<p class="text-sm font-medium">{item.label}</p>
+									<p class="text-sm text-muted-foreground">{item.tooltip}</p>
+								</div>
+							</div>
+						{/each}
+					</div>
+					<p class="text-xs text-muted-foreground border-t border-border/50 pt-3 mt-4">
+						Cocktails with intentional sweet/dry contrast earn a bonus. One-dimensional or contradictory profiles lose points.
 					</p>
-					<ul class="text-muted-foreground space-y-1.5 text-xs">
-						<li><span class="text-foreground font-medium">Versatility</span> matters most — crowd-pleasing drinks that work for any occasion score higher.</li>
-						<li><span class="text-foreground font-medium">Sweetness, Dryness & Strength</span> reward balance — mid-range values score best, while extremes are penalized.</li>
-					</ul>
-					<p class="text-muted-foreground text-xs mt-2 border-t border-border/50 pt-2">
-						Drinks with a purposeful sweet/dry contrast get a bonus. Contradictory or one-dimensional profiles lose points.
-					</p>
-				</Popover.Content>
-			</Popover.Root>
+				</Dialog.Content>
+			</Dialog.Root>
 		</Card.Title>
 	</Card.Header>
 	<Card.Content class="space-y-6">
@@ -152,14 +167,6 @@
 						<div class="flex items-center gap-2">
 							<item.icon class={cn('h-4 w-4', colors.icon)} />
 							<span class="text-sm font-medium">{item.label}</span>
-							<Popover.Root>
-								<Popover.Trigger class="text-muted-foreground/50 hover:text-muted-foreground transition-colors rounded-full">
-									<HelpCircle class="h-3 w-3" />
-								</Popover.Trigger>
-								<Popover.Content class="w-60 text-xs" align="start">
-									<p class="text-muted-foreground">{item.tooltip}</p>
-								</Popover.Content>
-							</Popover.Root>
 						</div>
 						<span class="text-sm font-semibold text-muted-foreground">
 							{item.value.toFixed(1)}
