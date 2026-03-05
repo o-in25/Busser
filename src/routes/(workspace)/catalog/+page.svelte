@@ -220,7 +220,7 @@
 			{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
 			<a href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ?? spirit.recipeCategoryId}" class="block group">
 				<Card.Root
-					class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300"
+					class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300 !bg-transparent"
 				>
 					<!-- Background image -->
 					<div class="absolute inset-0">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowUpDown, ChevronRight, Filter, GlassWater, SlidersHorizontal } from 'lucide-svelte';
+	import { ArrowUpDown, ChevronRight, Filter, GlassWater, Rows3, SlidersHorizontal } from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Select from '$lib/components/ui/select';
@@ -9,11 +9,13 @@
 		selectedSpirit,
 		selectedShowFilter,
 		sortOption,
+		perPage = '24',
 		advancedFilterCount = 0,
 		hideSpirit = false,
 		onSpiritChange,
 		onShowFilterChange,
 		onSortChange,
+		onPerPageChange,
 		onReset,
 		onAdvancedClick,
 	}: {
@@ -21,11 +23,13 @@
 		selectedSpirit: string;
 		selectedShowFilter: string;
 		sortOption: string;
+		perPage?: string;
 		advancedFilterCount?: number;
 		hideSpirit?: boolean;
 		onSpiritChange: (value: string) => void;
 		onShowFilterChange: (value: string) => void;
 		onSortChange: (value: string) => void;
+		onPerPageChange?: (value: string) => void;
 		onReset: () => void;
 		onAdvancedClick?: () => void;
 	} = $props();
@@ -55,15 +59,28 @@
 		return option?.label || 'All Recipes';
 	});
 
+	const perPageOptions = [
+		{ value: '12', label: '12 per page' },
+		{ value: '24', label: '24 per page' },
+		{ value: '48', label: '48 per page' },
+		{ value: '96', label: '96 per page' },
+	];
+
 	const sortLabel = $derived.by(() => {
 		const option = sortOptions.find((o) => o.value === sortOption);
 		return option?.label || 'Name (A-Z)';
 	});
 
+	const perPageLabel = $derived.by(() => {
+		const option = perPageOptions.find((o) => o.value === perPage);
+		return option?.label || '24 per page';
+	});
+
 	const hasNonDefaultFilters = $derived(
 		(selectedSpirit && selectedSpirit !== 'all') ||
 			(selectedShowFilter && selectedShowFilter !== 'all') ||
-			sortOption !== 'name-asc'
+			sortOption !== 'name-asc' ||
+			perPage !== '24'
 	);
 </script>
 
@@ -136,6 +153,28 @@
 			</Select.Content>
 		</Select.Root>
 	</div>
+
+	<!-- page size -->
+	{#if onPerPageChange}
+		<div class="flex flex-col gap-1.5">
+			<span class="text-sm font-medium text-muted-foreground">Page Size</span>
+			<Select.Root
+				type="single"
+				value={perPage}
+				onValueChange={(v) => onPerPageChange(v ?? '24')}
+			>
+				<Select.Trigger class="w-full">
+					<Rows3 class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="24 per page">{perPageLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					{#each perPageOptions as option}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
+	{/if}
 
 	<!-- advanced filters link -->
 	{#if onAdvancedClick}

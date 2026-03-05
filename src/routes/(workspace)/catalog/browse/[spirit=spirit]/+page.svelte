@@ -36,14 +36,16 @@
 	// filter state
 	let searchInput = $state(data.filters.search ?? '');
 	let selectedSort = $state(data.filters.sort ?? 'name-asc');
+	let perPage = $state(String(data.filters.perPage ?? 24));
 
 	// filter panel state
 	let filterOpen = $state(false);
 
-	// filter panel count (sort only, spirit is hidden)
+	// filter panel count (sort + perPage, spirit is hidden)
 	const activeFilterCount = $derived.by(() => {
 		let count = 0;
 		if (selectedSort !== 'name-asc') count++;
+		if (perPage !== '24') count++;
 		return count;
 	});
 
@@ -84,11 +86,13 @@
 
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const sort = overrides.sort !== undefined ? overrides.sort : selectedSort;
+		const pp = overrides.perPage !== undefined ? overrides.perPage : perPage;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 
 		params.set('page', String(pageNum));
 		if (search) params.set('search', String(search));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
+		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
 
 		const queryString = params.toString();
 		return queryString ? `${basePath}?${queryString}` : basePath;
@@ -104,6 +108,11 @@
 		goto(buildUrl({ sort: value, page: 1 }), { keepFocus: true });
 	}
 
+	function handlePerPageChange(value: string) {
+		perPage = value;
+		goto(buildUrl({ perPage: value, page: 1 }), { keepFocus: true });
+	}
+
 	function clearSearch() {
 		searchInput = '';
 		goto(buildUrl({ search: '' }), { keepFocus: true });
@@ -115,13 +124,15 @@
 
 	function resetPanelFilters() {
 		selectedSort = 'name-asc';
-		goto(buildUrl({ sort: 'name-asc', page: 1 }), { keepFocus: true });
+		perPage = '24';
+		goto(buildUrl({ sort: 'name-asc', perPage: '24', page: 1 }), { keepFocus: true });
 	}
 
 	// update local state when page data changes
 	$effect(() => {
 		searchInput = data.filters.search ?? '';
 		selectedSort = data.filters.sort ?? 'name-asc';
+		perPage = String(data.filters.perPage ?? 24);
 		favorites = new Set(data.favoriteRecipeIds);
 		featured = new Set(data.featuredRecipeIds);
 	});
@@ -303,10 +314,12 @@
 						selectedSpirit={String(data.spirit.recipeCategoryId)}
 						selectedShowFilter="all"
 						sortOption={selectedSort}
+						{perPage}
 						hideSpirit={true}
 						onSpiritChange={() => {}}
 						onShowFilterChange={() => {}}
 						onSortChange={handleSortChange}
+						onPerPageChange={handlePerPageChange}
 						onReset={resetPanelFilters}
 					/>
 				</FilterButton>

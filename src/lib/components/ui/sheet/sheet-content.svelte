@@ -23,6 +23,15 @@
 		right:
 			'inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:animate-slide-out-to-right data-[state=open]:animate-slide-in-from-right sm:max-w-sm',
 	};
+
+	// bottom sheets need safe-area-inset-bottom (home indicator), not top (notch)
+	const contentStyle = side === 'bottom'
+		? 'padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));'
+		: 'padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));';
+
+	const closeStyle = side === 'bottom'
+		? 'top: 1.25rem;'
+		: 'top: calc(1.25rem + env(safe-area-inset-top, 0px));';
 </script>
 
 <SheetPrimitive.Portal>
@@ -33,7 +42,7 @@
 			sideClasses[side],
 			className
 		)}
-		style="padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));"
+		style={contentStyle}
 		{...restProps}
 	>
 		{#if children}
@@ -41,7 +50,7 @@
 		{/if}
 		<SheetPrimitive.Close
 			class="absolute right-4 z-10 p-2.5 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-			style="top: calc(1.25rem + env(safe-area-inset-top, 0px));"
+			style={closeStyle}
 		>
 			<X class="h-5 w-5" />
 			<span class="sr-only">Close</span>

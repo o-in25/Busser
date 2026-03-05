@@ -190,6 +190,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			spiritId,
 			showFilter,
 			page,
+			perPage,
 			readyToMake,
 			ingredientInclude,
 			ingredientAny,

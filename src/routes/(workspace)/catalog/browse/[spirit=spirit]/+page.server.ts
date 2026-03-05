@@ -85,6 +85,7 @@ export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
 			search,
 			sort,
 			page,
+			perPage,
 		},
 	};
 };
