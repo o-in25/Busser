@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertCircle, KeyRound, Plus, Save, Shield, Trash2, Users, ChevronRight } from 'lucide-svelte';
+	import { AlertCircle, KeyRound, Plus, Shield, Trash2, Users, ChevronRight } from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -321,8 +321,7 @@
 							<input type="hidden" name="formData" bind:this={formDataInput} />
 							<input type="hidden" name="roleId" bind:this={roleIdInput} />
 							<Button type="submit" class="min-w-[120px]">
-								<Save class="h-4 w-4 mr-2" />
-								Save Changes
+								Save
 							</Button>
 						</div>
 					</form>

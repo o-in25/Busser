@@ -11,7 +11,6 @@
 		Lock,
 		LogOut,
 		Mail,
-		Pencil,
 		Shield,
 		Trash2,
 		Unlink,
@@ -112,7 +111,6 @@
 			class={cn(buttonVariants({ variant: 'default' }), 'w-fit')}
 			href="/settings/users/{data.user?.userId}/edit"
 		>
-			<Pencil class="h-4 w-4 mr-2" />
 			Edit Account
 		</a>
 	</div>
@@ -294,7 +292,6 @@
 								class="shrink-0 sm:w-auto w-full"
 								onclick={() => openUnlinkDialog(account.provider)}
 							>
-								<Unlink class="h-4 w-4 mr-2" />
 								Unlink
 							</Button>
 						</div>
@@ -476,7 +473,7 @@
 							{#if isSubmitting}
 								Saving...
 							{:else}
-								Save Preference
+								Save
 							{/if}
 						</Button>
 					</div>

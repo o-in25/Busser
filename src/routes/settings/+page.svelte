@@ -152,7 +152,6 @@
 									/>
 								{/if}
 								<Button type="submit" size="sm" disabled={isSaving}>
-									<Save class="h-4 w-4 mr-2" />
 									{isSaving ? 'Saving...' : 'Save'}
 								</Button>
 							</form>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertCircle, Loader2, Lock, XCircle } from 'lucide-svelte';
+	import { AlertCircle, Loader2, XCircle } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
 	import BackButton from '$lib/components/BackButton.svelte';
@@ -106,7 +106,6 @@
 						<Loader2 class="w-4 h-4 mr-2 animate-spin" />
 						Resetting...
 					{:else}
-						<Lock class="w-4 h-4 mr-2" />
 						Reset password
 					{/if}
 				</Button>

@@ -8,7 +8,6 @@
 		MailPlus,
 		Plus,
 		Trash2,
-		UserPlus,
 		X,
 	} from 'lucide-svelte';
 	import moment from 'moment';
@@ -75,7 +74,7 @@
 			}}
 		>
 			<Plus class="h-4 w-4 mr-2" />
-			Create Invite
+			Create
 		</Button>
 	</div>
 
@@ -124,7 +123,7 @@
 										openCreateModalForRequest(request.email, request.invitationRequestId)}
 								>
 									<Check class="h-4 w-4 mr-1" />
-									Create Invite
+									Create
 								</Button>
 								<form
 									method="POST"
@@ -370,10 +369,9 @@
 			<Dialog.Footer>
 				<Button type="submit" size="lg" class="w-full">
 					{#if prefillRequestId}
-						<UserPlus class="h-4 w-4 mr-2" />
-						Create Invite & Fulfill Request
+						Create
 					{:else}
-						Create Invite
+						Create
 					{/if}
 				</Button>
 			</Dialog.Footer>

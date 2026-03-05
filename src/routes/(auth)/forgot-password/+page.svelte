@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertCircle, CheckCircle2, Loader2, Mail } from 'lucide-svelte';
+	import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
 	import BackButton from '$lib/components/BackButton.svelte';
@@ -81,7 +81,6 @@
 						<Loader2 class="w-4 h-4 mr-2 animate-spin" />
 						Sending...
 					{:else}
-						<Mail class="w-4 h-4 mr-2" />
 						Send reset link
 					{/if}
 				</Button>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { Circle, CircleCheck, KeyRound, Lock, Save, User } from 'lucide-svelte';
+	import { Circle, CircleCheck, KeyRound, Lock, User } from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -201,8 +201,7 @@
 		<!-- save button -->
 		<div class="flex justify-end">
 			<Button type="submit" class="w-full sm:w-auto">
-				<Save class="h-4 w-4 mr-2" />
-				Save Changes
+				Save
 			</Button>
 		</div>
 	</form>

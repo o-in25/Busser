@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { Circle, CircleCheck, KeyRound, Lock, User, UserPlus } from 'lucide-svelte';
+	import { Circle, CircleCheck, KeyRound, Lock, User } from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -240,8 +240,7 @@
 		<!-- submit -->
 		<div class="flex justify-end">
 			<Button type="submit" disabled={!allRulesMet || !passwordsMatch} class="w-full sm:w-auto">
-				<UserPlus class="h-4 w-4 mr-2" />
-				Create User
+				Create
 			</Button>
 		</div>
 	</form>
