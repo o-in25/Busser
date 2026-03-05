@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dices, Info, Mail, MailX, Palette, Save, ShieldCheck, Upload, User, X } from 'lucide-svelte';
+	import { Dices, Info, Mail, MailX, Palette, ShieldCheck, Upload, User, X } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { enhance } from '$app/forms';
