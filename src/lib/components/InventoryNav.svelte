@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Package, Tags } from 'lucide-svelte';
+	import { Package, Store, Tags } from 'lucide-svelte';
 
 	import { page } from '$app/stores';
 	import { cn } from '$lib/utils';
@@ -7,19 +7,19 @@
 	const tabs = [
 		{ href: '/inventory', label: 'Products', icon: Package },
 		{ href: '/inventory/category', label: 'Categories', icon: Tags },
+		{ href: '/inventory/suppliers', label: 'Suppliers', icon: Store },
 	];
 
-	// Check if a tab is active (exact match for /inventory, starts with for /inventory/category)
 	function isActive(href: string): boolean {
 		const path = $page.url.pathname;
 		if (href === '/inventory') {
-			// Products tab: active only for /inventory or /inventory/add or /inventory/[id]/edit
 			return (
 				path === '/inventory' ||
-				(path.startsWith('/inventory/') && !path.startsWith('/inventory/category'))
+				(path.startsWith('/inventory/') &&
+					!path.startsWith('/inventory/category') &&
+					!path.startsWith('/inventory/suppliers'))
 			);
 		}
-		// Categories tab: active for anything starting with /inventory/category
 		return path.startsWith(href);
 	}
 </script>

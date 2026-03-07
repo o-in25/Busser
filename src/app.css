@@ -373,18 +373,6 @@
 		}
 	}
 
-	@media (hover: none) {
-		&:active {
-			transform: scale(0.97);
-			transition: transform 0.1s ease;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		&:active {
-			transform: none;
-		}
-	}
 }
 
 @utility glass-nav {

@@ -6,7 +6,7 @@
 </script>
 
 <a href="/catalog/{recipe.recipeId}" class="block">
-	<Card.Root class="cursor-pointer transition hover:bg-accent active:scale-95 p-3">
+	<Card.Root class="cursor-pointer transition hover:bg-accent p-3">
 		<div class="flex justify-center">
 			<div class="p-4 m-auto">
 				<SkeletonImage

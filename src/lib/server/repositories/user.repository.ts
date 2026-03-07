@@ -20,17 +20,15 @@ import { generateRandomShapeAvatar } from '../generators/avatar-generator';
 import { Logger } from '../logger';
 import { MailClient } from '../mail';
 import { deleteSignedUrl, uploadAvatarBuffer } from '../storage';
-import { AuthRepository } from './auth.repository';
+import * as auth from './auth.service';
 import { BaseRepository } from './base.repository';
 
 export class UserRepository extends BaseRepository {
 	private mailClient: MailClient;
-	private authRepo: AuthRepository;
 
-	constructor(db: DbProvider, authRepo: AuthRepository) {
+	constructor(db: DbProvider) {
 		super(db);
 		this.mailClient = new MailClient();
-		this.authRepo = authRepo;
 	}
 
 	// user CRUD
@@ -93,6 +91,27 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
+	// thin query methods used by auth service
+	async findCredentials(username: string) {
+		return this.db
+			.table('user')
+			.where({ username })
+			.select('userId', 'email', 'password', 'verified')
+			.first();
+	}
+
+	async updateLastActivity(userId: string) {
+		await this.db.table('user').update({ lastActivityDate: Logger.now() }).where({ userId });
+	}
+
+	async updatePassword(userId: string, hashedPassword: string): Promise<number> {
+		return this.db.table('user').where({ userId }).update({ password: hashedPassword });
+	}
+
+	async findPasswordHash(userId: string) {
+		return this.db.table('user').where({ userId }).select('password').first();
+	}
+
 	async create(
 		username: string,
 		email: string,
@@ -100,7 +119,7 @@ export class UserRepository extends BaseRepository {
 		roleIds: string[]
 	): Promise<User | null> {
 		try {
-			const hashedPassword = await this.authRepo.hashPassword(password);
+			const hashedPassword = await auth.hashPassword(password);
 			let userId: string | undefined;
 
 			await this.db.query.transaction(async (trx) => {
@@ -674,7 +693,7 @@ export class UserRepository extends BaseRepository {
 					}
 				}
 
-				const hashedPassword = await this.authRepo.hashPassword(password);
+				const hashedPassword = await auth.hashPassword(password);
 
 				const user = await this.register(trx, {
 					username,
@@ -708,7 +727,7 @@ export class UserRepository extends BaseRepository {
 			const now = moment();
 			const tokenExpiration = moment().add(24, 'hours');
 
-			const token = await this.authRepo.signToken<RegistrationToken>({
+			const token = await auth.signToken<RegistrationToken>({
 				userId: user.userId,
 				iat: now.unix(),
 				exp: tokenExpiration.unix(),
@@ -756,7 +775,7 @@ export class UserRepository extends BaseRepository {
 	async verify(registrationToken: string): Promise<QueryResult> {
 		try {
 			const { valid, expired, payload } =
-				await this.authRepo.verifyRegistrationToken(registrationToken);
+				await auth.verifyRegistrationToken(registrationToken);
 
 			if (!valid || !payload?.userId) throw new Error('Token is invalid.');
 			if (expired) throw new Error('Token is expired.');
@@ -786,7 +805,7 @@ export class UserRepository extends BaseRepository {
 			const now = moment();
 			const tokenExpiration = moment().add(24, 'hours');
 
-			const token = await this.authRepo.signToken<RegistrationToken>({
+			const token = await auth.signToken<RegistrationToken>({
 				userId: user.userId,
 				iat: now.unix(),
 				exp: tokenExpiration.unix(),
@@ -820,7 +839,7 @@ export class UserRepository extends BaseRepository {
 			const now = moment();
 			const tokenExpiration = moment().add(24, 'hours');
 
-			const token = await this.authRepo.signToken<RegistrationToken>({
+			const token = await auth.signToken<RegistrationToken>({
 				userId: user.userId,
 				iat: now.unix(),
 				exp: tokenExpiration.unix(),
@@ -1060,7 +1079,7 @@ export class UserRepository extends BaseRepository {
 			const now = moment();
 			const tokenExpiration = moment().add(1, 'hour');
 
-			const token = await this.authRepo.signToken<PasswordResetToken>({
+			const token = await auth.signToken<PasswordResetToken>({
 				userId: user.userId,
 				email: user.email,
 				type: 'password-reset',

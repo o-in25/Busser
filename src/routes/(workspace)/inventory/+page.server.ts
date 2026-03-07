@@ -64,9 +64,6 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		recipeUsage[productId] = count;
 	});
 
-	// Get out-of-stock items for alerts
-	const outOfStockItems = data.filter((p) => p.productInStockQuantity === 0).slice(0, 5);
-
 	// Get recently added items (highest productId = most recent)
 	const recentlyAdded = [...data]
 		.sort((a, b) => (b.productId || 0) - (a.productId || 0))
@@ -78,7 +75,6 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		stats,
 		categories,
 		recipeUsage,
-		outOfStockItems,
 		recentlyAdded,
 		filters: {
 			search: productName,
