@@ -21,46 +21,45 @@ vi.mock('$lib/server/logger', () => ({
 }));
 
 vi.mock('$lib/server/mail', () => ({
-	MailClient: vi.fn().mockImplementation(() => ({
-		sendUserRegistrationEmail: vi.fn(),
-		sendPasswordResetEmail: vi.fn(),
-	})),
+	MailClient: vi.fn(function () {
+		return {
+			sendUserRegistrationEmail: vi.fn(),
+			sendPasswordResetEmail: vi.fn(),
+		};
+	}),
 }));
 
+// auto-stub: returns a proxy that creates vi.fn() for any accessed property
+function autoStub() {
+	const stubs: Record<string, any> = {};
+	return new Proxy(stubs, {
+		get(target, prop) {
+			if (typeof prop === 'string' && !(prop in target)) {
+				target[prop] = vi.fn();
+			}
+			return target[prop];
+		},
+	});
+}
+
 vi.mock('$lib/server/db', () => ({
-	DbProvider: vi.fn().mockImplementation(() => ({})),
+	DbProvider: vi.fn(function () { return autoStub(); }),
 }));
 
 vi.mock('$lib/server/repositories/user.repository', () => ({
-	UserRepository: vi.fn().mockImplementation(() => ({
-		findCredentials: vi.fn(),
-		findById: vi.fn(),
-		updateLastActivity: vi.fn(),
-		updatePassword: vi.fn(),
-		findPasswordHash: vi.fn(),
-		setVerified: vi.fn(),
-		findVerificationInfo: vi.fn(),
-		findVerificationInfoByEmail: vi.fn(),
-	})),
+	UserRepository: vi.fn(function () { return autoStub(); }),
 }));
 
 vi.mock('$lib/server/repositories/workspace.repository', () => ({
-	WorkspaceRepository: vi.fn().mockImplementation(() => ({
-		hasWorkspaceAccess: vi.fn(),
-		getUserWorkspaces: vi.fn(),
-		getWorkspace: vi.fn(),
-	})),
+	WorkspaceRepository: vi.fn(function () { return autoStub(); }),
 }));
 
 vi.mock('$lib/server/repositories/settings.repository', () => ({
-	SettingsRepository: vi.fn().mockImplementation(() => ({
-		isInviteOnly: vi.fn(),
-		set: vi.fn(),
-	})),
+	SettingsRepository: vi.fn(function () { return autoStub(); }),
 }));
 
 vi.mock('$lib/server/repositories/oauth.repository', () => ({
-	OAuthRepository: vi.fn().mockImplementation(() => ({})),
+	OAuthRepository: vi.fn(function () { return autoStub(); }),
 }));
 
 import { hash, compare } from 'bcrypt';
