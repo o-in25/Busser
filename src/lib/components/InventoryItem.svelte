@@ -104,8 +104,10 @@
 		},
 	]);
 
-	// Check if flavor profile has any data
-	const hasFlavorProfile = $derived(flavorProfile.some((f) => f.value > 0));
+	// only show flavor profile for spirits (CategoryGroupId 1) with data
+	const hasFlavorProfile = $derived(
+		product.categoryGroupId === 1 && flavorProfile.some((f) => f.value > 0)
+	);
 
 	// Overall rating calculation
 	const generateRatings = () => {

@@ -41,6 +41,7 @@ export type SelectOption = {
 	categoryName?: string;
 	parentCategoryId?: number | null;
 	parentCategoryName?: string | null;
+	categoryGroupId?: number | null;
 };
 
 // logging

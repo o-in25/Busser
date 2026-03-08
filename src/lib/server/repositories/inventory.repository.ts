@@ -437,12 +437,13 @@ export class InventoryRepository extends BaseRepository {
 			let result = await this.db
 				.table('category as c')
 				.where('c.workspaceId', workspaceId)
-				.select('c.CategoryId', 'c.CategoryName')
+				.select('c.CategoryId', 'c.CategoryName', 'c.CategoryGroupId')
 				.orderBy('c.CategoryName');
 			let categories = result as Category[];
-			return categories.map(({ categoryId, categoryName }) => ({
+			return categories.map(({ categoryId, categoryName, categoryGroupId }) => ({
 				name: categoryName,
 				value: categoryId,
+				categoryGroupId: categoryGroupId ?? null,
 			}));
 		} catch (error: any) {
 			console.error(error);

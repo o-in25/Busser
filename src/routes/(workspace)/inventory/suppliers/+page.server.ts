@@ -1,6 +1,3 @@
-import { redirect } from '@sveltejs/kit';
-import { StatusCodes } from 'http-status-codes';
-
 import { inventoryRepo } from '$lib/server/core';
 
 import type { ShoppingListItem, ShoppingListSummary } from '$lib/types';
@@ -10,12 +7,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
 
-	if (!url.searchParams.size) {
-		throw redirect(StatusCodes.TEMPORARY_REDIRECT, url.pathname.concat('?', 'page=1'));
-	}
-
-	let page: string | number = url.searchParams.get('page') || '1';
-	page = Number(page);
+	const page = Number(url.searchParams.get('page') || '1');
 
 	const productName = url.searchParams.get('productName') || '';
 	const categoryGroupId = url.searchParams.get('categoryGroupId') || '';
