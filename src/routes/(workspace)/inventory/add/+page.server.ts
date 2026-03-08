@@ -62,6 +62,7 @@ export const actions: Actions = {
 			parseFloat(formData.get('productVersatilityRating') as string) || 0;
 		const productDescription = (formData.get('productDescription') as string) || '';
 		const productImageUrl = (formData.get('productImageUrl') as string) || '';
+		const supplierId = parseInt(formData.get('supplierId') as string) || 1;
 
 		if (!productName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Product name is required.' });
@@ -83,6 +84,7 @@ export const actions: Actions = {
 			productStrengthRating,
 			productVersatilityRating,
 			productDescription,
+			supplierId,
 		} as Product;
 
 		const result = await inventoryRepo.create(workspaceId, product, productImageUrl);

@@ -179,7 +179,7 @@ export class InventoryRepository extends BaseRepository {
 				await deleteSignedUrl(existing.productImageUrl);
 			}
 
-			product = { ...product, productImageUrl: resolvedImageUrl || '', supplierId: 1 };
+			product = { ...product, productImageUrl: resolvedImageUrl || '' };
 
 			await this.db.query.transaction(async (trx) => {
 				await trx('product')
@@ -871,15 +871,21 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
+
 	// supplier CRUD
-	async getSuppliers(workspaceId: string): Promise<Supplier[]> {
+	async getSuppliers(workspaceId: string, includeDefault = false): Promise<Supplier[]> {
 		try {
-			const result = await this.db
+			let query = this.db
 				.table('supplier')
 				.where(function () {
 					this.whereNull('WorkspaceId').orWhere('WorkspaceId', workspaceId);
-				})
-				.select(
+				});
+
+			if (!includeDefault) {
+				query = query.whereNot('SupplierId', 1);
+			}
+
+			const result = await query.select(
 					'SupplierId',
 					'SupplierName',
 					'SupplierDetails',

@@ -1,4 +1,5 @@
 import { getWorkspace, userRepo } from '$lib/server/auth';
+import { generateAndUploadAvatar } from '$lib/server/user';
 
 import type { LayoutServerLoad } from './$types';
 
@@ -16,7 +17,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 
 			// generate avatar on first login if user doesn't have one
 			if (!user.avatarImageUrl) {
-				const avatarResult = await userRepo.generateAndUploadAvatar(user.userId);
+				const avatarResult = await generateAndUploadAvatar(user.userId);
 				if (avatarResult.status === 'success' && avatarResult.data) {
 					user.avatarImageUrl = avatarResult.data;
 				}

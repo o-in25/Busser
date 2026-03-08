@@ -80,10 +80,10 @@
 <div class="w-full">
 	<slot></slot>
 	{#if name}
-		<Label for={name} class="mb-2 block">{label}</Label>
+		<Label for={name} class="mb-2 block">{label}{#if required} <span class="text-destructive">*</span>{/if}</Label>
 		<input id={name} {name} class="hidden" bind:value />
 	{:else}
-		<Label for="autoselect" class="mb-2 block">{label}</Label>
+		<Label for="autoselect" class="mb-2 block">{label}{#if required} <span class="text-destructive">*</span>{/if}</Label>
 		<input id="autoselect" class="hidden" bind:value />
 	{/if}
 	<div class="flex">

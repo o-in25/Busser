@@ -9,6 +9,7 @@
 		Palette,
 		Percent,
 		Sparkles,
+		Store,
 		Wind,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
@@ -54,6 +55,7 @@
 	let productUnitSizeInMilliliters = $state('');
 	let productProof = $state('');
 	let categoryId = $state<string | null>(null);
+	let supplierId = $state<string | null>('1');
 	let productImageUrl = $state<string | undefined>();
 	let productInStockQuantity = $state(0);
 	let productSweetnessRating = $state(0.0);
@@ -78,6 +80,7 @@
 					: '';
 			productProof = product.productProof !== undefined ? String(product.productProof) : '';
 			categoryId = product.categoryId !== undefined ? String(product.categoryId) : null;
+			supplierId = product.supplierId ? String(product.supplierId) : '1';
 			productImageUrl = product.productImageUrl;
 			productInStockQuantity = product.productInStockQuantity ?? 0;
 			productSweetnessRating = product.productSweetnessRating ?? 0.0;
@@ -171,6 +174,7 @@
 		productUnitSizeInMilliliters,
 		productProof,
 		categoryId,
+		supplierId,
 		productInStockQuantity,
 		productSweetnessRating,
 		productDrynessRating,
@@ -185,6 +189,7 @@
 		productUnitSizeInMilliliters = (data.productUnitSizeInMilliliters as string) ?? '';
 		productProof = (data.productProof as string) ?? '';
 		categoryId = (data.categoryId as string | null) ?? null;
+		supplierId = (data.supplierId as string | null) ?? '1';
 		productInStockQuantity = (data.productInStockQuantity as number) ?? 0;
 		productSweetnessRating = (data.productSweetnessRating as number) ?? 0;
 		productDrynessRating = (data.productDrynessRating as number) ?? 0;
@@ -427,6 +432,17 @@
 								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
 							{/if}
 						</div>
+						<div>
+							<Autocomplete
+								label="Supplier"
+								fetchUrl="/api/select/suppliers"
+								name="supplierId"
+								grant=""
+								key={product?.supplierName || 'Any'}
+								required={true}
+								bind:value={supplierId}
+							/>
+						</div>
 						<div class="flex items-center justify-end gap-3 pt-2">
 							<Label for="inStock-mobile" class="text-sm">In Stock</Label>
 							<Switch
@@ -638,6 +654,19 @@
 						</div>
 					</div>
 
+					<!-- Supplier -->
+					<div class="mt-4">
+						<Autocomplete
+							label="Supplier"
+							fetchUrl="/api/select/suppliers"
+							name="supplierId"
+							grant=""
+							key={product?.supplierName || 'Any'}
+							required={true}
+							bind:value={supplierId}
+						/>
+					</div>
+
 					<!-- Calculated fields and stock -->
 					<div class="flex flex-wrap items-center justify-between mt-6 pt-4 border-t">
 						<div class="flex flex-wrap gap-3">
@@ -738,6 +767,7 @@
 			/>
 			<input type="hidden" name="productProof" value={productProof} />
 			<input type="hidden" name="categoryId" value={categoryId ?? ''} />
+			<input type="hidden" name="supplierId" value={supplierId ?? ''} />
 			<input type="hidden" name="productInStockQuantity" value={productInStockQuantity} />
 			<input type="hidden" name="productSweetnessRating" value={productSweetnessRating} />
 			<input type="hidden" name="productDrynessRating" value={productDrynessRating} />

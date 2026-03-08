@@ -3,9 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('$app/environment', () => ({ dev: true }));
 
 vi.mock('$lib/server/auth', () => ({
-	authRepo: {
-		signToken: vi.fn().mockResolvedValue('jwt-token'),
-	},
+	signToken: vi.fn().mockResolvedValue('jwt-token'),
 	oauthRepo: {
 		findByOAuthAccount: vi.fn(),
 		linkOAuthAccount: vi.fn(),
@@ -114,13 +112,13 @@ describe('getAuthorizationUrl', () => {
 // --- handleCallback ---
 
 describe('handleCallback', () => {
-	let authRepo: any;
+	let signToken: any;
 	let oauthRepo: any;
 	let userRepo: any;
 
 	beforeEach(async () => {
 		const authModule = await import('$lib/server/auth');
-		authRepo = authModule.authRepo;
+		signToken = authModule.signToken;
 		oauthRepo = authModule.oauthRepo;
 		userRepo = authModule.userRepo;
 		vi.clearAllMocks();

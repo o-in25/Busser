@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// mock dependencies before imports
 vi.mock('bcrypt', () => ({
 	hash: vi.fn(),
 	compare: vi.fn(),
@@ -21,44 +20,78 @@ vi.mock('$lib/server/logger', () => ({
 	Logger: { now: () => '2026-01-01 00:00:00', error: vi.fn(), info: vi.fn() },
 }));
 
+vi.mock('$lib/server/mail', () => ({
+	MailClient: vi.fn().mockImplementation(() => ({
+		sendUserRegistrationEmail: vi.fn(),
+		sendPasswordResetEmail: vi.fn(),
+	})),
+}));
+
+vi.mock('$lib/server/db', () => ({
+	DbProvider: vi.fn().mockImplementation(() => ({})),
+}));
+
+vi.mock('$lib/server/repositories/user.repository', () => ({
+	UserRepository: vi.fn().mockImplementation(() => ({
+		findCredentials: vi.fn(),
+		findById: vi.fn(),
+		updateLastActivity: vi.fn(),
+		updatePassword: vi.fn(),
+		findPasswordHash: vi.fn(),
+		setVerified: vi.fn(),
+		findVerificationInfo: vi.fn(),
+		findVerificationInfoByEmail: vi.fn(),
+	})),
+}));
+
+vi.mock('$lib/server/repositories/workspace.repository', () => ({
+	WorkspaceRepository: vi.fn().mockImplementation(() => ({
+		hasWorkspaceAccess: vi.fn(),
+		getUserWorkspaces: vi.fn(),
+		getWorkspace: vi.fn(),
+	})),
+}));
+
+vi.mock('$lib/server/repositories/settings.repository', () => ({
+	SettingsRepository: vi.fn().mockImplementation(() => ({
+		isInviteOnly: vi.fn(),
+		set: vi.fn(),
+	})),
+}));
+
+vi.mock('$lib/server/repositories/oauth.repository', () => ({
+	OAuthRepository: vi.fn().mockImplementation(() => ({})),
+}));
+
 import { hash, compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { AuthRepository } from '$lib/server/repositories/auth.repository';
 
-// chainable knex mock
-function mockTable() {
-	const chain: any = {};
-	const methods = ['where', 'select', 'first', 'update', 'insert', 'del'];
-	for (const m of methods) {
-		chain[m] = vi.fn().mockReturnValue(chain);
-	}
-	return chain;
-}
-
-function makeDb() {
-	const chain = mockTable();
-	return {
-		db: { table: vi.fn().mockReturnValue(chain) } as any,
-		chain,
-	};
-}
+import {
+	signToken,
+	verifyToken,
+	hashPassword,
+	comparePassword,
+	authenticate,
+	login,
+	verifyRegistrationToken,
+	verifyPasswordResetToken,
+	resetPasswordWithToken,
+	resetPassword,
+	forceResetPassword,
+	userRepo,
+} from '$lib/server/auth';
 
 // --- token operations ---
 
-describe('AuthRepository - token operations', () => {
-	let repo: AuthRepository;
-
+describe('auth - token operations', () => {
 	beforeEach(() => {
-		vi.stubEnv('JWT_SIGNING_KEY', 'test-secret');
-		const { db } = makeDb();
-		repo = new AuthRepository(db);
 		vi.clearAllMocks();
 	});
 
 	it('signToken resolves with a token string', async () => {
 		vi.mocked(jwt.sign).mockImplementation((_p, _s, _o, cb: any) => cb(null, 'signed-token'));
 
-		const result = await repo.signToken({ userId: 'u1' });
+		const result = await signToken({ userId: 'u1' });
 		expect(result).toBe('signed-token');
 		expect(jwt.sign).toHaveBeenCalledWith(
 			{ userId: 'u1' },
@@ -71,15 +104,7 @@ describe('AuthRepository - token operations', () => {
 	it('signToken rejects when jwt.sign fails', async () => {
 		vi.mocked(jwt.sign).mockImplementation((_p, _s, _o, cb: any) => cb(new Error('sign error')));
 
-		await expect(repo.signToken({ userId: 'u1' })).rejects.toThrow('sign error');
-	});
-
-	it('signToken rejects when no signing key', async () => {
-		vi.stubEnv('JWT_SIGNING_KEY', '');
-		const { db } = makeDb();
-		const repoNoKey = new AuthRepository(db);
-
-		await expect(repoNoKey.signToken({ userId: 'u1' })).rejects.toThrow();
+		await expect(signToken({ userId: 'u1' })).rejects.toThrow('sign error');
 	});
 
 	it('verifyToken resolves with decoded payload', async () => {
@@ -87,7 +112,7 @@ describe('AuthRepository - token operations', () => {
 			cb(null, { userId: 'u1' })
 		);
 
-		const result = await repo.verifyToken<{ userId: string }>('some-token');
+		const result = await verifyToken<{ userId: string }>('some-token');
 		expect(result).toEqual({ userId: 'u1' });
 	});
 
@@ -96,13 +121,13 @@ describe('AuthRepository - token operations', () => {
 			cb(new Error('invalid'))
 		);
 
-		await expect(repo.verifyToken('bad-token')).rejects.toThrow('invalid');
+		await expect(verifyToken('bad-token')).rejects.toThrow('invalid');
 	});
 
 	it('hashPassword delegates to bcrypt hash', async () => {
 		vi.mocked(hash).mockResolvedValue('hashed-pw' as never);
 
-		const result = await repo.hashPassword('my-password');
+		const result = await hashPassword('my-password');
 		expect(result).toBe('hashed-pw');
 		expect(hash).toHaveBeenCalledWith('my-password', 10);
 	});
@@ -110,7 +135,7 @@ describe('AuthRepository - token operations', () => {
 	it('comparePassword delegates to bcrypt compare', async () => {
 		vi.mocked(compare).mockResolvedValue(true as never);
 
-		const result = await repo.comparePassword('plain', 'hashed');
+		const result = await comparePassword('plain', 'hashed');
 		expect(result).toBe(true);
 		expect(compare).toHaveBeenCalledWith('plain', 'hashed');
 	});
@@ -118,18 +143,13 @@ describe('AuthRepository - token operations', () => {
 
 // --- authenticate ---
 
-describe('AuthRepository - authenticate', () => {
-	let repo: AuthRepository;
-
+describe('auth - authenticate', () => {
 	beforeEach(() => {
-		vi.stubEnv('JWT_SIGNING_KEY', 'test-secret');
-		const { db } = makeDb();
-		repo = new AuthRepository(db);
 		vi.clearAllMocks();
 	});
 
 	it('returns null when no token provided', async () => {
-		const result = await repo.authenticate(undefined);
+		const result = await authenticate(undefined);
 		expect(result).toBeNull();
 	});
 
@@ -138,7 +158,7 @@ describe('AuthRepository - authenticate', () => {
 			cb(null, { userId: 'u1', username: 'testuser' })
 		);
 
-		const result = await repo.authenticate('valid-token');
+		const result = await authenticate('valid-token');
 		expect(result).toEqual({ userId: 'u1', username: 'testuser' });
 	});
 
@@ -147,119 +167,95 @@ describe('AuthRepository - authenticate', () => {
 			cb(new Error('expired'))
 		);
 
-		const result = await repo.authenticate('expired-token');
+		const result = await authenticate('expired-token');
 		expect(result).toBeNull();
 	});
 });
 
 // --- login ---
 
-describe('AuthRepository - login', () => {
-	let repo: AuthRepository;
-	let chain: any;
-
+describe('auth - login', () => {
 	beforeEach(() => {
-		vi.stubEnv('JWT_SIGNING_KEY', 'test-secret');
-		const made = makeDb();
-		chain = made.chain;
-		repo = new AuthRepository(made.db);
 		vi.clearAllMocks();
 	});
 
 	it('returns error when user not found', async () => {
-		chain.first.mockResolvedValue(null);
-		const getUserFn = vi.fn();
+		vi.mocked(userRepo.findCredentials).mockResolvedValue(null as any);
 
-		const result = await repo.login('nobody', 'pass', getUserFn);
-
+		const result = await login('nobody', 'pass');
 		expect(result.status).toBe('error');
-		expect(getUserFn).not.toHaveBeenCalled();
 	});
 
 	it('returns error on wrong password', async () => {
-		chain.first.mockResolvedValue({
+		vi.mocked(userRepo.findCredentials).mockResolvedValue({
 			userId: 'u1',
 			email: 'test@test.com',
 			password: 'hashed',
 			verified: 1,
 		});
 		vi.mocked(compare).mockResolvedValue(false as never);
-		const getUserFn = vi.fn();
 
-		const result = await repo.login('user1', 'wrong-pass', getUserFn);
-
+		const result = await login('user1', 'wrong-pass');
 		expect(result.status).toBe('error');
-		expect(getUserFn).not.toHaveBeenCalled();
 	});
 
 	it('returns verification error when user is unverified', async () => {
-		chain.first.mockResolvedValue({
+		vi.mocked(userRepo.findCredentials).mockResolvedValue({
 			userId: 'u1',
 			email: 'test@test.com',
 			password: 'hashed',
 			verified: 0,
 		});
 		vi.mocked(compare).mockResolvedValue(true as never);
-		const getUserFn = vi.fn();
 
-		const result = await repo.login('user1', 'correct', getUserFn);
-
+		const result = await login('user1', 'correct');
 		expect(result.status).toBe('error');
 		expect(result).toHaveProperty('needsVerification', true);
 		expect(result).toHaveProperty('email', 'test@test.com');
-		expect(getUserFn).not.toHaveBeenCalled();
 	});
 
 	it('returns token on successful login', async () => {
-		chain.first.mockResolvedValue({
+		vi.mocked(userRepo.findCredentials).mockResolvedValue({
 			userId: 'u1',
 			email: 'test@test.com',
 			password: 'hashed',
 			verified: 1,
 		});
 		vi.mocked(compare).mockResolvedValue(true as never);
+		vi.mocked(userRepo.findById).mockResolvedValue({
+			status: 'success',
+			data: { userId: 'u1', username: 'user1' } as any,
+		});
+		vi.mocked(userRepo.updateLastActivity).mockResolvedValue(undefined as any);
 		vi.mocked(jwt.sign).mockImplementation((_p, _s, _o, cb: any) => cb(null, 'jwt-token'));
 
-		const getUserFn = vi.fn().mockResolvedValue({
-			status: 'success',
-			data: { userId: 'u1', username: 'user1' },
-		});
-
-		const result = await repo.login('user1', 'correct', getUserFn);
-
+		const result = await login('user1', 'correct');
 		expect(result.status).toBe('success');
 		expect(result).toHaveProperty('data', 'jwt-token');
 	});
 
-	it('returns error when getUserFn fails', async () => {
-		chain.first.mockResolvedValue({
+	it('returns error when findById fails', async () => {
+		vi.mocked(userRepo.findCredentials).mockResolvedValue({
 			userId: 'u1',
 			email: 'test@test.com',
 			password: 'hashed',
 			verified: 1,
 		});
 		vi.mocked(compare).mockResolvedValue(true as never);
-
-		const getUserFn = vi.fn().mockResolvedValue({
+		vi.mocked(userRepo.findById).mockResolvedValue({
 			status: 'error',
 			error: 'DB error',
 		});
 
-		const result = await repo.login('user1', 'correct', getUserFn);
-
+		const result = await login('user1', 'correct');
 		expect(result.status).toBe('error');
 	});
 });
 
 // --- token verification ---
 
-describe('AuthRepository - verifyRegistrationToken', () => {
-	let repo: AuthRepository;
-
+describe('auth - verifyRegistrationToken', () => {
 	beforeEach(() => {
-		vi.stubEnv('JWT_SIGNING_KEY', 'test-secret');
-		const { db } = makeDb();
-		repo = new AuthRepository(db);
 		vi.clearAllMocks();
 	});
 
@@ -267,7 +263,7 @@ describe('AuthRepository - verifyRegistrationToken', () => {
 		const payload = { userId: 'u1', iat: 1000, exp: 9999999999 };
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, payload));
 
-		const result = await repo.verifyRegistrationToken('good-token');
+		const result = await verifyRegistrationToken('good-token');
 		expect(result).toEqual({ valid: true, expired: false, payload });
 	});
 
@@ -276,7 +272,7 @@ describe('AuthRepository - verifyRegistrationToken', () => {
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(err));
 		vi.mocked(jwt.decode).mockReturnValue({ userId: 'u1' } as any);
 
-		const result = await repo.verifyRegistrationToken('expired-token');
+		const result = await verifyRegistrationToken('expired-token');
 		expect(result.valid).toBe(false);
 		expect(result.expired).toBe(true);
 		expect(result.payload).toEqual({ userId: 'u1' });
@@ -287,18 +283,13 @@ describe('AuthRepository - verifyRegistrationToken', () => {
 			cb(new Error('malformed'))
 		);
 
-		const result = await repo.verifyRegistrationToken('bad');
+		const result = await verifyRegistrationToken('bad');
 		expect(result).toEqual({ valid: false, expired: false });
 	});
 });
 
-describe('AuthRepository - verifyPasswordResetToken', () => {
-	let repo: AuthRepository;
-
+describe('auth - verifyPasswordResetToken', () => {
 	beforeEach(() => {
-		vi.stubEnv('JWT_SIGNING_KEY', 'test-secret');
-		const { db } = makeDb();
-		repo = new AuthRepository(db);
 		vi.clearAllMocks();
 	});
 
@@ -306,7 +297,7 @@ describe('AuthRepository - verifyPasswordResetToken', () => {
 		const payload = { userId: 'u1', email: 'a@b.com', type: 'password-reset', iat: 1, exp: 9999999999 };
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, payload));
 
-		const result = await repo.verifyPasswordResetToken('token');
+		const result = await verifyPasswordResetToken('token');
 		expect(result.valid).toBe(true);
 		expect(result.payload).toEqual(payload);
 	});
@@ -315,22 +306,15 @@ describe('AuthRepository - verifyPasswordResetToken', () => {
 		const payload = { userId: 'u1', type: 'registration', iat: 1, exp: 9999999999 };
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, payload));
 
-		const result = await repo.verifyPasswordResetToken('token');
+		const result = await verifyPasswordResetToken('token');
 		expect(result.valid).toBe(false);
 	});
 });
 
 // --- password reset ---
 
-describe('AuthRepository - resetPasswordWithToken', () => {
-	let repo: AuthRepository;
-	let chain: any;
-
+describe('auth - resetPasswordWithToken', () => {
 	beforeEach(() => {
-		vi.stubEnv('JWT_SIGNING_KEY', 'test-secret');
-		const made = makeDb();
-		chain = made.chain;
-		repo = new AuthRepository(made.db);
 		vi.clearAllMocks();
 	});
 
@@ -338,9 +322,9 @@ describe('AuthRepository - resetPasswordWithToken', () => {
 		const payload = { userId: 'u1', email: 'a@b.com', type: 'password-reset', iat: 1, exp: 9999999999 };
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, payload));
 		vi.mocked(hash).mockResolvedValue('new-hash' as never);
-		chain.update.mockResolvedValue(1);
+		vi.mocked(userRepo.updatePassword).mockResolvedValue(1 as any);
 
-		const result = await repo.resetPasswordWithToken('token', 'new-pass');
+		const result = await resetPasswordWithToken('token', 'new-pass');
 		expect(result.status).toBe('success');
 	});
 
@@ -349,7 +333,7 @@ describe('AuthRepository - resetPasswordWithToken', () => {
 			cb(new Error('invalid'))
 		);
 
-		const result = await repo.resetPasswordWithToken('bad', 'new-pass');
+		const result = await resetPasswordWithToken('bad', 'new-pass');
 		expect(result.status).toBe('error');
 	});
 
@@ -357,83 +341,69 @@ describe('AuthRepository - resetPasswordWithToken', () => {
 		const payload = { userId: 'u1', email: 'a@b.com', type: 'password-reset', iat: 1, exp: 9999999999 };
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, payload));
 		vi.mocked(hash).mockResolvedValue('new-hash' as never);
-		chain.update.mockResolvedValue(0);
+		vi.mocked(userRepo.updatePassword).mockResolvedValue(0 as any);
 
-		const result = await repo.resetPasswordWithToken('token', 'new-pass');
+		const result = await resetPasswordWithToken('token', 'new-pass');
 		expect(result.status).toBe('error');
 	});
 });
 
-describe('AuthRepository - resetPassword', () => {
-	let repo: AuthRepository;
-	let chain: any;
-
+describe('auth - resetPassword', () => {
 	beforeEach(() => {
-		vi.stubEnv('JWT_SIGNING_KEY', 'test-secret');
-		const made = makeDb();
-		chain = made.chain;
-		repo = new AuthRepository(made.db);
 		vi.clearAllMocks();
 	});
 
 	it('returns false when user not found', async () => {
-		chain.first.mockResolvedValue(null);
+		vi.mocked(userRepo.findPasswordHash).mockResolvedValue(null as any);
 
-		const result = await repo.resetPassword('u1', 'old', 'new');
+		const result = await resetPassword('u1', 'old', 'new');
 		expect(result).toBe(false);
 	});
 
 	it('returns false when old password is wrong', async () => {
-		chain.first.mockResolvedValue({ password: 'hashed-old' });
+		vi.mocked(userRepo.findPasswordHash).mockResolvedValue({ password: 'hashed-old' });
 		vi.mocked(compare).mockResolvedValue(false as never);
 
-		const result = await repo.resetPassword('u1', 'wrong-old', 'new');
+		const result = await resetPassword('u1', 'wrong-old', 'new');
 		expect(result).toBe(false);
 	});
 
 	it('returns true on successful reset', async () => {
-		chain.first.mockResolvedValue({ password: 'hashed-old' });
+		vi.mocked(userRepo.findPasswordHash).mockResolvedValue({ password: 'hashed-old' });
 		vi.mocked(compare).mockResolvedValue(true as never);
 		vi.mocked(hash).mockResolvedValue('hashed-new' as never);
-		chain.update.mockResolvedValue(1);
+		vi.mocked(userRepo.updatePassword).mockResolvedValue(1 as any);
 
-		const result = await repo.resetPassword('u1', 'old', 'new');
+		const result = await resetPassword('u1', 'old', 'new');
 		expect(result).toBe(true);
 	});
 });
 
-describe('AuthRepository - forceResetPassword', () => {
-	let repo: AuthRepository;
-	let chain: any;
-
+describe('auth - forceResetPassword', () => {
 	beforeEach(() => {
-		vi.stubEnv('JWT_SIGNING_KEY', 'test-secret');
-		const made = makeDb();
-		chain = made.chain;
-		repo = new AuthRepository(made.db);
 		vi.clearAllMocks();
 	});
 
 	it('returns true on success', async () => {
 		vi.mocked(hash).mockResolvedValue('new-hash' as never);
-		chain.update.mockResolvedValue(1);
+		vi.mocked(userRepo.updatePassword).mockResolvedValue(1 as any);
 
-		const result = await repo.forceResetPassword('u1', 'new-pass');
+		const result = await forceResetPassword('u1', 'new-pass');
 		expect(result).toBe(true);
 	});
 
 	it('returns false when user not found', async () => {
 		vi.mocked(hash).mockResolvedValue('new-hash' as never);
-		chain.update.mockResolvedValue(0);
+		vi.mocked(userRepo.updatePassword).mockResolvedValue(0 as any);
 
-		const result = await repo.forceResetPassword('u1', 'new-pass');
+		const result = await forceResetPassword('u1', 'new-pass');
 		expect(result).toBe(false);
 	});
 
 	it('returns false on error', async () => {
 		vi.mocked(hash).mockRejectedValue(new Error('bcrypt error'));
 
-		const result = await repo.forceResetPassword('u1', 'new-pass');
+		const result = await forceResetPassword('u1', 'new-pass');
 		expect(result).toBe(false);
 	});
 });

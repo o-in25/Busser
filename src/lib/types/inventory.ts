@@ -104,6 +104,7 @@ export type Product = {
 	productDrynessRating: number;
 	productVersatilityRating: number;
 	productStrengthRating: number;
+	supplierName: string | null;
 };
 
 // google places result (for nearby store search UI)

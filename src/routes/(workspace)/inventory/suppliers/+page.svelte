@@ -79,7 +79,7 @@
 	let restockingIds = $state(new Set<number>());
 
 	// saved suppliers (excluding default "Any")
-	const savedSuppliers = $derived(data.suppliers.filter((s) => s.supplierId !== 1));
+	const savedSuppliers = $derived(data.suppliers);
 
 	// supplier product counts
 	const supplierProductCounts = $derived.by(() => {

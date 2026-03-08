@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { dev } from '$app/environment';
 
-import type { OAuthProfile, OAuthProvider, OAuthState } from '$lib/types';
+import type { OAuthProfile, OAuthProvider, OAuthState, QueryResult } from '$lib/types';
 
 export type { OAuthProfile, OAuthProvider, OAuthState };
 
@@ -177,7 +177,7 @@ export async function handleCallback(
 	stateParam: string,
 	cookies: any
 ) {
-	const { authRepo, oauthRepo, userRepo } = await import('./auth');
+	const { signToken, oauthRepo, userRepo } = await import('./auth');
 
 	// verify CSRF state
 	const storedToken = cookies.get('oauth_state');
@@ -230,7 +230,7 @@ export async function handleCallback(
 	}
 
 	// issue JWT session
-	const userToken = await authRepo.signToken(user);
+	const userToken = await signToken(user);
 	cookies.set('userToken', userToken, {
 		path: '/',
 		httpOnly: true,
@@ -245,4 +245,42 @@ export async function handleCallback(
 	}
 
 	throw redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
+}
+
+// sets username, clears onboarding flag, renames personal workspace
+export async function completeOnboarding(userId: string, username: string): Promise<QueryResult> {
+	const { db } = await import('./auth');
+
+	try {
+		await db.query.transaction(async (trx: any) => {
+			const existing = await trx('user').select('userId').where({ username }).first();
+			if (existing && existing.userId !== userId) {
+				throw new Error('Username already taken.');
+			}
+
+			await trx('user').where({ userId }).update({ username, needsOnboarding: 0 });
+
+			const personalWorkspace = await trx('workspace')
+				.where({ createdBy: userId, workspaceType: 'personal' })
+				.first();
+
+			if (personalWorkspace) {
+				await trx('workspace')
+					.where({ workspaceId: personalWorkspace.workspaceId })
+					.update({ workspaceName: `${username}'s Workspace` });
+			}
+		});
+
+		return { status: 'success' };
+	} catch (error: any) {
+		console.error('Failed to complete onboarding:', error.message);
+
+		return {
+			status: 'error',
+			error:
+				error.message === 'Username already taken.'
+					? error.message
+					: 'An error occurred. Please try again.',
+		};
+	}
 }
