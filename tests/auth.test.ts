@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// set env before module load so JWT_SIGNING_KEY is available in CI
+process.env.JWT_SIGNING_KEY ??= 'test-secret';
+process.env.USER_TABLE ??= 'user_d';
+
 vi.mock('bcrypt', () => ({
 	hash: vi.fn(),
 	compare: vi.fn(),
