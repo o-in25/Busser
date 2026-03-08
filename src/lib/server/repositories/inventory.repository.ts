@@ -7,6 +7,8 @@ import type {
 	Product,
 	QueryResult,
 	SelectOption,
+	ShoppingListItem,
+	Supplier,
 	Table,
 	CategoryGroup,
 } from '$lib/types';
@@ -177,7 +179,7 @@ export class InventoryRepository extends BaseRepository {
 				await deleteSignedUrl(existing.productImageUrl);
 			}
 
-			product = { ...product, productImageUrl: resolvedImageUrl || '', supplierId: 1 };
+			product = { ...product, productImageUrl: resolvedImageUrl || '' };
 
 			await this.db.query.transaction(async (trx) => {
 				await trx('product')
@@ -435,12 +437,13 @@ export class InventoryRepository extends BaseRepository {
 			let result = await this.db
 				.table('category as c')
 				.where('c.workspaceId', workspaceId)
-				.select('c.CategoryId', 'c.CategoryName')
+				.select('c.CategoryId', 'c.CategoryName', 'c.CategoryGroupId')
 				.orderBy('c.CategoryName');
 			let categories = result as Category[];
-			return categories.map(({ categoryId, categoryName }) => ({
+			return categories.map(({ categoryId, categoryName, categoryGroupId }) => ({
 				name: categoryName,
 				value: categoryId,
+				categoryGroupId: categoryGroupId ?? null,
 			}));
 		} catch (error: any) {
 			console.error(error);
@@ -709,6 +712,268 @@ export class InventoryRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error('Failed to get products by category:', error);
 			return [];
+		}
+	}
+
+	// shopping list: out-of-stock items with supplier info and recipe count
+	async getShoppingList(
+		workspaceId: string,
+		currentPage: number = 1,
+		perPage: number = 20,
+		filter: { productName?: string; categoryGroupId?: number; supplierId?: number } | null = null,
+		sort: string = 'name-asc'
+	): Promise<PaginationResult<ShoppingListItem[]>> {
+		try {
+			let query = this.db
+				.table('inventory as i')
+				.leftJoin('basicrecipestep as rs', function () {
+					this.on('i.ProductId', '=', 'rs.ProductId').andOn(
+						'i.WorkspaceId',
+						'=',
+						'rs.WorkspaceId'
+					);
+				})
+				.where('i.WorkspaceId', workspaceId)
+				.where('i.ProductInStockQuantity', 0);
+
+			if (filter?.productName) {
+				query = query.andWhere('i.ProductName', 'like', `%${filter.productName}%`);
+			}
+			if (filter?.categoryGroupId) {
+				query = query.andWhere('i.CategoryGroupId', '=', filter.categoryGroupId);
+			}
+			if (filter?.supplierId) {
+				query = query.andWhere('i.SupplierId', '=', filter.supplierId);
+			}
+
+			const sortMap: Record<string, { column: string; order: 'asc' | 'desc' }> = {
+				'name-asc': { column: 'i.ProductName', order: 'asc' },
+				'name-desc': { column: 'i.ProductName', order: 'desc' },
+				'price-asc': { column: 'i.ProductPricePerUnit', order: 'asc' },
+				'price-desc': { column: 'i.ProductPricePerUnit', order: 'desc' },
+			};
+			const { column, order } = sortMap[sort] || sortMap['name-asc'];
+
+			query = query
+				.select(
+					'i.ProductId',
+					'i.ProductName',
+					'i.ProductImageUrl',
+					'i.ProductPricePerUnit',
+					'i.ProductUnitSizeInMilliliters',
+					'i.CategoryName',
+					'i.CategoryGroupName',
+					'i.CategoryGroupId',
+					'i.SupplierId',
+					'i.SupplierName'
+				)
+				.count('rs.RecipeStepId as recipeCount')
+				.groupBy(
+					'i.ProductId',
+					'i.ProductName',
+					'i.ProductImageUrl',
+					'i.ProductPricePerUnit',
+					'i.ProductUnitSizeInMilliliters',
+					'i.CategoryName',
+					'i.CategoryGroupName',
+					'i.CategoryGroupId',
+					'i.SupplierId',
+					'i.SupplierName'
+				)
+				.orderBy(column, order);
+
+			const { data, pagination } = await query.paginate({
+				perPage,
+				currentPage,
+				isLengthAware: true,
+			});
+
+			const items: ShoppingListItem[] = (data as any[]).map((row) => ({
+				productId: row.productId,
+				productName: row.productName,
+				productImageUrl: row.productImageUrl || '',
+				productPricePerUnit: Number(row.productPricePerUnit) || 0,
+				productUnitSizeInMilliliters: Number(row.productUnitSizeInMilliliters) || 0,
+				categoryName: row.categoryName,
+				categoryGroupName: row.categoryGroupName || null,
+				supplierId: row.supplierId,
+				supplierName: row.supplierName || null,
+				recipeCount: Number(row.recipeCount) || 0,
+				unlockableRecipes: 0,
+				impactScore: 0,
+			}));
+
+			return { data: items, pagination };
+		} catch (error: any) {
+			console.error('Failed to get shopping list:', error);
+			return { data: [], pagination: emptyPagination };
+		}
+	}
+
+	// total cost of all out-of-stock items (unfiltered, for summary)
+	async getShoppingListTotals(
+		workspaceId: string
+	): Promise<{ totalCost: number; totalItems: number }> {
+		try {
+			const result = await this.db
+				.table('inventory')
+				.where('WorkspaceId', workspaceId)
+				.where('ProductInStockQuantity', 0)
+				.select(
+					this.db.query.raw('COALESCE(SUM(ProductPricePerUnit), 0) as totalCost'),
+					this.db.query.raw('COUNT(*) as totalItems')
+				)
+				.first();
+
+			return {
+				totalCost: Number((result as any)?.totalCost) || 0,
+				totalItems: Number((result as any)?.totalItems) || 0,
+			};
+		} catch (error: any) {
+			console.error('Failed to get shopping list totals:', error);
+			return { totalCost: 0, totalItems: 0 };
+		}
+	}
+
+	// per-product count of "almost-there" recipes that would be unlocked
+	async getShoppingListImpact(
+		workspaceId: string,
+		productIds: number[]
+	): Promise<Map<number, number>> {
+		try {
+			if (productIds.length === 0) return new Map();
+
+			// find recipes missing exactly 1 ingredient, then count per product
+			const result = await this.db
+				.table('basicrecipestep as rs')
+				.select('rs.ProductId')
+				.select(this.db.query.raw('COUNT(DISTINCT rs.RecipeId) as unlockable'))
+				.where('rs.WorkspaceId', workspaceId)
+				.where('rs.EffectiveInStock', 0)
+				.whereIn('rs.ProductId', productIds)
+				.whereIn('rs.RecipeId', function () {
+					this.select('sub.RecipeId')
+						.from('basicrecipestep as sub')
+						.where('sub.WorkspaceId', workspaceId)
+						.groupBy('sub.RecipeId')
+						.havingRaw('SUM(CASE WHEN sub.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
+						.havingRaw('COUNT(sub.RecipeStepId) > 1');
+				})
+				.groupBy('rs.ProductId');
+
+			const map = new Map<number, number>();
+			(result as any[]).forEach((row) => {
+				map.set(row.productId, Number(row.unlockable));
+			});
+			return map;
+		} catch (error: any) {
+			console.error('Failed to get shopping list impact:', error);
+			return new Map();
+		}
+	}
+
+
+	// supplier CRUD
+	async getSuppliers(workspaceId: string, includeDefault = false): Promise<Supplier[]> {
+		try {
+			let query = this.db
+				.table('supplier')
+				.where(function () {
+					this.whereNull('WorkspaceId').orWhere('WorkspaceId', workspaceId);
+				});
+
+			if (!includeDefault) {
+				query = query.whereNot('SupplierId', 1);
+			}
+
+			const result = await query.select(
+					'SupplierId',
+					'SupplierName',
+					'SupplierDetails',
+					'SupplierWebsiteUrl',
+					'SupplierPhone',
+					'SupplierAddress',
+					'SupplierPlaceId',
+					'SupplierType'
+				)
+				.orderBy('SupplierName');
+
+			return result as Supplier[];
+		} catch (error: any) {
+			console.error('Failed to get suppliers:', error);
+			return [];
+		}
+	}
+
+	async createSupplier(
+		workspaceId: string,
+		supplier: Partial<Supplier>
+	): Promise<QueryResult<Supplier>> {
+		try {
+			// dedup by placeId if provided
+			if (supplier.supplierPlaceId) {
+				const existing = await this.db
+					.table('supplier')
+					.where('SupplierPlaceId', supplier.supplierPlaceId)
+					.where(function () {
+						this.whereNull('WorkspaceId').orWhere('WorkspaceId', workspaceId);
+					})
+					.first();
+
+				if (existing) {
+					return { status: 'success', data: existing as Supplier };
+				}
+			}
+
+			const [supplierId] = await this.db.table('supplier').insert({
+				SupplierName: supplier.supplierName,
+				SupplierDetails: supplier.supplierDetails || null,
+				SupplierWebsiteUrl: supplier.supplierWebsiteUrl || null,
+				SupplierPhone: supplier.supplierPhone || null,
+				SupplierAddress: supplier.supplierAddress || null,
+				SupplierPlaceId: supplier.supplierPlaceId || null,
+				SupplierType: supplier.supplierType || 'liquor_store',
+				WorkspaceId: workspaceId,
+			});
+
+			const created = await this.db
+				.table('supplier')
+				.where('SupplierId', supplierId)
+				.first();
+
+			return { status: 'success', data: created as Supplier };
+		} catch (error: any) {
+			console.error('Failed to create supplier:', error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not create supplier.' };
+		}
+	}
+
+	async deleteSupplier(workspaceId: string, supplierId: number): Promise<QueryResult<number>> {
+		try {
+			// prevent deleting the global "Any" supplier
+			if (supplierId === 1) {
+				return { status: 'error', error: 'Cannot delete the default supplier.' };
+			}
+
+			// reassign products to "Any" before deleting
+			await this.db
+				.table('product')
+				.where('SupplierId', supplierId)
+				.where('WorkspaceId', workspaceId)
+				.update({ SupplierId: 1 });
+
+			const deleted = await this.db
+				.table('supplier')
+				.where('SupplierId', supplierId)
+				.where('WorkspaceId', workspaceId)
+				.del();
+
+			return { status: 'success', data: deleted };
+		} catch (error: any) {
+			console.error('Failed to delete supplier:', error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not delete supplier.' };
 		}
 	}
 

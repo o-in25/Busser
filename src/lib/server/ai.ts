@@ -7,11 +7,11 @@ import type {
 import { zodResponseFormat } from 'openai/helpers/zod.mjs';
 import { ZodSchema } from 'zod';
 
-const { OPENAI_API_KEY, GOOGLE_SERVICE_KEY } = process.env;
+import { getCredentials } from './google';
 
-// decode google credentials
-const base64Decode = (str: string) => (str ? Buffer.from(str, 'base64').toString() : '{}');
-const googleCredentials = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY || ''));
+const { OPENAI_API_KEY } = process.env;
+
+const googleCredentials = getCredentials();
 const LOCATION = 'us-central1';
 
 // clients (initialized lazily on first use)

@@ -23,6 +23,36 @@ export type Supplier = {
 	supplierId: number;
 	supplierName: string | null;
 	supplierDetails: string | null;
+	supplierWebsiteUrl: string | null;
+	supplierPhone: string | null;
+	supplierAddress: string | null;
+	supplierPlaceId: string | null;
+	supplierType: string | null;
+};
+
+// shopping list item (out-of-stock product enriched with supplier + recipe data)
+export type ShoppingListItem = {
+	productId: number;
+	productName: string;
+	productImageUrl: string;
+	productPricePerUnit: number;
+	productUnitSizeInMilliliters: number;
+	categoryName: string;
+	categoryGroupName: string | null;
+	supplierId: number;
+	supplierName: string | null;
+	recipeCount: number;
+	unlockableRecipes: number;
+	impactScore: number;
+};
+
+// shopping list summary stats
+export type ShoppingListSummary = {
+	totalItems: number;
+	totalEstimatedCost: number;
+	bySupplier: { supplierId: number; name: string; count: number; subtotal: number }[];
+	byCategory: { name: string; count: number; subtotal: number }[];
+	totalRecipesUnlockable: number;
 };
 
 // product table (raw)
@@ -74,6 +104,19 @@ export type Product = {
 	productDrynessRating: number;
 	productVersatilityRating: number;
 	productStrengthRating: number;
+	supplierName: string | null;
+};
+
+// google places result (for nearby store search UI)
+export type PlaceResult = {
+	placeId: string;
+	name: string;
+	address: string;
+	phone?: string;
+	website?: string;
+	types: string[];
+	rating?: number;
+	openNow?: boolean;
 };
 
 // stats and filters for inventory ui

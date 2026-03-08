@@ -26,7 +26,12 @@
 		{ max: 2, label: 'Forgettable', color: 'bg-red-500', textColor: 'text-red-500' },
 		{ max: 3, label: 'Bottom Shelf', color: 'bg-neon-amber-500', textColor: 'text-neon-amber-500' },
 		{ max: 4, label: 'Decent', color: 'bg-neon-yellow-500', textColor: 'text-neon-yellow-500' },
-		{ max: 5, label: 'Standard Pour', color: 'bg-neon-yellow-400', textColor: 'text-neon-yellow-500' },
+		{
+			max: 5,
+			label: 'Standard Pour',
+			color: 'bg-neon-yellow-400',
+			textColor: 'text-neon-yellow-500',
+		},
 		{ max: 6, label: 'Good Stuff', color: 'bg-lime-500', textColor: 'text-lime-500' },
 		{ max: 7, label: 'Top Shelf', color: 'bg-neon-green-500', textColor: 'text-neon-green-500' },
 		{
@@ -59,28 +64,32 @@
 			value: recipe.recipeSweetnessRating,
 			icon: Candy,
 			color: 'pink',
-			tooltip: 'Sweetness is a measure of the sugar presence in the drink. Balanced cocktails sit in the middle — too much and it\'s cloying, too little and the drink feels flat. Scores best around a 5.',
+			tooltip:
+				'Sweetness is a measure of the sugar presence in the drink. Most cocktails (with some noteworthy exceptions) will feature some form of sugaring agent or sweetening modifier to bring brightness and pop to the drink. It is a delicate manuever, however: too much lends to a cloying, spiked punch; too little and all the beverage has been reduced to is just a shot of spirts on the rocks; balanced cocktails find a strike a perfect harmony.',
 		},
 		{
 			label: 'Dryness',
 			value: recipe.recipeDrynessRating,
 			icon: Droplets,
 			color: 'amber',
-			tooltip: 'Dryness is a measure of bitterness, tartness, and astringency. A good cocktail usually has some edge to it, but going overboard in either direction costs points. Scores best around a 5.',
-		},
-		{
-			label: 'Versatility',
-			value: recipe.recipeVersatilityRating,
-			icon: Sparkles,
-			color: 'purple',
-			tooltip: 'Versatility is a measure of how flexible a recipe is — can its ingredients be freely substituted, and does it lend itself to variations? This is the most important factor and the higher the better.',
+			tooltip:
+				'Dryness is a measure of bitterness, tartness, and astringency. Dryness can be thought of as the opposing force to sweetness and well-groomed cocktails usually have a counter-punch to bite through some of the sugar contents. Going overboard, however, saps the life and brightness out of the drink.',
 		},
 		{
 			label: 'Strength',
 			value: recipe.recipeStrengthRating,
 			icon: Gauge,
 			color: 'orange',
-			tooltip: 'Strength is a measure of how well the alcohol integrates with the other flavors — not just how much is in the glass. The spirit should be present but never overpowering. Scores best around a 6.',
+			tooltip:
+				'Strength is a measure of how well the alcohol integrates with the other flavors, not just how much of it is in the glass. Regardless of volume, the base spirit should be present in the drink while never overstaying its welcome. Flavoring and bittering agents mask the harshness of alcohol but its breadcrumbs left behind should be noticeably apparent.',
+		},
+		{
+			label: 'Versatility',
+			value: recipe.recipeVersatilityRating,
+			icon: Sparkles,
+			color: 'purple',
+			tooltip:
+				'Versatility is a measure of how flexible a recipe is — and is the most important factor in the Verdict. Highly versatile drinks have ingredients comprised of several interchangeable parts or have countless deviations or spin-offs that can be easily substituted. While not necessarily always the case, cocktails with relatively few ingredients will typically be more versatile than drinks that require several niche or specialty ingredients. While these cocktails absolutely deserve merit on their own accord, flexibility of ingredients is vital for tending bar and thus caries the heaviest weight.',
 		},
 	];
 
@@ -98,18 +107,20 @@
 			<Award class="h-5 w-5 text-primary" />
 			Verdict
 			<Dialog.Root>
-				<Dialog.Trigger class="text-muted-foreground hover:text-foreground transition-colors rounded-full">
+				<Dialog.Trigger
+					class="text-muted-foreground hover:text-foreground transition-colors rounded-full"
+				>
 					<HelpCircle class="h-4 w-4" />
-					<span class="sr-only">How is the verdict calculated?</span>
+					<span class="sr-only">How is the Verdict calculated?</span>
 				</Dialog.Trigger>
 				<Dialog.Content>
 					<Dialog.Header>
 						<Dialog.Title class="flex items-center gap-2">
 							<Award class="h-5 w-5 text-primary" />
-							How the verdict works
+							How the Verdict works
 						</Dialog.Title>
 						<Dialog.Description class="text-muted-foreground">
-							The verdict is a 0–10 score that reflects how well-crafted and balanced a cocktail is.
+							The Verdict is a 0–10 score that reflects how well-crafted and balanced a cocktail is.
 						</Dialog.Description>
 					</Dialog.Header>
 					<div class="space-y-4">
@@ -127,7 +138,8 @@
 						{/each}
 					</div>
 					<p class="text-xs text-muted-foreground border-t border-border/50 pt-3 mt-4">
-						Cocktails with intentional sweet/dry contrast earn a bonus. One-dimensional or contradictory profiles lose points.
+						Cocktails with intentional sweet/dry contrast earn a bonus. One-dimensional or
+						contradictory profiles lose points.
 					</p>
 				</Dialog.Content>
 			</Dialog.Root>

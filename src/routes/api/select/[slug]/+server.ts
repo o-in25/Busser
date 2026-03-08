@@ -32,6 +32,11 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			return json(response);
 		}
 
+		case '/api/select/suppliers': {
+			const suppliers = await inventoryRepo.getSuppliers(workspaceId, true);
+			return json(suppliers.map((s) => ({ name: s.supplierName || 'Unknown', value: s.supplierId })));
+		}
+
 		default:
 			return json({ message: 'Route not found!' });
 	}

@@ -1,14 +1,12 @@
-// user management repository
+// user data access
 import moment from 'moment';
 
 import { generateSecureCode } from '$lib/math';
 import type {
 	Invitation,
 	InvitationRequest,
-	PasswordResetToken,
 	Permission,
 	QueryResult,
-	RegistrationToken,
 	Role,
 	SelectOption,
 	User,
@@ -16,24 +14,15 @@ import type {
 } from '$lib/types';
 
 import { DbProvider } from '../db';
-import { generateRandomShapeAvatar } from '../generators/avatar-generator';
 import { Logger } from '../logger';
-import { MailClient } from '../mail';
-import { deleteSignedUrl, uploadAvatarBuffer } from '../storage';
-import { AuthRepository } from './auth.repository';
 import { BaseRepository } from './base.repository';
 
 export class UserRepository extends BaseRepository {
-	private mailClient: MailClient;
-	private authRepo: AuthRepository;
-
-	constructor(db: DbProvider, authRepo: AuthRepository) {
+	constructor(db: DbProvider) {
 		super(db);
-		this.mailClient = new MailClient();
-		this.authRepo = authRepo;
 	}
 
-	// user CRUD
+	// user crud
 	async findAll(): Promise<User[]> {
 		try {
 			let users = await this.db.table<User>('user');
@@ -93,6 +82,27 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
+	// credential queries
+	async findCredentials(username: string) {
+		return this.db
+			.table('user')
+			.where({ username })
+			.select('userId', 'email', 'password', 'verified')
+			.first();
+	}
+
+	async updateLastActivity(userId: string) {
+		await this.db.table('user').update({ lastActivityDate: Logger.now() }).where({ userId });
+	}
+
+	async updatePassword(userId: string, hashedPassword: string): Promise<number> {
+		return this.db.table('user').where({ userId }).update({ password: hashedPassword });
+	}
+
+	async findPasswordHash(userId: string) {
+		return this.db.table('user').where({ userId }).select('password').first();
+	}
+
 	async create(
 		username: string,
 		email: string,
@@ -100,15 +110,14 @@ export class UserRepository extends BaseRepository {
 		roleIds: string[]
 	): Promise<User | null> {
 		try {
-			const hashedPassword = await this.authRepo.hashPassword(password);
 			let userId: string | undefined;
 
 			await this.db.query.transaction(async (trx) => {
-				await trx('user').insert({ username, email, password: hashedPassword, createdDate: Logger.now() });
+				await trx('user').insert({ username, email, password, createdDate: Logger.now() });
 
 				let dbResult: any = await trx('user')
 					.select('userId')
-					.where({ username, email, password: hashedPassword })
+					.where({ username, email, password })
 					.first();
 
 				const user = dbResult as Partial<User>;
@@ -275,7 +284,7 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
-	// invitation management
+	// invitations
 	async getInvitations(): Promise<QueryResult<Invitation[]>> {
 		try {
 			let dbResult = await this.db.table('invitation').select();
@@ -541,8 +550,7 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
-	// shared registration core: creates user, assigns role, sets up workspaces
-	// callers (registerUser, registerOAuth) handle their own concerns before/after
+	// registration core: creates user, assigns role, sets up workspaces
 	async register(
 		trx: any,
 		opts: {
@@ -623,76 +631,61 @@ export class UserRepository extends BaseRepository {
 			joinedDate: Logger.now(),
 		});
 
-		// generate random avatar if no provider avatar was supplied
-		if (!avatarUrl) {
-			this.generateAndUploadAvatar(user.userId).catch((err) => {
-				console.error('Failed to generate avatar for new user:', err);
-			});
-		}
-
 		return user;
 	}
 
-	// traditional registration: validates invitation, hashes password, sends verification email
-	async registerUser(
-		username: string,
-		email: string,
-		password: string,
+	// register with optional invitation consumption
+	async registerWithInvitation(
+		opts: {
+			username: string;
+			email: string;
+			password: string | null;
+			verified: number;
+			needsOnboarding: number;
+			avatarUrl?: string | null;
+		},
 		invitationCode: string | null
-	): Promise<QueryResult> {
-		try {
-			const { user } = await this.db.query.transaction(async (trx) => {
-				let invitation: Pick<
+	): Promise<Pick<User, 'userId' | 'username' | 'email'>> {
+		return this.db.query.transaction(async (trx) => {
+			let invitation: Pick<
+				Invitation,
+				'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
+			> | null = null;
+
+			if (invitationCode) {
+				let dbResult: any = await trx('invitation')
+					.select('invitationId', 'userId', 'email', 'expiresAt', 'workspaceId', 'workspaceRole')
+					.where({ invitationCode })
+					.first();
+
+				if (!dbResult) throw new Error('Invalid invitation code.');
+
+				invitation = dbResult as Pick<
 					Invitation,
 					'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
-				> | null = null;
+				>;
 
-				// validate invitation (only when code is provided)
-				if (invitationCode) {
-					let dbResult: any = await trx('invitation')
-						.select('invitationId', 'userId', 'email', 'expiresAt', 'workspaceId', 'workspaceRole')
-						.where({ invitationCode })
-						.first();
-
-					if (!dbResult) throw new Error('Invalid invitation code.');
-
-					invitation = dbResult as Pick<
-						Invitation,
-						'invitationId' | 'userId' | 'email' | 'expiresAt' | 'workspaceId' | 'workspaceRole'
-					>;
-
-					if (!invitation.invitationId || invitation.userId !== null) {
-						throw new Error('Invitation code has already been used.');
-					}
-
-					if (invitation.expiresAt && moment().isAfter(moment(invitation.expiresAt))) {
-						throw new Error('Invitation code has expired.');
-					}
-
-					if (invitation.email && invitation.email.toLowerCase() !== email.toLowerCase()) {
-						throw new Error('Email does not match the invitation.');
-					}
+				if (!invitation.invitationId || invitation.userId !== null) {
+					throw new Error('Invitation code has already been used.');
 				}
 
-				const hashedPassword = await this.authRepo.hashPassword(password);
-
-				const user = await this.register(trx, {
-					username,
-					email,
-					password: hashedPassword,
-					verified: 0,
-					needsOnboarding: 0,
-				});
-
-				// mark invitation as used
-				if (invitation) {
-					await trx('invitation')
-						.update({ userId: user.userId })
-						.where({ invitationId: invitation.invitationId });
+				if (invitation.expiresAt && moment().isAfter(moment(invitation.expiresAt))) {
+					throw new Error('Invitation code has expired.');
 				}
 
-				// if invitation was for a specific workspace, add user to that workspace
-				if (invitation?.workspaceId && invitation?.workspaceRole) {
+				if (invitation.email && invitation.email.toLowerCase() !== opts.email.toLowerCase()) {
+					throw new Error('Email does not match the invitation.');
+				}
+			}
+
+			const user = await this.register(trx, opts);
+
+			if (invitation) {
+				await trx('invitation')
+					.update({ userId: user.userId })
+					.where({ invitationId: invitation.invitationId });
+
+				if (invitation.workspaceId && invitation.workspaceRole) {
 					await trx('workspaceUser').insert({
 						workspaceId: invitation.workspaceId,
 						userId: user.userId,
@@ -700,144 +693,38 @@ export class UserRepository extends BaseRepository {
 						joinedDate: Logger.now(),
 					});
 				}
+			}
 
-				return { user };
-			});
-
-			// send verification email
-			const now = moment();
-			const tokenExpiration = moment().add(24, 'hours');
-
-			const token = await this.authRepo.signToken<RegistrationToken>({
-				userId: user.userId,
-				iat: now.unix(),
-				exp: tokenExpiration.unix(),
-			});
-
-			await this.mailClient.sendUserRegistrationEmail([user.email], {
-				username: user.username,
-				token,
-			});
-
-			return { status: 'success' };
-		} catch (error: any) {
-			console.error(error);
-
-			const getFriendlyError = (message: string): string => {
-				if (message.includes('ER_DUP_ENTRY') && message.includes('email')) {
-					return 'This email address is already registered.';
-				}
-				if (message.includes('ER_DUP_ENTRY') && message.includes('username')) {
-					return 'This username is already taken.';
-				}
-				if (message.includes('ER_DUP_ENTRY')) {
-					return 'An account with these details already exists.';
-				}
-
-				const friendlyMessages = [
-					'Invalid invitation code.',
-					'Invitation code has already been used.',
-					'Invitation code has expired.',
-					'Email does not match the invitation.',
-					'Username already taken.',
-					'Email already taken.',
-					'Could not create user.',
-					'Could not register user for default role.',
-				];
-
-				if (friendlyMessages.includes(message)) return message;
-				return 'An error occurred during registration. Please try again.';
-			};
-
-			return { status: 'error', error: getFriendlyError(error.message) };
-		}
+			return user;
+		});
 	}
 
-	async verify(registrationToken: string): Promise<QueryResult> {
+	async setVerified(userId: string): Promise<QueryResult> {
 		try {
-			const { valid, expired, payload } =
-				await this.authRepo.verifyRegistrationToken(registrationToken);
-
-			if (!valid || !payload?.userId) throw new Error('Token is invalid.');
-			if (expired) throw new Error('Token is expired.');
-
-			await this.db.table('user').update('verified', 1).where({ userId: payload.userId });
-
+			await this.db.table('user').update('verified', 1).where({ userId });
 			return { status: 'success' };
 		} catch (error: any) {
 			return { status: 'error', error: error.message };
 		}
 	}
 
-	async resendVerificationEmail(userId: string): Promise<QueryResult> {
-		try {
-			const dbResult = await this.db
-				.table('user')
-				.select('userId', 'username', 'email', 'verified')
-				.where({ userId })
-				.first();
-
-			if (!dbResult) throw new Error('User not found.');
-
-			const user = dbResult as Pick<User, 'userId' | 'username' | 'email' | 'verified'>;
-
-			if (user.verified === 1) throw new Error('User is already verified.');
-
-			const now = moment();
-			const tokenExpiration = moment().add(24, 'hours');
-
-			const token = await this.authRepo.signToken<RegistrationToken>({
-				userId: user.userId,
-				iat: now.unix(),
-				exp: tokenExpiration.unix(),
-			});
-
-			await this.mailClient.sendUserRegistrationEmail([user.email], {
-				username: user.username,
-				token,
-			});
-
-			return { status: 'success' };
-		} catch (error: any) {
-			return { status: 'error', error: error.message };
-		}
+	async findVerificationInfo(userId: string) {
+		return this.db
+			.table('user')
+			.select('userId', 'username', 'email', 'verified')
+			.where({ userId })
+			.first();
 	}
 
-	async resendVerificationEmailByEmail(email: string): Promise<QueryResult> {
-		try {
-			const dbResult = await this.db
-				.table('user')
-				.select('userId', 'username', 'email', 'verified')
-				.where({ email })
-				.first();
-
-			if (!dbResult) throw new Error('No account found with this email address.');
-
-			const user = dbResult as Pick<User, 'userId' | 'username' | 'email' | 'verified'>;
-
-			if (user.verified === 1) throw new Error('This account is already verified. You can log in.');
-
-			const now = moment();
-			const tokenExpiration = moment().add(24, 'hours');
-
-			const token = await this.authRepo.signToken<RegistrationToken>({
-				userId: user.userId,
-				iat: now.unix(),
-				exp: tokenExpiration.unix(),
-			});
-
-			await this.mailClient.sendUserRegistrationEmail([user.email], {
-				username: user.username,
-				token,
-			});
-
-			return { status: 'success' };
-		} catch (error: any) {
-			return { status: 'error', error: error.message };
-		}
+	async findVerificationInfoByEmail(email: string) {
+		return this.db
+			.table('user')
+			.select('userId', 'username', 'email', 'verified')
+			.where({ email })
+			.first();
 	}
 
-	// Preferred workspace management
+	// preferred workspace
 	async getPreferredWorkspaceId(userId: string): Promise<string | null> {
 		try {
 			const dbResult = await this.db
@@ -895,68 +782,13 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
-	async generateAndUploadAvatar(userId: string): Promise<QueryResult<string>> {
-		try {
-			// get current avatar to delete if exists
-			const dbResult = await this.db
-				.table('user')
-				.select('AvatarImageUrl')
-				.where({ userId })
-				.first();
-
-			const currentUrl = dbResult?.avatarImageUrl;
-			if (currentUrl) {
-				await deleteSignedUrl(currentUrl);
-			}
-
-			// generate new avatar
-			const avatar = generateRandomShapeAvatar(`${userId}-${Date.now()}`);
-			const publicUrl = await uploadAvatarBuffer(avatar.buffer, userId, 'image/svg+xml');
-
-			if (!publicUrl) {
-				return { status: 'error', error: 'Failed to upload avatar.' };
-			}
-
-			// update user record
-			await this.db.table('user').where({ userId }).update({ AvatarImageUrl: publicUrl });
-
-			return { status: 'success', data: publicUrl };
-		} catch (error: any) {
-			console.error('Error generating avatar:', error.message);
-			return { status: 'error', error: 'Failed to generate avatar.' };
-		}
-	}
-
-	async uploadCustomAvatar(userId: string, file: File): Promise<QueryResult<string>> {
-		try {
-			// get current avatar to delete if exists
-			const dbResult = await this.db
-				.table('user')
-				.select('AvatarImageUrl')
-				.where({ userId })
-				.first();
-
-			const currentUrl = dbResult?.avatarImageUrl;
-			if (currentUrl) {
-				await deleteSignedUrl(currentUrl);
-			}
-
-			// upload new avatar
-			const buffer = Buffer.from(await file.arrayBuffer());
-			const publicUrl = await uploadAvatarBuffer(buffer, userId, file.type);
-
-			if (!publicUrl) {
-				return { status: 'error', error: 'Failed to upload avatar.' };
-			}
-
-			// update user record
-			await this.db.table('user').where({ userId }).update({ AvatarImageUrl: publicUrl });
-
-			return { status: 'success', data: publicUrl };
-		} catch (error: any) {
-			console.error('Error uploading avatar:', error.message);
-			return { status: 'error', error: 'Failed to upload avatar.' };
-		}
+	async findAvatarUrl(userId: string): Promise<string | null> {
+		const dbResult = await this.db
+			.table('user')
+			.select('AvatarImageUrl')
+			.where({ userId })
+			.first();
+		return dbResult?.avatarImageUrl || null;
 	}
 
 	// get users in workspaces where the given user is an owner
@@ -1042,48 +874,7 @@ export class UserRepository extends BaseRepository {
 		}
 	}
 
-	async requestPasswordReset(email: string): Promise<QueryResult> {
-		try {
-			const dbResult = await this.db
-				.table('user')
-				.select('userId', 'username', 'email', 'verified')
-				.where({ email })
-				.first();
-
-			if (!dbResult) {
-				// don't reveal if email exists
-				return { status: 'success' };
-			}
-
-			const user = dbResult as Pick<User, 'userId' | 'username' | 'email' | 'verified'>;
-
-			const now = moment();
-			const tokenExpiration = moment().add(1, 'hour');
-
-			const token = await this.authRepo.signToken<PasswordResetToken>({
-				userId: user.userId,
-				email: user.email,
-				type: 'password-reset',
-				iat: now.unix(),
-				exp: tokenExpiration.unix(),
-			});
-
-			await this.mailClient.sendPasswordResetEmail([user.email], {
-				username: user.username,
-				token,
-			});
-
-			return { status: 'success' };
-		} catch (error: any) {
-			console.error('Password reset request error:', error);
-			return {
-				status: 'error',
-				error: 'Failed to process password reset request. Please try again.',
-			};
-		}
-	}
-
-	// User favorites management
+	// favorites
 	async getFavorites(userId: string, workspaceId?: string): Promise<UserFavorite[]> {
 		try {
 			let query = this.db.table('userFavorite').where({ userId });

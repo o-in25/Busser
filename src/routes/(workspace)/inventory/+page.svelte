@@ -15,8 +15,7 @@
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
-	import StockAlerts from '$lib/components/StockAlerts.svelte';
-	import ViewToggle from '$lib/components/ViewToggle.svelte';
+import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -274,7 +273,15 @@
 		stockFilter = 'all';
 		sortOption = 'name-asc';
 		perPage = '20';
-		goto(buildUrl({ categoryGroupId: 'all', stockFilter: 'all', sort: 'name-asc', perPage: '20', page: 1 }));
+		goto(
+			buildUrl({
+				categoryGroupId: 'all',
+				stockFilter: 'all',
+				sort: 'name-asc',
+				perPage: '20',
+				page: 1,
+			})
+		);
 	}
 
 	// Pagination navigation
@@ -311,9 +318,6 @@
 <!-- Dashboard Header -->
 <InventoryDashboard stats={data.stats} />
 
-<!-- Stock Alerts -->
-<StockAlerts outOfStockItems={data.outOfStockItems} />
-
 <!-- Toolbar -->
 <div class="flex flex-col gap-3 mb-6">
 	<div class="flex items-center gap-2">
@@ -340,7 +344,14 @@
 		</form>
 
 		<!-- Filters -->
-		<FilterButton bind:open={filterOpen} activeCount={activeFilterCount} viewModes={['table', 'grid', 'list']} activeView={viewMode} onViewChange={setViewMode} onRefresh={handleRefresh}>
+		<FilterButton
+			bind:open={filterOpen}
+			activeCount={activeFilterCount}
+			viewModes={['table', 'grid', 'list']}
+			activeView={viewMode}
+			onViewChange={setViewMode}
+			onRefresh={handleRefresh}
+		>
 			<InventoryFilterPanel
 				categories={data.categories}
 				{selectedCategory}
@@ -439,7 +450,7 @@
 					disabled={bulkActionLoading}
 				>
 					<PackageCheck class="h-4 w-4 sm:mr-1.5" />
-					<span class="hidden sm:inline">Mark</span> In Stock
+					In Stock
 				</Button>
 				<Button
 					variant="outline"
@@ -449,7 +460,7 @@
 					disabled={bulkActionLoading}
 				>
 					<PackageX class="h-4 w-4 sm:mr-1.5" />
-					<span class="hidden sm:inline">Mark</span> Out of Stock
+					Out of Stock
 				</Button>
 				<Button
 					variant="destructive"
@@ -496,11 +507,7 @@
 
 	<!-- Pagination for Grid/List views -->
 	{#if data.data.length > 0}
-		<Pagination
-			pagination={data.pagination}
-			itemLabel="products"
-			onNavigate={navigatePage}
-		/>
+		<Pagination pagination={data.pagination} itemLabel="products" onNavigate={navigatePage} />
 	{/if}
 {/if}
 

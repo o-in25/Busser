@@ -52,6 +52,14 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
+	function getGreeting() {
+		const hour = new Date().getHours();
+		if (hour < 12) return 'Good morning';
+		if (hour < 17) return 'Good afternoon';
+		if (hour < 21) return 'Good evening';
+		return 'Welcome back';
+	}
+
 	// Invitation request modal state
 	let requestModalOpen = $state(false);
 	let isSubmitting = $state(false);
@@ -711,9 +719,9 @@
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 				<div>
 					<h1 class="text-3xl md:text-4xl font-bold mb-2">
-						Welcome back, {dashboardData.userName}!
+						{getGreeting()}
 					</h1>
-					<p class="text-muted-foreground">Here's what's happening with your home bar today.</p>
+					<p class="text-muted-foreground">Here's what's happening with your home bar.</p>
 				</div>
 
 				<!-- Quick Stats Cards -->

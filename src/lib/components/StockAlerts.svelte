@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowRight, ChevronDown } from 'lucide-svelte';
+	import { ArrowRight, ChevronDown, ShoppingCart, XCircle } from 'lucide-svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { slide } from 'svelte/transition';
 
@@ -45,7 +45,7 @@
 				{#if outOfStockOpen}
 					<div transition:slide={{ duration: 200 }}>
 						<div class="px-4 pb-3 space-y-2">
-							{#each outOfStockItems as item}
+							{#each outOfStockItems.slice(0, 5) as item}
 								<a
 									href="/inventory/{item.productId}/edit"
 									class="flex items-center justify-between p-2 rounded-md bg-background/80 hover:bg-background transition-colors group"
@@ -69,6 +69,13 @@
 									/>
 								</a>
 							{/each}
+							<a
+								href="/inventory/suppliers"
+								class="flex items-center justify-center gap-2 p-2 rounded-md bg-background/80 hover:bg-background transition-colors text-sm font-medium text-primary"
+							>
+								<ShoppingCart class="h-4 w-4" />
+								View Shopping List
+							</a>
 						</div>
 					</div>
 				{/if}

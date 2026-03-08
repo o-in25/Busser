@@ -19,6 +19,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import logoNav from '$lib/assets/logo-nav.png';
 	import { haptics } from '$lib/utils/haptics';
+	import NavigationProgress from './NavigationProgress.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
@@ -220,6 +221,7 @@
 		<a href="/" class="mobile-header-logo">
 			<img src={logoNav} class="h-10" alt="Busser" />
 		</a>
+		<NavigationProgress />
 	</div>
 {/if}
 
@@ -290,6 +292,7 @@
 			<div class="w-10"></div>
 		{/if}
 	</div>
+	<NavigationProgress />
 </nav>
 
 <style>
@@ -401,12 +404,7 @@
 		color: rgba(63, 63, 70, 1);
 	}
 
-	.mobile-nav-item:active {
-		opacity: 0.7;
-		transform: scale(0.95);
-	}
-
-	.mobile-nav-item.active {
+.mobile-nav-item.active {
 		background: linear-gradient(135deg, rgba(232, 25, 95, 0.15) 0%, rgba(165, 125, 213, 0.15) 100%);
 		color: rgba(232, 25, 95, 1);
 		box-shadow: 0 2px 8px rgba(232, 25, 95, 0.2);

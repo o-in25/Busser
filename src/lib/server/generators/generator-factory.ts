@@ -14,6 +14,8 @@ import type {
 	RecipeInsightsOutput,
 	RecipeRatingsInput,
 	RecipeRatingsOutput,
+	ProductRatingsInput,
+	ProductRatingsOutput,
 	CategoryDescriptionInput,
 	CategoryDescriptionOutput,
 	BottleScanInput,
@@ -89,6 +91,13 @@ const recipeInsightsSchema: z.ZodType<RecipeInsightsOutput> = z.object({
 });
 
 const recipeRatingsSchema: z.ZodType<RecipeRatingsOutput> = z.object({
+	sweetnessRating: z.number().min(1).max(10),
+	drynessRating: z.number().min(1).max(10),
+	versatilityRating: z.number().min(1).max(10),
+	strengthRating: z.number().min(1).max(10),
+});
+
+const productRatingsSchema: z.ZodType<ProductRatingsOutput> = z.object({
 	sweetnessRating: z.number().min(1).max(10),
 	drynessRating: z.number().min(1).max(10),
 	versatilityRating: z.number().min(1).max(10),
@@ -186,6 +195,21 @@ const generators: { [T in GeneratorType]: GeneratorConfig<T> } = {
 				)
 				.replace('[COUNT]', String(input.ingredients.length))
 				.replace('[INGREDIENTS]', ingredientsList);
+		},
+	},
+
+	'product-ratings': {
+		type: 'text',
+		schema: productRatingsSchema,
+		buildPrompt: (input: ProductRatingsInput) => {
+			return prompts.productRatings
+				.replace('[NAME]', input.productName)
+				.replace('[CATEGORY]', input.categoryName)
+				.replace('[PROOF]', input.proof ? `PROOF: ${input.proof}\n` : '')
+				.replace(
+					'[DESCRIPTION]',
+					input.description ? `DESCRIPTION: ${input.description}` : ''
+				);
 		},
 	},
 

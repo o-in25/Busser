@@ -5,10 +5,13 @@
 		DollarSign,
 		Flame,
 		Image,
+		Loader2,
 		Package,
 		Palette,
 		Percent,
 		Sparkles,
+		Store,
+		Wand2,
 		Wind,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
@@ -54,6 +57,7 @@
 	let productUnitSizeInMilliliters = $state('');
 	let productProof = $state('');
 	let categoryId = $state<string | null>(null);
+	let supplierId = $state<string | null>('1');
 	let productImageUrl = $state<string | undefined>();
 	let productInStockQuantity = $state(0);
 	let productSweetnessRating = $state(0.0);
@@ -61,6 +65,12 @@
 	let productStrengthRating = $state(0.0);
 	let productVersatilityRating = $state(0.0);
 	let productDescription = $state('');
+	let categoryGroupId = $state<number | null>(product?.categoryGroupId ?? null);
+	let categoryName = $state(product?.categoryName ?? '');
+	let ratingsGenerating = $state(false);
+
+	// whether the selected category is a spirit (CategoryGroupId 1)
+	const isSpirit = $derived(categoryGroupId === 1);
 
 	// Pending image state (held in memory until form save)
 	let pendingImageFile = $state<File | null>(null);
@@ -78,6 +88,7 @@
 					: '';
 			productProof = product.productProof !== undefined ? String(product.productProof) : '';
 			categoryId = product.categoryId !== undefined ? String(product.categoryId) : null;
+			supplierId = product.supplierId ? String(product.supplierId) : '1';
 			productImageUrl = product.productImageUrl;
 			productInStockQuantity = product.productInStockQuantity ?? 0;
 			productSweetnessRating = product.productSweetnessRating ?? 0.0;
@@ -85,6 +96,8 @@
 			productStrengthRating = product.productStrengthRating ?? 0.0;
 			productVersatilityRating = product.productVersatilityRating ?? 0.0;
 			productDescription = product.productDescription ?? '';
+			categoryGroupId = product.categoryGroupId ?? null;
+			categoryName = product.categoryName ?? '';
 		}
 	});
 
@@ -171,6 +184,7 @@
 		productUnitSizeInMilliliters,
 		productProof,
 		categoryId,
+		supplierId,
 		productInStockQuantity,
 		productSweetnessRating,
 		productDrynessRating,
@@ -185,12 +199,54 @@
 		productUnitSizeInMilliliters = (data.productUnitSizeInMilliliters as string) ?? '';
 		productProof = (data.productProof as string) ?? '';
 		categoryId = (data.categoryId as string | null) ?? null;
+		supplierId = (data.supplierId as string | null) ?? '1';
 		productInStockQuantity = (data.productInStockQuantity as number) ?? 0;
 		productSweetnessRating = (data.productSweetnessRating as number) ?? 0;
 		productDrynessRating = (data.productDrynessRating as number) ?? 0;
 		productStrengthRating = (data.productStrengthRating as number) ?? 0;
 		productVersatilityRating = (data.productVersatilityRating as number) ?? 0;
 		productDescription = (data.productDescription as string) ?? '';
+	}
+
+	function handleCategorySelect(item: SelectOption) {
+		categoryGroupId = item.categoryGroupId ?? null;
+		categoryName = item.name;
+	}
+
+	async function generateFlavorRatings() {
+		if (!productName || !categoryName) {
+			$notificationStore.error = {
+				message: 'Please add a product name and select a category first.',
+			};
+			return;
+		}
+
+		ratingsGenerating = true;
+		try {
+			const response = await fetch('/api/generator/product-rating', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					productName,
+					categoryName,
+					proof: productProof ? parseFloat(productProof) : undefined,
+					description: productDescription || undefined,
+				}),
+			});
+
+			if (!response.ok) throw new Error('Failed to generate ratings');
+
+			const data = await response.json();
+			productSweetnessRating = data.sweetnessRating;
+			productDrynessRating = data.drynessRating;
+			productVersatilityRating = data.versatilityRating;
+			productStrengthRating = data.strengthRating;
+		} catch (error) {
+			console.error('Failed to generate ratings:', error);
+			$notificationStore.error = { message: 'Failed to generate flavor ratings.' };
+		} finally {
+			ratingsGenerating = false;
+		}
 	}
 
 	const deleteItem = async () => {
@@ -331,6 +387,7 @@
 								key={product?.categoryName}
 								required={true}
 								bind:value={categoryId}
+								onselect={handleCategorySelect}
 							/>
 							{#if touched.categoryId && errors.categoryId}
 								<Helper color="red">{errors.categoryId}</Helper>
@@ -427,6 +484,17 @@
 								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
 							{/if}
 						</div>
+						<div>
+							<Autocomplete
+								label="Supplier"
+								fetchUrl="/api/select/suppliers"
+								name="supplierId"
+								grant=""
+								key={product?.supplierName || 'Any'}
+								required={true}
+								bind:value={supplierId}
+							/>
+						</div>
 						<div class="flex items-center justify-end gap-3 pt-2">
 							<Label for="inStock-mobile" class="text-sm">In Stock</Label>
 							<Switch
@@ -440,36 +508,59 @@
 					</div>
 				{:else if step === 2}
 					<!-- Flavor Profile Step -->
-					<div class="space-y-6">
-						<FlavorSlider
-							bind:value={productSweetnessRating}
-							label="Sweetness"
-							name="productSweetnessRating-mobile"
-							icon={Candy}
-							color="pink"
-						/>
-						<FlavorSlider
-							bind:value={productDrynessRating}
-							label="Dryness"
-							name="productDrynessRating-mobile"
-							icon={Wind}
-							color="amber"
-						/>
-						<FlavorSlider
-							bind:value={productVersatilityRating}
-							label="Versatility"
-							name="productVersatilityRating-mobile"
-							icon={Sparkles}
-							color="purple"
-						/>
-						<FlavorSlider
-							bind:value={productStrengthRating}
-							label="Strength"
-							name="productStrengthRating-mobile"
-							icon={Flame}
-							color="orange"
-						/>
-					</div>
+					{#if isSpirit}
+						<div class="space-y-6">
+							<div class="flex justify-end">
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onclick={generateFlavorRatings}
+									disabled={ratingsGenerating}
+								>
+									{#if ratingsGenerating}
+										<Loader2 class="w-4 h-4 mr-2 animate-spin" />
+										Generating...
+									{:else}
+										<Wand2 class="w-4 h-4 mr-2" />
+										Generate with AI
+									{/if}
+								</Button>
+							</div>
+							<FlavorSlider
+								bind:value={productSweetnessRating}
+								label="Sweetness"
+								name="productSweetnessRating-mobile"
+								icon={Candy}
+								color="pink"
+							/>
+							<FlavorSlider
+								bind:value={productDrynessRating}
+								label="Dryness"
+								name="productDrynessRating-mobile"
+								icon={Wind}
+								color="amber"
+							/>
+							<FlavorSlider
+								bind:value={productVersatilityRating}
+								label="Versatility"
+								name="productVersatilityRating-mobile"
+								icon={Sparkles}
+								color="purple"
+							/>
+							<FlavorSlider
+								bind:value={productStrengthRating}
+								label="Strength"
+								name="productStrengthRating-mobile"
+								icon={Flame}
+								color="orange"
+							/>
+						</div>
+					{:else}
+						<p class="text-sm text-muted-foreground text-center py-8">
+							Flavor profile is only available for spirits.
+						</p>
+					{/if}
 				{:else if step === 3}
 					<!-- Description Step -->
 					<div class="space-y-6">
@@ -538,6 +629,7 @@
 								key={product?.categoryName}
 								required={true}
 								bind:value={categoryId}
+								onselect={handleCategorySelect}
 							/>
 							{#if touched.categoryId && errors.categoryId}
 								<Helper color="red">{errors.categoryId}</Helper>
@@ -638,6 +730,19 @@
 						</div>
 					</div>
 
+					<!-- Supplier -->
+					<div class="mt-4">
+						<Autocomplete
+							label="Supplier"
+							fetchUrl="/api/select/suppliers"
+							name="supplierId"
+							grant=""
+							key={product?.supplierName || 'Any'}
+							required={true}
+							bind:value={supplierId}
+						/>
+					</div>
+
 					<!-- Calculated fields and stock -->
 					<div class="flex flex-wrap items-center justify-between mt-6 pt-4 border-t">
 						<div class="flex flex-wrap gap-3">
@@ -670,39 +775,58 @@
 				</Card.Content>
 			</Card.Root>
 
-			<!-- Flavor Profile Card (Collapsible) -->
-			<CollapsibleSection title="Flavor Profile" icon={Palette} open={action === 'edit'}>
-				<div class="grid gap-6 md:grid-cols-2">
-					<FlavorSlider
-						bind:value={productSweetnessRating}
-						label="Sweetness"
-						name="productSweetnessRating"
-						icon={Candy}
-						color="pink"
-					/>
-					<FlavorSlider
-						bind:value={productDrynessRating}
-						label="Dryness"
-						name="productDrynessRating"
-						icon={Wind}
-						color="amber"
-					/>
-					<FlavorSlider
-						bind:value={productVersatilityRating}
-						label="Versatility"
-						name="productVersatilityRating"
-						icon={Sparkles}
-						color="purple"
-					/>
-					<FlavorSlider
-						bind:value={productStrengthRating}
-						label="Strength"
-						name="productStrengthRating"
-						icon={Flame}
-						color="orange"
-					/>
-				</div>
-			</CollapsibleSection>
+			<!-- Flavor Profile Card (Collapsible, spirits only) -->
+			{#if isSpirit}
+				<CollapsibleSection title="Flavor Profile" icon={Palette} open={action === 'edit'}>
+					<div class="flex justify-end mb-4">
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onclick={generateFlavorRatings}
+							disabled={ratingsGenerating}
+						>
+							{#if ratingsGenerating}
+								<Loader2 class="w-4 h-4 mr-2 animate-spin" />
+								Generating...
+							{:else}
+								<Wand2 class="w-4 h-4 mr-2" />
+								Generate with AI
+							{/if}
+						</Button>
+					</div>
+					<div class="grid gap-6 md:grid-cols-2">
+						<FlavorSlider
+							bind:value={productSweetnessRating}
+							label="Sweetness"
+							name="productSweetnessRating"
+							icon={Candy}
+							color="pink"
+						/>
+						<FlavorSlider
+							bind:value={productDrynessRating}
+							label="Dryness"
+							name="productDrynessRating"
+							icon={Wind}
+							color="amber"
+						/>
+						<FlavorSlider
+							bind:value={productVersatilityRating}
+							label="Versatility"
+							name="productVersatilityRating"
+							icon={Sparkles}
+							color="purple"
+						/>
+						<FlavorSlider
+							bind:value={productStrengthRating}
+							label="Strength"
+							name="productStrengthRating"
+							icon={Flame}
+							color="orange"
+						/>
+					</div>
+				</CollapsibleSection>
+			{/if}
 
 			<!-- Description & Image (Collapsible) -->
 			<CollapsibleSection title="Description & Image" icon={Image} open={action === 'edit'}>
@@ -738,6 +862,7 @@
 			/>
 			<input type="hidden" name="productProof" value={productProof} />
 			<input type="hidden" name="categoryId" value={categoryId ?? ''} />
+			<input type="hidden" name="supplierId" value={supplierId ?? ''} />
 			<input type="hidden" name="productInStockQuantity" value={productInStockQuantity} />
 			<input type="hidden" name="productSweetnessRating" value={productSweetnessRating} />
 			<input type="hidden" name="productDrynessRating" value={productDrynessRating} />

@@ -1,6 +1,3 @@
-import { redirect } from '@sveltejs/kit';
-import { StatusCodes } from 'http-status-codes';
-
 import { inventoryRepo } from '$lib/server/core';
 
 import type { PageServerLoad } from './$types';
@@ -10,13 +7,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
 
-	// redirect to page 1
-	if (!url.searchParams.size) {
-		throw redirect(StatusCodes.TEMPORARY_REDIRECT, url.pathname.concat('?', 'page=1'));
-	}
-
-	let page: string | number = url.searchParams.get('page') || '1';
-	page = Number(page);
+	const page = Number(url.searchParams.get('page') || '1');
 
 	const productName = url.searchParams.get('productName') || '';
 	const categoryGroupId = url.searchParams.get('categoryGroupId') || '';
@@ -64,9 +55,6 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		recipeUsage[productId] = count;
 	});
 
-	// Get out-of-stock items for alerts
-	const outOfStockItems = data.filter((p) => p.productInStockQuantity === 0).slice(0, 5);
-
 	// Get recently added items (highest productId = most recent)
 	const recentlyAdded = [...data]
 		.sort((a, b) => (b.productId || 0) - (a.productId || 0))
@@ -78,7 +66,6 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		stats,
 		categories,
 		recipeUsage,
-		outOfStockItems,
 		recentlyAdded,
 		filters: {
 			search: productName,

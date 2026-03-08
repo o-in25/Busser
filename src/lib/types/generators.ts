@@ -23,6 +23,12 @@ export type RecipeRatingsInput = {
 	recipeDescription?: string;
 	ingredients: Array<{ name: string; quantity: number; unit: string; proof?: number }>;
 };
+export type ProductRatingsInput = {
+	productName: string;
+	categoryName: string;
+	proof?: number;
+	description?: string;
+};
 export type CategoryDescriptionInput = { name: string };
 
 // output types
@@ -65,6 +71,13 @@ export type RecipeRatingsOutput = {
 	strengthRating: number;
 };
 
+export type ProductRatingsOutput = {
+	sweetnessRating: number;
+	drynessRating: number;
+	versatilityRating: number;
+	strengthRating: number;
+};
+
 export type CategoryDescriptionOutput = {
 	description: string;
 };
@@ -94,6 +107,7 @@ export type GeneratorMap = {
 	'catalog-image': { input: CatalogImageInput; output: ImageResult };
 	'recipe-insights': { input: RecipeInsightsInput; output: RecipeInsightsOutput };
 	'recipe-ratings': { input: RecipeRatingsInput; output: RecipeRatingsOutput };
+	'product-ratings': { input: ProductRatingsInput; output: ProductRatingsOutput };
 	'category-description': { input: CategoryDescriptionInput; output: CategoryDescriptionOutput };
 	'bottle-scan': { input: BottleScanInput; output: BottleScanOutput };
 };

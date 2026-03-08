@@ -58,7 +58,7 @@
 				</p>
 			{/if}
 			<div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-				<BackButton fallback="/" label="Go Back" variant="outline" size="sm" />
+				<BackButton fallback="/" label="Go Back" variant="outline" size="default" />
 				<Button href="/">
 					<House class="h-4 w-4 mr-2" />
 					Go Home

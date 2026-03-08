@@ -6,7 +6,6 @@
 
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { ProgressBar } from '@prgm/sveltekit-progress-bar';
 	import { toast } from 'svelte-sonner';
 
 	import Footer from '$lib/components/Footer.svelte';
@@ -30,6 +29,13 @@
 		'/settings': 5,
 	};
 
+	// inventory tab order for directional transitions within inventory
+	const inventoryOrder: Record<string, number> = {
+		'/inventory': 1,
+		'/inventory/category': 2,
+		'/inventory/suppliers': 3,
+	};
+
 	// settings tab order for directional transitions within settings
 	const settingsOrder: Record<string, number> = {
 		'/settings': 0,
@@ -44,6 +50,12 @@
 		// match top-level route segment (e.g. /catalog/123 -> /catalog)
 		const match = pathname.match(/^\/[^/]*/);
 		return match?.[0] || '/';
+	}
+
+	function getInventoryKey(pathname: string): string {
+		// match up to 2 segments (e.g. /inventory/category/123 -> /inventory/category)
+		const match = pathname.match(/^\/inventory(?:\/[^/]+)?/);
+		return match?.[0] || '/inventory';
 	}
 
 	function getSettingsKey(pathname: string): string {
@@ -72,14 +84,21 @@
 			const fromKey = getRouteKey(fromPath);
 			const toKey = getRouteKey(toPath);
 
-			// use settings sub-route order when navigating within settings
+			// use sub-route order when navigating within the same section
 			if (fromKey === '/settings' && toKey === '/settings') {
 				const fromIndex = settingsOrder[getSettingsKey(fromPath)] ?? -1;
 				const toIndex = settingsOrder[getSettingsKey(toPath)] ?? -1;
 				if (fromIndex !== -1 && toIndex !== -1) {
 					direction = toIndex >= fromIndex ? 'forward' : 'back';
 				}
-			} else {
+			} else if (fromKey === '/inventory' && toKey === '/inventory') {
+				const fromIndex = inventoryOrder[getInventoryKey(fromPath)] ?? -1;
+				const toIndex = inventoryOrder[getInventoryKey(toPath)] ?? -1;
+				if (fromIndex !== -1 && toIndex !== -1) {
+					direction = toIndex >= fromIndex ? 'forward' : 'back';
+				}
+			} else if (fromPath === fromKey || fromPath === fromKey + '/') {
+				// only use route order for top-level nav transitions
 				const fromIndex = routeOrder[fromKey] ?? -1;
 				const toIndex = routeOrder[toKey] ?? -1;
 				if (fromIndex !== -1 && toIndex !== -1) {
@@ -206,8 +225,6 @@
 	{#if showNav}
 		<Nav {activeUrl} {user} {workspaceName} {keyboardOpen} />
 	{/if}
-
-	<ProgressBar color="#e5195f" zIndex={49} />
 
 	<!-- page content with bottom padding on mobile for fixed nav -->
 	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}">

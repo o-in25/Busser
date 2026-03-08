@@ -86,6 +86,7 @@ export const actions: Actions = {
 		const productDescription = (formData.get('productDescription') as string) || '';
 		const productImageUrl = (formData.get('productImageUrl') as string) || '';
 		const productImageCleared = formData.get('productImageCleared') === 'true';
+		const supplierId = parseInt(formData.get('supplierId') as string) || 1;
 
 		if (!productName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Product name is required.' });
@@ -108,6 +109,7 @@ export const actions: Actions = {
 			productStrengthRating,
 			productVersatilityRating,
 			productDescription,
+			supplierId,
 		} as Product;
 
 		const result = await inventoryRepo.update(
