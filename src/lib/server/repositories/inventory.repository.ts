@@ -754,7 +754,7 @@ export class InventoryRepository extends BaseRepository {
 			};
 			const { column, order } = sortMap[sort] || sortMap['name-asc'];
 
-			query = query
+			query = (query as any)
 				.select(
 					'i.ProductId',
 					'i.ProductName',

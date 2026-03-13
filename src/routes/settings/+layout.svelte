@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Building2, Mail, SlidersHorizontal, UserCog, Users, UsersRound } from 'lucide-svelte';
+	import { GalleryHorizontalEnd, Mail, SlidersHorizontal, UserCog, Users, UsersRound } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { page } from '$app/stores';
@@ -93,7 +93,7 @@
 			class={activeUrl$.includes('workspaces') ? activeClass : defaultClass}
 		>
 			<div class="flex items-center justify-center gap-2">
-				<Building2 class="h-5 w-5" /><span class="hidden md:inline-block">Workspaces</span>
+				<GalleryHorizontalEnd class="h-5 w-5" /><span class="hidden md:inline-block">Workspaces</span>
 			</div>
 		</a>
 	</li>

@@ -131,7 +131,7 @@ export const actions = {
 						return redirect(StatusCodes.TEMPORARY_REDIRECT, '/');
 					} else if (workspacesResult.data.length > 1) {
 						// User has multiple workspaces - need to select
-						return redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace-selector');
+						return redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace/select');
 					}
 				}
 			}

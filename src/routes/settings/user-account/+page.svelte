@@ -1,12 +1,10 @@
 <script lang="ts">
 	import {
 		AlertTriangle,
-		ArrowRight,
-		Building2,
-		Check,
 		Crown,
 		Globe,
 		KeyRound,
+		GalleryHorizontalEnd,
 		Link2,
 		Lock,
 		LogOut,
@@ -31,9 +29,6 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	// Track selected workspace for the form
-	let selectedWorkspaceId = $state(data.preferredWorkspaceId || '');
-	let isSubmitting = $state(false);
 	let isSigningOut = $state(false);
 	let isDeleting = $state(false);
 	let deleteDialogOpen = $state(false);
@@ -42,11 +37,6 @@
 	let unlinkProvider = $state('');
 	let isUnlinking = $state(false);
 	let unlinkError = $state('');
-
-	// Update selected when data changes
-	$effect(() => {
-		selectedWorkspaceId = data.preferredWorkspaceId || '';
-	});
 
 	const permissions: string[] = getContext('permissions') || [];
 	const roles: string[] = getContext('roles') || [];
@@ -166,7 +156,7 @@
 			<!-- Current Workspace -->
 			<div class="p-4 rounded-lg bg-muted/30 space-y-2">
 				<div class="flex items-center gap-2 text-sm text-muted-foreground">
-					<Building2 class="h-3.5 w-3.5" />
+					<GalleryHorizontalEnd class="h-3.5 w-3.5" />
 					Current Workspace
 				</div>
 				{#if data.currentWorkspace}
@@ -369,124 +359,6 @@
 					<p class="text-sm text-muted-foreground">
 						You don't have any OAuth providers linked to your account.
 					</p>
-				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
-
-	<!-- Default Workspace Card -->
-	<Card.Root>
-		<Card.Header>
-			<Card.Title class="flex items-center gap-2">
-				<ArrowRight class="h-5 w-5" />
-				Default Workspace
-			</Card.Title>
-			<Card.Description>
-				Select your preferred workspace. This will be automatically selected when you log in.
-			</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			{#if data.workspaces && data.workspaces.length > 0}
-				<form
-					method="POST"
-					action="?/setPreferredWorkspace"
-					use:enhance={() => {
-						isSubmitting = true;
-						return async ({ update }) => {
-							isSubmitting = false;
-							await update();
-						};
-					}}
-				>
-					<div class="space-y-2 mb-4">
-						{#each data.workspaces as workspace (workspace.workspaceId)}
-							<button
-								type="button"
-								onclick={() => (selectedWorkspaceId = workspace.workspaceId)}
-								disabled={data.workspaces.length === 1}
-								class="w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all {selectedWorkspaceId ===
-								workspace.workspaceId
-									? 'border-primary bg-primary/5'
-									: 'border-transparent bg-muted/30 hover:bg-muted/50'} {data.workspaces.length ===
-								1
-									? 'opacity-60 cursor-not-allowed'
-									: ''}"
-							>
-								<div class="flex items-center gap-3">
-									<div
-										class="p-2 rounded-lg {workspace.workspaceId === 'ws-global-catalog'
-											? 'bg-blue-500/10'
-											: workspace.workspaceType === 'personal'
-												? 'bg-secondary-500/10'
-												: 'bg-neon-green-500/10'}"
-									>
-										{#if workspace.workspaceId === 'ws-global-catalog'}
-											<Globe class="h-4 w-4 text-blue-500" />
-										{:else if workspace.workspaceType === 'personal'}
-											<User class="h-4 w-4 text-secondary-500" />
-										{:else}
-											<Users class="h-4 w-4 text-neon-green-500" />
-										{/if}
-									</div>
-									<div class="text-left">
-										<div class="font-medium flex items-center gap-2">
-											{workspace.workspaceName}
-											{#if workspace.workspaceId === 'ws-global-catalog'}
-												<Badge variant="outline" class="text-xs">Global</Badge>
-											{/if}
-										</div>
-										<div class="text-sm text-muted-foreground capitalize">
-											{workspace.workspaceType} workspace
-										</div>
-									</div>
-								</div>
-								<div class="flex items-center gap-2">
-									{#if selectedWorkspaceId === workspace.workspaceId}
-										<div class="w-2 h-2 rounded-full bg-primary"></div>
-									{/if}
-								</div>
-							</button>
-						{/each}
-					</div>
-
-					<input type="hidden" name="workspaceId" value={selectedWorkspaceId} />
-
-					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
-						{#if form?.success}
-							<p class="text-sm text-neon-green-600 flex items-center gap-1">
-								<Check class="h-4 w-4" />
-								Preference saved
-							</p>
-						{:else if form?.error}
-							<p class="text-sm text-destructive">{form.error}</p>
-						{:else}
-							<div></div>
-						{/if}
-						<Button
-							type="submit"
-							class="w-full sm:w-auto"
-							disabled={!selectedWorkspaceId ||
-								selectedWorkspaceId === data.preferredWorkspaceId ||
-								isSubmitting ||
-								data.workspaces.length === 1}
-						>
-							{#if isSubmitting}
-								Saving...
-							{:else}
-								Save
-							{/if}
-						</Button>
-					</div>
-				</form>
-			{:else}
-				<div class="text-center py-8">
-					<div
-						class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
-					>
-						<Building2 class="h-8 w-8 text-muted-foreground/50" />
-					</div>
-					<h3 class="font-semibold mb-1">No Workspaces</h3>
-					<p class="text-sm text-muted-foreground">You don't belong to any workspaces yet.</p>
 				</div>
 			{/if}
 		</Card.Content>

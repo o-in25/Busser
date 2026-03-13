@@ -8,6 +8,7 @@ import {
 	isWorkspaceOwner,
 	updateWorkspace,
 } from '$lib/server/auth';
+import { getPreferredWorkspaceId, setPreferredWorkspaceId } from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -28,11 +29,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	// get current workspace ID from locals (set by hooks) or fall back to query param
 	const currentWorkspaceId = locals.activeWorkspaceId || url.searchParams.get('from') || null;
 
+	// get preferred workspace ID from DB
+	const preferredWorkspaceId = await getPreferredWorkspaceId(locals.user.userId);
+
 	if (result.status === 'error') {
-		return { workspaces: [], currentWorkspaceId, error: result.error };
+		return { workspaces: [], currentWorkspaceId, preferredWorkspaceId, error: result.error };
 	}
 
-	return { workspaces: result.data || [], currentWorkspaceId };
+	return { workspaces: result.data || [], currentWorkspaceId, preferredWorkspaceId };
 };
 
 export const actions: Actions = {
@@ -132,6 +136,43 @@ export const actions: Actions = {
 		}
 
 		return { success: true, workspace: result.data };
+	},
+
+	setPreferredWorkspace: async ({ locals, request, cookies }) => {
+		if (!locals.user) {
+			return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authenticated' });
+		}
+
+		const formData = await request.formData();
+		const workspaceId = formData.get('workspaceId')?.toString() || null;
+
+		// allow clearing preferred workspace
+		if (!workspaceId) {
+			await setPreferredWorkspaceId(locals.user.userId, null);
+			return { success: true };
+		}
+
+		// verify user has access to this workspace
+		const workspacesResult = await getUserWorkspaces(locals.user.userId);
+		const workspaces = workspacesResult.status === 'success' ? workspacesResult.data || [] : [];
+		const selectedWorkspace = workspaces.find((w) => w.workspaceId === workspaceId);
+
+		if (!selectedWorkspace) {
+			return fail(StatusCodes.FORBIDDEN, { error: 'You do not have access to this workspace' });
+		}
+
+		await setPreferredWorkspaceId(locals.user.userId, workspaceId);
+
+		// also update the cookie
+		cookies.set('activeWorkspaceId', workspaceId, {
+			path: '/',
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: process.env.NODE_ENV === 'production',
+			maxAge: 60 * 60 * 24 * 365,
+		});
+
+		return { success: true };
 	},
 
 	delete: async ({ locals, request, url }) => {

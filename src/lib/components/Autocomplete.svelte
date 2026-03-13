@@ -13,7 +13,7 @@
 	export let fetchUrl: string;
 	export let placeholder = '';
 	export let name = '';
-	export let key: string | undefined;
+	export let key: string | undefined = undefined;
 	export let required = false;
 	export let actionUrl = '';
 	export let grant = '';

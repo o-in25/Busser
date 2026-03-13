@@ -426,7 +426,7 @@ export const isInviteOnly = settingsRepo.isInviteOnly.bind(settingsRepo);
 export const setAppSetting = settingsRepo.set.bind(settingsRepo);
 
 export function hasGlobalPermission(
-	user: { permissions?: Array<{ permissionName: string }> } | undefined,
+	user: { permissions?: Array<{ permissionName: string }> } | undefined | null,
 	permission: string
 ): boolean {
 	return user?.permissions?.some((p) => p.permissionName === permission) ?? false;

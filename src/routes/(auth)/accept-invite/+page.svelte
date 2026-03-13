@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertCircle, Building2, Check, Crown, Eye, Pencil, X } from 'lucide-svelte';
+	import { AlertCircle, Check, Crown, Eye, GalleryHorizontalEnd, Pencil, X } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
 	import { Badge } from '$lib/components/ui/badge';
@@ -44,7 +44,7 @@
 		<div
 			class="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center"
 		>
-			<Building2 class="h-6 w-6 text-primary" />
+			<GalleryHorizontalEnd class="h-6 w-6 text-primary" />
 		</div>
 		<h3 class="text-2xl font-semibold">Workspace Invitation</h3>
 	</div>

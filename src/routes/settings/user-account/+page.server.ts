@@ -2,12 +2,7 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { getUserWorkspaces, hasGlobalPermission, oauthRepo } from '$lib/server/auth';
-import {
-	deleteUser,
-	getPreferredWorkspaceId,
-	getUser,
-	setPreferredWorkspaceId,
-} from '$lib/server/user';
+import { deleteUser, getUser } from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -34,53 +29,14 @@ export const load = (async ({ locals, url }) => {
 		? workspaces.find((w) => w.workspaceId === currentWorkspaceId) || null
 		: null;
 
-	// get preferred workspace ID from DB
-	const preferredWorkspaceId = await getPreferredWorkspaceId(userId);
-
 	// load linked oauth accounts
 	const linkedAccountsResult = await oauthRepo.getLinkedAccounts(userId);
 	const linkedAccounts = linkedAccountsResult.status === 'success' ? linkedAccountsResult.data || [] : [];
 
-	return { user, workspaces, currentWorkspace, preferredWorkspaceId, linkedAccounts };
+	return { user, workspaces, currentWorkspace, linkedAccounts };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-	setPreferredWorkspace: async ({ locals, request, cookies }) => {
-		if (!locals.user) {
-			return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authenticated' });
-		}
-
-		const formData = await request.formData();
-		const workspaceId = formData.get('workspaceId')?.toString();
-
-		if (!workspaceId) {
-			return fail(StatusCodes.BAD_REQUEST, { error: 'Workspace ID is required' });
-		}
-
-		// Verify user has access to this workspace
-		const workspacesResult = await getUserWorkspaces(locals.user.userId);
-		const workspaces = workspacesResult.status === 'success' ? workspacesResult.data || [] : [];
-		const selectedWorkspace = workspaces.find((w) => w.workspaceId === workspaceId);
-
-		if (!selectedWorkspace) {
-			return fail(StatusCodes.FORBIDDEN, { error: 'You do not have access to this workspace' });
-		}
-
-		// Set preferred workspace in DB
-		await setPreferredWorkspaceId(locals.user.userId, workspaceId);
-
-		// Also update the cookie
-		cookies.set('activeWorkspaceId', workspaceId, {
-			path: '/',
-			httpOnly: true,
-			sameSite: 'lax',
-			secure: process.env.NODE_ENV === 'production',
-			maxAge: 60 * 60 * 24 * 365, // 1 year
-		});
-
-		return { success: true };
-	},
-
 	unlinkAccount: async ({ locals, request }) => {
 		if (!locals.user) {
 			return fail(StatusCodes.UNAUTHORIZED, { error: 'Not authenticated' });

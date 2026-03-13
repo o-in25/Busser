@@ -47,10 +47,10 @@
 	const pathGenerator = geoPath(projection);
 
 	// extract geojson features from topojson
-	const countries = topojson.feature(
+	const countries = (topojson.feature(
 		worldData as any,
 		(worldData as any).objects.countries
-	).features;
+	) as any).features;
 
 	// land outline for subtle border
 	const land = topojson.mesh(worldData as any, (worldData as any).objects.land);
