@@ -7,6 +7,7 @@
 		Github,
 		House,
 		Info,
+		GalleryHorizontalEnd,
 		LayoutGrid,
 		LogOut,
 		Menu,
@@ -20,19 +21,41 @@
 	import logoNav from '$lib/assets/logo-nav.png';
 	import { haptics } from '$lib/utils/haptics';
 	import NavigationProgress from './NavigationProgress.svelte';
+	import WorkspaceList from '$lib/components/WorkspaceList.svelte';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import Placeholder from './Placeholder.svelte';
 
 	let mobileMenuOpen = $state(false);
+	let switchDialogOpen = $state(false);
 
 	let {
 		user,
 		activeUrl,
 		workspaceName,
+		workspaces = [],
+		activeWorkspaceId = null,
 		keyboardOpen = false,
-	}: { user: User | null; activeUrl: string; workspaceName?: string | null; keyboardOpen?: boolean } = $props();
+	}: {
+		user: User | null;
+		activeUrl: string;
+		workspaceName?: string | null;
+		workspaces?: WorkspaceWithRole[];
+		activeWorkspaceId?: string | null;
+		keyboardOpen?: boolean;
+	} = $props();
+
+	async function switchWorkspace(workspaceId: string) {
+		const res = await fetch('/api/workspace/switch', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ workspaceId }),
+		});
+		if (res.ok) location.reload();
+	}
 
 	// scroll direction tracking for mobile header
 	let lastScrollY = $state(0);
@@ -132,6 +155,18 @@
 							<Settings class="h-4 w-4 text-muted-foreground" />
 							Settings
 						</button>
+						{#if workspaces.length > 1}
+							<button
+								class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
+								onclick={() => {
+									mobileMenuOpen = false;
+									switchDialogOpen = true;
+								}}
+							>
+								<GalleryHorizontalEnd class="h-4 w-4 text-muted-foreground" />
+								Switch Workspace
+							</button>
+						{/if}
 					</div>
 
 					<div class="h-px bg-border my-4"></div>
@@ -280,6 +315,12 @@
 						<Settings class="mr-2 h-4 w-4" />
 						Settings
 					</DropdownMenu.Item>
+					{#if workspaces.length > 1}
+						<DropdownMenu.Item onclick={() => (switchDialogOpen = true)} class="cursor-pointer">
+							<GalleryHorizontalEnd class="mr-2 h-4 w-4" />
+							Switch Workspace
+						</DropdownMenu.Item>
+					{/if}
 					<DropdownMenu.Separator />
 					<DropdownMenu.Item onclick={logout} class="cursor-pointer">
 						<LogOut class="mr-2 h-4 w-4" />
@@ -294,6 +335,43 @@
 	</div>
 	<NavigationProgress />
 </nav>
+
+<!-- Switch Workspace Modal -->
+<Dialog.Root bind:open={switchDialogOpen}>
+	<Dialog.Content class="sm:max-w-md">
+		<Dialog.Header>
+			<Dialog.Title class="flex items-center gap-2">
+				<GalleryHorizontalEnd class="h-5 w-5" />
+				Switch Workspace
+			</Dialog.Title>
+			<Dialog.Description>
+				Select a workspace to switch to
+			</Dialog.Description>
+		</Dialog.Header>
+		<div class="max-h-72 overflow-y-auto">
+			<WorkspaceList
+				{workspaces}
+				{activeWorkspaceId}
+				onSelect={(id) => {
+					switchDialogOpen = false;
+					switchWorkspace(id);
+				}}
+			/>
+		</div>
+		<div class="pt-3 mt-3 border-t border-border/50">
+			<button
+				class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
+				onclick={() => {
+					switchDialogOpen = false;
+					goto('/settings/workspaces');
+				}}
+			>
+				<Settings class="h-4 w-4" />
+				Manage Workspaces
+			</button>
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
 
 <style>
 	/* mobile top logo */

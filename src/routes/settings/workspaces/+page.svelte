@@ -1,12 +1,15 @@
 <script lang="ts">
 	import {
-		Building2,
+		Check,
 		Crown,
 		Globe,
+		GalleryHorizontalEnd,
+		HelpCircle,
 		Lock,
 		Pencil,
 		Plus,
 		Shield,
+		Settings,
 		Trash2,
 		User,
 		UserCog,
@@ -14,10 +17,12 @@
 	} from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
+	import WorkspaceList from '$lib/components/WorkspaceList.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
+	import * as Popover from '$lib/components/ui/popover';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
@@ -29,6 +34,25 @@
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
+
+	// preferred workspace state
+	let selectedPreferredId = $state<string | null>(data.preferredWorkspaceId || null);
+	let isPreferredSubmitting = $state(false);
+
+	$effect(() => {
+		selectedPreferredId = data.preferredWorkspaceId || null;
+	});
+
+	function selectPreferred(workspaceId: string) {
+		// toggle off if already selected
+		if (selectedPreferredId === workspaceId) {
+			selectedPreferredId = null;
+		} else {
+			selectedPreferredId = workspaceId;
+		}
+	}
+
+	const preferredChanged = $derived(selectedPreferredId !== (data.preferredWorkspaceId || null));
 
 	// Local state
 	let createDialogOpen = $state(false);
@@ -129,7 +153,50 @@
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 		<div>
-			<h1 class="text-2xl font-bold">Workspace Management</h1>
+			<div class="flex items-center gap-1.5">
+				<h1 class="text-2xl font-bold">Workspace Management</h1>
+				<Popover.Root>
+					<Popover.Trigger
+						class="text-muted-foreground hover:text-foreground transition-colors rounded-full"
+					>
+						<HelpCircle class="h-4 w-4" />
+						<span class="sr-only">What are Workspaces?</span>
+					</Popover.Trigger>
+					<Popover.Content class="w-72 text-sm text-left" align="start">
+						<p class="font-semibold mb-2">What are Workspaces?</p>
+						<p class="text-muted-foreground mb-3">
+							Workspaces let you organize your bar separately, each with its own inventory, recipes,
+							and catalog.
+						</p>
+						<div class="space-y-2 mb-3">
+							<div class="flex items-start gap-2">
+								<Globe class="h-3.5 w-3.5 text-blue-500 mt-1 shrink-0" />
+								<p class="text-muted-foreground">
+									<span class="text-foreground font-medium">Global</span> &mdash; a shared, read-only
+									catalog of every recipe and ingredient available to all Busser users.
+								</p>
+							</div>
+							<div class="flex items-start gap-2">
+								<User class="h-3.5 w-3.5 text-secondary-500 mt-1 shrink-0" />
+								<p class="text-muted-foreground">
+									<span class="text-foreground font-medium">Personal</span> &mdash; your private
+									workspace with full control over your own catalog and inventory.
+								</p>
+							</div>
+							<div class="flex items-start gap-2">
+								<Users class="h-3.5 w-3.5 text-neon-green-500 mt-1 shrink-0" />
+								<p class="text-muted-foreground">
+									<span class="text-foreground font-medium">Shared</span> &mdash; a collaborative
+									workspace where multiple users manage a shared catalog and inventory.
+								</p>
+							</div>
+						</div>
+						<p class="text-muted-foreground text-xs border-t border-border/50 pt-2">
+							Owners can invite members and manage settings from Workspace Settings.
+						</p>
+					</Popover.Content>
+				</Popover.Root>
+			</div>
 			<p class="text-sm text-muted-foreground mt-1">
 				Create and manage workspaces for organizing content
 			</p>
@@ -160,7 +227,7 @@
 			<div class="flex items-center justify-between">
 				<div>
 					<Card.Title class="flex items-center gap-2">
-						<Building2 class="h-5 w-5" />
+						<GalleryHorizontalEnd class="h-5 w-5" />
 						Workspaces
 					</Card.Title>
 					<Card.Description>
@@ -304,7 +371,7 @@
 				</Table.Root>
 			{:else}
 				<div class="flex flex-col items-center justify-center py-12 text-center">
-					<Building2 class="h-12 w-12 text-muted-foreground/50 mb-4" />
+					<GalleryHorizontalEnd class="h-12 w-12 text-muted-foreground/50 mb-4" />
 					<h3 class="text-lg font-medium">No workspaces found</h3>
 					<p class="text-sm text-muted-foreground mt-1">
 						Create your first workspace to get started.
@@ -314,31 +381,103 @@
 		</Card.Content>
 	</Card.Root>
 
-	<!-- Role Legend -->
+	<!-- Preferred Workspace & Permissions Card -->
 	<Card.Root>
 		<Card.Header>
-			<Card.Title class="flex items-center gap-2 text-base">
-				<Shield class="h-5 w-5" />
-				Role Permissions
+			<Card.Title class="flex items-center gap-2">
+				<Settings class="h-5 w-5" />
+				Preferred Workspace
 			</Card.Title>
 			<Card.Description>
-				Your access level in each Workspace determines what you can do with recipes and inventory
+				Your preferred workspace is automatically selected when you log in. Clear the selection to
+				choose manually each time.
 			</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-				{#each Object.entries(roleDescriptions) as [role, info]}
-					<div class="flex flex-col gap-1.5">
-						<Badge class="{info.bg} {info.color} border-0 w-fit">
-							{#if role === 'owner'}
-								<Crown class="h-3 w-3 mr-1" />
-							{/if}
-							{info.label}
-						</Badge>
-						<span class="text-muted-foreground text-xs">{info.description}</span>
+			{#if data.workspaces && data.workspaces.length > 0}
+				<form
+					method="POST"
+					action="?/setPreferredWorkspace"
+					use:enhance={() => {
+						isPreferredSubmitting = true;
+						return async ({ update }) => {
+							isPreferredSubmitting = false;
+							await update();
+						};
+					}}
+				>
+					<div class="mb-4">
+						<WorkspaceList
+							workspaces={data.workspaces}
+							activeWorkspaceId={selectedPreferredId}
+							onSelect={selectPreferred}
+						/>
 					</div>
-				{/each}
-			</div>
+
+					<!-- workspace permissions for the selected workspace -->
+					{#if selectedPreferredId}
+						{@const selectedWs = data.workspaces.find((w) => w.workspaceId === selectedPreferredId)}
+						{#if selectedWs}
+							{@const info = roleDescriptions[selectedWs.workspaceRole]}
+							{#if info}
+								<div class="mb-4 p-3 rounded-lg bg-muted/30 border border-border/50">
+									<div class="flex items-center gap-2 mb-1">
+										<Shield class="h-4 w-4 text-muted-foreground" />
+										<span class="text-sm font-medium">Workspace Permissions</span>
+									</div>
+									<div class="flex items-center gap-2 mt-2">
+										<Badge class="{info.bg} {info.color} border-0">
+											{#if selectedWs.workspaceRole === 'owner'}
+												<Crown class="h-3 w-3 mr-1" />
+											{/if}
+											{info.label}
+										</Badge>
+										<span class="text-xs text-muted-foreground">{info.description}</span>
+									</div>
+								</div>
+							{/if}
+						{/if}
+					{/if}
+
+					<input type="hidden" name="workspaceId" value={selectedPreferredId || ''} />
+
+					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
+						{#if form?.success}
+							<p class="text-sm text-neon-green-600 flex items-center gap-1">
+								<Check class="h-4 w-4" />
+								Preference saved
+							</p>
+						{:else if form?.error}
+							<p class="text-sm text-destructive">{form.error}</p>
+						{:else}
+							<div></div>
+						{/if}
+						<Button
+							type="submit"
+							class="w-full sm:w-auto"
+							disabled={!preferredChanged ||
+								isPreferredSubmitting ||
+								data.workspaces.length === 1}
+						>
+							{#if isPreferredSubmitting}
+								Saving...
+							{:else}
+								Save
+							{/if}
+						</Button>
+					</div>
+				</form>
+			{:else}
+				<div class="text-center py-8">
+					<div
+						class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4"
+					>
+						<GalleryHorizontalEnd class="h-8 w-8 text-muted-foreground/50" />
+					</div>
+					<h3 class="font-semibold mb-1">No Workspaces</h3>
+					<p class="text-sm text-muted-foreground">You don't belong to any workspaces yet.</p>
+				</div>
+			{/if}
 		</Card.Content>
 	</Card.Root>
 </div>

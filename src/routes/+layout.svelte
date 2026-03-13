@@ -125,7 +125,7 @@
 		'/verify-email',
 		'/forgot-password',
 		'/reset-password',
-		'/workspace-selector',
+		'/workspace/select',
 	];
 
 	const getActiveUrl = (url: string) => {
@@ -202,6 +202,8 @@
 	$: activeUrl = getActiveUrl($page.url.pathname);
 	$: user = data.user;
 	$: workspaceName = data.workspaceName;
+	$: workspaces = data.workspaces || [];
+	$: activeWorkspaceId = data.activeWorkspaceId || null;
 	$: showNav = user && !isAuthRoute($page.url.pathname);
 
 	$: {
@@ -223,7 +225,7 @@
 <div class="flex flex-col min-h-screen" style:padding-top={showNav ? undefined : 'env(safe-area-inset-top, 0px)'} use:refresh>
 	<!-- nav (only show when logged in and not on auth routes) -->
 	{#if showNav}
-		<Nav {activeUrl} {user} {workspaceName} {keyboardOpen} />
+		<Nav {activeUrl} {user} {workspaceName} {workspaces} {activeWorkspaceId} {keyboardOpen} />
 	{/if}
 
 	<!-- page content with bottom padding on mobile for fixed nav -->

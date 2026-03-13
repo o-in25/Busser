@@ -14,7 +14,6 @@ const publicRoutes = [
 	'/verify-email/**',
 	'/forgot-password',
 	'/reset-password/**',
-	'/workspace-selector',
 	'/api/mail/user-registration',
 	'/api/oauth/**',
 ];
@@ -34,7 +33,7 @@ const workspaceExemptRoutes = [
 	'/verify-email/**',
 	'/forgot-password',
 	'/reset-password/**',
-	'/workspace-selector',
+	'/workspace/select',
 	'/onboarding',
 	'/settings/**',
 	'/api/**',
@@ -96,7 +95,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		// If no workspace selected and trying to access a route that requires workspace, redirect to selector
 		const isWorkspaceExempt = micromatch.isMatch(slug, workspaceExemptRoutes);
 		if (!activeWorkspaceId && !isWorkspaceExempt) {
-			return redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace-selector');
+			return redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace/select');
 		}
 	}
 

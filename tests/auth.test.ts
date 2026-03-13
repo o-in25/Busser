@@ -43,7 +43,7 @@ function autoStub() {
 			if (typeof prop === 'string' && !(prop in target)) {
 				target[prop] = vi.fn();
 			}
-			return target[prop];
+			return target[prop as string];
 		},
 	});
 }

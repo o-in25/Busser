@@ -2,10 +2,9 @@
 	import {
 		AlertCircle,
 		ArrowRight,
-		Building2,
-		Crown,
 		Globe,
 		HelpCircle,
+		GalleryHorizontalEnd,
 		LogOut,
 		User,
 		Users,
@@ -13,7 +12,7 @@
 
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
-	import { Badge } from '$lib/components/ui/badge';
+	import WorkspaceList from '$lib/components/WorkspaceList.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Label } from '$lib/components/ui/label';
@@ -34,19 +33,10 @@
 		}
 	}
 
-	const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
-
-	// Local state
 	let selectedWorkspaceId = $state<string | null>(null);
 	let setAsDefault = $state(true);
 	let isSubmitting = $state(false);
 
-	// Check if workspace is global
-	function isGlobalWorkspace(workspaceId: string): boolean {
-		return workspaceId === GLOBAL_WORKSPACE_ID;
-	}
-
-	// Select a workspace
 	function selectWorkspace(workspaceId: string) {
 		selectedWorkspaceId = workspaceId;
 	}
@@ -119,7 +109,7 @@
 {#if data.hasNoWorkspaces}
 	<div class="flex flex-col items-center justify-center py-8 text-center">
 		<div class="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-			<Building2 class="h-6 w-6 text-muted-foreground/50" />
+			<GalleryHorizontalEnd class="h-6 w-6 text-muted-foreground/50" />
 		</div>
 		<h3 class="font-semibold mb-1">No Workspaces Available</h3>
 		<p class="text-muted-foreground text-sm">
@@ -128,57 +118,12 @@
 	</div>
 {:else}
 	<!-- Workspace List -->
-	<div class="space-y-2 mb-4 max-h-64 overflow-y-auto">
-		{#each data.workspaces as workspace (workspace.workspaceId)}
-			<button
-				type="button"
-				onclick={() => selectWorkspace(workspace.workspaceId)}
-				class="w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all {selectedWorkspaceId ===
-				workspace.workspaceId
-					? 'border-primary bg-primary/5'
-					: 'border-transparent bg-muted/30 hover:bg-muted/50'}"
-			>
-				<div class="flex items-center gap-3">
-					<div
-						class="p-2 rounded-lg {isGlobalWorkspace(workspace.workspaceId)
-							? 'bg-blue-500/10'
-							: workspace.workspaceType === 'personal'
-								? 'bg-secondary-500/10'
-								: 'bg-neon-green-500/10'}"
-					>
-						{#if isGlobalWorkspace(workspace.workspaceId)}
-							<Globe class="h-4 w-4 text-blue-500" />
-						{:else if workspace.workspaceType === 'personal'}
-							<User class="h-4 w-4 text-secondary-500" />
-						{:else}
-							<Users class="h-4 w-4 text-neon-green-500" />
-						{/if}
-					</div>
-					<div class="text-left">
-						<div class="font-medium text-sm flex items-center gap-2">
-							{workspace.workspaceName}
-							{#if isGlobalWorkspace(workspace.workspaceId)}
-								<Badge variant="outline" class="text-xs">Global</Badge>
-							{/if}
-						</div>
-						<div class="text-xs text-muted-foreground capitalize">
-							{workspace.workspaceType} workspace
-						</div>
-					</div>
-				</div>
-				<div class="flex items-center gap-2">
-					<Badge variant="secondary" class="capitalize text-xs">
-						{#if workspace.workspaceRole === 'owner'}
-							<Crown class="h-3 w-3 mr-1" />
-						{/if}
-						{workspace.workspaceRole}
-					</Badge>
-					{#if selectedWorkspaceId === workspace.workspaceId}
-						<div class="w-2 h-2 rounded-full bg-primary"></div>
-					{/if}
-				</div>
-			</button>
-		{/each}
+	<div class="mb-4 max-h-64 overflow-y-auto">
+		<WorkspaceList
+			workspaces={data.workspaces}
+			activeWorkspaceId={selectedWorkspaceId}
+			onSelect={selectWorkspace}
+		/>
 	</div>
 
 	<!-- Set as default checkbox -->
@@ -189,7 +134,7 @@
 			onCheckedChange={(checked) => (setAsDefault = checked === true)}
 		/>
 		<Label for="setAsDefault" class="text-sm text-muted-foreground cursor-pointer">
-			Remember as my default workspace
+			Remember as my preferred workspace
 		</Label>
 	</div>
 

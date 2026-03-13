@@ -19,7 +19,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 
 	if (!workspaceId) {
 		// Should be handled by hooks, but just in case
-		redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace-selector');
+		redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace/select');
 	}
 
 	const result = await getWorkspace(locals.user.userId, workspaceId);
