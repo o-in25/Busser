@@ -1,22 +1,15 @@
 <script lang="ts">
-	import { Dices, Info, Mail, MailX, Palette, ShieldCheck, Upload, User, X } from 'lucide-svelte';
-	import { getContext } from 'svelte';
+	import { Dices, Info, Palette, Upload, User, X } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { Switch } from '$lib/components/ui/switch';
 	import ThemeMixer from '$lib/components/ThemeMixer.svelte';
 	import { generateRandomAvatarDataUri } from '$lib/utils/avatar';
-	import { notificationStore } from '../../stores';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
-
-	const permissions: string[] = getContext('permissions') || [];
-	let inviteOnly = $state(data.inviteOnly);
-	let toggleFormRef: HTMLFormElement;
 
 	let currentAvatarUrl = $state(data.avatarImageUrl || '');
 	let pendingAvatarDataUri = $state<string | null>(null);
@@ -209,64 +202,6 @@
 		</Card.Content>
 	</Card.Root>
 
-	<!-- Registration Mode Toggle (admin only) -->
-	{#if permissions.includes('edit_admin')}
-		<Card.Root>
-			<Card.Header>
-				<Card.Title class="flex items-center gap-2">
-					<ShieldCheck class="h-5 w-5" />
-					Registration Mode
-				</Card.Title>
-				<Card.Description>Control how new users can sign up</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<div class="flex items-center justify-between gap-4 p-4 rounded-lg bg-muted/30">
-					<div class="space-y-1">
-						<p class="font-medium">Invite-Only Mode</p>
-						<p class="text-sm text-muted-foreground">
-							{inviteOnly ? 'Users must have a valid invitation code to register' : 'Anyone can register without an invitation'}
-						</p>
-					</div>
-					<form
-						bind:this={toggleFormRef}
-						method="POST"
-						action="?/toggleInviteOnly"
-						use:enhance={() => {
-							return async ({ result, update }) => {
-								if (result.type === 'success') {
-									$notificationStore.success = {
-										message: inviteOnly ? 'Invite-only mode enabled.' : 'Open registration enabled.',
-									};
-								} else if (result.type === 'failure') {
-									inviteOnly = !inviteOnly;
-									$notificationStore.error = {
-										message: 'Failed to update registration mode.',
-									};
-								}
-								await update();
-							};
-						}}
-					>
-						<input type="hidden" name="enabled" value={inviteOnly} />
-						<div class="flex items-center gap-3">
-							<MailX class="h-4 w-4 text-red-500" />
-							<Switch
-								checked={inviteOnly}
-								onCheckedChange={(checked) => {
-									inviteOnly = checked;
-									const input = toggleFormRef.querySelector<HTMLInputElement>('input[name="enabled"]');
-									if (input) input.value = String(checked);
-									toggleFormRef.requestSubmit();
-								}}
-							/>
-							<Mail class="h-4 w-4 text-neon-green-500" />
-						</div>
-					</form>
-				</div>
-			</Card.Content>
-		</Card.Root>
-	{/if}
-
 	<!-- App Info Card -->
 	<Card.Root>
 		<Card.Header>
@@ -277,15 +212,9 @@
 			<Card.Description>Application information</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<div class="grid gap-4 sm:grid-cols-2">
-				<div class="p-4 rounded-lg bg-muted/30">
-					<p class="text-sm text-muted-foreground mb-1">Application</p>
-					<p class="font-semibold">Busser</p>
-				</div>
-				<div class="p-4 rounded-lg bg-muted/30">
-					<p class="text-sm text-muted-foreground mb-1">Version</p>
-					<p class="font-semibold">{data.appVersion}</p>
-				</div>
+			<div class="p-4 rounded-lg bg-muted/30">
+				<p class="text-sm text-muted-foreground mb-1">Version</p>
+				<p class="font-semibold">{data.appVersion}</p>
 			</div>
 		</Card.Content>
 	</Card.Root>

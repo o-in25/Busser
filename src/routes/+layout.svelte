@@ -176,17 +176,16 @@
 			const vp = window.visualViewport;
 			if (!vp) return;
 
-			// keyboard is open when viewport shrinks significantly
-			keyboardOpen = vp.height < initialHeight - 100;
+			// only treat viewport shrink as keyboard open when an input is focused
+			const el = document.activeElement;
+			const inputFocused = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT');
+			keyboardOpen = inputFocused ? vp.height < initialHeight - 100 : false;
 
 			// keyboard dismissed (viewport grew back) — blur the active input
 			const grew = vp.height > lastVpHeight + 50;
 			lastVpHeight = vp.height;
-			if (grew) {
-				const el = document.activeElement;
-				if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
-					(el as HTMLElement).blur();
-				}
+			if (grew && inputFocused) {
+				(el as HTMLElement).blur();
 			}
 		}
 		window.visualViewport?.addEventListener('resize', handleViewportResize);

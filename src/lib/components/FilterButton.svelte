@@ -94,11 +94,14 @@
 {#if isMobile}
 	<Sheet.Root bind:open>
 		<Sheet.Trigger
-			class={cn(buttonVariants({ variant: 'outline' }), 'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4')}
+			class={cn(
+				buttonVariants({ variant: 'outline' }),
+				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4'
+			)}
 		>
 			{@render trigger()}
 		</Sheet.Trigger>
-		<Sheet.Content side="bottom" class="rounded-t-2xl max-h-[70vh] overflow-y-auto">
+		<Sheet.Content side="bottom" class="rounded-t-2xl overflow-y-auto">
 			<Sheet.Header>
 				<Sheet.Title>{title}</Sheet.Title>
 			</Sheet.Header>
@@ -107,7 +110,9 @@
 					{#if viewModes && activeView && onViewChange}
 						<div class="flex flex-col gap-1.5">
 							<span class="text-sm font-medium text-muted-foreground">View</span>
-							<div class="flex items-center border border-input/50 rounded-lg overflow-hidden w-fit">
+							<div
+								class="flex items-center border border-input/50 rounded-lg overflow-hidden w-fit"
+							>
 								{#each viewModes as mode}
 									{@const Icon = viewIcons[mode]}
 									<button
@@ -133,7 +138,9 @@
 							)}
 							aria-label="Refresh results"
 						>
-							<RefreshCw class={cn('h-4 w-4 text-muted-foreground', isRefreshing && 'animate-spin')} />
+							<RefreshCw
+								class={cn('h-4 w-4 text-muted-foreground', isRefreshing && 'animate-spin')}
+							/>
 						</button>
 					{/if}
 				</div>
@@ -149,7 +156,10 @@
 {:else}
 	<Popover.Root bind:open>
 		<Popover.Trigger
-			class={cn(buttonVariants({ variant: 'outline' }), 'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4')}
+			class={cn(
+				buttonVariants({ variant: 'outline' }),
+				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4'
+			)}
 		>
 			{@render trigger()}
 		</Popover.Trigger>

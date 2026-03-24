@@ -477,7 +477,13 @@ export class InventoryRepository extends BaseRepository {
 				.table('category')
 				.where('categoryId', categoryId)
 				.where('workspaceId', workspaceId)
-				.select('CategoryId', 'CategoryName', 'CategoryDescription', 'ParentCategoryId', 'CategoryGroupId')
+				.select(
+					'CategoryId',
+					'CategoryName',
+					'CategoryDescription',
+					'ParentCategoryId',
+					'CategoryGroupId'
+				)
 				.first();
 
 			if (!dbResult) throw new Error('No category found for given ID.');
@@ -519,6 +525,10 @@ export class InventoryRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+
+			if (error.code === 'ER_DUP_ENTRY') {
+				return { status: 'error', error: 'A category with this name already exists.' };
+			}
 			return { status: 'error', error: error?.code || 'An unknown error occurred.' };
 		}
 	}
@@ -593,7 +603,9 @@ export class InventoryRepository extends BaseRepository {
 		currentPage: number = 1,
 		perPage: number = 10,
 		search: string | null = null
-	): Promise<PaginationResult<(Category & { productCount: number; categoryGroupName: string | null })[]>> {
+	): Promise<
+		PaginationResult<(Category & { productCount: number; categoryGroupName: string | null })[]>
+	> {
 		try {
 			let query = this.db
 				.table('category')
@@ -727,11 +739,7 @@ export class InventoryRepository extends BaseRepository {
 			let query = this.db
 				.table('inventory as i')
 				.leftJoin('basicrecipestep as rs', function () {
-					this.on('i.ProductId', '=', 'rs.ProductId').andOn(
-						'i.WorkspaceId',
-						'=',
-						'rs.WorkspaceId'
-					);
+					this.on('i.ProductId', '=', 'rs.ProductId').andOn('i.WorkspaceId', '=', 'rs.WorkspaceId');
 				})
 				.where('i.WorkspaceId', workspaceId)
 				.where('i.ProductInStockQuantity', 0);
@@ -872,21 +880,19 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-
 	// supplier CRUD
 	async getSuppliers(workspaceId: string, includeDefault = false): Promise<Supplier[]> {
 		try {
-			let query = this.db
-				.table('supplier')
-				.where(function () {
-					this.whereNull('WorkspaceId').orWhere('WorkspaceId', workspaceId);
-				});
+			let query = this.db.table('supplier').where(function () {
+				this.whereNull('WorkspaceId').orWhere('WorkspaceId', workspaceId);
+			});
 
 			if (!includeDefault) {
 				query = query.whereNot('SupplierId', 1);
 			}
 
-			const result = await query.select(
+			const result = await query
+				.select(
 					'SupplierId',
 					'SupplierName',
 					'SupplierDetails',
@@ -936,10 +942,7 @@ export class InventoryRepository extends BaseRepository {
 				WorkspaceId: workspaceId,
 			});
 
-			const created = await this.db
-				.table('supplier')
-				.where('SupplierId', supplierId)
-				.first();
+			const created = await this.db.table('supplier').where('SupplierId', supplierId).first();
 
 			return { status: 'success', data: created as Supplier };
 		} catch (error: any) {

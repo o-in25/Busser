@@ -18,7 +18,7 @@
 
 <div class="container mx-auto max-w-4xl">
 	<!-- Header -->
-	<div class="flex items-center gap-4 mb-6 mt-4">
+	<div class="hidden md:flex items-center gap-4 mb-6 mt-4">
 		<BackButton fallback="/inventory" />
 		<div>
 			<h1 class="text-2xl font-bold">Edit Product</h1>

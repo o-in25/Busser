@@ -6,7 +6,9 @@
 		Copy,
 		Mail,
 		MailPlus,
+		MailX,
 		Plus,
+		ShieldCheck,
 		Trash2,
 		X,
 	} from 'lucide-svelte';
@@ -20,12 +22,15 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { Switch } from '$lib/components/ui/switch';
 	import * as Table from '$lib/components/ui/table';
 
 	import { notificationStore } from '../../../stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+	let inviteOnly = $state(data.inviteOnly);
+	let toggleFormRef: HTMLFormElement;
 	let formModal = $state(false);
 	let selectedDate = $state('');
 
@@ -279,6 +284,62 @@
 					</Button>
 				</div>
 			{/if}
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Registration Mode Toggle -->
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="flex items-center gap-2">
+				<ShieldCheck class="h-5 w-5" />
+				Registration Mode
+			</Card.Title>
+			<Card.Description>Control how new users can sign up</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			<div class="flex items-center justify-between gap-4 p-4 rounded-lg bg-muted/30">
+				<div class="space-y-1">
+					<p class="font-medium">Invite-Only Mode</p>
+					<p class="text-sm text-muted-foreground">
+						{inviteOnly ? 'Users must have a valid invitation code to register' : 'Anyone can register without an invitation'}
+					</p>
+				</div>
+				<form
+					bind:this={toggleFormRef}
+					method="POST"
+					action="?/toggleInviteOnly"
+					use:enhance={() => {
+						return async ({ result, update }) => {
+							if (result.type === 'success') {
+								$notificationStore.success = {
+									message: inviteOnly ? 'Invite-only mode enabled.' : 'Open registration enabled.',
+								};
+							} else if (result.type === 'failure') {
+								inviteOnly = !inviteOnly;
+								$notificationStore.error = {
+									message: 'Failed to update registration mode.',
+								};
+							}
+							await update();
+						};
+					}}
+				>
+					<input type="hidden" name="enabled" value={inviteOnly} />
+					<div class="flex items-center gap-3">
+						<MailX class="h-4 w-4 text-red-500" />
+						<Switch
+							checked={inviteOnly}
+							onCheckedChange={(checked) => {
+								inviteOnly = checked;
+								const input = toggleFormRef.querySelector<HTMLInputElement>('input[name="enabled"]');
+								if (input) input.value = String(checked);
+								toggleFormRef.requestSubmit();
+							}}
+						/>
+						<Mail class="h-4 w-4 text-neon-green-500" />
+					</div>
+				</form>
+			</div>
 		</Card.Content>
 	</Card.Root>
 </div>
