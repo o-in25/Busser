@@ -35,15 +35,15 @@
 	<div
 		class={cn(
 			'relative flex flex-col items-center rounded-xl border-2 transition-all duration-200 overflow-hidden',
-			'bg-white dark:bg-gray-800',
+			'bg-background',
 			selected
 				? 'border-primary ring-4 ring-primary/20 shadow-lg shadow-primary/10'
-				: 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
+				: 'border-transparent hover:border-primary/50'
 		)}
 	>
 		<!-- Image container - fills the card -->
 		<div
-			class="relative w-full aspect-[4/3] bg-white dark:bg-gray-200 flex items-center justify-center p-2"
+			class="relative w-full aspect-[4/3] flex items-center justify-center"
 		>
 			{#if selected}
 				<div class="absolute inset-0 bg-primary/5 z-10"></div>

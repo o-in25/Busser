@@ -10,6 +10,7 @@
 		Image,
 		Plus,
 		Sparkles,
+		Trash2,
 		Wand2,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
@@ -375,17 +376,7 @@
 	}
 </script>
 
-<!-- Draft manager (add mode only) -->
-{#if isAddMode}
-	<FormDraftManager
-		bind:this={draftManager}
-		draftKey="catalog-form"
-		data={draftData}
-		onrestore={handleRestoreDraft}
-	/>
-{/if}
-
-<div class="px-2 sm:px-4 py-4 mt-3">
+<div class="px-2 sm:px-4 pt-1 pb-4 md:py-4 md:mt-3">
 	<form
 		class="relative"
 		method="POST"
@@ -440,7 +431,7 @@
 		}}
 	>
 		<!-- Mobile wizard view -->
-		<CatalogFormWizard bind:currentStep={wizardStep} canProceed={canProceedWizard}>
+		<CatalogFormWizard bind:currentStep={wizardStep} canProceed={canProceedWizard} cancelHref="/catalog">
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Step 1: Details (Name + Spirit Category) -->
@@ -897,6 +888,28 @@
 		</Dialog.Root>
 	{/if}
 </div>
+
+<!-- Draft manager (add mode only) -->
+{#if isAddMode}
+	<FormDraftManager
+		bind:this={draftManager}
+		draftKey="catalog-form"
+		data={draftData}
+		onrestore={handleRestoreDraft}
+	/>
+{/if}
+
+<!-- Delete pill (edit mode, mobile only) -->
+{#if !isAddMode}
+	<button
+		type="button"
+		onclick={() => (modalOpen = true)}
+		class="mt-3 mx-auto w-fit flex items-center gap-2 text-xs text-destructive/60 hover:text-destructive bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-destructive/20 hover:border-destructive/40 shadow-sm transition-colors cursor-pointer md:hidden"
+	>
+		<Trash2 class="h-3 w-3" />
+		<span>Delete</span>
+	</button>
+{/if}
 
 <style>
 	/* placeholder shown where dragged item will be inserted */

@@ -13,12 +13,13 @@
 		activeUrl$.includes('account') || (!isAdmin && activeUrl$.includes('/users/'));
 
 	let activeClass =
-		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed p-4 text-primary-600 bg-white/60 dark:bg-zinc-800/50 backdrop-blur-sm rounded-t-lg dark:text-primary-500';
+		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-primary-foreground bg-primary/25 dark:bg-primary/20 backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)] rounded-xl';
 	let defaultClass =
-		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed p-4 text-gray-500 rounded-t-lg hover:text-gray-600 hover:bg-white/40 dark:text-gray-400 dark:hover:bg-zinc-800/40 dark:hover:text-gray-300 transition-colors';
+		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-muted-foreground rounded-xl hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground transition-all duration-200';
 </script>
 
-<ul class="flex flex-wrap md:flex-nowrap space-x-2 rtl:space-x-reverse">
+<nav class="flex md:inline-flex rounded-xl backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 mb-4">
+<ul class="flex w-full flex-wrap md:flex-nowrap space-x-1 rtl:space-x-reverse">
 	<li class="group flex-1" role="presentation">
 		<a
 			href="/settings"
@@ -98,7 +99,7 @@
 		</a>
 	</li>
 </ul>
-<div class="h-0.5 bg-zinc-200/50 dark:bg-zinc-700/40"></div>
-<div class="p-4 glass-surface mt-4">
+</nav>
+<div class="p-4 glass-surface">
 	<slot />
 </div>

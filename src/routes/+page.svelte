@@ -6,7 +6,8 @@
 		BookOpen,
 		CheckCircle2,
 		ChefHat,
-		ChevronRight,
+		ChevronDown,
+	ChevronRight,
 		FlaskConical,
 		GlassWater,
 		Lightbulb,
@@ -27,7 +28,7 @@
 		DollarSign,
 		X,
 	} from 'lucide-svelte';
-	import { fade } from 'svelte/transition';
+	import { fade, slide } from 'svelte/transition';
 
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -114,6 +115,8 @@
 	// Filter state for gallery
 	let sortBy: string | number = $state('all');
 	let activeMood: string | null = $state(null);
+	let moodExpanded = $state(false);
+	let spiritExpanded = $state(false);
 
 	// mood definitions
 	const moods = [
@@ -848,9 +851,59 @@
 
 			<!-- Mood Filter Chips -->
 			{#if gallery.length > 0}
-				<div class="flex items-center gap-2 mb-2">
+				<!-- mobile: stacked card deck that fans out -->
+				<div class="sm:hidden mb-2 flex items-center overflow-x-auto scrollbar-none">
+					<!-- label badge with box-shadow stack effect -->
+					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 					<span
-						class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0 hidden sm:block"
+						class="inline-flex items-center rounded-full h-7 text-xs px-3 bg-background/60 backdrop-blur-sm border border-border/50 shrink-0 whitespace-nowrap cursor-pointer transition-all duration-300 ease-out"
+						style={!moodExpanded
+							? 'box-shadow: 7px 0 0 -1px hsl(var(--background)), 7px 0 0 0px hsl(var(--border)), 14px 0 0 -1px hsl(var(--background)), 14px 0 0 0px hsl(var(--border)); margin-right: 14px;'
+							: 'margin-right: 0;'}
+						onclick={() => (moodExpanded = !moodExpanded)}
+					>
+						Mood
+						{#if activeMood && !moodExpanded}
+							<span class="ml-1 text-primary text-[10px]">{moods.find((m) => m.id === activeMood)?.label}</span>
+						{/if}
+					</span>
+					<!-- real filter badges -->
+					{#each moods as mood}
+						{#if moodCounts[mood.id] > 0}
+							<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+							<span
+								class="inline-flex items-center rounded-full h-7 text-xs border border-dashed shrink-0 cursor-pointer shadow-sm whitespace-nowrap
+									transition-all duration-300 ease-out
+									{activeMood === mood.id
+										? 'bg-primary text-primary-foreground border-primary'
+										: 'bg-background/60 backdrop-blur-sm border-border/50'}
+									{moodExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
+								onclick={() => {
+									activeMood = activeMood === mood.id ? null : mood.id;
+									moodExpanded = false;
+								}}
+							>
+								{mood.label}
+								<span class="text-[10px] opacity-60 ml-1">{moodCounts[mood.id]}</span>
+							</span>
+						{/if}
+					{/each}
+					<!-- close button -->
+					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+					<span
+						class="inline-flex items-center justify-center rounded-full h-7 border border-border/50 shrink-0 cursor-pointer bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-foreground
+							transition-all duration-300 ease-out
+							{moodExpanded ? 'w-7 ml-1.5 opacity-100' : 'w-0 ml-0 opacity-0 overflow-hidden'}"
+						onclick={() => (moodExpanded = false)}
+					>
+						<X class="h-3 w-3" />
+					</span>
+				</div>
+
+				<!-- desktop: horizontal scroll -->
+				<div class="hidden sm:flex items-center gap-2 mb-2">
+					<span
+						class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0"
 						>Mood</span
 					>
 					<div class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mb-1">
@@ -882,9 +935,79 @@
 			{/if}
 
 			<!-- Spirit Filter Chips -->
-			<div class="flex items-center gap-2 mb-4">
+			<!-- mobile: stacked card deck that fans out -->
+			<div class="sm:hidden mb-4 flex items-center overflow-x-auto scrollbar-none">
+				<!-- label badge with box-shadow stack effect -->
+				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 				<span
-					class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0 hidden sm:block"
+					class="inline-flex items-center rounded-full h-7 text-xs px-3 bg-background/60 backdrop-blur-sm border border-border/50 shrink-0 whitespace-nowrap cursor-pointer transition-all duration-300 ease-out"
+					style={!spiritExpanded
+						? 'box-shadow: 7px 0 0 -1px hsl(var(--background)), 7px 0 0 0px hsl(var(--border)), 14px 0 0 -1px hsl(var(--background)), 14px 0 0 0px hsl(var(--border)); margin-right: 14px;'
+						: 'margin-right: 0;'}
+					onclick={() => (spiritExpanded = !spiritExpanded)}
+				>
+					Spirit
+					{#if sortBy !== 'all' && !spiritExpanded}
+						<span class="ml-1 text-primary text-[10px]">{spirits.find((s) => s.recipeCategoryId === sortBy)?.recipeCategoryDescription}</span>
+					{/if}
+				</span>
+				<!-- "All" badge -->
+				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+				<span
+					class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
+						transition-all duration-300 ease-out
+						{sortBy === 'all'
+							? 'bg-primary text-primary-foreground border-primary'
+							: 'bg-background/60 backdrop-blur-sm border-border/50'}
+						{spiritExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
+					onclick={() => {
+						setFilterType('all');
+						spiritExpanded = false;
+					}}
+				>
+					All
+					<span class="text-[10px] opacity-60 ml-1">{gallery.length}</span>
+				</span>
+				<!-- real spirit badges -->
+				{#each spirits as spirit}
+					{@const count = gallery.filter(
+						(g) => g.data.recipeCategoryId === spirit.recipeCategoryId
+					).length}
+					{#if count > 0}
+						<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+						<span
+							class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
+								transition-all duration-300 ease-out
+								{sortBy === spirit.recipeCategoryId
+									? 'bg-primary text-primary-foreground border-primary'
+									: 'bg-background/60 backdrop-blur-sm border-border/50'}
+								{spiritExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
+							onclick={() => {
+								setFilterType(spirit.recipeCategoryId);
+								spiritExpanded = false;
+							}}
+						>
+							{spirit.recipeCategoryDescription}
+							<span class="text-[10px] opacity-60 ml-1">{count}</span>
+						</span>
+					{/if}
+				{/each}
+				<!-- close button -->
+				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+				<span
+					class="inline-flex items-center justify-center rounded-full h-7 border border-border/50 shrink-0 cursor-pointer bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-foreground
+						transition-all duration-300 ease-out
+						{spiritExpanded ? 'w-7 ml-1.5 opacity-100' : 'w-0 ml-0 opacity-0 overflow-hidden'}"
+					onclick={() => (spiritExpanded = false)}
+				>
+					<X class="h-3 w-3" />
+				</span>
+			</div>
+
+			<!-- desktop: horizontal scroll -->
+			<div class="hidden sm:flex items-center gap-2 mb-4">
+				<span
+					class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0"
 					>Spirit</span
 				>
 				<div class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mb-1">

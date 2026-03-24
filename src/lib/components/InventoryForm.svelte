@@ -12,6 +12,7 @@
 		Sparkles,
 		Store,
 		Wand2,
+		Trash2,
 		Wind,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
@@ -298,17 +299,7 @@
 	});
 </script>
 
-<!-- Draft Manager (only for add mode) -->
-{#if action === 'add'}
-	<FormDraftManager
-		bind:this={draftManager}
-		draftKey="inventory-form"
-		data={draftData}
-		onrestore={handleDraftRestore}
-	/>
-{/if}
-
-<div class="px-4 p-4 mt-3">
+<div class="px-4 pt-1 pb-4 md:p-4 md:mt-3">
 	<form
 		class="relative"
 		method="POST"
@@ -352,6 +343,7 @@
 			steps={wizardSteps}
 			bind:currentStep={currentWizardStep}
 			canProceed={canProceedWizard}
+			cancelHref="/inventory"
 		>
 			{#snippet children({ step })}
 				{#if step === 0}
@@ -903,3 +895,25 @@
 		</Dialog.Content>
 	</Dialog.Root>
 </div>
+
+<!-- Draft Manager (only for add mode) -->
+{#if action === 'add'}
+	<FormDraftManager
+		bind:this={draftManager}
+		draftKey="inventory-form"
+		data={draftData}
+		onrestore={handleDraftRestore}
+	/>
+{/if}
+
+<!-- Delete pill (edit mode, mobile only) -->
+{#if action === 'edit'}
+	<button
+		type="button"
+		onclick={() => (modalOpen = true)}
+		class="mt-3 mx-auto w-fit flex items-center gap-2 text-xs text-destructive/60 hover:text-destructive bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-destructive/20 hover:border-destructive/40 shadow-sm transition-colors cursor-pointer md:hidden"
+	>
+		<Trash2 class="h-3 w-3" />
+		<span>Delete</span>
+	</button>
+{/if}
