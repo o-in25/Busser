@@ -1,5 +1,6 @@
 <svelte:head>
 	<title>Cookie Policy - Busser</title>
+	<meta name="description" content="Learn how Busser uses cookies and similar technologies on our website." />
 </svelte:head>
 
 <h1 class="text-3xl font-bold mb-6">Cookie Policy</h1>

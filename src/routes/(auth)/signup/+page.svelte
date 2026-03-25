@@ -35,6 +35,7 @@
 
 <svelte:head>
 	<title>Sign Up - Busser</title>
+	<meta name="description" content="Create a free Busser account to start managing your home bar and discovering cocktails." />
 </svelte:head>
 
 <div class="flex flex-col space-y-6">
