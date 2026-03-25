@@ -85,13 +85,15 @@
 	{#if category.categoryDescription}
 		<p class="text-sm text-muted-foreground mb-3">{category.categoryDescription}</p>
 	{/if}
-	<a
-		href="/inventory/category/{category.categoryId}/edit"
-		class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-	>
-		<Pencil class="h-3.5 w-3.5" />
-		Edit category
-	</a>
+	{#if canModify}
+		<a
+			href="/inventory/category/{category.categoryId}/edit"
+			class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+		>
+			<Pencil class="h-3.5 w-3.5" />
+			Edit category
+		</a>
+	{/if}
 </div>
 
 <!-- Tree -->

@@ -32,6 +32,17 @@ export const load = (async ({ parent, locals }) => {
 		}
 	}
 
+	// ready to make and almost-there counts
+	const availableResult = await catalogRepo.getAvailableRecipes(workspaceId);
+	const availableCount =
+		availableResult.status === 'success' ? (availableResult.data?.length ?? 0) : 0;
+	const almostThereRecipes = await catalogRepo.getAlmostThereRecipes(workspaceId);
+	const almostThereCount = almostThereRecipes.length;
+
+	// highest impact ingredient to buy
+	const impactIngredients = await catalogRepo.getHighestImpactIngredients(workspaceId);
+	const topIngredient = impactIngredients.length > 0 ? impactIngredients[0] : null;
+
 	// Get workspace featured cocktails (curated by workspace admins)
 	const featuredCocktails = await catalogRepo.getFeatured(workspaceId);
 
@@ -53,7 +64,7 @@ export const load = (async ({ parent, locals }) => {
 	const featuredRecipeIds = new Set(featuredCocktails.map((f) => f.recipeId));
 
 	// Find most popular spirit (one with most recipes)
-	let popularSpirit = spirits[0] || null;
+	let popularSpirit: (typeof spirits)[0] | null = null;
 	let maxCount = 0;
 	for (const spirit of spirits) {
 		const count = spiritCounts[spirit.recipeCategoryId] || 0;
@@ -72,6 +83,9 @@ export const load = (async ({ parent, locals }) => {
 			featuredCocktails,
 			totalRecipes,
 			popularSpirit,
+			availableCount,
+			almostThereCount,
+			topIngredient,
 			favoriteRecipeIds: [...favoriteRecipeIds],
 			featuredRecipeIds: [...featuredRecipeIds],
 		},

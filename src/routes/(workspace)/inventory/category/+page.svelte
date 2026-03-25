@@ -153,57 +153,25 @@
 <InventoryNav />
 
 <!-- Hero Section -->
-<div
-	class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4"
->
-	<div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
-	<div class="relative px-6 py-8 md:py-10">
-		<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-			<div>
-				<h1 class="text-3xl md:text-4xl font-bold mb-2">Categories</h1>
-				<p class="text-muted-foreground">
-					Organize your inventory with categories and groups.
-				</p>
-			</div>
+<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5">
+	<h1 class="text-2xl font-bold mb-3">Categories</h1>
+	<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
+		<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
+			<Tags class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{data.pagination.total}</span>
+			<span class="text-xs text-muted-foreground">Categories</span>
 		</div>
 
-		<!-- Stat Cards -->
-		<div class="grid grid-cols-3 gap-2 md:gap-3 mt-6">
-			<div
-				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
-			>
-				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 shrink-0">
-					<Tags class="h-4 w-4 md:h-5 md:w-5 text-primary" />
-				</div>
-				<div class="text-center md:text-left">
-					<p class="text-lg md:text-xl font-bold">{data.pagination.total}</p>
-					<p class="text-[10px] md:text-xs text-muted-foreground">Categories</p>
-				</div>
-			</div>
+		<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
+			<Package class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{data.totalProducts}</span>
+			<span class="text-xs text-muted-foreground">Products</span>
+		</div>
 
-			<div
-				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
-			>
-				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 shrink-0">
-					<Package class="h-4 w-4 md:h-5 md:w-5 text-primary" />
-				</div>
-				<div class="text-center md:text-left">
-					<p class="text-lg md:text-xl font-bold">{data.totalProducts}</p>
-					<p class="text-[10px] md:text-xs text-muted-foreground">Products</p>
-				</div>
-			</div>
-
-			<div
-				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
-			>
-				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 shrink-0">
-					<Layers class="h-4 w-4 md:h-5 md:w-5 text-primary" />
-				</div>
-				<div class="text-center md:text-left">
-					<p class="text-lg md:text-xl font-bold">{categoryGroups.length}</p>
-					<p class="text-[10px] md:text-xs text-muted-foreground">Groups</p>
-				</div>
-			</div>
+		<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
+			<Layers class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{categoryGroups.length}</span>
+			<span class="text-xs text-muted-foreground">Groups</span>
 		</div>
 	</div>
 </div>
@@ -548,8 +516,11 @@
 </Dialog.Root>
 
 <style>
-	.bg-grid-pattern {
-		background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-		background-size: 24px 24px;
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
 	}
 </style>

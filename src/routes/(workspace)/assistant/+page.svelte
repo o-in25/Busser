@@ -77,14 +77,14 @@
 				<div>
 					<h2 class="text-lg font-semibold">View-only access</h2>
 					<p class="text-sm text-muted-foreground mt-1">
-						You need editor or owner access to use the AI assistant in this workspace. The assistant
-						modifies your catalog and inventory, which requires write permissions.
+						Busser AI modifies your catalog and inventory, which requires write permissions for this
+						Workspace.
 					</p>
 				</div>
 
 				{#if data.editableWorkspaces.length > 0}
 					<div class="pt-2 space-y-2">
-						<p class="text-sm font-medium">Switch to a workspace you can edit:</p>
+						<p class="text-sm font-medium">Switch to a Workspace you can edit:</p>
 						<div class="flex flex-col gap-2">
 							{#each data.editableWorkspaces as ws}
 								<Button
