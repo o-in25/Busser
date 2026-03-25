@@ -192,6 +192,7 @@
 
 <svelte:head>
 	<title>Busser - Home Bar Management</title>
+	<meta name="description" content="Manage your home bar — track inventory, discover cocktails you can make, and collaborate with friends. From shelf to shaker." />
 </svelte:head>
 
 {#if !$page.data.user}

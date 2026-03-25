@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /inventory
+Disallow: /catalog
+Disallow: /assistant
+Disallow: /settings
+Disallow: /onboarding
+Disallow: /workspace
+Disallow: /api
+
+Sitemap: https://busserapp.com/sitemap.xml

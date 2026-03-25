@@ -48,6 +48,7 @@
 
 <svelte:head>
 	<title>Log In - Busser</title>
+	<meta name="description" content="Log in to Busser to manage your home bar inventory and discover cocktail recipes." />
 </svelte:head>
 <div class="flex flex-col space-y-6">
 	<h3 class="text-xl font-medium">Log in</h3>

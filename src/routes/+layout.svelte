@@ -6,6 +6,9 @@
 
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { derived } from 'svelte/store';
+
+	const canonical = derived(page, ($page) => `https://busserapp.com${$page.url.pathname}`);
 	import { toast } from 'svelte-sonner';
 
 	import Footer from '$lib/components/Footer.svelte';
@@ -220,6 +223,10 @@
 		$notificationStore.error = null;
 	}
 </script>
+
+<svelte:head>
+	<link rel="canonical" href={$canonical} />
+</svelte:head>
 
 <div class="flex flex-col min-h-screen" style:padding-top={showNav ? undefined : 'env(safe-area-inset-top, 0px)'} use:refresh>
 	<!-- nav (only show when logged in and not on auth routes) -->
