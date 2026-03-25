@@ -167,7 +167,7 @@
 
 	<div class="mb-4 mt-4 flex items-center justify-between">
 		<BackButton
-			href="/catalog/browse"
+			href="/catalog"
 			label="Back to Catalog"
 			size="sm"
 			class="max-sm:[&>span]:hidden max-sm:gap-0"
@@ -192,8 +192,8 @@
 			></div>
 		{/if}
 
-		<div class="relative px-4 py-4 sm:px-6 sm:py-5 flex flex-col gap-3">
-			<h1 class="text-2xl font-bold">{data.spiritContent.displayName}</h1>
+		<div class="relative px-4 pt-16 pb-4 sm:px-6 sm:pt-20 sm:pb-5 flex flex-col gap-3">
+			<h1 class="text-3xl sm:text-4xl font-bold">{data.spiritContent.displayName}</h1>
 
 			<!-- Action pills -->
 			<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
@@ -203,13 +203,13 @@
 					<span class="text-xs text-muted-foreground">{data.pagination.total === 1 ? 'Recipe' : 'Recipes'}</span>
 				</div>
 
-				<a
-					href="#spirit-guide"
-					class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+				<button
+					onclick={() => document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })}
+					class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
 				>
 					<BookOpen class="h-4 w-4 text-primary shrink-0" />
 					<span class="text-xs text-muted-foreground">Spirit Guide &darr;</span>
-				</a>
+				</button>
 			</div>
 		</div>
 	</div>
@@ -354,55 +354,65 @@
 	</section>
 
 	<!-- Spirit Guide (educational content) -->
-	<section id="spirit-guide" class="scroll-mt-4">
-		<!-- History & Overview -->
-		<div class="reveal-on-scroll" use:reveal>
-			<SpiritOverview
-				overview={data.spiritContent.overview}
-				funFact={data.spiritContent.funFact}
-				accentColor={data.spiritContent.accentColor}
-			/>
-		</div>
+	<div id="spirit-guide" class="scroll-mt-4 mb-12">
+		<Card.Root>
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2">
+					<BookOpen class="h-5 w-5 text-primary" />
+					{data.spiritContent.displayName} Spirit Guide
+				</Card.Title>
+			</Card.Header>
+			<Card.Content>
+				<!-- History & Overview -->
+				<div class="reveal-on-scroll" use:reveal>
+					<SpiritOverview
+						overview={data.spiritContent.overview}
+						funFact={data.spiritContent.funFact}
+						accentColor={data.spiritContent.accentColor}
+					/>
+				</div>
 
-		<!-- gradient divider -->
-		<div
-			class="h-px my-4 mx-auto max-w-md"
-			style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-		></div>
+				<!-- gradient divider -->
+				<div
+					class="h-px my-4 mx-auto max-w-md"
+					style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
+				></div>
 
-		<!-- Subcategories -->
-		<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
-			<SpiritSubcategories
-				subcategories={data.spiritContent.subcategories}
-				accentColor={data.spiritContent.accentColor}
-			/>
-		</div>
+				<!-- Subcategories -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
+					<SpiritSubcategories
+						subcategories={data.spiritContent.subcategories}
+						accentColor={data.spiritContent.accentColor}
+					/>
+				</div>
 
-		<!-- gradient divider -->
-		<div
-			class="h-px my-4 mx-auto max-w-md"
-			style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-		></div>
+				<!-- gradient divider -->
+				<div
+					class="h-px my-4 mx-auto max-w-md"
+					style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
+				></div>
 
-		<!-- Geographic Origins -->
-		<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
-			<SpiritRegions
-				regions={data.spiritContent.regions}
-				accentColor={data.spiritContent.accentColor}
-			/>
-		</div>
+				<!-- Geographic Origins -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
+					<SpiritRegions
+						regions={data.spiritContent.regions}
+						accentColor={data.spiritContent.accentColor}
+					/>
+				</div>
 
-		<!-- gradient divider -->
-		<div
-			class="h-px my-4 mx-auto max-w-md"
-			style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-		></div>
+				<!-- gradient divider -->
+				<div
+					class="h-px my-4 mx-auto max-w-md"
+					style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
+				></div>
 
-		<!-- Sources -->
-		<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
-			<SpiritSources sources={data.spiritContent.sources} />
-		</div>
-	</section>
+				<!-- Sources -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
+					<SpiritSources sources={data.spiritContent.sources} />
+				</div>
+			</Card.Content>
+		</Card.Root>
+	</div>
 </div>
 
 <style>

@@ -140,10 +140,12 @@
 </svelte:head>
 
 <!-- Hero Section -->
-<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5">
+<div
+	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5"
+>
 	<!-- Row 1: Title + Search -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-		<h1 class="text-2xl font-bold">Cocktail Catalog</h1>
+		<h1 class="text-2xl font-bold">Catalog</h1>
 		<form onsubmit={handleSearch} class="flex gap-2 sm:max-w-xs w-full sm:w-auto">
 			<div class="relative flex-1">
 				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -159,7 +161,9 @@
 	</div>
 
 	<!-- Row 2: Smart Action Pills -->
-	<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
+	<div
+		class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1"
+	>
 		<a
 			href="/catalog/browse"
 			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
@@ -191,7 +195,8 @@
 
 		{#if popularSpirit}
 			<a
-				href="/catalog/browse/{idToSlug[popularSpirit.recipeCategoryId] ?? popularSpirit.recipeCategoryId}"
+				href="/catalog/browse/{idToSlug[popularSpirit.recipeCategoryId] ??
+					popularSpirit.recipeCategoryId}"
 				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
 			>
 				<TrendingUp class="h-4 w-4 text-primary shrink-0" />
@@ -199,7 +204,9 @@
 				<span class="text-xs text-muted-foreground">Most Popular</span>
 			</a>
 		{:else}
-			<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
+			<div
+				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0"
+			>
 				<TrendingUp class="h-4 w-4 text-muted-foreground shrink-0" />
 				<span class="text-sm font-bold">&mdash;</span>
 				<span class="text-xs text-muted-foreground">Most Popular</span>
@@ -216,6 +223,14 @@
 				<span class="text-xs text-muted-foreground">Buy {topIngredient.ingredientName}</span>
 			</a>
 		{/if}
+
+		<a
+			href="/catalog/browse"
+			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+		>
+			<ArrowRight class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-xs text-muted-foreground">View All</span>
+		</a>
 	</div>
 </div>
 
@@ -226,19 +241,15 @@
 			<GlassWater class="h-6 w-6 text-primary" />
 			Explore by Spirit
 		</h2>
-		<a
-			class="hidden sm:flex text-sm font-medium hover:underline items-center text-muted-foreground hover:text-foreground transition-colors"
-			href="/catalog/browse"
-		>
-			View all cocktails
-			<ArrowRight class="ms-1 h-4 w-4" />
-		</a>
 	</div>
 
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 		{#each spirits as spirit}
 			{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
-			<a href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ?? spirit.recipeCategoryId}" class="block group">
+			<a
+				href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ?? spirit.recipeCategoryId}"
+				class="block group"
+			>
 				<Card.Root
 					class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300"
 				>
@@ -281,13 +292,6 @@
 		{/each}
 	</div>
 
-	<!-- Mobile: View all button -->
-	<div class="flex sm:hidden justify-center mt-4">
-		<a href="/catalog/browse" class={cn(buttonVariants({ variant: 'outline' }), 'w-full')}>
-			View All Cocktails
-			<ArrowRight class="ml-2 h-4 w-4" />
-		</a>
-	</div>
 </section>
 
 <!-- Featured Cocktail + Recent Cocktails Grid -->
@@ -383,10 +387,7 @@
 						<div
 							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
 						>
-							<a
-								href="/catalog/{cocktail.recipeId}"
-								class="shrink-0"
-							>
+							<a href="/catalog/{cocktail.recipeId}" class="shrink-0">
 								<SkeletonImage
 									src={cocktail.recipeImageUrl}
 									alt={cocktail.recipeName}
@@ -517,7 +518,9 @@
 			<p class="text-xs text-muted-foreground/70 italic">
 				— {currentTip.source}
 			</p>
-			<p class="text-xs text-neon-amber-600/50 dark:text-neon-amber-400/50 mt-3">Click for another tip</p>
+			<p class="text-xs text-neon-amber-600/50 dark:text-neon-amber-400/50 mt-3">
+				Click for another tip
+			</p>
 		</Card.Content>
 	</Card.Root>
 
