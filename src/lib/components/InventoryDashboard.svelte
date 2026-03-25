@@ -16,68 +16,44 @@
 	}
 </script>
 
-<!-- Header Section with Dashboard Stats -->
-<div
-	class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4"
->
-	<div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
-	<div class="relative px-6 py-8 md:py-10">
-		<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-			<div>
-				<h1 class="text-3xl md:text-4xl font-bold mb-2">Inventory</h1>
-				<p class="text-muted-foreground">
-					Manage your {stats.total} products across {stats.categoryBreakdown.length} categories.
-				</p>
-			</div>
-		</div>
+<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5">
+	<h1 class="text-2xl font-bold mb-3">Inventory</h1>
+	<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
+		<button
+			onclick={() => applyFilter('all')}
+			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
+		>
+			<Package class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{stats.total}</span>
+			<span class="text-xs text-muted-foreground">Products</span>
+		</button>
 
-		<!-- Quick Stats -->
-		<div class="grid grid-cols-3 gap-2 md:gap-3 mt-6">
-			<button
-				onclick={() => applyFilter('all')}
-				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors cursor-pointer"
-			>
-				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 shrink-0">
-					<Package class="h-4 w-4 md:h-5 md:w-5 text-primary" />
-				</div>
-				<div class="text-center md:text-left">
-					<p class="text-lg md:text-xl font-bold">{stats.total}</p>
-					<p class="text-[10px] md:text-xs text-muted-foreground">Total</p>
-				</div>
-			</button>
+		<button
+			onclick={() => applyFilter('in-stock')}
+			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-neon-green-500/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
+		>
+			<CheckCircle2 class="h-4 w-4 text-neon-green-500 shrink-0" />
+			<span class="text-sm font-bold">{stats.inStock}</span>
+			<span class="text-xs text-muted-foreground">In Stock</span>
+		</button>
 
-			<button
-				onclick={() => applyFilter('in-stock')}
-				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-neon-green-500/50 hover:bg-background transition-colors cursor-pointer"
-			>
-				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-neon-green-500/10 shrink-0">
-					<CheckCircle2 class="h-4 w-4 md:h-5 md:w-5 text-neon-green-500" />
-				</div>
-				<div class="text-center md:text-left">
-					<p class="text-lg md:text-xl font-bold">{stats.inStock}</p>
-					<p class="text-[10px] md:text-xs text-muted-foreground">In Stock</p>
-				</div>
-			</button>
-
-			<button
-				onclick={() => applyFilter('out-of-stock')}
-				class="flex flex-col items-center gap-2 py-3 md:flex-row md:gap-3 md:px-4 md:py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-red-500/50 hover:bg-background transition-colors cursor-pointer"
-			>
-				<div class="flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-red-500/10 shrink-0">
-					<XCircle class="h-4 w-4 md:h-5 md:w-5 text-red-500" />
-				</div>
-				<div class="text-center md:text-left">
-					<p class="text-lg md:text-xl font-bold">{stats.outOfStock}</p>
-					<p class="text-[10px] md:text-xs text-muted-foreground">Out of Stock</p>
-				</div>
-			</button>
-		</div>
+		<button
+			onclick={() => applyFilter('out-of-stock')}
+			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-red-500/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
+		>
+			<XCircle class="h-4 w-4 text-red-500 shrink-0" />
+			<span class="text-sm font-bold">{stats.outOfStock}</span>
+			<span class="text-xs text-muted-foreground">Out of Stock</span>
+		</button>
 	</div>
 </div>
 
 <style>
-	.bg-grid-pattern {
-		background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-		background-size: 24px 24px;
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
 	}
 </style>

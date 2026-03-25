@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronLeft, FlaskConical, Plus, Search, X } from 'lucide-svelte';
+	import { BookOpen, ChevronLeft, FlaskConical, Plus, Search, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -13,11 +13,9 @@
 	import SpiritSources from '$lib/components/SpiritSources.svelte';
 	import SpiritSubcategories from '$lib/components/SpiritSubcategories.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
-	import { idToSlug } from '$lib/spirits';
 	import { reveal } from '$lib/actions/reveal';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
@@ -194,78 +192,27 @@
 			></div>
 		{/if}
 
-		<div class="relative px-6 py-12 md:py-16">
-			<h1 class="text-4xl md:text-5xl font-bold mb-3">
-				{data.spiritContent.displayName}
-			</h1>
+		<div class="relative px-4 py-4 sm:px-6 sm:py-5 flex flex-col gap-3">
+			<h1 class="text-2xl font-bold">{data.spiritContent.displayName}</h1>
 
-			<p class="text-muted-foreground max-w-2xl text-lg">
-				{data.spiritContent.overview.intro}
-			</p>
+			<!-- Action pills -->
+			<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
+				<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
+					<FlaskConical class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold">{data.pagination.total}</span>
+					<span class="text-xs text-muted-foreground">{data.pagination.total === 1 ? 'Recipe' : 'Recipes'}</span>
+				</div>
+
+				<a
+					href="#spirit-guide"
+					class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+				>
+					<BookOpen class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-xs text-muted-foreground">Spirit Guide &darr;</span>
+				</a>
+			</div>
 		</div>
 	</div>
-
-	<!-- Spirit nav badges -->
-	<div class="flex flex-wrap gap-2 mb-10">
-		{#each data.spirits as spirit}
-			{@const slug = idToSlug[spirit.recipeCategoryId]}
-			{#if slug}
-				<a href="/catalog/browse/{slug}">
-					<Badge
-						variant={spirit.recipeCategoryId === data.spirit.recipeCategoryId
-							? 'default'
-							: 'outline'}
-						class="cursor-pointer hover:bg-accent transition-colors"
-					>
-						{spirit.recipeCategoryDescription}
-					</Badge>
-				</a>
-			{/if}
-		{/each}
-	</div>
-
-	<!-- History & Overview -->
-	<div class="reveal-on-scroll" use:reveal>
-		<SpiritOverview
-			overview={data.spiritContent.overview}
-			funFact={data.spiritContent.funFact}
-			accentColor={data.spiritContent.accentColor}
-		/>
-	</div>
-
-	<!-- gradient divider -->
-	<div
-		class="h-px my-4 mx-auto max-w-md"
-		style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-	></div>
-
-	<!-- Subcategories -->
-	<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
-		<SpiritSubcategories
-			subcategories={data.spiritContent.subcategories}
-			accentColor={data.spiritContent.accentColor}
-		/>
-	</div>
-
-	<!-- gradient divider -->
-	<div
-		class="h-px my-4 mx-auto max-w-md"
-		style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-	></div>
-
-	<!-- Geographic Origins -->
-	<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
-		<SpiritRegions
-			regions={data.spiritContent.regions}
-			accentColor={data.spiritContent.accentColor}
-		/>
-	</div>
-
-	<!-- gradient divider -->
-	<div
-		class="h-px my-4 mx-auto max-w-md"
-		style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-	></div>
 
 	<!-- Recipe Browsing Section -->
 	<section class="mb-12">
@@ -406,10 +353,56 @@
 		{/if}
 	</section>
 
-	<!-- Sources -->
-	<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
-		<SpiritSources sources={data.spiritContent.sources} />
-	</div>
+	<!-- Spirit Guide (educational content) -->
+	<section id="spirit-guide" class="scroll-mt-4">
+		<!-- History & Overview -->
+		<div class="reveal-on-scroll" use:reveal>
+			<SpiritOverview
+				overview={data.spiritContent.overview}
+				funFact={data.spiritContent.funFact}
+				accentColor={data.spiritContent.accentColor}
+			/>
+		</div>
+
+		<!-- gradient divider -->
+		<div
+			class="h-px my-4 mx-auto max-w-md"
+			style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
+		></div>
+
+		<!-- Subcategories -->
+		<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
+			<SpiritSubcategories
+				subcategories={data.spiritContent.subcategories}
+				accentColor={data.spiritContent.accentColor}
+			/>
+		</div>
+
+		<!-- gradient divider -->
+		<div
+			class="h-px my-4 mx-auto max-w-md"
+			style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
+		></div>
+
+		<!-- Geographic Origins -->
+		<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
+			<SpiritRegions
+				regions={data.spiritContent.regions}
+				accentColor={data.spiritContent.accentColor}
+			/>
+		</div>
+
+		<!-- gradient divider -->
+		<div
+			class="h-px my-4 mx-auto max-w-md"
+			style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
+		></div>
+
+		<!-- Sources -->
+		<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
+			<SpiritSources sources={data.spiritContent.sources} />
+		</div>
+	</section>
 </div>
 
 <style>
@@ -466,5 +459,13 @@
 		.spirit-orb {
 			animation: none !important;
 		}
+	}
+
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
 	}
 </style>

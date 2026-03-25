@@ -8,6 +8,7 @@
 		Lightbulb,
 		Plus,
 		Search,
+		ShoppingCart,
 		Sparkles,
 		Star,
 		TrendingUp,
@@ -35,6 +36,9 @@
 		featuredCocktail,
 		totalRecipes,
 		popularSpirit,
+		availableCount,
+		almostThereCount,
+		topIngredient,
 		favoriteRecipeIds,
 		featuredRecipeIds,
 	} = data.args;
@@ -136,66 +140,82 @@
 </svelte:head>
 
 <!-- Hero Section -->
-<div
-	class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4"
->
-	<div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
-	<div class="relative px-6 py-10 md:py-14">
-		<div class="max-w-2xl">
-			<h1 class="text-4xl md:text-5xl font-bold mb-3">Cocktail Catalog</h1>
-			<p class="text-lg text-muted-foreground mb-6">
-				Explore recipes by spirit, discover new favorites, and master the art of mixology.
-			</p>
-
-			<!-- Search bar -->
-			<form onsubmit={handleSearch} class="flex gap-2 max-w-md">
-				<div class="relative flex-1">
-					<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-					<Input
-						type="text"
-						placeholder="Search cocktails..."
-						bind:value={searchQuery}
-						class="pl-10"
-					/>
-				</div>
-				<Button type="submit">Search</Button>
-			</form>
-		</div>
-
-		<!-- Quick stats -->
-		<div class="grid grid-cols-3 gap-2 sm:gap-4 mt-8">
-			<a
-				href="/catalog/browse"
-				class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
-			>
-				<FlaskConical class="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-				<div class="min-w-0">
-					<p class="text-lg sm:text-2xl font-bold">{totalRecipes}</p>
-					<p class="text-[10px] sm:text-xs text-muted-foreground">Total Recipes</p>
-				</div>
-			</a>
-			<div
-				class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border"
-			>
-				<GlassWater class="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-				<div class="min-w-0">
-					<p class="text-lg sm:text-2xl font-bold">{spirits.length}</p>
-					<p class="text-[10px] sm:text-xs text-muted-foreground">Spirit Categories</p>
-				</div>
+<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5">
+	<!-- Row 1: Title + Search -->
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+		<h1 class="text-2xl font-bold">Cocktail Catalog</h1>
+		<form onsubmit={handleSearch} class="flex gap-2 sm:max-w-xs w-full sm:w-auto">
+			<div class="relative flex-1">
+				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+				<Input
+					type="text"
+					placeholder="Search cocktails..."
+					bind:value={searchQuery}
+					class="pl-10"
+				/>
 			</div>
-			{#if popularSpirit}
-				<a
-					href="/catalog/browse/{idToSlug[popularSpirit.recipeCategoryId] ?? popularSpirit.recipeCategoryId}"
-					class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border hover:border-primary/50 hover:bg-background transition-colors"
-				>
-					<TrendingUp class="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-					<div class="min-w-0">
-						<p class="text-lg sm:text-2xl font-bold truncate">{popularSpirit.recipeCategoryDescription}</p>
-						<p class="text-[10px] sm:text-xs text-muted-foreground">Most Popular</p>
-					</div>
-				</a>
-			{/if}
-		</div>
+			<Button type="submit" size="sm">Search</Button>
+		</form>
+	</div>
+
+	<!-- Row 2: Smart Action Pills -->
+	<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
+		<a
+			href="/catalog/browse"
+			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+		>
+			<FlaskConical class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{totalRecipes}</span>
+			<span class="text-xs text-muted-foreground">Recipes</span>
+		</a>
+
+		<a
+			href="/catalog/browse?readyToMake=true"
+			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+		>
+			<Sparkles class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{availableCount}</span>
+			<span class="text-xs text-muted-foreground">Ready</span>
+		</a>
+
+		{#if almostThereCount > 0}
+			<a
+				href="/catalog/browse?almostThere=true"
+				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+			>
+				<GlassWater class="h-4 w-4 text-primary shrink-0" />
+				<span class="text-sm font-bold">{almostThereCount}</span>
+				<span class="text-xs text-muted-foreground">Almost There</span>
+			</a>
+		{/if}
+
+		{#if popularSpirit}
+			<a
+				href="/catalog/browse/{idToSlug[popularSpirit.recipeCategoryId] ?? popularSpirit.recipeCategoryId}"
+				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+			>
+				<TrendingUp class="h-4 w-4 text-primary shrink-0" />
+				<span class="text-sm font-bold truncate">{popularSpirit.recipeCategoryDescription}</span>
+				<span class="text-xs text-muted-foreground">Most Popular</span>
+			</a>
+		{:else}
+			<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
+				<TrendingUp class="h-4 w-4 text-muted-foreground shrink-0" />
+				<span class="text-sm font-bold">&mdash;</span>
+				<span class="text-xs text-muted-foreground">Most Popular</span>
+			</div>
+		{/if}
+
+		{#if topIngredient}
+			<a
+				href="/inventory"
+				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+			>
+				<ShoppingCart class="h-4 w-4 text-primary shrink-0" />
+				<span class="text-sm font-bold">+{topIngredient.unlockableRecipes}</span>
+				<span class="text-xs text-muted-foreground">Buy {topIngredient.ingredientName}</span>
+			</a>
+		{/if}
 	</div>
 </div>
 
@@ -536,8 +556,11 @@
 </div>
 
 <style>
-	.bg-grid-pattern {
-		background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-		background-size: 24px 24px;
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
 	}
 </style>
