@@ -4,6 +4,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
@@ -27,6 +28,7 @@
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const authenticated = $derived(!!$page.data.user);
 
 	// view mode
 	let viewMode = $state<'grid' | 'list'>('grid');
@@ -343,6 +345,7 @@
 						isFavorite={favorites.has(recipe.recipeId)}
 						isFeatured={featured.has(recipe.recipeId)}
 						{canModify}
+						{authenticated}
 						workspaceId={workspace.workspaceId}
 						actionPath="?"
 						onToggleFavorite={handleToggleFavorite}

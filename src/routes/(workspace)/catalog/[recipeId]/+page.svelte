@@ -4,6 +4,7 @@
 
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import Recipe from '$lib/components/Recipe.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -16,6 +17,7 @@
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const authenticated = $derived(!!$page.data.user);
 
 	// Local state for optimistic updates
 	let isFavorite = $state(data.isFavorite);
@@ -49,6 +51,7 @@
 		/>
 
 		<div class="flex items-center gap-2">
+			{#if authenticated}
 			<!-- Favorite button -->
 			<form
 				method="POST"
@@ -77,7 +80,7 @@
 			</form>
 
 			<!-- Featured button (only for editors/owners) -->
-			{#if canModify}
+			{#if authenticated && canModify}
 				<form
 					method="POST"
 					action="?/toggleFeatured"
@@ -106,6 +109,7 @@
 						<span class="hidden sm:inline">{isFeatured ? 'Featured' : 'Feature'}</span>
 					</Button>
 				</form>
+			{/if}
 			{/if}
 		</div>
 	</div>

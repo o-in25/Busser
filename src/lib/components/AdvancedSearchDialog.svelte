@@ -13,11 +13,13 @@
 		open = $bindable(false),
 		preparationMethods = [],
 		filters = {},
+		authenticated = true,
 		onsearch,
 	}: {
 		open?: boolean;
 		preparationMethods?: PreparationMethod[];
 		filters?: Record<string, any>;
+		authenticated?: boolean;
 		onsearch?: (params: Record<string, string>) => void;
 	} = $props();
 
@@ -146,16 +148,18 @@
 		</Dialog.Header>
 
 		<div class="space-y-6 py-4">
-			<!-- ready to make -->
-			<div class="flex items-center justify-between rounded-lg border p-4">
-				<div class="space-y-0.5">
-					<Label>Ready to Make</Label>
-					<p class="text-sm text-muted-foreground">
-						Only show recipes you have all ingredients for
-					</p>
+			<!-- ready to make (requires inventory, hidden when signed out) -->
+			{#if authenticated}
+				<div class="flex items-center justify-between rounded-lg border p-4">
+					<div class="space-y-0.5">
+						<Label>Ready to Make</Label>
+						<p class="text-sm text-muted-foreground">
+							Only show recipes you have all ingredients for
+						</p>
+					</div>
+					<Switch bind:checked={readyToMake} />
 				</div>
-				<Switch bind:checked={readyToMake} />
-			</div>
+			{/if}
 
 			<!-- ingredient filters -->
 			<div class="space-y-3">

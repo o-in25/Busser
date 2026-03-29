@@ -4,6 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
 
 	import AiAssistant from '$lib/components/AiAssistant.svelte';
+	import AuthGateway from '$lib/components/AuthGateway.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 
@@ -113,26 +114,9 @@
 	{/if}
 </div>
 {:else}
-<!-- public landing page -->
-<div class="flex flex-col items-center justify-center py-20 text-center max-w-lg mx-auto">
-	<div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-6">
-		<Sparkles class="h-10 w-10 text-primary" />
-	</div>
-	<h1 class="text-3xl font-bold mb-3">Your AI Bartender</h1>
-	<p class="text-muted-foreground mb-2">
-		Get personalized cocktail recommendations based on what's in your bar. Ask for drink ideas, substitutions, or techniques.
-	</p>
-	<p class="text-sm text-muted-foreground mb-8">
-		Busser AI knows your inventory and suggests cocktails you can actually make right now.
-	</p>
-	<div class="flex gap-3">
-		<a href="/signup" class={buttonVariants()}>
-			Sign Up Free
-		</a>
-		<a href="/catalog" class={buttonVariants({ variant: 'outline' })}>
-			Browse Recipes
-		</a>
-	</div>
-</div>
+<AuthGateway
+	title="What Should I Make Tonight?"
+	description="Get personalized cocktail recommendations based on what's in your bar."
+/>
 {/if}
 

@@ -44,7 +44,7 @@
 		</Card.Root>
 
 		<!-- BAC Estimator Card -->
-		<Card.Root class="lg:col-span-2">
+		<Card.Root class="lg:col-span-2 overflow-visible relative z-10">
 			<Card.Header>
 				<div class="flex items-start gap-4">
 					<div class="p-3 rounded-xl bg-rose-500/10">

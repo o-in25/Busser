@@ -7,6 +7,7 @@
 	import { haptics } from '$lib/utils/haptics';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
+	import AuthGateway from '$lib/components/AuthGateway.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
 	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
@@ -313,27 +314,10 @@ import ViewToggle from '$lib/components/ViewToggle.svelte';
 </svelte:head>
 
 {#if !data.authenticated}
-	<!-- public landing page -->
-	<div class="flex flex-col items-center justify-center py-20 text-center max-w-lg mx-auto">
-		<div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-			<Package class="h-10 w-10 text-primary" />
-		</div>
-		<h1 class="text-3xl font-bold mb-3">Track Your Bar Inventory</h1>
-		<p class="text-muted-foreground mb-2">
-			Know exactly what's in your bar. Add your bottles, track stock levels, and see which cocktails you can make right now.
-		</p>
-		<p class="text-sm text-muted-foreground mb-8">
-			Busser matches your inventory against recipes automatically — no manual searching required.
-		</p>
-		<div class="flex gap-3">
-			<a href="/signup" class={buttonVariants()}>
-				Sign Up Free
-			</a>
-			<a href="/catalog" class={buttonVariants({ variant: 'outline' })}>
-				Browse Recipes
-			</a>
-		</div>
-	</div>
+	<AuthGateway
+		title="Track Your Bar Inventory"
+		description="Add your bottles, track stock levels, and see which cocktails you can make right now."
+	/>
 {:else}
 
 <!-- Inventory Section Navigation -->

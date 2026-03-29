@@ -26,6 +26,7 @@
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const authenticated = $derived(!!$page.data.user);
 
 	// View mode
 	let viewMode = $state<'grid' | 'list'>('grid');
@@ -77,7 +78,9 @@
 		selectedShowFilter = 'all';
 		selectedSort = 'name-asc';
 		perPage = '24';
-		goto(buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', perPage: '24', page: 1 }), { keepFocus: true });
+		goto(buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', perPage: '24', page: 1 }), {
+			keepFocus: true,
+		});
 	}
 
 	// Restore view mode from localStorage
@@ -219,9 +222,15 @@
 
 <svelte:head>
 	<title>Browse Catalog - Busser</title>
-	<meta name="description" content="Browse and search our complete collection of cocktail recipes. Filter by spirit, strength, ingredients, and more." />
+	<meta
+		name="description"
+		content="Browse and search our complete collection of cocktail recipes. Filter by spirit, strength, ingredients, and more."
+	/>
 	<meta property="og:title" content="Browse Cocktail Recipes - Busser" />
-	<meta property="og:description" content="Search and filter cocktail recipes by spirit, strength, ingredients, and more." />
+	<meta
+		property="og:description"
+		content="Search and filter cocktail recipes by spirit, strength, ingredients, and more."
+	/>
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4">
@@ -230,10 +239,12 @@
 		<BackButton href="/catalog" />
 		<div>
 			<h1 class="text-2xl font-bold">Browse Catalog</h1>
-			<p class="text-muted-foreground">
-				{data.pagination.total}
-				{data.pagination.total === 1 ? 'recipe' : 'recipes'} in your collection
-			</p>
+			{#if authenticated}
+				<p class="text-muted-foreground">
+					{data.pagination.total}
+					{data.pagination.total === 1 ? 'recipe' : 'recipes'} in your collection
+				</p>
+			{/if}
 		</div>
 	</div>
 
@@ -452,6 +463,7 @@
 					isFavorite={favorites.has(recipe.recipeId)}
 					isFeatured={featured.has(recipe.recipeId)}
 					{canModify}
+					{authenticated}
 					workspaceId={workspace.workspaceId}
 					actionPath="?"
 					onToggleFavorite={handleToggleFavorite}
@@ -469,5 +481,6 @@
 	bind:open={advancedSearchOpen}
 	preparationMethods={data.preparationMethods}
 	filters={data.filters}
+	{authenticated}
 	onsearch={handleAdvancedSearch}
 />

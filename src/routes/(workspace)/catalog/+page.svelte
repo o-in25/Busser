@@ -17,6 +17,7 @@
 
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -50,6 +51,7 @@
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 	const isGlobalCatalog = workspace?.workspaceId === 'ws-global-catalog';
+	const authenticated = $derived(!!$page.data.user);
 
 	// Search state
 	let searchQuery = $state('');
@@ -318,45 +320,47 @@
 					Featured
 				</Badge>
 				<!-- Action buttons on featured card -->
-				<div class="absolute top-3 right-3 flex gap-1">
-					<form
-						method="POST"
-						action="?/toggleFavorite"
-						use:enhance={() => {
-							const newFavorites = new Set(favorites);
-							if (newFavorites.has(featuredCocktail.recipeId)) {
-								newFavorites.delete(featuredCocktail.recipeId);
-							} else {
-								newFavorites.add(featuredCocktail.recipeId);
-							}
-							favorites = newFavorites;
-							return async ({ result }) => {
-								if (result.type !== 'success' || (result.data && !result.data.success)) {
-									invalidateAll();
+				{#if authenticated}
+					<div class="absolute top-3 right-3 flex gap-1">
+						<form
+							method="POST"
+							action="?/toggleFavorite"
+							use:enhance={() => {
+								const newFavorites = new Set(favorites);
+								if (newFavorites.has(featuredCocktail.recipeId)) {
+									newFavorites.delete(featuredCocktail.recipeId);
+								} else {
+									newFavorites.add(featuredCocktail.recipeId);
 								}
-							};
-						}}
-					>
-						<input type="hidden" name="recipeId" value={featuredCocktail.recipeId} />
-						<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-						<button
-							type="submit"
-							class="p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-							title={favorites.has(featuredCocktail.recipeId)
-								? 'Remove from favorites'
-								: 'Add to favorites'}
+								favorites = newFavorites;
+								return async ({ result }) => {
+									if (result.type !== 'success' || (result.data && !result.data.success)) {
+										invalidateAll();
+									}
+								};
+							}}
 						>
-							<Heart
-								class={cn(
-									'h-4 w-4 transition-colors',
-									favorites.has(featuredCocktail.recipeId)
-										? 'fill-red-500 text-red-500'
-										: 'text-muted-foreground hover:text-red-500'
-								)}
-							/>
-						</button>
-					</form>
-				</div>
+							<input type="hidden" name="recipeId" value={featuredCocktail.recipeId} />
+							<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+							<button
+								type="submit"
+								class="p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+								title={favorites.has(featuredCocktail.recipeId)
+									? 'Remove from favorites'
+									: 'Add to favorites'}
+							>
+								<Heart
+									class={cn(
+										'h-4 w-4 transition-colors',
+										favorites.has(featuredCocktail.recipeId)
+											? 'fill-red-500 text-red-500'
+											: 'text-muted-foreground hover:text-red-500'
+									)}
+								/>
+							</button>
+						</form>
+					</div>
+				{/if}
 			</div>
 			<Card.Content class="pt-4">
 				<h3 class="font-bold text-lg mb-1">{featuredCocktail.recipeName}</h3>
@@ -413,12 +417,12 @@
 									{cocktail.recipeCategoryDescription}
 								</p>
 							</a>
+							{#if authenticated}
 							<div class="flex items-center gap-1">
 								<form
 									method="POST"
 									action="?/toggleFavorite"
 									use:enhance={() => {
-										// Optimistic update with new Set for reactivity
 										const newFavorites = new Set(favorites);
 										if (newFavorites.has(cocktail.recipeId)) {
 											newFavorites.delete(cocktail.recipeId);
@@ -427,7 +431,6 @@
 										}
 										favorites = newFavorites;
 										return async ({ result }) => {
-											// Revert on any error
 											if (result.type !== 'success' || (result.data && !result.data.success)) {
 												invalidateAll();
 											}
@@ -495,6 +498,7 @@
 									</form>
 								{/if}
 							</div>
+							{/if}
 						</div>
 					{/each}
 				</div>
