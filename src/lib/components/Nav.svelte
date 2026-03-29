@@ -328,10 +328,7 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		{:else}
-			<a
-				href="/login"
-				class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-foreground hover:text-primary transition-colors"
-			>
+			<a href="/login" class="sign-in-button">
 				Sign In
 			</a>
 		{/if}
@@ -623,6 +620,73 @@
 
 	.desktop-avatar-button:hover {
 		opacity: 0.8;
+	}
+
+	/* sign-in button — liquid glass style */
+	.sign-in-button {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1.25rem;
+		border-radius: 9999px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: rgba(63, 63, 70, 1);
+		text-decoration: none;
+		background: linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.6) 0%,
+			rgba(253, 242, 248, 0.5) 50%,
+			rgba(245, 243, 255, 0.5) 100%
+		);
+		backdrop-filter: blur(12px) saturate(1.4);
+		-webkit-backdrop-filter: blur(12px) saturate(1.4);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.06),
+			inset 0 1px 0 rgba(255, 255, 255, 0.4);
+		transition: all 0.2s ease;
+	}
+
+	.sign-in-button:hover {
+		background: linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.75) 0%,
+			rgba(253, 242, 248, 0.65) 50%,
+			rgba(245, 243, 255, 0.65) 100%
+		);
+		box-shadow:
+			0 6px 20px rgba(0, 0, 0, 0.08),
+			inset 0 1px 0 rgba(255, 255, 255, 0.5);
+		color: rgba(232, 25, 95, 1);
+	}
+
+	:global(.dark) .sign-in-button {
+		color: rgba(212, 212, 216, 1);
+		background: linear-gradient(
+			135deg,
+			rgba(39, 39, 42, 0.6) 0%,
+			rgba(50, 30, 40, 0.5) 50%,
+			rgba(40, 30, 50, 0.5) 100%
+		);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	}
+
+	:global(.dark) .sign-in-button:hover {
+		background: linear-gradient(
+			135deg,
+			rgba(248, 78, 128, 0.06) 0%,
+			rgba(165, 125, 213, 0.06) 100%
+		);
+		border: 1px solid rgba(248, 78, 128, 0.15);
+		color: rgba(248, 78, 128, 1);
+		box-shadow:
+			0 0 8px rgba(248, 78, 128, 0.35),
+			0 0 24px rgba(248, 78, 128, 0.15),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
 	}
 
 	/* drawer logo glow (matches home page hero) */

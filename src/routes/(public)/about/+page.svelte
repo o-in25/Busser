@@ -16,7 +16,8 @@
 	} from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
-	import { buttonVariants } from '$lib/components/ui/button';
+	import FancyButton from '$lib/components/FancyButton.svelte';
+
 	import * as Card from '$lib/components/ui/card';
 
 	import type { PageData } from './$types';
@@ -271,11 +272,11 @@
 				Create a free account to start tracking your inventory and discovering new cocktails today.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-3 justify-center">
-				<a href="/signup" class={buttonVariants({ size: 'lg' })}>
+				<FancyButton variant="primary" href="/signup">
 					Get Started Free
 					<ArrowRight class="ml-2 h-4 w-4" />
-				</a>
-				<a href="/login" class={buttonVariants({ variant: 'outline', size: 'lg' })}> Log In </a>
+				</FancyButton>
+				<FancyButton href="/login">Log In</FancyButton>
 			</div>
 		</Card.Content>
 	</Card.Root>

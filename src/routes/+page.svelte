@@ -38,6 +38,7 @@
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
 	import TopSpirit from '$lib/components/TopSpirit.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -240,17 +241,14 @@
 
 			<!-- CTAs -->
 			<div class="flex flex-col sm:flex-row justify-center gap-4 hero-enter" style="--delay: 600ms">
-				<a class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')} href="/signup">
+				<FancyButton variant="primary" href="/signup">
 					<Mail class="w-5 h-5 mr-2" />
 					Sign Up
-				</a>
-				<a
-					class={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'text-lg px-8')}
-					href="/login"
-				>
+				</FancyButton>
+				<FancyButton href="/login">
 					<LogIn class="w-5 h-5 mr-2" />
 					Log In
-				</a>
+				</FancyButton>
 			</div>
 
 			<!-- Featured Recipes -->
@@ -686,10 +684,10 @@
 							</button>
 						</p>
 					{/if}
-					<a href="/signup" class={cn(buttonVariants({ size: 'lg' }), 'text-lg px-8')}>
+					<FancyButton variant="primary" href="/signup">
 						Sign Up
 						<ArrowRight class="ml-2 h-5 w-5" />
-					</a>
+					</FancyButton>
 				</div>
 			</div>
 		</div>
@@ -1548,4 +1546,6 @@
 			transform: none;
 		}
 	}
+
+
 </style>
