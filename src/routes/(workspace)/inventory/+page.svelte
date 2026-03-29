@@ -7,7 +7,9 @@
 	import { haptics } from '$lib/utils/haptics';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
-	import AuthGateway from '$lib/components/AuthGateway.svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
+	import Hero from '$lib/components/Hero.svelte';
+	import logo from '$lib/assets/logo.png';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
 	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
@@ -16,7 +18,7 @@
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
-import ViewToggle from '$lib/components/ViewToggle.svelte';
+	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -142,8 +144,8 @@ import ViewToggle from '$lib/components/ViewToggle.svelte';
 	async function handleStockChange(productId: number, inStock: boolean) {
 		haptics.medium();
 		// Optimistically update local data
-		const productIndex = data.data.findIndex((p) => p.productId === productId);
-		if (productIndex !== -1) {
+		const productIndex = data.data?.findIndex((p) => p.productId === productId) ?? -1;
+		if (productIndex !== -1 && data.data) {
 			data.data[productIndex].productInStockQuantity = inStock ? 1 : 0;
 		}
 		if (selectedProduct?.productId === productId) {
@@ -165,7 +167,7 @@ import ViewToggle from '$lib/components/ViewToggle.svelte';
 			$notificationStore.error = { message: 'Failed to update inventory.' };
 
 			// Revert on error
-			if (productIndex !== -1) {
+			if (productIndex !== -1 && data.data) {
 				data.data[productIndex].productInStockQuantity = inStock ? 0 : 1;
 			}
 		}
@@ -314,263 +316,276 @@ import ViewToggle from '$lib/components/ViewToggle.svelte';
 </svelte:head>
 
 {#if !data.authenticated}
-	<AuthGateway
-		title="Track Your Bar Inventory"
-		description="Add your bottles, track stock levels, and see which cocktails you can make right now."
-	/>
-{:else}
-
-<!-- Inventory Section Navigation -->
-<InventoryNav />
-
-<!-- Dashboard Header -->
-<InventoryDashboard stats={data.stats} />
-
-<!-- Toolbar -->
-<div class="flex flex-col gap-3 mb-6">
-	<div class="flex items-center gap-2">
-		<!-- Search -->
-		<form onsubmit={handleSearch} class="flex-1 min-w-0">
-			<div class="relative">
-				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-				<Input
-					type="text"
-					placeholder="Search inventory..."
-					bind:value={searchInput}
-					class="pl-10 pr-10"
-				/>
-				{#if searchInput}
-					<button
-						type="button"
-						onclick={clearSearch}
-						class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-					>
-						<X class="h-4 w-4" />
-					</button>
-				{/if}
-			</div>
-		</form>
-
-		<!-- Filters -->
-		<FilterButton
-			bind:open={filterOpen}
-			activeCount={activeFilterCount}
-			viewModes={['table', 'grid', 'list']}
-			activeView={viewMode}
-			onViewChange={setViewMode}
-			onRefresh={handleRefresh}
-		>
-			<InventoryFilterPanel
-				categories={data.categories}
-				{selectedCategory}
-				{stockFilter}
-				{sortOption}
-				{perPage}
-				{basePath}
-				onCategoryChange={handleCategoryChange}
-				onStockFilterChange={handleStockFilterChange}
-				onSortChange={handleSortChange}
-				onPerPageChange={handlePerPageChange}
-				onReset={resetPanelFilters}
-			/>
-		</FilterButton>
-
-		<!-- View toggle -->
-		<ViewToggle modes={['table', 'grid', 'list']} active={viewMode} onchange={setViewMode} />
-
-		<!-- Add Product -->
-		{#if canModify}
-			<a href="{basePath}/add" class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}>
-				<Plus class="h-4 w-4 sm:mr-2" />
-				<span class="hidden sm:inline">Add Product</span>
-			</a>
-		{/if}
-	</div>
-</div>
-
-<!-- Active Filters Display -->
-<ActiveFiltersDisplay
-	search={searchInput}
-	categoryGroupId={selectedCategory}
-	{stockFilter}
-	categories={data.categories}
-	onClearSearch={clearSearch}
-	onClearCategory={clearCategory}
-	onClearStockFilter={clearStockFilter}
-	onClearAll={clearAllFilters}
-/>
-
-<!-- Results Count -->
-<div class="flex items-center justify-between mb-4">
-	<p class="text-sm text-muted-foreground">
-		Showing {data.data.length} of {data.pagination.total} products
-	</p>
-</div>
-
-<!-- Content Area -->
-{#if data.data.length === 0}
-	<!-- Empty State -->
-	<Card.Root class="border-dashed">
-		<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
-			<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
-				<Package class="h-10 w-10 text-muted-foreground/50" />
-			</div>
-			<h3 class="text-xl font-semibold mb-2">No Products Found</h3>
-			<p class="text-muted-foreground mb-6 max-w-md">
-				{#if hasActiveFilters}
-					No products match your current filters. Try adjusting your search or clearing filters.
-				{:else}
-					Your inventory is empty. Start by adding your first product!
-				{/if}
+	<Hero class="rounded-2xl mt-4" logo>
+		<div class="max-w-2xl mx-auto text-center px-4 py-12 md:py-18">
+			<h1
+				class="text-3xl md:text-4xl font-extrabold mb-4 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
+			>
+				Track Your Bar Inventory
+			</h1>
+			<p class="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+				Add your bottles, track stock levels, and see which cocktails you can make right now.
 			</p>
-			<div class="flex gap-3">
-				{#if hasActiveFilters}
-					<Button variant="outline" onclick={clearAllFilters}>Clear Filters</Button>
-				{/if}
-				{#if canModify}
-					<a href="{basePath}/add" class={buttonVariants()}>
-						<Plus class="h-4 w-4 mr-2" />
-						Add Product
-					</a>
-				{/if}
-			</div>
-		</Card.Content>
-	</Card.Root>
-{:else if viewMode === 'table'}
-	<!-- Bulk Action Bar -->
-	{#if canModify && selectedIds.length > 0}
-		<div
-			class="sticky top-0 z-10 mb-4 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm"
-		>
-			<div class="flex items-center justify-between mb-2 sm:mb-0">
-				<span class="text-sm font-medium">{selectedIds.length} selected</span>
-				<Button variant="ghost" size="sm" onclick={clearSelection}>
-					<X class="h-4 w-4 mr-1.5" />
-					Clear
-				</Button>
-			</div>
-			<div class="flex items-center gap-2 sm:mt-0">
-				<Button
-					variant="outline"
-					size="sm"
-					class="flex-1 sm:flex-none"
-					onclick={() => handleBulkSetStock(true)}
-					disabled={bulkActionLoading}
-				>
-					<PackageCheck class="h-4 w-4 sm:mr-1.5" />
-					In Stock
-				</Button>
-				<Button
-					variant="outline"
-					size="sm"
-					class="flex-1 sm:flex-none"
-					onclick={() => handleBulkSetStock(false)}
-					disabled={bulkActionLoading}
-				>
-					<PackageX class="h-4 w-4 sm:mr-1.5" />
-					Out of Stock
-				</Button>
-				<Button
-					variant="destructive"
-					size="sm"
-					class="flex-1 sm:flex-none"
-					onclick={() => (deleteDialogOpen = true)}
-					disabled={bulkActionLoading}
-				>
-					<Trash2 class="h-4 w-4 sm:mr-1.5" />
-					Delete
-				</Button>
+			<div class="flex flex-col sm:flex-row justify-center gap-4">
+				<FancyButton variant="primary" href="/signup">Sign Up</FancyButton>
+				<FancyButton href="/login">Log In</FancyButton>
 			</div>
 		</div>
-	{/if}
-
-	<!-- Table View -->
-	<InventoryTable
-		products={data.data}
-		paginationData={data.pagination}
-		recipeUsage={data.recipeUsage}
-		onRowClick={handleCardClick}
-		selectable={canModify}
-		{selectedIds}
-		onSelectionChange={handleSelectionChange}
-	/>
+	</Hero>
 {:else}
-	<!-- Grid/List View -->
-	<div
-		class={cn(
-			viewMode === 'grid'
-				? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-				: 'flex flex-col gap-3'
-		)}
-	>
-		{#each data.data as product (product.productId)}
-			<InventoryCard
-				{product}
-				{viewMode}
-				recipeCount={product.productId ? data.recipeUsage[product.productId] || 0 : 0}
-				onClick={handleCardClick}
-			/>
-		{/each}
+	<!-- Inventory Section Navigation -->
+	<InventoryNav />
+
+	<!-- Dashboard Header -->
+	<InventoryDashboard stats={data.stats} />
+
+	<!-- Toolbar -->
+	<div class="flex flex-col gap-3 mb-6">
+		<div class="flex items-center gap-2">
+			<!-- Search -->
+			<form onsubmit={handleSearch} class="flex-1 min-w-0">
+				<div class="relative">
+					<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+					<Input
+						type="text"
+						placeholder="Search inventory..."
+						bind:value={searchInput}
+						class="pl-10 pr-10"
+					/>
+					{#if searchInput}
+						<button
+							type="button"
+							onclick={clearSearch}
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+						>
+							<X class="h-4 w-4" />
+						</button>
+					{/if}
+				</div>
+			</form>
+
+			<!-- Filters -->
+			<FilterButton
+				bind:open={filterOpen}
+				activeCount={activeFilterCount}
+				viewModes={['table', 'grid', 'list']}
+				activeView={viewMode}
+				onViewChange={setViewMode}
+				onRefresh={handleRefresh}
+			>
+				<InventoryFilterPanel
+					categories={data.categories}
+					{selectedCategory}
+					{stockFilter}
+					{sortOption}
+					{perPage}
+					{basePath}
+					onCategoryChange={handleCategoryChange}
+					onStockFilterChange={handleStockFilterChange}
+					onSortChange={handleSortChange}
+					onPerPageChange={handlePerPageChange}
+					onReset={resetPanelFilters}
+				/>
+			</FilterButton>
+
+			<!-- View toggle -->
+			<ViewToggle modes={['table', 'grid', 'list']} active={viewMode} onchange={setViewMode} />
+
+			<!-- Add Product -->
+			{#if canModify}
+				<a
+					href="{basePath}/add"
+					class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}
+				>
+					<Plus class="h-4 w-4 sm:mr-2" />
+					<span class="hidden sm:inline">Add Product</span>
+				</a>
+			{/if}
+		</div>
 	</div>
 
-	<!-- Pagination for Grid/List views -->
-	{#if data.data.length > 0}
-		<Pagination pagination={data.pagination} itemLabel="products" onNavigate={navigatePage} />
-	{/if}
-{/if}
+	<!-- Active Filters Display -->
+	<ActiveFiltersDisplay
+		search={searchInput}
+		categoryGroupId={selectedCategory}
+		{stockFilter}
+		categories={data.categories}
+		onClearSearch={clearSearch}
+		onClearCategory={clearCategory}
+		onClearStockFilter={clearStockFilter}
+		onClearAll={clearAllFilters}
+	/>
 
-<!-- Recently Added Section -->
-{#if data.recentlyAdded.length > 0 && !hasActiveFilters}
-	<div class="mt-12">
-		<h2 class="text-2xl font-bold mb-4">Recently Added</h2>
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-			{#each data.recentlyAdded as product (product.productId)}
+	<!-- Results Count -->
+	<div class="flex items-center justify-between mb-4">
+		<p class="text-sm text-muted-foreground">
+			Showing {data.data.length} of {data.pagination.total} products
+		</p>
+	</div>
+
+	<!-- Content Area -->
+	{#if data.data.length === 0}
+		<!-- Empty State -->
+		<Card.Root class="border-dashed">
+			<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
+				<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+					<Package class="h-10 w-10 text-muted-foreground/50" />
+				</div>
+				<h3 class="text-xl font-semibold mb-2">No Products Found</h3>
+				<p class="text-muted-foreground mb-6 max-w-md">
+					{#if hasActiveFilters}
+						No products match your current filters. Try adjusting your search or clearing filters.
+					{:else}
+						Your inventory is empty. Start by adding your first product!
+					{/if}
+				</p>
+				<div class="flex gap-3">
+					{#if hasActiveFilters}
+						<Button variant="outline" onclick={clearAllFilters}>Clear Filters</Button>
+					{/if}
+					{#if canModify}
+						<a href="{basePath}/add" class={buttonVariants()}>
+							<Plus class="h-4 w-4 mr-2" />
+							Add Product
+						</a>
+					{/if}
+				</div>
+			</Card.Content>
+		</Card.Root>
+	{:else if viewMode === 'table'}
+		<!-- Bulk Action Bar -->
+		{#if canModify && selectedIds.length > 0}
+			<div
+				class="sticky top-0 z-10 mb-4 rounded-lg border border-border/50 bg-background/80 backdrop-blur-md px-4 py-3 shadow-sm"
+			>
+				<div class="flex items-center justify-between mb-2 sm:mb-0">
+					<span class="text-sm font-medium">{selectedIds.length} selected</span>
+					<Button variant="ghost" size="sm" onclick={clearSelection}>
+						<X class="h-4 w-4 mr-1.5" />
+						Clear
+					</Button>
+				</div>
+				<div class="flex items-center gap-2 sm:mt-0">
+					<Button
+						variant="outline"
+						size="sm"
+						class="flex-1 sm:flex-none"
+						onclick={() => handleBulkSetStock(true)}
+						disabled={bulkActionLoading}
+					>
+						<PackageCheck class="h-4 w-4 sm:mr-1.5" />
+						In Stock
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						class="flex-1 sm:flex-none"
+						onclick={() => handleBulkSetStock(false)}
+						disabled={bulkActionLoading}
+					>
+						<PackageX class="h-4 w-4 sm:mr-1.5" />
+						Out of Stock
+					</Button>
+					<Button
+						variant="destructive"
+						size="sm"
+						class="flex-1 sm:flex-none"
+						onclick={() => (deleteDialogOpen = true)}
+						disabled={bulkActionLoading}
+					>
+						<Trash2 class="h-4 w-4 sm:mr-1.5" />
+						Delete
+					</Button>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Table View -->
+		<InventoryTable
+			products={data.data}
+			paginationData={data.pagination}
+			recipeUsage={data.recipeUsage}
+			onRowClick={handleCardClick}
+			selectable={canModify}
+			{selectedIds}
+			onSelectionChange={handleSelectionChange}
+		/>
+	{:else}
+		<!-- Grid/List View -->
+		<div
+			class={cn(
+				viewMode === 'grid'
+					? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+					: 'flex flex-col gap-3'
+			)}
+		>
+			{#each data.data as product (product.productId)}
 				<InventoryCard
 					{product}
-					viewMode="grid"
+					{viewMode}
 					recipeCount={product.productId ? data.recipeUsage[product.productId] || 0 : 0}
 					onClick={handleCardClick}
 				/>
 			{/each}
 		</div>
-	</div>
-{/if}
 
-<!-- Bulk Delete Confirmation Dialog -->
-<Dialog.Root bind:open={deleteDialogOpen}>
-	<Dialog.Content>
-		<Dialog.Header>
-			<Dialog.Title>Delete {selectedIds.length} item(s)?</Dialog.Title>
-			<Dialog.Description>
-				This will permanently remove the selected products from your inventory. This action cannot
-				be undone.
-			</Dialog.Description>
-		</Dialog.Header>
-		<Dialog.Footer>
-			<Button
-				variant="outline"
-				onclick={() => (deleteDialogOpen = false)}
-				disabled={bulkActionLoading}
-			>
-				Cancel
-			</Button>
-			<Button variant="destructive" onclick={handleBulkDelete} disabled={bulkActionLoading}>
-				{#if bulkActionLoading}
-					Deleting...
-				{:else}
-					Delete
-				{/if}
-			</Button>
-		</Dialog.Footer>
-	</Dialog.Content>
-</Dialog.Root>
+		<!-- Pagination for Grid/List views -->
+		{#if data.data.length > 0}
+			<Pagination pagination={data.pagination} itemLabel="products" onNavigate={navigatePage} />
+		{/if}
+	{/if}
 
-<!-- Detail Drawer -->
-<InventoryDetailDrawer
-	bind:open={drawerOpen}
-	product={selectedProduct}
-	recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
-	onStockChange={handleStockChange}
-/>
+	<!-- Recently Added Section -->
+	{#if data.recentlyAdded.length > 0 && !hasActiveFilters}
+		<div class="mt-12">
+			<h2 class="text-2xl font-bold mb-4">Recently Added</h2>
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+				{#each data.recentlyAdded as product (product.productId)}
+					<InventoryCard
+						{product}
+						viewMode="grid"
+						recipeCount={product.productId ? data.recipeUsage[product.productId] || 0 : 0}
+						onClick={handleCardClick}
+					/>
+				{/each}
+			</div>
+		</div>
+	{/if}
 
+	<!-- Bulk Delete Confirmation Dialog -->
+	<Dialog.Root bind:open={deleteDialogOpen}>
+		<Dialog.Content>
+			<Dialog.Header>
+				<Dialog.Title>Delete {selectedIds.length} item(s)?</Dialog.Title>
+				<Dialog.Description>
+					This will permanently remove the selected products from your inventory. This action cannot
+					be undone.
+				</Dialog.Description>
+			</Dialog.Header>
+			<Dialog.Footer>
+				<Button
+					variant="outline"
+					onclick={() => (deleteDialogOpen = false)}
+					disabled={bulkActionLoading}
+				>
+					Cancel
+				</Button>
+				<Button variant="destructive" onclick={handleBulkDelete} disabled={bulkActionLoading}>
+					{#if bulkActionLoading}
+						Deleting...
+					{:else}
+						Delete
+					{/if}
+				</Button>
+			</Dialog.Footer>
+		</Dialog.Content>
+	</Dialog.Root>
+
+	<!-- Detail Drawer -->
+	<InventoryDetailDrawer
+		bind:open={drawerOpen}
+		product={selectedProduct}
+		recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
+		onStockChange={handleStockChange}
+	/>
 {/if}
