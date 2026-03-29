@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { ShieldAlert, Sparkles } from 'lucide-svelte';
+	import { ShieldAlert, Sparkles, UserPlus } from 'lucide-svelte';
 	import { page } from '$app/stores';
 	import { invalidateAll } from '$app/navigation';
 
 	import AiAssistant from '$lib/components/AiAssistant.svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
+	import Hero from '$lib/components/Hero.svelte';
+	import logo from '$lib/assets/logo.png';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 
@@ -32,82 +35,101 @@
 	<title>Busser AI - Busser</title>
 </svelte:head>
 
-<div class="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] max-w-3xl mx-auto">
-	<!-- hero -->
-	<div
-		class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-secondary/5 border border-primary/10 mb-4 mt-2"
-	>
-		<div class="relative px-5 py-5 flex items-center gap-4">
-			<div
-				class="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0"
-			>
-				<Sparkles class="h-5 w-5 text-white" />
-			</div>
-			<div>
-				<div class="flex items-center gap-2">
-					<h1 class="text-xl font-bold">Busser AI</h1>
-					<Badge
-						variant="secondary"
-						class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5">Beta</Badge
-					>
-				</div>
-				<p class="text-sm text-muted-foreground mt-0.5">
-					Describe a cocktail and Busser AI will check your inventory, suggest ingredients, and add
-					it to your catalog.
-				</p>
-			</div>
-		</div>
-	</div>
-
-	{#if data.canModify}
-		<!-- chat container -->
-		<div class="glass-panel flex-1 min-h-0 overflow-hidden">
-			<AiAssistant userAvatarUrl={$page.data.user?.avatarImageUrl} />
-		</div>
-	{:else}
-		<!-- permission gate -->
-		<div class="glass-panel flex-1 min-h-0 overflow-hidden flex items-center justify-center p-6">
-			<div class="text-center max-w-md space-y-4">
+{#if data.authenticated}
+	<div class="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] max-w-3xl mx-auto">
+		<!-- hero -->
+		<div
+			class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-secondary/5 border border-primary/10 mb-4 mt-2"
+		>
+			<div class="relative px-5 py-5 flex items-center gap-4">
 				<div
-					class="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto"
+					class="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0"
 				>
-					<ShieldAlert class="h-7 w-7 text-destructive" />
+					<Sparkles class="h-5 w-5 text-white" />
 				</div>
-
 				<div>
-					<h2 class="text-lg font-semibold">View-only access</h2>
-					<p class="text-sm text-muted-foreground mt-1">
-						Busser AI modifies your catalog and inventory, which requires write permissions for this
-						Workspace.
+					<div class="flex items-center gap-2">
+						<h1 class="text-xl font-bold">Busser AI</h1>
+						<Badge
+							variant="secondary"
+							class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5">Beta</Badge
+						>
+					</div>
+					<p class="text-sm text-muted-foreground mt-0.5">
+						Describe a cocktail and Busser AI will check your inventory, suggest ingredients, and
+						add it to your catalog.
 					</p>
 				</div>
+			</div>
+		</div>
 
-				{#if data.editableWorkspaces.length > 0}
-					<div class="pt-2 space-y-2">
-						<p class="text-sm font-medium">Switch to a Workspace you can edit:</p>
-						<div class="flex flex-col gap-2">
-							{#each data.editableWorkspaces as ws}
-								<Button
-									variant="outline"
-									class="w-full justify-start"
-									disabled={switching}
-									onclick={() => switchWorkspace(ws.workspaceId)}
-								>
-									{ws.workspaceName}
-								</Button>
-							{/each}
-						</div>
-						<p class="text-xs text-muted-foreground mt-2">
-							This will switch your active workspace for this session only.
+		{#if data.canModify}
+			<!-- chat container -->
+			<div class="glass-panel flex-1 min-h-0 overflow-hidden">
+				<AiAssistant userAvatarUrl={$page.data.user?.avatarImageUrl} />
+			</div>
+		{:else}
+			<!-- permission gate -->
+			<div class="glass-panel flex-1 min-h-0 overflow-hidden flex items-center justify-center p-6">
+				<div class="text-center max-w-md space-y-4">
+					<div
+						class="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto"
+					>
+						<ShieldAlert class="h-7 w-7 text-destructive" />
+					</div>
+
+					<div>
+						<h2 class="text-lg font-semibold">View-only access</h2>
+						<p class="text-sm text-muted-foreground mt-1">
+							Busser AI modifies your catalog and inventory, which requires write permissions for
+							this Workspace.
 						</p>
 					</div>
-				{:else}
-					<p class="text-sm text-muted-foreground">
-						You don't have editor or owner access to any workspace. Ask a workspace owner to upgrade
-						your role.
-					</p>
-				{/if}
+
+					{#if data.editableWorkspaces.length > 0}
+						<div class="pt-2 space-y-2">
+							<p class="text-sm font-medium">Switch to a Workspace you can edit:</p>
+							<div class="flex flex-col gap-2">
+								{#each data.editableWorkspaces as ws}
+									<Button
+										variant="outline"
+										class="w-full justify-start"
+										disabled={switching}
+										onclick={() => switchWorkspace(ws.workspaceId)}
+									>
+										{ws.workspaceName}
+									</Button>
+								{/each}
+							</div>
+							<p class="text-xs text-muted-foreground mt-2">
+								This will switch your active workspace for this session only.
+							</p>
+						</div>
+					{:else}
+						<p class="text-sm text-muted-foreground">
+							You don't have editor or owner access to any workspace. Ask a workspace owner to
+							upgrade your role.
+						</p>
+					{/if}
+				</div>
+			</div>
+		{/if}
+	</div>
+{:else}
+	<Hero class="rounded-2xl mt-4" logo>
+		<div class="max-w-2xl mx-auto text-center px-4 py-12 md:py-18">
+			<h1
+				class="text-3xl md:text-4xl font-extrabold mb-4 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
+			>
+				What Should I Make Tonight?
+			</h1>
+			<p class="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+				Get personalized cocktail recommendations based on what's in your bar.
+			</p>
+			<div class="flex flex-col sm:flex-row justify-center gap-4">
+				<FancyButton variant="primary" href="/signup">Sign Up</FancyButton>
+				<FancyButton href="/login">Log In</FancyButton>
 			</div>
 		</div>
-	{/if}
-</div>
+	</Hero>
+{/if}

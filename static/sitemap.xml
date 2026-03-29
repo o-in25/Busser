@@ -7,4 +7,13 @@
   <url><loc>https://busserapp.com/cookies</loc></url>
   <url><loc>https://busserapp.com/login</loc></url>
   <url><loc>https://busserapp.com/signup</loc></url>
+  <url><loc>https://busserapp.com/catalog</loc></url>
+  <url><loc>https://busserapp.com/catalog/browse</loc></url>
+  <url><loc>https://busserapp.com/catalog/browse/gin</loc></url>
+  <url><loc>https://busserapp.com/catalog/browse/vodka</loc></url>
+  <url><loc>https://busserapp.com/catalog/browse/whiskey</loc></url>
+  <url><loc>https://busserapp.com/catalog/browse/rum</loc></url>
+  <url><loc>https://busserapp.com/catalog/browse/tequila</loc></url>
+  <url><loc>https://busserapp.com/catalog/browse/brandy</loc></url>
+  <url><loc>https://busserapp.com/tools</loc></url>
 </urlset>

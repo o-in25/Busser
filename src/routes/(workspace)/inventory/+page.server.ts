@@ -2,7 +2,12 @@ import { inventoryRepo } from '$lib/server/core';
 
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, parent }) => {
+export const load: PageServerLoad = async ({ url, parent, locals }) => {
+	// unauthenticated users see a landing page
+	if (!locals.user) {
+		return { authenticated: false as const };
+	}
+
 	// get workspace from parent layout
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
@@ -61,6 +66,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		.slice(0, 6);
 
 	return {
+		authenticated: true as const,
 		data,
 		pagination,
 		stats,

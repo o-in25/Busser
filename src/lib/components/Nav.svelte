@@ -115,8 +115,8 @@
 </script>
 
 <!-- Mobile Top Logo (visible on small screens) -->
-{#if user}
-	<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
+<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
+	{#if user}
 		<Sheet.Root bind:open={mobileMenuOpen}>
 			<Sheet.Trigger class="mobile-header-left w-8 h-8 flex items-center justify-center" aria-label="Open menu">
 				<Menu class="h-5 w-5 text-muted-foreground" />
@@ -253,26 +253,27 @@
 				</div>
 			</Sheet.Content>
 		</Sheet.Root>
-		<a href="/" class="mobile-header-logo">
-			<img src={logoNav} class="h-10" alt="Busser" />
-		</a>
-		<NavigationProgress />
-	</div>
-{/if}
+	{:else}
+		<!-- placeholder to maintain layout when logged out -->
+		<div class="mobile-header-left w-8 h-8"></div>
+	{/if}
+	<a href="/" class="mobile-header-logo">
+		<img src={logoNav} class="h-10" alt="Busser" />
+	</a>
+	<NavigationProgress />
+</div>
 
 <!-- Mobile Bottom Navigation (visible on small screens) -->
-{#if user}
-	<nav class="mobile-nav-container flex md:hidden" class:nav-hidden={keyboardOpen}>
-		<div class="mobile-nav-pill">
-			{#each navItems as item}
-				<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
-					<item.icon class="h-5 w-5" />
-					<span class="mobile-nav-label">{item.label}</span>
-				</a>
-			{/each}
-		</div>
-	</nav>
-{/if}
+<nav class="mobile-nav-container flex md:hidden" class:nav-hidden={keyboardOpen}>
+	<div class="mobile-nav-pill">
+		{#each navItems as item}
+			<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
+				<item.icon class="h-5 w-5" />
+				<span class="mobile-nav-label">{item.label}</span>
+			</a>
+		{/each}
+	</div>
+</nav>
 
 <!-- Desktop Top Navigation (visible on medium+ screens) -->
 <nav class="desktop-nav hidden md:block">
@@ -283,18 +284,16 @@
 		</a>
 
 		<!-- Center nav pill -->
-		{#if user}
-			<div class="desktop-nav-pill">
-				{#each navItems as item}
-					<a href={item.href} class="desktop-nav-item {isActive(item.href) ? 'active' : ''}">
-						<item.icon class="h-4 w-4" />
-						<span>{item.label}</span>
-					</a>
-				{/each}
-			</div>
-		{/if}
+		<div class="desktop-nav-pill">
+			{#each navItems as item}
+				<a href={item.href} class="desktop-nav-item {isActive(item.href) ? 'active' : ''}">
+					<item.icon class="h-4 w-4" />
+					<span>{item.label}</span>
+				</a>
+			{/each}
+		</div>
 
-		<!-- Avatar (right) -->
+		<!-- Avatar (right) or Sign In -->
 		{#if user}
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger class="desktop-avatar-button">
@@ -329,8 +328,9 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		{:else}
-			<!-- Empty placeholder to maintain layout when logged out -->
-			<div class="w-10"></div>
+			<a href="/login" class="sign-in-button">
+				Sign In
+			</a>
 		{/if}
 	</div>
 	<NavigationProgress />
@@ -620,6 +620,73 @@
 
 	.desktop-avatar-button:hover {
 		opacity: 0.8;
+	}
+
+	/* sign-in button — liquid glass style */
+	.sign-in-button {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1.25rem;
+		border-radius: 9999px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: rgba(63, 63, 70, 1);
+		text-decoration: none;
+		background: linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.6) 0%,
+			rgba(253, 242, 248, 0.5) 50%,
+			rgba(245, 243, 255, 0.5) 100%
+		);
+		backdrop-filter: blur(12px) saturate(1.4);
+		-webkit-backdrop-filter: blur(12px) saturate(1.4);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.06),
+			inset 0 1px 0 rgba(255, 255, 255, 0.4);
+		transition: all 0.2s ease;
+	}
+
+	.sign-in-button:hover {
+		background: linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.75) 0%,
+			rgba(253, 242, 248, 0.65) 50%,
+			rgba(245, 243, 255, 0.65) 100%
+		);
+		box-shadow:
+			0 6px 20px rgba(0, 0, 0, 0.08),
+			inset 0 1px 0 rgba(255, 255, 255, 0.5);
+		color: rgba(232, 25, 95, 1);
+	}
+
+	:global(.dark) .sign-in-button {
+		color: rgba(212, 212, 216, 1);
+		background: linear-gradient(
+			135deg,
+			rgba(39, 39, 42, 0.6) 0%,
+			rgba(50, 30, 40, 0.5) 50%,
+			rgba(40, 30, 50, 0.5) 100%
+		);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	}
+
+	:global(.dark) .sign-in-button:hover {
+		background: linear-gradient(
+			135deg,
+			rgba(248, 78, 128, 0.06) 0%,
+			rgba(165, 125, 213, 0.06) 100%
+		);
+		border: 1px solid rgba(248, 78, 128, 0.15);
+		color: rgba(248, 78, 128, 1);
+		box-shadow:
+			0 0 8px rgba(248, 78, 128, 0.35),
+			0 0 24px rgba(248, 78, 128, 0.15),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
 	}
 
 	/* drawer logo glow (matches home page hero) */

@@ -17,6 +17,7 @@
 		isFavorite = false,
 		isFeatured = false,
 		canModify = false,
+		authenticated = true,
 		workspaceId = '',
 		actionPath = '?',
 		onToggleFavorite,
@@ -27,6 +28,7 @@
 		isFavorite?: boolean;
 		isFeatured?: boolean;
 		canModify?: boolean;
+		authenticated?: boolean;
 		workspaceId?: string;
 		actionPath?: string;
 		onToggleFavorite?: (recipeId: number) => void;
@@ -98,7 +100,7 @@
 				</Badge>
 
 				<!-- Favorite/Featured indicators (bottom right) -->
-				{#if isFavorite || isFeatured}
+				{#if authenticated && (isFavorite || isFeatured)}
 					<div class="absolute bottom-3 right-3 flex items-center gap-1">
 						{#if isFeatured}
 							<div class="p-1 rounded-full bg-neon-yellow-500/90 backdrop-blur-sm">
@@ -138,10 +140,10 @@
 				{/if}
 
 				<!-- Action buttons and rating -->
-				{#if workspaceId || hasRatings}
+				{#if (authenticated && workspaceId) || hasRatings}
 					<div class="flex items-center justify-between gap-1 mt-2 pt-2 border-t">
 						<div class="flex items-center gap-1">
-							{#if workspaceId}
+							{#if authenticated && workspaceId}
 								<form
 									method="POST"
 									action="{actionPath}/toggleFavorite"
@@ -234,7 +236,7 @@
 						class="h-full w-full"
 					/>
 					<!-- Favorite/Featured indicators -->
-					{#if isFavorite || isFeatured}
+					{#if authenticated && (isFavorite || isFeatured)}
 						<div class="absolute bottom-1 right-1 flex items-center gap-0.5">
 							{#if isFeatured}
 								<div class="p-0.5 rounded-full bg-neon-yellow-500/90">
@@ -273,9 +275,9 @@
 				</a>
 
 				<!-- Action buttons and rating -->
-				{#if workspaceId || hasRatings}
+				{#if (authenticated && workspaceId) || hasRatings}
 					<div class="flex flex-col items-end gap-1 shrink-0">
-						{#if workspaceId}
+						{#if authenticated && workspaceId}
 							<div class="flex items-center gap-1">
 								<form
 									method="POST"

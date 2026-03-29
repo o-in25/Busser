@@ -4,6 +4,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
@@ -27,6 +28,7 @@
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const authenticated = $derived(!!$page.data.user);
 
 	// view mode
 	let viewMode = $state<'grid' | 'list'>('grid');
@@ -158,6 +160,9 @@
 
 <svelte:head>
 	<title>{data.spiritContent.displayName} - Spirit Guide</title>
+	<meta name="description" content="Explore {data.spiritContent.displayName} cocktail recipes. Learn about the spirit's history, subcategories, and geographic origins." />
+	<meta property="og:title" content="{data.spiritContent.displayName} Spirit Guide - Busser" />
+	<meta property="og:description" content="Explore {data.spiritContent.displayName} cocktail recipes and learn about the spirit." />
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4 relative overflow-hidden">
@@ -340,6 +345,7 @@
 						isFavorite={favorites.has(recipe.recipeId)}
 						isFeatured={featured.has(recipe.recipeId)}
 						{canModify}
+						{authenticated}
 						workspaceId={workspace.workspaceId}
 						actionPath="?"
 						onToggleFavorite={handleToggleFavorite}

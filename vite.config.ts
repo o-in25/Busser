@@ -9,7 +9,7 @@ export default defineConfig({
 		external: ['form-data', 'mailgun.js'],
 	},
 	build: {
-		sourcemap: true,
+		sourcemap: process.env.NODE_ENV !== 'production',
 	},
 	server: {
 		sourcemapIgnoreList: false,
