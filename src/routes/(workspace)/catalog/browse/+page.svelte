@@ -219,6 +219,9 @@
 
 <svelte:head>
 	<title>Browse Catalog - Busser</title>
+	<meta name="description" content="Browse and search our complete collection of cocktail recipes. Filter by spirit, strength, ingredients, and more." />
+	<meta property="og:title" content="Browse Cocktail Recipes - Busser" />
+	<meta property="og:description" content="Search and filter cocktail recipes by spirit, strength, ingredients, and more." />
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4">

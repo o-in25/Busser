@@ -3,6 +3,10 @@ import { getUserWorkspaces } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, parent }) => {
+	if (!locals.user) {
+		return { authenticated: false as const, canModify: false, editableWorkspaces: [] };
+	}
+
 	const { workspace } = await parent();
 
 	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
@@ -18,5 +22,5 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 		}
 	}
 
-	return { canModify, editableWorkspaces };
+	return { authenticated: true as const, canModify, editableWorkspaces };
 };

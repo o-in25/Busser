@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { ShieldAlert, Sparkles } from 'lucide-svelte';
+	import { ShieldAlert, Sparkles, UserPlus } from 'lucide-svelte';
 	import { page } from '$app/stores';
 	import { invalidateAll } from '$app/navigation';
 
 	import AiAssistant from '$lib/components/AiAssistant.svelte';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 
 	let { data } = $props();
 	let switching = $state(false);
@@ -32,6 +32,7 @@
 	<title>Busser AI - Busser</title>
 </svelte:head>
 
+{#if data.authenticated}
 <div class="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] max-w-3xl mx-auto">
 	<!-- hero -->
 	<div
@@ -111,3 +112,27 @@
 		</div>
 	{/if}
 </div>
+{:else}
+<!-- public landing page -->
+<div class="flex flex-col items-center justify-center py-20 text-center max-w-lg mx-auto">
+	<div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-6">
+		<Sparkles class="h-10 w-10 text-primary" />
+	</div>
+	<h1 class="text-3xl font-bold mb-3">Your AI Bartender</h1>
+	<p class="text-muted-foreground mb-2">
+		Get personalized cocktail recommendations based on what's in your bar. Ask for drink ideas, substitutions, or techniques.
+	</p>
+	<p class="text-sm text-muted-foreground mb-8">
+		Busser AI knows your inventory and suggests cocktails you can actually make right now.
+	</p>
+	<div class="flex gap-3">
+		<a href="/signup" class={buttonVariants()}>
+			Sign Up Free
+		</a>
+		<a href="/catalog" class={buttonVariants({ variant: 'outline' })}>
+			Browse Recipes
+		</a>
+	</div>
+</div>
+{/if}
+

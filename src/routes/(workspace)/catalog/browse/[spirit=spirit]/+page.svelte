@@ -158,6 +158,9 @@
 
 <svelte:head>
 	<title>{data.spiritContent.displayName} - Spirit Guide</title>
+	<meta name="description" content="Explore {data.spiritContent.displayName} cocktail recipes. Learn about the spirit's history, subcategories, and geographic origins." />
+	<meta property="og:title" content="{data.spiritContent.displayName} Spirit Guide - Busser" />
+	<meta property="og:description" content="Explore {data.spiritContent.displayName} cocktail recipes and learn about the spirit." />
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4 relative overflow-hidden">

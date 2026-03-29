@@ -206,7 +206,7 @@
 	$: workspaceName = data.workspaceName;
 	$: workspaces = data.workspaces || [];
 	$: activeWorkspaceId = data.activeWorkspaceId || null;
-	$: showNav = user && !isAuthRoute($page.url.pathname);
+	$: showNav = !isAuthRoute($page.url.pathname);
 
 	$: {
 		setContext('permissions', user?.permissions.map(({ permissionName }) => permissionName) || []);

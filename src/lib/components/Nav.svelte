@@ -115,8 +115,8 @@
 </script>
 
 <!-- Mobile Top Logo (visible on small screens) -->
-{#if user}
-	<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
+<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
+	{#if user}
 		<Sheet.Root bind:open={mobileMenuOpen}>
 			<Sheet.Trigger class="mobile-header-left w-8 h-8 flex items-center justify-center" aria-label="Open menu">
 				<Menu class="h-5 w-5 text-muted-foreground" />
@@ -253,26 +253,27 @@
 				</div>
 			</Sheet.Content>
 		</Sheet.Root>
-		<a href="/" class="mobile-header-logo">
-			<img src={logoNav} class="h-10" alt="Busser" />
-		</a>
-		<NavigationProgress />
-	</div>
-{/if}
+	{:else}
+		<!-- placeholder to maintain layout when logged out -->
+		<div class="mobile-header-left w-8 h-8"></div>
+	{/if}
+	<a href="/" class="mobile-header-logo">
+		<img src={logoNav} class="h-10" alt="Busser" />
+	</a>
+	<NavigationProgress />
+</div>
 
 <!-- Mobile Bottom Navigation (visible on small screens) -->
-{#if user}
-	<nav class="mobile-nav-container flex md:hidden" class:nav-hidden={keyboardOpen}>
-		<div class="mobile-nav-pill">
-			{#each navItems as item}
-				<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
-					<item.icon class="h-5 w-5" />
-					<span class="mobile-nav-label">{item.label}</span>
-				</a>
-			{/each}
-		</div>
-	</nav>
-{/if}
+<nav class="mobile-nav-container flex md:hidden" class:nav-hidden={keyboardOpen}>
+	<div class="mobile-nav-pill">
+		{#each navItems as item}
+			<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
+				<item.icon class="h-5 w-5" />
+				<span class="mobile-nav-label">{item.label}</span>
+			</a>
+		{/each}
+	</div>
+</nav>
 
 <!-- Desktop Top Navigation (visible on medium+ screens) -->
 <nav class="desktop-nav hidden md:block">
@@ -283,18 +284,16 @@
 		</a>
 
 		<!-- Center nav pill -->
-		{#if user}
-			<div class="desktop-nav-pill">
-				{#each navItems as item}
-					<a href={item.href} class="desktop-nav-item {isActive(item.href) ? 'active' : ''}">
-						<item.icon class="h-4 w-4" />
-						<span>{item.label}</span>
-					</a>
-				{/each}
-			</div>
-		{/if}
+		<div class="desktop-nav-pill">
+			{#each navItems as item}
+				<a href={item.href} class="desktop-nav-item {isActive(item.href) ? 'active' : ''}">
+					<item.icon class="h-4 w-4" />
+					<span>{item.label}</span>
+				</a>
+			{/each}
+		</div>
 
-		<!-- Avatar (right) -->
+		<!-- Avatar (right) or Sign In -->
 		{#if user}
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger class="desktop-avatar-button">
@@ -329,8 +328,12 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		{:else}
-			<!-- Empty placeholder to maintain layout when logged out -->
-			<div class="w-10"></div>
+			<a
+				href="/login"
+				class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-foreground hover:text-primary transition-colors"
+			>
+				Sign In
+			</a>
 		{/if}
 	</div>
 	<NavigationProgress />

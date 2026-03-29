@@ -7,7 +7,7 @@
 		CheckCircle2,
 		ChefHat,
 		ChevronDown,
-	ChevronRight,
+		ChevronRight,
 		FlaskConical,
 		GlassWater,
 		Lightbulb,
@@ -47,6 +47,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { reveal } from '$lib/actions/reveal';
+	import { idToSlug } from '$lib/spirits';
 	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
@@ -192,7 +193,10 @@
 
 <svelte:head>
 	<title>Busser - Home Bar Management</title>
-	<meta name="description" content="Manage your home bar — track inventory, discover cocktails you can make, and collaborate with friends. From shelf to shaker." />
+	<meta
+		name="description"
+		content="Manage your home bar — track inventory, discover cocktails you can make, and collaborate with friends. From shelf to shaker."
+	/>
 </svelte:head>
 
 {#if !$page.data.user}
@@ -220,15 +224,10 @@
 
 			<!-- Headline -->
 			<h1
-				class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight hero-enter"
+				class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight hero-enter text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
 				style="--delay: 200ms"
 			>
-				From Shelf To
-				<span
-					class="text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
-				>
-					Shaker
-				</span>
+				From Shelf To Shaker
 			</h1>
 
 			<!-- Subheadline -->
@@ -236,7 +235,7 @@
 				class="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto hero-enter"
 				style="--delay: 400ms"
 			>
-				Busser finds recipes that match your on-hand ingredients, no guesswork needed.
+				Track your bottles. Discover what you can mix.
 			</p>
 
 			<!-- CTAs -->
@@ -254,51 +253,139 @@
 				</a>
 			</div>
 
-			<!-- App Preview Mockup -->
+			<!-- Featured Recipes -->
 			{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
 				<div class="mt-12 mx-auto max-w-3xl hero-enter" style="--delay: 800ms">
-					<div class="app-preview-frame rounded-xl overflow-hidden shadow-2xl shadow-primary/20">
-						<!-- Browser chrome bar -->
-						<div class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 dark:bg-zinc-950">
-							<div class="flex gap-1.5">
-								<span class="w-3 h-3 rounded-full bg-red-500"></span>
-								<span class="w-3 h-3 rounded-full bg-neon-yellow-500"></span>
-								<span class="w-3 h-3 rounded-full bg-neon-green-500"></span>
-							</div>
+					<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+						{#each landingData.featuredRecipes as recipe, i}
 							<div
-								class="flex-1 mx-2 px-3 py-1 rounded-md bg-zinc-700 dark:bg-zinc-800 text-xs text-zinc-400 truncate"
+								class="group rounded-xl overflow-hidden bg-background/30 backdrop-blur-sm border border-border/50 shadow-lg shadow-primary/5 hero-enter"
+								style="--delay: {800 + (i + 1) * 100}ms"
 							>
-								busserapp.com/catalog
+								<div class="aspect-square relative">
+									<SkeletonImage
+										src={recipe.recipeImageUrl}
+										alt={recipe.recipeName}
+										variant="recipe"
+										class="h-full w-full group-hover:scale-105 transition-transform duration-300"
+									/>
+									<div
+										class="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"
+									></div>
+									{#if recipe.recipeCategoryDescription}
+										<Badge
+											variant="secondary"
+											class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-xs"
+										>
+											{recipe.recipeCategoryDescription}
+										</Badge>
+									{/if}
+									<p
+										class="absolute bottom-2 left-2 right-2 text-sm font-semibold text-foreground truncate"
+									>
+										{recipe.recipeName}
+									</p>
+								</div>
 							</div>
-						</div>
-						<!-- Content area -->
-						<div class="bg-background/95 p-4">
-							<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-								{#each landingData.featuredRecipes as recipe}
-									<div class="rounded-lg overflow-hidden bg-muted/50 border border-border/50">
-										<div class="aspect-square relative">
-											<SkeletonImage
-												src={recipe.recipeImageUrl}
-												alt={recipe.recipeName}
-												variant="recipe"
-												class="h-full w-full"
-											/>
-											<div
-												class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"
-											></div>
-											<p
-												class="absolute bottom-1.5 left-2 right-2 text-xs font-semibold text-foreground truncate"
-											>
-												{recipe.recipeName}
-											</p>
-										</div>
+						{/each}
+					</div>
+					<p class="mt-6 text-sm text-muted-foreground">
+						<a href="/catalog" class="text-primary hover:underline">Explore the full catalog</a>
+					</p>
+				</div>
+			{/if}
+		</div>
+	</section>
+
+	<!-- Live Catalog Content -->
+	<section class="py-8 px-4">
+		<div class="max-w-6xl mx-auto">
+			<!-- Cocktail of the Day -->
+			{#if landingData?.cocktailOfTheDay}
+				<div class="mb-8 reveal-on-scroll" use:reveal>
+					<h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+						<Star class="h-6 w-6 text-primary" />
+						Cocktail of the Day
+					</h2>
+					<a href="/catalog/{landingData.cocktailOfTheDay.recipeId}" class="block group">
+						<Card.Root class="overflow-hidden hover:shadow-lg transition-all">
+							<div class="flex flex-col sm:flex-row">
+								{#if landingData.cocktailOfTheDay.recipeImageUrl}
+									<div class="sm:w-48 h-48 sm:h-auto shrink-0">
+										<SkeletonImage
+											src={landingData.cocktailOfTheDay.recipeImageUrl}
+											alt={landingData.cocktailOfTheDay.recipeName}
+											variant="recipe"
+											class="h-full w-full"
+										/>
 									</div>
-								{/each}
+								{/if}
+								<Card.Content class="flex-1 py-4">
+									<Badge variant="secondary" class="mb-2">{landingData.cocktailOfTheDay.recipeCategoryDescription}</Badge>
+									<h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{landingData.cocktailOfTheDay.recipeName}</h3>
+									<p class="text-sm text-muted-foreground line-clamp-2">{landingData.cocktailOfTheDay.recipeDescription}</p>
+									<span class="inline-flex items-center gap-1 text-sm text-primary mt-3">
+										View Recipe <ArrowRight class="h-4 w-4" />
+									</span>
+								</Card.Content>
 							</div>
-						</div>
+						</Card.Root>
+					</a>
+				</div>
+			{/if}
+
+			<!-- Browse by Spirit -->
+			{#if landingData?.allSpirits && landingData.allSpirits.length > 0}
+				<div class="mb-8 reveal-on-scroll" use:reveal={{ delay: 100 }}>
+					<div class="flex items-center justify-between mb-4">
+						<h2 class="text-2xl font-bold flex items-center gap-2">
+							<GlassWater class="h-6 w-6 text-primary" />
+							Explore by Spirit
+						</h2>
+						<a href="/catalog" class="text-sm text-primary hover:underline flex items-center gap-1">
+							View All <ArrowRight class="h-3 w-3" />
+						</a>
+					</div>
+					<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+						{#each landingData.allSpirits as spirit}
+							<a href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ?? spirit.recipeCategoryId}" class="block group">
+								<Card.Root class="relative overflow-hidden h-32 hover:shadow-lg transition-all">
+									{#if spirit.recipeCategoryDescriptionImageUrl}
+										<div class="absolute inset-0">
+											<img
+												src={spirit.recipeCategoryDescriptionImageUrl}
+												alt={spirit.recipeCategoryDescription}
+												class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+											/>
+											<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+										</div>
+									{/if}
+									<div class="absolute inset-0 p-3 flex flex-col justify-end">
+										<h3 class="text-sm font-bold text-foreground">{spirit.recipeCategoryDescription}</h3>
+									</div>
+								</Card.Root>
+							</a>
+						{/each}
 					</div>
 				</div>
 			{/if}
+
+			<!-- Quick Actions -->
+			<div class="flex flex-wrap gap-3 justify-center mb-4 reveal-on-scroll" use:reveal={{ delay: 200 }}>
+				<a href="/catalog/browse" class={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
+					<FlaskConical class="h-4 w-4 mr-2" />
+					Browse {landingData?.totalRecipes || ''} Recipes
+				</a>
+				<Button variant="outline" size="lg" onclick={() => {
+					if (recipes.length > 0) {
+						const random = recipes[Math.floor(Math.random() * recipes.length)];
+						goto(`/catalog/${random.recipeId}`);
+					}
+				}}>
+					<Shuffle class="h-4 w-4 mr-2" />
+					Surprise Me
+				</Button>
+			</div>
 		</div>
 	</section>
 
@@ -308,7 +395,7 @@
 			<div class="text-center mb-12 reveal-on-scroll" use:reveal>
 				<h2 class="text-3xl md:text-4xl font-bold mb-4">Features</h2>
 				<p class="text-muted-foreground text-lg max-w-2xl mx-auto">
-					Tools to help you manage your home bar.
+					Busser finds recipes that match your on-hand ingredients, no guesswork needed.
 				</p>
 			</div>
 
@@ -865,7 +952,9 @@
 					>
 						Mood
 						{#if activeMood && !moodExpanded}
-							<span class="ml-1 text-primary text-[10px]">{moods.find((m) => m.id === activeMood)?.label}</span>
+							<span class="ml-1 text-primary text-[10px]"
+								>{moods.find((m) => m.id === activeMood)?.label}</span
+							>
 						{/if}
 					</span>
 					<!-- real filter badges -->
@@ -876,8 +965,8 @@
 								class="inline-flex items-center rounded-full h-7 text-xs border border-dashed shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 									transition-all duration-300 ease-out
 									{activeMood === mood.id
-										? 'bg-primary text-primary-foreground border-primary'
-										: 'bg-background/60 backdrop-blur-sm border-border/50'}
+									? 'bg-primary text-primary-foreground border-primary'
+									: 'bg-background/60 backdrop-blur-sm border-border/50'}
 									{moodExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
 								onclick={() => {
 									activeMood = activeMood === mood.id ? null : mood.id;
@@ -903,8 +992,7 @@
 
 				<!-- desktop: horizontal scroll -->
 				<div class="hidden sm:flex items-center gap-2 mb-2">
-					<span
-						class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0"
+					<span class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0"
 						>Mood</span
 					>
 					<div class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mb-1">
@@ -949,7 +1037,9 @@
 				>
 					Spirit
 					{#if sortBy !== 'all' && !spiritExpanded}
-						<span class="ml-1 text-primary text-[10px]">{spirits.find((s) => s.recipeCategoryId === sortBy)?.recipeCategoryDescription}</span>
+						<span class="ml-1 text-primary text-[10px]"
+							>{spirits.find((s) => s.recipeCategoryId === sortBy)?.recipeCategoryDescription}</span
+						>
 					{/if}
 				</span>
 				<!-- "All" badge -->
@@ -958,9 +1048,11 @@
 					class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 						transition-all duration-300 ease-out
 						{sortBy === 'all'
-							? 'bg-primary text-primary-foreground border-primary'
-							: 'bg-background/60 backdrop-blur-sm border-border/50'}
-						{spiritExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
+						? 'bg-primary text-primary-foreground border-primary'
+						: 'bg-background/60 backdrop-blur-sm border-border/50'}
+						{spiritExpanded
+						? 'max-w-48 px-3 ml-1.5 opacity-100'
+						: 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
 					onclick={() => {
 						setFilterType('all');
 						spiritExpanded = false;
@@ -980,9 +1072,11 @@
 							class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 								transition-all duration-300 ease-out
 								{sortBy === spirit.recipeCategoryId
-									? 'bg-primary text-primary-foreground border-primary'
-									: 'bg-background/60 backdrop-blur-sm border-border/50'}
-								{spiritExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
+								? 'bg-primary text-primary-foreground border-primary'
+								: 'bg-background/60 backdrop-blur-sm border-border/50'}
+								{spiritExpanded
+								? 'max-w-48 px-3 ml-1.5 opacity-100'
+								: 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
 							onclick={() => {
 								setFilterType(spirit.recipeCategoryId);
 								spiritExpanded = false;
@@ -1007,8 +1101,7 @@
 
 			<!-- desktop: horizontal scroll -->
 			<div class="hidden sm:flex items-center gap-2 mb-4">
-				<span
-					class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0"
+				<span class="text-[10px] uppercase tracking-wider text-muted-foreground/60 shrink-0"
 					>Spirit</span
 				>
 				<div class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mb-1">

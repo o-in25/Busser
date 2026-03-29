@@ -49,6 +49,7 @@
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const isGlobalCatalog = workspace?.workspaceId === 'ws-global-catalog';
 
 	// Search state
 	let searchQuery = $state('');
@@ -137,6 +138,9 @@
 
 <svelte:head>
 	<title>Catalog - Busser</title>
+	<meta name="description" content="Browse our curated collection of classic and modern cocktail recipes. Find your next favorite drink." />
+	<meta property="og:title" content="Cocktail Catalog - Busser" />
+	<meta property="og:description" content="Browse our curated collection of classic and modern cocktail recipes." />
 </svelte:head>
 
 <!-- Hero Section -->
@@ -173,24 +177,26 @@
 			<span class="text-xs text-muted-foreground">Recipes</span>
 		</a>
 
-		<a
-			href="/catalog/browse?readyToMake=true"
-			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
-		>
-			<Sparkles class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{availableCount}</span>
-			<span class="text-xs text-muted-foreground">Ready</span>
-		</a>
-
-		{#if almostThereCount > 0}
+		{#if !isGlobalCatalog}
 			<a
-				href="/catalog/browse?almostThere=true"
+				href="/catalog/browse?readyToMake=true"
 				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
 			>
-				<GlassWater class="h-4 w-4 text-primary shrink-0" />
-				<span class="text-sm font-bold">{almostThereCount}</span>
-				<span class="text-xs text-muted-foreground">Almost There</span>
+				<Sparkles class="h-4 w-4 text-primary shrink-0" />
+				<span class="text-sm font-bold">{availableCount}</span>
+				<span class="text-xs text-muted-foreground">Ready</span>
 			</a>
+
+			{#if almostThereCount > 0}
+				<a
+					href="/catalog/browse?almostThere=true"
+					class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+				>
+					<GlassWater class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold">{almostThereCount}</span>
+					<span class="text-xs text-muted-foreground">Almost There</span>
+				</a>
+			{/if}
 		{/if}
 
 		{#if popularSpirit}
@@ -213,7 +219,7 @@
 			</div>
 		{/if}
 
-		{#if topIngredient}
+		{#if topIngredient && !isGlobalCatalog}
 			<a
 				href="/inventory"
 				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"

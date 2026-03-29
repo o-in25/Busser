@@ -202,6 +202,8 @@ export const load = (async ({ locals }) => {
 		spiritCount: number;
 		featuredRecipes: View.BasicRecipe[];
 		inviteOnly: boolean;
+		allSpirits: Awaited<ReturnType<typeof catalogRepo.getSpirits>>;
+		cocktailOfTheDay: View.BasicRecipe | null;
 	} | null = null;
 
 	if (!user) {
@@ -209,7 +211,7 @@ export const load = (async ({ locals }) => {
 		const catalogResult = await catalogRepo.findAll(GLOBAL_WORKSPACE_ID, 1, 1);
 		const totalRecipes = catalogResult.pagination.total;
 
-		// Get spirits for stats
+		// Get spirits for browse-by-spirit shortcuts
 		const allSpirits = await catalogRepo.getSpirits();
 
 		// Get featured recipes (ones with images)
@@ -218,11 +220,23 @@ export const load = (async ({ locals }) => {
 
 		const inviteOnly = await isInviteOnly();
 
+		// deterministic daily cocktail pick from global catalog
+		let cocktailOfTheDay: View.BasicRecipe | null = null;
+		if (recipes.length > 0) {
+			const d = new Date();
+			const seed = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+			let hash = 0;
+			for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+			cocktailOfTheDay = recipes[Math.abs(hash) % recipes.length];
+		}
+
 		landingData = {
 			totalRecipes,
 			spiritCount: allSpirits.length,
 			featuredRecipes,
 			inviteOnly,
+			allSpirits,
+			cocktailOfTheDay,
 		};
 	}
 

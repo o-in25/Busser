@@ -30,6 +30,12 @@
 
 <svelte:head>
 	<title>{data.recipe.recipeName} - Catalog</title>
+	<meta name="description" content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe on Busser.`} />
+	<meta property="og:title" content="{data.recipe.recipeName} - Busser" />
+	<meta property="og:description" content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`} />
+	{#if data.recipe.recipeImageUrl}
+		<meta property="og:image" content={data.recipe.recipeImageUrl} />
+	{/if}
 </svelte:head>
 
 <div class="container mx-auto max-w-6xl px-4">

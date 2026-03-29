@@ -1,12 +1,32 @@
 import { error, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
+import micromatch from 'micromatch';
 
 import { getWorkspace } from '$lib/server/auth';
 
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
+
+// routes within (workspace) that can be accessed without auth
+const publicWorkspaceRoutes = ['/catalog/**', '/tools/**', '/inventory', '/assistant'];
+
+export const load: LayoutServerLoad = async ({ locals, url }) => {
+	const isPublicRoute = micromatch.isMatch(url.pathname, publicWorkspaceRoutes);
+
+	// unauthenticated users get a read-only global workspace for public routes
 	if (!locals.user) {
+		if (isPublicRoute) {
+			return {
+				workspace: {
+					workspaceId: GLOBAL_WORKSPACE_ID,
+					workspaceName: 'Global Recipe Catalog',
+					workspaceType: 'shared' as const,
+					workspaceRole: 'viewer' as const,
+				},
+			};
+		}
+
 		error(StatusCodes.UNAUTHORIZED, {
 			reason: getReasonPhrase(StatusCodes.UNAUTHORIZED),
 			code: StatusCodes.UNAUTHORIZED,
@@ -18,7 +38,17 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	const workspaceId = locals.activeWorkspaceId;
 
 	if (!workspaceId) {
-		// Should be handled by hooks, but just in case
+		// public routes fall back to global workspace if no workspace selected
+		if (isPublicRoute) {
+			return {
+				workspace: {
+					workspaceId: GLOBAL_WORKSPACE_ID,
+					workspaceName: 'Global Recipe Catalog',
+					workspaceType: 'shared' as const,
+					workspaceRole: 'viewer' as const,
+				},
+			};
+		}
 		redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace/select');
 	}
 
