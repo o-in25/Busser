@@ -101,7 +101,7 @@ describe('auth - token operations', () => {
 		expect(jwt.sign).toHaveBeenCalledWith(
 			{ userId: 'u1' },
 			expect.any(String),
-			{ algorithm: 'HS256' },
+			{ algorithm: 'HS256', expiresIn: '7d' },
 			expect.any(Function)
 		);
 	});
