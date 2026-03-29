@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
 import { isInviteOnly } from '$lib/server/auth';
+import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import { getInvitationByCode, registerUser } from '$lib/server/user';
 
 import type { PageServerLoad } from './$types';
@@ -40,6 +41,14 @@ export const load = (async ({ url, locals }) => {
 
 export const actions = {
 	default: async ({ request }) => {
+		const ip = getClientIp(request);
+		const rateLimit = checkRateLimit(`signup:${ip}`, { maxRequests: 5, windowMs: 10 * 60 * 1000 });
+		if (!rateLimit.allowed) {
+			return fail(StatusCodes.TOO_MANY_REQUESTS, {
+				error: 'Too many signup attempts. Please try again later.',
+			});
+		}
+
 		let formData: any = await request.formData();
 		formData = Object.fromEntries(formData);
 

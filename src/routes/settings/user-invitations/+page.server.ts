@@ -64,7 +64,11 @@ export const actions: Actions = {
 		return { success: true };
 	},
 
-	delete: async ({ request }) => {
+	delete: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { error: 'Unauthorized.' });
+		}
+
 		const formData = await request.formData();
 		const invitationId = formData.get('invitationId');
 
@@ -81,7 +85,11 @@ export const actions: Actions = {
 		return { success: true };
 	},
 
-	toggleInviteOnly: async ({ request }) => {
+	toggleInviteOnly: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { error: 'Unauthorized.' });
+		}
+
 		const formData = await request.formData();
 		const enabled = formData.get('enabled') as string;
 		await setAppSetting('invite_only_mode', enabled === 'true' ? 'true' : 'false');

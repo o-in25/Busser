@@ -48,7 +48,7 @@ export async function signToken<T>(payload: T): Promise<string> {
 		jwt.sign(
 			JSON.parse(JSON.stringify(payload)),
 			JWT_SIGNING_KEY,
-			{ algorithm: 'HS256' },
+			{ algorithm: 'HS256', ...(!('exp' in (payload as any)) && { expiresIn: '7d' }) },
 			(err, token) => {
 				if (err) return reject(err);
 				return resolve(token as string);

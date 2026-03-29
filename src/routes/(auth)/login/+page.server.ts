@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { dev } from '$app/environment';
 import { getUserWorkspaces, hasWorkspaceAccess, login, verifyToken } from '$lib/server/auth';
+import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import { getPreferredWorkspaceId } from '$lib/server/user';
 import type { User } from '$lib/types';
 
@@ -19,6 +20,14 @@ export const load = (async ({ locals, url }) => {
 
 export const actions = {
 	default: async ({ request, cookies }) => {
+		const ip = getClientIp(request);
+		const rateLimit = checkRateLimit(`login:${ip}`, { maxRequests: 5, windowMs: 10 * 60 * 1000 });
+		if (!rateLimit.allowed) {
+			return fail(StatusCodes.TOO_MANY_REQUESTS, {
+				error: 'Too many login attempts. Please try again later.',
+			});
+		}
+
 		const formData: any = await request.formData();
 		const username = formData.get('username');
 		const password = formData.get('password');
