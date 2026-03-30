@@ -4,6 +4,7 @@ import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { createInvitationRequest, hasWorkspaceAccess, isInviteOnly } from '$lib/server/auth';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
+import { indexFromSeed } from '$lib/math';
 import type { View } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
@@ -167,15 +168,11 @@ export const load = (async ({ locals }) => {
 			};
 		}
 
-		// deterministic daily pick using date as seed
-		let cocktailOfTheDay: View.BasicRecipe | null = null;
-		if (recipes.length > 0) {
-			const d = new Date();
-			const seed = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-			let hash = 0;
-			for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
-			cocktailOfTheDay = recipes[Math.abs(hash) % recipes.length];
-		}
+		// deterministic daily pick from all recipes in the workspace
+		const allRecipesResult = await catalogRepo.findAll(workspaceId, 1, 9999);
+		const today = new Date();
+		const dateSeed = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+		const cocktailOfTheDay = indexFromSeed(allRecipesResult.data, dateSeed);
 
 		dashboardData = {
 			inventoryCount,
@@ -220,15 +217,11 @@ export const load = (async ({ locals }) => {
 
 		const inviteOnly = await isInviteOnly();
 
-		// deterministic daily cocktail pick from global catalog
-		let cocktailOfTheDay: View.BasicRecipe | null = null;
-		if (recipes.length > 0) {
-			const d = new Date();
-			const seed = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-			let hash = 0;
-			for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
-			cocktailOfTheDay = recipes[Math.abs(hash) % recipes.length];
-		}
+		// deterministic daily pick from all global catalog recipes
+		const allGlobalRecipes = (await catalogRepo.findAll(GLOBAL_WORKSPACE_ID, 1, 9999)).data;
+		const today = new Date();
+		const dateSeed = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+		const cocktailOfTheDay = indexFromSeed(allGlobalRecipes, dateSeed);
 
 		landingData = {
 			totalRecipes,

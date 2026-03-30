@@ -301,34 +301,7 @@
 			<!-- Cocktail of the Day -->
 			{#if landingData?.cocktailOfTheDay}
 				<div class="mb-8 reveal-on-scroll" use:reveal>
-					<h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
-						<Star class="h-6 w-6 text-primary" />
-						Cocktail of the Day
-					</h2>
-					<a href="/catalog/{landingData.cocktailOfTheDay.recipeId}" class="block group">
-						<Card.Root class="overflow-hidden hover:shadow-lg transition-all">
-							<div class="flex flex-col sm:flex-row">
-								{#if landingData.cocktailOfTheDay.recipeImageUrl}
-									<div class="sm:w-48 h-48 sm:h-auto shrink-0">
-										<SkeletonImage
-											src={landingData.cocktailOfTheDay.recipeImageUrl}
-											alt={landingData.cocktailOfTheDay.recipeName}
-											variant="recipe"
-											class="h-full w-full"
-										/>
-									</div>
-								{/if}
-								<Card.Content class="flex-1 py-4">
-									<Badge variant="secondary" class="mb-2">{landingData.cocktailOfTheDay.recipeCategoryDescription}</Badge>
-									<h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{landingData.cocktailOfTheDay.recipeName}</h3>
-									<p class="text-sm text-muted-foreground line-clamp-2">{landingData.cocktailOfTheDay.recipeDescription}</p>
-									<span class="inline-flex items-center gap-1 text-sm text-primary mt-3">
-										View Recipe <ArrowRight class="h-4 w-4" />
-									</span>
-								</Card.Content>
-							</div>
-						</Card.Root>
-					</a>
+					<CocktailOfTheDay recipe={landingData.cocktailOfTheDay} />
 				</div>
 			{/if}
 
@@ -346,7 +319,11 @@
 					</div>
 					<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
 						{#each landingData.allSpirits as spirit}
-							<a href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ?? spirit.recipeCategoryId}" class="block group">
+							<a
+								href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ??
+									spirit.recipeCategoryId}"
+								class="block group"
+							>
 								<Card.Root class="relative overflow-hidden h-32 hover:shadow-lg transition-all">
 									{#if spirit.recipeCategoryDescriptionImageUrl}
 										<div class="absolute inset-0">
@@ -355,11 +332,15 @@
 												alt={spirit.recipeCategoryDescription}
 												class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
 											/>
-											<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+											<div
+												class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
+											></div>
 										</div>
 									{/if}
 									<div class="absolute inset-0 p-3 flex flex-col justify-end">
-										<h3 class="text-sm font-bold text-foreground">{spirit.recipeCategoryDescription}</h3>
+										<h3 class="text-sm font-bold text-foreground">
+											{spirit.recipeCategoryDescription}
+										</h3>
 									</div>
 								</Card.Root>
 							</a>
@@ -369,17 +350,24 @@
 			{/if}
 
 			<!-- Quick Actions -->
-			<div class="flex flex-wrap gap-3 justify-center mb-4 reveal-on-scroll" use:reveal={{ delay: 200 }}>
+			<div
+				class="flex flex-wrap gap-3 justify-center mb-4 reveal-on-scroll"
+				use:reveal={{ delay: 200 }}
+			>
 				<a href="/catalog/browse" class={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
 					<FlaskConical class="h-4 w-4 mr-2" />
 					Browse {landingData?.totalRecipes || ''} Recipes
 				</a>
-				<Button variant="outline" size="lg" onclick={() => {
-					if (recipes.length > 0) {
-						const random = recipes[Math.floor(Math.random() * recipes.length)];
-						goto(`/catalog/${random.recipeId}`);
-					}
-				}}>
+				<Button
+					variant="outline"
+					size="lg"
+					onclick={() => {
+						if (recipes.length > 0) {
+							const random = recipes[Math.floor(Math.random() * recipes.length)];
+							goto(`/catalog/${random.recipeId}`);
+						}
+					}}
+				>
 					<Shuffle class="h-4 w-4 mr-2" />
 					Surprise Me
 				</Button>
@@ -1546,6 +1534,4 @@
 			transform: none;
 		}
 	}
-
-
 </style>

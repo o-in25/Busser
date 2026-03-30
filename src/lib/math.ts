@@ -159,6 +159,27 @@ const units: Record<
 	},
 };
 
+// deterministic 32 bit hash from string val
+const djb2 = (str: string): number => {
+	let hash = 5381;
+	for (let i = 0; i < str.length; i++) {
+		// multiply by 31 via bit ops + add char code
+		// then force the result to be signed 32 bit int
+		hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0;
+	}
+	return hash;
+};
+
+// gets db index from djb2 hash
+export const indexFromSeed = <T>(items: T[], seed: string | number): T | null => {
+	if (items.length === 0) return null;
+	const str = String(seed);
+	const hash = djb2(str);
+	// handle negative hash vals
+	const index = ((hash % items.length) + items.length) % items.length;
+	return items[index];
+};
+
 export const weightedMean = (arrValues: number[], arrWeights: number[]) => {
 	const result = arrValues
 		.map((value, i) => {

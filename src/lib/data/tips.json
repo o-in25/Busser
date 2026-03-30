@@ -1,0 +1,87 @@
+[
+	{
+		"title": "The Fundamental Law of Cocktails",
+		"tip": "There is no chilling without dilution, and there is no dilution without chilling. The two are inextricably linked.",
+		"source": "Dave Arnold"
+	},
+	{
+		"title": "Perfect Stirring",
+		"tip": "Stir drinks for about 30 seconds with good ice. Stirred drinks should be silky and slightly less diluted than shaken ones.",
+		"source": "Classic Technique"
+	},
+	{
+		"title": "The Shake Test",
+		"tip": "Shake until the outside of your shaker is frosted and almost painfully cold to hold - usually 10-15 seconds.",
+		"source": "Classic Technique"
+	},
+	{
+		"title": "Ice Matters",
+		"tip": "Clear ice isn't just pretty - it's denser and melts slower, giving you better control over dilution in your drinks.",
+		"source": "Ice Science"
+	},
+	{
+		"title": "Fresh Citrus",
+		"tip": "Always use freshly squeezed citrus juice. The flavor degrades significantly after just a few hours.",
+		"source": "Classic Technique"
+	},
+	{
+		"title": "Why Freezer Ice is Cloudy",
+		"tip": "Ice trays freeze from all sides, trapping gas and impurities in the center. Clear ice forms layer by layer from one direction, pushing out impurities as it grows.",
+		"source": "Ice Science"
+	},
+	{
+		"title": "The Supercooling Effect",
+		"tip": "Water needs to be chilled below 0\u00b0C to form ice crystals. Slow freezing produces fewer, larger crystals that are clearer and melt more slowly.",
+		"source": "Dave Arnold"
+	},
+	{
+		"title": "Essential Bar Tools",
+		"tip": "Start with a good jigger set, Hawthorne strainer, julep strainer, muddler, and a Y-peeler. These basics will cover most cocktail recipes.",
+		"source": "Bar Equipment"
+	},
+	{
+		"title": "The 2-Inch Cube",
+		"tip": "Large ice cubes have less surface area relative to volume, meaning slower melting and less dilution - perfect for spirit-forward drinks.",
+		"source": "Ice Science"
+	},
+	{
+		"title": "Water Expands When It Freezes",
+		"tip": "Water expands about 9% when freezing. This force can shatter rocks and pipes - and explains those peaks on your ice cubes.",
+		"source": "Ice Science"
+	},
+	{
+		"title": "The Lewis Bag",
+		"tip": "For crushed ice, use a Lewis bag and mallet. It gives you control over ice texture and is quieter than an electric crusher.",
+		"source": "Bar Equipment"
+	},
+	{
+		"title": "Anomalous Expansion of Water",
+		"tip": "Water is densest at 4\u00b0C, not 0\u00b0C. As it cools below 4\u00b0, it actually expands \u2014 which is why ice forms at the surface of a lake and grows downward, not the other way around.",
+		"source": "Dave Arnold"
+	},
+	{
+		"title": "Nucleation",
+		"tip": "Ice crystals can't form at exactly 0\u00b0C without something to grow on \u2014 an existing crystal or a speck of dust. Once initial crystals nucleate, they grow slowly and push out impurities, producing clear ice.",
+		"source": "Dave Arnold"
+	},
+	{
+		"title": "Freezing Gives Off Heat",
+		"tip": "Water going from liquid to solid releases energy. That's why growing ice crystals warm the surrounding water back to 0\u00b0C, preventing new crystals from forming nearby and keeping ice growth slow and clear.",
+		"source": "Dave Arnold"
+	},
+	{
+		"title": "Double Strain for Clarity",
+		"tip": "Pour shaken drinks through both a Hawthorne strainer and a fine tea strainer. The double strain catches tiny ice shards and pulp for a cleaner, more elegant pour.",
+		"source": "Bar Equipment"
+	},
+	{
+		"title": "Dasher Tops for Bitters",
+		"tip": "Replace the factory caps on your bitters bottles with dasher tops. They give you precise, consistent dashes instead of unpredictable glugs.",
+		"source": "Bar Equipment"
+	},
+	{
+		"title": "Cooler Ice Hack",
+		"tip": "Freeze water in a small rectangular cooler with the lid off. The insulated sides force ice to freeze from the top down \u2014 just like a lake \u2014 producing a large block of crystal-clear ice.",
+		"source": "Dave Arnold"
+	}
+]

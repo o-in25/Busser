@@ -177,6 +177,40 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
+	// check if a recipe was already imported from a source
+	async findImportedRecipe(
+		workspaceId: string,
+		sourceRecipeId: number,
+		sourceWorkspaceId: string
+	): Promise<View.BasicRecipe | null> {
+		try {
+			const result = await this.db
+				.table('basicrecipe')
+				.where({
+					SourceRecipeId: sourceRecipeId,
+					SourceWorkspaceId: sourceWorkspaceId,
+					WorkspaceId: workspaceId,
+				})
+				.first();
+			return (result as View.BasicRecipe) || null;
+		} catch {
+			return null;
+		}
+	}
+
+	// find a recipe by name in a workspace
+	async findByName(workspaceId: string, recipeName: string): Promise<View.BasicRecipe | null> {
+		try {
+			const result = await this.db
+				.table('basicrecipe')
+				.where({ RecipeName: recipeName, WorkspaceId: workspaceId })
+				.first();
+			return (result as View.BasicRecipe) || null;
+		} catch {
+			return null;
+		}
+	}
+
 	async findById(
 		workspaceId: string,
 		recipeId: string
@@ -491,6 +525,183 @@ export class CatalogRepository extends BaseRepository {
 			console.error(error.message);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Cannot save changes.' };
+		}
+	}
+
+	// import a recipe from one workspace into another
+	async importRecipe(
+		targetWorkspaceId: string,
+		sourceRecipeId: number,
+		sourceWorkspaceId: string
+	): Promise<QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[]; alreadyImported?: boolean }>> {
+		try {
+			let result: { recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[]; alreadyImported?: boolean } = {
+				recipe: {} as View.BasicRecipe,
+				recipeSteps: [],
+			};
+
+			await this.db.query.transaction(async (trx) => {
+				// 1. already-imported check
+				const existing = await trx('recipe')
+					.where({
+						SourceRecipeId: sourceRecipeId,
+						SourceWorkspaceId: sourceWorkspaceId,
+						WorkspaceId: targetWorkspaceId,
+					})
+					.first();
+				if (existing) {
+					const [imported] = await trx('basicrecipe')
+						.where({ RecipeId: existing.RecipeId, WorkspaceId: targetWorkspaceId });
+					result = { recipe: imported as View.BasicRecipe, recipeSteps: [], alreadyImported: true };
+					return;
+				}
+
+				// 2. fetch source recipe + steps
+				const [sourceRecipe] = await trx('basicrecipe')
+					.where({ RecipeId: sourceRecipeId, WorkspaceId: sourceWorkspaceId });
+				if (!sourceRecipe) throw new Error('Source recipe not found.');
+
+				const sourceSteps = await trx('basicrecipestep')
+					.where({ RecipeId: sourceRecipeId, WorkspaceId: sourceWorkspaceId })
+					.orderBy('RecipeStepId', 'asc') as View.BasicRecipeStep[];
+
+				// 3. validate eligibility — all steps must use category matching
+				const ineligible = sourceSteps.find(
+					(s) => s.matchMode !== 'ANY_IN_CATEGORY' && s.matchMode !== 'ANY_IN_PARENT_CATEGORY'
+				);
+				if (ineligible) {
+					throw new Error('Recipe contains EXACT_PRODUCT steps and cannot be imported.');
+				}
+
+				// 4. resolve categories in target workspace
+				const categoryMap = new Map<string, number>();
+				for (const step of sourceSteps) {
+					const catName = step.categoryName;
+					if (!catName || categoryMap.has(catName)) continue;
+
+					let cat = await trx('category')
+						.where({ CategoryName: catName, WorkspaceId: targetWorkspaceId })
+						.first();
+
+					if (!cat) {
+						// resolve parent category if source step has one
+						let parentCategoryId: number | null = null;
+						if (step.parentCategoryName) {
+							let parent = await trx('category')
+								.where({ CategoryName: step.parentCategoryName, WorkspaceId: targetWorkspaceId })
+								.first();
+							if (!parent) {
+								const [parentId] = await trx('category').insert({
+									WorkspaceId: targetWorkspaceId,
+									CategoryName: step.parentCategoryName,
+								});
+								parentCategoryId = parentId;
+							} else {
+								parentCategoryId = parent.CategoryId;
+							}
+						}
+
+						const [catId] = await trx('category').insert({
+							WorkspaceId: targetWorkspaceId,
+							CategoryName: catName,
+							ParentCategoryId: parentCategoryId,
+						});
+						categoryMap.set(catName, catId);
+					} else {
+						categoryMap.set(catName, cat.CategoryId);
+					}
+				}
+
+				// 5. resolve products via category matching
+				const productMap = new Map<number, number>();
+				for (const step of sourceSteps) {
+					const catName = step.categoryName;
+					if (!catName) continue;
+					const targetCategoryId = categoryMap.get(catName);
+					if (!targetCategoryId || productMap.has(targetCategoryId)) continue;
+
+					// check if user already has any product in this category
+					const existingProduct = await trx('product')
+						.where({ CategoryId: targetCategoryId, WorkspaceId: targetWorkspaceId })
+						.first();
+
+					if (existingProduct) {
+						productMap.set(targetCategoryId, existingProduct.ProductId);
+					} else {
+						// copy source product with stock=0
+						const [productId] = await trx('product').insert({
+							WorkspaceId: targetWorkspaceId,
+							CategoryId: targetCategoryId,
+							SupplierId: 1,
+							ProductName: step.productName || catName,
+							ProductInStockQuantity: 0,
+							ProductPricePerUnit: 0,
+							ProductUnitSizeInMilliliters: 0,
+							ProductProof: step.productProof || 0,
+						});
+						productMap.set(targetCategoryId, productId);
+					}
+				}
+
+				// 6. create recipe chain
+				const [descId] = await trx('recipedescription').insert({
+					RecipeDescription: sourceRecipe.RecipeDescription,
+					RecipeDescriptionImageUrl: sourceRecipe.RecipeDescriptionImageUrl,
+					RecipeSweetnessRating: sourceRecipe.RecipeSweetnessRating,
+					RecipeDrynessRating: sourceRecipe.RecipeDrynessRating,
+					RecipeStrengthRating: sourceRecipe.RecipeStrengthRating,
+					RecipeVersatilityRating: sourceRecipe.RecipeVersatilityRating,
+				});
+
+				const [newRecipeId] = await trx('recipe').insert({
+					WorkspaceId: targetWorkspaceId,
+					RecipeCategoryId: sourceRecipe.RecipeCategoryId,
+					RecipeDescriptionId: descId,
+					RecipeName: sourceRecipe.RecipeName,
+					RecipeImageUrl: sourceRecipe.RecipeImageUrl,
+					SourceRecipeId: sourceRecipeId,
+					SourceWorkspaceId: sourceWorkspaceId,
+				});
+
+				await trx('recipetechnique').insert({
+					RecipeTechniqueDescriptionId: sourceRecipe.RecipeTechniqueDescriptionId,
+					RecipeId: newRecipeId,
+				});
+
+				for (const step of sourceSteps) {
+					const targetCategoryId = categoryMap.get(step.categoryName || '');
+					const targetProductId = targetCategoryId ? productMap.get(targetCategoryId) : null;
+					if (!targetCategoryId || !targetProductId) continue;
+
+					await trx('recipestep').insert({
+						RecipeId: newRecipeId,
+						ProductId: targetProductId,
+						CategoryId: targetCategoryId,
+						MatchMode: 'ANY_IN_CATEGORY',
+						ProductIdQuantityInMilliliters: step.productIdQuantityInMilliliters,
+						ProductIdQuantityUnit: step.productIdQuantityUnit,
+						RecipeStepDescription: step.recipeStepDescription,
+					});
+				}
+
+				// 7. fetch the created recipe back via views
+				const [newRecipe] = await trx('basicrecipe')
+					.where({ RecipeId: newRecipeId, WorkspaceId: targetWorkspaceId });
+				const newSteps = await trx('basicrecipestep')
+					.where({ RecipeId: newRecipeId, WorkspaceId: targetWorkspaceId })
+					.orderBy('RecipeStepId', 'asc');
+
+				result = {
+					recipe: newRecipe as View.BasicRecipe,
+					recipeSteps: newSteps as View.BasicRecipeStep[],
+				};
+			});
+
+			return { status: 'success', data: result };
+		} catch (error: any) {
+			console.error(error.message);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: error.message || 'Cannot import recipe.' };
 		}
 	}
 

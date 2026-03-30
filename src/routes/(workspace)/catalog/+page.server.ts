@@ -1,5 +1,7 @@
 import { catalogRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
+import { getFavoriteRecipes } from '$lib/server/user-settings';
+import { indexFromSeed } from '$lib/math';
 import type { View } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
@@ -46,19 +48,15 @@ export const load = (async ({ parent, locals }) => {
 	// Get workspace featured cocktails (curated by workspace admins)
 	const featuredCocktails = await catalogRepo.getFeatured(workspaceId);
 
-	// Pick a random featured cocktail, or fall back to random recent if none featured
-	let featuredCocktail: View.BasicRecipe | null = null;
-	if (featuredCocktails.length > 0) {
-		const randomIndex = Math.floor(Math.random() * featuredCocktails.length);
-		featuredCocktail = featuredCocktails[randomIndex];
-	} else if (recentCocktails.length > 0) {
-		const randomIndex = Math.floor(Math.random() * recentCocktails.length);
-		featuredCocktail = recentCocktails[randomIndex];
-	}
+	// cocktail of the day: deterministic daily pick from all recipes
+	const allRecipes = (await catalogRepo.findAll(workspaceId, 1, 9999)).data;
+	const today = new Date();
+	const cocktailOfTheDay = indexFromSeed(allRecipes, `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`);
 
 	// Get user's favorites for this workspace
 	const userFavorites = userId ? await userRepo.getFavorites(userId, workspaceId) : [];
 	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
+	const favoriteRecipes = userId ? await getFavoriteRecipes(userId, workspaceId) : [];
 
 	// Get featured recipe IDs for this workspace
 	const featuredRecipeIds = new Set(featuredCocktails.map((f) => f.recipeId));
@@ -79,8 +77,9 @@ export const load = (async ({ parent, locals }) => {
 			spirits,
 			spiritCounts,
 			recentCocktails,
-			featuredCocktail,
 			featuredCocktails,
+			cocktailOfTheDay,
+			favoriteRecipes,
 			totalRecipes,
 			popularSpirit,
 			availableCount,
