@@ -48,10 +48,9 @@ export const load = (async ({ parent, locals }) => {
 	// Get workspace featured cocktails (curated by workspace admins)
 	const featuredCocktails = await catalogRepo.getFeatured(workspaceId);
 
-	// cocktail of the day: deterministic daily pick from all recipes
-	const allRecipes = (await catalogRepo.findAll(workspaceId, 1, 9999)).data;
+	// cocktail of the day: deterministic daily pick from featured recipes
 	const today = new Date();
-	const cocktailOfTheDay = indexFromSeed(allRecipes, `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`);
+	const cocktailOfTheDay = indexFromSeed(featuredCocktails, `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`);
 
 	// Get user's favorites for this workspace
 	const userFavorites = userId ? await userRepo.getFavorites(userId, workspaceId) : [];
