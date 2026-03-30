@@ -2,9 +2,11 @@ import { error } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { catalogRepo } from '$lib/server/core';
-import { userRepo, canModifyWorkspace } from '$lib/server/auth';
+import { userRepo, canModifyWorkspace, getUserWorkspaces } from '$lib/server/auth';
 
 import type { Actions, PageServerLoad } from './$types';
+
+const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
 export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	const { workspace } = await parent();
@@ -30,17 +32,66 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
-	// Check if this recipe is favorited by the user
 	const isFavorite = userId ? await userRepo.isFavorite(userId, Number(recipeId)) : false;
-
-	// Check if this recipe is featured in the workspace
 	const isFeatured = await catalogRepo.isFeatured(workspaceId, Number(recipeId));
+
+	// import context: only when viewing global catalog as a non-admin authenticated user
+	let importData: {
+		editableWorkspaces: { workspaceId: string; workspaceName: string }[];
+		importedTo: string[];
+		nameCollisions: string[];
+		eligible: boolean;
+	} | null = null;
+
+	const isGlobalCatalog = workspaceId === GLOBAL_WORKSPACE_ID;
+
+	if (userId && isGlobalCatalog) {
+		// check if user is an editor/owner of the global catalog (admins don't import)
+		const isGlobalAdmin = await canModifyWorkspace(userId, GLOBAL_WORKSPACE_ID);
+
+		if (!isGlobalAdmin) {
+			const wsResult = await getUserWorkspaces(userId);
+			const allWorkspaces = wsResult.status === 'success' ? (wsResult.data ?? []) : [];
+
+			// editable workspaces excluding global catalog
+			const editableWorkspaces = allWorkspaces
+				.filter((w) => w.workspaceId !== GLOBAL_WORKSPACE_ID)
+				.filter((w) => w.workspaceRole === 'owner' || w.workspaceRole === 'editor')
+				.map((w) => ({ workspaceId: w.workspaceId, workspaceName: w.workspaceName }));
+
+			if (editableWorkspaces.length > 0) {
+				// check which workspaces already have this recipe imported
+				const importedTo: string[] = [];
+				const nameCollisions: string[] = [];
+
+				for (const ws of editableWorkspaces) {
+					const imported = await catalogRepo.findImportedRecipe(
+						ws.workspaceId, Number(recipeId), GLOBAL_WORKSPACE_ID
+					);
+					if (imported) importedTo.push(ws.workspaceId);
+
+					const nameMatch = await catalogRepo.findByName(
+						ws.workspaceId, result.data.recipe.recipeName
+					);
+					if (nameMatch) nameCollisions.push(ws.workspaceId);
+				}
+
+				// eligibility: all steps must use category matching
+				const eligible = result.data.recipeSteps.every(
+					(s) => s.matchMode === 'ANY_IN_CATEGORY' || s.matchMode === 'ANY_IN_PARENT_CATEGORY'
+				);
+
+				importData = { editableWorkspaces, importedTo, nameCollisions, eligible };
+			}
+		}
+	}
 
 	return {
 		recipe: result.data.recipe,
 		recipeSteps: result.data.recipeSteps,
 		isFavorite,
 		isFeatured,
+		importData,
 	};
 };
 
@@ -94,5 +145,51 @@ export const actions: Actions = {
 		}
 
 		return { success: true, isFeatured: result.data?.isFeatured };
+	},
+
+	importToWorkspace: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		if (!userId) {
+			return { success: false, error: 'Not authenticated' };
+		}
+
+		const formData = await request.formData();
+		const recipeId = Number(formData.get('recipeId'));
+		const sourceWorkspaceId = formData.get('sourceWorkspaceId') as string;
+		const targetWorkspaceId = formData.get('targetWorkspaceId') as string;
+
+		if (!recipeId || !sourceWorkspaceId || !targetWorkspaceId) {
+			return { success: false, error: 'Missing required fields' };
+		}
+
+		// only allow importing from global catalog for now
+		if (sourceWorkspaceId !== GLOBAL_WORKSPACE_ID) {
+			return { success: false, error: 'Importing is only supported from the global catalog' };
+		}
+
+		// verify user can edit the target workspace
+		const canModify = await canModifyWorkspace(userId, targetWorkspaceId);
+		if (!canModify) {
+			return { success: false, error: 'You do not have permission to import to this workspace' };
+		}
+
+		// verify user is not an admin of global catalog
+		const isGlobalAdmin = await canModifyWorkspace(userId, GLOBAL_WORKSPACE_ID);
+		if (isGlobalAdmin) {
+			return { success: false, error: 'Global catalog admins cannot import recipes' };
+		}
+
+		const result = await catalogRepo.importRecipe(targetWorkspaceId, recipeId, sourceWorkspaceId);
+
+		if (result.status === 'error') {
+			return { success: false, error: result.error };
+		}
+
+		return {
+			success: true,
+			alreadyImported: result.data?.alreadyImported || false,
+			importedRecipeId: result.data?.recipe.recipeId,
+			targetWorkspaceId,
+		};
 	},
 };

@@ -234,6 +234,8 @@ export namespace View {
 		recipeVersatilityRating: number;
 		insightsEnabled: boolean;
 		workspaceId: string;
+		sourceRecipeId: number | null;
+		sourceWorkspaceId: string | null;
 	};
 
 	export type BasicRecipeStep = {

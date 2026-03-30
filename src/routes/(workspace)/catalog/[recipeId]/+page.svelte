@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Heart, Star } from 'lucide-svelte';
+	import { Heart, Plus, Star, Check } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { enhance } from '$app/forms';
@@ -8,7 +8,9 @@
 	import BackButton from '$lib/components/BackButton.svelte';
 	import Recipe from '$lib/components/Recipe.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { cn } from '$lib/utils';
+	import { toast } from 'svelte-sonner';
 
 	import type { PageData } from './$types';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
@@ -19,15 +21,24 @@
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 	const authenticated = $derived(!!$page.data.user);
 
-	// Local state for optimistic updates
+	// local state for optimistic updates
 	let isFavorite = $state(data.isFavorite);
 	let isFeatured = $state(data.isFeatured);
+	let importingTo = $state<string | null>(null);
 
-	// Sync when server data changes (e.g., after navigation or invalidation)
 	$effect(() => {
 		isFavorite = data.isFavorite;
 		isFeatured = data.isFeatured;
 	});
+
+	// import helpers
+	const importData = $derived(data.importData);
+	const showImport = $derived(
+		authenticated && importData && importData.eligible && importData.editableWorkspaces.length > 0
+	);
+	const singleWorkspace = $derived(
+		importData?.editableWorkspaces.length === 1 ? importData.editableWorkspaces[0] : null
+	);
 </script>
 
 <svelte:head>
@@ -41,7 +52,7 @@
 </svelte:head>
 
 <div class="container mx-auto max-w-6xl px-4">
-	<!-- Back navigation + action buttons -->
+	<!-- back navigation + action buttons -->
 	<div class="mb-4 mt-4 flex items-center justify-between">
 		<BackButton
 			href="/catalog/browse"
@@ -51,8 +62,115 @@
 		/>
 
 		<div class="flex items-center gap-2">
+			<!-- import button -->
+			{#if showImport}
+				{#if singleWorkspace}
+					{@const alreadyImported = importData?.importedTo.includes(singleWorkspace.workspaceId)}
+					{@const nameCollision = importData?.nameCollisions.includes(singleWorkspace.workspaceId)}
+					<form
+						method="POST"
+						action="?/importToWorkspace"
+						use:enhance={() => {
+							importingTo = singleWorkspace.workspaceId;
+							return async ({ result }) => {
+								importingTo = null;
+								if (result.type === 'success' && result.data) {
+									const d = result.data as any;
+									if (d.alreadyImported) {
+										toast.info('Already imported to your workspace');
+									} else if (d.success) {
+										toast.success(`Imported to ${singleWorkspace.workspaceName}`);
+										invalidateAll();
+									}
+								} else {
+									toast.error('Failed to import recipe');
+								}
+							};
+						}}
+					>
+						<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+						<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
+						<input type="hidden" name="targetWorkspaceId" value={singleWorkspace.workspaceId} />
+						<Button
+							type="submit"
+							variant={alreadyImported ? 'outline' : 'default'}
+							size="sm"
+							disabled={!!alreadyImported || !!importingTo}
+							class="max-sm:h-10 max-sm:px-3"
+						>
+							{#if alreadyImported}
+								<Check class="h-4 w-4 sm:mr-2" />
+								<span class="hidden sm:inline">Already Imported</span>
+							{:else}
+								<Plus class="h-4 w-4 sm:mr-2" />
+								<span class="hidden sm:inline">Add to Workspace</span>
+							{/if}
+						</Button>
+						{#if nameCollision && !alreadyImported}
+							<p class="text-xs text-muted-foreground mt-1">You already have a recipe called "{data.recipe.recipeName}"</p>
+						{/if}
+					</form>
+				{:else if importData}
+					<!-- multiple workspaces: dropdown -->
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							<Button variant="default" size="sm" class="max-sm:h-10 max-sm:px-3">
+								<Plus class="h-4 w-4 sm:mr-2" />
+								<span class="hidden sm:inline">Add to Workspace</span>
+							</Button>
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content align="end">
+							{#each importData.editableWorkspaces as ws}
+								{@const alreadyImported = importData.importedTo.includes(ws.workspaceId)}
+								<form
+									method="POST"
+									action="?/importToWorkspace"
+									use:enhance={() => {
+										importingTo = ws.workspaceId;
+										return async ({ result }) => {
+											importingTo = null;
+											if (result.type === 'success' && result.data) {
+												const d = result.data as any;
+												if (d.alreadyImported) {
+													toast.info(`Already imported to ${ws.workspaceName}`);
+												} else if (d.success) {
+													toast.success(`Imported to ${ws.workspaceName}`);
+													invalidateAll();
+												}
+											} else {
+												toast.error('Failed to import recipe');
+											}
+										};
+									}}
+								>
+									<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+									<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
+									<input type="hidden" name="targetWorkspaceId" value={ws.workspaceId} />
+									<DropdownMenu.Item
+										disabled={alreadyImported || importingTo === ws.workspaceId}
+										class="cursor-pointer"
+									>
+										<button type="submit" class="flex items-center gap-2 w-full" disabled={alreadyImported}>
+											{#if alreadyImported}
+												<Check class="h-4 w-4 text-muted-foreground" />
+											{:else}
+												<Download class="h-4 w-4" />
+											{/if}
+											{ws.workspaceName}
+											{#if alreadyImported}
+												<span class="text-xs text-muted-foreground ml-auto">imported</span>
+											{/if}
+										</button>
+									</DropdownMenu.Item>
+								</form>
+							{/each}
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+				{/if}
+			{/if}
+
 			{#if authenticated}
-			<!-- Favorite button -->
+			<!-- favorite button -->
 			<form
 				method="POST"
 				action="?/toggleFavorite"
@@ -79,7 +197,7 @@
 				</Button>
 			</form>
 
-			<!-- Featured button (only for editors/owners) -->
+			<!-- featured button (only for editors/owners) -->
 			{#if authenticated && canModify}
 				<form
 					method="POST"

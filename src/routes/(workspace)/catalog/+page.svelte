@@ -9,6 +9,7 @@
 		Plus,
 		Search,
 		ShoppingCart,
+		Shuffle,
 		Sparkles,
 		Star,
 		TrendingUp,
@@ -23,7 +24,9 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { idToSlug } from '$lib/spirits';
+	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
+	import tips from '$lib/data/tips.json';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
@@ -34,7 +37,9 @@
 		spirits,
 		spiritCounts,
 		recentCocktails,
-		featuredCocktail,
+		featuredCocktails,
+		cocktailOfTheDay,
+		favoriteRecipes,
 		totalRecipes,
 		popularSpirit,
 		availableCount,
@@ -53,6 +58,21 @@
 	const isGlobalCatalog = workspace?.workspaceId === 'ws-global-catalog';
 	const authenticated = $derived(!!$page.data.user);
 
+	// recipe list tab state
+	let activeTab = $state<'featured' | 'favorites' | 'recent'>('featured');
+	const tabRecipes = $derived.by(() => {
+		if (activeTab === 'favorites') return favoriteRecipes;
+		if (activeTab === 'recent') return recentCocktails;
+		return featuredCocktails;
+	});
+
+	function surpriseMe() {
+		const all = [...recentCocktails, ...featuredCocktails];
+		if (all.length === 0) return;
+		const pick = all[Math.floor(Math.random() * all.length)];
+		goto(`/catalog/${pick.recipeId}`);
+	}
+
 	// Search state
 	let searchQuery = $state('');
 
@@ -64,63 +84,7 @@
 	}
 
 	// Bartender tips - rotating educational content
-	const bartenderTips = [
-		{
-			title: 'The Fundamental Law of Cocktails',
-			tip: 'There is no chilling without dilution, and there is no dilution without chilling. The two are inextricably linked.',
-			source: 'Dave Arnold',
-		},
-		{
-			title: 'Perfect Stirring',
-			tip: 'Stir drinks for about 30 seconds with good ice. Stirred drinks should be silky and slightly less diluted than shaken ones.',
-			source: 'Classic Technique',
-		},
-		{
-			title: 'The Shake Test',
-			tip: 'Shake until the outside of your shaker is frosted and almost painfully cold to hold - usually 10-15 seconds.',
-			source: 'Classic Technique',
-		},
-		{
-			title: 'Ice Matters',
-			tip: "Clear ice isn't just pretty - it's denser and melts slower, giving you better control over dilution in your drinks.",
-			source: 'Ice Science',
-		},
-		{
-			title: 'Fresh Citrus',
-			tip: 'Always use freshly squeezed citrus juice. The flavor degrades significantly after just a few hours.',
-			source: 'Classic Technique',
-		},
-		{
-			title: 'Why Freezer Ice is Cloudy',
-			tip: 'Ice trays freeze from all sides, trapping gas and impurities in the center. Clear ice forms layer by layer from one direction, pushing out impurities as it grows.',
-			source: 'Ice Science',
-		},
-		{
-			title: 'The Supercooling Effect',
-			tip: 'Water needs to be chilled below 0°C to form ice crystals. Slow freezing produces fewer, larger crystals that are clearer and melt more slowly.',
-			source: 'Dave Arnold',
-		},
-		{
-			title: 'Essential Bar Tools',
-			tip: 'Start with a good jigger set, Hawthorne strainer, julep strainer, muddler, and a Y-peeler. These basics will cover most cocktail recipes.',
-			source: 'Bar Equipment',
-		},
-		{
-			title: 'The 2-Inch Cube',
-			tip: 'Large ice cubes have less surface area relative to volume, meaning slower melting and less dilution - perfect for spirit-forward drinks.',
-			source: 'Ice Science',
-		},
-		{
-			title: 'Water Expands When It Freezes',
-			tip: 'Water expands about 9% when freezing. This force can shatter rocks and pipes - and explains those peaks on your ice cubes.',
-			source: 'Ice Science',
-		},
-		{
-			title: 'The Lewis Bag',
-			tip: 'For crushed ice, use a Lewis bag and mallet. It gives you control over ice texture and is quieter than an electric crusher.',
-			source: 'Bar Equipment',
-		},
-	];
+	const bartenderTips: { title: string; tip: string; source: string }[] = tips;
 
 	// Pick a random tip
 	function getRandomTip() {
@@ -232,6 +196,14 @@
 			</a>
 		{/if}
 
+		<button
+			onclick={surpriseMe}
+			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
+		>
+			<Shuffle class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-xs text-muted-foreground">Surprise Me</span>
+		</button>
+
 		<a
 			href="/catalog/browse"
 			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
@@ -302,204 +274,96 @@
 
 </section>
 
-<!-- Featured Cocktail + Recent Cocktails Grid -->
+<!-- Cocktail of the Day + Recipe List -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-	<!-- Featured Cocktail -->
-	{#if featuredCocktail}
-		<Card.Root class="lg:col-span-1 overflow-hidden">
-			<div class="relative h-48">
-				<SkeletonImage
-					src={featuredCocktail.recipeImageUrl}
-					alt={featuredCocktail.recipeName}
-					variant="recipe"
-					class="h-full w-full"
-				/>
-				<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
-				<Badge class="absolute top-3 left-3 bg-primary text-primary-foreground">
-					<Star class="h-3 w-3 mr-1" />
-					Featured
-				</Badge>
-				<!-- Action buttons on featured card -->
-				{#if authenticated}
-					<div class="absolute top-3 right-3 flex gap-1">
-						<form
-							method="POST"
-							action="?/toggleFavorite"
-							use:enhance={() => {
-								const newFavorites = new Set(favorites);
-								if (newFavorites.has(featuredCocktail.recipeId)) {
-									newFavorites.delete(featuredCocktail.recipeId);
-								} else {
-									newFavorites.add(featuredCocktail.recipeId);
-								}
-								favorites = newFavorites;
-								return async ({ result }) => {
-									if (result.type !== 'success' || (result.data && !result.data.success)) {
-										invalidateAll();
-									}
-								};
-							}}
-						>
-							<input type="hidden" name="recipeId" value={featuredCocktail.recipeId} />
-							<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-							<button
-								type="submit"
-								class="p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-								title={favorites.has(featuredCocktail.recipeId)
-									? 'Remove from favorites'
-									: 'Add to favorites'}
-							>
-								<Heart
-									class={cn(
-										'h-4 w-4 transition-colors',
-										favorites.has(featuredCocktail.recipeId)
-											? 'fill-red-500 text-red-500'
-											: 'text-muted-foreground hover:text-red-500'
-									)}
-								/>
-							</button>
-						</form>
-					</div>
-				{/if}
-			</div>
-			<Card.Content class="pt-4">
-				<h3 class="font-bold text-lg mb-1">{featuredCocktail.recipeName}</h3>
-				<p class="text-sm text-muted-foreground mb-3">
-					{featuredCocktail.recipeCategoryDescription}
-				</p>
-				<a
-					href="/catalog/{featuredCocktail.recipeId}"
-					class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full')}
-				>
-					View Recipe
-					<ArrowRight class="ml-2 h-4 w-4" />
-				</a>
-			</Card.Content>
-		</Card.Root>
+	<!-- Cocktail of the Day -->
+	{#if cocktailOfTheDay}
+		<div class="lg:col-span-1">
+			<CocktailOfTheDay recipe={cocktailOfTheDay} />
+		</div>
 	{/if}
 
-	<!-- Recent Cocktails -->
-	<Card.Root class={featuredCocktail ? 'lg:col-span-2' : 'lg:col-span-3'}>
+	<!-- Tabbed Recipe List -->
+	<Card.Root class={cocktailOfTheDay ? 'lg:col-span-2' : 'lg:col-span-3'}>
 		<Card.Header>
-			<Card.Title class="flex items-center gap-2">
-				<BookOpen class="h-5 w-5 text-primary" />
-				Recent Additions
-			</Card.Title>
+			<div class="flex items-center gap-2">
+				<div class="flex gap-1 rounded-full bg-muted/50 p-1">
+					<button
+						class={cn(
+							'px-3 py-1 rounded-full text-xs font-medium transition-colors',
+							activeTab === 'featured'
+								? 'bg-primary text-primary-foreground shadow-sm'
+								: 'text-muted-foreground hover:text-foreground'
+						)}
+						onclick={() => (activeTab = 'featured')}
+					>
+						<Star class="h-3 w-3 inline-block mr-1 -mt-0.5" />
+						Featured
+					</button>
+					{#if authenticated}
+						<button
+							class={cn(
+								'px-3 py-1 rounded-full text-xs font-medium transition-colors',
+								activeTab === 'favorites'
+									? 'bg-primary text-primary-foreground shadow-sm'
+									: 'text-muted-foreground hover:text-foreground'
+							)}
+							onclick={() => (activeTab = 'favorites')}
+						>
+							<Heart class="h-3 w-3 inline-block mr-1 -mt-0.5" />
+							Favorites
+						</button>
+					{/if}
+					<button
+						class={cn(
+							'px-3 py-1 rounded-full text-xs font-medium transition-colors',
+							activeTab === 'recent'
+								? 'bg-primary text-primary-foreground shadow-sm'
+								: 'text-muted-foreground hover:text-foreground'
+						)}
+						onclick={() => (activeTab = 'recent')}
+					>
+						<BookOpen class="h-3 w-3 inline-block mr-1 -mt-0.5" />
+						Recent
+					</button>
+				</div>
+			</div>
 		</Card.Header>
 		<Card.Content>
-			{#if recentCocktails.length === 0}
+			{#if tabRecipes.length === 0}
 				<p class="text-muted-foreground text-center py-8">
-					No cocktails yet. Add your first recipe!
+					{#if activeTab === 'favorites'}
+						No favorites yet. Browse recipes and tap the heart to save your favorites.
+					{:else if activeTab === 'featured'}
+						No featured cocktails yet.
+					{:else}
+						No recipes yet.
+					{/if}
 				</p>
 			{:else}
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					{#each recentCocktails.slice(0, 6) as cocktail}
-						<div
+					{#each tabRecipes.slice(0, 6) as cocktail (cocktail.recipeId)}
+						<a
+							href="/catalog/{cocktail.recipeId}"
 							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
 						>
-							<a href="/catalog/{cocktail.recipeId}" class="shrink-0">
+							<div class="shrink-0">
 								<SkeletonImage
 									src={cocktail.recipeImageUrl}
 									alt={cocktail.recipeName}
 									variant="recipe"
 									class="w-12 h-12 rounded-lg"
 								/>
-							</a>
-							<a href="/catalog/{cocktail.recipeId}" class="flex-1 min-w-0">
-								<p
-									class="font-medium truncate group-hover:text-accent-foreground transition-colors"
-								>
+							</div>
+							<div class="flex-1 min-w-0">
+								<p class="font-medium truncate group-hover:text-accent-foreground transition-colors">
 									{cocktail.recipeName}
 								</p>
-								<p
-									class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors"
-								>
+								<p class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors">
 									{cocktail.recipeCategoryDescription}
 								</p>
-							</a>
-							{#if authenticated}
-							<div class="flex items-center gap-1">
-								<form
-									method="POST"
-									action="?/toggleFavorite"
-									use:enhance={() => {
-										const newFavorites = new Set(favorites);
-										if (newFavorites.has(cocktail.recipeId)) {
-											newFavorites.delete(cocktail.recipeId);
-										} else {
-											newFavorites.add(cocktail.recipeId);
-										}
-										favorites = newFavorites;
-										return async ({ result }) => {
-											if (result.type !== 'success' || (result.data && !result.data.success)) {
-												invalidateAll();
-											}
-										};
-									}}
-								>
-									<input type="hidden" name="recipeId" value={cocktail.recipeId} />
-									<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-									<button
-										type="submit"
-										class="p-1.5 rounded-md hover:bg-background/50 transition-colors"
-										title={favorites.has(cocktail.recipeId)
-											? 'Remove from favorites'
-											: 'Add to favorites'}
-									>
-										<Heart
-											class={cn(
-												'h-4 w-4 transition-colors group-hover:text-accent-foreground',
-												favorites.has(cocktail.recipeId)
-													? 'fill-red-500 text-red-500 group-hover:fill-accent-foreground'
-													: 'text-muted-foreground hover:text-red-500'
-											)}
-										/>
-									</button>
-								</form>
-								{#if canModify}
-									<form
-										method="POST"
-										action="?/toggleFeatured"
-										use:enhance={() => {
-											// Optimistic update with new Set for reactivity
-											const newFeatured = new Set(featured);
-											if (newFeatured.has(cocktail.recipeId)) {
-												newFeatured.delete(cocktail.recipeId);
-											} else {
-												newFeatured.add(cocktail.recipeId);
-											}
-											featured = newFeatured;
-											return async ({ result }) => {
-												// Revert on any error
-												if (result.type !== 'success' || (result.data && !result.data.success)) {
-													invalidateAll();
-												}
-											};
-										}}
-									>
-										<input type="hidden" name="recipeId" value={cocktail.recipeId} />
-										<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-										<button
-											type="submit"
-											class="p-1.5 rounded-md hover:bg-background/50 transition-colors"
-											title={featured.has(cocktail.recipeId)
-												? 'Remove from featured'
-												: 'Add to featured'}
-										>
-											<Star
-												class={cn(
-													'h-4 w-4 transition-colors group-hover:text-accent-foreground',
-													featured.has(cocktail.recipeId)
-														? 'fill-neon-yellow-500 text-neon-yellow-500 group-hover:fill-accent-foreground'
-														: 'text-muted-foreground hover:text-neon-yellow-500'
-												)}
-											/>
-										</button>
-									</form>
-								{/if}
 							</div>
-							{/if}
-						</div>
+						</a>
 					{/each}
 				</div>
 			{/if}

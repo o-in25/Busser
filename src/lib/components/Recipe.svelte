@@ -130,9 +130,9 @@
 		}
 	}
 
-	// fetch generator content
+	// fetch generator content (only for authenticated editors/owners)
 	onMount(async () => {
-		if (!recipe.insightsEnabled) {
+		if (!recipe.insightsEnabled || !canModify) {
 			contentLoading = false;
 			return;
 		}
@@ -467,7 +467,7 @@
 	</div>
 
 	<!-- Row 4: Cocktail Insights -->
-	{#if recipe.insightsEnabled}
+	{#if recipe.insightsEnabled && canModify}
 		<RecipeInsights
 			{content}
 			loading={contentLoading}

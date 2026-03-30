@@ -43,7 +43,7 @@
 						<Sparkles class="h-3 w-3" />
 						Cocktail of the Day
 					</Badge>
-					<span class="text-[10px] text-muted-foreground/80">{today}</span>
+					<Badge variant="outline" class="bg-background/60 backdrop-blur-sm text-[10px] text-foreground/70">{today}</Badge>
 				</div>
 
 				<h3 class="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
