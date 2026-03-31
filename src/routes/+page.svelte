@@ -36,6 +36,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import logo from '$lib/assets/logo.png';
+	import FancyCarousel from '$lib/components/FancyCarousel.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
@@ -204,7 +205,7 @@
 
 {#if !$page.data.user}
 	<!-- Hero Section -->
-	<section class="relative overflow-hidden py-10 md:py-14 rounded-2xl mt-4">
+	<section class="relative overflow-hidden h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl">
 		<!-- Animated background gradient -->
 		<div class="absolute inset-0 hero-gradient-bg -z-10 rounded-2xl"></div>
 		<div class="absolute inset-0 bg-grid-pattern opacity-5 -z-10"></div>
@@ -221,7 +222,7 @@
 			<img
 				src={logo}
 				alt="Busser"
-				class="h-28 md:h-36 lg:h-44 mx-auto mb-5 hero-enter-glow"
+				class="h-28 md:h-36 lg:h-44 mx-auto mb-3 hero-enter-glow"
 				style="--delay: 0ms"
 			/>
 
@@ -235,7 +236,7 @@
 
 			<!-- Subheadline -->
 			<p
-				class="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto hero-enter"
+				class="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto hero-enter"
 				style="--delay: 400ms"
 			>
 				Track your bottles. Discover what you can mix.
@@ -253,51 +254,20 @@
 				</FancyButton>
 			</div>
 
-			<!-- Featured Recipes -->
-			{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
-				<div class="mt-8 mx-auto max-w-3xl hero-enter" style="--delay: 800ms">
-					<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-						{#each landingData.featuredRecipes as recipe, i}
-							<div
-								class="group rounded-xl overflow-hidden bg-background/30 backdrop-blur-sm border border-border/50 shadow-lg shadow-primary/5 hero-enter"
-								style="--delay: {800 + (i + 1) * 100}ms"
-							>
-								<div class="aspect-square relative">
-									<SkeletonImage
-										src={recipe.recipeImageUrl}
-										alt={recipe.recipeName}
-										variant="recipe"
-										class="h-full w-full group-hover:scale-105 transition-transform duration-300"
-									/>
-									<div
-										class="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"
-									></div>
-									{#if recipe.recipeCategoryDescription}
-										<Badge
-											variant="secondary"
-											class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-xs"
-										>
-											{recipe.recipeCategoryDescription}
-										</Badge>
-									{/if}
-									<p
-										class="absolute bottom-2 left-2 right-2 text-sm font-semibold text-foreground truncate"
-									>
-										{recipe.recipeName}
-									</p>
-								</div>
-							</div>
-						{/each}
-					</div>
-					<div class="mt-6">
-						<FancyButton href="/catalog" class="!py-2 !px-5 !text-sm">
-							Browse Catalog
-							<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
-						</FancyButton>
-					</div>
-				</div>
-			{/if}
 		</div>
+
+		<!-- Featured Recipes Carousel -->
+		{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
+			<div class="mt-4 w-full hero-enter" style="--delay: 800ms">
+				<FancyCarousel recipes={landingData.featuredRecipes} />
+				<div class="mt-3 text-center">
+					<FancyButton href="/catalog" class="!py-2 !px-5 !text-sm">
+						Browse Catalog
+						<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
+					</FancyButton>
+				</div>
+			</div>
+		{/if}
 	</section>
 
 	<!-- Live Catalog Content -->

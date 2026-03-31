@@ -7,6 +7,7 @@
 		class: className,
 		align = 'center',
 		sideOffset = 4,
+		collisionPadding = 16,
 		children,
 		...restProps
 	}: PopoverPrimitive.ContentProps & { class?: string } = $props();
@@ -15,6 +16,7 @@
 <PopoverPrimitive.Content
 	{align}
 	{sideOffset}
+	{collisionPadding}
 	class={cn(
 		'z-50 w-72 rounded-xl border border-white/30 dark:border-zinc-700/40 bg-white/80 dark:bg-zinc-900/85 backdrop-blur-xl backdrop-saturate-150 p-4 text-popover-foreground shadow-2xl outline-none',
 		'origin-[var(--bits-popover-content-transform-origin)]',

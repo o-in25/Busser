@@ -1,8 +1,12 @@
 <script lang="ts">
 	import {
 		ArrowRight,
+		Award,
 		BookOpen,
+		Candy,
+		Droplets,
 		FlaskConical,
+		Gauge,
 		GlassWater,
 		Heart,
 		Lightbulb,
@@ -431,6 +435,67 @@
 		</Card.Root>
 	{/if}
 </div>
+
+<!-- Verdict Explanation -->
+<section id="verdict" class="mb-10 scroll-mt-20">
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="flex items-center gap-2 text-lg">
+				<Award class="h-5 w-5 text-primary" />
+				How the Verdict Works
+			</Card.Title>
+			<Card.Description>
+				The Verdict is a 0–10 score that reflects how well-crafted and balanced a cocktail is.
+				Cocktails with intentional sweet/dry contrast earn a bonus, while one-dimensional or
+				contradictory profiles lose points.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			<div class="grid gap-4 sm:grid-cols-2">
+				<div class="flex items-start gap-3 p-3 rounded-lg bg-primary-500/10 border border-primary-500/20">
+					<Candy class="h-4 w-4 text-primary-500 mt-0.5 shrink-0" />
+					<div>
+						<p class="text-sm font-medium">Sweetness</p>
+						<p class="text-xs text-muted-foreground">
+							A measure of sugar presence. Most cocktails feature a sweetening agent for brightness
+							and pop — too much is cloying, too little reduces the drink to spirits on the rocks.
+						</p>
+					</div>
+				</div>
+				<div class="flex items-start gap-3 p-3 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20">
+					<Droplets class="h-4 w-4 text-neon-amber-500 mt-0.5 shrink-0" />
+					<div>
+						<p class="text-sm font-medium">Dryness</p>
+						<p class="text-xs text-muted-foreground">
+							A measure of bitterness, tartness, and astringency. Dryness is the opposing force to
+							sweetness — well-groomed cocktails have a counter-punch to bite through the sugar.
+						</p>
+					</div>
+				</div>
+				<div class="flex items-start gap-3 p-3 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20">
+					<Gauge class="h-4 w-4 text-neon-amber-500 mt-0.5 shrink-0" />
+					<div>
+						<p class="text-sm font-medium">Strength</p>
+						<p class="text-xs text-muted-foreground">
+							How well the alcohol integrates with other flavors, not just volume. The base spirit
+							should be present without overstaying its welcome.
+						</p>
+					</div>
+				</div>
+				<div class="flex items-start gap-3 p-3 rounded-lg bg-secondary-500/10 border border-secondary-500/20">
+					<Sparkles class="h-4 w-4 text-secondary-500 mt-0.5 shrink-0" />
+					<div>
+						<p class="text-sm font-medium">Versatility</p>
+						<p class="text-xs text-muted-foreground">
+							How flexible a recipe is — the most important factor. Highly versatile drinks have
+							interchangeable parts and countless spin-offs, making them vital for tending bar.
+						</p>
+					</div>
+				</div>
+			</div>
+		</Card.Content>
+	</Card.Root>
+</section>
 
 <style>
 	.scrollbar-hide {
