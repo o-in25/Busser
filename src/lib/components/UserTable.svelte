@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { AlertCircle, CheckCircle2, Eye, Mail, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
+	import { AlertCircle, Eye, Mail, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
 	import moment from 'moment';
 
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { toast } from 'svelte-sonner';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -52,16 +52,6 @@
 	$: targetUser = users?.find(({ userId }) => target === userId);
 </script>
 
-{#if result.error || result.success}
-	<Alert variant={result.error ? 'destructive' : 'default'} class="mx-6 mt-4">
-		{#if result.error}
-			<AlertCircle class="h-4 w-4" />
-		{:else}
-			<CheckCircle2 class="h-4 w-4" />
-		{/if}
-		<AlertDescription>{result.error || result.success}</AlertDescription>
-	</Alert>
-{/if}
 
 {#if users && users.length > 0}
 	<div class="overflow-x-auto">
@@ -81,13 +71,22 @@
 						<Table.Cell class="pl-6">
 							<div class="flex items-center gap-3">
 								<!-- Avatar -->
-								<div
-									class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
-								>
-									<span class="text-sm font-semibold text-primary">
-										{getInitials(user.username)}
-									</span>
-								</div>
+								{#if user.avatarImageUrl}
+									<img
+										src={user.avatarImageUrl}
+										alt={user.username}
+										class="w-10 h-10 rounded-full object-cover shrink-0"
+										referrerpolicy="no-referrer"
+									/>
+								{:else}
+									<div
+										class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
+									>
+										<span class="text-sm font-semibold text-primary">
+											{getInitials(user.username)}
+										</span>
+									</div>
+								{/if}
 								<div class="min-w-0">
 									<div class="flex items-center gap-2">
 										<p class="font-medium truncate">{user.username}</p>
@@ -198,13 +197,22 @@
 		<div class="py-4">
 			{#if targetUser}
 				<div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-					<div
-						class="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0"
-					>
-						<span class="text-sm font-semibold text-destructive">
-							{getInitials(targetUser.username)}
-						</span>
-					</div>
+					{#if targetUser.avatarImageUrl}
+						<img
+							src={targetUser.avatarImageUrl}
+							alt={targetUser.username}
+							class="w-10 h-10 rounded-full object-cover shrink-0"
+							referrerpolicy="no-referrer"
+						/>
+					{:else}
+						<div
+							class="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0"
+						>
+							<span class="text-sm font-semibold text-destructive">
+								{getInitials(targetUser.username)}
+							</span>
+						</div>
+					{/if}
 					<div>
 						<p class="font-medium">{targetUser.username}</p>
 						<p class="text-sm text-muted-foreground">{targetUser.email}</p>
@@ -219,7 +227,8 @@
 				onclick={async () => {
 					if (target) {
 						let { success, error, refresh } = await deleteUser(target);
-						result = { success, error };
+						if (error) toast.error(error);
+						if (success) toast.success(success);
 						users = refresh;
 					}
 					target = undefined;

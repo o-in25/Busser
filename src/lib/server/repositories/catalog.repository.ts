@@ -551,7 +551,7 @@ export class CatalogRepository extends BaseRepository {
 					.first();
 				if (existing) {
 					const [imported] = await trx('basicrecipe')
-						.where({ RecipeId: existing.RecipeId, WorkspaceId: targetWorkspaceId });
+						.where({ RecipeId: existing.recipeId, WorkspaceId: targetWorkspaceId });
 					result = { recipe: imported as View.BasicRecipe, recipeSteps: [], alreadyImported: true };
 					return;
 				}
@@ -597,7 +597,7 @@ export class CatalogRepository extends BaseRepository {
 								});
 								parentCategoryId = parentId;
 							} else {
-								parentCategoryId = parent.CategoryId;
+								parentCategoryId = parent.categoryId;
 							}
 						}
 
@@ -608,7 +608,7 @@ export class CatalogRepository extends BaseRepository {
 						});
 						categoryMap.set(catName, catId);
 					} else {
-						categoryMap.set(catName, cat.CategoryId);
+						categoryMap.set(catName, cat.categoryId);
 					}
 				}
 
@@ -626,7 +626,7 @@ export class CatalogRepository extends BaseRepository {
 						.first();
 
 					if (existingProduct) {
-						productMap.set(targetCategoryId, existingProduct.ProductId);
+						productMap.set(targetCategoryId, existingProduct.productId);
 					} else {
 						// copy source product with stock=0
 						const [productId] = await trx('product').insert({
@@ -643,28 +643,28 @@ export class CatalogRepository extends BaseRepository {
 					}
 				}
 
-				// 6. create recipe chain
+				// 6. create recipe chain (sourceRecipe is camelCase from postProcessResponse)
 				const [descId] = await trx('recipedescription').insert({
-					RecipeDescription: sourceRecipe.RecipeDescription,
-					RecipeDescriptionImageUrl: sourceRecipe.RecipeDescriptionImageUrl,
-					RecipeSweetnessRating: sourceRecipe.RecipeSweetnessRating,
-					RecipeDrynessRating: sourceRecipe.RecipeDrynessRating,
-					RecipeStrengthRating: sourceRecipe.RecipeStrengthRating,
-					RecipeVersatilityRating: sourceRecipe.RecipeVersatilityRating,
+					RecipeDescription: sourceRecipe.recipeDescription,
+					RecipeDescriptionImageUrl: sourceRecipe.recipeDescriptionImageUrl,
+					RecipeSweetnessRating: sourceRecipe.recipeSweetnessRating,
+					RecipeDrynessRating: sourceRecipe.recipeDrynessRating,
+					RecipeStrengthRating: sourceRecipe.recipeStrengthRating,
+					RecipeVersatilityRating: sourceRecipe.recipeVersatilityRating,
 				});
 
 				const [newRecipeId] = await trx('recipe').insert({
 					WorkspaceId: targetWorkspaceId,
-					RecipeCategoryId: sourceRecipe.RecipeCategoryId,
+					RecipeCategoryId: sourceRecipe.recipeCategoryId,
 					RecipeDescriptionId: descId,
-					RecipeName: sourceRecipe.RecipeName,
-					RecipeImageUrl: sourceRecipe.RecipeImageUrl,
+					RecipeName: sourceRecipe.recipeName,
+					RecipeImageUrl: sourceRecipe.recipeImageUrl,
 					SourceRecipeId: sourceRecipeId,
 					SourceWorkspaceId: sourceWorkspaceId,
 				});
 
 				await trx('recipetechnique').insert({
-					RecipeTechniqueDescriptionId: sourceRecipe.RecipeTechniqueDescriptionId,
+					RecipeTechniqueDescriptionId: sourceRecipe.recipeTechniqueDescriptionId,
 					RecipeId: newRecipeId,
 				});
 

@@ -3,6 +3,7 @@
 
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import ThemeMixer from '$lib/components/ThemeMixer.svelte';
@@ -23,7 +24,9 @@
 			currentAvatarUrl = form.avatarImageUrl;
 			pendingAvatarDataUri = null;
 			pendingAvatarFile = null;
+			toast.success('Avatar updated');
 		}
+		if (form?.error) toast.error(form.error);
 	});
 
 	// also sync with data changes
@@ -174,9 +177,6 @@
 						{/if}
 					</div>
 
-					{#if form?.error}
-						<p class="text-sm text-destructive">{form.error}</p>
-					{/if}
 				</div>
 			</div>
 		</Card.Content>

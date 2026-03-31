@@ -17,6 +17,7 @@
 	} from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
+	import { toast } from 'svelte-sonner';
 	import WorkspaceList from '$lib/components/WorkspaceList.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -32,6 +33,11 @@
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	$effect(() => {
+		if (form?.error) toast.error(form.error);
+		if (form?.success) toast.success('Operation completed successfully.');
+	});
 
 	const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
@@ -207,19 +213,6 @@
 		</Button>
 	</div>
 
-	<!-- Error Message -->
-	{#if form?.error}
-		<div class="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-			{form.error}
-		</div>
-	{/if}
-
-	<!-- Success Message -->
-	{#if form?.success}
-		<div class="bg-neon-green-500/10 text-neon-green-600 dark:text-neon-green-400 px-4 py-3 rounded-md text-sm">
-			Operation completed successfully.
-		</div>
-	{/if}
 
 	<!-- Workspaces Card -->
 	<Card.Root>
@@ -441,17 +434,7 @@
 
 					<input type="hidden" name="workspaceId" value={selectedPreferredId || ''} />
 
-					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
-						{#if form?.success}
-							<p class="text-sm text-neon-green-600 flex items-center gap-1">
-								<Check class="h-4 w-4" />
-								Preference saved
-							</p>
-						{:else if form?.error}
-							<p class="text-sm text-destructive">{form.error}</p>
-						{:else}
-							<div></div>
-						{/if}
+					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2">
 						<Button
 							type="submit"
 							class="w-full sm:w-auto"
