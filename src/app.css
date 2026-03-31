@@ -456,27 +456,23 @@
 .glass-cta-primary {
 	background: linear-gradient(
 		135deg,
-		rgba(232, 25, 95, 0.55) 0%,
-		rgba(190, 50, 120, 0.45) 50%,
-		rgba(165, 125, 213, 0.4) 100%
+		rgba(232, 25, 95, 0.8) 0%,
+		rgba(190, 50, 120, 0.7) 50%,
+		rgba(165, 125, 213, 0.65) 100%
 	);
 	color: rgba(255, 255, 255, 1);
-	border: 1px solid rgba(255, 255, 255, 0.25);
-	box-shadow:
-		0 4px 16px rgba(232, 25, 95, 0.25),
-		inset 0 1px 0 rgba(255, 255, 255, 0.25);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	box-shadow: 0 4px 16px rgba(232, 25, 95, 0.25);
 }
 
 .glass-cta-primary:hover {
 	background: linear-gradient(
 		135deg,
-		rgba(232, 25, 95, 0.65) 0%,
-		rgba(190, 50, 120, 0.55) 50%,
-		rgba(165, 125, 213, 0.5) 100%
+		rgba(232, 25, 95, 0.9) 0%,
+		rgba(190, 50, 120, 0.8) 50%,
+		rgba(165, 125, 213, 0.75) 100%
 	);
-	box-shadow:
-		0 6px 24px rgba(232, 25, 95, 0.35),
-		inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	box-shadow: 0 6px 24px rgba(232, 25, 95, 0.35);
 }
 
 :is(.dark) .glass-cta-primary {
