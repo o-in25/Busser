@@ -7,8 +7,7 @@
 	import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
 
 	import type { ActionData, PageData } from './$types';
-	export let form: ActionData;
-	export let data: PageData;
+	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const { userId } = page.params;
 
 	$effect(() => {
