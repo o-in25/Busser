@@ -5,6 +5,7 @@
 
 	type BaseProps = {
 		variant?: 'default' | 'primary';
+		size?: 'sm' | 'md' | 'lg';
 		children?: Snippet;
 		class?: string;
 	};
@@ -12,8 +13,15 @@
 	type AnchorProps = BaseProps & { href: string } & HTMLAnchorAttributes;
 	type ButtonProps = BaseProps & { href?: never } & HTMLButtonAttributes;
 
+	const sizeClasses = {
+		sm: 'glass-cta-sm',
+		md: 'glass-cta-md',
+		lg: '',
+	};
+
 	let {
 		variant = 'default',
+		size = 'lg',
 		children,
 		class: className,
 		href,
@@ -24,14 +32,14 @@
 {#if href}
 	<a
 		{href}
-		class={cn('glass-cta', variant === 'primary' && 'glass-cta-primary', className)}
+		class={cn('glass-cta', variant === 'primary' && 'glass-cta-primary', sizeClasses[size], className)}
 		{...restProps as HTMLAnchorAttributes}
 	>
 		{#if children}{@render children()}{/if}
 	</a>
 {:else}
 	<button
-		class={cn('glass-cta', variant === 'primary' && 'glass-cta-primary', className)}
+		class={cn('glass-cta', variant === 'primary' && 'glass-cta-primary', sizeClasses[size], className)}
 		{...restProps as HTMLButtonAttributes}
 	>
 		{#if children}{@render children()}{/if}
