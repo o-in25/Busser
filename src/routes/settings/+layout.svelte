@@ -13,7 +13,7 @@
 		activeUrl$.includes('account') || (!isAdmin && activeUrl$.includes('/users/'));
 
 	let activeClass =
-		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-primary-foreground bg-primary/25 dark:bg-primary/20 backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)] rounded-xl';
+		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-primary dark:text-[rgba(248,78,128,1)] bg-primary/25 dark:bg-primary/20 backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)] rounded-xl';
 	let defaultClass =
 		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-muted-foreground rounded-xl hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground transition-all duration-200';
 </script>

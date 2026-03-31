@@ -2,7 +2,7 @@
 	import { Award, Candy, Droplets, Gauge, HelpCircle, Sparkles } from 'lucide-svelte';
 
 	import * as Card from '$lib/components/ui/card';
-	import * as Dialog from '$lib/components/ui/dialog';
+	import * as Popover from '$lib/components/ui/popover';
 	import { calculateAbv, calculateOverallScore } from '$lib/math';
 	import type { View } from '$lib/types';
 	import { cn } from '$lib/utils';
@@ -106,43 +106,24 @@
 		<Card.Title class="flex items-center gap-2 text-lg">
 			<Award class="h-5 w-5 text-primary" />
 			Verdict
-			<Dialog.Root>
-				<Dialog.Trigger
+			<Popover.Root>
+				<Popover.Trigger
 					class="text-muted-foreground hover:text-foreground transition-colors rounded-full"
 				>
 					<HelpCircle class="h-4 w-4" />
 					<span class="sr-only">How is the Verdict calculated?</span>
-				</Dialog.Trigger>
-				<Dialog.Content>
-					<Dialog.Header>
-						<Dialog.Title class="flex items-center gap-2">
-							<Award class="h-5 w-5 text-primary" />
-							How the Verdict works
-						</Dialog.Title>
-						<Dialog.Description class="text-muted-foreground">
-							The Verdict is a 0–10 score that reflects how well-crafted and balanced a cocktail is.
-						</Dialog.Description>
-					</Dialog.Header>
-					<div class="space-y-4">
-						{#each ratingItems as item}
-							{@const colors = colorClasses[item.color]}
-							<div class="flex items-start gap-3">
-								<div class="mt-0.5 shrink-0">
-									<item.icon class={cn('h-4 w-4', colors.icon)} />
-								</div>
-								<div>
-									<p class="text-sm font-medium">{item.label}</p>
-									<p class="text-sm text-muted-foreground">{item.tooltip}</p>
-								</div>
-							</div>
-						{/each}
-					</div>
-					<p class="text-xs text-muted-foreground border-t border-border/50 pt-3 mt-4">
-						Cocktails with intentional sweet/dry contrast earn a bonus. One-dimensional or
-						contradictory profiles lose points.
+				</Popover.Trigger>
+				<Popover.Content class="w-72 text-sm text-left" align="start">
+					<p class="font-semibold mb-1">How the Verdict works</p>
+					<p class="text-muted-foreground mb-2">
+						A 0–10 score reflecting how well-crafted and balanced a cocktail is, based on sweetness,
+						dryness, strength, and versatility.
 					</p>
-				</Dialog.Content>
-			</Dialog.Root>
+					<a href="/catalog#verdict" class="text-xs text-primary hover:underline">
+						Learn more
+					</a>
+				</Popover.Content>
+			</Popover.Root>
 		</Card.Title>
 	</Card.Header>
 	<Card.Content class="space-y-6">

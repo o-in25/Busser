@@ -27,6 +27,8 @@
 		BarChart3,
 		DollarSign,
 		X,
+		SwatchBook,
+		MapPin,
 	} from 'lucide-svelte';
 	import { fade, slide } from 'svelte/transition';
 
@@ -34,6 +36,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import logo from '$lib/assets/logo.png';
+	import FancyCarousel from '$lib/components/FancyCarousel.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
@@ -202,7 +205,7 @@
 
 {#if !$page.data.user}
 	<!-- Hero Section -->
-	<section class="relative overflow-hidden py-12 md:py-18 rounded-2xl mt-4">
+	<section class="relative overflow-hidden h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl">
 		<!-- Animated background gradient -->
 		<div class="absolute inset-0 hero-gradient-bg -z-10 rounded-2xl"></div>
 		<div class="absolute inset-0 bg-grid-pattern opacity-5 -z-10"></div>
@@ -219,13 +222,13 @@
 			<img
 				src={logo}
 				alt="Busser"
-				class="h-40 md:h-52 lg:h-60 mx-auto mb-8 hero-enter-glow"
+				class="h-28 md:h-36 lg:h-44 mx-auto mb-3 hero-enter-glow"
 				style="--delay: 0ms"
 			/>
 
 			<!-- Headline -->
 			<h1
-				class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight hero-enter text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
+				class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight hero-enter text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
 				style="--delay: 200ms"
 			>
 				From Shelf To Shaker
@@ -233,7 +236,7 @@
 
 			<!-- Subheadline -->
 			<p
-				class="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto hero-enter"
+				class="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto hero-enter"
 				style="--delay: 400ms"
 			>
 				Track your bottles. Discover what you can mix.
@@ -251,48 +254,20 @@
 				</FancyButton>
 			</div>
 
-			<!-- Featured Recipes -->
-			{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
-				<div class="mt-12 mx-auto max-w-3xl hero-enter" style="--delay: 800ms">
-					<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-						{#each landingData.featuredRecipes as recipe, i}
-							<div
-								class="group rounded-xl overflow-hidden bg-background/30 backdrop-blur-sm border border-border/50 shadow-lg shadow-primary/5 hero-enter"
-								style="--delay: {800 + (i + 1) * 100}ms"
-							>
-								<div class="aspect-square relative">
-									<SkeletonImage
-										src={recipe.recipeImageUrl}
-										alt={recipe.recipeName}
-										variant="recipe"
-										class="h-full w-full group-hover:scale-105 transition-transform duration-300"
-									/>
-									<div
-										class="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"
-									></div>
-									{#if recipe.recipeCategoryDescription}
-										<Badge
-											variant="secondary"
-											class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-xs"
-										>
-											{recipe.recipeCategoryDescription}
-										</Badge>
-									{/if}
-									<p
-										class="absolute bottom-2 left-2 right-2 text-sm font-semibold text-foreground truncate"
-									>
-										{recipe.recipeName}
-									</p>
-								</div>
-							</div>
-						{/each}
-					</div>
-					<p class="mt-6 text-sm text-muted-foreground">
-						<a href="/catalog" class="text-primary hover:underline">Explore the full catalog</a>
-					</p>
-				</div>
-			{/if}
 		</div>
+
+		<!-- Featured Recipes Carousel -->
+		{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
+			<div class="mt-4 w-full hero-enter" style="--delay: 800ms">
+				<FancyCarousel recipes={landingData.featuredRecipes} />
+				<div class="mt-3 text-center">
+					<FancyButton href="/catalog" class="!py-2 !px-5 !text-sm">
+						Browse Catalog
+						<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
+					</FancyButton>
+				</div>
+			</div>
+		{/if}
 	</section>
 
 	<!-- Live Catalog Content -->
@@ -354,13 +329,12 @@
 				class="flex flex-wrap gap-3 justify-center mb-4 reveal-on-scroll"
 				use:reveal={{ delay: 200 }}
 			>
-				<a href="/catalog/browse" class={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
+				<FancyButton href="/catalog/browse" size="md">
 					<FlaskConical class="h-4 w-4 mr-2" />
 					Browse {landingData?.totalRecipes || ''} Recipes
-				</a>
-				<Button
-					variant="outline"
-					size="lg"
+				</FancyButton>
+				<FancyButton
+					size="md"
 					onclick={() => {
 						if (recipes.length > 0) {
 							const random = recipes[Math.floor(Math.random() * recipes.length)];
@@ -370,7 +344,7 @@
 				>
 					<Shuffle class="h-4 w-4 mr-2" />
 					Surprise Me
-				</Button>
+				</FancyButton>
 			</div>
 		</div>
 	</section>
@@ -391,67 +365,18 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div
-							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-2xl"
-						></div>
+						<div class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.6)]"></div>
 						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
-							>
+							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
 								<Package class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Inventory Management</Card.Title>
 						</Card.Header>
 						<Card.Content>
-							<p class="text-sm text-muted-foreground mb-3">
+							<p class="text-sm text-muted-foreground">
 								Track your spirits, liqueurs, mixers, and ingredients in one place. Organize by
 								category and never lose track of what you have.
 							</p>
-							<div class="flex flex-wrap gap-2">
-								<Badge variant="outline" class="text-xs">
-									<Bell class="h-3 w-3 mr-1" />
-									Stock Alerts
-								</Badge>
-								<Badge variant="outline" class="text-xs">
-									<Search class="h-3 w-3 mr-1" />
-									Quick Search
-								</Badge>
-							</div>
-						</Card.Content>
-					</Card.Root>
-				</div>
-
-				<!-- Recipe Catalog -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
-					<Card.Root
-						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-					>
-						<div
-							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-neon-amber-500/10 blur-2xl"
-						></div>
-						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-neon-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-neon-amber-500/20 transition-colors"
-							>
-								<BookOpen class="h-6 w-6 text-neon-amber-600 dark:text-neon-amber-400" />
-							</div>
-							<Card.Title class="text-lg">Recipe Catalog</Card.Title>
-						</Card.Header>
-						<Card.Content>
-							<p class="text-sm text-muted-foreground mb-3">
-								Browse a curated collection of classic and modern cocktails. Each recipe includes
-								detailed ingredients and step-by-step instructions.
-							</p>
-							<div class="flex flex-wrap gap-2">
-								<Badge variant="outline" class="text-xs">
-									<FlaskConical class="h-3 w-3 mr-1" />
-									Classic Cocktails
-								</Badge>
-								<Badge variant="outline" class="text-xs">
-									<Star class="h-3 w-3 mr-1" />
-									Modern Recipes
-								</Badge>
-							</div>
 						</Card.Content>
 					</Card.Root>
 				</div>
@@ -461,32 +386,39 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div
-							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-neon-green-500/10 blur-2xl"
-						></div>
+						<div class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(28,186,138,0.6)]"></div>
 						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-neon-green-500/10 flex items-center justify-center mb-3 group-hover:bg-neon-green-500/20 transition-colors"
-							>
-								<ChefHat class="h-6 w-6 text-neon-green-600 dark:text-neon-green-400" />
+							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+								<SwatchBook class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Smart Matching</Card.Title>
 						</Card.Header>
 						<Card.Content>
-							<p class="text-sm text-muted-foreground mb-3">
+							<p class="text-sm text-muted-foreground">
 								Discover which cocktails you can make right now based on your current inventory. No
 								more guessing or missing ingredients.
 							</p>
-							<div class="flex flex-wrap gap-2">
-								<Badge variant="outline" class="text-xs">
-									<Sparkles class="h-3 w-3 mr-1" />
-									Instant Results
-								</Badge>
-								<Badge variant="outline" class="text-xs">
-									<GlassWater class="h-3 w-3 mr-1" />
-									Make Tonight
-								</Badge>
+						</Card.Content>
+					</Card.Root>
+				</div>
+
+				<!-- Spirit Guide -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
+					>
+						<div class="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(232,163,15,0.6)]"></div>
+						<Card.Header class="pb-2">
+							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+								<BookOpen class="h-6 w-6 text-primary" />
 							</div>
+							<Card.Title class="text-lg">Spirit Guide</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground">
+								Browse a curated and detailed spirit catalog, with cocktail history, how different
+								spirits are made, and bartending tips.
+							</p>
 						</Card.Content>
 					</Card.Root>
 				</div>
@@ -496,60 +428,65 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div
-							class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-secondary-500/10 blur-2xl"
-						></div>
+						<div class="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(165,125,213,0.6)]"></div>
 						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-secondary-500/10 flex items-center justify-center mb-3 group-hover:bg-secondary-500/20 transition-colors"
-							>
-								<Sparkles class="h-6 w-6 text-secondary-600 dark:text-secondary-400" />
+							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+								<Sparkles class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">AI-Powered Tools</Card.Title>
 						</Card.Header>
 						<Card.Content>
-							<p class="text-sm text-muted-foreground mb-3">
+							<p class="text-sm text-muted-foreground">
 								Leverage intelligent features to generate recipe suggestions and get personalized
 								recommendations based on your preferences.
 							</p>
-							<div class="flex flex-wrap gap-2">
-								<Badge variant="outline" class="text-xs">
-									<Lightbulb class="h-3 w-3 mr-1" />
-									Smart Suggestions
-								</Badge>
-								<Badge variant="outline" class="text-xs">
-									<Star class="h-3 w-3 mr-1" />
-									Personalized
-								</Badge>
-							</div>
 						</Card.Content>
 					</Card.Root>
 				</div>
 			</div>
 
-			<!-- Workspace Feature -->
-			<div class="reveal-on-scroll" use:reveal={{ delay: 400 }}>
-				<Card.Root
-					class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-				>
-					<div
-						class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-2xl"
-					></div>
-					<Card.Content class="flex flex-col md:flex-row items-center gap-6 py-6">
-						<div
-							class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors"
-						>
-							<Users class="h-6 w-6 text-primary" />
-						</div>
-						<div class="text-center md:text-left">
-							<h3 class="text-lg font-semibold mb-2">Workspace Collaboration</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<!-- Store Finder -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 400 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
+					>
+						<div class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(34,211,238,0.6)]"></div>
+						<Card.Header class="pb-2">
+							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+								<MapPin class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">Store Finder</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground">
+								Find nearby liquor stores to restock your bar or compare product prices.
+								Powered by Google Places, so you always know where to get what you need.
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</div>
+
+				<!-- Workspace Collaboration -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 500 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
+					>
+						<div class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.4)]"></div>
+						<Card.Header class="pb-2">
+							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+								<Users class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">Workspace Collaboration</Card.Title>
+						</Card.Header>
+						<Card.Content>
 							<p class="text-sm text-muted-foreground">
 								Create shared workspaces to manage your bar with friends, family, or colleagues.
 								Perfect for home bars, small events, or collaborative cocktail exploration.
 							</p>
-						</div>
-					</Card.Content>
-				</Card.Root>
+						</Card.Content>
+					</Card.Root>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -604,7 +541,7 @@
 								<div
 									class="w-24 h-24 rounded-full bg-neon-amber-500/10 flex items-center justify-center"
 								>
-									<Sparkles class="h-10 w-10 text-neon-amber-500" />
+									<SwatchBook class="h-10 w-10 text-neon-amber-500" />
 								</div>
 							</div>
 							<span

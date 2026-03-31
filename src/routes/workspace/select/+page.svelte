@@ -2,12 +2,9 @@
 	import {
 		AlertCircle,
 		ArrowRight,
-		Globe,
 		HelpCircle,
 		GalleryHorizontalEnd,
 		LogOut,
-		User,
-		Users,
 	} from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
@@ -58,37 +55,14 @@
 				<span class="sr-only">What are Workspaces?</span>
 			</Popover.Trigger>
 			<Popover.Content class="w-72 text-sm text-left" align="center">
-				<p class="font-semibold mb-2">What are Workspaces?</p>
-				<p class="text-muted-foreground mb-3">
+				<p class="font-semibold mb-1">What are Workspaces?</p>
+				<p class="text-muted-foreground mb-2">
 					Workspaces let you organize your bar separately, each with its own inventory, recipes, and
 					catalog.
 				</p>
-				<div class="space-y-2 mb-3">
-					<div class="flex items-start gap-2">
-						<Globe class="h-3.5 w-3.5 text-blue-500 mt-1 shrink-0" />
-						<p class="text-muted-foreground">
-							<span class="text-foreground font-medium">Global</span> &mdash; a shared, read-only
-							catalog of every recipe and ingredient available to all Busser users.
-						</p>
-					</div>
-					<div class="flex items-start gap-2">
-						<User class="h-3.5 w-3.5 text-secondary-500 mt-1 shrink-0" />
-						<p class="text-muted-foreground">
-							<span class="text-foreground font-medium">Personal</span> &mdash; your private Workspace
-							with full control over your own catalog and inventory.
-						</p>
-					</div>
-					<div class="flex items-start gap-2">
-						<Users class="h-3.5 w-3.5 text-neon-green-500 mt-1 shrink-0" />
-						<p class="text-muted-foreground">
-							<span class="text-foreground font-medium">Shared</span> &mdash; a collaborative Workspace
-							where multiple users manage a shared catalog and inventory.
-						</p>
-					</div>
-				</div>
-				<p class="text-muted-foreground text-xs border-t border-border/50 pt-2">
-					Owners can invite members and manage settings from Workspace Settings.
-				</p>
+				<a href="/settings/workspaces" class="text-xs text-primary hover:underline">
+					Learn more
+				</a>
 			</Popover.Content>
 		</Popover.Root>
 	</div>

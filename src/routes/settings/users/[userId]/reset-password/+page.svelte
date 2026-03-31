@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { Info } from 'lucide-svelte';
-
 	import { page } from '$app/state';
+	import { toast } from 'svelte-sonner';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import BreadcrumbItem from '$lib/components/BreadcrumbItem.svelte';
 	import ResetPasswordForm from '$lib/components/ResetPasswordForm.svelte';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 
 	import type { ActionData, PageData } from './$types';
 	export let form: ActionData;
 	export let data: PageData;
 	const { userId } = page.params;
+
+	$effect(() => {
+		if (form?.error) toast.error(form.error.message);
+		if (form?.success) toast.success(form.success.message);
+	});
 </script>
 
 <svelte:head>
@@ -26,17 +29,6 @@
 		<BackButton fallback="/settings/users/{userId}" label="Back" variant="outline" size="sm" />
 	</div>
 	<div class="grow">
-		{#if form?.error || form?.success}
-			<Alert
-				variant={form.error ? 'destructive' : 'default'}
-				class="mb-4 {form.error ? '' : 'border-neon-green-500 text-neon-green-700 dark:text-neon-green-400'}"
-			>
-				<Info class="w-5 h-5" />
-				<AlertDescription>
-					{form.error ? form.error.message : form.success.message}
-				</AlertDescription>
-			</Alert>
-		{/if}
 		<ResetPasswordForm canForceReset={data.canForceReset}></ResetPasswordForm>
 	</div>
 </div>

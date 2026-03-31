@@ -211,23 +211,8 @@ export const load = (async ({ locals }) => {
 		// Get spirits for browse-by-spirit shortcuts
 		const allSpirits = await catalogRepo.getSpirits();
 
-		// Get admin-curated featured recipes, pick 4 deterministically per day
+		// get all admin-curated featured recipes for carousel
 		const allFeatured = await catalogRepo.getFeatured(GLOBAL_WORKSPACE_ID);
-		const featuredRecipes: typeof allFeatured = [];
-		if (allFeatured.length <= 4) {
-			featuredRecipes.push(...allFeatured);
-		} else {
-			const d = new Date();
-			const baseSeed = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-			const used = new Set<number>();
-			for (let i = 0; featuredRecipes.length < 4 && i < allFeatured.length; i++) {
-				const pick = indexFromSeed(allFeatured, `${baseSeed}-feat-${i}`);
-				if (pick && !used.has(pick.recipeId)) {
-					used.add(pick.recipeId);
-					featuredRecipes.push(pick);
-				}
-			}
-		}
 
 		const inviteOnly = await isInviteOnly();
 
@@ -239,7 +224,7 @@ export const load = (async ({ locals }) => {
 		landingData = {
 			totalRecipes,
 			spiritCount: allSpirits.length,
-			featuredRecipes,
+			featuredRecipes: allFeatured,
 			inviteOnly,
 			allSpirits,
 			cocktailOfTheDay,

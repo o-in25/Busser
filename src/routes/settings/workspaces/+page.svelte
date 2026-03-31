@@ -17,6 +17,7 @@
 	} from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
+	import { toast } from 'svelte-sonner';
 	import WorkspaceList from '$lib/components/WorkspaceList.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -32,6 +33,11 @@
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	$effect(() => {
+		if (form?.error) toast.error(form.error);
+		if (form?.success) toast.success('Operation completed successfully.');
+	});
 
 	const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
@@ -163,36 +169,10 @@
 						<span class="sr-only">What are Workspaces?</span>
 					</Popover.Trigger>
 					<Popover.Content class="w-72 text-sm text-left" align="start">
-						<p class="font-semibold mb-2">What are Workspaces?</p>
-						<p class="text-muted-foreground mb-3">
+						<p class="font-semibold mb-1">What are Workspaces?</p>
+						<p class="text-muted-foreground">
 							Workspaces let you organize your bar separately, each with its own inventory, recipes,
-							and catalog.
-						</p>
-						<div class="space-y-2 mb-3">
-							<div class="flex items-start gap-2">
-								<Globe class="h-3.5 w-3.5 text-blue-500 mt-1 shrink-0" />
-								<p class="text-muted-foreground">
-									<span class="text-foreground font-medium">Global</span> &mdash; a shared, read-only
-									catalog of every recipe and ingredient available to all Busser users.
-								</p>
-							</div>
-							<div class="flex items-start gap-2">
-								<User class="h-3.5 w-3.5 text-secondary-500 mt-1 shrink-0" />
-								<p class="text-muted-foreground">
-									<span class="text-foreground font-medium">Personal</span> &mdash; your private
-									workspace with full control over your own catalog and inventory.
-								</p>
-							</div>
-							<div class="flex items-start gap-2">
-								<Users class="h-3.5 w-3.5 text-neon-green-500 mt-1 shrink-0" />
-								<p class="text-muted-foreground">
-									<span class="text-foreground font-medium">Shared</span> &mdash; a collaborative
-									workspace where multiple users manage a shared catalog and inventory.
-								</p>
-							</div>
-						</div>
-						<p class="text-muted-foreground text-xs border-t border-border/50 pt-2">
-							Owners can invite members and manage settings from Workspace Settings.
+							and catalog. See the breakdown below.
 						</p>
 					</Popover.Content>
 				</Popover.Root>
@@ -207,19 +187,37 @@
 		</Button>
 	</div>
 
-	<!-- Error Message -->
-	{#if form?.error}
-		<div class="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-			{form.error}
-		</div>
-	{/if}
 
-	<!-- Success Message -->
-	{#if form?.success}
-		<div class="bg-neon-green-500/10 text-neon-green-600 dark:text-neon-green-400 px-4 py-3 rounded-md text-sm">
-			Operation completed successfully.
+	<!-- Workspace Types -->
+	<div class="grid gap-3 sm:grid-cols-3">
+		<div class="flex items-start gap-3 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+			<Globe class="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+			<div>
+				<p class="text-sm font-medium">Global</p>
+				<p class="text-xs text-muted-foreground">
+					A shared, read-only catalog of every recipe and ingredient available to all Busser users.
+				</p>
+			</div>
 		</div>
-	{/if}
+		<div class="flex items-start gap-3 p-4 rounded-lg bg-secondary-500/10 border border-secondary-500/20">
+			<User class="h-4 w-4 text-secondary-500 mt-0.5 shrink-0" />
+			<div>
+				<p class="text-sm font-medium">Personal</p>
+				<p class="text-xs text-muted-foreground">
+					Your private workspace with full control over your own catalog and inventory.
+				</p>
+			</div>
+		</div>
+		<div class="flex items-start gap-3 p-4 rounded-lg bg-neon-green-500/10 border border-neon-green-500/20">
+			<Users class="h-4 w-4 text-neon-green-500 mt-0.5 shrink-0" />
+			<div>
+				<p class="text-sm font-medium">Shared</p>
+				<p class="text-xs text-muted-foreground">
+					A collaborative workspace where multiple users manage a shared catalog and inventory.
+				</p>
+			</div>
+		</div>
+	</div>
 
 	<!-- Workspaces Card -->
 	<Card.Root>
@@ -441,17 +439,7 @@
 
 					<input type="hidden" name="workspaceId" value={selectedPreferredId || ''} />
 
-					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
-						{#if form?.success}
-							<p class="text-sm text-neon-green-600 flex items-center gap-1">
-								<Check class="h-4 w-4" />
-								Preference saved
-							</p>
-						{:else if form?.error}
-							<p class="text-sm text-destructive">{form.error}</p>
-						{:else}
-							<div></div>
-						{/if}
+					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2">
 						<Button
 							type="submit"
 							class="w-full sm:w-auto"

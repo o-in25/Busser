@@ -2,6 +2,7 @@
 	import { Clock, Crown, Eye, Pencil, Shield, Trash2, Users } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
+	import { toast } from 'svelte-sonner';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -15,6 +16,19 @@
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	$effect(() => {
+		if (form?.error) toast.error(form.error);
+		if (form?.success) {
+			const messages: Record<string, string> = {
+				update: 'Member role updated successfully.',
+				remove: 'Member removed successfully.',
+				invite: 'Invitation sent successfully.',
+				cancel: 'Invitation cancelled.',
+			};
+			toast.success(messages[form.action] || 'Operation completed successfully.');
+		}
+	});
 
 	// local state
 	let inviteDialogOpen = $state(false);
@@ -97,30 +111,6 @@
 			Invite Member
 		</Button>
 	</div>
-
-	<!-- Error Message -->
-	{#if form?.error}
-		<div class="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-			{form.error}
-		</div>
-	{/if}
-
-	<!-- Success Message -->
-	{#if form?.success}
-		<div class="bg-neon-green-500/10 text-neon-green-600 dark:text-neon-green-400 px-4 py-3 rounded-md text-sm">
-			{#if form.action === 'update'}
-				Member role updated successfully.
-			{:else if form.action === 'remove'}
-				Member removed successfully.
-			{:else if form.action === 'invite'}
-				Invitation sent successfully.
-			{:else if form.action === 'cancel'}
-				Invitation cancelled.
-			{:else}
-				Operation completed successfully.
-			{/if}
-		</div>
-	{/if}
 
 	<!-- Members Card -->
 	<Card.Root>
