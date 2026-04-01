@@ -93,7 +93,7 @@
 				{#if recipeCount > 0}
 					<button
 						class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-						onclick={(e) => { e.preventDefault(); e.stopPropagation(); goto(`/catalog/browse?ingredient=${product.productId}`); }}
+						onclick={(e) => { e.preventDefault(); e.stopPropagation(); goto(`/catalog/browse?ingredientInclude=${product.productId}`); }}
 					>
 						<FlaskConical class="h-3.5 w-3.5" />
 						<span>Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span>
@@ -142,7 +142,7 @@
 						{#if recipeCount > 0}
 							<button
 								class="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-								onclick={(e) => { e.preventDefault(); e.stopPropagation(); goto(`/catalog/browse?ingredient=${product.productId}`); }}
+								onclick={(e) => { e.preventDefault(); e.stopPropagation(); goto(`/catalog/browse?ingredientInclude=${product.productId}`); }}
 							>
 								<FlaskConical class="h-3.5 w-3.5" />
 								Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}

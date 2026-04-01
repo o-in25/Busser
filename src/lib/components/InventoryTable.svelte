@@ -128,7 +128,7 @@
 					<Table.Cell class="hidden sm:table-cell">
 						{#if product.productId && recipeUsage[product.productId]}
 							<div class="flex justify-center">
-								<a href="/catalog/browse?ingredient={product.productId}">
+								<a href="/catalog/browse?ingredientInclude={product.productId}">
 									<Badge
 										variant="secondary"
 										class="gap-1 hover:bg-secondary/80 transition-colors cursor-pointer"
