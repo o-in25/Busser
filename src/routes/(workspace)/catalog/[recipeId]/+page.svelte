@@ -39,6 +39,22 @@
 	const singleWorkspace = $derived(
 		importData?.editableWorkspaces.length === 1 ? importData.editableWorkspaces[0] : null
 	);
+
+	// json-ld structured data for search engines
+	const jsonLd = $derived({
+		'@context': 'https://schema.org',
+		'@type': 'Recipe',
+		name: data.recipe.recipeName,
+		description: data.recipe.recipeDescription || `${data.recipe.recipeName} cocktail recipe.`,
+		...(data.recipe.recipeImageUrl && { image: data.recipe.recipeImageUrl }),
+		recipeCategory: data.recipe.recipeCategoryDescription,
+		recipeIngredient: data.recipeSteps.map(
+			(s) => `${s.productIdQuantityInMilliliters} ${s.productIdQuantityUnit} ${s.productName}`
+		),
+		...(data.recipe.recipeTechniqueDescriptionText && {
+			recipeInstructions: data.recipe.recipeTechniqueDescriptionText,
+		}),
+	});
 </script>
 
 <svelte:head>
@@ -46,9 +62,18 @@
 	<meta name="description" content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe on Busser.`} />
 	<meta property="og:title" content="{data.recipe.recipeName} - Busser" />
 	<meta property="og:description" content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`} />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://busserapp.com/catalog/{data.recipe.recipeId}" />
 	{#if data.recipe.recipeImageUrl}
 		<meta property="og:image" content={data.recipe.recipeImageUrl} />
 	{/if}
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="{data.recipe.recipeName} - Busser" />
+	<meta name="twitter:description" content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`} />
+	{#if data.recipe.recipeImageUrl}
+		<meta name="twitter:image" content={data.recipe.recipeImageUrl} />
+	{/if}
+	{@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
 </svelte:head>
 
 <div class="container mx-auto max-w-6xl px-4">

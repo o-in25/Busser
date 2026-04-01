@@ -163,6 +163,10 @@
 	<meta name="description" content="Explore {data.spiritContent.displayName} cocktail recipes. Learn about the spirit's history, subcategories, and geographic origins." />
 	<meta property="og:title" content="{data.spiritContent.displayName} Spirit Guide - Busser" />
 	<meta property="og:description" content="Explore {data.spiritContent.displayName} cocktail recipes and learn about the spirit." />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://busserapp.com/catalog/browse/{data.spiritContent.slug}" />
+	<meta property="og:image" content={data.spirit.recipeCategoryDescriptionImageUrl || 'https://busserapp.com/og-image.png'} />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4 relative overflow-hidden">

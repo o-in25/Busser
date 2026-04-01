@@ -111,6 +111,10 @@
 	<meta name="description" content="Browse our curated collection of classic and modern cocktail recipes. Find your next favorite drink." />
 	<meta property="og:title" content="Cocktail Catalog - Busser" />
 	<meta property="og:description" content="Browse our curated collection of classic and modern cocktail recipes." />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://busserapp.com/catalog" />
+	<meta property="og:image" content="https://busserapp.com/og-image.png" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <!-- Hero Section -->
