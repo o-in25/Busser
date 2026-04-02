@@ -7,7 +7,7 @@ import {
 	getUserWorkspaces,
 	isWorkspaceOwner,
 	updateWorkspace,
-} from '$lib/server/auth';
+} from '$lib/server/workspace';
 import { getPreferredWorkspaceId, setPreferredWorkspaceId } from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';

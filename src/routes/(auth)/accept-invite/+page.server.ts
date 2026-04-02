@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 import moment from 'moment';
 
-import { getWorkspaceInfo } from '$lib/server/auth';
+import { getWorkspaceInfo } from '$lib/server/workspace';
 import { acceptWorkspaceInvitation, deleteInvitation, getInvitationByCode } from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';

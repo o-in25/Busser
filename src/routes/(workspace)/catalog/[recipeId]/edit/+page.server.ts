@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { canModifyWorkspace } from '$lib/server/auth';
+import { canModifyWorkspace } from '$lib/server/workspace';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 
 import type { Actions, PageServerLoad } from './$types';

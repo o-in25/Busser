@@ -1,7 +1,8 @@
 import { error, fail } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { createInvitationRequest, hasWorkspaceAccess, isInviteOnly } from '$lib/server/auth';
+import { createInvitationRequest, isInviteOnly } from '$lib/server/auth';
+import { hasWorkspaceAccess } from '$lib/server/workspace';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import { indexFromSeed } from '$lib/math';

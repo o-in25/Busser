@@ -1,4 +1,4 @@
-import { getUserWorkspaces } from '$lib/server/auth';
+import { getUserWorkspaces } from '$lib/server/workspace';
 
 import type { PageServerLoad } from './$types';
 

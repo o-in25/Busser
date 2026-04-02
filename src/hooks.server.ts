@@ -2,7 +2,8 @@ import { type Handle, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 import micromatch from 'micromatch';
 
-import { authenticate, getUserWorkspaces, hasGlobalPermission, hasWorkspaceAccess } from '$lib/server/auth';
+import { authenticate, hasGlobalPermission } from '$lib/server/auth';
+import { getUserWorkspaces, hasWorkspaceAccess } from '$lib/server/workspace';
 import { checkRateLimit, type RateLimitConfig } from '$lib/server/rate-limit';
 import { getPreferredWorkspaceId } from '$lib/server/user';
 

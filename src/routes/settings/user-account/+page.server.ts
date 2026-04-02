@@ -1,7 +1,8 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { getUserWorkspaces, hasGlobalPermission, oauthRepo } from '$lib/server/auth';
+import { hasGlobalPermission, oauthRepo } from '$lib/server/auth';
+import { getUserWorkspaces } from '$lib/server/workspace';
 import { deleteUser, getUser } from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';

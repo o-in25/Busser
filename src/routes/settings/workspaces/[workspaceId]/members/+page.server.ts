@@ -9,7 +9,7 @@ import {
 	isWorkspaceOwner,
 	removeWorkspaceMember,
 	updateWorkspaceMemberRole,
-} from '$lib/server/auth';
+} from '$lib/server/workspace';
 import { MailClient } from '$lib/server/mail';
 import type { WorkspaceRole } from '$lib/server/repositories/workspace.repository';
 import { createInvitation, deleteInvitation, getWorkspaceInvitations } from '$lib/server/user';

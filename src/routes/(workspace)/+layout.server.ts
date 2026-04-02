@@ -2,7 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import micromatch from 'micromatch';
 
-import { getWorkspace } from '$lib/server/auth';
+import { getWorkspace } from '$lib/server/workspace';
 
 import type { LayoutServerLoad } from './$types';
 

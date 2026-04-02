@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { StatusCodes } from 'http-status-codes';
 
-vi.mock('$lib/server/auth', () => ({
+vi.mock('$lib/server/workspace', () => ({
 	canModifyWorkspace: vi.fn(),
 }));
 
@@ -14,7 +14,7 @@ vi.mock('$lib/server/core', () => ({
 	},
 }));
 
-import { canModifyWorkspace } from '$lib/server/auth';
+import { canModifyWorkspace } from '$lib/server/workspace';
 import { inventoryRepo } from '$lib/server/core';
 
 function makeRequest(fields: Record<string, string>): Request {
