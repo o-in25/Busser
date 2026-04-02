@@ -58,7 +58,8 @@ export class OAuthRepository extends BaseRepository {
 	// registers user + creates oauth link + consumes invitation in one transaction
 	async registerOAuth(
 		profile: OAuthProfile,
-		invitationCode: string | null = null
+		invitationCode: string | null = null,
+		globalWorkspaceId: string
 	): Promise<QueryResult<User>> {
 		try {
 			const user = await this.db.query.transaction(async (trx) => {
@@ -72,7 +73,7 @@ export class OAuthRepository extends BaseRepository {
 					verified: 1,
 					needsOnboarding: 1,
 					avatarUrl: profile.avatarUrl,
-				});
+				}, globalWorkspaceId);
 
 				await trx('oauthUser').insert({
 					provider: profile.provider,

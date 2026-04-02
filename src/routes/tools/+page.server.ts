@@ -1,15 +1,16 @@
 import { catalogRepo } from '$lib/server/core';
+import { getGlobalWorkspace } from '$lib/server/workspace';
 import type { PageServerLoad } from './$types';
 
-const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
+const GLOBAL_WORKSPACE = getGlobalWorkspace();
 
 export const load = (async () => {
-	const recipesResult = await catalogRepo.findAll(GLOBAL_WORKSPACE_ID, 1, 100);
+	const recipesResult = await catalogRepo.findAll(GLOBAL_WORKSPACE, 1, 100);
 
 	// Get steps for each recipe (needed for alcohol content)
 	const recipesWithSteps = await Promise.all(
 		recipesResult.data.map(async (recipe) => {
-			const result = await catalogRepo.findById(GLOBAL_WORKSPACE_ID, String(recipe.recipeId));
+			const result = await catalogRepo.findById(GLOBAL_WORKSPACE, String(recipe.recipeId));
 			return result.status === 'success' ? result.data : null;
 		})
 	);

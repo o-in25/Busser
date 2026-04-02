@@ -5,7 +5,7 @@ import { Storage } from '@google-cloud/storage';
 import config from '../knexfile';
 import recipes from '../seeds/core/data/global-catalog-recipes.json';
 
-const WORKSPACE = 'ws-global-catalog';
+const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
 const API = 'https://www.thecocktaildb.com/api/json/v1/1/search.php';
 
 // some recipe names differ between us and cocktaildb

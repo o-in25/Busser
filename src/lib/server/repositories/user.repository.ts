@@ -560,7 +560,8 @@ export class UserRepository extends BaseRepository {
 			verified: number;
 			needsOnboarding: number;
 			avatarUrl?: string | null;
-		}
+		},
+		globalWorkspaceId: string
 	): Promise<Pick<User, 'userId' | 'username' | 'email'>> {
 		const { username, email, password, verified, needsOnboarding, avatarUrl } = opts;
 
@@ -625,7 +626,7 @@ export class UserRepository extends BaseRepository {
 
 		// add to global catalog as viewer
 		await trx('workspaceUser').insert({
-			workspaceId: 'ws-global-catalog',
+			workspaceId: globalWorkspaceId,
 			userId: user.userId,
 			workspaceRole: 'viewer',
 			joinedDate: Logger.now(),
@@ -644,7 +645,8 @@ export class UserRepository extends BaseRepository {
 			needsOnboarding: number;
 			avatarUrl?: string | null;
 		},
-		invitationCode: string | null
+		invitationCode: string | null,
+		globalWorkspaceId: string
 	): Promise<Pick<User, 'userId' | 'username' | 'email'>> {
 		return this.db.query.transaction(async (trx) => {
 			let invitation: Pick<
@@ -678,7 +680,7 @@ export class UserRepository extends BaseRepository {
 				}
 			}
 
-			const user = await this.register(trx, opts);
+			const user = await this.register(trx, opts, globalWorkspaceId);
 
 			if (invitation) {
 				await trx('invitation')

@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { Check, Crown, GalleryHorizontalEnd, Globe, User, Users } from 'lucide-svelte';
 
+	import { page } from '$app/stores';
 	import { Badge } from '$lib/components/ui/badge';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
-
-	const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
 	let {
 		workspaces,
@@ -17,7 +16,7 @@
 	} = $props();
 
 	function isGlobalWorkspace(workspaceId: string): boolean {
-		return workspaceId === GLOBAL_WORKSPACE_ID;
+		return workspaceId === $page.data.globalWorkspaceId;
 	}
 </script>
 

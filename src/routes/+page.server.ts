@@ -5,13 +5,11 @@ import { createInvitationRequest, isInviteOnly } from '$lib/server/auth';
 import { hasWorkspaceAccess } from '$lib/server/workspace';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
+import { getGlobalWorkspace } from '$lib/server/workspace';
 import { indexFromSeed } from '$lib/math';
 import type { View } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
-
-// Global workspace for unauthenticated landing page showcase
-const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
 // Rate limit config: 3 requests per hour per IP
 const INVITE_REQUEST_RATE_LIMIT = {
@@ -21,9 +19,10 @@ const INVITE_REQUEST_RATE_LIMIT = {
 
 export const load = (async ({ locals }) => {
 	const { user } = locals;
+	const globalWorkspace = getGlobalWorkspace();
 	// Use user's active workspace for authenticated users, global for landing page
 	const workspaceId =
-		user && locals.activeWorkspaceId ? locals.activeWorkspaceId : GLOBAL_WORKSPACE_ID;
+		user && locals.activeWorkspaceId ? locals.activeWorkspaceId : globalWorkspace;
 
 	// Get spirits for filter chips
 	const baseSpiritsQuery = await catalogRepo.getCategories();
@@ -206,14 +205,14 @@ export const load = (async ({ locals }) => {
 
 	if (!user) {
 		// Get total catalog count for stats (use global workspace for landing page)
-		const catalogResult = await catalogRepo.findAll(GLOBAL_WORKSPACE_ID, 1, 1);
+		const catalogResult = await catalogRepo.findAll(globalWorkspace, 1, 1);
 		const totalRecipes = catalogResult.pagination.total;
 
 		// Get spirits for browse-by-spirit shortcuts
 		const allSpirits = await catalogRepo.getSpirits();
 
 		// get all admin-curated featured recipes for carousel
-		const allFeatured = await catalogRepo.getFeatured(GLOBAL_WORKSPACE_ID);
+		const allFeatured = await catalogRepo.getFeatured(globalWorkspace);
 
 		const inviteOnly = await isInviteOnly();
 

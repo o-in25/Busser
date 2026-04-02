@@ -2,7 +2,7 @@
  * Seed reference data for user_d: log levels, roles, permissions, and role-permission mappings.
  * Idempotent — safe to run multiple times.
  *
- * NOTE: The "ws-global-catalog" shared workspace is NOT seeded here because it
+ * NOTE: The global workspace (GLOBAL_WORKSPACE env var, defaults to "ws-global-catalog") is NOT seeded here because it
  * requires a createdBy user to exist first. Create it after the first admin registers.
  */
 import type { Knex } from 'knex';

@@ -17,6 +17,7 @@
 	} from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 	import { toast } from 'svelte-sonner';
 	import WorkspaceList from '$lib/components/WorkspaceList.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -39,7 +40,6 @@
 		if (form?.success) toast.success('Operation completed successfully.');
 	});
 
-	const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
 	// preferred workspace state
 	let selectedPreferredId = $state<string | null>(data.preferredWorkspaceId || null);
@@ -80,7 +80,7 @@
 
 	// Check if workspace is the global workspace
 	function isGlobalWorkspace(workspace: WorkspaceWithRole): boolean {
-		return workspace.workspaceId === GLOBAL_WORKSPACE_ID;
+		return workspace.workspaceId === $page.data.globalWorkspaceId;
 	}
 
 	// Check if workspace is the current workspace

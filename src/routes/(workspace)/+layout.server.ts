@@ -2,11 +2,11 @@ import { error, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import micromatch from 'micromatch';
 
-import { getWorkspace } from '$lib/server/workspace';
+import { getWorkspace, getGlobalWorkspace } from '$lib/server/workspace';
 
 import type { LayoutServerLoad } from './$types';
 
-const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
+const GLOBAL_WORKSPACE = getGlobalWorkspace();
 
 // routes within (workspace) that can be accessed without auth
 const publicWorkspaceRoutes = ['/catalog/**', '/tools/**', '/inventory', '/assistant'];
@@ -18,8 +18,9 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {
 		if (isPublicRoute) {
 			return {
+				isGlobalWorkspace: true,
 				workspace: {
-					workspaceId: GLOBAL_WORKSPACE_ID,
+					workspaceId: GLOBAL_WORKSPACE,
 					workspaceName: 'Global Recipe Catalog',
 					workspaceType: 'shared' as const,
 					workspaceRole: 'viewer' as const,
@@ -41,8 +42,9 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		// public routes fall back to global workspace if no workspace selected
 		if (isPublicRoute) {
 			return {
+				isGlobalWorkspace: true,
 				workspace: {
-					workspaceId: GLOBAL_WORKSPACE_ID,
+					workspaceId: GLOBAL_WORKSPACE,
 					workspaceName: 'Global Recipe Catalog',
 					workspaceType: 'shared' as const,
 					workspaceRole: 'viewer' as const,
@@ -63,6 +65,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 	}
 
 	return {
+		isGlobalWorkspace: result.data.workspaceId === GLOBAL_WORKSPACE,
 		workspace: {
 			workspaceId: result.data.workspaceId,
 			workspaceName: result.data.workspaceName,

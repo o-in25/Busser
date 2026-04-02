@@ -194,20 +194,6 @@ export class WorkspaceRepository extends BaseRepository {
 		workspaceType: 'personal' | 'shared'
 	): Promise<QueryResult<Workspace>> {
 		try {
-			// prevent updating the global workspace type
-			if (workspaceId === 'ws-global-catalog') {
-				// allow name change but not type change for global workspace
-				const existing = await this.db
-					.table<Workspace>('workspace')
-					.select('workspaceType')
-					.where({ workspaceId })
-					.first();
-
-				if (existing && workspaceType !== existing.workspaceType) {
-					return { status: 'error', error: 'Cannot change the type of the global workspace.' };
-				}
-			}
-
 			const rowsUpdated = await this.db.table('workspace').where({ workspaceId }).update({
 				workspaceName: workspaceName.trim(),
 				workspaceType,
@@ -243,11 +229,6 @@ export class WorkspaceRepository extends BaseRepository {
 
 	// delete a workspace and all associated data
 	async deleteWorkspace(workspaceId: string): Promise<QueryResult<boolean>> {
-		// prevent deletion of the global workspace
-		if (workspaceId === 'ws-global-catalog') {
-			return { status: 'error', error: 'The global workspace cannot be deleted.' };
-		}
-
 		try {
 			await this.db.query.transaction(async (trx) => {
 				// delete workspace user associations

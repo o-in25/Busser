@@ -59,7 +59,7 @@
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
-	const isGlobalCatalog = workspace?.workspaceId === 'ws-global-catalog';
+	const isGlobalCatalog = $page.data.isGlobalWorkspace;
 	const authenticated = $derived(!!$page.data.user);
 
 	// recipe list tab state

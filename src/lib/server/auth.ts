@@ -17,6 +17,7 @@ import { MailClient } from './mail';
 import { SettingsRepository } from './repositories/settings.repository';
 import { UserRepository } from './repositories/user.repository';
 import { OAuthRepository } from './repositories/oauth.repository';
+import { getGlobalWorkspace } from './workspace';
 
 const { JWT_SIGNING_KEY, USER_TABLE } = process.env;
 const HASH_ROUNDS = 10;
@@ -177,7 +178,8 @@ export async function registerUser(
 
 		const user = await userRepo.registerWithInvitation(
 			{ username, email, password: hashedPassword, verified: 0, needsOnboarding: 0 },
-			invitationCode
+			invitationCode,
+			getGlobalWorkspace()
 		);
 
 		const now = moment();
