@@ -1,7 +1,8 @@
 import { error } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { hasGlobalPermission, getUserWorkspaces } from '$lib/server/auth';
+import { hasGlobalPermission } from '$lib/server/auth';
+import { getUserWorkspaces } from '$lib/server/workspace';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { getUser } from '$lib/server/user';
 

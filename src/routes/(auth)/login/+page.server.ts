@@ -2,7 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
 import { dev } from '$app/environment';
-import { getUserWorkspaces, hasWorkspaceAccess, login, verifyToken } from '$lib/server/auth';
+import { login, verifyToken } from '$lib/server/auth';
+import { getUserWorkspaces, hasWorkspaceAccess } from '$lib/server/workspace';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import { getPreferredWorkspaceId } from '$lib/server/user';
 import type { User } from '$lib/types';

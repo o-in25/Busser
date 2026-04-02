@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { canModifyWorkspace } from '$lib/server/auth';
+import { canModifyWorkspace } from '$lib/server/workspace';
 import { catalogRepo } from '$lib/server/core';
 
 import type { RequestHandler } from './$types';

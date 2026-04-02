@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { runAssistantChat } from '$lib/server/ai';
 import { ToolExecutor } from '$lib/server/assistant';
-import { canModifyWorkspace } from '$lib/server/auth';
+import { canModifyWorkspace } from '$lib/server/workspace';
 import { assistantTools } from '$lib/types/assistant';
 
 import type { RequestHandler } from './$types';

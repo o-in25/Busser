@@ -1,6 +1,6 @@
 import { generateImage, generateText, generateTextFromImage } from '../ai';
 import { z } from 'zod';
-import prompts from './prompts.json';
+import prompts from '$lib/data/prompts.json';
 import type {
 	ImageResult,
 	InventoryDescriptionInput,

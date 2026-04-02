@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { getUserWorkspaces } from '$lib/server/auth';
+import { getUserWorkspaces } from '$lib/server/workspace';
 import { setPreferredWorkspaceId } from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';

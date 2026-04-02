@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
-import { hasWorkspaceAccess } from '$lib/server/auth';
+import { hasWorkspaceAccess } from '$lib/server/workspace';
 
 import type { RequestHandler } from './$types';
 

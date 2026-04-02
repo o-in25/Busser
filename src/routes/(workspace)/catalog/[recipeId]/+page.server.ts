@@ -2,7 +2,8 @@ import { error } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { catalogRepo } from '$lib/server/core';
-import { userRepo, canModifyWorkspace, getUserWorkspaces } from '$lib/server/auth';
+import { userRepo } from '$lib/server/auth';
+import { canModifyWorkspace, getUserWorkspaces } from '$lib/server/workspace';
 
 import type { Actions, PageServerLoad } from './$types';
 

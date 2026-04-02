@@ -12,7 +12,8 @@ function convertRowKeys(row: Record<string, any>): Record<string, any> {
 }
 
 export class DbProvider {
-	private knex: knex.Knex<any, any[]>;
+	private static instances = new Map<string, DbProvider>();
+	private knex!: knex.Knex<any, any[]>;
 
 	public get query() {
 		return this.knex;
@@ -23,6 +24,10 @@ export class DbProvider {
 	}
 
 	constructor(database: string) {
+		if (DbProvider.instances.has(database)) {
+			return DbProvider.instances.get(database)!;
+		}
+
 		this.knex = knex({
 			client: 'mysql2',
 			connection: {
@@ -52,6 +57,8 @@ export class DbProvider {
 				return result;
 			},
 		});
+
+		DbProvider.instances.set(database, this);
 
 		if (!Object.prototype.hasOwnProperty.call(this.knex, 'paginate')) {
 			attachPaginate();

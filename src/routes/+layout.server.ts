@@ -1,4 +1,5 @@
-import { getUserWorkspaces, getWorkspace, userRepo } from '$lib/server/auth';
+import { userRepo } from '$lib/server/auth';
+import { getUserWorkspaces, getWorkspace } from '$lib/server/workspace';
 import { generateAndUploadAvatar } from '$lib/server/user';
 import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 

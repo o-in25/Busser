@@ -17,7 +17,6 @@ import { MailClient } from './mail';
 import { SettingsRepository } from './repositories/settings.repository';
 import { UserRepository } from './repositories/user.repository';
 import { OAuthRepository } from './repositories/oauth.repository';
-import { WorkspaceRepository } from './repositories/workspace.repository';
 
 const { JWT_SIGNING_KEY, USER_TABLE } = process.env;
 const HASH_ROUNDS = 10;
@@ -25,12 +24,11 @@ const HASH_ROUNDS = 10;
 // singletons
 const db = new DbProvider(USER_TABLE || '');
 const userRepo = new UserRepository(db);
-const workspaceRepo = new WorkspaceRepository(db);
 const settingsRepo = new SettingsRepository(db);
 const oauthRepo = new OAuthRepository(db, userRepo);
 const mailClient = new MailClient();
 
-export { db, userRepo, workspaceRepo, settingsRepo, oauthRepo };
+export { db, userRepo, settingsRepo, oauthRepo };
 
 export async function verifyToken<T>(token: string): Promise<T> {
 	return new Promise((resolve, reject) => {
@@ -383,32 +381,6 @@ export async function resetPassword(userId: string, oldPassword: string, newPass
 		console.error(error);
 		return false;
 	}
-}
-
-export const hasWorkspaceAccess = workspaceRepo.hasWorkspaceAccess.bind(workspaceRepo);
-export const getUserWorkspaces = workspaceRepo.getUserWorkspaces.bind(workspaceRepo);
-export const getWorkspace = workspaceRepo.getWorkspace.bind(workspaceRepo);
-export const getWorkspaceInfo = workspaceRepo.getWorkspaceInfo.bind(workspaceRepo);
-export const createWorkspace = workspaceRepo.createWorkspace.bind(workspaceRepo);
-export const getAllWorkspaces = workspaceRepo.getAllWorkspaces.bind(workspaceRepo);
-export const updateWorkspace = workspaceRepo.updateWorkspace.bind(workspaceRepo);
-export const deleteWorkspace = workspaceRepo.deleteWorkspace.bind(workspaceRepo);
-export const getWorkspaceMembers = workspaceRepo.getWorkspaceMembers.bind(workspaceRepo);
-export const addWorkspaceMember = workspaceRepo.addWorkspaceMember.bind(workspaceRepo);
-export const removeWorkspaceMember = workspaceRepo.removeWorkspaceMember.bind(workspaceRepo);
-export const updateWorkspaceMemberRole =
-	workspaceRepo.updateWorkspaceMemberRole.bind(workspaceRepo);
-
-export type { WorkspaceRole } from './repositories/workspace.repository';
-
-export async function canModifyWorkspace(userId: string, workspaceId: string): Promise<boolean> {
-	const role = await hasWorkspaceAccess(userId, workspaceId);
-	return role === 'owner' || role === 'editor';
-}
-
-export async function isWorkspaceOwner(userId: string, workspaceId: string): Promise<boolean> {
-	const role = await hasWorkspaceAccess(userId, workspaceId);
-	return role === 'owner';
 }
 
 export const getInvitations = userRepo.getInvitations.bind(userRepo);

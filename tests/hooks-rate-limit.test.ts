@@ -3,6 +3,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('$lib/server/auth', () => ({
 	authenticate: vi.fn(),
 	hasGlobalPermission: vi.fn(),
+}));
+
+vi.mock('$lib/server/workspace', () => ({
 	getUserWorkspaces: vi.fn(),
 	hasWorkspaceAccess: vi.fn(),
 }));
@@ -16,7 +19,8 @@ vi.mock('$lib/server/rate-limit', async () => {
 	return { ...actual, checkRateLimit: vi.fn(actual.checkRateLimit) };
 });
 
-import { authenticate, hasGlobalPermission, hasWorkspaceAccess, getUserWorkspaces } from '$lib/server/auth';
+import { authenticate, hasGlobalPermission } from '$lib/server/auth';
+import { hasWorkspaceAccess, getUserWorkspaces } from '$lib/server/workspace';
 import { getPreferredWorkspaceId } from '$lib/server/user';
 import { checkRateLimit } from '$lib/server/rate-limit';
 import { handle } from '../src/hooks.server';

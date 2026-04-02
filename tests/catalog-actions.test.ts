@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { StatusCodes } from 'http-status-codes';
 
 // mock external dependencies before importing the modules under test
-vi.mock('$lib/server/auth', () => ({
+vi.mock('$lib/server/workspace', () => ({
 	canModifyWorkspace: vi.fn(),
 }));
 
@@ -18,7 +18,7 @@ vi.mock('$lib/server/core', () => ({
 	},
 }));
 
-import { canModifyWorkspace } from '$lib/server/auth';
+import { canModifyWorkspace } from '$lib/server/workspace';
 import { catalogRepo } from '$lib/server/core';
 
 // helper to build a mock formdata from a plain object
