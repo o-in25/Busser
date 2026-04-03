@@ -15,6 +15,7 @@ export type AdvancedFilter = {
 	preparationMethodId?: number;
 	ratingMin?: number;
 	ratingMax?: number;
+	mood?: string;
 };
 
 // Match mode for recipe ingredients

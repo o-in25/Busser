@@ -34,6 +34,7 @@
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const showStock = $derived(workspace?.workspaceRole === 'owner' && !$page.data.isGlobalWorkspace);
 
 	// Base path for inventory routes
 	const basePath = '/inventory';
@@ -337,7 +338,7 @@
 	<InventoryNav />
 
 	<!-- Dashboard Header -->
-	<InventoryDashboard stats={data.stats} />
+	<InventoryDashboard stats={data.stats} {showStock} />
 
 	<!-- Toolbar -->
 	<div class="flex flex-col gap-3 mb-6">
@@ -379,6 +380,7 @@
 					{stockFilter}
 					{sortOption}
 					{perPage}
+					{showStock}
 					{basePath}
 					onCategoryChange={handleCategoryChange}
 					onStockFilterChange={handleStockFilterChange}
@@ -410,6 +412,7 @@
 		categoryGroupId={selectedCategory}
 		{stockFilter}
 		categories={data.categories}
+		{showStock}
 		onClearSearch={clearSearch}
 		onClearCategory={clearCategory}
 		onClearStockFilter={clearStockFilter}
@@ -466,26 +469,28 @@
 					</Button>
 				</div>
 				<div class="flex items-center gap-2 sm:mt-0">
-					<Button
-						variant="outline"
-						size="sm"
-						class="flex-1 sm:flex-none"
-						onclick={() => handleBulkSetStock(true)}
-						disabled={bulkActionLoading}
-					>
-						<PackageCheck class="h-4 w-4 sm:mr-1.5" />
-						In Stock
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						class="flex-1 sm:flex-none"
-						onclick={() => handleBulkSetStock(false)}
-						disabled={bulkActionLoading}
-					>
-						<PackageX class="h-4 w-4 sm:mr-1.5" />
-						Out of Stock
-					</Button>
+					{#if showStock}
+						<Button
+							variant="outline"
+							size="sm"
+							class="flex-1 sm:flex-none"
+							onclick={() => handleBulkSetStock(true)}
+							disabled={bulkActionLoading}
+						>
+							<PackageCheck class="h-4 w-4 sm:mr-1.5" />
+							In Stock
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							class="flex-1 sm:flex-none"
+							onclick={() => handleBulkSetStock(false)}
+							disabled={bulkActionLoading}
+						>
+							<PackageX class="h-4 w-4 sm:mr-1.5" />
+							Out of Stock
+						</Button>
+					{/if}
 					<Button
 						variant="destructive"
 						size="sm"
@@ -508,6 +513,7 @@
 			onRowClick={handleCardClick}
 			selectable={canModify}
 			{selectedIds}
+			{showStock}
 			onSelectionChange={handleSelectionChange}
 		/>
 	{:else}
@@ -523,6 +529,7 @@
 				<InventoryCard
 					{product}
 					{viewMode}
+					{showStock}
 					recipeCount={product.productId ? data.recipeUsage[product.productId] || 0 : 0}
 					onClick={handleCardClick}
 				/>
@@ -586,6 +593,7 @@
 		bind:open={drawerOpen}
 		product={selectedProduct}
 		recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
+		{showStock}
 		onStockChange={handleStockChange}
 	/>
 {/if}

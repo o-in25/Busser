@@ -29,10 +29,12 @@
 	let {
 		product,
 		recipeCount = 0,
+		showStock = true,
 		onStockChange = null,
 	}: {
 		product: Product;
 		recipeCount?: number;
+		showStock?: boolean;
 		onStockChange?: ((productId: number, inStock: boolean) => void) | null;
 	} = $props();
 
@@ -218,10 +220,12 @@
 
 		<!-- Status Badges -->
 		<div class="flex items-center gap-2 flex-wrap">
-			<Badge variant={stockStatus.variant} class="gap-1.5 {stockStatus.bgColor}">
-				<StockIcon class="h-3.5 w-3.5 {stockStatus.color}" />
-				{stockStatus.label}
-			</Badge>
+			{#if showStock}
+				<Badge variant={stockStatus.variant} class="gap-1.5 {stockStatus.bgColor}">
+					<StockIcon class="h-3.5 w-3.5 {stockStatus.color}" />
+					{stockStatus.label}
+				</Badge>
+			{/if}
 			{#if recipeCount > 0}
 				<a href="/catalog/browse?ingredientInclude={product.productId}">
 					<Badge variant="outline" class="gap-1.5 hover:bg-accent transition-colors cursor-pointer">
@@ -317,7 +321,7 @@
 
 		<!-- Actions -->
 		<div class="flex items-center justify-between pt-4 border-t">
-			{#if canModify && onStockChange}
+			{#if canModify && onStockChange && showStock}
 				<div class="flex items-center gap-3">
 					<Switch
 						id="stock-toggle-{product.productId}"

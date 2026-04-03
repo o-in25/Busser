@@ -4,11 +4,15 @@
 	import { page } from '$app/stores';
 	import { cn } from '$lib/utils';
 
-	const tabs = [
+	const isOwner = $derived($page.data.workspace?.workspaceRole === 'owner');
+
+	const allTabs = [
 		{ href: '/inventory', label: 'Products', icon: Package },
 		{ href: '/inventory/category', label: 'Categories', icon: Tags },
-		{ href: '/inventory/suppliers', label: 'Suppliers', icon: Store },
+		{ href: '/inventory/suppliers', label: 'Suppliers', icon: Store, ownerOnly: true },
 	];
+
+	const tabs = $derived(allTabs.filter((t) => !t.ownerOnly || isOwner));
 
 	function isActive(href: string): boolean {
 		const path = $page.url.pathname;

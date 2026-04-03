@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import type { InventoryStats } from '$lib/types';
 
-	let { stats }: { stats: InventoryStats } = $props();
+	let { stats, showStock = true }: { stats: InventoryStats; showStock?: boolean } = $props();
 
 	function applyFilter(stockFilter: string) {
 		const params = new URLSearchParams();
@@ -28,23 +28,25 @@
 			<span class="text-xs text-muted-foreground">Products</span>
 		</button>
 
-		<button
-			onclick={() => applyFilter('in-stock')}
-			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-neon-green-500/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
-		>
-			<CheckCircle2 class="h-4 w-4 text-neon-green-500 shrink-0" />
-			<span class="text-sm font-bold">{stats.inStock}</span>
-			<span class="text-xs text-muted-foreground">In Stock</span>
-		</button>
+		{#if showStock}
+			<button
+				onclick={() => applyFilter('in-stock')}
+				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-neon-green-500/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
+			>
+				<CheckCircle2 class="h-4 w-4 text-neon-green-500 shrink-0" />
+				<span class="text-sm font-bold">{stats.inStock}</span>
+				<span class="text-xs text-muted-foreground">In Stock</span>
+			</button>
 
-		<button
-			onclick={() => applyFilter('out-of-stock')}
-			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-red-500/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
-		>
-			<XCircle class="h-4 w-4 text-red-500 shrink-0" />
-			<span class="text-sm font-bold">{stats.outOfStock}</span>
-			<span class="text-xs text-muted-foreground">Out of Stock</span>
-		</button>
+			<button
+				onclick={() => applyFilter('out-of-stock')}
+				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-red-500/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
+			>
+				<XCircle class="h-4 w-4 text-red-500 shrink-0" />
+				<span class="text-sm font-bold">{stats.outOfStock}</span>
+				<span class="text-xs text-muted-foreground">Out of Stock</span>
+			</button>
+		{/if}
 	</div>
 </div>
 

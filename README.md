@@ -12,7 +12,13 @@ can make with what you have, and share your bar with friends and family.
 - **Inventory Management** - Track your bottles, spirits, mixers, and garnishes with stock levels
   and categories
 - **Cocktail Catalog** - Browse and search recipes organized by base spirit
+- **Public Catalog** - Browse the global recipe catalog without signing in
+- **Spirit Guides** - Educational pages for each base spirit with history, subcategories, and
+  regions
+- **Recipe Import** - Import recipes from the global catalog into your workspace
 - **Smart Recommendations** - See which cocktails you can make based on your current inventory
+- **Advanced Search** - Filter recipes by ingredients, strength, preparation method, and more
+- **Cocktail of the Day** - Daily featured cocktail on the catalog page
 - **Workspaces** - Create dedicated spaces for your bar with their own inventory and recipes
 - **Collaboration** - Invite others to your workspace as owners, editors, or viewers
 - **AI-Powered** - Generate cocktail images and get recipe suggestions
@@ -22,7 +28,7 @@ can make with what you have, and share your bar with friends and family.
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - pnpm
 - Access to Cloud SQL instance (or local MySQL)
 
@@ -46,25 +52,28 @@ pnpm run build      # Production build
 pnpm run preview    # Preview production build
 pnpm test           # Run all tests once
 pnpm test:watch     # Run tests in watch mode
+pnpm run prepare    # Install Husky pre-commit hooks
 ```
 
 ### Environment Variables
 
-| Variable                   | Description             |
-| -------------------------- | ----------------------- |
-| `DB_HOSTNAME`              | Database host           |
-| `DB_USER`                  | Database user           |
-| `DB_PASSWORD`              | Database password       |
-| `DB_PORT`                  | Database port           |
-| `JWT_SIGNING_KEY`          | Secret for JWT signing  |
-| `GOOGLE_SERVICE_KEY`       | GCP service account key |
-| `BUCKET`                   | GCS bucket name         |
-| `INSTANCE_CONNECTION_NAME` | Cloud SQL instance      |
-| `OPENAI_API_KEY`           | OpenAI API key          |
-| `MAILGUN_KEY`              | Mailgun API key         |
-| `APP_URL`                  | Public app URL          |
-| `GOOGLE_OAUTH_CLIENT_ID`     | Google OAuth client ID  |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth secret     |
+| Variable                     | Description                               |
+| ---------------------------- | ----------------------------------------- |
+| `DB_HOSTNAME`                | Database host                             |
+| `DB_USER`                    | Database user                             |
+| `DB_PASSWORD`                | Database password                         |
+| `DB_PORT`                    | Database port                             |
+| `JWT_SIGNING_KEY`            | Secret for JWT signing                    |
+| `GOOGLE_SERVICE_KEY`         | GCP service account key                   |
+| `BUCKET`                     | GCS bucket name                           |
+| `INSTANCE_CONNECTION_NAME`   | Cloud SQL instance                        |
+| `OPENAI_API_KEY`             | OpenAI API key                            |
+| `MAILGUN_KEY`                | Mailgun API key                           |
+| `APP_URL`                    | Public app URL                            |
+| `GOOGLE_OAUTH_CLIENT_ID`     | Google OAuth client ID                    |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth secret                       |
+| `GLOBAL_WORKSPACE`           | Global catalog workspace ID               |
+| `APP_VERSION`                | App version (auto-set by deploy workflow) |
 
 ### Migrations
 
@@ -84,10 +93,20 @@ Migration files live in `migrations/core/` and `migrations/user/`, named with a
 
 ## Deployment
 
-Deploy to [Fly.io](https://fly.io):
+Merging to `main` triggers a GitHub Actions workflow that:
+
+1. Runs tests
+2. Bumps the version via semantic tagging
+3. Deploys to [Fly.io](https://fly.io) with all build args
+4. Creates a GitHub release with changelog
+
+Manual deploy:
 
 ```bash
-fly deploy --build-arg APP_SECRET_1=$APP_SECRET_1 APP_SECRET_2=$APP_SECRET_2 ...
+flyctl deploy --remote-only --no-cache \
+  --build-arg DB_HOSTNAME=$DB_HOSTNAME \
+  --build-arg DB_USER=$DB_USER \
+  ...
 ```
 
 Access the deployed machine:

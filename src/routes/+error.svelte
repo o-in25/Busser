@@ -1,8 +1,18 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import BackButton from '$lib/components/BackButton.svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { House } from 'lucide-svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
+	import { ArrowLeft, House } from 'lucide-svelte';
+
+	function handleBack() {
+		document.documentElement.dataset.navOverride = 'back';
+		if (browser && window.history.length > 1) {
+			history.back();
+		} else {
+			goto('/');
+		}
+	}
 
 	// Map common status codes to user-friendly titles
 	const statusTitles: Record<number, string> = {
@@ -58,11 +68,14 @@
 				</p>
 			{/if}
 			<div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-				<BackButton fallback="/" label="Go Back" variant="outline" size="default" />
-				<Button href="/">
+				<FancyButton size="md" onclick={handleBack}>
+					<ArrowLeft class="h-4 w-4 mr-2" />
+					Go Back
+				</FancyButton>
+				<FancyButton size="md" variant="primary" href="/">
 					<House class="h-4 w-4 mr-2" />
 					Go Home
-				</Button>
+				</FancyButton>
 			</div>
 		</div>
 	</div>

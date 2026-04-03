@@ -20,6 +20,7 @@
 	export let selectable: boolean = false;
 	export let selectedIds: number[] = [];
 	export let onSelectionChange: ((ids: number[]) => void) | null = null;
+	export let showStock: boolean = true;
 
 	const handleRowClick = (product: Product) => {
 		if (onRowClick) {
@@ -92,7 +93,7 @@
 				{/if}
 				<Table.Head class="hidden sm:table-cell">Name</Table.Head>
 				<Table.Head class="hidden sm:table-cell">Category</Table.Head>
-				<Table.Head class="hidden sm:table-cell">Status</Table.Head>
+				{#if showStock}<Table.Head class="hidden sm:table-cell">Status</Table.Head>{/if}
 				<Table.Head class="hidden sm:table-cell text-center">Used In</Table.Head>
 				<Table.Head class="hidden sm:table-cell">Group</Table.Head>
 			</Table.Row>
@@ -116,15 +117,17 @@
 					<Table.Cell class="hidden sm:table-cell">
 						{product.categoryName}
 					</Table.Cell>
-					<Table.Cell class="hidden sm:table-cell">
-						<span class="flex items-center">
-							{#if product.productInStockQuantity === 0}
-								<Indicator color="red" class="me-1.5" />Out of stock
-							{:else}
-								<Indicator color="green" class="me-1.5" />In stock
-							{/if}
-						</span>
-					</Table.Cell>
+					{#if showStock}
+						<Table.Cell class="hidden sm:table-cell">
+							<span class="flex items-center">
+								{#if product.productInStockQuantity === 0}
+									<Indicator color="red" class="me-1.5" />Out of stock
+								{:else}
+									<Indicator color="green" class="me-1.5" />In stock
+								{/if}
+							</span>
+						</Table.Cell>
+					{/if}
 					<Table.Cell class="hidden sm:table-cell">
 						{#if product.productId && recipeUsage[product.productId]}
 							<div class="flex justify-center">

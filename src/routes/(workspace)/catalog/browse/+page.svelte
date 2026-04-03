@@ -27,7 +27,6 @@
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 	const authenticated = $derived(!!$page.data.user);
-
 	// View mode
 	let viewMode = $state<'grid' | 'list'>('grid');
 
@@ -37,6 +36,7 @@
 	let selectedSpirit = $state(data.filters.spiritId || 'all');
 	let selectedShowFilter = $state(data.filters.showFilter || 'all');
 	let perPage = $state(String(data.filters.perPage ?? 24));
+	let selectedMood = $state(data.filters.mood || '');
 
 	// Filter panel state
 	let filterOpen = $state(false);
@@ -48,6 +48,7 @@
 		if (selectedShowFilter && selectedShowFilter !== 'all') count++;
 		if (selectedSort !== 'name-asc') count++;
 		if (perPage !== '24') count++;
+		if (selectedMood) count++;
 		return count;
 	});
 
@@ -78,9 +79,13 @@
 		selectedShowFilter = 'all';
 		selectedSort = 'name-asc';
 		perPage = '24';
-		goto(buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', perPage: '24', page: 1 }), {
-			keepFocus: true,
-		});
+		selectedMood = '';
+		goto(
+			buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', perPage: '24', mood: '', page: 1 }),
+			{
+				keepFocus: true,
+			}
+		);
 	}
 
 	// Restore view mode from localStorage
@@ -107,6 +112,7 @@
 		const show = overrides.show !== undefined ? overrides.show : selectedShowFilter;
 		const pp = overrides.perPage !== undefined ? overrides.perPage : perPage;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
+		const mood = overrides.mood !== undefined ? overrides.mood : selectedMood;
 
 		params.set('page', String(pageNum));
 		if (search) params.set('search', String(search));
@@ -114,6 +120,7 @@
 		if (spirit && spirit !== 'all') params.set('spirit', String(spirit));
 		if (show && show !== 'all') params.set('show', String(show));
 		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
+		if (mood) params.set('mood', String(mood));
 
 		// preserve advanced filter params
 		for (const key of advancedParamKeys) {
@@ -123,6 +130,11 @@
 
 		const queryString = params.toString();
 		return queryString ? `/catalog/browse?${queryString}` : '/catalog/browse';
+	}
+
+	function handleMoodChange(moodId: string) {
+		selectedMood = selectedMood === moodId ? '' : moodId;
+		goto(buildUrl({ mood: selectedMood || null, page: 1 }), { keepFocus: true });
 	}
 
 	function handleSearch(e: Event) {
@@ -243,12 +255,18 @@
 		<BackButton href="/catalog" />
 		<div>
 			<h1 class="text-2xl font-bold">Browse Catalog</h1>
-			{#if authenticated}
-				<p class="text-muted-foreground">
-					{data.pagination.total}
-					{data.pagination.total === 1 ? 'recipe' : 'recipes'} in your collection
-				</p>
-			{/if}
+			<p class="text-muted-foreground">
+				{data.pagination.total}
+				{#if $page.data.isGlobalWorkspace}
+					{data.pagination.total === 1
+						? "recipe in Busser's catalog"
+						: "recipes in Busser's catalog"}
+				{:else if workspace?.workspaceRole === 'owner'}
+					{data.pagination.total === 1 ? 'recipe' : 'recipes'} in your catalog
+				{:else}
+					{data.pagination.total === 1 ? 'recipe' : 'recipes'} available
+				{/if}
+			</p>
 		</div>
 	</div>
 
@@ -290,11 +308,13 @@
 					spirits={data.spirits}
 					{selectedSpirit}
 					{selectedShowFilter}
+					{selectedMood}
 					sortOption={selectedSort}
 					{perPage}
 					{advancedFilterCount}
 					onSpiritChange={handleSpiritChange}
 					onShowFilterChange={handleShowFilterChange}
+					onMoodChange={handleMoodChange}
 					onSortChange={handleSortChange}
 					onPerPageChange={handlePerPageChange}
 					onReset={resetPanelFilters}

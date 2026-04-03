@@ -9,6 +9,7 @@
 		categoryGroupId,
 		stockFilter,
 		categories,
+		showStock = true,
 		onClearSearch,
 		onClearCategory,
 		onClearStockFilter,
@@ -18,6 +19,7 @@
 		categoryGroupId: string;
 		stockFilter: string;
 		categories: CategoryGroupCount[];
+		showStock?: boolean;
 		onClearSearch: () => void;
 		onClearCategory: () => void;
 		onClearStockFilter: () => void;
@@ -26,7 +28,7 @@
 
 	const hasSearch = $derived(!!search);
 	const hasCategory = $derived(!!categoryGroupId && categoryGroupId !== 'all');
-	const hasStockFilter = $derived(!!stockFilter && stockFilter !== 'all');
+	const hasStockFilter = $derived(showStock && !!stockFilter && stockFilter !== 'all');
 	const hasActiveFilters = $derived(hasSearch || hasCategory || hasStockFilter);
 
 	const categoryName = $derived(
