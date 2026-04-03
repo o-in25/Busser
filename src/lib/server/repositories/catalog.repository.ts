@@ -146,6 +146,25 @@ export class CatalogRepository extends BaseRepository {
 				if (advancedFilter.preparationMethodId) {
 					query = query.where('r.recipeTechniqueDescriptionId', advancedFilter.preparationMethodId);
 				}
+
+				if (advancedFilter.mood) {
+					const moodIds = advancedFilter.mood.split(',').filter(Boolean);
+					const moodSql: Record<string, string> = {
+						'strong-dry': '(r.recipeStrengthRating >= 6 AND r.recipeDrynessRating >= 6)',
+						'sweet-easy': '(r.recipeSweetnessRating >= 6 AND r.recipeStrengthRating <= 5)',
+						'balanced': `(
+							ABS(r.recipeSweetnessRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
+							AND ABS(r.recipeDrynessRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
+							AND ABS(r.recipeStrengthRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
+							AND ABS(r.recipeVersatilityRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
+						)`,
+						'bold-complex': '(r.recipeStrengthRating >= 6 AND r.recipeVersatilityRating >= 6)',
+					};
+					const clauses = moodIds.map((id) => moodSql[id]).filter(Boolean);
+					if (clauses.length > 0) {
+						query = query.whereRaw(`(${clauses.join(' OR ')})`);
+					}
+				}
 			}
 
 			query = query.orderBy('recipeName');
@@ -584,6 +603,12 @@ export class CatalogRepository extends BaseRepository {
 						.first();
 
 					if (!cat) {
+						// look up source category to preserve group assignment
+						const sourceCat = await trx('category')
+							.where({ CategoryId: step.categoryId })
+							.first();
+						const categoryGroupId = sourceCat?.categoryGroupId ?? null;
+
 						// resolve parent category if source step has one
 						let parentCategoryId: number | null = null;
 						if (step.parentCategoryName) {
@@ -591,9 +616,14 @@ export class CatalogRepository extends BaseRepository {
 								.where({ CategoryName: step.parentCategoryName, WorkspaceId: targetWorkspaceId })
 								.first();
 							if (!parent) {
+								// look up source parent for its group
+								const sourceParent = await trx('category')
+									.where({ CategoryName: step.parentCategoryName, WorkspaceId: sourceWorkspaceId })
+									.first();
 								const [parentId] = await trx('category').insert({
 									WorkspaceId: targetWorkspaceId,
 									CategoryName: step.parentCategoryName,
+									CategoryGroupId: sourceParent?.categoryGroupId ?? null,
 								});
 								parentCategoryId = parentId;
 							} else {
@@ -605,9 +635,21 @@ export class CatalogRepository extends BaseRepository {
 							WorkspaceId: targetWorkspaceId,
 							CategoryName: catName,
 							ParentCategoryId: parentCategoryId,
+							CategoryGroupId: categoryGroupId,
 						});
 						categoryMap.set(catName, catId);
 					} else {
+						// backfill missing group assignment from source
+						if (!cat.categoryGroupId) {
+							const sourceCat = await trx('category')
+								.where({ CategoryId: step.categoryId })
+								.first();
+							if (sourceCat?.categoryGroupId) {
+								await trx('category')
+									.where({ CategoryId: cat.categoryId })
+									.update({ CategoryGroupId: sourceCat.categoryGroupId });
+							}
+						}
 						categoryMap.set(catName, cat.categoryId);
 					}
 				}

@@ -17,6 +17,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const sort = url.searchParams.get('sort') || 'name-asc';
 	const spiritId = url.searchParams.get('spirit') || '';
 	const showFilter = url.searchParams.get('show') || ''; // 'favorites' | 'featured' | ''
+	const mood = url.searchParams.get('mood') || '';
 
 	// advanced search params
 	const readyToMake = url.searchParams.get('readyToMake') || '';
@@ -59,6 +60,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	if (method) advancedFilter.preparationMethodId = parseInt(method);
 	if (ratingMin) advancedFilter.ratingMin = parseFloat(ratingMin);
 	if (ratingMax) advancedFilter.ratingMax = parseFloat(ratingMax);
+	if (mood) advancedFilter.mood = mood;
 
 	const hasAdvancedFilter = Object.keys(advancedFilter).length > 0;
 
@@ -189,6 +191,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			sort,
 			spiritId,
 			showFilter,
+			mood,
 			page,
 			perPage,
 			readyToMake,

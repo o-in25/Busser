@@ -3,11 +3,11 @@ import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 import { catalogRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
-import { canModifyWorkspace, getUserWorkspaces } from '$lib/server/workspace';
+import { canModifyWorkspace, getUserWorkspaces, getGlobalWorkspace } from '$lib/server/workspace';
 
 import type { Actions, PageServerLoad } from './$types';
 
-const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
+const GLOBAL_WORKSPACE = getGlobalWorkspace();
 
 export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	const { workspace } = await parent();
@@ -44,11 +44,11 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		eligible: boolean;
 	} | null = null;
 
-	const isGlobalCatalog = workspaceId === GLOBAL_WORKSPACE_ID;
+	const isGlobalCatalog = workspaceId === GLOBAL_WORKSPACE;
 
 	if (userId && isGlobalCatalog) {
 		// check if user is an editor/owner of the global catalog (admins don't import)
-		const isGlobalAdmin = await canModifyWorkspace(userId, GLOBAL_WORKSPACE_ID);
+		const isGlobalAdmin = await canModifyWorkspace(userId, GLOBAL_WORKSPACE);
 
 		if (!isGlobalAdmin) {
 			const wsResult = await getUserWorkspaces(userId);
@@ -56,7 +56,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 
 			// editable workspaces excluding global catalog
 			const editableWorkspaces = allWorkspaces
-				.filter((w) => w.workspaceId !== GLOBAL_WORKSPACE_ID)
+				.filter((w) => w.workspaceId !== GLOBAL_WORKSPACE)
 				.filter((w) => w.workspaceRole === 'owner' || w.workspaceRole === 'editor')
 				.map((w) => ({ workspaceId: w.workspaceId, workspaceName: w.workspaceName }));
 
@@ -67,7 +67,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 
 				for (const ws of editableWorkspaces) {
 					const imported = await catalogRepo.findImportedRecipe(
-						ws.workspaceId, Number(recipeId), GLOBAL_WORKSPACE_ID
+						ws.workspaceId, Number(recipeId), GLOBAL_WORKSPACE
 					);
 					if (imported) importedTo.push(ws.workspaceId);
 
@@ -164,7 +164,7 @@ export const actions: Actions = {
 		}
 
 		// only allow importing from global catalog for now
-		if (sourceWorkspaceId !== GLOBAL_WORKSPACE_ID) {
+		if (sourceWorkspaceId !== GLOBAL_WORKSPACE) {
 			return { success: false, error: 'Importing is only supported from the global catalog' };
 		}
 
@@ -175,7 +175,7 @@ export const actions: Actions = {
 		}
 
 		// verify user is not an admin of global catalog
-		const isGlobalAdmin = await canModifyWorkspace(userId, GLOBAL_WORKSPACE_ID);
+		const isGlobalAdmin = await canModifyWorkspace(userId, GLOBAL_WORKSPACE);
 		if (isGlobalAdmin) {
 			return { success: false, error: 'Global catalog admins cannot import recipes' };
 		}

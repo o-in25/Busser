@@ -1,7 +1,7 @@
 import type { Knex } from 'knex';
 import recipes from './data/global-catalog-recipes.json';
 
-const WORKSPACE = 'ws-global-catalog';
+const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
 const SUPPLIER_ID = 1;
 
 // parent categories for new ingredient categories

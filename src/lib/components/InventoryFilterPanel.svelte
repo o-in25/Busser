@@ -10,6 +10,7 @@
 		stockFilter,
 		sortOption,
 		perPage,
+		showStock = true,
 		basePath = '/inventory',
 		onCategoryChange,
 		onStockFilterChange,
@@ -22,6 +23,7 @@
 		stockFilter: string;
 		sortOption: string;
 		perPage: string;
+		showStock?: boolean;
 		basePath?: string;
 		onCategoryChange: (value: string) => void;
 		onStockFilterChange: (value: string) => void;
@@ -115,24 +117,26 @@
 	</div>
 
 	<!-- stock level -->
-	<div class="flex flex-col gap-1.5">
-		<span class="text-sm font-medium text-muted-foreground">Stock Level</span>
-		<Select.Root
-			type="single"
-			value={stockFilter}
-			onValueChange={(v) => onStockFilterChange(v ?? '')}
-		>
-			<Select.Trigger class="w-full">
-				<Package class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="All Stock Levels">{stockFilterLabel}</Select.Value>
-			</Select.Trigger>
-			<Select.Content>
-				{#each stockFilterOptions as option}
-					<Select.Item value={option.value} label={option.label} />
-				{/each}
-			</Select.Content>
-		</Select.Root>
-	</div>
+	{#if showStock}
+		<div class="flex flex-col gap-1.5">
+			<span class="text-sm font-medium text-muted-foreground">Stock Level</span>
+			<Select.Root
+				type="single"
+				value={stockFilter}
+				onValueChange={(v) => onStockFilterChange(v ?? '')}
+			>
+				<Select.Trigger class="w-full">
+					<Package class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="All Stock Levels">{stockFilterLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					{#each stockFilterOptions as option}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
+	{/if}
 
 	<!-- sort -->
 	<div class="flex flex-col gap-1.5">

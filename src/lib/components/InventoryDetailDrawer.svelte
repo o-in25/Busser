@@ -8,11 +8,13 @@
 		open = $bindable(false),
 		product,
 		recipeCount = 0,
+		showStock = true,
 		onStockChange = null,
 	}: {
 		open?: boolean;
 		product: Product | null;
 		recipeCount?: number;
+		showStock?: boolean;
 		onStockChange?: ((productId: number, inStock: boolean) => void) | null;
 	} = $props();
 </script>
@@ -27,7 +29,7 @@
 
 		<div class="py-6">
 			{#if product}
-				<InventoryItem {product} {recipeCount} {onStockChange} />
+				<InventoryItem {product} {recipeCount} {showStock} {onStockChange} />
 			{:else}
 				<div class="flex items-center justify-center h-32 text-muted-foreground">
 					No product selected

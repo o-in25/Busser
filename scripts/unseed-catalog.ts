@@ -3,7 +3,7 @@ import knex from 'knex';
 import config from '../knexfile';
 import recipes from '../seeds/core/data/global-catalog-recipes.json';
 
-const WORKSPACE = 'ws-global-catalog';
+const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
 
 async function main() {
 	const db = knex(config.core);

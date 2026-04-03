@@ -1,34 +1,16 @@
 <script lang="ts">
-	import { ShieldAlert, Sparkles, UserPlus } from 'lucide-svelte';
+	import { Globe, Sparkles } from 'lucide-svelte';
 	import { page } from '$app/stores';
-	import { invalidateAll } from '$app/navigation';
 
 	import AiAssistant from '$lib/components/AiAssistant.svelte';
+	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Hero from '$lib/components/Hero.svelte';
 	import logo from '$lib/assets/logo.png';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
+	import { workspaceSwitcherOpen } from '../../../stores';
 
 	let { data } = $props();
-	let switching = $state(false);
-
-	async function switchWorkspace(workspaceId: string) {
-		switching = true;
-		try {
-			const res = await fetch('/api/workspace/switch', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ workspaceId }),
-			});
-
-			if (res.ok) {
-				await invalidateAll();
-			}
-		} finally {
-			switching = false;
-		}
-	}
 </script>
 
 <svelte:head>
@@ -36,7 +18,7 @@
 </svelte:head>
 
 {#if data.authenticated}
-	<div class="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] max-w-3xl mx-auto">
+	<div class="flex flex-col max-w-3xl mx-auto {data.canModify ? 'h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)]' : ''}">
 		<!-- hero -->
 		<div
 			class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-secondary/5 border border-primary/10 mb-4 mt-2"
@@ -69,48 +51,22 @@
 				<AiAssistant userAvatarUrl={$page.data.user?.avatarImageUrl} />
 			</div>
 		{:else}
-			<!-- permission gate -->
-			<div class="glass-panel flex-1 min-h-0 overflow-hidden flex items-center justify-center p-6">
-				<div class="text-center max-w-md space-y-4">
-					<div
-						class="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto"
-					>
-						<ShieldAlert class="h-7 w-7 text-destructive" />
+			<!-- switch workspace prompt -->
+			<div class="glass-panel overflow-hidden flex items-center justify-center p-6">
+				<div class="text-center max-w-sm space-y-6">
+					<div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+						<Sparkles class="h-8 w-8 text-primary" />
 					</div>
-
 					<div>
-						<h2 class="text-lg font-semibold">View-only access</h2>
-						<p class="text-sm text-muted-foreground mt-1">
-							Busser AI modifies your catalog and inventory, which requires write permissions for
-							this Workspace.
+						<h2 class="text-lg font-semibold mb-1">Switch to your workspace</h2>
+						<p class="text-sm text-muted-foreground">
+							Busser AI needs write access to your catalog and inventory. Switch to a workspace you own to get started.
 						</p>
 					</div>
-
-					{#if data.editableWorkspaces.length > 0}
-						<div class="pt-2 space-y-2">
-							<p class="text-sm font-medium">Switch to a Workspace you can edit:</p>
-							<div class="flex flex-col gap-2">
-								{#each data.editableWorkspaces as ws}
-									<Button
-										variant="outline"
-										class="w-full justify-start"
-										disabled={switching}
-										onclick={() => switchWorkspace(ws.workspaceId)}
-									>
-										{ws.workspaceName}
-									</Button>
-								{/each}
-							</div>
-							<p class="text-xs text-muted-foreground mt-2">
-								This will switch your active workspace for this session only.
-							</p>
-						</div>
-					{:else}
-						<p class="text-sm text-muted-foreground">
-							You don't have editor or owner access to any workspace. Ask a workspace owner to
-							upgrade your role.
-						</p>
-					{/if}
+					<FancyButton size="md" variant="primary" onclick={() => ($workspaceSwitcherOpen = true)}>
+						<Globe class="h-4 w-4 mr-2" />
+						Switch Workspace
+					</FancyButton>
 				</div>
 			</div>
 		{/if}

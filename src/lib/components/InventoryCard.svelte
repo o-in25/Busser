@@ -12,11 +12,13 @@
 		product,
 		viewMode = 'grid',
 		recipeCount = 0,
+		showStock = true,
 		onClick = null,
 	}: {
 		product: Product;
 		viewMode?: 'grid' | 'list';
 		recipeCount?: number;
+		showStock?: boolean;
 		onClick?: ((product: Product) => void) | null;
 	} = $props();
 
@@ -72,12 +74,14 @@
 				</Badge>
 
 				<!-- Stock status badge -->
-				<div class="absolute top-3 right-3">
-					<Badge variant={stockStatus.variant} class={cn('bg-background/80 backdrop-blur-sm', stockStatus.variant === 'default' && 'dark:shadow-glow-green')}>
-						<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
-						{stockStatus.label}
-					</Badge>
-				</div>
+				{#if showStock}
+					<div class="absolute top-3 right-3">
+						<Badge variant={stockStatus.variant} class={cn('bg-background/80 backdrop-blur-sm', stockStatus.variant === 'default' && 'dark:shadow-glow-green')}>
+							<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
+							{stockStatus.label}
+						</Badge>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Content -->
@@ -130,10 +134,12 @@
 							<Badge variant="secondary">
 								{product.categoryName}
 							</Badge>
-							<Badge variant={stockStatus.variant}>
-								<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
-								{stockStatus.label}
-							</Badge>
+							{#if showStock}
+								<Badge variant={stockStatus.variant}>
+									<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
+									{stockStatus.label}
+								</Badge>
+							{/if}
 						</div>
 					</div>
 

@@ -2,18 +2,22 @@
 	import { ArrowUpDown, ChevronRight, Filter, GlassWater, Rows3, SlidersHorizontal } from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
 	import * as Select from '$lib/components/ui/select';
+	import { moods } from '$lib/spirits';
 
 	let {
 		spirits,
 		selectedSpirit,
 		selectedShowFilter,
+		selectedMood = '',
 		sortOption,
 		perPage = '24',
 		advancedFilterCount = 0,
 		hideSpirit = false,
 		onSpiritChange,
 		onShowFilterChange,
+		onMoodChange,
 		onSortChange,
 		onPerPageChange,
 		onReset,
@@ -22,12 +26,14 @@
 		spirits: { recipeCategoryId: number; recipeCategoryDescription: string | null }[];
 		selectedSpirit: string;
 		selectedShowFilter: string;
+		selectedMood?: string;
 		sortOption: string;
 		perPage?: string;
 		advancedFilterCount?: number;
 		hideSpirit?: boolean;
 		onSpiritChange: (value: string) => void;
 		onShowFilterChange: (value: string) => void;
+		onMoodChange?: (value: string) => void;
 		onSortChange: (value: string) => void;
 		onPerPageChange?: (value: string) => void;
 		onReset: () => void;
@@ -59,6 +65,18 @@
 		return option?.label || 'All Recipes';
 	});
 
+	const activeMoods = $derived(new Set(selectedMood ? selectedMood.split(',') : []));
+
+	function toggleMood(id: string) {
+		const current = new Set(activeMoods);
+		if (current.has(id)) {
+			current.delete(id);
+		} else {
+			current.add(id);
+		}
+		onMoodChange?.([...current].join(','));
+	}
+
 	const perPageOptions = [
 		{ value: '12', label: '12 per page' },
 		{ value: '24', label: '24 per page' },
@@ -79,6 +97,7 @@
 	const hasNonDefaultFilters = $derived(
 		(selectedSpirit && selectedSpirit !== 'all') ||
 			(selectedShowFilter && selectedShowFilter !== 'all') ||
+			!!selectedMood ||
 			sortOption !== 'name-asc' ||
 			perPage !== '24'
 	);
@@ -111,6 +130,25 @@
 					{/each}
 				</Select.Content>
 			</Select.Root>
+		</div>
+	{/if}
+
+	<!-- mood -->
+	{#if onMoodChange}
+		<div class="flex flex-col gap-1.5">
+			<span class="text-sm font-medium text-muted-foreground">Mood</span>
+			<div class="flex flex-wrap gap-1.5">
+				{#each moods as mood}
+					<Button
+						variant={activeMoods.has(mood.id) ? 'default' : 'outline'}
+						class="rounded-full border-dashed h-7 text-xs px-3"
+						size="sm"
+						onclick={() => toggleMood(mood.id)}
+					>
+						{mood.label}
+					</Button>
+				{/each}
+			</div>
 		</div>
 	{/if}
 

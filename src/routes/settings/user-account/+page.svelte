@@ -18,6 +18,7 @@
 	import { getContext } from 'svelte';
 
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -162,13 +163,13 @@
 				{#if data.currentWorkspace}
 					<div class="flex items-center gap-3">
 						<div
-							class="p-2 rounded-lg {data.currentWorkspace.workspaceId === 'ws-global-catalog'
+							class="p-2 rounded-lg {data.currentWorkspace.workspaceId === $page.data.globalWorkspaceId
 								? 'bg-blue-500/10'
 								: data.currentWorkspace.workspaceType === 'personal'
 									? 'bg-secondary-500/10'
 									: 'bg-neon-green-500/10'}"
 						>
-							{#if data.currentWorkspace.workspaceId === 'ws-global-catalog'}
+							{#if data.currentWorkspace.workspaceId === $page.data.globalWorkspaceId}
 								<Globe class="h-4 w-4 text-blue-500" />
 							{:else if data.currentWorkspace.workspaceType === 'personal'}
 								<User class="h-4 w-4 text-secondary-500" />

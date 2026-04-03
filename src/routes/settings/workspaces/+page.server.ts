@@ -10,9 +10,11 @@ import {
 } from '$lib/server/workspace';
 import { getPreferredWorkspaceId, setPreferredWorkspaceId } from '$lib/server/user';
 
+import { getGlobalWorkspace } from '$lib/server/workspace';
+
 import type { Actions, PageServerLoad } from './$types';
 
-const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
+const GLOBAL_WORKSPACE = getGlobalWorkspace();
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {
@@ -94,7 +96,7 @@ export const actions: Actions = {
 		}
 
 		// prevent editing the global workspace
-		if (workspaceId === GLOBAL_WORKSPACE_ID) {
+		if (workspaceId === GLOBAL_WORKSPACE) {
 			return fail(StatusCodes.FORBIDDEN, {
 				error: 'The global workspace cannot be modified.',
 			});
@@ -193,7 +195,7 @@ export const actions: Actions = {
 		}
 
 		// prevent deletion of the global workspace
-		if (workspaceId === GLOBAL_WORKSPACE_ID) {
+		if (workspaceId === GLOBAL_WORKSPACE) {
 			return fail(StatusCodes.FORBIDDEN, {
 				error: 'The global workspace cannot be deleted.',
 			});

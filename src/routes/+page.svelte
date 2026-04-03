@@ -22,7 +22,6 @@
 		Shuffle,
 		Sparkles,
 		Star,
-		TrendingUp,
 		Users,
 		BarChart3,
 		DollarSign,
@@ -42,7 +41,6 @@
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
-	import TopSpirit from '$lib/components/TopSpirit.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -51,7 +49,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { reveal } from '$lib/actions/reveal';
-	import { idToSlug } from '$lib/spirits';
+	import { idToSlug, moods } from '$lib/spirits';
 	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
@@ -84,6 +82,7 @@
 	// workspace role determines resource access (viewer can only read)
 	const workspaceRole = $derived(dashboardData?.workspaceRole);
 	const canModify = $derived(workspaceRole === 'owner' || workspaceRole === 'editor');
+	const isOwner = $derived(workspaceRole === 'owner');
 
 	// Gallery setup for authenticated users
 	const gallery = $derived(
@@ -123,42 +122,6 @@
 	let moodExpanded = $state(false);
 	let spiritExpanded = $state(false);
 
-	// mood definitions
-	const moods = [
-		{
-			id: 'strong-dry',
-			label: 'Strong & Dry',
-			test: (d: (typeof gallery)[0]['data']) =>
-				d.recipeStrengthRating >= 6 && d.recipeDrynessRating >= 6,
-		},
-		{
-			id: 'sweet-easy',
-			label: 'Sweet & Easy',
-			test: (d: (typeof gallery)[0]['data']) =>
-				d.recipeSweetnessRating >= 6 && d.recipeStrengthRating <= 5,
-		},
-		{
-			id: 'balanced',
-			label: 'Balanced',
-			test: (d: (typeof gallery)[0]['data']) => {
-				const vals = [
-					d.recipeSweetnessRating,
-					d.recipeDrynessRating,
-					d.recipeStrengthRating,
-					d.recipeVersatilityRating,
-				];
-				const mean = vals.reduce((a, b) => a + b, 0) / 4;
-				return vals.every((v) => Math.abs(v - mean) <= 2.5);
-			},
-		},
-		{
-			id: 'bold-complex',
-			label: 'Bold & Complex',
-			test: (d: (typeof gallery)[0]['data']) =>
-				d.recipeStrengthRating >= 6 && d.recipeVersatilityRating >= 6,
-		},
-	];
-
 	// compose spirit + mood filters
 	let filter = $derived.by(() => {
 		let result =
@@ -187,6 +150,16 @@
 		}
 	};
 
+	// build browse URL preserving active filters
+	const browseUrl = $derived.by(() => {
+		const params = new URLSearchParams();
+		if (isOwner) params.set('readyToMake', '1');
+		if (sortBy !== 'all') params.set('spirit', String(sortBy));
+		if (activeMood) params.set('mood', activeMood);
+		const qs = params.toString();
+		return qs ? `/catalog/browse?${qs}` : '/catalog/browse';
+	});
+
 	// Surprise me - pick random available recipe
 	function surpriseMe() {
 		if (gallery.length === 0) return;
@@ -205,7 +178,9 @@
 
 {#if !$page.data.user}
 	<!-- Hero Section -->
-	<section class="relative overflow-hidden h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl">
+	<section
+		class="relative overflow-hidden h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl"
+	>
 		<!-- Animated background gradient -->
 		<div class="absolute inset-0 hero-gradient-bg -z-10 rounded-2xl"></div>
 		<div class="absolute inset-0 bg-grid-pattern opacity-5 -z-10"></div>
@@ -253,7 +228,6 @@
 					Log In
 				</FancyButton>
 			</div>
-
 		</div>
 
 		<!-- Featured Recipes Carousel -->
@@ -365,9 +339,13 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.6)]"></div>
+						<div
+							class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<Package class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Inventory Management</Card.Title>
@@ -386,9 +364,13 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(28,186,138,0.6)]"></div>
+						<div
+							class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(28,186,138,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<SwatchBook class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Smart Matching</Card.Title>
@@ -407,9 +389,13 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div class="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(232,163,15,0.6)]"></div>
+						<div
+							class="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(232,163,15,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<BookOpen class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Spirit Guide</Card.Title>
@@ -428,9 +414,13 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div class="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(165,125,213,0.6)]"></div>
+						<div
+							class="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(165,125,213,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<Sparkles class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">AI-Powered Tools</Card.Title>
@@ -451,17 +441,21 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
 					>
-						<div class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(34,211,238,0.6)]"></div>
+						<div
+							class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(34,211,238,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<MapPin class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Store Finder</Card.Title>
 						</Card.Header>
 						<Card.Content>
 							<p class="text-sm text-muted-foreground">
-								Find nearby liquor stores to restock your bar or compare product prices.
-								Powered by Google Places, so you always know where to get what you need.
+								Find nearby liquor stores to restock your bar or compare product prices. Powered by
+								Google Places, so you always know where to get what you need.
 							</p>
 						</Card.Content>
 					</Card.Root>
@@ -472,9 +466,13 @@
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
 					>
-						<div class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.4)]"></div>
+						<div
+							class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.4)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<Users class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Workspace Collaboration</Card.Title>
@@ -735,11 +733,15 @@
 					<h1 class="text-3xl md:text-4xl font-bold mb-2">
 						{getGreeting()}
 					</h1>
-					<p class="text-muted-foreground">Here's what's happening with your home bar.</p>
+					<p class="text-muted-foreground">
+						{isOwner
+							? "Here's what's happening with your home bar."
+							: "Explore recipes in Busser's catalog."}
+					</p>
 				</div>
 
 				<!-- Quick Stats Cards -->
-				<div class="grid grid-cols-2 gap-3 w-full md:w-auto">
+				<div class="{isOwner ? 'grid grid-cols-2 gap-3' : 'flex'} w-full md:w-auto">
 					<Card.Root class="px-4 py-3 md:min-w-[180px]">
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-full bg-neon-green-500/10">
@@ -747,28 +749,32 @@
 							</div>
 							<div>
 								<p class="text-2xl font-bold">{dashboardData.availableCount}</p>
-								<p class="text-xs text-muted-foreground">Recipes Ready</p>
+								<p class="text-xs text-muted-foreground">
+									{isOwner ? 'Recipes Ready' : 'Total Recipes'}
+								</p>
 							</div>
 						</div>
 					</Card.Root>
-					<Card.Root class="px-4 py-3 md:min-w-[180px]">
-						<div class="flex items-center gap-3">
-							<div class="p-2 rounded-full bg-primary/10">
-								<Package class="h-5 w-5 text-primary" />
+					{#if isOwner}
+						<Card.Root class="px-4 py-3 md:min-w-[180px]">
+							<div class="flex items-center gap-3">
+								<div class="p-2 rounded-full bg-primary/10">
+									<Package class="h-5 w-5 text-primary" />
+								</div>
+								<div>
+									<p class="text-2xl font-bold">{dashboardData.inventoryCount}</p>
+									<p class="text-xs text-muted-foreground">Bottles in Stock</p>
+								</div>
 							</div>
-							<div>
-								<p class="text-2xl font-bold">{dashboardData.inventoryCount}</p>
-								<p class="text-xs text-muted-foreground">Bottles in Stock</p>
-							</div>
-						</div>
-					</Card.Root>
+						</Card.Root>
+					{/if}
 				</div>
 			</div>
 		</section>
 
 		<!-- Quick Actions -->
 		<section class="mb-8">
-			<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+			<div class="grid grid-cols-2 {isOwner ? 'md:grid-cols-4' : ''} gap-3">
 				<a href="/catalog/browse" class="block">
 					<Card.Root
 						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
@@ -785,38 +791,40 @@
 					</Card.Root>
 				</a>
 
-				<a href="/inventory?page=1&stockFilter=out-of-stock" class="block">
-					<Card.Root
-						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
-					>
-						<div class="flex items-center gap-3">
-							<div class="p-2 rounded-lg bg-primary/10">
-								<ShoppingCart class="h-5 w-5 text-primary" />
-							</div>
-							<div>
-								<p class="font-medium">Shopping List</p>
-								<p class="text-xs text-muted-foreground">What you need</p>
-							</div>
-						</div>
-					</Card.Root>
-				</a>
-
-				{#if canModify}
-					<a href="/inventory/add" class="block">
+				{#if isOwner}
+					<a href="/inventory?page=1&stockFilter=out-of-stock" class="block">
 						<Card.Root
-							class="p-4 hover:shadow-md transition-shadow hover:border-neon-green-500/50 cursor-pointer h-full dark:hover:shadow-glow-green"
+							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
 						>
 							<div class="flex items-center gap-3">
-								<div class="p-2 rounded-lg bg-neon-green-500/10">
-									<Plus class="h-5 w-5 text-neon-green-500" />
+								<div class="p-2 rounded-lg bg-primary/10">
+									<ShoppingCart class="h-5 w-5 text-primary" />
 								</div>
 								<div>
-									<p class="font-medium">Add Ingredient</p>
-									<p class="text-xs text-muted-foreground">Update inventory</p>
+									<p class="font-medium">Shopping List</p>
+									<p class="text-xs text-muted-foreground">What you need</p>
 								</div>
 							</div>
 						</Card.Root>
 					</a>
+
+					{#if canModify}
+						<a href="/inventory/add" class="block">
+							<Card.Root
+								class="p-4 hover:shadow-md transition-shadow hover:border-neon-green-500/50 cursor-pointer h-full dark:hover:shadow-glow-green"
+							>
+								<div class="flex items-center gap-3">
+									<div class="p-2 rounded-lg bg-neon-green-500/10">
+										<Plus class="h-5 w-5 text-neon-green-500" />
+									</div>
+									<div>
+										<p class="font-medium">Add Ingredient</p>
+										<p class="text-xs text-muted-foreground">Update inventory</p>
+									</div>
+								</div>
+							</Card.Root>
+						</a>
+					{/if}
 				{/if}
 
 				{#if gallery.length > 0}
@@ -844,15 +852,22 @@
 			<div class="flex items-center justify-between mb-4">
 				<div>
 					<h2 class="text-2xl font-bold flex items-center gap-2">
-						<CheckCircle2 class="h-6 w-6 text-neon-green-500" />
-						Ready to Make
+						{#if isOwner}
+							<CheckCircle2 class="h-6 w-6 text-neon-green-500" />
+							Ready to Make
+						{:else}
+							<BookOpen class="h-6 w-6 text-primary" />
+							Browse Recipes
+						{/if}
 					</h2>
 					<p class="text-sm text-muted-foreground">
-						Cocktails you can make right now with your inventory
+						{isOwner
+							? 'Cocktails you can make right now with your inventory'
+							: 'Recipes available in this catalog'}
 					</p>
 				</div>
 				<a
-					href="/catalog/browse?available=true"
+					href={browseUrl}
 					class="text-sm text-primary hover:underline hidden md:flex items-center"
 				>
 					View all
@@ -865,8 +880,7 @@
 				<!-- mobile: stacked card deck that fans out -->
 				<div class="sm:hidden mb-2 flex items-center overflow-x-auto scrollbar-none">
 					<!-- label badge with box-shadow stack effect -->
-					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-					<span
+					<button
 						class="inline-flex items-center rounded-full h-7 text-xs px-3 bg-background/60 backdrop-blur-sm border border-border/50 shrink-0 whitespace-nowrap cursor-pointer transition-all duration-300 ease-out"
 						style={!moodExpanded
 							? 'box-shadow: 7px 0 0 -1px hsl(var(--background)), 7px 0 0 0px hsl(var(--border)), 14px 0 0 -1px hsl(var(--background)), 14px 0 0 0px hsl(var(--border)); margin-right: 14px;'
@@ -879,12 +893,11 @@
 								>{moods.find((m) => m.id === activeMood)?.label}</span
 							>
 						{/if}
-					</span>
+					</button>
 					<!-- real filter badges -->
 					{#each moods as mood}
 						{#if moodCounts[mood.id] > 0}
-							<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-							<span
+							<button
 								class="inline-flex items-center rounded-full h-7 text-xs border border-dashed shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 									transition-all duration-300 ease-out
 									{activeMood === mood.id
@@ -898,19 +911,18 @@
 							>
 								{mood.label}
 								<span class="text-[10px] opacity-60 ml-1">{moodCounts[mood.id]}</span>
-							</span>
+							</button>
 						{/if}
 					{/each}
 					<!-- close button -->
-					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-					<span
+					<button
 						class="inline-flex items-center justify-center rounded-full h-7 border border-border/50 shrink-0 cursor-pointer bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-foreground
 							transition-all duration-300 ease-out
 							{moodExpanded ? 'w-7 ml-1.5 opacity-100' : 'w-0 ml-0 opacity-0 overflow-hidden'}"
 						onclick={() => (moodExpanded = false)}
 					>
 						<X class="h-3 w-3" />
-					</span>
+					</button>
 				</div>
 
 				<!-- desktop: horizontal scroll -->
@@ -950,8 +962,7 @@
 			<!-- mobile: stacked card deck that fans out -->
 			<div class="sm:hidden mb-4 flex items-center overflow-x-auto scrollbar-none">
 				<!-- label badge with box-shadow stack effect -->
-				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-				<span
+				<button
 					class="inline-flex items-center rounded-full h-7 text-xs px-3 bg-background/60 backdrop-blur-sm border border-border/50 shrink-0 whitespace-nowrap cursor-pointer transition-all duration-300 ease-out"
 					style={!spiritExpanded
 						? 'box-shadow: 7px 0 0 -1px hsl(var(--background)), 7px 0 0 0px hsl(var(--border)), 14px 0 0 -1px hsl(var(--background)), 14px 0 0 0px hsl(var(--border)); margin-right: 14px;'
@@ -964,10 +975,9 @@
 							>{spirits.find((s) => s.recipeCategoryId === sortBy)?.recipeCategoryDescription}</span
 						>
 					{/if}
-				</span>
+				</button>
 				<!-- "All" badge -->
-				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-				<span
+				<button
 					class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 						transition-all duration-300 ease-out
 						{sortBy === 'all'
@@ -983,15 +993,14 @@
 				>
 					All
 					<span class="text-[10px] opacity-60 ml-1">{gallery.length}</span>
-				</span>
+				</button>
 				<!-- real spirit badges -->
 				{#each spirits as spirit}
 					{@const count = gallery.filter(
 						(g) => g.data.recipeCategoryId === spirit.recipeCategoryId
 					).length}
 					{#if count > 0}
-						<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-						<span
+						<button
 							class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 								transition-all duration-300 ease-out
 								{sortBy === spirit.recipeCategoryId
@@ -1007,19 +1016,18 @@
 						>
 							{spirit.recipeCategoryDescription}
 							<span class="text-[10px] opacity-60 ml-1">{count}</span>
-						</span>
+						</button>
 					{/if}
 				{/each}
 				<!-- close button -->
-				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-				<span
+				<button
 					class="inline-flex items-center justify-center rounded-full h-7 border border-border/50 shrink-0 cursor-pointer bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-foreground
 						transition-all duration-300 ease-out
 						{spiritExpanded ? 'w-7 ml-1.5 opacity-100' : 'w-0 ml-0 opacity-0 overflow-hidden'}"
 					onclick={() => (spiritExpanded = false)}
 				>
 					<X class="h-3 w-3" />
-				</span>
+				</button>
 			</div>
 
 			<!-- desktop: horizontal scroll -->
@@ -1063,11 +1071,15 @@
 						<div class="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
 							<GlassWater class="h-8 w-8 text-muted-foreground/50" />
 						</div>
-						<h3 class="text-lg font-semibold mb-2">No Cocktails Available Yet</h3>
+						<h3 class="text-lg font-semibold mb-2">
+							{isOwner ? 'No Cocktails Available Yet' : 'No Recipes Found'}
+						</h3>
 						<p class="text-muted-foreground mb-4 max-w-md">
-							Add more ingredients to your inventory to unlock cocktail recipes you can make.
+							{isOwner
+								? 'Add more ingredients to your inventory to unlock cocktail recipes you can make.'
+								: 'There are no recipes in this catalog yet.'}
 						</p>
-						{#if canModify}
+						{#if canModify && isOwner}
 							<a href="/inventory/add" class={buttonVariants()}>
 								<Plus class="h-4 w-4 mr-2" />
 								Add Ingredients
@@ -1115,49 +1127,15 @@
 
 				{#if filter.length > 8}
 					<div class="text-center mt-4">
-						<a href="/catalog/browse?available=true" class={buttonVariants({ variant: 'outline' })}>
-							View All {filter.length} Available Recipes
+						<a href={browseUrl} class={buttonVariants({ variant: 'outline' })}>
+							View All {filter.length}
+							{isOwner ? 'Available' : ''} Recipes
 							<ArrowRight class="ml-2 h-4 w-4" />
 						</a>
 					</div>
 				{/if}
 			{/if}
 		</section>
-
-		<!-- Cocktail of the Day + Top Spirit Row -->
-		{#if dashboardData.cocktailOfTheDay || (dashboardData.topSpirit && dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId] > 0)}
-			<section class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-				{#if dashboardData.cocktailOfTheDay}
-					<CocktailOfTheDay recipe={dashboardData.cocktailOfTheDay} />
-				{/if}
-
-				{#if dashboardData.topSpirit && dashboardData.spiritCounts[dashboardData.topSpirit.recipeCategoryId] > 0}
-					<Card.Root>
-						<Card.Header class="pb-3">
-							<div class="flex items-center gap-2">
-								<div class="p-2 rounded-lg bg-neon-cyan-500/10">
-									<TrendingUp class="h-5 w-5 text-neon-cyan-500" />
-								</div>
-								<div>
-									<Card.Title class="text-lg">Your Top Spirit</Card.Title>
-									<p class="text-xs text-muted-foreground">
-										{dashboardData.topSpirit.recipeCategoryDescription} leads your collection
-									</p>
-								</div>
-							</div>
-						</Card.Header>
-						<Card.Content>
-							<TopSpirit
-								topSpirit={dashboardData.topSpirit}
-								spiritCounts={dashboardData.spiritCounts}
-								availableCount={dashboardData.availableCount}
-								allSpirits={dashboardData.allSpirits}
-							/>
-						</Card.Content>
-					</Card.Root>
-				{/if}
-			</section>
-		{/if}
 
 		<!-- Almost There Section -->
 		{#if dashboardData.almostThereRecipes && dashboardData.almostThereRecipes.length > 0}
@@ -1210,85 +1188,181 @@
 			</section>
 		{/if}
 
-		<!-- Dashboard Widgets -->
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-			<!-- Highest Impact Purchases -->
-			{#if dashboardData.highImpactIngredients && dashboardData.highImpactIngredients.length > 0}
-				<Card.Root>
-					<Card.Header class="pb-3">
-						<div class="flex items-center gap-2">
-							<div class="p-2 rounded-lg bg-neon-amber-500/10">
-								<ShoppingCart class="h-5 w-5 text-neon-amber-500" />
-							</div>
-							<div>
-								<Card.Title class="text-lg">Highest Impact Purchases</Card.Title>
-								<p class="text-xs text-muted-foreground">Buy these to unlock the most cocktails</p>
-							</div>
-						</div>
-					</Card.Header>
-					<Card.Content class="space-y-3">
-						{#each dashboardData.highImpactIngredients as ingredient, i}
-							<div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50">
-								<div class="flex items-center gap-3 min-w-0">
-									<span class="text-lg font-bold text-muted-foreground/60 w-5 text-center shrink-0">
-										{i + 1}
-									</span>
-									<p class="font-medium truncate">{ingredient.ingredientName}</p>
+		<!-- Dashboard Widgets (owner only) -->
+		{#if isOwner}
+			<section class="mb-8">
+				<div class="mb-4">
+					<h2 class="text-2xl font-bold flex items-center gap-2">
+						<BarChart3 class="h-6 w-6 text-primary" />
+						Dashboard
+					</h2>
+					<p class="text-sm text-muted-foreground">Insights and stats for your bar</p>
+				</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<!-- Highest Impact Purchases -->
+					<Card.Root class="flex flex-col">
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-neon-amber-500/10">
+									<ShoppingCart class="h-5 w-5 text-neon-amber-500" />
 								</div>
-								<Badge variant="secondary" class="shrink-0">
-									<Sparkles class="h-3 w-3 mr-1" />
-									unlocks {ingredient.unlockableRecipes}
-								</Badge>
+								<div>
+									<Card.Title class="text-lg">Highest Impact Purchases</Card.Title>
+									<p class="text-xs text-muted-foreground">
+										Buy these to unlock the most cocktails
+									</p>
+								</div>
 							</div>
-						{/each}
-					</Card.Content>
-				</Card.Root>
-			{/if}
-
-			<!-- Taste Profile -->
-			{#if dashboardData.tasteProfile}
-				<Card.Root>
-					<Card.Header class="pb-3">
-						<div class="flex items-center gap-2">
-							<div class="p-2 rounded-lg bg-primary/10">
-								<BarChart3 class="h-5 w-5 text-primary" />
-							</div>
-							<div>
-								<Card.Title class="text-lg">Taste Profile</Card.Title>
-								<p class="text-xs text-muted-foreground">
-									Average flavor profile across {dashboardData.availableCount} recipes
+						</Card.Header>
+						<Card.Content class="flex flex-col flex-1">
+							{#if dashboardData.highImpactIngredients && dashboardData.highImpactIngredients.length > 0}
+								<div class="space-y-3">
+									{#each dashboardData.highImpactIngredients as ingredient, i}
+										<div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50">
+											<div class="flex items-center gap-3 min-w-0">
+												<span
+													class="text-lg font-bold text-muted-foreground/60 w-5 text-center shrink-0"
+												>
+													{i + 1}
+												</span>
+												<p class="font-medium truncate">{ingredient.ingredientName}</p>
+											</div>
+											<Badge variant="secondary" class="shrink-0">
+												<Sparkles class="h-3 w-3 mr-1" />
+												unlocks {ingredient.unlockableRecipes}
+											</Badge>
+										</div>
+									{/each}
+								</div>
+							{:else}
+								<p
+									class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center"
+								>
+									Add more recipes to your catalog to see purchase suggestions.
 								</p>
-							</div>
-						</div>
-					</Card.Header>
-					<Card.Content>
-						<TasteProfileChart {...dashboardData.tasteProfile} />
-					</Card.Content>
-				</Card.Root>
-			{/if}
+							{/if}
+						</Card.Content>
+					</Card.Root>
 
-			<!-- Cost Breakdown -->
-			{#if dashboardData.costBreakdown}
-				<Card.Root>
-					<Card.Header class="pb-3">
-						<div class="flex items-center gap-2">
-							<div class="p-2 rounded-lg bg-neon-green-500/10">
-								<DollarSign class="h-5 w-5 text-neon-green-500" />
+					<!-- Taste Profile -->
+					<Card.Root class="flex flex-col">
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-primary/10">
+									<BarChart3 class="h-5 w-5 text-primary" />
+								</div>
+								<div>
+									<Card.Title class="text-lg">Taste Profile</Card.Title>
+									<p class="text-xs text-muted-foreground">
+										{dashboardData.tasteProfile
+											? `Average flavor profile across ${dashboardData.availableCount} recipes`
+											: 'Your flavor profile at a glance'}
+									</p>
+								</div>
 							</div>
-							<div>
-								<Card.Title class="text-lg">Cost Breakdown</Card.Title>
-								<p class="text-xs text-muted-foreground">
-									Estimated costs across your available recipes
+						</Card.Header>
+						<Card.Content class="flex flex-col flex-1">
+							{#if dashboardData.tasteProfile}
+								<TasteProfileChart {...dashboardData.tasteProfile} />
+							{:else}
+								<p
+									class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center"
+								>
+									Add ingredients to your inventory to see your taste profile.
 								</p>
+							{/if}
+						</Card.Content>
+					</Card.Root>
+
+					<!-- Bar Overview -->
+					<Card.Root class="flex flex-col">
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-neon-cyan-500/10">
+									<FlaskConical class="h-5 w-5 text-neon-cyan-500" />
+								</div>
+								<div>
+									<Card.Title class="text-lg">Bar Overview</Card.Title>
+									<p class="text-xs text-muted-foreground">Your inventory at a glance</p>
+								</div>
 							</div>
-						</div>
-					</Card.Header>
-					<Card.Content>
-						<CostBreakdown costBreakdown={dashboardData.costBreakdown} />
-					</Card.Content>
-				</Card.Root>
-			{/if}
-		</div>
+						</Card.Header>
+						<Card.Content class="flex flex-col flex-1">
+							<div class="space-y-4">
+								<div>
+									<div class="flex items-center justify-between mb-1">
+										<span class="text-sm font-medium">Catalog Coverage</span>
+										<span class="text-sm font-bold"
+											>{Math.round(dashboardData.catalogCoverage * 100)}%</span
+										>
+									</div>
+									<div class="w-full h-2 rounded-full bg-muted">
+										<div
+											class="h-2 rounded-full bg-neon-cyan-500 transition-all duration-500"
+											style="width: {Math.round(dashboardData.catalogCoverage * 100)}%"
+										></div>
+									</div>
+									<p class="text-xs text-muted-foreground mt-1">
+										{dashboardData.availableCount} of {dashboardData.totalRecipes} recipes covered
+									</p>
+								</div>
+								{#if dashboardData.barBreakdown.length > 0}
+									<div class="space-y-2">
+										{#each dashboardData.barBreakdown as category}
+											{@const maxCount = Math.max(
+												...dashboardData.barBreakdown.map((c) => c.count)
+											)}
+											<div class="flex items-center gap-3">
+												<span class="text-sm min-w-[100px] truncate"
+													>{category.categoryGroupName}</span
+												>
+												<div class="flex-1 h-2 rounded-full bg-muted">
+													<div
+														class="h-2 rounded-full bg-neon-cyan-500/60 transition-all duration-500"
+														style="width: {(category.count / maxCount) * 100}%"
+													></div>
+												</div>
+												<span class="text-xs text-muted-foreground w-6 text-right"
+													>{category.count}</span
+												>
+											</div>
+										{/each}
+									</div>
+								{/if}
+							</div>
+						</Card.Content>
+					</Card.Root>
+
+					<!-- Cost Breakdown -->
+					<Card.Root class="flex flex-col">
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-neon-green-500/10">
+									<DollarSign class="h-5 w-5 text-neon-green-500" />
+								</div>
+								<div>
+									<Card.Title class="text-lg">Cost Breakdown</Card.Title>
+									<p class="text-xs text-muted-foreground">
+										Estimated costs across your available recipes
+									</p>
+								</div>
+							</div>
+						</Card.Header>
+						<Card.Content class="flex flex-col flex-1">
+							{#if dashboardData.costBreakdown}
+								<CostBreakdown costBreakdown={dashboardData.costBreakdown} />
+							{:else}
+								<p
+									class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center"
+								>
+									Add priced recipes to see your cost breakdown.
+								</p>
+							{/if}
+						</Card.Content>
+					</Card.Root>
+				</div>
+			</section>
+		{/if}
 	{/if}
 {/if}
 

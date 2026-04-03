@@ -15,10 +15,10 @@ declare global {
 			activeWorkspaceId: string | null;
 		}
 
-		// interface PageData {
-		//   args: any,
-		//   error?: Error | null
-		// }
+		interface PageData {
+			globalWorkspaceId: string;
+			isGlobalWorkspace?: boolean;
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}

@@ -1,11 +1,10 @@
 <!doctype html>
 <html lang="en" class="dark">
+
 	<head>
 		<meta charset="utf-8" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-		/>
+		<meta name="viewport"
+					content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 		<title>Busser — Offline</title>
 
 		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
@@ -14,12 +13,12 @@
 		<link rel="icon" href="/favicon.png" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-			rel="stylesheet"
-		/>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+					rel="stylesheet" />
 		<style>
-			*, *::before, *::after {
+			*,
+			*::before,
+			*::after {
 				margin: 0;
 				padding: 0;
 				box-sizing: border-box;
@@ -56,15 +55,21 @@
 				height: 6rem;
 				margin-bottom: 0;
 			}
+
 			@media (min-width: 768px) {
-				.logo { height: 8rem; }
+				.logo {
+					height: 8rem;
+				}
 			}
 
 			.logo-link {
 				transition: opacity 0.2s;
 				text-decoration: none;
 			}
-			.logo-link:hover { opacity: 0.8; }
+
+			.logo-link:hover {
+				opacity: 0.8;
+			}
 
 			/* light glass card */
 			.card {
@@ -87,7 +92,9 @@
 			}
 
 			@media (min-width: 768px) {
-				.card { padding: 1.5rem; }
+				.card {
+					padding: 1.5rem;
+				}
 			}
 
 			.card-content {
@@ -107,6 +114,7 @@
 				line-height: 1.5;
 				color: hsl(240, 3.8%, 46.1%);
 			}
+
 			.dark .message {
 				color: hsl(240, 5%, 64.9%);
 			}
@@ -129,10 +137,12 @@
 				background: hsl(340, 82%, 50%);
 				color: hsl(0, 0%, 98%);
 			}
+
 			.dark .retry {
 				background: hsl(340, 87%, 60%);
 				color: hsl(0, 0%, 98%);
 			}
+
 			.retry:hover {
 				opacity: 0.9;
 			}
@@ -146,27 +156,31 @@
 				text-decoration: none;
 				transition: color 0.15s;
 			}
+
 			.dark .home-link {
 				color: hsl(240, 5%, 64.9%);
 			}
+
 			.home-link:hover {
 				color: hsl(340, 82%, 50%);
 			}
+
 			.dark .home-link:hover {
 				color: hsl(340, 87%, 60%);
 			}
 		</style>
 		<script>
-			if (localStorage.getItem('color-theme')) {
-				localStorage.getItem('color-theme') === 'dark'
+			if(localStorage.getItem('color-theme')) {
+				localStorage.getItem('color-theme')==='dark'
 					? document.documentElement.classList.add('dark')
-					: document.documentElement.classList.remove('dark');
+					:document.documentElement.classList.remove('dark');
 			} else {
-				if (window.matchMedia('(prefers-color-scheme: light)').matches)
+				if(window.matchMedia('(prefers-color-scheme: light)').matches)
 					document.documentElement.classList.remove('dark');
 			}
 		</script>
 	</head>
+
 	<body>
 		<a href="/" class="logo-link">
 			<img src="/favicon.png" alt="Busser" class="logo" />
@@ -184,4 +198,5 @@
 			</div>
 		</div>
 	</body>
+
 </html>

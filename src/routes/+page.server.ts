@@ -5,13 +5,11 @@ import { createInvitationRequest, isInviteOnly } from '$lib/server/auth';
 import { hasWorkspaceAccess } from '$lib/server/workspace';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
+import { getGlobalWorkspace } from '$lib/server/workspace';
 import { indexFromSeed } from '$lib/math';
 import type { View } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
-
-// Global workspace for unauthenticated landing page showcase
-const GLOBAL_WORKSPACE_ID = 'ws-global-catalog';
 
 // Rate limit config: 3 requests per hour per IP
 const INVITE_REQUEST_RATE_LIMIT = {
@@ -21,26 +19,45 @@ const INVITE_REQUEST_RATE_LIMIT = {
 
 export const load = (async ({ locals }) => {
 	const { user } = locals;
+	const globalWorkspace = getGlobalWorkspace();
 	// Use user's active workspace for authenticated users, global for landing page
 	const workspaceId =
-		user && locals.activeWorkspaceId ? locals.activeWorkspaceId : GLOBAL_WORKSPACE_ID;
+		user && locals.activeWorkspaceId ? locals.activeWorkspaceId : globalWorkspace;
 
 	// Get spirits for filter chips
 	const baseSpiritsQuery = await catalogRepo.getCategories();
 
-	// Get available recipes (ready to make)
-	const gallerySeedQuery = await catalogRepo.getAvailableRecipes(workspaceId);
+	// check role early so we can decide which recipes to load
+	const workspaceRole = user && locals.activeWorkspaceId
+		? await hasWorkspaceAccess(user.userId, workspaceId)
+		: null;
+	const isOwner = workspaceRole === 'owner';
 
-	if (!('data' in baseSpiritsQuery) || !('data' in gallerySeedQuery)) {
-		return error(StatusCodes.INTERNAL_SERVER_ERROR, {
-			reason: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
-			code: StatusCodes.INTERNAL_SERVER_ERROR,
-			message: 'Could not load Gallery. Please try again later.',
-		});
+	// owners see available (ready to make) recipes; non-owners see full catalog
+	let recipes: View.BasicRecipe[] = [];
+	if (isOwner) {
+		const gallerySeedQuery = await catalogRepo.getAvailableRecipes(workspaceId);
+		if (!('data' in baseSpiritsQuery) || !('data' in gallerySeedQuery)) {
+			return error(StatusCodes.INTERNAL_SERVER_ERROR, {
+				reason: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
+				code: StatusCodes.INTERNAL_SERVER_ERROR,
+				message: 'Could not load Gallery. Please try again later.',
+			});
+		}
+		recipes = gallerySeedQuery.data || [];
+	} else {
+		if (!('data' in baseSpiritsQuery)) {
+			return error(StatusCodes.INTERNAL_SERVER_ERROR, {
+				reason: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
+				code: StatusCodes.INTERNAL_SERVER_ERROR,
+				message: 'Could not load Gallery. Please try again later.',
+			});
+		}
+		const allRecipes = await catalogRepo.findAll(workspaceId, 1, 100);
+		recipes = allRecipes.data || [];
 	}
 
 	const spirits = baseSpiritsQuery.data || [];
-	const recipes = gallerySeedQuery.data || [];
 
 	// Data for authenticated users only
 	let dashboardData: {
@@ -48,9 +65,6 @@ export const load = (async ({ locals }) => {
 		totalRecipes: number;
 		availableCount: number;
 		almostThereRecipes: Array<View.BasicRecipe & { missingIngredient: string | null }>;
-		allSpirits: Awaited<ReturnType<typeof catalogRepo.getSpirits>>;
-		spiritCounts: Record<number, number>;
-		topSpirit: Awaited<ReturnType<typeof catalogRepo.getSpirits>>[0] | null;
 		userName: string;
 		workspaceRole: string | null;
 		highImpactIngredients: { ingredientName: string; unlockableRecipes: number }[];
@@ -62,7 +76,6 @@ export const load = (async ({ locals }) => {
 			strength: number;
 			versatility: number;
 		} | null;
-		cocktailOfTheDay: View.BasicRecipe | null;
 		costBreakdown: {
 			averageCost: number;
 			cheapest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
@@ -73,8 +86,6 @@ export const load = (async ({ locals }) => {
 	} | null = null;
 
 	if (user && locals.activeWorkspaceId) {
-		// Get user's role in this workspace
-		const workspaceRole = await hasWorkspaceAccess(user.userId, workspaceId);
 
 		// Get inventory count
 		const inventoryResult = await inventoryRepo.findAll(workspaceId, 1, 1);
@@ -86,28 +97,6 @@ export const load = (async ({ locals }) => {
 
 		// Get "almost there" recipes
 		const almostThereRecipes = await catalogRepo.getAlmostThereRecipes(workspaceId);
-
-		// Get all spirits with images for the dashboard
-		const allSpirits = await catalogRepo.getSpirits();
-
-		// Calculate recipes per spirit for the available recipes
-		const spiritCounts: Record<number, number> = {};
-		for (const recipe of recipes) {
-			if (recipe.recipeCategoryId !== undefined) {
-				spiritCounts[recipe.recipeCategoryId] = (spiritCounts[recipe.recipeCategoryId] || 0) + 1;
-			}
-		}
-
-		// Find most productive spirit (one with most available recipes)
-		let topSpirit = allSpirits[0] || null;
-		let maxCount = 0;
-		for (const spirit of allSpirits) {
-			const count = spiritCounts[spirit.recipeCategoryId] || 0;
-			if (count > maxCount) {
-				maxCount = count;
-				topSpirit = spirit;
-			}
-		}
 
 		// Get highest impact ingredients
 		const highImpactIngredients = await catalogRepo.getHighestImpactIngredients(workspaceId);
@@ -169,27 +158,17 @@ export const load = (async ({ locals }) => {
 			};
 		}
 
-		// deterministic daily pick from featured recipes
-		const wsFeatured = await catalogRepo.getFeatured(workspaceId);
-		const today = new Date();
-		const dateSeed = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-		const cocktailOfTheDay = indexFromSeed(wsFeatured, dateSeed);
-
 		dashboardData = {
 			inventoryCount,
 			totalRecipes,
 			availableCount: recipes.length,
 			almostThereRecipes,
-			allSpirits,
-			spiritCounts,
-			topSpirit,
 			userName,
 			workspaceRole,
 			highImpactIngredients,
 			barBreakdown,
 			catalogCoverage,
 			tasteProfile,
-			cocktailOfTheDay,
 			costBreakdown,
 		};
 	}
@@ -206,14 +185,14 @@ export const load = (async ({ locals }) => {
 
 	if (!user) {
 		// Get total catalog count for stats (use global workspace for landing page)
-		const catalogResult = await catalogRepo.findAll(GLOBAL_WORKSPACE_ID, 1, 1);
+		const catalogResult = await catalogRepo.findAll(globalWorkspace, 1, 1);
 		const totalRecipes = catalogResult.pagination.total;
 
 		// Get spirits for browse-by-spirit shortcuts
 		const allSpirits = await catalogRepo.getSpirits();
 
 		// get all admin-curated featured recipes for carousel
-		const allFeatured = await catalogRepo.getFeatured(GLOBAL_WORKSPACE_ID);
+		const allFeatured = await catalogRepo.getFeatured(globalWorkspace);
 
 		const inviteOnly = await isInviteOnly();
 

@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { dev } from '$app/environment';
 
 import type { OAuthProfile, OAuthProvider, OAuthState, QueryResult } from '$lib/types';
+import { getGlobalWorkspace } from '$lib/server/workspace';
 
 export type { OAuthProfile, OAuthProvider, OAuthState };
 
@@ -209,7 +210,6 @@ export async function handleCallback(
 		const existingUser = await userRepo.findByEmail(profile.email);
 
 		if (existingUser.status === 'success' && existingUser.data) {
-			// existing password user — link oauth account and log in
 			await oauthRepo.linkOAuthAccount(
 				existingUser.data.userId,
 				profile.provider,
@@ -218,7 +218,7 @@ export async function handleCallback(
 			user = existingUser.data;
 		} else {
 			// entirely new user — register
-			const result = await oauthRepo.registerOAuth(profile, inviteCode);
+			const result = await oauthRepo.registerOAuth(profile, inviteCode, getGlobalWorkspace());
 
 			if (result.status === 'error') {
 				const params = new URLSearchParams({ error: result.error || 'Registration failed.' });

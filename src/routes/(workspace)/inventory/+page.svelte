@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
+	import { Globe, Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -7,6 +7,7 @@
 	import { haptics } from '$lib/utils/haptics';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
+	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Hero from '$lib/components/Hero.svelte';
 	import logo from '$lib/assets/logo.png';
@@ -27,13 +28,14 @@
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
-	import { notificationStore } from '../../../stores';
+	import { notificationStore, workspaceSwitcherOpen } from '../../../stores';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const showStock = $derived(workspace?.workspaceRole === 'owner' && !$page.data.isGlobalWorkspace);
 
 	// Base path for inventory routes
 	const basePath = '/inventory';
@@ -336,8 +338,21 @@
 	<!-- Inventory Section Navigation -->
 	<InventoryNav />
 
+	{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
+		<FancyAlert class="mb-6 mt-4">
+			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
+			{#snippet children()}
+				<p class="sm:hidden">Viewing global catalog</p>
+				<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
+			{/snippet}
+			{#snippet action()}
+				<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
+			{/snippet}
+		</FancyAlert>
+	{/if}
+
 	<!-- Dashboard Header -->
-	<InventoryDashboard stats={data.stats} />
+	<InventoryDashboard stats={data.stats} {showStock} />
 
 	<!-- Toolbar -->
 	<div class="flex flex-col gap-3 mb-6">
@@ -379,6 +394,7 @@
 					{stockFilter}
 					{sortOption}
 					{perPage}
+					{showStock}
 					{basePath}
 					onCategoryChange={handleCategoryChange}
 					onStockFilterChange={handleStockFilterChange}
@@ -410,6 +426,7 @@
 		categoryGroupId={selectedCategory}
 		{stockFilter}
 		categories={data.categories}
+		{showStock}
 		onClearSearch={clearSearch}
 		onClearCategory={clearCategory}
 		onClearStockFilter={clearStockFilter}
@@ -466,26 +483,28 @@
 					</Button>
 				</div>
 				<div class="flex items-center gap-2 sm:mt-0">
-					<Button
-						variant="outline"
-						size="sm"
-						class="flex-1 sm:flex-none"
-						onclick={() => handleBulkSetStock(true)}
-						disabled={bulkActionLoading}
-					>
-						<PackageCheck class="h-4 w-4 sm:mr-1.5" />
-						In Stock
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						class="flex-1 sm:flex-none"
-						onclick={() => handleBulkSetStock(false)}
-						disabled={bulkActionLoading}
-					>
-						<PackageX class="h-4 w-4 sm:mr-1.5" />
-						Out of Stock
-					</Button>
+					{#if showStock}
+						<Button
+							variant="outline"
+							size="sm"
+							class="flex-1 sm:flex-none"
+							onclick={() => handleBulkSetStock(true)}
+							disabled={bulkActionLoading}
+						>
+							<PackageCheck class="h-4 w-4 sm:mr-1.5" />
+							In Stock
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							class="flex-1 sm:flex-none"
+							onclick={() => handleBulkSetStock(false)}
+							disabled={bulkActionLoading}
+						>
+							<PackageX class="h-4 w-4 sm:mr-1.5" />
+							Out of Stock
+						</Button>
+					{/if}
 					<Button
 						variant="destructive"
 						size="sm"
@@ -508,6 +527,7 @@
 			onRowClick={handleCardClick}
 			selectable={canModify}
 			{selectedIds}
+			{showStock}
 			onSelectionChange={handleSelectionChange}
 		/>
 	{:else}
@@ -523,6 +543,7 @@
 				<InventoryCard
 					{product}
 					{viewMode}
+					{showStock}
 					recipeCount={product.productId ? data.recipeUsage[product.productId] || 0 : 0}
 					onClick={handleCardClick}
 				/>
@@ -586,6 +607,7 @@
 		bind:open={drawerOpen}
 		product={selectedProduct}
 		recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
+		{showStock}
 		onStockChange={handleStockChange}
 	/>
 {/if}

@@ -3,14 +3,6 @@ import { camelCase } from 'change-case';
 import knex from 'knex';
 import { attachPaginate } from 'knex-paginate';
 
-function convertRowKeys(row: Record<string, any>): Record<string, any> {
-	const result: Record<string, any> = {};
-	for (const key of Object.keys(row)) {
-		result[camelCase(key)] = row[key];
-	}
-	return result;
-}
-
 export class DbProvider {
 	private static instances = new Map<string, DbProvider>();
 	private knex!: knex.Knex<any, any[]>;
@@ -46,6 +38,14 @@ export class DbProvider {
 			},
 			pool: { min: 0, max: 10 },
 			postProcessResponse: (result) => {
+				const convertRowKeys = (row: Record<string, any>): Record<string, any> => {
+					const out: Record<string, any> = {};
+					for (const key of Object.keys(row)) {
+						out[camelCase(key)] = row[key];
+					}
+					return out;
+				};
+
 				if (Array.isArray(result)) {
 					return result.map((row) =>
 						row && typeof row === 'object' && !(row instanceof Date) ? convertRowKeys(row) : row

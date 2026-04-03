@@ -1,6 +1,7 @@
 import { userRepo } from '$lib/server/auth';
 import { getUserWorkspaces, getWorkspace } from '$lib/server/workspace';
 import { generateAndUploadAvatar } from '$lib/server/user';
+import { getGlobalWorkspace } from '$lib/server/workspace';
 import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 import type { LayoutServerLoad } from './$types';
@@ -43,5 +44,5 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		}
 	}
 
-	return { user, workspaceName, workspaces, activeWorkspaceId };
+	return { user, workspaceName, workspaces, activeWorkspaceId, globalWorkspaceId: getGlobalWorkspace() };
 };

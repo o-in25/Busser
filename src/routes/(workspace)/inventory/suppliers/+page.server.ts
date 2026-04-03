@@ -1,3 +1,6 @@
+import { error } from '@sveltejs/kit';
+import { StatusCodes, getReasonPhrase } from 'http-status-codes';
+
 import { inventoryRepo } from '$lib/server/core';
 
 import type { ShoppingListItem, ShoppingListSummary } from '$lib/types';
@@ -6,6 +9,14 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ url, parent }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
+
+	if (workspace.workspaceRole !== 'owner') {
+		error(StatusCodes.FORBIDDEN, {
+			reason: getReasonPhrase(StatusCodes.FORBIDDEN),
+			code: StatusCodes.FORBIDDEN,
+			message: 'Only workspace owners can view suppliers.',
+		});
+	}
 
 	const page = Number(url.searchParams.get('page') || '1');
 

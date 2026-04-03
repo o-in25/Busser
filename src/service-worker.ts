@@ -14,6 +14,7 @@ const MAX_CACHED_IMAGES = 200;
 const PRECACHE_ASSETS = [
 	...build,
 	'/offline.html',
+	'/favicon.png',
 ];
 
 sw.addEventListener('install', (event) => {
