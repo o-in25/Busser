@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
+	import { Globe, Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -7,6 +7,7 @@
 	import { haptics } from '$lib/utils/haptics';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
+	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Hero from '$lib/components/Hero.svelte';
 	import logo from '$lib/assets/logo.png';
@@ -27,7 +28,7 @@
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
-	import { notificationStore } from '../../../stores';
+	import { notificationStore, workspaceSwitcherOpen } from '../../../stores';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
@@ -336,6 +337,19 @@
 {:else}
 	<!-- Inventory Section Navigation -->
 	<InventoryNav />
+
+	{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
+		<FancyAlert class="mb-6 mt-4">
+			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
+			{#snippet children()}
+				<p class="sm:hidden">Viewing global catalog</p>
+				<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
+			{/snippet}
+			{#snippet action()}
+				<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
+			{/snippet}
+		</FancyAlert>
+	{/if}
 
 	<!-- Dashboard Header -->
 	<InventoryDashboard stats={data.stats} {showStock} />

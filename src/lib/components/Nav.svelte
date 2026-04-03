@@ -27,10 +27,10 @@
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { workspaceSwitcherOpen } from '../../stores';
 	import Placeholder from './Placeholder.svelte';
 
 	let mobileMenuOpen = $state(false);
-	let switchDialogOpen = $state(false);
 
 	let {
 		user,
@@ -160,7 +160,7 @@
 								class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
 								onclick={() => {
 									mobileMenuOpen = false;
-									switchDialogOpen = true;
+									$workspaceSwitcherOpen = true;
 								}}
 							>
 								<GalleryHorizontalEnd class="h-4 w-4 text-muted-foreground" />
@@ -315,7 +315,7 @@
 						Settings
 					</DropdownMenu.Item>
 					{#if workspaces.length > 1}
-						<DropdownMenu.Item onclick={() => (switchDialogOpen = true)} class="cursor-pointer">
+						<DropdownMenu.Item onclick={() => ($workspaceSwitcherOpen = true)} class="cursor-pointer">
 							<GalleryHorizontalEnd class="mr-2 h-4 w-4" />
 							Switch Workspace
 						</DropdownMenu.Item>
@@ -337,7 +337,7 @@
 </nav>
 
 <!-- Switch Workspace Modal -->
-<Dialog.Root bind:open={switchDialogOpen}>
+<Dialog.Root bind:open={$workspaceSwitcherOpen}>
 	<Dialog.Content class="sm:max-w-md">
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
@@ -353,7 +353,7 @@
 				{workspaces}
 				{activeWorkspaceId}
 				onSelect={(id) => {
-					switchDialogOpen = false;
+					$workspaceSwitcherOpen = false;
 					switchWorkspace(id);
 				}}
 			/>
@@ -362,7 +362,7 @@
 			<button
 				class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
 				onclick={() => {
-					switchDialogOpen = false;
+					$workspaceSwitcherOpen = false;
 					goto('/settings/workspaces');
 				}}
 			>

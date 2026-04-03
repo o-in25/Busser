@@ -41,7 +41,7 @@
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
-import { Badge } from '$lib/components/ui/badge';
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -178,7 +178,9 @@ import { Badge } from '$lib/components/ui/badge';
 
 {#if !$page.data.user}
 	<!-- Hero Section -->
-	<section class="relative overflow-hidden h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl">
+	<section
+		class="relative overflow-hidden h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl"
+	>
 		<!-- Animated background gradient -->
 		<div class="absolute inset-0 hero-gradient-bg -z-10 rounded-2xl"></div>
 		<div class="absolute inset-0 bg-grid-pattern opacity-5 -z-10"></div>
@@ -226,7 +228,6 @@ import { Badge } from '$lib/components/ui/badge';
 					Log In
 				</FancyButton>
 			</div>
-
 		</div>
 
 		<!-- Featured Recipes Carousel -->
@@ -338,9 +339,13 @@ import { Badge } from '$lib/components/ui/badge';
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.6)]"></div>
+						<div
+							class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<Package class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Inventory Management</Card.Title>
@@ -359,9 +364,13 @@ import { Badge } from '$lib/components/ui/badge';
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(28,186,138,0.6)]"></div>
+						<div
+							class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(28,186,138,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<SwatchBook class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Smart Matching</Card.Title>
@@ -380,9 +389,13 @@ import { Badge } from '$lib/components/ui/badge';
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div class="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(232,163,15,0.6)]"></div>
+						<div
+							class="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(232,163,15,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<BookOpen class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Spirit Guide</Card.Title>
@@ -401,9 +414,13 @@ import { Badge } from '$lib/components/ui/badge';
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
 					>
-						<div class="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(165,125,213,0.6)]"></div>
+						<div
+							class="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(165,125,213,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<Sparkles class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">AI-Powered Tools</Card.Title>
@@ -424,17 +441,21 @@ import { Badge } from '$lib/components/ui/badge';
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
 					>
-						<div class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(34,211,238,0.6)]"></div>
+						<div
+							class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(34,211,238,0.6)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<MapPin class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Store Finder</Card.Title>
 						</Card.Header>
 						<Card.Content>
 							<p class="text-sm text-muted-foreground">
-								Find nearby liquor stores to restock your bar or compare product prices.
-								Powered by Google Places, so you always know where to get what you need.
+								Find nearby liquor stores to restock your bar or compare product prices. Powered by
+								Google Places, so you always know where to get what you need.
 							</p>
 						</Card.Content>
 					</Card.Root>
@@ -445,9 +466,13 @@ import { Badge } from '$lib/components/ui/badge';
 					<Card.Root
 						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
 					>
-						<div class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.4)]"></div>
+						<div
+							class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.4)]"
+						></div>
 						<Card.Header class="pb-2">
-							<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
 								<Users class="h-6 w-6 text-primary" />
 							</div>
 							<Card.Title class="text-lg">Workspace Collaboration</Card.Title>
@@ -708,7 +733,11 @@ import { Badge } from '$lib/components/ui/badge';
 					<h1 class="text-3xl md:text-4xl font-bold mb-2">
 						{getGreeting()}
 					</h1>
-					<p class="text-muted-foreground">{isOwner ? "Here's what's happening with your home bar." : "Explore recipes in Busser's catalog."}</p>
+					<p class="text-muted-foreground">
+						{isOwner
+							? "Here's what's happening with your home bar."
+							: "Explore recipes in Busser's catalog."}
+					</p>
 				</div>
 
 				<!-- Quick Stats Cards -->
@@ -720,7 +749,9 @@ import { Badge } from '$lib/components/ui/badge';
 							</div>
 							<div>
 								<p class="text-2xl font-bold">{dashboardData.availableCount}</p>
-								<p class="text-xs text-muted-foreground">{isOwner ? 'Recipes Ready' : 'Total Recipes'}</p>
+								<p class="text-xs text-muted-foreground">
+									{isOwner ? 'Recipes Ready' : 'Total Recipes'}
+								</p>
 							</div>
 						</div>
 					</Card.Root>
@@ -830,7 +861,9 @@ import { Badge } from '$lib/components/ui/badge';
 						{/if}
 					</h2>
 					<p class="text-sm text-muted-foreground">
-						{isOwner ? 'Cocktails you can make right now with your inventory' : 'Recipes available in this catalog'}
+						{isOwner
+							? 'Cocktails you can make right now with your inventory'
+							: 'Recipes available in this catalog'}
 					</p>
 				</div>
 				<a
@@ -847,8 +880,7 @@ import { Badge } from '$lib/components/ui/badge';
 				<!-- mobile: stacked card deck that fans out -->
 				<div class="sm:hidden mb-2 flex items-center overflow-x-auto scrollbar-none">
 					<!-- label badge with box-shadow stack effect -->
-					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-					<span
+					<button
 						class="inline-flex items-center rounded-full h-7 text-xs px-3 bg-background/60 backdrop-blur-sm border border-border/50 shrink-0 whitespace-nowrap cursor-pointer transition-all duration-300 ease-out"
 						style={!moodExpanded
 							? 'box-shadow: 7px 0 0 -1px hsl(var(--background)), 7px 0 0 0px hsl(var(--border)), 14px 0 0 -1px hsl(var(--background)), 14px 0 0 0px hsl(var(--border)); margin-right: 14px;'
@@ -861,12 +893,11 @@ import { Badge } from '$lib/components/ui/badge';
 								>{moods.find((m) => m.id === activeMood)?.label}</span
 							>
 						{/if}
-					</span>
+					</button>
 					<!-- real filter badges -->
 					{#each moods as mood}
 						{#if moodCounts[mood.id] > 0}
-							<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-							<span
+							<button
 								class="inline-flex items-center rounded-full h-7 text-xs border border-dashed shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 									transition-all duration-300 ease-out
 									{activeMood === mood.id
@@ -880,19 +911,18 @@ import { Badge } from '$lib/components/ui/badge';
 							>
 								{mood.label}
 								<span class="text-[10px] opacity-60 ml-1">{moodCounts[mood.id]}</span>
-							</span>
+							</button>
 						{/if}
 					{/each}
 					<!-- close button -->
-					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-					<span
+					<button
 						class="inline-flex items-center justify-center rounded-full h-7 border border-border/50 shrink-0 cursor-pointer bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-foreground
 							transition-all duration-300 ease-out
 							{moodExpanded ? 'w-7 ml-1.5 opacity-100' : 'w-0 ml-0 opacity-0 overflow-hidden'}"
 						onclick={() => (moodExpanded = false)}
 					>
 						<X class="h-3 w-3" />
-					</span>
+					</button>
 				</div>
 
 				<!-- desktop: horizontal scroll -->
@@ -932,8 +962,7 @@ import { Badge } from '$lib/components/ui/badge';
 			<!-- mobile: stacked card deck that fans out -->
 			<div class="sm:hidden mb-4 flex items-center overflow-x-auto scrollbar-none">
 				<!-- label badge with box-shadow stack effect -->
-				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-				<span
+				<button
 					class="inline-flex items-center rounded-full h-7 text-xs px-3 bg-background/60 backdrop-blur-sm border border-border/50 shrink-0 whitespace-nowrap cursor-pointer transition-all duration-300 ease-out"
 					style={!spiritExpanded
 						? 'box-shadow: 7px 0 0 -1px hsl(var(--background)), 7px 0 0 0px hsl(var(--border)), 14px 0 0 -1px hsl(var(--background)), 14px 0 0 0px hsl(var(--border)); margin-right: 14px;'
@@ -946,10 +975,9 @@ import { Badge } from '$lib/components/ui/badge';
 							>{spirits.find((s) => s.recipeCategoryId === sortBy)?.recipeCategoryDescription}</span
 						>
 					{/if}
-				</span>
+				</button>
 				<!-- "All" badge -->
-				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-				<span
+				<button
 					class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 						transition-all duration-300 ease-out
 						{sortBy === 'all'
@@ -965,15 +993,14 @@ import { Badge } from '$lib/components/ui/badge';
 				>
 					All
 					<span class="text-[10px] opacity-60 ml-1">{gallery.length}</span>
-				</span>
+				</button>
 				<!-- real spirit badges -->
 				{#each spirits as spirit}
 					{@const count = gallery.filter(
 						(g) => g.data.recipeCategoryId === spirit.recipeCategoryId
 					).length}
 					{#if count > 0}
-						<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-						<span
+						<button
 							class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 								transition-all duration-300 ease-out
 								{sortBy === spirit.recipeCategoryId
@@ -989,19 +1016,18 @@ import { Badge } from '$lib/components/ui/badge';
 						>
 							{spirit.recipeCategoryDescription}
 							<span class="text-[10px] opacity-60 ml-1">{count}</span>
-						</span>
+						</button>
 					{/if}
 				{/each}
 				<!-- close button -->
-				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-				<span
+				<button
 					class="inline-flex items-center justify-center rounded-full h-7 border border-border/50 shrink-0 cursor-pointer bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-foreground
 						transition-all duration-300 ease-out
 						{spiritExpanded ? 'w-7 ml-1.5 opacity-100' : 'w-0 ml-0 opacity-0 overflow-hidden'}"
 					onclick={() => (spiritExpanded = false)}
 				>
 					<X class="h-3 w-3" />
-				</span>
+				</button>
 			</div>
 
 			<!-- desktop: horizontal scroll -->
@@ -1102,7 +1128,8 @@ import { Badge } from '$lib/components/ui/badge';
 				{#if filter.length > 8}
 					<div class="text-center mt-4">
 						<a href={browseUrl} class={buttonVariants({ variant: 'outline' })}>
-							View All {filter.length} {isOwner ? 'Available' : ''} Recipes
+							View All {filter.length}
+							{isOwner ? 'Available' : ''} Recipes
 							<ArrowRight class="ml-2 h-4 w-4" />
 						</a>
 					</div>
@@ -1163,156 +1190,178 @@ import { Badge } from '$lib/components/ui/badge';
 
 		<!-- Dashboard Widgets (owner only) -->
 		{#if isOwner}
-		<section class="mb-8">
-			<div class="mb-4">
-				<h2 class="text-2xl font-bold flex items-center gap-2">
-					<BarChart3 class="h-6 w-6 text-primary" />
-					Dashboard
-				</h2>
-				<p class="text-sm text-muted-foreground">
-					Insights and stats for your bar
-				</p>
-			</div>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-			<!-- Highest Impact Purchases -->
-			<Card.Root class="flex flex-col">
-				<Card.Header class="pb-3">
-					<div class="flex items-center gap-2">
-						<div class="p-2 rounded-lg bg-neon-amber-500/10">
-							<ShoppingCart class="h-5 w-5 text-neon-amber-500" />
-						</div>
-						<div>
-							<Card.Title class="text-lg">Highest Impact Purchases</Card.Title>
-							<p class="text-xs text-muted-foreground">Buy these to unlock the most cocktails</p>
-						</div>
-					</div>
-				</Card.Header>
-				<Card.Content class="flex flex-col flex-1">
-					{#if dashboardData.highImpactIngredients && dashboardData.highImpactIngredients.length > 0}
-						<div class="space-y-3">
-							{#each dashboardData.highImpactIngredients as ingredient, i}
-								<div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50">
-									<div class="flex items-center gap-3 min-w-0">
-										<span class="text-lg font-bold text-muted-foreground/60 w-5 text-center shrink-0">
-											{i + 1}
-										</span>
-										<p class="font-medium truncate">{ingredient.ingredientName}</p>
-									</div>
-									<Badge variant="secondary" class="shrink-0">
-										<Sparkles class="h-3 w-3 mr-1" />
-										unlocks {ingredient.unlockableRecipes}
-									</Badge>
+			<section class="mb-8">
+				<div class="mb-4">
+					<h2 class="text-2xl font-bold flex items-center gap-2">
+						<BarChart3 class="h-6 w-6 text-primary" />
+						Dashboard
+					</h2>
+					<p class="text-sm text-muted-foreground">Insights and stats for your bar</p>
+				</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<!-- Highest Impact Purchases -->
+					<Card.Root class="flex flex-col">
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-neon-amber-500/10">
+									<ShoppingCart class="h-5 w-5 text-neon-amber-500" />
 								</div>
-							{/each}
-						</div>
-					{:else}
-						<p class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center">Add more recipes to your catalog to see purchase suggestions.</p>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Taste Profile -->
-			<Card.Root class="flex flex-col">
-				<Card.Header class="pb-3">
-					<div class="flex items-center gap-2">
-						<div class="p-2 rounded-lg bg-primary/10">
-							<BarChart3 class="h-5 w-5 text-primary" />
-						</div>
-						<div>
-							<Card.Title class="text-lg">Taste Profile</Card.Title>
-							<p class="text-xs text-muted-foreground">
-								{dashboardData.tasteProfile
-									? `Average flavor profile across ${dashboardData.availableCount} recipes`
-									: 'Your flavor profile at a glance'}
-							</p>
-						</div>
-					</div>
-				</Card.Header>
-				<Card.Content class="flex flex-col flex-1">
-					{#if dashboardData.tasteProfile}
-						<TasteProfileChart {...dashboardData.tasteProfile} />
-					{:else}
-						<p class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center">Add ingredients to your inventory to see your taste profile.</p>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Bar Overview -->
-			<Card.Root class="flex flex-col">
-				<Card.Header class="pb-3">
-					<div class="flex items-center gap-2">
-						<div class="p-2 rounded-lg bg-neon-cyan-500/10">
-							<FlaskConical class="h-5 w-5 text-neon-cyan-500" />
-						</div>
-						<div>
-							<Card.Title class="text-lg">Bar Overview</Card.Title>
-							<p class="text-xs text-muted-foreground">Your inventory at a glance</p>
-						</div>
-					</div>
-				</Card.Header>
-				<Card.Content class="flex flex-col flex-1">
-					<div class="space-y-4">
-						<div>
-							<div class="flex items-center justify-between mb-1">
-								<span class="text-sm font-medium">Catalog Coverage</span>
-								<span class="text-sm font-bold">{Math.round(dashboardData.catalogCoverage * 100)}%</span>
+								<div>
+									<Card.Title class="text-lg">Highest Impact Purchases</Card.Title>
+									<p class="text-xs text-muted-foreground">
+										Buy these to unlock the most cocktails
+									</p>
+								</div>
 							</div>
-							<div class="w-full h-2 rounded-full bg-muted">
-								<div
-									class="h-2 rounded-full bg-neon-cyan-500 transition-all duration-500"
-									style="width: {Math.round(dashboardData.catalogCoverage * 100)}%"
-								></div>
-							</div>
-							<p class="text-xs text-muted-foreground mt-1">
-								{dashboardData.availableCount} of {dashboardData.totalRecipes} recipes covered
-							</p>
-						</div>
-						{#if dashboardData.barBreakdown.length > 0}
-							<div class="space-y-2">
-								{#each dashboardData.barBreakdown as category}
-									{@const maxCount = Math.max(...dashboardData.barBreakdown.map(c => c.count))}
-									<div class="flex items-center gap-3">
-										<span class="text-sm min-w-[100px] truncate">{category.categoryGroupName}</span>
-										<div class="flex-1 h-2 rounded-full bg-muted">
-											<div
-												class="h-2 rounded-full bg-neon-cyan-500/60 transition-all duration-500"
-												style="width: {(category.count / maxCount) * 100}%"
-											></div>
+						</Card.Header>
+						<Card.Content class="flex flex-col flex-1">
+							{#if dashboardData.highImpactIngredients && dashboardData.highImpactIngredients.length > 0}
+								<div class="space-y-3">
+									{#each dashboardData.highImpactIngredients as ingredient, i}
+										<div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50">
+											<div class="flex items-center gap-3 min-w-0">
+												<span
+													class="text-lg font-bold text-muted-foreground/60 w-5 text-center shrink-0"
+												>
+													{i + 1}
+												</span>
+												<p class="font-medium truncate">{ingredient.ingredientName}</p>
+											</div>
+											<Badge variant="secondary" class="shrink-0">
+												<Sparkles class="h-3 w-3 mr-1" />
+												unlocks {ingredient.unlockableRecipes}
+											</Badge>
 										</div>
-										<span class="text-xs text-muted-foreground w-6 text-right">{category.count}</span>
-									</div>
-								{/each}
-							</div>
-						{/if}
-					</div>
-				</Card.Content>
-			</Card.Root>
+									{/each}
+								</div>
+							{:else}
+								<p
+									class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center"
+								>
+									Add more recipes to your catalog to see purchase suggestions.
+								</p>
+							{/if}
+						</Card.Content>
+					</Card.Root>
 
-			<!-- Cost Breakdown -->
-			<Card.Root class="flex flex-col">
-				<Card.Header class="pb-3">
-					<div class="flex items-center gap-2">
-						<div class="p-2 rounded-lg bg-neon-green-500/10">
-							<DollarSign class="h-5 w-5 text-neon-green-500" />
-						</div>
-						<div>
-							<Card.Title class="text-lg">Cost Breakdown</Card.Title>
-							<p class="text-xs text-muted-foreground">
-								Estimated costs across your available recipes
-							</p>
-						</div>
-					</div>
-				</Card.Header>
-				<Card.Content class="flex flex-col flex-1">
-					{#if dashboardData.costBreakdown}
-						<CostBreakdown costBreakdown={dashboardData.costBreakdown} />
-					{:else}
-						<p class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center">Add priced recipes to see your cost breakdown.</p>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-		</div>
-		</section>
+					<!-- Taste Profile -->
+					<Card.Root class="flex flex-col">
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-primary/10">
+									<BarChart3 class="h-5 w-5 text-primary" />
+								</div>
+								<div>
+									<Card.Title class="text-lg">Taste Profile</Card.Title>
+									<p class="text-xs text-muted-foreground">
+										{dashboardData.tasteProfile
+											? `Average flavor profile across ${dashboardData.availableCount} recipes`
+											: 'Your flavor profile at a glance'}
+									</p>
+								</div>
+							</div>
+						</Card.Header>
+						<Card.Content class="flex flex-col flex-1">
+							{#if dashboardData.tasteProfile}
+								<TasteProfileChart {...dashboardData.tasteProfile} />
+							{:else}
+								<p
+									class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center"
+								>
+									Add ingredients to your inventory to see your taste profile.
+								</p>
+							{/if}
+						</Card.Content>
+					</Card.Root>
+
+					<!-- Bar Overview -->
+					<Card.Root class="flex flex-col">
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-neon-cyan-500/10">
+									<FlaskConical class="h-5 w-5 text-neon-cyan-500" />
+								</div>
+								<div>
+									<Card.Title class="text-lg">Bar Overview</Card.Title>
+									<p class="text-xs text-muted-foreground">Your inventory at a glance</p>
+								</div>
+							</div>
+						</Card.Header>
+						<Card.Content class="flex flex-col flex-1">
+							<div class="space-y-4">
+								<div>
+									<div class="flex items-center justify-between mb-1">
+										<span class="text-sm font-medium">Catalog Coverage</span>
+										<span class="text-sm font-bold"
+											>{Math.round(dashboardData.catalogCoverage * 100)}%</span
+										>
+									</div>
+									<div class="w-full h-2 rounded-full bg-muted">
+										<div
+											class="h-2 rounded-full bg-neon-cyan-500 transition-all duration-500"
+											style="width: {Math.round(dashboardData.catalogCoverage * 100)}%"
+										></div>
+									</div>
+									<p class="text-xs text-muted-foreground mt-1">
+										{dashboardData.availableCount} of {dashboardData.totalRecipes} recipes covered
+									</p>
+								</div>
+								{#if dashboardData.barBreakdown.length > 0}
+									<div class="space-y-2">
+										{#each dashboardData.barBreakdown as category}
+											{@const maxCount = Math.max(
+												...dashboardData.barBreakdown.map((c) => c.count)
+											)}
+											<div class="flex items-center gap-3">
+												<span class="text-sm min-w-[100px] truncate"
+													>{category.categoryGroupName}</span
+												>
+												<div class="flex-1 h-2 rounded-full bg-muted">
+													<div
+														class="h-2 rounded-full bg-neon-cyan-500/60 transition-all duration-500"
+														style="width: {(category.count / maxCount) * 100}%"
+													></div>
+												</div>
+												<span class="text-xs text-muted-foreground w-6 text-right"
+													>{category.count}</span
+												>
+											</div>
+										{/each}
+									</div>
+								{/if}
+							</div>
+						</Card.Content>
+					</Card.Root>
+
+					<!-- Cost Breakdown -->
+					<Card.Root class="flex flex-col">
+						<Card.Header class="pb-3">
+							<div class="flex items-center gap-2">
+								<div class="p-2 rounded-lg bg-neon-green-500/10">
+									<DollarSign class="h-5 w-5 text-neon-green-500" />
+								</div>
+								<div>
+									<Card.Title class="text-lg">Cost Breakdown</Card.Title>
+									<p class="text-xs text-muted-foreground">
+										Estimated costs across your available recipes
+									</p>
+								</div>
+							</div>
+						</Card.Header>
+						<Card.Content class="flex flex-col flex-1">
+							{#if dashboardData.costBreakdown}
+								<CostBreakdown costBreakdown={dashboardData.costBreakdown} />
+							{:else}
+								<p
+									class="text-sm text-muted-foreground text-center py-4 flex-1 flex items-center justify-center"
+								>
+									Add priced recipes to see your cost breakdown.
+								</p>
+							{/if}
+						</Card.Content>
+					</Card.Root>
+				</div>
+			</section>
 		{/if}
 	{/if}
 {/if}

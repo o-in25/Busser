@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { FlaskConical, Plus, Search, X } from 'lucide-svelte';
+	import { FlaskConical, Globe, Plus, Search, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
+	import FancyAlert from '$lib/components/FancyAlert.svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
@@ -20,6 +22,7 @@
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
+	import { workspaceSwitcherOpen } from '../../../../stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -250,6 +253,19 @@
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4">
+	{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
+		<FancyAlert class="mb-6">
+			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
+			{#snippet children()}
+				<p class="sm:hidden">Viewing global catalog</p>
+				<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
+			{/snippet}
+			{#snippet action()}
+				<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
+			{/snippet}
+		</FancyAlert>
+	{/if}
+
 	<!-- Header -->
 	<div class="flex items-center gap-4 mb-6">
 		<BackButton href="/catalog" />
