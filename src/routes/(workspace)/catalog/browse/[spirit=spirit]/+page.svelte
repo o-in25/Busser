@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BookOpen, ChevronLeft, FlaskConical, Plus, Search, X } from 'lucide-svelte';
+	import { BookOpen, ChevronLeft, FlaskConical, Martini, Plus, Search, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -23,6 +23,7 @@
 
 	import type { PageData } from './$types';
 	import BackButton from '$lib/components/BackButton.svelte';
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -174,12 +175,11 @@
 	<div class="spirit-orb spirit-orb-1" style="background: {hex}"></div>
 	<div class="spirit-orb spirit-orb-2" style="background: {hex}"></div>
 
-	<div class="mb-4 mt-4 flex items-center justify-between">
+	<div class="mb-4 mt-4 hidden sm:flex items-center justify-between">
 		<BackButton
 			href="/catalog"
 			label="Back to Catalog"
 			size="sm"
-			class="max-sm:[&>span]:hidden max-sm:gap-0"
 		/>
 	</div>
 	<!-- Hero Section -->
@@ -201,33 +201,38 @@
 			></div>
 		{/if}
 
-		<div class="relative px-4 pt-16 pb-4 sm:px-6 sm:pt-20 sm:pb-5 flex flex-col gap-3">
+		<div class="relative px-4 pt-10 sm:pt-16 pb-4 sm:px-6 sm:pt-20 sm:pb-5 flex flex-col gap-3">
 			<h1 class="text-3xl sm:text-4xl font-bold">{data.spiritContent.displayName}</h1>
 
-			<!-- Action pills -->
-			<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
-				<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
-					<FlaskConical class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{data.pagination.total}</span>
-					<span class="text-xs text-muted-foreground">{data.pagination.total === 1 ? 'Recipe' : 'Recipes'}</span>
-				</div>
+			<!-- Navigation pills — Mobile -->
+			<div class="flex gap-2 sm:hidden">
+				<FancyBadge href="/catalog" class="flex-1 justify-center">
+					<ChevronLeft class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-xs text-muted-foreground">Back</span>
+				</FancyBadge>
 
-				<button
-					onclick={() => document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })}
-					class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
-				>
+				<FancyBadge as="button" onclick={() => document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })} class="flex-1 justify-center">
 					<BookOpen class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-xs text-muted-foreground">Spirit Guide &darr;</span>
-				</button>
+					<span class="text-xs text-muted-foreground">Spirit Guide</span>
+				</FancyBadge>
+			</div>
+
+			<!-- Navigation pills — Desktop -->
+			<div class="hidden sm:flex gap-2">
+				<FancyBadge as="button" onclick={() => document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })}>
+					<BookOpen class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-xs text-muted-foreground">Spirit Guide</span>
+				</FancyBadge>
 			</div>
 		</div>
 	</div>
 
 	<!-- Recipe Browsing Section -->
 	<section class="mb-12">
-		<h2 class="text-2xl font-bold mb-6">
-			{data.spiritContent.displayName} Cocktails
-		</h2>
+		<div class="mb-6">
+			<h2 class="text-2xl font-bold">{data.spiritContent.displayName} Cocktails</h2>
+			<p class="text-muted-foreground">{data.pagination.total} {data.pagination.total === 1 ? 'recipe' : 'recipes'}</p>
+		</div>
 
 		<!-- Toolbar -->
 		<div class="flex flex-col gap-3 mb-6">

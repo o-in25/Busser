@@ -71,17 +71,17 @@
 			class="absolute inset-0 opacity-[0.04] pointer-events-none"
 			style="background: linear-gradient(135deg, {accentColor.hex}, transparent)"
 		></div>
-		<div class="flex items-start gap-4 relative">
-			<div
-				class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-				style="background: {accentColor.hex}20"
-			>
-				<Lightbulb class="h-5 w-5" style="color: {accentColor.hex}" />
+		<div class="relative">
+			<div class="flex items-center gap-3 mb-2">
+				<div
+					class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+					style="background: {accentColor.hex}20"
+				>
+					<Lightbulb class="h-5 w-5" style="color: {accentColor.hex}" />
+				</div>
+				<p class="font-semibold text-sm">Fun Fact</p>
 			</div>
-			<div>
-				<p class="font-semibold text-sm mb-1">Fun Fact</p>
-				<p class="text-muted-foreground text-sm italic leading-relaxed">{funFact}</p>
-			</div>
+			<p class="text-muted-foreground text-sm italic leading-relaxed">{funFact}</p>
 		</div>
 	</div>
 </section>
