@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FlaskConical, Globe, Plus, Search, X } from 'lucide-svelte';
+	import { ArrowRight, ChevronLeft, FlaskConical, Globe, Plus, Search, SlidersHorizontal, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -7,9 +7,9 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import FancyAlert from '$lib/components/FancyAlert.svelte';
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
-	import BackButton from '$lib/components/BackButton.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
@@ -266,12 +266,26 @@
 		</FancyAlert>
 	{/if}
 
-	<!-- Header -->
-	<div class="flex items-center gap-4 mb-6">
-		<BackButton href="/catalog" />
-		<div>
+	<!-- Desktop toolbar above hero -->
+	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
+		<FancyButton href="/catalog" size="sm">
+			<ChevronLeft class="h-4 w-4 mr-1" />
+			Back to Catalog
+		</FancyButton>
+		{#if canModify}
+			<FancyButton href="/catalog/add" variant="primary" size="sm">
+				<Plus class="h-4 w-4 mr-1" />
+				Add Recipe
+			</FancyButton>
+		{/if}
+	</div>
+
+	<!-- Hero Section -->
+	<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5">
+		<!-- Desktop: title + badges below -->
+		<div class="hidden md:block">
 			<h1 class="text-2xl font-bold">Browse Catalog</h1>
-			<p class="text-muted-foreground">
+			<p class="text-sm text-muted-foreground mt-0.5 mb-3">
 				{data.pagination.total}
 				{#if $page.data.isGlobalWorkspace}
 					{data.pagination.total === 1
@@ -283,6 +297,49 @@
 					{data.pagination.total === 1 ? 'recipe' : 'recipes'} available
 				{/if}
 			</p>
+			<div class="flex gap-2 flex-wrap">
+				<FancyBadge class="whitespace-nowrap">
+					<FlaskConical class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold">{data.pagination.total}</span>
+					<span class="text-xs text-muted-foreground">Recipes</span>
+				</FancyBadge>
+
+				{#if selectedSpirit && selectedSpirit !== 'all'}
+					{@const spiritObj = data.spirits.find((s) => String(s.recipeCategoryId) === selectedSpirit)}
+					{#if spiritObj}
+						<FancyBadge class="whitespace-nowrap">
+							<span class="text-sm font-bold">{spiritObj.recipeCategoryDescription}</span>
+							<span class="text-xs text-muted-foreground">Spirit</span>
+						</FancyBadge>
+					{/if}
+				{/if}
+
+				{#if advancedFilterCount > 0}
+					<FancyBadge as="button" onclick={clearAllAdvancedFilters} class="whitespace-nowrap">
+						<SlidersHorizontal class="h-4 w-4 text-primary shrink-0" />
+						<span class="text-sm font-bold">{advancedFilterCount}</span>
+						<span class="text-xs text-muted-foreground">Advanced Filter{advancedFilterCount !== 1 ? 's' : ''}</span>
+						<X class="h-3 w-3 text-muted-foreground" />
+					</FancyBadge>
+				{/if}
+			</div>
+		</div>
+
+		<!-- Mobile: title + buttons only (no badges) -->
+		<div class="md:hidden">
+			<h1 class="text-2xl font-bold mb-3">Browse Catalog</h1>
+			<div class="flex gap-2">
+				<FancyButton href="/catalog" size="sm" class="flex-1 justify-center">
+					<ChevronLeft class="h-4 w-4 mr-1" />
+					Catalog
+				</FancyButton>
+				{#if canModify}
+					<FancyButton href="/catalog/add" variant="primary" size="sm" class="flex-1 justify-center">
+						<Plus class="h-4 w-4 mr-1" />
+						Add Recipe
+					</FancyButton>
+				{/if}
+			</div>
 		</div>
 	</div>
 
@@ -343,14 +400,6 @@
 
 			<!-- View toggle -->
 			<ViewToggle modes={['grid', 'list']} active={viewMode} onchange={setViewMode} />
-
-			<!-- Add Recipe -->
-			{#if canModify}
-				<a href="/catalog/add" class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}>
-					<Plus class="h-4 w-4 sm:mr-2" />
-					<span class="hidden sm:inline">Add Recipe</span>
-				</a>
-			{/if}
 		</div>
 	</div>
 

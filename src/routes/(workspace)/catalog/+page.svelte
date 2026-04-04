@@ -136,14 +136,26 @@
 	</FancyAlert>
 {/if}
 
+<!-- Desktop toolbar above hero -->
+<div class="hidden md:flex items-center justify-end gap-2 mb-4 mt-4">
+	<FancyButton onclick={surpriseMe} size="sm">
+		<Shuffle class="h-4 w-4 mr-1" />
+		Surprise Me
+	</FancyButton>
+	<FancyButton href="/catalog/browse" variant="primary" size="sm">
+		<ArrowRight class="h-4 w-4 mr-1" />
+		View All
+	</FancyButton>
+</div>
+
 <!-- Hero Section -->
 <div
-	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5"
+	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 md:mt-0 px-4 py-4 sm:px-6 sm:py-5"
 >
-	<!-- Row 1: Title + Search -->
+	<!-- Title + Search -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 		<h1 class="text-2xl font-bold">Catalog</h1>
-		<form onsubmit={handleSearch} class="flex gap-2 sm:max-w-xs w-full sm:w-auto">
+		<form onsubmit={handleSearch} class="flex gap-2 w-full sm:max-w-xs sm:w-auto">
 			<div class="relative flex-1">
 				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
 				<FancyInput
@@ -153,27 +165,24 @@
 					class="pl-10"
 				/>
 			</div>
-			<FancyButton type="submit" size="sm" variant="primary">Search</FancyButton>
+			<FancyButton type="submit" size="sm">Search</FancyButton>
 		</form>
 	</div>
 
-	<!-- Row 2: Mobile — Surprise Me + View All only -->
-	<div class="flex gap-2 sm:hidden">
-		<FancyBadge as="button" onclick={surpriseMe} class="flex-1 justify-center">
-			<Shuffle class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-xs text-muted-foreground">Surprise Me</span>
-		</FancyBadge>
-
-		<FancyBadge href="/catalog/browse" variant="primary" class="flex-1 justify-center">
-			<ArrowRight class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-xs text-primary dark:text-[rgba(248,78,128,1)]">View All</span>
-		</FancyBadge>
+	<!-- Mobile: Surprise Me + View All -->
+	<div class="flex gap-2 md:hidden mb-4">
+		<FancyButton onclick={surpriseMe} size="sm" class="flex-1 justify-center">
+			<Shuffle class="h-4 w-4 mr-1" />
+			Surprise Me
+		</FancyButton>
+		<FancyButton href="/catalog/browse" variant="primary" size="sm" class="flex-1 justify-center">
+			<ArrowRight class="h-4 w-4 mr-1" />
+			View All
+		</FancyButton>
 	</div>
 
-	<!-- Row 2: Desktop — All Smart Action Pills -->
-	<div
-		class="hidden sm:flex gap-2 flex-wrap pb-1 -mb-1"
-	>
+	<!-- Desktop: Smart Action Pills -->
+	<div class="hidden md:flex gap-2 flex-wrap pb-1 -mb-1">
 		<FancyBadge href="/catalog/browse" class="whitespace-nowrap">
 			<FlaskConical class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{totalRecipes}</span>
@@ -221,16 +230,6 @@
 				<span class="text-xs text-muted-foreground">Buy {topIngredient.ingredientName}</span>
 			</FancyBadge>
 		{/if}
-
-		<FancyBadge as="button" onclick={surpriseMe} class="whitespace-nowrap">
-			<Shuffle class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-xs text-muted-foreground">Surprise Me</span>
-		</FancyBadge>
-
-		<FancyBadge href="/catalog/browse" variant="primary" class="whitespace-nowrap">
-			<ArrowRight class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-xs text-primary dark:text-[rgba(248,78,128,1)]">View All</span>
-		</FancyBadge>
 	</div>
 </div>
 

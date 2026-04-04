@@ -1,16 +1,18 @@
 <script lang="ts">
-	import { Heart, Plus, Star, Check } from 'lucide-svelte';
+	import { ChevronLeft, EllipsisVertical, Heart, Pencil, Plus, Star, Check, Trash2, Download } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
-	import BackButton from '$lib/components/BackButton.svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Recipe from '$lib/components/Recipe.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { cn } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
+	import { notificationStore } from '../../../../stores';
 
 	import type { PageData } from './$types';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
@@ -55,6 +57,20 @@
 			recipeInstructions: data.recipe.recipeTechniqueDescriptionText,
 		}),
 	});
+
+	// delete state
+	let deleteModalOpen = $state(false);
+
+	async function deleteRecipe() {
+		const response = await fetch(`/api/catalog/${data.recipe.recipeId}`, { method: 'DELETE' });
+		const result = await response.json();
+		if ('data' in result) {
+			$notificationStore.success = { message: 'Catalog item deleted.' };
+			goto('/catalog');
+		} else {
+			$notificationStore.error = { message: result.error };
+		}
+	}
 </script>
 
 <svelte:head>
@@ -77,21 +93,86 @@
 </svelte:head>
 
 <div class="container mx-auto max-w-6xl px-4">
-	<!-- back navigation + action buttons -->
-	<div class="mb-4 mt-4 flex items-center justify-between">
-		<BackButton
-			href="/catalog/browse"
-			label="Back to Catalog"
-			size="sm"
-			class="max-sm:[&>span]:hidden max-sm:gap-0"
-		/>
+	<!-- Desktop toolbar above hero -->
+	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
+		<FancyButton href="/catalog/browse" size="sm">
+			<ChevronLeft class="h-4 w-4 mr-1" />
+			Back to Catalog
+		</FancyButton>
 
 		<div class="flex items-center gap-2">
-			<!-- import button -->
+			{#if authenticated}
+				<form
+					method="POST"
+					action="?/toggleFavorite"
+					use:enhance={() => {
+						isFavorite = !isFavorite;
+						return async ({ result }) => {
+							if (result.type === 'failure') {
+								isFavorite = !isFavorite;
+								invalidateAll();
+							}
+						};
+					}}
+				>
+					<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+					<FancyButton type="submit" variant={isFavorite ? 'danger' : 'default'} size="sm">
+						<Heart class={cn('h-4 w-4 mr-1', isFavorite && 'fill-current')} />
+						{isFavorite ? 'Favorited' : 'Favorite'}
+					</FancyButton>
+				</form>
+			{/if}
+
+			{#if authenticated && canModify}
+				<form
+					method="POST"
+					action="?/toggleFeatured"
+					use:enhance={() => {
+						isFeatured = !isFeatured;
+						return async ({ result }) => {
+							if (result.type === 'failure') {
+								isFeatured = !isFeatured;
+								invalidateAll();
+							}
+						};
+					}}
+				>
+					<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+					<FancyButton type="submit" variant={isFeatured ? 'warning' : 'default'} size="sm">
+						<Star class={cn('h-4 w-4 mr-1', isFeatured && 'fill-current')} />
+						{isFeatured ? 'Featured' : 'Feature'}
+					</FancyButton>
+				</form>
+			{/if}
+
+			{#if canModify}
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger class="glass-cta glass-cta-sm">
+						<EllipsisVertical class="h-4 w-4 mr-1" />
+						More
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end">
+						<DropdownMenu.Item onclick={() => goto(`/catalog/${data.recipe.recipeId}/edit`)}>
+							<Pencil class="h-4 w-4 mr-2" />
+							Edit Recipe
+						</DropdownMenu.Item>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item
+							class="text-destructive data-[highlighted]:text-destructive data-[highlighted]:bg-destructive/10"
+							onclick={() => (deleteModalOpen = true)}
+						>
+							<Trash2 class="h-4 w-4 mr-2" />
+							Delete Recipe
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+			{/if}
+
 			{#if showImport}
 				{#if singleWorkspace}
 					{@const alreadyImported = importData?.importedTo.includes(singleWorkspace.workspaceId)}
-					{@const nameCollision = importData?.nameCollisions.includes(singleWorkspace.workspaceId)}
 					<form
 						method="POST"
 						action="?/importToWorkspace"
@@ -116,33 +197,21 @@
 						<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
 						<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
 						<input type="hidden" name="targetWorkspaceId" value={singleWorkspace.workspaceId} />
-						<Button
-							type="submit"
-							variant={alreadyImported ? 'outline' : 'default'}
-							size="sm"
-							disabled={!!alreadyImported || !!importingTo}
-							class="max-sm:h-10 max-sm:px-3"
-						>
+						<FancyButton type="submit" variant={alreadyImported ? 'default' : 'primary'} size="sm" disabled={!!alreadyImported || !!importingTo}>
 							{#if alreadyImported}
-								<Check class="h-4 w-4 sm:mr-2" />
-								<span class="hidden sm:inline">Already Imported</span>
+								<Check class="h-4 w-4 mr-1" />
+								Imported
 							{:else}
-								<Plus class="h-4 w-4 sm:mr-2" />
-								<span class="hidden sm:inline">Add to Workspace</span>
+								<Plus class="h-4 w-4 mr-1" />
+								Add to Workspace
 							{/if}
-						</Button>
-						{#if nameCollision && !alreadyImported}
-							<p class="text-xs text-muted-foreground mt-1">You already have a recipe called "{data.recipe.recipeName}"</p>
-						{/if}
+						</FancyButton>
 					</form>
 				{:else if importData}
-					<!-- multiple workspaces: dropdown -->
 					<DropdownMenu.Root>
-						<DropdownMenu.Trigger>
-							<Button variant="default" size="sm" class="max-sm:h-10 max-sm:px-3">
-								<Plus class="h-4 w-4 sm:mr-2" />
-								<span class="hidden sm:inline">Add to Workspace</span>
-							</Button>
+						<DropdownMenu.Trigger class="glass-cta glass-cta-primary glass-cta-sm">
+							<Plus class="h-4 w-4 mr-1" />
+							Import
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content align="end">
 							{#each importData.editableWorkspaces as ws}
@@ -171,10 +240,7 @@
 									<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
 									<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
 									<input type="hidden" name="targetWorkspaceId" value={ws.workspaceId} />
-									<DropdownMenu.Item
-										disabled={alreadyImported || importingTo === ws.workspaceId}
-										class="cursor-pointer"
-									>
+									<DropdownMenu.Item disabled={alreadyImported || importingTo === ws.workspaceId} class="cursor-pointer">
 										<button type="submit" class="flex items-center gap-2 w-full" disabled={alreadyImported}>
 											{#if alreadyImported}
 												<Check class="h-4 w-4 text-muted-foreground" />
@@ -193,69 +259,102 @@
 					</DropdownMenu.Root>
 				{/if}
 			{/if}
-
-			{#if authenticated}
-			<!-- favorite button -->
-			<form
-				method="POST"
-				action="?/toggleFavorite"
-				use:enhance={() => {
-					isFavorite = !isFavorite;
-					return async ({ result }) => {
-						if (result.type === 'failure') {
-							isFavorite = !isFavorite;
-							invalidateAll();
-						}
-					};
-				}}
-			>
-				<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
-				<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-				<Button
-					type="submit"
-					variant={isFavorite ? 'default' : 'outline'}
-					size="sm"
-					class={cn('max-sm:h-10 max-sm:w-10 max-sm:px-0', isFavorite && 'bg-red-500 hover:bg-red-600 border-red-500 dark:shadow-glow-pink')}
-				>
-					<Heart class={cn('h-5 w-5 sm:h-4 sm:w-4 sm:mr-2', isFavorite && 'fill-current')} />
-					<span class="hidden sm:inline">{isFavorite ? 'Favorited' : 'Favorite'}</span>
-				</Button>
-			</form>
-
-			<!-- featured button (only for editors/owners) -->
-			{#if authenticated && canModify}
-				<form
-					method="POST"
-					action="?/toggleFeatured"
-					use:enhance={() => {
-						isFeatured = !isFeatured;
-						return async ({ result }) => {
-							if (result.type === 'failure') {
-								isFeatured = !isFeatured;
-								invalidateAll();
-							}
-						};
-					}}
-				>
-					<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
-					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-					<Button
-						type="submit"
-						variant={isFeatured ? 'default' : 'outline'}
-						size="sm"
-						class={cn(
-							'max-sm:h-10 max-sm:w-10 max-sm:px-0',
-							isFeatured && 'bg-neon-yellow-500 hover:bg-neon-yellow-600 border-neon-yellow-500 text-black dark:shadow-glow-yellow'
-						)}
-					>
-						<Star class={cn('h-5 w-5 sm:h-4 sm:w-4 sm:mr-2', isFeatured && 'fill-current')} />
-						<span class="hidden sm:inline">{isFeatured ? 'Featured' : 'Feature'}</span>
-					</Button>
-				</form>
-			{/if}
-			{/if}
 		</div>
 	</div>
 
-	<Recipe recipe={data.recipe} recipeSteps={data.recipeSteps} />
+	<Recipe recipe={data.recipe} recipeSteps={data.recipeSteps}>
+		{#snippet actions()}
+			{#if authenticated && canModify}
+				<div class="grid grid-cols-2 gap-2 w-full">
+					<FancyButton href="/catalog/browse" size="sm" class="w-full justify-center">
+						<ChevronLeft class="h-4 w-4 mr-1" />
+						Back
+					</FancyButton>
+
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger class="glass-cta glass-cta-sm w-full justify-center">
+							<EllipsisVertical class="h-4 w-4 mr-1" />
+							More
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content align="end">
+							<DropdownMenu.Item onclick={() => goto(`/catalog/${data.recipe.recipeId}/edit`)}>
+								<Pencil class="h-4 w-4 mr-2" />
+								Edit Recipe
+							</DropdownMenu.Item>
+							<DropdownMenu.Separator />
+							<DropdownMenu.Item
+								class="text-destructive data-[highlighted]:text-destructive data-[highlighted]:bg-destructive/10"
+								onclick={() => (deleteModalOpen = true)}
+							>
+								<Trash2 class="h-4 w-4 mr-2" />
+								Delete Recipe
+							</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+
+					<form class="contents" method="POST" action="?/toggleFavorite"
+						use:enhance={() => { isFavorite = !isFavorite; return async ({ result }) => { if (result.type === 'failure') { isFavorite = !isFavorite; invalidateAll(); } }; }}
+					>
+						<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+						<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+						<FancyButton type="submit" variant={isFavorite ? 'danger' : 'default'} size="sm" class="w-full justify-center">
+							<Heart class={cn('h-4 w-4 mr-1', isFavorite && 'fill-current')} />
+							{isFavorite ? 'Favorited' : 'Favorite'}
+						</FancyButton>
+					</form>
+
+					<form class="contents" method="POST" action="?/toggleFeatured"
+						use:enhance={() => { isFeatured = !isFeatured; return async ({ result }) => { if (result.type === 'failure') { isFeatured = !isFeatured; invalidateAll(); } }; }}
+					>
+						<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+						<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+						<FancyButton type="submit" variant={isFeatured ? 'warning' : 'default'} size="sm" class="w-full justify-center">
+							<Star class={cn('h-4 w-4 mr-1', isFeatured && 'fill-current')} />
+							{isFeatured ? 'Featured' : 'Feature'}
+						</FancyButton>
+					</form>
+				</div>
+			{:else}
+				<div class="flex gap-2 w-full">
+					<FancyButton href="/catalog/browse" size="sm" class="flex-1 justify-center">
+						<ChevronLeft class="h-4 w-4 mr-1" />
+						Back
+					</FancyButton>
+					{#if authenticated}
+						<form class="flex-1" method="POST" action="?/toggleFavorite"
+							use:enhance={() => { isFavorite = !isFavorite; return async ({ result }) => { if (result.type === 'failure') { isFavorite = !isFavorite; invalidateAll(); } }; }}
+						>
+							<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+							<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
+							<FancyButton type="submit" variant={isFavorite ? 'danger' : 'default'} size="sm" class="w-full justify-center">
+								<Heart class={cn('h-4 w-4 mr-1', isFavorite && 'fill-current')} />
+								{isFavorite ? 'Favorited' : 'Favorite'}
+							</FancyButton>
+						</form>
+					{/if}
+				</div>
+			{/if}
+		{/snippet}
+	</Recipe>
 </div>
+
+<!-- delete confirmation -->
+{#if canModify}
+	<Dialog.Root bind:open={deleteModalOpen}>
+		<Dialog.Content>
+			<Dialog.Header>
+				<Dialog.Title>Confirm Delete</Dialog.Title>
+				<Dialog.Description>
+					Delete <span class="font-semibold">{data.recipe.recipeName}</span> from catalog?
+					<p class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20">
+						Once deleted, it can't be recovered.
+					</p>
+				</Dialog.Description>
+			</Dialog.Header>
+			<Dialog.Footer>
+				<Button variant="outline" onclick={() => (deleteModalOpen = false)}>Cancel</Button>
+				<Button variant="destructive" onclick={async () => { await deleteRecipe(); deleteModalOpen = false; }}>Delete</Button>
+			</Dialog.Footer>
+		</Dialog.Content>
+	</Dialog.Root>
+{/if}

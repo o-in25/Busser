@@ -514,6 +514,72 @@
 		inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
+/* secondary variant — purple tinted glass */
+.glass-cta-secondary {
+	background: linear-gradient(135deg, rgba(165, 125, 213, 0.8) 0%, rgba(144, 88, 196, 0.7) 50%, rgba(132, 78, 179, 0.65) 100%);
+	color: rgba(255, 255, 255, 1);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	box-shadow: 0 4px 16px rgba(165, 125, 213, 0.25);
+}
+.glass-cta-secondary:hover {
+	background: linear-gradient(135deg, rgba(165, 125, 213, 0.9) 0%, rgba(144, 88, 196, 0.8) 50%, rgba(132, 78, 179, 0.75) 100%);
+	box-shadow: 0 6px 24px rgba(165, 125, 213, 0.35);
+}
+:is(.dark) .glass-cta-secondary {
+	background: linear-gradient(135deg, rgba(165, 125, 213, 0.4) 0%, rgba(144, 88, 196, 0.3) 50%, rgba(132, 78, 179, 0.25) 100%);
+	color: rgba(255, 255, 255, 0.95);
+	border: 1px solid rgba(165, 125, 213, 0.25);
+	box-shadow: 0 0 8px rgba(165, 125, 213, 0.35), 0 0 24px rgba(165, 125, 213, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+:is(.dark) .glass-cta-secondary:hover {
+	background: linear-gradient(135deg, rgba(165, 125, 213, 0.5) 0%, rgba(144, 88, 196, 0.4) 50%, rgba(132, 78, 179, 0.35) 100%);
+	box-shadow: 0 0 12px rgba(165, 125, 213, 0.45), 0 0 32px rgba(165, 125, 213, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* danger variant — red tinted glass */
+.glass-cta-danger {
+	background: linear-gradient(135deg, rgba(239, 68, 68, 0.8) 0%, rgba(220, 50, 50, 0.7) 50%, rgba(185, 40, 40, 0.65) 100%);
+	color: rgba(255, 255, 255, 1);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+}
+.glass-cta-danger:hover {
+	background: linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(220, 50, 50, 0.8) 50%, rgba(185, 40, 40, 0.75) 100%);
+	box-shadow: 0 6px 24px rgba(239, 68, 68, 0.35);
+}
+:is(.dark) .glass-cta-danger {
+	background: linear-gradient(135deg, rgba(239, 68, 68, 0.4) 0%, rgba(220, 50, 50, 0.3) 50%, rgba(185, 40, 40, 0.25) 100%);
+	color: rgba(255, 255, 255, 0.95);
+	border: 1px solid rgba(239, 68, 68, 0.25);
+	box-shadow: 0 0 8px rgba(239, 68, 68, 0.35), 0 0 24px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+:is(.dark) .glass-cta-danger:hover {
+	background: linear-gradient(135deg, rgba(239, 68, 68, 0.5) 0%, rgba(220, 50, 50, 0.4) 50%, rgba(185, 40, 40, 0.35) 100%);
+	box-shadow: 0 0 12px rgba(239, 68, 68, 0.45), 0 0 32px rgba(239, 68, 68, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* warning variant — amber tinted glass */
+.glass-cta-warning {
+	background: linear-gradient(135deg, rgba(245, 158, 11, 0.8) 0%, rgba(220, 140, 10, 0.7) 50%, rgba(190, 120, 8, 0.65) 100%);
+	color: rgba(255, 255, 255, 1);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);
+}
+.glass-cta-warning:hover {
+	background: linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(220, 140, 10, 0.8) 50%, rgba(190, 120, 8, 0.75) 100%);
+	box-shadow: 0 6px 24px rgba(245, 158, 11, 0.35);
+}
+:is(.dark) .glass-cta-warning {
+	background: linear-gradient(135deg, rgba(245, 158, 11, 0.4) 0%, rgba(220, 140, 10, 0.3) 50%, rgba(190, 120, 8, 0.25) 100%);
+	color: rgba(255, 255, 255, 0.95);
+	border: 1px solid rgba(245, 158, 11, 0.25);
+	box-shadow: 0 0 8px rgba(245, 158, 11, 0.35), 0 0 24px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+:is(.dark) .glass-cta-warning:hover {
+	background: linear-gradient(135deg, rgba(245, 158, 11, 0.5) 0%, rgba(220, 140, 10, 0.4) 50%, rgba(190, 120, 8, 0.35) 100%);
+	box-shadow: 0 0 12px rgba(245, 158, 11, 0.45), 0 0 32px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
 /* fancy card — liquid glass recipe card */
 .fancy-card {
 	background: linear-gradient(

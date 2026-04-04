@@ -16,14 +16,12 @@
 	const productionSteps = $derived(overview.production.split('\n\n'));
 </script>
 
-<section class="mb-12 relative">
+<div class="relative">
 	<!-- decorative blur orb -->
 	<div
 		class="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl opacity-[0.07] pointer-events-none"
 		style="background: {accentColor.hex}"
 	></div>
-
-	<h2 class="text-2xl font-bold mb-6">History & Production</h2>
 
 	<!-- history panel -->
 	<div
@@ -84,4 +82,4 @@
 			<p class="text-muted-foreground text-sm italic leading-relaxed">{funFact}</p>
 		</div>
 	</div>
-</section>
+</div>

@@ -4,7 +4,7 @@
 	import { cn } from '$lib/utils';
 
 	type BaseProps = {
-		variant?: 'default' | 'primary';
+		variant?: 'default' | 'primary' | 'secondary' | 'danger' | 'warning';
 		size?: 'sm' | 'md' | 'lg';
 		children?: Snippet;
 		class?: string;
@@ -32,14 +32,14 @@
 {#if href}
 	<a
 		{href}
-		class={cn('glass-cta', variant === 'primary' && 'glass-cta-primary', sizeClasses[size], className)}
+		class={cn('glass-cta', variant !== 'default' && `glass-cta-${variant}`, sizeClasses[size], className)}
 		{...restProps as HTMLAnchorAttributes}
 	>
 		{#if children}{@render children()}{/if}
 	</a>
 {:else}
 	<button
-		class={cn('glass-cta', variant === 'primary' && 'glass-cta-primary', sizeClasses[size], className)}
+		class={cn('glass-cta', variant !== 'default' && `glass-cta-${variant}`, sizeClasses[size], className)}
 		{...restProps as HTMLButtonAttributes}
 	>
 		{#if children}{@render children()}{/if}

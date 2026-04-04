@@ -8,7 +8,6 @@
 		GlassWater,
 		Layers,
 		Martini,
-		Pencil,
 		Percent,
 		Sparkles,
 		X,
@@ -17,9 +16,9 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
 
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { Badge } from '$lib/components/ui/badge';
-	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { calculateAbv, getDilutionInfo } from '$lib/math';
 	import type { View } from '$lib/types';
@@ -31,12 +30,16 @@
 	import RecipeVerdictCard from './RecipeVerdictCard.svelte';
 
 	// Props using $props()
+	import type { Snippet } from 'svelte';
+
 	let {
 		recipe,
 		recipeSteps: initialRecipeSteps,
+		actions,
 	}: {
 		recipe: View.BasicRecipe;
 		recipeSteps: View.BasicRecipeStep[];
+		actions?: Snippet;
 	} = $props();
 
 	// get workspace role for permission checks
@@ -213,44 +216,44 @@
 
 		<!-- Hero Content -->
 		<div class="relative pt-48 pb-6 px-4 md:px-6 pointer-events-none">
-			<div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+			<!-- Desktop: title + badges -->
+			<div class="hidden md:flex items-end justify-between gap-4">
 				<div>
-					<!-- Category badge -->
-					<Badge variant="secondary" class="mb-3 text-sm pointer-events-auto">
+					<FancyBadge variant="secondary" class="mb-3 !text-sm pointer-events-auto">
 						{recipe.recipeCategoryDescription}
-					</Badge>
-
-					<!-- Recipe name -->
+					</FancyBadge>
 					<h1 class="text-3xl md:text-4xl font-bold text-foreground mb-2">
 						{recipe.recipeName}
 					</h1>
-
-					<!-- Quick stats -->
-					<div class="flex flex-wrap items-center gap-2 mt-3 pointer-events-auto">
-						<Badge variant="outline" class="flex items-center gap-1.5">
-							<Percent class="h-3.5 w-3.5" />
-							{abv}
-						</Badge>
-						<Badge variant="outline" class="flex items-center gap-1.5">
-							<ServingIcon class="h-3.5 w-3.5" />
-							{recipe.recipeTechniqueDescriptionText}
-						</Badge>
-						<Badge variant="outline" class="flex items-center gap-1.5">
-							<FlaskConical class="h-3.5 w-3.5" />
-							{ingredientCount} ingredients
-						</Badge>
-					</div>
 				</div>
+				<div class="flex flex-wrap items-center gap-2 pointer-events-auto justify-end">
+					<FancyBadge class="!py-1 !px-3 !text-xs !gap-1.5">
+						<Percent class="h-3.5 w-3.5" />
+						{abv}
+					</FancyBadge>
+					<FancyBadge class="!py-1 !px-3 !text-xs !gap-1.5">
+						<ServingIcon class="h-3.5 w-3.5" />
+						{recipe.recipeTechniqueDescriptionText}
+					</FancyBadge>
+					<FancyBadge class="!py-1 !px-3 !text-xs !gap-1.5">
+						<FlaskConical class="h-3.5 w-3.5" />
+						{ingredientCount} ingredients
+					</FancyBadge>
+				</div>
+			</div>
 
-				<!-- Edit button -->
-				{#if canModify}
-					<a
-						class={cn(buttonVariants({ variant: 'default' }), 'shrink-0 pointer-events-auto')}
-						href="/catalog/{recipe.recipeId}/edit"
-					>
-						<Pencil class="w-4 h-4 mr-2" />
-						Edit Recipe
-					</a>
+			<!-- Mobile: title + actions, no badges -->
+			<div class="md:hidden">
+				<FancyBadge variant="secondary" class="mb-3 !text-sm pointer-events-auto">
+					{recipe.recipeCategoryDescription}
+				</FancyBadge>
+				<h1 class="text-3xl font-bold text-foreground mb-2">
+					{recipe.recipeName}
+				</h1>
+				{#if actions}
+					<div class="flex items-center gap-2 mt-3 pointer-events-auto">
+						{@render actions()}
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -435,6 +438,10 @@
 				<div class="flex items-center justify-between border-t pt-3">
 					<span class="text-sm font-medium">Final volume</span>
 					<span class="text-sm font-bold">{finalVolumeOz} oz</span>
+				</div>
+				<div class="flex items-center justify-between">
+					<span class="text-sm text-muted-foreground">ABV</span>
+					<Badge variant="outline">{abv}</Badge>
 				</div>
 			</Card.Content>
 		</Card.Root>

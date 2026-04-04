@@ -91,6 +91,20 @@
 					if (fromIndex !== -1 && toIndex !== -1) {
 						direction = toIndex >= fromIndex ? 'forward' : 'back';
 					}
+				} else if (fromKey === '/catalog') {
+					const fromBrowse = fromPath.startsWith('/catalog/browse');
+					const toBrowse = toPath.startsWith('/catalog/browse');
+					const fromRecipe = /^\/catalog\/\d+/.test(fromPath);
+					const toRecipe = /^\/catalog\/\d+/.test(toPath);
+					if (fromBrowse && toRecipe) {
+						direction = 'forward';
+					} else if (fromRecipe && toBrowse) {
+						direction = 'back';
+					} else {
+						const fromDepth = fromPath.replace(/\/$/, '').split('/').length;
+						const toDepth = toPath.replace(/\/$/, '').split('/').length;
+						direction = toDepth >= fromDepth ? 'forward' : 'back';
+					}
 				} else {
 					// depth navigation: compare segment counts
 					const fromDepth = fromPath.replace(/\/$/, '').split('/').length;
