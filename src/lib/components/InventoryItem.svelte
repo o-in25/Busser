@@ -16,8 +16,8 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
-	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import * as Popover from '$lib/components/ui/popover';
@@ -160,169 +160,156 @@
 </script>
 
 {#if product}
-	<div class="space-y-6">
-		<!-- Hero Image -->
-		<div class="relative aspect-[4/3] w-full rounded-xl overflow-hidden">
-			<SkeletonImage
-				src={product.productImageUrl}
-				alt={product.productName}
-				variant="product"
-				class="h-full w-full"
-			/>
-			{#if hasFlavorProfile}
-				<div class="absolute bottom-3 right-3">
-					<span
-						class="text-sm font-bold px-3 py-1.5 rounded-lg text-white shadow-lg {overallRating.style}"
-					>
-						{overallRating.score} · {overallRating.label}
-					</span>
-				</div>
-			{/if}
-		</div>
+	<div class="space-y-4">
+		<!-- Hero: image with name, category, and rating overlaid -->
+		<div class="relative rounded-xl overflow-hidden">
+			<div class="aspect-[3/2] w-full">
+				<SkeletonImage
+					src={product.productImageUrl}
+					alt={product.productName}
+					variant="product"
+					class="h-full w-full"
+				/>
+			</div>
+			<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
 
-		<!-- Header -->
-		<div>
-			<h2 class="text-2xl font-bold text-foreground mb-2">
-				{product.productName}
-			</h2>
-			<div class="flex items-center gap-2 flex-wrap">
-				<Popover.Root>
-					<Popover.Trigger
-						class="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-					>
-						{product.categoryName}
-						<Info class="w-3.5 h-3.5 ml-1" />
-					</Popover.Trigger>
-					<Popover.Content
-						class="w-72"
-						side="bottom"
-						align="start"
-						avoidCollisions={true}
-						collisionPadding={16}
-					>
-						<div class="space-y-2">
-							<h4 class="font-medium">{product.categoryName}</h4>
-							<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
-							<a
-								href="/inventory/category/{product.categoryId}/edit"
-								class="inline-flex items-center text-sm font-medium text-primary hover:underline"
-							>
-								Edit Category <ArrowRight class="ml-1 h-3 w-3" />
-							</a>
+			<!-- Name + category over image -->
+			<div class="absolute inset-x-0 bottom-0 p-4">
+				<div class="flex items-start justify-between gap-3">
+					<div class="min-w-0">
+						<h2 class="text-xl font-bold text-foreground leading-tight">
+							{product.productName}
+						</h2>
+						<div class="flex items-center gap-2 mt-1.5 flex-wrap">
+							<Popover.Root>
+								<Popover.Trigger
+									class="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+								>
+									{product.categoryName}
+									<Info class="w-3 h-3 ml-1" />
+								</Popover.Trigger>
+								<Popover.Content
+									class="w-72"
+									side="bottom"
+									align="start"
+									avoidCollisions={true}
+									collisionPadding={16}
+								>
+									<div class="space-y-2">
+										<h4 class="font-medium">{product.categoryName}</h4>
+										<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
+										<a
+											href="/inventory/category/{product.categoryId}/edit"
+											class="inline-flex items-center text-sm font-medium text-primary hover:underline"
+										>
+											Edit Category <ArrowRight class="ml-1 h-3 w-3" />
+										</a>
+									</div>
+								</Popover.Content>
+							</Popover.Root>
+							{#if product.categoryGroupName}
+								<span class="text-xs text-muted-foreground/50">&middot;</span>
+								<span class="text-sm text-muted-foreground">{product.categoryGroupName}</span>
+							{/if}
 						</div>
-					</Popover.Content>
-				</Popover.Root>
-				{#if product.categoryGroupName}
-					<Badge variant="outline" class="text-xs">{product.categoryGroupName}</Badge>
-				{/if}
+					</div>
+
+					<!-- Rating pill -->
+					{#if hasFlavorProfile}
+						<span
+							class="shrink-0 flex flex-col items-center px-2.5 py-1.5 rounded-xl text-white shadow-lg {overallRating.style}"
+						>
+							<span class="text-[9px] font-semibold uppercase tracking-wider opacity-80 leading-none">verdict</span>
+							<span class="text-lg font-bold leading-tight">{overallRating.score}</span>
+							<span class="text-[10px] opacity-80 leading-none">{overallRating.label}</span>
+						</span>
+					{/if}
+				</div>
 			</div>
 		</div>
 
-		<!-- Status Badges -->
+		<!-- Status + recipe count row -->
 		<div class="flex items-center gap-2 flex-wrap">
 			{#if showStock}
-				<Badge variant={stockStatus.variant} class="gap-1.5 {stockStatus.bgColor}">
+				<FancyBadge variant={product.productInStockQuantity > 0 ? 'default' : 'danger'}>
 					<StockIcon class="h-3.5 w-3.5 {stockStatus.color}" />
-					{stockStatus.label}
-				</Badge>
+					<span class="text-xs">{stockStatus.label}</span>
+				</FancyBadge>
 			{/if}
 			{#if recipeCount > 0}
-				<a href="/catalog/browse?ingredientInclude={product.productId}">
-					<Badge variant="outline" class="gap-1.5 hover:bg-accent transition-colors cursor-pointer">
-						<FlaskConical class="h-3.5 w-3.5" />
-						Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}
-					</Badge>
-				</a>
+				<FancyBadge href="/catalog/browse?ingredientInclude={product.productId}">
+					<FlaskConical class="h-3.5 w-3.5 text-primary" />
+					<span class="text-xs text-muted-foreground">Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span>
+				</FancyBadge>
 			{/if}
 		</div>
 
-		<!-- Quick Stats Grid -->
-		<div class="grid grid-cols-2 gap-3">
+		<!-- Quick stats — compact inline pills -->
+		<div class="flex flex-wrap gap-2">
 			{#if product.productPricePerUnit}
-				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-					<DollarSign class="h-5 w-5 text-neon-green-500 shrink-0" />
-					<div>
-						<p class="text-xs text-muted-foreground">Price</p>
-						<p class="font-semibold">${product.productPricePerUnit.toFixed(2)}</p>
-					</div>
-				</div>
+				<FancyBadge>
+					<DollarSign class="h-3.5 w-3.5 text-neon-green-500" />
+					<span class="text-xs font-semibold">${product.productPricePerUnit.toFixed(2)}</span>
+				</FancyBadge>
 			{/if}
 			{#if product.productUnitSizeInMilliliters}
-				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-					<Beaker class="h-5 w-5 text-blue-500 shrink-0" />
-					<div>
-						<p class="text-xs text-muted-foreground">Size</p>
-						<p class="font-semibold">{product.productUnitSizeInMilliliters}mL</p>
-					</div>
-				</div>
+				<FancyBadge>
+					<Beaker class="h-3.5 w-3.5 text-blue-500" />
+					<span class="text-xs font-semibold">{product.productUnitSizeInMilliliters}mL</span>
+				</FancyBadge>
 			{/if}
 			{#if product.productProof}
-				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-					<Flame class="h-5 w-5 text-neon-amber-500 shrink-0" />
-					<div>
-						<p class="text-xs text-muted-foreground">Proof / ABV</p>
-						<p class="font-semibold">
-							{product.productProof}° {#if abvPercent}<span
-									class="text-muted-foreground font-normal">({abvPercent}%)</span
-								>{/if}
-						</p>
-					</div>
-				</div>
+				<FancyBadge>
+					<Flame class="h-3.5 w-3.5 text-neon-amber-500" />
+					<span class="text-xs font-semibold">
+						{product.productProof}° {#if abvPercent}<span class="font-normal text-muted-foreground">({abvPercent}%)</span>{/if}
+					</span>
+				</FancyBadge>
 			{/if}
 			{#if pricePerOunce}
-				<div class="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-					<Calculator class="h-5 w-5 text-secondary-500 shrink-0" />
-					<div>
-						<p class="text-xs text-muted-foreground">Price/oz</p>
-						<p class="font-semibold">${pricePerOunce}</p>
-					</div>
-				</div>
+				<FancyBadge>
+					<Calculator class="h-3.5 w-3.5 text-secondary-500" />
+					<span class="text-xs font-semibold">${pricePerOunce}/oz</span>
+				</FancyBadge>
 			{/if}
 		</div>
 
 		<!-- Flavor Profile -->
 		{#if hasFlavorProfile}
-			<div class="space-y-3">
-				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+			<div class="rounded-xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-sm border border-white/20 dark:border-white/10 p-3 space-y-2.5">
+				<h3 class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
 					Flavor Profile
 				</h3>
-				<div class="space-y-2">
-					{#each flavorProfile as flavor}
-						{#if flavor.value > 0}
-							{@const FlavorIcon = flavor.icon}
-							<div class="flex items-center gap-3">
-								<FlavorIcon class="h-4 w-4 text-muted-foreground shrink-0" />
-								<span class="text-sm w-20 shrink-0">{flavor.label}</span>
-								<div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-									<div
-										class="h-full {flavor.color} transition-all"
-										style="width: {(flavor.value / 10) * 100}%"
-									></div>
-								</div>
-								<span class="text-sm font-medium w-8 text-right">{flavor.value.toFixed(1)}</span>
+				{#each flavorProfile as flavor}
+					{#if flavor.value > 0}
+						{@const FlavorIcon = flavor.icon}
+						<div class="flex items-center gap-2.5">
+							<FlavorIcon class="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+							<span class="text-xs w-16 shrink-0 text-muted-foreground">{flavor.label}</span>
+							<div class="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+								<div
+									class="h-full rounded-full {flavor.color} transition-all"
+									style="width: {(flavor.value / 10) * 100}%"
+								></div>
 							</div>
-						{/if}
-					{/each}
-				</div>
+							<span class="text-xs font-medium w-7 text-right text-muted-foreground">{flavor.value.toFixed(1)}</span>
+						</div>
+					{/if}
+				{/each}
 			</div>
 		{/if}
 
 		<!-- Description -->
 		{#if product.productDescription}
-			<div class="space-y-2">
-				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-					Description
-				</h3>
-				<p class="text-sm text-muted-foreground leading-relaxed">
-					{product.productDescription}
-				</p>
-			</div>
+			<p class="text-sm text-muted-foreground leading-relaxed">
+				{product.productDescription}
+			</p>
 		{/if}
 
 		<!-- Actions -->
-		<div class="flex items-center justify-between pt-4 border-t">
+		<div class="flex items-center justify-between pt-3 border-t border-white/10">
 			{#if canModify && onStockChange && showStock}
-				<div class="flex items-center gap-3">
+				<div class="flex items-center gap-2.5">
 					<Switch
 						id="stock-toggle-{product.productId}"
 						checked={product.productInStockQuantity > 0}
@@ -337,17 +324,17 @@
 			{/if}
 			{#if canModify}
 				<a
-					class={cn(buttonVariants({ variant: 'default' }))}
+					class={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
 					href="/inventory/{product.productId}/edit"
 				>
-					<Pencil class="w-4 h-4 mr-2" />
-					Edit Product
+					<Pencil class="w-3.5 h-3.5 mr-1.5" />
+					Edit
 				</a>
 			{/if}
 		</div>
 	</div>
 {:else}
-	<div class="flex items-center justify-center h-32 bg-muted rounded-lg">
-		<span class="text-muted-foreground">No product data</span>
+	<div class="flex items-center justify-center h-32 text-muted-foreground">
+		No product data
 	</div>
 {/if}

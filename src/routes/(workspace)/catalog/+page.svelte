@@ -30,7 +30,9 @@
 	import { Input } from '$lib/components/ui/input';
 	import { idToSlug } from '$lib/spirits';
 	import FancyAlert from '$lib/components/FancyAlert.svelte';
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
+	import FancyInput from '$lib/components/FancyInput.svelte';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import tips from '$lib/data/tips.json';
@@ -134,108 +136,100 @@
 	</FancyAlert>
 {/if}
 
+<!-- Desktop toolbar above hero -->
+<div class="hidden md:flex items-center justify-end gap-2 mb-4 mt-4">
+	<FancyButton onclick={surpriseMe} size="sm">
+		<Shuffle class="h-4 w-4 mr-1" />
+		Surprise Me
+	</FancyButton>
+	<FancyButton href="/catalog/browse" variant="primary" size="sm">
+		<ArrowRight class="h-4 w-4 mr-1" />
+		View All
+	</FancyButton>
+</div>
+
 <!-- Hero Section -->
 <div
-	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5"
+	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 md:mt-0 px-4 py-4 sm:px-6 sm:py-5"
 >
-	<!-- Row 1: Title + Search -->
+	<!-- Title + Search -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 		<h1 class="text-2xl font-bold">Catalog</h1>
-		<form onsubmit={handleSearch} class="flex gap-2 sm:max-w-xs w-full sm:w-auto">
+		<form onsubmit={handleSearch} class="flex gap-2 w-full sm:max-w-xs sm:w-auto">
 			<div class="relative flex-1">
-				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-				<Input
+				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+				<FancyInput
 					type="text"
 					placeholder="Search cocktails..."
 					bind:value={searchQuery}
 					class="pl-10"
 				/>
 			</div>
-			<Button type="submit" size="sm">Search</Button>
+			<FancyButton type="submit" size="sm">Search</FancyButton>
 		</form>
 	</div>
 
-	<!-- Row 2: Smart Action Pills -->
-	<div
-		class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1"
-	>
-		<a
-			href="/catalog/browse"
-			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
-		>
+	<!-- Mobile: Surprise Me + View All -->
+	<div class="flex gap-2 md:hidden mb-4">
+		<FancyButton onclick={surpriseMe} size="sm" class="flex-1 justify-center">
+			<Shuffle class="h-4 w-4 mr-1" />
+			Surprise Me
+		</FancyButton>
+		<FancyButton href="/catalog/browse" variant="primary" size="sm" class="flex-1 justify-center">
+			<ArrowRight class="h-4 w-4 mr-1" />
+			View All
+		</FancyButton>
+	</div>
+
+	<!-- Desktop: Smart Action Pills -->
+	<div class="hidden md:flex gap-2 flex-wrap pb-1 -mb-1">
+		<FancyBadge href="/catalog/browse" class="whitespace-nowrap">
 			<FlaskConical class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{totalRecipes}</span>
 			<span class="text-xs text-muted-foreground">Recipes</span>
-		</a>
+		</FancyBadge>
 
 		{#if !isGlobalCatalog}
-			<a
-				href="/catalog/browse?readyToMake=true"
-				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
-			>
+			<FancyBadge href="/catalog/browse?readyToMake=true" class="whitespace-nowrap">
 				<Sparkles class="h-4 w-4 text-primary shrink-0" />
 				<span class="text-sm font-bold">{availableCount}</span>
 				<span class="text-xs text-muted-foreground">Ready</span>
-			</a>
+			</FancyBadge>
 
 			{#if almostThereCount > 0}
-				<a
-					href="/catalog/browse?almostThere=true"
-					class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
-				>
+				<FancyBadge href="/catalog/browse?almostThere=true" class="whitespace-nowrap">
 					<GlassWater class="h-4 w-4 text-primary shrink-0" />
 					<span class="text-sm font-bold">{almostThereCount}</span>
 					<span class="text-xs text-muted-foreground">Almost There</span>
-				</a>
+				</FancyBadge>
 			{/if}
 		{/if}
 
 		{#if popularSpirit}
-			<a
+			<FancyBadge
 				href="/catalog/browse/{idToSlug[popularSpirit.recipeCategoryId] ??
 					popularSpirit.recipeCategoryId}"
-				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
+				class="whitespace-nowrap"
 			>
 				<TrendingUp class="h-4 w-4 text-primary shrink-0" />
 				<span class="text-sm font-bold truncate">{popularSpirit.recipeCategoryDescription}</span>
 				<span class="text-xs text-muted-foreground">Most Popular</span>
-			</a>
+			</FancyBadge>
 		{:else}
-			<div
-				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0"
-			>
+			<FancyBadge class="whitespace-nowrap">
 				<TrendingUp class="h-4 w-4 text-muted-foreground shrink-0" />
 				<span class="text-sm font-bold">&mdash;</span>
 				<span class="text-xs text-muted-foreground">Most Popular</span>
-			</div>
+			</FancyBadge>
 		{/if}
 
 		{#if topIngredient && !isGlobalCatalog}
-			<a
-				href="/inventory"
-				class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
-			>
+			<FancyBadge href="/inventory" class="whitespace-nowrap">
 				<ShoppingCart class="h-4 w-4 text-primary shrink-0" />
 				<span class="text-sm font-bold">+{topIngredient.unlockableRecipes}</span>
 				<span class="text-xs text-muted-foreground">Buy {topIngredient.ingredientName}</span>
-			</a>
+			</FancyBadge>
 		{/if}
-
-		<button
-			onclick={surpriseMe}
-			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
-		>
-			<Shuffle class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-xs text-muted-foreground">Surprise Me</span>
-		</button>
-
-		<a
-			href="/catalog/browse"
-			class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0"
-		>
-			<ArrowRight class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-xs text-muted-foreground">View All</span>
-		</a>
 	</div>
 </div>
 
@@ -312,13 +306,13 @@
 	<Card.Root class={cocktailOfTheDay ? 'lg:col-span-2' : 'lg:col-span-3'}>
 		<Card.Header>
 			<div class="flex items-center gap-2">
-				<div class="flex gap-1 rounded-full bg-muted/50 p-1">
+				<div class="inline-flex items-center rounded-full backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground">
 					<button
 						class={cn(
-							'px-3 py-1 rounded-full text-xs font-medium transition-colors',
+							'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
 							activeTab === 'featured'
-								? 'bg-primary text-primary-foreground shadow-sm'
-								: 'text-muted-foreground hover:text-foreground'
+								? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
+								: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
 						)}
 						onclick={() => (activeTab = 'featured')}
 					>
@@ -328,10 +322,10 @@
 					{#if authenticated}
 						<button
 							class={cn(
-								'px-3 py-1 rounded-full text-xs font-medium transition-colors',
+								'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
 								activeTab === 'favorites'
-									? 'bg-primary text-primary-foreground shadow-sm'
-									: 'text-muted-foreground hover:text-foreground'
+									? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
+									: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
 							)}
 							onclick={() => (activeTab = 'favorites')}
 						>
@@ -341,10 +335,10 @@
 					{/if}
 					<button
 						class={cn(
-							'px-3 py-1 rounded-full text-xs font-medium transition-colors',
+							'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
 							activeTab === 'recent'
-								? 'bg-primary text-primary-foreground shadow-sm'
-								: 'text-muted-foreground hover:text-foreground'
+								? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
+								: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
 						)}
 						onclick={() => (activeTab = 'recent')}
 					>
@@ -434,10 +428,10 @@
 				<p class="text-muted-foreground text-sm mb-4 max-w-xs">
 					Create a new cocktail recipe from your inventory ingredients.
 				</p>
-				<a href="/catalog/add" class={buttonVariants()}>
+				<FancyButton href="/catalog/add" variant="primary" size="md">
 					<Plus class="h-4 w-4 mr-2" />
 					Add Recipe
-				</a>
+				</FancyButton>
 			</Card.Content>
 		</Card.Root>
 	{:else}

@@ -1,5 +1,16 @@
 <script lang="ts">
-	import { BookOpen, ChevronLeft, FlaskConical, Plus, Search, X } from 'lucide-svelte';
+	import {
+		BookOpen,
+		ChevronLeft,
+		ExternalLink,
+		FlaskConical,
+		Globe,
+		Layers,
+		Martini,
+		Plus,
+		Search,
+		X,
+	} from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -16,13 +27,15 @@
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import CollapsibleSection from '$lib/components/ui/collapsible/collapsible.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { reveal } from '$lib/actions/reveal';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
-	import BackButton from '$lib/components/BackButton.svelte';
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -160,12 +173,25 @@
 
 <svelte:head>
 	<title>{data.spiritContent.displayName} - Spirit Guide</title>
-	<meta name="description" content="Explore {data.spiritContent.displayName} cocktail recipes. Learn about the spirit's history, subcategories, and geographic origins." />
+	<meta
+		name="description"
+		content="Explore {data.spiritContent
+			.displayName} cocktail recipes. Learn about the spirit's history, subcategories, and geographic origins."
+	/>
 	<meta property="og:title" content="{data.spiritContent.displayName} Spirit Guide - Busser" />
-	<meta property="og:description" content="Explore {data.spiritContent.displayName} cocktail recipes and learn about the spirit." />
+	<meta
+		property="og:description"
+		content="Explore {data.spiritContent.displayName} cocktail recipes and learn about the spirit."
+	/>
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://busserapp.com/catalog/browse/{data.spiritContent.slug}" />
-	<meta property="og:image" content={data.spirit.recipeCategoryDescriptionImageUrl || 'https://busserapp.com/og-image.png'} />
+	<meta
+		property="og:url"
+		content="https://busserapp.com/catalog/browse/{data.spiritContent.slug}"
+	/>
+	<meta
+		property="og:image"
+		content={data.spirit.recipeCategoryDescriptionImageUrl || 'https://busserapp.com/og-image.png'}
+	/>
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
@@ -174,16 +200,32 @@
 	<div class="spirit-orb spirit-orb-1" style="background: {hex}"></div>
 	<div class="spirit-orb spirit-orb-2" style="background: {hex}"></div>
 
-	<div class="mb-4 mt-4 flex items-center justify-between">
-		<BackButton
-			href="/catalog"
-			label="Back to Catalog"
-			size="sm"
-			class="max-sm:[&>span]:hidden max-sm:gap-0"
-		/>
+	<!-- Desktop toolbar above hero -->
+	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
+		<FancyButton href="/catalog" size="sm">
+			<ChevronLeft class="h-4 w-4 mr-1" />
+			Back to Catalog
+		</FancyButton>
+		<div class="flex items-center gap-2">
+			<FancyButton
+				size="sm"
+				onclick={() =>
+					document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })}
+			>
+				<BookOpen class="h-4 w-4 mr-1" />
+				Spirit Guide
+			</FancyButton>
+			{#if canModify}
+				<FancyButton href="/catalog/add" variant="primary" size="sm">
+					<Plus class="h-4 w-4 mr-1" />
+					Add Recipe
+				</FancyButton>
+			{/if}
+		</div>
 	</div>
+
 	<!-- Hero Section -->
-	<div class="relative overflow-hidden rounded-xl mb-8">
+	<div class="relative overflow-hidden rounded-xl mb-8 mt-4 md:mt-0">
 		{#if data.spirit.recipeCategoryDescriptionImageUrl}
 			<div class="absolute inset-0">
 				<img
@@ -201,33 +243,45 @@
 			></div>
 		{/if}
 
-		<div class="relative px-4 pt-16 pb-4 sm:px-6 sm:pt-20 sm:pb-5 flex flex-col gap-3">
+		<div class="relative px-4 pt-10 md:pt-16 pb-4 sm:px-6 md:pt-20 sm:pb-5 flex flex-col gap-3">
 			<h1 class="text-3xl sm:text-4xl font-bold">{data.spiritContent.displayName}</h1>
 
-			<!-- Action pills -->
-			<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
-				<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
-					<FlaskConical class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{data.pagination.total}</span>
-					<span class="text-xs text-muted-foreground">{data.pagination.total === 1 ? 'Recipe' : 'Recipes'}</span>
-				</div>
+			<!-- Mobile buttons inside hero -->
+			<div class="flex gap-2 md:hidden">
+				<FancyButton href="/catalog" size="sm" class="flex-1 justify-center whitespace-nowrap">
+					<ChevronLeft class="h-4 w-4 mr-1" />
+					Back
+				</FancyButton>
 
-				<button
-					onclick={() => document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })}
-					class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border hover:border-primary/50 transition-colors whitespace-nowrap snap-start shrink-0 cursor-pointer"
+				<FancyButton
+					size="sm"
+					onclick={() =>
+						document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })}
+					class="flex-1 justify-center whitespace-nowrap"
 				>
-					<BookOpen class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-xs text-muted-foreground">Spirit Guide &darr;</span>
-				</button>
+					<BookOpen class="h-4 w-4 mr-1" />
+					Guide
+				</FancyButton>
+
+				{#if canModify}
+					<FancyButton href="/catalog/add" variant="primary" size="sm" class="flex-1 justify-center whitespace-nowrap">
+						<Plus class="h-4 w-4 mr-1" />
+						Add
+					</FancyButton>
+				{/if}
 			</div>
 		</div>
 	</div>
 
 	<!-- Recipe Browsing Section -->
-	<section class="mb-12">
-		<h2 class="text-2xl font-bold mb-6">
-			{data.spiritContent.displayName} Cocktails
-		</h2>
+	<section class="mb-2">
+		<div class="mb-6">
+			<h2 class="text-2xl font-bold">{data.spiritContent.displayName} Cocktails</h2>
+			<p class="text-muted-foreground">
+				{data.pagination.total}
+				{data.pagination.total === 1 ? 'recipe' : 'recipes'}
+			</p>
+		</div>
 
 		<!-- Toolbar -->
 		<div class="flex flex-col gap-3 mb-6">
@@ -365,63 +419,46 @@
 
 	<!-- Spirit Guide (educational content) -->
 	<div id="spirit-guide" class="scroll-mt-4 mb-12">
-		<Card.Root>
-			<Card.Header>
-				<Card.Title class="flex items-center gap-2">
-					<BookOpen class="h-5 w-5 text-primary" />
-					{data.spiritContent.displayName} Spirit Guide
-				</Card.Title>
-			</Card.Header>
-			<Card.Content>
-				<!-- History & Overview -->
-				<div class="reveal-on-scroll" use:reveal>
+		<h2 class="text-2xl font-bold flex items-center gap-2 mb-6">
+			<BookOpen class="h-5 w-5 text-primary" />
+			{data.spiritContent.displayName} Spirit Guide
+		</h2>
+
+		<div class="space-y-4">
+			<div class="reveal-on-scroll" use:reveal>
+				<CollapsibleSection title="History & Production" icon={BookOpen} open={true}>
 					<SpiritOverview
 						overview={data.spiritContent.overview}
 						funFact={data.spiritContent.funFact}
 						accentColor={data.spiritContent.accentColor}
 					/>
-				</div>
+				</CollapsibleSection>
+			</div>
 
-				<!-- gradient divider -->
-				<div
-					class="h-px my-4 mx-auto max-w-md"
-					style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-				></div>
-
-				<!-- Subcategories -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
+			<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
+				<CollapsibleSection title="Styles & Varieties" icon={Layers} open={false}>
 					<SpiritSubcategories
 						subcategories={data.spiritContent.subcategories}
 						accentColor={data.spiritContent.accentColor}
 					/>
-				</div>
+				</CollapsibleSection>
+			</div>
 
-				<!-- gradient divider -->
-				<div
-					class="h-px my-4 mx-auto max-w-md"
-					style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-				></div>
-
-				<!-- Geographic Origins -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
+			<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
+				<CollapsibleSection title="Geographic Origins" icon={Globe} open={false}>
 					<SpiritRegions
 						regions={data.spiritContent.regions}
 						accentColor={data.spiritContent.accentColor}
 					/>
-				</div>
+				</CollapsibleSection>
+			</div>
 
-				<!-- gradient divider -->
-				<div
-					class="h-px my-4 mx-auto max-w-md"
-					style="background: linear-gradient(90deg, transparent, {hex}40, transparent)"
-				></div>
-
-				<!-- Sources -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
+			<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
+				<CollapsibleSection title="Sources & References" icon={ExternalLink} open={false}>
 					<SpiritSources sources={data.spiritContent.sources} />
-				</div>
-			</Card.Content>
-		</Card.Root>
+				</CollapsibleSection>
+			</div>
+		</div>
 	</div>
 </div>
 

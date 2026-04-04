@@ -7,6 +7,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import FancyAlert from '$lib/components/FancyAlert.svelte';
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import CategoryDetailDrawer from '$lib/components/CategoryDetailDrawer.svelte';
 	import CategoryFilterPanel from '$lib/components/CategoryFilterPanel.svelte';
@@ -171,24 +172,40 @@
 <!-- Hero Section -->
 <div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5">
 	<h1 class="text-2xl font-bold mb-3">Categories</h1>
-	<div class="flex gap-2 overflow-x-auto sm:flex-wrap scrollbar-hide snap-x snap-mandatory pb-1 -mb-1">
-		<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
-			<Tags class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{data.pagination.total}</span>
-			<span class="text-xs text-muted-foreground">Categories</span>
-		</div>
-
-		<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
+	<!-- Mobile -->
+	<div class="flex gap-2 sm:hidden">
+		<FancyBadge class="flex-1 justify-center">
 			<Package class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{data.totalProducts}</span>
 			<span class="text-xs text-muted-foreground">Products</span>
-		</div>
+		</FancyBadge>
 
-		<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border whitespace-nowrap snap-start shrink-0">
+		<FancyBadge class="flex-1 justify-center">
 			<Layers class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{categoryGroups.length}</span>
 			<span class="text-xs text-muted-foreground">Groups</span>
-		</div>
+		</FancyBadge>
+	</div>
+
+	<!-- Desktop -->
+	<div class="hidden sm:flex gap-2 flex-wrap pb-1 -mb-1">
+		<FancyBadge class="whitespace-nowrap">
+			<Tags class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{data.pagination.total}</span>
+			<span class="text-xs text-muted-foreground">Categories</span>
+		</FancyBadge>
+
+		<FancyBadge class="whitespace-nowrap">
+			<Package class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{data.totalProducts}</span>
+			<span class="text-xs text-muted-foreground">Products</span>
+		</FancyBadge>
+
+		<FancyBadge class="whitespace-nowrap">
+			<Layers class="h-4 w-4 text-primary shrink-0" />
+			<span class="text-sm font-bold">{categoryGroups.length}</span>
+			<span class="text-xs text-muted-foreground">Groups</span>
+		</FancyBadge>
 	</div>
 </div>
 

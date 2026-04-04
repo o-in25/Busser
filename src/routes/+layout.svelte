@@ -22,16 +22,6 @@
 
 	export let data: LayoutData;
 
-	// route order for directional transitions (lower index = further "left")
-	const routeOrder: Record<string, number> = {
-		'/': 0,
-		'/inventory': 1,
-		'/catalog': 2,
-		'/assistant': 3,
-		'/tools': 4,
-		'/settings': 5,
-	};
-
 	// inventory tab order for directional transitions within inventory
 	const inventoryOrder: Record<string, number> = {
 		'/inventory': 1,
@@ -87,26 +77,43 @@
 			const fromKey = getRouteKey(fromPath);
 			const toKey = getRouteKey(toPath);
 
-			// use sub-route order when navigating within the same section
-			if (fromKey === '/settings' && toKey === '/settings') {
-				const fromIndex = settingsOrder[getSettingsKey(fromPath)] ?? -1;
-				const toIndex = settingsOrder[getSettingsKey(toPath)] ?? -1;
-				if (fromIndex !== -1 && toIndex !== -1) {
-					direction = toIndex >= fromIndex ? 'forward' : 'back';
+			if (fromKey === toKey) {
+				// same section: depth or sub-tab navigation
+				if (fromKey === '/settings') {
+					const fromIndex = settingsOrder[getSettingsKey(fromPath)] ?? -1;
+					const toIndex = settingsOrder[getSettingsKey(toPath)] ?? -1;
+					if (fromIndex !== -1 && toIndex !== -1) {
+						direction = toIndex >= fromIndex ? 'forward' : 'back';
+					}
+				} else if (fromKey === '/inventory') {
+					const fromIndex = inventoryOrder[getInventoryKey(fromPath)] ?? -1;
+					const toIndex = inventoryOrder[getInventoryKey(toPath)] ?? -1;
+					if (fromIndex !== -1 && toIndex !== -1) {
+						direction = toIndex >= fromIndex ? 'forward' : 'back';
+					}
+				} else if (fromKey === '/catalog') {
+					const fromBrowse = fromPath.startsWith('/catalog/browse');
+					const toBrowse = toPath.startsWith('/catalog/browse');
+					const fromRecipe = /^\/catalog\/\d+/.test(fromPath);
+					const toRecipe = /^\/catalog\/\d+/.test(toPath);
+					if (fromBrowse && toRecipe) {
+						direction = 'forward';
+					} else if (fromRecipe && toBrowse) {
+						direction = 'back';
+					} else {
+						const fromDepth = fromPath.replace(/\/$/, '').split('/').length;
+						const toDepth = toPath.replace(/\/$/, '').split('/').length;
+						direction = toDepth >= fromDepth ? 'forward' : 'back';
+					}
+				} else {
+					// depth navigation: compare segment counts
+					const fromDepth = fromPath.replace(/\/$/, '').split('/').length;
+					const toDepth = toPath.replace(/\/$/, '').split('/').length;
+					direction = toDepth >= fromDepth ? 'forward' : 'back';
 				}
-			} else if (fromKey === '/inventory' && toKey === '/inventory') {
-				const fromIndex = inventoryOrder[getInventoryKey(fromPath)] ?? -1;
-				const toIndex = inventoryOrder[getInventoryKey(toPath)] ?? -1;
-				if (fromIndex !== -1 && toIndex !== -1) {
-					direction = toIndex >= fromIndex ? 'forward' : 'back';
-				}
-			} else if (fromPath === fromKey || fromPath === fromKey + '/') {
-				// only use route order for top-level nav transitions
-				const fromIndex = routeOrder[fromKey] ?? -1;
-				const toIndex = routeOrder[toKey] ?? -1;
-				if (fromIndex !== -1 && toIndex !== -1) {
-					direction = toIndex >= fromIndex ? 'forward' : 'back';
-				}
+			} else {
+				// different sections: lateral crossfade
+				direction = 'crossfade';
 			}
 		}
 

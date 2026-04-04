@@ -128,7 +128,7 @@
 		</div>
 	{:else}
 		<!-- Toggle variant (default) -->
-		<div class="grid grid-cols-2 sm:flex rounded-lg border border-input bg-card p-1 gap-1">
+		<div class="grid grid-cols-2 sm:flex rounded-full backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 gap-0.5">
 			{#each methods as method}
 				{@const isSelected = method.recipeTechniqueDescriptionId === value}
 				{@const MethodIcon = iconMap[method.recipeTechniqueDescriptionText] || Martini}
@@ -136,10 +136,10 @@
 				<button
 					type="button"
 					class={cn(
-						'sm:flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-md text-sm font-medium transition-all duration-200',
+						'sm:flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-full text-sm font-medium transition-all duration-200',
 						isSelected
-							? 'bg-primary text-primary-foreground shadow-sm'
-							: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+							? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
+							: 'text-muted-foreground hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
 					)}
 					onclick={() => handleSelect(method)}
 				>

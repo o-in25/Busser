@@ -20,14 +20,12 @@
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content side="right" class="w-full sm:max-w-lg overflow-y-auto">
-		<Sheet.Header class="pb-4 border-b">
-			<div class="flex items-center justify-between">
-				<Sheet.Title class="text-lg font-semibold">Product Details</Sheet.Title>
-			</div>
+	<Sheet.Content side="right" class="w-full sm:max-w-md overflow-y-auto p-0">
+		<Sheet.Header class="sr-only">
+			<Sheet.Title>Product Details</Sheet.Title>
 		</Sheet.Header>
 
-		<div class="py-6">
+		<div class="p-4">
 			{#if product}
 				<InventoryItem {product} {recipeCount} {showStock} {onStockChange} />
 			{:else}

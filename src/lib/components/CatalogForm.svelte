@@ -10,7 +10,6 @@
 		Image,
 		Plus,
 		Sparkles,
-		Trash2,
 		Wand2,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
@@ -23,7 +22,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { CollapsibleSection } from '$lib/components/ui/collapsible';
-	import * as Dialog from '$lib/components/ui/dialog';
 	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
 	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
@@ -48,13 +46,11 @@
 		preparationMethods,
 		recipe: initialRecipe = {} as View.BasicRecipe,
 		recipeSteps: initialRecipeSteps = [],
-		modalOpen = $bindable(false),
 	}: {
 		spirits: Spirit[];
 		preparationMethods: PreparationMethod[];
 		recipe?: View.BasicRecipe;
 		recipeSteps?: View.BasicRecipeStep[];
-		modalOpen?: boolean;
 	} = $props();
 
 	// Make recipe deeply reactive for two-way binding on properties
@@ -204,20 +200,6 @@
 	function handleDndFinalize(e: CustomEvent<DndEvent<StepWithId>>) {
 		steps = e.detail.items as StepWithId[];
 	}
-
-	const deleteRecipe = async () => {
-		const response = await fetch(`/api/catalog/${recipe.recipeId}`, {
-			method: 'DELETE',
-		});
-
-		const result = await response.json();
-		if ('data' in result) {
-			$notificationStore.success = { message: 'Catalog item deleted.' };
-			goto('/catalog');
-		} else {
-			$notificationStore.error = { message: result.error };
-		}
-	};
 
 	// form props - these are $state because they can be modified by user selection or draft restore
 	let selectedSpiritId: number | undefined = $state(undefined);
@@ -857,37 +839,7 @@
 		</div>
 	</form>
 
-	<!-- Delete confirmation dialog -->
-	{#if recipe.recipeId}
-		<Dialog.Root bind:open={modalOpen}>
-			<Dialog.Content>
-				<Dialog.Header>
-					<Dialog.Title>Confirm Delete</Dialog.Title>
-					<Dialog.Description>
-						Delete <span class="font-semibold">{recipe?.recipeName}</span> from catalog?
-						<p
-							class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
-						>
-							Once deleted, it can't be recovered.
-						</p>
-					</Dialog.Description>
-				</Dialog.Header>
-				<Dialog.Footer>
-					<Button variant="outline" onclick={() => (modalOpen = false)}>Cancel</Button>
-					<Button
-						variant="destructive"
-						onclick={async () => {
-							await deleteRecipe();
-							modalOpen = false;
-						}}
-					>
-						Delete
-					</Button>
-				</Dialog.Footer>
-			</Dialog.Content>
-		</Dialog.Root>
-	{/if}
-</div>
+	</div>
 
 <!-- Draft manager (add mode only) -->
 {#if isAddMode}
@@ -897,18 +849,6 @@
 		data={draftData}
 		onrestore={handleRestoreDraft}
 	/>
-{/if}
-
-<!-- Delete pill (edit mode, mobile only) -->
-{#if !isAddMode}
-	<button
-		type="button"
-		onclick={() => (modalOpen = true)}
-		class="mt-3 mx-auto w-fit flex items-center gap-2 text-xs text-destructive/60 hover:text-destructive bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-destructive/20 hover:border-destructive/40 shadow-sm transition-colors cursor-pointer md:hidden"
-	>
-		<Trash2 class="h-3 w-3" />
-		<span>Delete</span>
-	</button>
 {/if}
 
 <style>

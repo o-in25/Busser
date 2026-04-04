@@ -5,8 +5,6 @@
 	import { invalidateAll } from '$app/navigation';
 	import { haptics } from '$lib/utils/haptics';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
-	import { Badge } from '$lib/components/ui/badge';
-	import * as Card from '$lib/components/ui/card';
 	import { calculateOverallScore } from '$lib/math';
 	import type { View } from '$lib/types';
 	import { cn } from '$lib/utils';
@@ -77,79 +75,90 @@
 </script>
 
 {#if viewMode === 'grid'}
-	<!-- Grid View Card -->
-	<div class="block group">
-		<Card.Root class="overflow-hidden hover:shadow-lg transition-all duration-300 h-full">
-			<!-- Image -->
-			<a href="/catalog/{recipe.recipeId}" class="relative h-44 overflow-hidden block">
-				<SkeletonImage
+	<!-- Grid View Card — liquid glass -->
+	<a href="/catalog/{recipe.recipeId}" class="block group h-full">
+		<div class="relative rounded-2xl overflow-hidden h-full browse-grid-card">
+			<!-- Blurred background glow from recipe image -->
+			{#if recipe.recipeImageUrl}
+				<img
 					src={recipe.recipeImageUrl}
-					alt={recipe.recipeName}
-					variant="recipe"
-					class="h-full w-full"
-					imgClass="transition-transform duration-300 group-hover:scale-110"
+					alt=""
+					aria-hidden="true"
+					class="absolute inset-0 w-full h-full object-cover scale-150 blur-3xl opacity-40 dark:opacity-30 saturate-150 pointer-events-none"
 				/>
-				<!-- Gradient overlay on hover -->
-				<div
-					class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
-				></div>
+			{/if}
 
-				<!-- Spirit category badge (top left) -->
-				<Badge variant="secondary" class="absolute top-3 left-3 backdrop-blur-sm bg-background/80">
-					{recipe.recipeCategoryDescription}
-				</Badge>
+			<!-- Glass surface -->
+			<div class="relative h-full flex flex-col bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-white/40 dark:border-white/10 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300">
+				<!-- Image area -->
+				<div class="relative h-44 overflow-hidden rounded-t-2xl">
+					<SkeletonImage
+						src={recipe.recipeImageUrl}
+						alt={recipe.recipeName}
+						variant="recipe"
+						class="h-full w-full"
+						imgClass="transition-transform duration-300 group-hover:scale-110"
+					/>
+					<!-- Gradient fade into glass body -->
+					<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
 
-				<!-- Favorite/Featured indicators (bottom right) -->
-				{#if authenticated && (isFavorite || isFeatured)}
-					<div class="absolute bottom-3 right-3 flex items-center gap-1">
-						{#if isFeatured}
-							<div class="p-1 rounded-full bg-neon-yellow-500/90 backdrop-blur-sm">
-								<Star class="h-3 w-3 fill-current text-white" />
-							</div>
-						{/if}
-						{#if isFavorite}
-							<div class="p-1 rounded-full bg-red-500/90 backdrop-blur-sm">
-								<Heart class="h-3 w-3 fill-current text-white" />
-							</div>
-						{/if}
-					</div>
-				{/if}
-			</a>
+					<!-- Category pill (top left) -->
+					<span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/15 text-foreground shadow-sm">
+						{recipe.recipeCategoryDescription}
+					</span>
 
-			<!-- Content -->
-			<Card.Content class="p-4">
-				<a href="/catalog/{recipe.recipeId}" class="block min-w-0">
-					<h3
-						class="font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-1"
-					>
-						{recipe.recipeName}
-					</h3>
-					<p class="text-sm text-muted-foreground line-clamp-2">
-						{recipe.recipeDescription || 'A delicious cocktail recipe'}
-					</p>
-				</a>
-
-				<!-- Meta info row: technique -->
-				{#if recipe.recipeTechniqueDescriptionText}
-					<div class="flex items-center gap-2 mt-2">
-						<span class="flex items-center gap-1 text-xs text-muted-foreground">
-							<TechniqueIcon class="h-3.5 w-3.5" />
-							{recipe.recipeTechniqueDescriptionText}
+					<!-- Verdict pill (top right) -->
+					{#if hasRatings}
+						<span
+							class={cn(
+								'absolute top-3 right-3 flex flex-col items-center px-2 py-1 rounded-full text-white shadow-lg',
+								rating.bg
+							)}
+							title={rating.label}
+						>
+							<span class="text-[8px] font-semibold uppercase tracking-wider opacity-80 leading-none">verdict</span>
+							<span class="text-sm font-bold leading-tight">{score.toFixed(1)}</span>
 						</span>
-					</div>
-				{/if}
+					{/if}
 
-				<!-- Action buttons and rating -->
-				{#if (authenticated && workspaceId) || hasRatings}
-					<div class="flex items-center justify-between gap-1 mt-2 pt-2 border-t">
-						<div class="flex items-center gap-1">
-							{#if authenticated && workspaceId}
+					<!-- Action icons (bottom right, over image) -->
+					{#if authenticated && workspaceId}
+						<div class="absolute bottom-2 right-2 flex items-center gap-1" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.preventDefault()} role="toolbar" tabindex="-1">
+							<form
+								method="POST"
+								action="{actionPath}/toggleFavorite"
+								use:enhance={() => {
+									haptics.light();
+									onToggleFavorite?.(recipe.recipeId);
+									return async ({ result }) => {
+										if (result.type === 'failure') invalidateAll();
+									};
+								}}
+							>
+								<input type="hidden" name="recipeId" value={recipe.recipeId} />
+								<input type="hidden" name="workspaceId" value={workspaceId} />
+								<button
+									type="submit"
+									class="p-1.5 rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 transition-colors"
+									title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+								>
+									<Heart
+										class={cn(
+											'h-4 w-4 transition-colors',
+											isFavorite
+												? 'fill-red-500 text-red-500'
+												: 'text-white/80 hover:text-red-400'
+										)}
+									/>
+								</button>
+							</form>
+							{#if canModify}
 								<form
 									method="POST"
-									action="{actionPath}/toggleFavorite"
+									action="{actionPath}/toggleFeatured"
 									use:enhance={() => {
 										haptics.light();
-										onToggleFavorite?.(recipe.recipeId);
+										onToggleFeatured?.(recipe.recipeId);
 										return async ({ result }) => {
 											if (result.type === 'failure') invalidateAll();
 										};
@@ -159,201 +168,171 @@
 									<input type="hidden" name="workspaceId" value={workspaceId} />
 									<button
 										type="submit"
-										class={cn(
-											'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors',
-											isFavorite
-												? 'bg-red-500/10 text-red-600 hover:bg-red-500/20'
-												: 'hover:bg-muted text-muted-foreground hover:text-foreground'
-										)}
-										title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+										class="p-1.5 rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 transition-colors"
+										title={isFeatured ? 'Remove from featured' : 'Add to featured'}
 									>
-										<Heart class={cn('h-3.5 w-3.5', isFavorite && 'fill-current')} />
-										<span class="hidden sm:inline">{isFavorite ? 'Saved' : 'Save'}</span>
+										<Star
+											class={cn(
+												'h-4 w-4 transition-colors',
+												isFeatured
+													? 'fill-neon-yellow-500 text-neon-yellow-500'
+													: 'text-white/80 hover:text-neon-yellow-400'
+											)}
+										/>
 									</button>
 								</form>
-								{#if canModify}
-									<form
-										method="POST"
-										action="{actionPath}/toggleFeatured"
-										use:enhance={() => {
-											haptics.light();
-											onToggleFeatured?.(recipe.recipeId);
-											return async ({ result }) => {
-												if (result.type === 'failure') invalidateAll();
-											};
-										}}
-									>
-										<input type="hidden" name="recipeId" value={recipe.recipeId} />
-										<input type="hidden" name="workspaceId" value={workspaceId} />
-										<button
-											type="submit"
-											class={cn(
-												'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors',
-												isFeatured
-													? 'bg-neon-yellow-500/10 text-neon-yellow-600 hover:bg-neon-yellow-500/20'
-													: 'hover:bg-muted text-muted-foreground hover:text-foreground'
-											)}
-											title={isFeatured ? 'Remove from featured' : 'Add to featured'}
-										>
-											<Star class={cn('h-3.5 w-3.5', isFeatured && 'fill-current')} />
-											<span class="hidden sm:inline">{isFeatured ? 'Featured' : 'Feature'}</span>
-										</button>
-									</form>
-								{/if}
 							{/if}
 						</div>
-						{#if hasRatings}
-							<span
-								class={cn(
-									'flex items-center gap-1 px-2 py-1 rounded text-xs font-bold text-white',
-									rating.bg
-								)}
-								title={rating.label}
-							>
-								<ThumbsUp class="h-3 w-3" />
-								{score.toFixed(1)}/10
+					{/if}
+				</div>
+
+				<!-- Text content -->
+				<div class="flex-1 flex flex-col p-4 pt-3">
+					<h3 class="font-semibold text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+						{recipe.recipeName}
+					</h3>
+					<p class="text-sm text-muted-foreground/80 line-clamp-2 mt-1">
+						{recipe.recipeDescription || 'A delicious cocktail recipe'}
+					</p>
+					{#if recipe.recipeTechniqueDescriptionText}
+						<div class="flex items-center gap-1.5 mt-auto pt-2">
+							<span class="flex items-center gap-1 text-[11px] text-muted-foreground/60">
+								<TechniqueIcon class="h-3 w-3" />
+								{recipe.recipeTechniqueDescriptionText}
 							</span>
-						{/if}
-					</div>
-				{/if}
-			</Card.Content>
-		</Card.Root>
-	</div>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</a>
 {:else}
-	<!-- List View Card -->
-	<div class="block group">
-		<Card.Root class="hover:shadow-md transition-all duration-200">
-			<div class="flex items-center gap-4 p-3">
-				<!-- Thumbnail -->
-				<a
-					href="/catalog/{recipe.recipeId}"
-					class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden"
-				>
+	<!-- List View Card — liquid glass -->
+	<a href="/catalog/{recipe.recipeId}" class="block group">
+		<div class="relative rounded-2xl overflow-hidden browse-list-card">
+			<!-- Blurred background image -->
+			{#if recipe.recipeImageUrl}
+				<img
+					src={recipe.recipeImageUrl}
+					alt=""
+					aria-hidden="true"
+					class="absolute inset-0 w-full h-full object-cover scale-150 blur-3xl opacity-40 dark:opacity-30 saturate-150 pointer-events-none"
+				/>
+			{/if}
+
+			<!-- Glass surface -->
+			<div class="relative flex items-center gap-3 p-3 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-white/40 dark:border-white/10 rounded-2xl shadow-sm hover:shadow-md hover:bg-white/90 dark:hover:bg-zinc-900/80 transition-all duration-200">
+				<!-- Thumbnail with verdict overlay -->
+				<div class="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-md ring-1 ring-black/5 dark:ring-white/10">
 					<SkeletonImage
 						src={recipe.recipeImageUrl}
 						alt={recipe.recipeName}
 						variant="recipe"
 						class="h-full w-full"
 					/>
-					<!-- Favorite/Featured indicators -->
-					{#if authenticated && (isFavorite || isFeatured)}
-						<div class="absolute bottom-1 right-1 flex items-center gap-0.5">
-							{#if isFeatured}
-								<div class="p-0.5 rounded-full bg-neon-yellow-500/90">
-									<Star class="h-2.5 w-2.5 fill-current text-white" />
-								</div>
-							{/if}
-							{#if isFavorite}
-								<div class="p-0.5 rounded-full bg-red-500/90">
-									<Heart class="h-2.5 w-2.5 fill-current text-white" />
-								</div>
-							{/if}
+
+					<!-- Verdict pill overlaid on image bottom -->
+					{#if hasRatings}
+						<div class="absolute inset-x-0 bottom-0 flex justify-center pb-1 bg-gradient-to-t from-black/60 to-transparent pt-3">
+							<span
+								class={cn(
+									'px-1.5 py-px rounded-full text-[10px] font-bold text-white leading-tight',
+									rating.bg
+								)}
+								title={rating.label}
+							>
+								{score.toFixed(1)}
+							</span>
 						</div>
 					{/if}
-				</a>
+				</div>
 
-				<!-- Content -->
-				<a href="/catalog/{recipe.recipeId}" class="flex-1 min-w-0">
-					<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
+				<!-- Text content — gets full remaining width -->
+				<div class="flex-1 min-w-0">
+					<h3 class="font-semibold text-[15px] text-foreground truncate group-hover:text-primary transition-colors">
 						{recipe.recipeName}
 					</h3>
-					<p class="text-sm text-muted-foreground line-clamp-1">
+					<p class="text-sm text-muted-foreground/80 truncate">
 						{recipe.recipeDescription || 'A delicious cocktail recipe'}
 					</p>
-					<div class="flex items-center gap-2 mt-1">
-						<span class="text-xs text-muted-foreground/70">
+					<div class="flex items-center gap-1.5 mt-1">
+						<span class="text-[11px] text-muted-foreground/60">
 							{recipe.recipeCategoryDescription}
 						</span>
 						{#if recipe.recipeTechniqueDescriptionText}
-							<span class="text-xs text-muted-foreground/40">&middot;</span>
-							<span class="flex items-center gap-1 text-xs text-muted-foreground/70">
+							<span class="text-[11px] text-muted-foreground/30">&middot;</span>
+							<span class="flex items-center gap-0.5 text-[11px] text-muted-foreground/60">
 								<TechniqueIcon class="h-3 w-3" />
 								{recipe.recipeTechniqueDescriptionText}
 							</span>
 						{/if}
 					</div>
-				</a>
+				</div>
 
-				<!-- Action buttons and rating -->
-				{#if (authenticated && workspaceId) || hasRatings}
-					<div class="flex flex-col items-end gap-1 shrink-0">
-						{#if authenticated && workspaceId}
-							<div class="flex items-center gap-1">
-								<form
-									method="POST"
-									action="{actionPath}/toggleFavorite"
-									use:enhance={() => {
-										haptics.light();
-										onToggleFavorite?.(recipe.recipeId);
-										return async ({ result }) => {
-											if (result.type === 'failure') invalidateAll();
-										};
-									}}
-								>
-									<input type="hidden" name="recipeId" value={recipe.recipeId} />
-									<input type="hidden" name="workspaceId" value={workspaceId} />
-									<button
-										type="submit"
-										class="p-1.5 rounded-md hover:bg-muted transition-colors"
-										title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-									>
-										<Heart
-											class={cn(
-												'h-4 w-4 transition-colors',
-												isFavorite
-													? 'fill-red-500 text-red-500'
-													: 'text-muted-foreground hover:text-red-500'
-											)}
-										/>
-									</button>
-								</form>
-								{#if canModify}
-									<form
-										method="POST"
-										action="{actionPath}/toggleFeatured"
-										use:enhance={() => {
-											haptics.light();
-											onToggleFeatured?.(recipe.recipeId);
-											return async ({ result }) => {
-												if (result.type === 'failure') invalidateAll();
-											};
-										}}
-									>
-										<input type="hidden" name="recipeId" value={recipe.recipeId} />
-										<input type="hidden" name="workspaceId" value={workspaceId} />
-										<button
-											type="submit"
-											class="p-1.5 rounded-md hover:bg-muted transition-colors"
-											title={isFeatured ? 'Remove from featured' : 'Add to featured'}
-										>
-											<Star
-												class={cn(
-													'h-4 w-4 transition-colors',
-													isFeatured
-														? 'fill-neon-yellow-500 text-neon-yellow-500'
-														: 'text-muted-foreground hover:text-neon-yellow-500'
-												)}
-											/>
-										</button>
-									</form>
-								{/if}
-							</div>
-						{/if}
-						{#if hasRatings}
-							<span
-								class={cn(
-									'flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold text-white',
-									rating.bg
-								)}
-								title={rating.label}
+				<!-- Compact action icons -->
+				{#if authenticated && workspaceId}
+					<div class="flex items-center gap-0.5 shrink-0" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.preventDefault()} role="toolbar" tabindex="-1">
+						<form
+							method="POST"
+							action="{actionPath}/toggleFavorite"
+							use:enhance={() => {
+								haptics.light();
+								onToggleFavorite?.(recipe.recipeId);
+								return async ({ result }) => {
+									if (result.type === 'failure') invalidateAll();
+								};
+							}}
+						>
+							<input type="hidden" name="recipeId" value={recipe.recipeId} />
+							<input type="hidden" name="workspaceId" value={workspaceId} />
+							<button
+								type="submit"
+								class="p-1.5 rounded-full hover:bg-white/40 dark:hover:bg-white/10 transition-colors"
+								title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
 							>
-								<ThumbsUp class="h-3 w-3" />
-								{score.toFixed(1)}/10
-							</span>
+								<Heart
+									class={cn(
+										'h-4 w-4 transition-colors',
+										isFavorite
+											? 'fill-red-500 text-red-500'
+											: 'text-muted-foreground/50 hover:text-red-500'
+									)}
+								/>
+							</button>
+						</form>
+						{#if canModify}
+							<form
+								method="POST"
+								action="{actionPath}/toggleFeatured"
+								use:enhance={() => {
+									haptics.light();
+									onToggleFeatured?.(recipe.recipeId);
+									return async ({ result }) => {
+										if (result.type === 'failure') invalidateAll();
+									};
+								}}
+							>
+								<input type="hidden" name="recipeId" value={recipe.recipeId} />
+								<input type="hidden" name="workspaceId" value={workspaceId} />
+								<button
+									type="submit"
+									class="p-1.5 rounded-full hover:bg-white/40 dark:hover:bg-white/10 transition-colors"
+									title={isFeatured ? 'Remove from featured' : 'Add to featured'}
+								>
+									<Star
+										class={cn(
+											'h-4 w-4 transition-colors',
+											isFeatured
+												? 'fill-neon-yellow-500 text-neon-yellow-500'
+												: 'text-muted-foreground/50 hover:text-neon-yellow-500'
+										)}
+									/>
+								</button>
+							</form>
 						{/if}
 					</div>
 				{/if}
 			</div>
-		</Card.Root>
-	</div>
+		</div>
+	</a>
 {/if}

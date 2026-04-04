@@ -8,12 +8,14 @@
 		variant = 'recipe',
 		class: className = '',
 		imgClass = '',
+		transitionName = '',
 	}: {
 		src?: string | null;
 		alt: string;
 		variant?: 'recipe' | 'product';
 		class?: string;
 		imgClass?: string;
+		transitionName?: string;
 	} = $props();
 
 	let loaded = $state(false);
@@ -41,7 +43,7 @@
 	const showImage = $derived(!!src && !errored);
 </script>
 
-<div class={cn('relative overflow-hidden', className)}>
+<div class={cn('relative overflow-hidden', className)} style={transitionName ? `view-transition-name: ${transitionName}` : undefined}>
 	{#if showImage && !loaded}
 		<div class="absolute inset-0 bg-muted skeleton-delayed"></div>
 	{/if}
