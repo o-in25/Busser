@@ -253,7 +253,7 @@
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4">
-	{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
+	{#if authenticated && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
 		<FancyAlert class="mb-6">
 			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
 			{#snippet children()}
