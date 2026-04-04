@@ -123,7 +123,7 @@
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
-{#if isGlobalCatalog && workspace?.workspaceRole !== 'owner'}
+{#if authenticated && isGlobalCatalog && workspace?.workspaceRole !== 'owner'}
 	<FancyAlert class="mb-6 mt-4">
 		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
 		{#snippet children()}

@@ -156,7 +156,7 @@
 <!-- Inventory Section Navigation -->
 <InventoryNav />
 
-{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
+{#if $page.data.user && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
 	<FancyAlert class="mb-6 mt-4">
 		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
 		{#snippet children()}
