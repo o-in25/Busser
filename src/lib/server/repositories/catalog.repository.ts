@@ -681,6 +681,19 @@ export class CatalogRepository extends BaseRepository {
 							ProductUnitSizeInMilliliters: 0,
 							ProductProof: step.productProof || 0,
 						});
+
+						// attach canonical product image and description if available
+						const canonical = await trx('productdescription')
+							.where({ ProductId: step.productId })
+							.first();
+						if (canonical?.productDescriptionImageUrl || canonical?.productDescriptionText) {
+							await trx('productdetail').insert({
+								ProductId: productId,
+								ProductImageUrl: canonical.productDescriptionImageUrl || null,
+								ProductDescription: canonical.productDescriptionText || null,
+							});
+						}
+
 						productMap.set(targetCategoryId, productId);
 					}
 				}

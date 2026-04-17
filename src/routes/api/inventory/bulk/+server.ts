@@ -34,12 +34,18 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 		});
 	}
 
-	const results = await Promise.all(
-		productIds.map((id: number) => inventoryRepo.delete(workspaceId, id))
-	);
+	const result = await inventoryRepo.bulkDelete(workspaceId, productIds);
 
-	const succeeded = results.filter((r) => r.status === 'success').length;
-	const failed = results.filter((r) => r.status === 'error').length;
+	if (result.status === 'error') {
+		error(StatusCodes.INTERNAL_SERVER_ERROR, {
+			reason: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
+			code: StatusCodes.INTERNAL_SERVER_ERROR,
+			message: result.error,
+		});
+	}
+
+	const succeeded = result.data?.deleted ?? 0;
+	const failed = productIds.length - succeeded;
 
 	return json({ succeeded, failed, total: productIds.length });
 };

@@ -9,6 +9,7 @@
 		Info,
 		GalleryHorizontalEnd,
 		LayoutGrid,
+		Loader2,
 		LogOut,
 		Menu,
 		Ruler,
@@ -18,6 +19,7 @@
 	} from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 	import logoNav from '$lib/assets/logo-nav.png';
 	import { haptics } from '$lib/utils/haptics';
 	import NavigationProgress from './NavigationProgress.svelte';
@@ -31,6 +33,7 @@
 	import Placeholder from './Placeholder.svelte';
 
 	let mobileMenuOpen = $state(false);
+	let isSwitching = $state(false);
 
 	let {
 		user,
@@ -48,13 +51,38 @@
 		keyboardOpen?: boolean;
 	} = $props();
 
+	function redirectTargetForWorkspaceSwitch(pathname: string): string | null {
+		// workspace-scoped detail routes that will 404 in another workspace
+		if (/^\/catalog\/(?!browse|add)[^/]+/.test(pathname)) return '/catalog';
+		if (/^\/inventory\/category\/(?!add)[^/]+\/edit/.test(pathname)) return '/inventory/category';
+		if (/^\/inventory\/(?!category|suppliers|add)[^/]+\/edit/.test(pathname)) return '/inventory';
+		return null;
+	}
+
 	async function switchWorkspace(workspaceId: string) {
-		const res = await fetch('/api/workspace/switch', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ workspaceId }),
-		});
-		if (res.ok) location.reload();
+		if (isSwitching) return;
+		if (workspaceId === activeWorkspaceId) {
+			$workspaceSwitcherOpen = false;
+			return;
+		}
+		isSwitching = true;
+		try {
+			const res = await fetch('/api/workspace/switch', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ workspaceId }),
+			});
+			if (!res.ok) return;
+			const target = redirectTargetForWorkspaceSwitch($page.url.pathname);
+			if (target) {
+				await goto(target, { invalidateAll: true });
+			} else {
+				await invalidateAll();
+			}
+			$workspaceSwitcherOpen = false;
+		} finally {
+			isSwitching = false;
+		}
 	}
 
 	// scroll direction tracking for mobile header
@@ -337,7 +365,12 @@
 </nav>
 
 <!-- Switch Workspace Modal -->
-<Dialog.Root bind:open={$workspaceSwitcherOpen}>
+<Dialog.Root
+	open={$workspaceSwitcherOpen}
+	onOpenChange={(v) => {
+		if (!isSwitching) $workspaceSwitcherOpen = v;
+	}}
+>
 	<Dialog.Content class="sm:max-w-md">
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
@@ -345,31 +378,35 @@
 				Switch Workspace
 			</Dialog.Title>
 			<Dialog.Description>
-				Select a workspace to switch to
+				{isSwitching ? 'Loading the new workspace...' : 'Select a workspace to switch to'}
 			</Dialog.Description>
 		</Dialog.Header>
-		<div class="max-h-72 overflow-y-auto">
-			<WorkspaceList
-				{workspaces}
-				{activeWorkspaceId}
-				onSelect={(id) => {
-					$workspaceSwitcherOpen = false;
-					switchWorkspace(id);
-				}}
-			/>
-		</div>
-		<div class="pt-3 mt-3 border-t border-border/50">
-			<button
-				class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
-				onclick={() => {
-					$workspaceSwitcherOpen = false;
-					goto('/settings/workspaces');
-				}}
-			>
-				<Settings class="h-4 w-4" />
-				Manage Workspaces
-			</button>
-		</div>
+		{#if isSwitching}
+			<div class="flex flex-col items-center justify-center py-10 gap-3">
+				<Loader2 class="h-8 w-8 animate-spin text-primary" />
+				<p class="text-sm text-muted-foreground">Switching workspaces...</p>
+			</div>
+		{:else}
+			<div class="max-h-72 overflow-y-auto">
+				<WorkspaceList
+					{workspaces}
+					{activeWorkspaceId}
+					onSelect={(id) => switchWorkspace(id)}
+				/>
+			</div>
+			<div class="pt-3 mt-3 border-t border-border/50">
+				<button
+					class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
+					onclick={() => {
+						$workspaceSwitcherOpen = false;
+						goto('/settings/workspaces');
+					}}
+				>
+					<Settings class="h-4 w-4" />
+					Manage Workspaces
+				</button>
+			</div>
+		{/if}
 	</Dialog.Content>
 </Dialog.Root>
 

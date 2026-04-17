@@ -227,29 +227,77 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
+	async bulkDelete(
+		workspaceId: string,
+		productIds: number[]
+	): Promise<QueryResult<{ deleted: number }>> {
+		try {
+			if (productIds.length === 0) {
+				return { status: 'success', data: { deleted: 0 } };
+			}
+
+			const { imageUrls, deleted } = await this.db.query.transaction(async (trx) => {
+				// scope to ids that actually belong to this workspace
+				const ownedRows = (await trx('product')
+					.select('ProductId')
+					.whereIn('ProductId', productIds)
+					.where('workspaceId', workspaceId)) as Array<{ productId: number }>;
+
+				const ownedIds = ownedRows.map((r) => r.productId);
+				if (ownedIds.length === 0) {
+					return { imageUrls: [] as string[], deleted: 0 };
+				}
+
+				const detailRows = (await trx('productdetail')
+					.select('ProductImageUrl')
+					.whereIn('ProductId', ownedIds)) as Array<{ productImageUrl: string | null }>;
+
+				const urls = detailRows
+					.map((r) => r.productImageUrl)
+					.filter((url): url is string => !!url);
+
+				const rows = await trx<Product>('product')
+					.whereIn('ProductId', ownedIds)
+					.where('workspaceId', workspaceId)
+					.del();
+
+				return { imageUrls: urls, deleted: rows };
+			});
+
+			// clean up gcs outside the transaction so we don't hold a db connection during storage i/o
+			await Promise.all(imageUrls.map((url) => deleteSignedUrl(url)));
+
+			return { status: 'success', data: { deleted } };
+		} catch (error: any) {
+			if (error?.code === 'ER_ROW_IS_REFERENCED_2' || error?.errno === 1451) {
+				return {
+					status: 'error',
+					error: 'One or more of the selected items are used in recipes. Remove them from those recipes first, then try again.',
+				};
+			}
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not delete inventory items.' };
+		}
+	}
+
 	async delete(workspaceId: string, productId: number): Promise<QueryResult<number>> {
 		try {
-			let productImageUrl: string | undefined;
-			let rowsDeleted: number | undefined;
-
-			await this.db.query.transaction(async (trx) => {
-				let childRow = await trx('productdetail')
+			const { productImageUrl, rowsDeleted } = await this.db.query.transaction(async (trx) => {
+				const childRow = await trx('productdetail')
 					.select('ProductImageUrl')
 					.where('ProductId', productId)
 					.first();
 
-				if (childRow?.productImageUrl) {
-					productImageUrl = childRow.productImageUrl;
-				}
-
-				const rows = await this.db
-					.table<Product>('product')
+				const rows = await trx<Product>('product')
 					.where('ProductId', productId)
 					.where('workspaceId', workspaceId)
 					.del();
 
-				rowsDeleted = rows;
-				await trx.commit();
+				return {
+					productImageUrl: childRow?.productImageUrl as string | undefined,
+					rowsDeleted: rows,
+				};
 			});
 
 			if (productImageUrl) {
@@ -258,6 +306,12 @@ export class InventoryRepository extends BaseRepository {
 
 			return { status: 'success', data: rowsDeleted || 0 };
 		} catch (error: any) {
+			if (error?.code === 'ER_ROW_IS_REFERENCED_2' || error?.errno === 1451) {
+				return {
+					status: 'error',
+					error: 'This item is used in one or more recipes. Remove it from those recipes first, then try again.',
+				};
+			}
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Could not delete inventory item.' };
