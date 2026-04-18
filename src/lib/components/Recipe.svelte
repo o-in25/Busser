@@ -379,9 +379,9 @@
 			</Card.Content>
 		</Card.Root>
 
-		<!-- Verdict Card (matches ingredients height on desktop) -->
-		<div class="lg:col-span-1">
-			<RecipeVerdictCard {recipe} recipeSteps={initialRecipeSteps} class="lg:h-full" />
+		<!-- Verdict Card (sticky on desktop, offset to clear the nav) -->
+		<div class="lg:col-span-1 lg:sticky lg:top-20 lg:self-start">
+			<RecipeVerdictCard {recipe} recipeSteps={initialRecipeSteps} />
 		</div>
 	</div>
 

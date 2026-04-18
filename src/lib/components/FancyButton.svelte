@@ -6,6 +6,7 @@
 	type BaseProps = {
 		variant?: 'default' | 'primary' | 'secondary' | 'danger' | 'warning';
 		size?: 'sm' | 'md' | 'lg';
+		disabled?: boolean;
 		children?: Snippet;
 		class?: string;
 	};
@@ -22,6 +23,7 @@
 	let {
 		variant = 'default',
 		size = 'lg',
+		disabled = false,
 		children,
 		class: className,
 		href,
@@ -31,8 +33,10 @@
 
 {#if href}
 	<a
-		{href}
+		href={disabled ? undefined : href}
 		class={cn('glass-cta', variant !== 'default' && `glass-cta-${variant}`, sizeClasses[size], className)}
+		aria-disabled={disabled || undefined}
+		tabindex={disabled ? -1 : undefined}
 		{...restProps as HTMLAnchorAttributes}
 	>
 		{#if children}{@render children()}{/if}
@@ -40,6 +44,7 @@
 {:else}
 	<button
 		class={cn('glass-cta', variant !== 'default' && `glass-cta-${variant}`, sizeClasses[size], className)}
+		{disabled}
 		{...restProps as HTMLButtonAttributes}
 	>
 		{#if children}{@render children()}{/if}

@@ -424,6 +424,27 @@
 	font-size: 0.9375rem;
 }
 
+/* disabled state — desaturated, non-interactive */
+.glass-cta:disabled,
+.glass-cta[aria-disabled='true'] {
+	opacity: 0.5;
+	filter: saturate(0.4);
+	cursor: not-allowed;
+	pointer-events: none;
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.04),
+		inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+:is(.dark) .glass-cta:disabled,
+:is(.dark) .glass-cta[aria-disabled='true'] {
+	opacity: 0.45;
+	filter: saturate(0.3) brightness(0.85);
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.15),
+		inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
 .glass-cta:hover {
 	background: linear-gradient(
 		135deg,
