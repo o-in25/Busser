@@ -1,8 +1,12 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+
 	import { Package, Store, Tags } from 'lucide-svelte';
 
 	import { page } from '$app/stores';
 	import { cn } from '$lib/utils';
+
+	let { action }: { action?: Snippet } = $props();
 
 	const isOwner = $derived($page.data.workspace?.workspaceRole === 'owner');
 
@@ -28,9 +32,9 @@
 	}
 </script>
 
-<nav class="mb-6">
+<nav class="mb-6 flex items-center gap-2">
 	<div
-		class="relative flex md:inline-flex h-10 items-center justify-center rounded-xl backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
+		class="relative flex md:inline-flex h-10 min-w-0 flex-1 md:flex-none items-center justify-center rounded-xl backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
 	>
 		{#each tabs as tab}
 			<a
@@ -47,4 +51,9 @@
 			</a>
 		{/each}
 	</div>
+	{#if action}
+		<div class="ml-auto shrink-0">
+			{@render action()}
+		</div>
+	{/if}
 </nav>

@@ -336,17 +336,6 @@
 
 				<!-- View toggle -->
 				<ViewToggle modes={['grid', 'list']} active={viewMode} onchange={setViewMode} />
-
-				<!-- Add Recipe -->
-				{#if canModify}
-					<a
-						href="/catalog/add"
-						class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}
-					>
-						<Plus class="h-4 w-4 sm:mr-2" />
-						<span class="hidden sm:inline">Add Recipe</span>
-					</a>
-				{/if}
 			</div>
 		</div>
 

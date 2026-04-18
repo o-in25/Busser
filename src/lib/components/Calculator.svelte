@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Calculator, Citrus, Droplets, FlaskConical, Scale, Sparkles } from 'lucide-svelte';
+	import { Citrus, Droplets, FlaskConical, Sparkles, Weight } from 'lucide-svelte';
 
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -104,7 +104,7 @@
 	<div class="grid gap-4 sm:grid-cols-2">
 		<div class="space-y-2">
 			<Label for="peel-weight" class="flex items-center gap-2">
-				<Scale class="h-4 w-4 text-muted-foreground" />
+				<Weight class="h-4 w-4 text-muted-foreground" />
 				Peel Weight
 			</Label>
 			<div class="relative">
@@ -146,7 +146,6 @@
 
 	<!-- Calculate Button -->
 	<Button onclick={calculate} class="w-full sm:w-auto">
-		<Calculator class="h-4 w-4 mr-2" />
 		Calculate Recipe
 	</Button>
 

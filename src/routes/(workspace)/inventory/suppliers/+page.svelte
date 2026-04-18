@@ -633,18 +633,13 @@
 								<Table.Cell class="hidden sm:table-cell">
 									{item.supplierName || 'Any'}
 								</Table.Cell>
-								<Table.Cell class="hidden sm:table-cell">
+								<Table.Cell class="text-center hidden sm:table-cell">
 									{#if item.recipeCount > 0}
-										<div class="flex justify-center">
-											<Badge variant="secondary" class="gap-1">
-												<FlaskConical class="h-3 w-3" />
-												{item.recipeCount}
-											</Badge>
-										</div>
+										<span class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium">
+											{item.recipeCount}
+										</span>
 									{:else}
-										<div class="flex justify-center">
-											<span class="text-muted-foreground text-sm">-</span>
-										</div>
+										<span class="text-muted-foreground text-sm">-</span>
 									{/if}
 								</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell">

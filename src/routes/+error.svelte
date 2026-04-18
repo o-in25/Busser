@@ -6,7 +6,6 @@
 	import { ArrowLeft, House } from 'lucide-svelte';
 
 	function handleBack() {
-		document.documentElement.dataset.navOverride = 'back';
 		if (browser && window.history.length > 1) {
 			history.back();
 		} else {

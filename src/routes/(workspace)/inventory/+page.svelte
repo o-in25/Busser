@@ -336,7 +336,21 @@
 	</Hero>
 {:else}
 	<!-- Inventory Section Navigation -->
-	<InventoryNav />
+	<InventoryNav>
+		{#snippet action()}
+			{#if canModify}
+				<FancyButton
+					variant="primary"
+					size="sm"
+					href="{basePath}/add"
+					class="shrink-0 w-10 px-0 sm:w-auto sm:px-4"
+				>
+					<Plus class="h-4 w-4 sm:mr-2" />
+					<span class="hidden sm:inline">Add Product</span>
+				</FancyButton>
+			{/if}
+		{/snippet}
+	</InventoryNav>
 
 	{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
 		<FancyAlert class="mb-6 mt-4">
@@ -406,17 +420,6 @@
 
 			<!-- View toggle -->
 			<ViewToggle modes={['table', 'grid', 'list']} active={viewMode} onchange={setViewMode} />
-
-			<!-- Add Product -->
-			{#if canModify}
-				<a
-					href="{basePath}/add"
-					class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}
-				>
-					<Plus class="h-4 w-4 sm:mr-2" />
-					<span class="hidden sm:inline">Add Product</span>
-				</a>
-			{/if}
 		</div>
 	</div>
 

@@ -2,6 +2,7 @@
 	import { CircleCheck, FlaskConical, CircleX } from 'lucide-svelte';
 
 	import { goto } from '$app/navigation';
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
@@ -112,36 +113,37 @@
 		<Card.Root class="hover:shadow-md transition-all duration-200 dark:hover:shadow-glow-purple">
 			<div class="flex items-center gap-4 p-3">
 				<!-- Thumbnail -->
-				<SkeletonImage
-					src={product.productImageUrl}
-					alt={product.productName}
-					variant="product"
-					class="w-20 h-20 shrink-0 rounded-lg"
-				/>
+				<div class="relative w-20 h-20 shrink-0">
+					<SkeletonImage
+						src={product.productImageUrl}
+						alt={product.productName}
+						variant="product"
+						class="w-20 h-20 rounded-lg"
+					/>
+					{#if showStock && product.productInStockQuantity === 0}
+						<span
+							class="absolute -top-1 -right-1 inline-flex items-center gap-1 rounded-full bg-red-500/90 text-white text-[10px] font-semibold px-1.5 py-0.5 backdrop-blur-sm shadow-sm ring-1 ring-red-400/50"
+							title="Out of stock"
+						>
+							<CircleX class="h-2.5 w-2.5" />
+							Out
+						</span>
+					{/if}
+				</div>
 
 				<!-- Content -->
 				<div class="flex-1 min-w-0">
-					<div class="flex items-start justify-between gap-2">
-						<div class="min-w-0">
-							<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
-								{product.productName}
-							</h3>
-							<p class="text-sm text-muted-foreground line-clamp-1">
-								{product.productDescription || product.categoryDescription || 'No description'}
-							</p>
-						</div>
-						<div class="flex flex-col gap-1 shrink-0 items-end">
-							<Badge variant="secondary">
-								{product.categoryName}
-							</Badge>
-							{#if showStock}
-								<Badge variant={stockStatus.variant}>
-									<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
-									{stockStatus.label}
-								</Badge>
-							{/if}
-						</div>
+					<div class="flex items-center gap-2 flex-wrap">
+						<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
+							{product.productName}
+						</h3>
+						<FancyBadge variant="secondary" class="!px-2 !py-0.5 !gap-1 shrink-0">
+							<span class="text-xs">{product.categoryName}</span>
+						</FancyBadge>
 					</div>
+					<p class="text-sm text-muted-foreground line-clamp-1">
+						{product.productDescription || product.categoryDescription || 'No description'}
+					</p>
 
 					<!-- Meta info -->
 					<div class="flex items-center gap-3 mt-2">

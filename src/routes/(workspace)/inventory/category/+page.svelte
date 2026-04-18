@@ -154,7 +154,21 @@
 </svelte:head>
 
 <!-- Inventory Section Navigation -->
-<InventoryNav />
+<InventoryNav>
+	{#snippet action()}
+		{#if canModify}
+			<FancyButton
+				variant="primary"
+				size="sm"
+				href="/inventory/category/add"
+				class="shrink-0 w-10 px-0 sm:w-auto sm:px-4"
+			>
+				<Plus class="h-4 w-4 sm:mr-2" />
+				<span class="hidden sm:inline">Add Category</span>
+			</FancyButton>
+		{/if}
+	{/snippet}
+</InventoryNav>
 
 {#if $page.data.user && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
 	<FancyAlert class="mb-6 mt-4">
@@ -253,13 +267,6 @@
 	</FilterButton>
 
 	<ViewToggle modes={['table', 'list']} active={viewMode} onchange={(mode) => setViewMode(mode)} />
-
-	{#if canModify}
-		<a href="/inventory/category/add" class={cn(buttonVariants(), 'shrink-0 w-10 px-0 sm:w-auto sm:px-4')}>
-			<Plus class="h-4 w-4 sm:mr-2" />
-			<span class="hidden sm:inline">Add Category</span>
-		</a>
-	{/if}
 </div>
 
 <!-- Results info -->
