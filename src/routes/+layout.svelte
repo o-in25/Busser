@@ -4,7 +4,6 @@
 
 	import { onMount, setContext } from 'svelte';
 
-	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { derived } from 'svelte/store';
 
@@ -21,111 +20,6 @@
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
-
-	// inventory tab order for directional transitions within inventory
-	const inventoryOrder: Record<string, number> = {
-		'/inventory': 1,
-		'/inventory/category': 2,
-		'/inventory/suppliers': 3,
-	};
-
-	// settings tab order for directional transitions within settings
-	const settingsOrder: Record<string, number> = {
-		'/settings': 0,
-		'/settings/user-account': 1,
-		'/settings/users': 2,
-		'/settings/user-permissions': 3,
-		'/settings/user-invitations': 4,
-		'/settings/workspaces': 5,
-	};
-
-	function getRouteKey(pathname: string): string {
-		// match top-level route segment (e.g. /catalog/123 -> /catalog)
-		const match = pathname.match(/^\/[^/]*/);
-		return match?.[0] || '/';
-	}
-
-	function getInventoryKey(pathname: string): string {
-		// match up to 2 segments (e.g. /inventory/category/123 -> /inventory/category)
-		const match = pathname.match(/^\/inventory(?:\/[^/]+)?/);
-		return match?.[0] || '/inventory';
-	}
-
-	function getSettingsKey(pathname: string): string {
-		// match up to 2 segments (e.g. /settings/users/123 -> /settings/users)
-		const match = pathname.match(/^\/settings(?:\/[^/]+)?/);
-		return match?.[0] || '/settings';
-	}
-
-	// directional view transitions
-	onNavigate((navigation) => {
-		if (!document.startViewTransition) return;
-
-		// BackButton sets this override before navigation fires
-		const override = document.documentElement.dataset.navOverride;
-		delete document.documentElement.dataset.navOverride;
-
-		let direction = 'forward';
-
-		if (override) {
-			direction = override;
-		} else if (navigation.type === 'popstate') {
-			direction = 'back';
-		} else {
-			const fromPath = $page.url.pathname;
-			const toPath = navigation.to?.url.pathname ?? '/';
-			const fromKey = getRouteKey(fromPath);
-			const toKey = getRouteKey(toPath);
-
-			if (fromKey === toKey) {
-				// same section: depth or sub-tab navigation
-				if (fromKey === '/settings') {
-					const fromIndex = settingsOrder[getSettingsKey(fromPath)] ?? -1;
-					const toIndex = settingsOrder[getSettingsKey(toPath)] ?? -1;
-					if (fromIndex !== -1 && toIndex !== -1) {
-						direction = toIndex >= fromIndex ? 'forward' : 'back';
-					}
-				} else if (fromKey === '/inventory') {
-					const fromIndex = inventoryOrder[getInventoryKey(fromPath)] ?? -1;
-					const toIndex = inventoryOrder[getInventoryKey(toPath)] ?? -1;
-					if (fromIndex !== -1 && toIndex !== -1) {
-						direction = toIndex >= fromIndex ? 'forward' : 'back';
-					}
-				} else if (fromKey === '/catalog') {
-					const fromBrowse = fromPath.startsWith('/catalog/browse');
-					const toBrowse = toPath.startsWith('/catalog/browse');
-					const fromRecipe = /^\/catalog\/\d+/.test(fromPath);
-					const toRecipe = /^\/catalog\/\d+/.test(toPath);
-					if (fromBrowse && toRecipe) {
-						direction = 'forward';
-					} else if (fromRecipe && toBrowse) {
-						direction = 'back';
-					} else {
-						const fromDepth = fromPath.replace(/\/$/, '').split('/').length;
-						const toDepth = toPath.replace(/\/$/, '').split('/').length;
-						direction = toDepth >= fromDepth ? 'forward' : 'back';
-					}
-				} else {
-					// depth navigation: compare segment counts
-					const fromDepth = fromPath.replace(/\/$/, '').split('/').length;
-					const toDepth = toPath.replace(/\/$/, '').split('/').length;
-					direction = toDepth >= fromDepth ? 'forward' : 'back';
-				}
-			} else {
-				// different sections: lateral crossfade
-				direction = 'crossfade';
-			}
-		}
-
-		document.documentElement.setAttribute('data-nav-direction', direction);
-
-		return new Promise((resolve) => {
-			document.startViewTransition(async () => {
-				resolve();
-				await navigation.complete;
-			});
-		});
-	});
 
 	// Auth routes where we don't show the navbar
 	const authRoutes = [

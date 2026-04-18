@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FlaskConical, Info } from 'lucide-svelte';
+	import { Info } from 'lucide-svelte';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -128,23 +128,17 @@
 							</span>
 						</Table.Cell>
 					{/if}
-					<Table.Cell class="hidden sm:table-cell">
+					<Table.Cell class="text-center hidden sm:table-cell">
 						{#if product.productId && recipeUsage[product.productId]}
-							<div class="flex justify-center">
-								<a href="/catalog/browse?ingredientInclude={product.productId}">
-									<Badge
-										variant="secondary"
-										class="gap-1 hover:bg-secondary/80 transition-colors cursor-pointer"
-									>
-										<FlaskConical class="h-3 w-3" />
-										{recipeUsage[product.productId]}
-									</Badge>
-								</a>
-							</div>
+							<a
+								href="/catalog/browse?ingredientInclude={product.productId}"
+								onclick={(e) => e.stopPropagation()}
+								class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium hover:bg-muted/70 transition-colors"
+							>
+								{recipeUsage[product.productId]}
+							</a>
 						{:else}
-							<div class="flex justify-center">
-								<span class="text-muted-foreground text-sm">-</span>
-							</div>
+							<span class="text-muted-foreground text-sm">-</span>
 						{/if}
 					</Table.Cell>
 					<Table.Cell class="hidden sm:table-cell">

@@ -305,7 +305,7 @@
 			>
 				<FancyButton href="/catalog/browse" size="md">
 					<FlaskConical class="h-4 w-4 mr-2" />
-					Browse {landingData?.totalRecipes || ''} Recipes
+					Browse {landingData?.totalRecipes || ''} {landingData?.totalRecipes === 1 ? 'Recipe' : 'Recipes'}
 				</FancyButton>
 				<FancyButton
 					size="md"
@@ -785,7 +785,7 @@
 							</div>
 							<div>
 								<p class="font-medium">Browse Catalog</p>
-								<p class="text-xs text-muted-foreground">{dashboardData.totalRecipes} recipes</p>
+								<p class="text-xs text-muted-foreground">{dashboardData.totalRecipes} {dashboardData.totalRecipes === 1 ? 'recipe' : 'recipes'}</p>
 							</div>
 						</div>
 					</Card.Root>
@@ -827,23 +827,29 @@
 					{/if}
 				{/if}
 
-				{#if gallery.length > 0}
-					<button onclick={surpriseMe} class="block text-left w-full">
-						<Card.Root
-							class="p-4 hover:shadow-md transition-shadow hover:border-neon-amber-500/50 cursor-pointer h-full dark:hover:shadow-glow-amber"
-						>
-							<div class="flex items-center gap-3">
-								<div class="p-2 rounded-lg bg-neon-amber-500/10">
-									<Shuffle class="h-5 w-5 text-neon-amber-500" />
-								</div>
-								<div>
-									<p class="font-medium">Surprise Me!</p>
-									<p class="text-xs text-muted-foreground">Random cocktail</p>
-								</div>
+				<button
+					onclick={surpriseMe}
+					disabled={gallery.length === 0}
+					class="block text-left w-full disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					<Card.Root
+						class="p-4 h-full transition-shadow {gallery.length > 0
+							? 'hover:shadow-md hover:border-neon-amber-500/50 cursor-pointer dark:hover:shadow-glow-amber'
+							: ''}"
+					>
+						<div class="flex items-center gap-3">
+							<div class="p-2 rounded-lg bg-neon-amber-500/10">
+								<Shuffle class="h-5 w-5 text-neon-amber-500" />
 							</div>
-						</Card.Root>
-					</button>
-				{/if}
+							<div>
+								<p class="font-medium">Surprise Me!</p>
+								<p class="text-xs text-muted-foreground">
+									{gallery.length > 0 ? 'Random cocktail' : 'No recipes yet'}
+								</p>
+							</div>
+						</div>
+					</Card.Root>
+				</button>
 			</div>
 		</section>
 
@@ -1080,10 +1086,10 @@
 								: 'There are no recipes in this catalog yet.'}
 						</p>
 						{#if canModify && isOwner}
-							<a href="/inventory/add" class={buttonVariants()}>
+							<FancyButton href="/inventory/add" size="sm" variant="primary">
 								<Plus class="h-4 w-4 mr-2" />
 								Add Ingredients
-							</a>
+							</FancyButton>
 						{/if}
 					</Card.Content>
 				</Card.Root>

@@ -1,16 +1,15 @@
 <script lang="ts">
 	import {
 		Beer,
-		Calculator,
 		Clock,
 		GlassWater,
 		Martini,
 		Minus,
 		Plus,
-		Scale,
 		Search,
 		TriangleAlert,
 		User,
+		Weight,
 		Wine,
 	} from 'lucide-svelte';
 	import type { View } from '$lib/types';
@@ -280,7 +279,7 @@
 		<!-- Weight Input -->
 		<div class="space-y-2">
 			<Label for="weight" class="flex items-center gap-2">
-				<Scale class="h-4 w-4 text-muted-foreground" />
+				<Weight class="h-4 w-4 text-muted-foreground" />
 				Body Weight
 			</Label>
 			<div class="flex gap-2">
@@ -523,7 +522,6 @@
 
 	<!-- Calculate Button -->
 	<Button onclick={calculate} class="w-full sm:w-auto" disabled={selectedDrinks.length === 0}>
-		<Calculator class="h-4 w-4 mr-2" />
 		Calculate BAC
 	</Button>
 
