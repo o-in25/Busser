@@ -370,6 +370,7 @@
 			if (pendingImageFile) {
 				const uploadData = new FormData();
 				uploadData.append('file', pendingImageFile);
+				uploadData.append('kind', 'recipes');
 				const res = await fetch('/api/upload/image', { method: 'POST', body: uploadData });
 				const data = await res.json();
 				if (data.url) {

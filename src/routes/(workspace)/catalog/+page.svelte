@@ -19,8 +19,6 @@
 		Star,
 		TrendingUp,
 	} from 'lucide-svelte';
-	import { getContext } from 'svelte';
-
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -43,29 +41,36 @@
 	import { workspaceSwitcherOpen } from '../../../stores';
 
 	let { data }: { data: PageData } = $props();
-	const {
-		spirits,
-		spiritCounts,
-		recentCocktails,
-		featuredCocktails,
-		cocktailOfTheDay,
-		favoriteRecipes,
-		totalRecipes,
-		popularSpirit,
-		availableCount,
-		almostThereCount,
-		topIngredient,
-		favoriteRecipeIds,
-		featuredRecipeIds,
-	} = data.args;
 
-	// Track favorite/featured state locally for optimistic updates
-	let favorites = $state(new Set(favoriteRecipeIds));
-	let featured = $state(new Set(featuredRecipeIds));
+	// derive from data so values refresh on invalidateAll (e.g. workspace switch)
+	const spirits = $derived(data.args.spirits);
+	const spiritCounts = $derived(data.args.spiritCounts);
+	const recentCocktails = $derived(data.args.recentCocktails);
+	const featuredCocktails = $derived(data.args.featuredCocktails);
+	const cocktailOfTheDay = $derived(data.args.cocktailOfTheDay);
+	const favoriteRecipes = $derived(data.args.favoriteRecipes);
+	const totalRecipes = $derived(data.args.totalRecipes);
+	const popularSpirit = $derived(data.args.popularSpirit);
+	const availableCount = $derived(data.args.availableCount);
+	const almostThereCount = $derived(data.args.almostThereCount);
+	const topIngredient = $derived(data.args.topIngredient);
 
-	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
-	const isGlobalCatalog = $page.data.isGlobalWorkspace;
+	// local optimistic state, resynced when server data changes
+	let favorites = $state(new Set(data.args.favoriteRecipeIds));
+	let featured = $state(new Set(data.args.featuredRecipeIds));
+	$effect(() => {
+		favorites = new Set(data.args.favoriteRecipeIds);
+	});
+	$effect(() => {
+		featured = new Set(data.args.featuredRecipeIds);
+	});
+
+	// read workspace from page store so it stays current after switches
+	const workspace = $derived($page.data.workspace as WorkspaceWithRole);
+	const canModify = $derived(
+		workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor',
+	);
+	const isGlobalCatalog = $derived($page.data.isGlobalWorkspace);
 	const authenticated = $derived(!!$page.data.user);
 
 	// recipe list tab state

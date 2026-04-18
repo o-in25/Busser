@@ -14,7 +14,7 @@ import type {
 import { DbProvider } from '../db';
 import { deleteCachedContent } from '../generators/cache';
 import { Logger } from '../logger';
-import { deleteSignedUrl } from '../storage';
+import { copyGcsFile, deleteSignedUrl } from '../storage';
 import { BaseRepository, emptyPagination } from './base.repository';
 
 export class CatalogRepository extends BaseRepository {
@@ -687,9 +687,17 @@ export class CatalogRepository extends BaseRepository {
 							.where({ ProductId: step.productId })
 							.first();
 						if (canonical?.productDescriptionImageUrl || canonical?.productDescriptionText) {
+							// copy source image into the target workspace so deletes don't cascade
+							const copiedImageUrl = canonical.productDescriptionImageUrl
+								? await copyGcsFile(
+										canonical.productDescriptionImageUrl,
+										'ingredients',
+										targetWorkspaceId
+								  )
+								: null;
 							await trx('productdetail').insert({
 								ProductId: productId,
-								ProductImageUrl: canonical.productDescriptionImageUrl || null,
+								ProductImageUrl: copiedImageUrl,
 								ProductDescription: canonical.productDescriptionText || null,
 							});
 						}
@@ -699,9 +707,17 @@ export class CatalogRepository extends BaseRepository {
 				}
 
 				// 6. create recipe chain (sourceRecipe is camelCase from postProcessResponse)
+				// copy source images so delete in target workspace doesn't destroy source gcs objects
+				const copiedDescImageUrl = sourceRecipe.recipeDescriptionImageUrl
+					? await copyGcsFile(sourceRecipe.recipeDescriptionImageUrl, 'recipes', targetWorkspaceId)
+					: null;
+				const copiedRecipeImageUrl = sourceRecipe.recipeImageUrl
+					? await copyGcsFile(sourceRecipe.recipeImageUrl, 'recipes', targetWorkspaceId)
+					: null;
+
 				const [descId] = await trx('recipedescription').insert({
 					RecipeDescription: sourceRecipe.recipeDescription,
-					RecipeDescriptionImageUrl: sourceRecipe.recipeDescriptionImageUrl,
+					RecipeDescriptionImageUrl: copiedDescImageUrl,
 					RecipeSweetnessRating: sourceRecipe.recipeSweetnessRating,
 					RecipeDrynessRating: sourceRecipe.recipeDrynessRating,
 					RecipeStrengthRating: sourceRecipe.recipeStrengthRating,
@@ -713,7 +729,7 @@ export class CatalogRepository extends BaseRepository {
 					RecipeCategoryId: sourceRecipe.recipeCategoryId,
 					RecipeDescriptionId: descId,
 					RecipeName: sourceRecipe.recipeName,
-					RecipeImageUrl: sourceRecipe.recipeImageUrl,
+					RecipeImageUrl: copiedRecipeImageUrl,
 					SourceRecipeId: sourceRecipeId,
 					SourceWorkspaceId: sourceWorkspaceId,
 				});

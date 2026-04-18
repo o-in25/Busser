@@ -2,11 +2,13 @@ import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
 import type { RequestHandler } from './$types';
-import { getSignedUrl } from '$lib/server/storage';
+import { getSignedUrl, type UploadKind } from '$lib/server/storage';
 
 export const config = {
 	body: { maxSize: '1mb' },
 };
+
+const ALLOWED_KINDS: readonly UploadKind[] = ['recipes', 'ingredients', 'ai-generated'];
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.activeWorkspaceId) {
@@ -29,7 +31,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 		}
 
-		const publicUrl = await getSignedUrl(file);
+		// default to 'recipes' for backward-compat during rollout
+		const kindRaw = (formData.get('kind') as string | null) ?? 'recipes';
+		const kind = (ALLOWED_KINDS as readonly string[]).includes(kindRaw)
+			? (kindRaw as UploadKind)
+			: 'recipes';
+
+		const publicUrl = await getSignedUrl(file, file.name, kind, locals.activeWorkspaceId);
 
 		if (!publicUrl) {
 			throw new Error('Failed to upload image');

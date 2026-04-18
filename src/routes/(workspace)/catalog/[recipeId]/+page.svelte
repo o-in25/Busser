@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronLeft, EllipsisVertical, Heart, Pencil, Plus, Star, Check, Trash2, Download } from 'lucide-svelte';
+	import { ChevronLeft, EllipsisVertical, Heart, Pencil, Plus, Star, Check, Trash2, Download, Loader2 } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { enhance } from '$app/forms';
@@ -198,7 +198,10 @@
 						<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
 						<input type="hidden" name="targetWorkspaceId" value={singleWorkspace.workspaceId} />
 						<FancyButton type="submit" variant={alreadyImported ? 'default' : 'primary'} size="sm" disabled={!!alreadyImported || !!importingTo}>
-							{#if alreadyImported}
+							{#if importingTo === singleWorkspace.workspaceId}
+								<Loader2 class="h-4 w-4 mr-1 animate-spin" />
+								Importing...
+							{:else if alreadyImported}
 								<Check class="h-4 w-4 mr-1" />
 								Imported
 							{:else}
@@ -241,14 +244,18 @@
 									<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
 									<input type="hidden" name="targetWorkspaceId" value={ws.workspaceId} />
 									<DropdownMenu.Item disabled={alreadyImported || importingTo === ws.workspaceId} class="cursor-pointer">
-										<button type="submit" class="flex items-center gap-2 w-full" disabled={alreadyImported}>
-											{#if alreadyImported}
+										<button type="submit" class="flex items-center gap-2 w-full" disabled={alreadyImported || importingTo === ws.workspaceId}>
+											{#if importingTo === ws.workspaceId}
+												<Loader2 class="h-4 w-4 animate-spin" />
+											{:else if alreadyImported}
 												<Check class="h-4 w-4 text-muted-foreground" />
 											{:else}
 												<Download class="h-4 w-4" />
 											{/if}
 											{ws.workspaceName}
-											{#if alreadyImported}
+											{#if importingTo === ws.workspaceId}
+												<span class="text-xs text-muted-foreground ml-auto">importing...</span>
+											{:else if alreadyImported}
 												<span class="text-xs text-muted-foreground ml-auto">imported</span>
 											{/if}
 										</button>
