@@ -131,7 +131,7 @@
 					<Table.Cell class="text-center hidden sm:table-cell">
 						{#if product.productId && recipeUsage[product.productId]}
 							<a
-								href="/catalog/browse?ingredientInclude={product.productId}"
+								href="/catalog?ingredientInclude={product.productId}"
 								onclick={(e) => e.stopPropagation()}
 								class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium hover:bg-muted/70 transition-colors"
 							>

@@ -95,7 +95,7 @@
 <div class="container mx-auto max-w-6xl px-4">
 	<!-- Desktop toolbar above hero -->
 	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
-		<FancyButton href="/catalog/browse" size="sm">
+		<FancyButton href="/catalog" size="sm">
 			<ChevronLeft class="h-4 w-4 mr-1" />
 			Back to Catalog
 		</FancyButton>
@@ -273,7 +273,7 @@
 		{#snippet actions()}
 			{#if authenticated && canModify}
 				<div class="grid grid-cols-2 gap-2 w-full">
-					<FancyButton href="/catalog/browse" size="sm" class="w-full justify-center">
+					<FancyButton href="/catalog" size="sm" class="w-full justify-center">
 						<ChevronLeft class="h-4 w-4 mr-1" />
 						Back
 					</FancyButton>
@@ -323,7 +323,7 @@
 				</div>
 			{:else}
 				<div class="flex gap-2 w-full">
-					<FancyButton href="/catalog/browse" size="sm" class="flex-1 justify-center">
+					<FancyButton href="/catalog" size="sm" class="flex-1 justify-center">
 						<ChevronLeft class="h-4 w-4 mr-1" />
 						Back
 					</FancyButton>

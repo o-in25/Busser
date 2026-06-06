@@ -1,94 +1,214 @@
-import { catalogRepo } from '$lib/server/core';
+import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
 import { getFavoriteRecipes } from '$lib/server/user-settings';
-import { indexFromSeed } from '$lib/math';
-import type { View } from '$lib/types';
+import { calculateOverallScore } from '$lib/math';
+import type { AdvancedFilter } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
 
-export const load = (async ({ parent, locals }) => {
-	// get workspace from parent layout
+export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
 	const userId = locals.user?.userId;
 
-	// Get all spirits (global reference data)
-	const spirits = await catalogRepo.getSpirits();
+	const page = parseInt(url.searchParams.get('page') || '1');
+	const perPage = parseInt(url.searchParams.get('perPage') || '24');
+	const search = url.searchParams.get('search') || '';
+	const sort = url.searchParams.get('sort') || 'name-asc';
+	const spiritId = url.searchParams.get('spirit') || '';
+	const showFilter = url.searchParams.get('show') || ''; // 'favorites' | 'featured' | ''
+	const mood = url.searchParams.get('mood') || '';
 
-	// Get recent cocktails (first page, limit 6)
-	const recentCatalog = await catalogRepo.findAll(workspaceId, 1, 6);
-	const recentCocktails = recentCatalog.data;
+	// advanced search params
+	const readyToMake = url.searchParams.get('readyToMake') || '';
+	const ingredientInclude = url.searchParams.get('ingredientInclude') || '';
+	const ingredientAny = url.searchParams.get('ingredientAny') || '';
+	const ingredientExclude = url.searchParams.get('ingredientExclude') || '';
+	const strengthMin = url.searchParams.get('strengthMin') || '';
+	const strengthMax = url.searchParams.get('strengthMax') || '';
+	const ingredientCountMin = url.searchParams.get('ingredientCountMin') || '';
+	const ingredientCountMax = url.searchParams.get('ingredientCountMax') || '';
+	const method = url.searchParams.get('method') || '';
+	const ratingMin = url.searchParams.get('ratingMin') || '';
+	const ratingMax = url.searchParams.get('ratingMax') || '';
 
-	// Get total recipe count
-	const totalCatalog = await catalogRepo.findAll(workspaceId, 1, 1);
-	const totalRecipes = totalCatalog.pagination.total;
+	// parse comma-separated ingredient ID lists
+	const parseIds = (s: string) => s ? s.split(',').map(Number).filter((n) => !isNaN(n) && n > 0) : [];
+	const includeIds = parseIds(ingredientInclude);
+	const anyIds = parseIds(ingredientAny);
+	const excludeIds = parseIds(ingredientExclude);
 
-	// Get recipe counts per spirit category
-	const spiritCounts: Record<number, number> = {};
-	for (const spirit of spirits) {
-		const result = await catalogRepo.getRecipesByCategory(workspaceId, spirit.recipeCategoryId);
-		if (result.status === 'success' && result.data) {
-			spiritCounts[spirit.recipeCategoryId] = result.data.length;
-		} else {
-			spiritCounts[spirit.recipeCategoryId] = 0;
-		}
+	// Build filter
+	const filter: Record<string, any> = {};
+	if (search) {
+		filter.recipeName = search;
+	}
+	if (spiritId) {
+		filter.recipeCategoryId = parseInt(spiritId);
 	}
 
-	// ready to make and almost-there counts
-	const availableResult = await catalogRepo.getAvailableRecipes(workspaceId);
-	const availableCount =
-		availableResult.status === 'success' ? (availableResult.data?.length ?? 0) : 0;
-	const almostThereRecipes = await catalogRepo.getAlmostThereRecipes(workspaceId);
-	const almostThereCount = almostThereRecipes.length;
+	// build advanced filter
+	const advancedFilter: AdvancedFilter = {};
+	if (readyToMake === '1') advancedFilter.readyToMake = true;
+	if (includeIds.length) advancedFilter.ingredientInclude = includeIds;
+	if (anyIds.length) advancedFilter.ingredientAny = anyIds;
+	if (excludeIds.length) advancedFilter.ingredientExclude = excludeIds;
+	if (strengthMin) advancedFilter.strengthMin = parseInt(strengthMin);
+	if (strengthMax) advancedFilter.strengthMax = parseInt(strengthMax);
+	if (ingredientCountMin) advancedFilter.ingredientCountMin = parseInt(ingredientCountMin);
+	if (ingredientCountMax) advancedFilter.ingredientCountMax = parseInt(ingredientCountMax);
+	if (method) advancedFilter.preparationMethodId = parseInt(method);
+	if (ratingMin) advancedFilter.ratingMin = parseFloat(ratingMin);
+	if (ratingMax) advancedFilter.ratingMax = parseFloat(ratingMax);
+	if (mood) advancedFilter.mood = mood;
 
-	// highest impact ingredient to buy
-	const impactIngredients = await catalogRepo.getHighestImpactIngredients(workspaceId);
-	const topIngredient = impactIngredients.length > 0 ? impactIngredients[0] : null;
+	const hasAdvancedFilter = Object.keys(advancedFilter).length > 0;
 
-	// Get workspace featured cocktails (curated by workspace admins)
-	const featuredCocktails = await catalogRepo.getFeatured(workspaceId);
+	// look up product names for all referenced ingredient IDs
+	const allIngredientIds = [...new Set([...includeIds, ...anyIds, ...excludeIds])];
+	const ingredientNameLookups = allIngredientIds.map((id) =>
+		inventoryRepo.findById(workspaceId, id).then((p) => [id, p?.productName || String(id)] as const)
+	);
 
-	// cocktail of the day: deterministic daily pick from featured recipes
-	const today = new Date();
-	const cocktailOfTheDay = indexFromSeed(featuredCocktails, `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`);
+	// Get recipes, spirits, favorites, featured, preparation methods, and ingredient names in parallel
+	const [
+		catalogResult,
+		spirits,
+		userFavorites,
+		favoriteRecipes,
+		featuredRecipes,
+		prepMethodsResult,
+		...ingredientEntries
+	] = await Promise.all([
+		catalogRepo.findAll(
+			workspaceId,
+			page,
+			perPage,
+			Object.keys(filter).length > 0 ? filter : null,
+			hasAdvancedFilter ? advancedFilter : null
+		),
+		catalogRepo.getSpirits(),
+		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
+		userId ? getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
+		catalogRepo.getFeatured(workspaceId),
+		catalogRepo.getPreparationMethods(),
+		...ingredientNameLookups,
+	]);
 
-	// Get user's favorites for this workspace
-	const userFavorites = userId ? await userRepo.getFavorites(userId, workspaceId) : [];
+	const ingredientNames = Object.fromEntries(ingredientEntries) as Record<number, string>;
+
+	let { data, pagination } = catalogResult;
+	const preparationMethods =
+		prepMethodsResult.status === 'success' ? (prepMethodsResult.data ?? []) : [];
+
+	// Build sets for quick lookup
 	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
-	const favoriteRecipes = userId ? await getFavoriteRecipes(userId, workspaceId) : [];
+	const featuredRecipeIds = new Set(featuredRecipes.map((f) => f.recipeId));
 
-	// Get featured recipe IDs for this workspace
-	const featuredRecipeIds = new Set(featuredCocktails.map((f) => f.recipeId));
+	// Apply show filter (favorites/featured)
+	if (showFilter === 'favorites') {
+		// Use the actual favorite recipes, not filtered paginated results
+		data = favoriteRecipes;
+		pagination = {
+			...pagination,
+			total: favoriteRecipes.length,
+			lastPage: 1,
+			currentPage: 1,
+		};
+	} else if (showFilter === 'featured') {
+		// Use the actual featured recipes, not filtered paginated results
+		data = featuredRecipes;
+		pagination = {
+			...pagination,
+			total: featuredRecipes.length,
+			lastPage: 1,
+			currentPage: 1,
+		};
+	}
 
-	// Find most popular spirit (one with most recipes)
-	let popularSpirit: (typeof spirits)[0] | null = null;
-	let maxCount = 0;
-	for (const spirit of spirits) {
-		const count = spiritCounts[spirit.recipeCategoryId] || 0;
-		if (count > maxCount) {
-			maxCount = count;
-			popularSpirit = spirit;
-		}
+	// Apply rating post-filter (score formula is too complex for SQL)
+	if (advancedFilter.ratingMin !== undefined || advancedFilter.ratingMax !== undefined) {
+		data = data.filter((recipe) => {
+			const score = calculateOverallScore(
+				recipe.recipeVersatilityRating,
+				recipe.recipeSweetnessRating,
+				recipe.recipeDrynessRating,
+				recipe.recipeStrengthRating
+			);
+			if (advancedFilter.ratingMin !== undefined && score < advancedFilter.ratingMin) return false;
+			if (advancedFilter.ratingMax !== undefined && score > advancedFilter.ratingMax) return false;
+			return true;
+		});
+		pagination = {
+			...pagination,
+			total: data.length,
+			lastPage: Math.max(1, Math.ceil(data.length / perPage)),
+		};
+	}
+
+	// Apply client-side sorting
+	switch (sort) {
+		case 'name-asc':
+			data.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
+			break;
+		case 'name-desc':
+			data.sort((a, b) => b.recipeName.localeCompare(a.recipeName));
+			break;
+		case 'top-rated':
+			data.sort((a, b) => {
+				const scoreA = calculateOverallScore(
+					a.recipeVersatilityRating,
+					a.recipeSweetnessRating,
+					a.recipeDrynessRating,
+					a.recipeStrengthRating
+				);
+				const scoreB = calculateOverallScore(
+					b.recipeVersatilityRating,
+					b.recipeSweetnessRating,
+					b.recipeDrynessRating,
+					b.recipeStrengthRating
+				);
+				return scoreB - scoreA; // Descending (highest first)
+			});
+			break;
+		case 'newest':
+			data.sort((a, b) => b.recipeId - a.recipeId);
+			break;
+		case 'oldest':
+			data.sort((a, b) => a.recipeId - b.recipeId);
+			break;
 	}
 
 	return {
-		args: {
-			spirits,
-			spiritCounts,
-			recentCocktails,
-			featuredCocktails,
-			cocktailOfTheDay,
-			favoriteRecipes,
-			totalRecipes,
-			popularSpirit,
-			availableCount,
-			almostThereCount,
-			topIngredient,
-			favoriteRecipeIds: [...favoriteRecipeIds],
-			featuredRecipeIds: [...featuredRecipeIds],
+		recipes: data,
+		pagination,
+		spirits,
+		preparationMethods,
+		favoriteRecipeIds: [...favoriteRecipeIds],
+		featuredRecipeIds: [...featuredRecipeIds],
+		filters: {
+			search,
+			sort,
+			spiritId,
+			showFilter,
+			mood,
+			page,
+			perPage,
+			readyToMake,
+			ingredientInclude,
+			ingredientAny,
+			ingredientExclude,
+			ingredientNames,
+			strengthMin,
+			strengthMax,
+			ingredientCountMin,
+			ingredientCountMax,
+			method,
+			ratingMin,
+			ratingMax,
 		},
 	};
-}) satisfies PageServerLoad;
+};
 
 export const actions: Actions = {
 	toggleFavorite: async ({ request, locals }) => {

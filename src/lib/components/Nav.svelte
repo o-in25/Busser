@@ -53,7 +53,7 @@
 
 	function redirectTargetForWorkspaceSwitch(pathname: string): string | null {
 		// workspace-scoped detail routes that will 404 in another workspace
-		if (/^\/catalog\/(?!browse|add)[^/]+/.test(pathname)) return '/catalog';
+		if (/^\/catalog\/(?!browse|add|explore)[^/]+/.test(pathname)) return '/catalog';
 		if (/^\/inventory\/category\/(?!add)[^/]+\/edit/.test(pathname)) return '/inventory/category';
 		if (/^\/inventory\/(?!category|suppliers|add)[^/]+\/edit/.test(pathname)) return '/inventory';
 		return null;

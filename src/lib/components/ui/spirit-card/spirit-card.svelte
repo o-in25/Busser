@@ -34,54 +34,25 @@
 	/>
 	<div
 		class={cn(
-			'relative flex flex-col items-center rounded-xl border-2 transition-all duration-200 overflow-hidden',
+			'relative flex items-center justify-center rounded-xl border-2 transition-all duration-200 px-4 py-5 min-h-[72px] text-center',
 			'bg-background',
 			selected
 				? 'border-primary ring-4 ring-primary/20 shadow-lg shadow-primary/10'
 				: 'border-transparent hover:border-primary/50'
 		)}
 	>
-		<!-- Image container - fills the card -->
-		<div
-			class="relative w-full aspect-[4/3] flex items-center justify-center"
-		>
-			{#if selected}
-				<div class="absolute inset-0 bg-primary/5 z-10"></div>
-			{/if}
-			<img
-				src={spirit.recipeCategoryDescriptionImageUrl}
-				alt={spirit.recipeCategoryDescription}
-				class="max-w-full max-h-full object-contain relative z-10"
-			/>
-			<!-- Dark mode overlay - darkens white backgrounds while preserving bottle colors -->
-			<div
-				class="absolute inset-0 bg-gray-400 mix-blend-multiply opacity-0 dark:opacity-30 pointer-events-none"
-			></div>
-		</div>
-
-		<!-- Label bar at bottom -->
-		<div
+		<span
 			class={cn(
-				'w-full py-2 px-3 text-center border-t transition-colors backdrop-blur-sm',
-				selected
-					? 'bg-primary/20 border-primary/20'
-					: 'bg-background/80 border-gray-100 dark:border-gray-600'
+				'text-sm font-medium transition-colors',
+				selected ? 'text-primary' : 'text-foreground'
 			)}
 		>
-			<span
-				class={cn(
-					'text-sm font-medium truncate block transition-colors',
-					selected ? 'text-primary' : 'text-muted-foreground'
-				)}
-			>
-				{spirit.recipeCategoryDescription}
-			</span>
-		</div>
+			{spirit.recipeCategoryDescription}
+		</span>
 
-		<!-- Selected indicator -->
 		{#if selected}
 			<div
-				class="absolute top-2 right-2 z-20 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-md"
+				class="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-md"
 			>
 				<svg class="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
 					<path

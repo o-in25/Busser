@@ -157,7 +157,7 @@
 		if (sortBy !== 'all') params.set('spirit', String(sortBy));
 		if (activeMood) params.set('mood', activeMood);
 		const qs = params.toString();
-		return qs ? `/catalog/browse?${qs}` : '/catalog/browse';
+		return qs ? `/catalog?${qs}` : '/catalog';
 	});
 
 	// Surprise me - pick random available recipe
@@ -269,7 +269,7 @@
 					<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
 						{#each landingData.allSpirits as spirit}
 							<a
-								href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ??
+								href="/catalog/explore/{idToSlug[spirit.recipeCategoryId] ??
 									spirit.recipeCategoryId}"
 								class="block group"
 							>
@@ -303,7 +303,7 @@
 				class="flex flex-wrap gap-3 justify-center mb-4 reveal-on-scroll"
 				use:reveal={{ delay: 200 }}
 			>
-				<FancyButton href="/catalog/browse" size="md">
+				<FancyButton href="/catalog" size="md">
 					<FlaskConical class="h-4 w-4 mr-2" />
 					Browse {landingData?.totalRecipes || ''} {landingData?.totalRecipes === 1 ? 'Recipe' : 'Recipes'}
 				</FancyButton>
@@ -775,7 +775,7 @@
 		<!-- Quick Actions -->
 		<section class="mb-8">
 			<div class="grid grid-cols-2 {isOwner ? 'md:grid-cols-4' : ''} gap-3">
-				<a href="/catalog/browse" class="block">
+				<a href="/catalog" class="block">
 					<Card.Root
 						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
 					>

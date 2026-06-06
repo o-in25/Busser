@@ -237,7 +237,7 @@
 				</FancyBadge>
 			{/if}
 			{#if recipeCount > 0}
-				<FancyBadge href="/catalog/browse?ingredientInclude={product.productId}">
+				<FancyBadge href="/catalog?ingredientInclude={product.productId}">
 					<FlaskConical class="h-3.5 w-3.5 text-primary" />
 					<span class="text-xs text-muted-foreground">Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span>
 				</FancyBadge>

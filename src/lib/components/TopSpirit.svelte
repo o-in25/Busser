@@ -121,7 +121,7 @@
 	<!-- explore link -->
 	<div class="pt-2 border-t border-border/50">
 		<a
-			href="/catalog/browse/{idToSlug[topSpirit.recipeCategoryId] ?? topSpirit.recipeCategoryId}"
+			href="/catalog/explore/{idToSlug[topSpirit.recipeCategoryId] ?? topSpirit.recipeCategoryId}"
 			class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full justify-center gap-2 h-7 text-xs')}
 		>
 			Explore {topSpirit.recipeCategoryDescription} Cocktails
