@@ -75,7 +75,7 @@
 	];
 
 	// base path for this spirit's browse page
-	const basePath = $derived(`/catalog/browse/${data.spiritContent.slug}`);
+	const basePath = $derived(`/catalog/explore/${data.spiritContent.slug}`);
 
 	const hex = $derived(data.spiritContent.accentColor.hex);
 
@@ -186,7 +186,7 @@
 	<meta property="og:type" content="website" />
 	<meta
 		property="og:url"
-		content="https://busserapp.com/catalog/browse/{data.spiritContent.slug}"
+		content="https://busserapp.com/catalog/explore/{data.spiritContent.slug}"
 	/>
 	<meta
 		property="og:image"
@@ -202,9 +202,9 @@
 
 	<!-- Desktop toolbar above hero -->
 	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
-		<FancyButton href="/catalog" size="sm">
+		<FancyButton href="/catalog/explore" size="sm">
 			<ChevronLeft class="h-4 w-4 mr-1" />
-			Back to Catalog
+			Back to Explore
 		</FancyButton>
 		<div class="flex items-center gap-2">
 			<FancyButton
@@ -248,7 +248,7 @@
 
 			<!-- Mobile buttons inside hero -->
 			<div class="flex gap-2 md:hidden">
-				<FancyButton href="/catalog" size="sm" class="flex-1 justify-center whitespace-nowrap">
+				<FancyButton href="/catalog/explore" size="sm" class="flex-1 justify-center whitespace-nowrap">
 					<ChevronLeft class="h-4 w-4 mr-1" />
 					Back
 				</FancyButton>

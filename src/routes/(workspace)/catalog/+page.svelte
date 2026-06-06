@@ -1,528 +1,575 @@
 <script lang="ts">
-	import {
-		ArrowRight,
-		Award,
-		BookOpen,
-		Candy,
-		Droplets,
-		FlaskConical,
-		Gauge,
-		GlassWater,
-		Globe,
-		Heart,
-		Lightbulb,
-		Plus,
-		Search,
-		ShoppingCart,
-		Shuffle,
-		Sparkles,
-		Star,
-		TrendingUp,
-	} from 'lucide-svelte';
-	import { enhance } from '$app/forms';
+	import { ArrowRight, Compass, FlaskConical, Globe, Plus, Search, SlidersHorizontal, X } from 'lucide-svelte';
+	import { getContext, onMount } from 'svelte';
+
+	import { browser } from '$app/environment';
+
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
+	import FancyAlert from '$lib/components/FancyAlert.svelte';
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
+	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
+	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
+	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
+	import FilterButton from '$lib/components/FilterButton.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
+	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
-	import { idToSlug } from '$lib/spirits';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
-	import FancyInput from '$lib/components/FancyInput.svelte';
-	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
-	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
-	import tips from '$lib/data/tips.json';
+	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
-	import type { PageData } from './$types';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { workspaceSwitcherOpen } from '../../../stores';
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	// derive from data so values refresh on invalidateAll (e.g. workspace switch)
-	const spirits = $derived(data.args.spirits);
-	const spiritCounts = $derived(data.args.spiritCounts);
-	const recentCocktails = $derived(data.args.recentCocktails);
-	const featuredCocktails = $derived(data.args.featuredCocktails);
-	const cocktailOfTheDay = $derived(data.args.cocktailOfTheDay);
-	const favoriteRecipes = $derived(data.args.favoriteRecipes);
-	const totalRecipes = $derived(data.args.totalRecipes);
-	const popularSpirit = $derived(data.args.popularSpirit);
-	const availableCount = $derived(data.args.availableCount);
-	const almostThereCount = $derived(data.args.almostThereCount);
-	const topIngredient = $derived(data.args.topIngredient);
-
-	// local optimistic state, resynced when server data changes
-	let favorites = $state(new Set(data.args.favoriteRecipeIds));
-	let featured = $state(new Set(data.args.featuredRecipeIds));
-	$effect(() => {
-		favorites = new Set(data.args.favoriteRecipeIds);
-	});
-	$effect(() => {
-		featured = new Set(data.args.featuredRecipeIds);
-	});
-
-	// read workspace from page store so it stays current after switches
-	const workspace = $derived($page.data.workspace as WorkspaceWithRole);
-	const canModify = $derived(
-		workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor',
-	);
-	const isGlobalCatalog = $derived($page.data.isGlobalWorkspace);
+	const workspace = getContext<WorkspaceWithRole>('workspace');
+	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 	const authenticated = $derived(!!$page.data.user);
+	// View mode
+	let viewMode = $state<'grid' | 'list'>('grid');
 
-	// recipe list tab state
-	let activeTab = $state<'featured' | 'favorites' | 'recent'>('featured');
-	const tabRecipes = $derived.by(() => {
-		if (activeTab === 'favorites') return favoriteRecipes;
-		if (activeTab === 'recent') return recentCocktails;
-		return featuredCocktails;
+	// Filter state
+	let searchInput = $state(data.filters.search || '');
+	let selectedSort = $state(data.filters.sort || 'name-asc');
+	let selectedSpirit = $state(data.filters.spiritId || 'all');
+	let selectedShowFilter = $state(data.filters.showFilter || 'all');
+	let perPage = $state(String(data.filters.perPage ?? 24));
+	let selectedMood = $state(data.filters.mood || '');
+
+	// Filter panel state
+	let filterOpen = $state(false);
+
+	// count of non-default filters behind the filter panel
+	const activeFilterCount = $derived.by(() => {
+		let count = 0;
+		if (selectedSpirit && selectedSpirit !== 'all') count++;
+		if (selectedShowFilter && selectedShowFilter !== 'all') count++;
+		if (selectedSort !== 'name-asc') count++;
+		if (perPage !== '24') count++;
+		if (selectedMood) count++;
+		return count;
 	});
 
-	function surpriseMe() {
-		const all = [...recentCocktails, ...featuredCocktails];
-		if (all.length === 0) return;
-		const pick = all[Math.floor(Math.random() * all.length)];
-		goto(`/catalog/${pick.recipeId}`);
+	// Advanced search
+	let advancedSearchOpen = $state(false);
+	const advancedParamKeys = [
+		'readyToMake',
+		'ingredientInclude',
+		'ingredientAny',
+		'ingredientExclude',
+		'strengthMin',
+		'strengthMax',
+		'ingredientCountMin',
+		'ingredientCountMax',
+		'method',
+		'ratingMin',
+		'ratingMax',
+	] as const;
+	const advancedFilterCount = $derived(advancedParamKeys.filter((k) => !!data.filters[k]).length);
+
+	// Track favorites/featured for optimistic updates
+	let favorites = $state(new Set(data.favoriteRecipeIds));
+	let featured = $state(new Set(data.featuredRecipeIds));
+
+	// reset filters behind the panel (spirit, show, sort, perPage)
+	function resetPanelFilters() {
+		selectedSpirit = 'all';
+		selectedShowFilter = 'all';
+		selectedSort = 'name-asc';
+		perPage = '24';
+		selectedMood = '';
+		goto(
+			buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', perPage: '24', mood: '', page: 1 }),
+			{
+				keepFocus: true,
+			}
+		);
 	}
 
-	// Search state
-	let searchQuery = $state('');
+	// Restore view mode from localStorage
+	onMount(() => {
+		const savedViewMode = localStorage.getItem('catalog-browse-view-mode');
+		if (savedViewMode === 'list' || savedViewMode === 'grid') {
+			viewMode = savedViewMode;
+		}
+	});
+
+	function setViewMode(mode: 'grid' | 'list') {
+		viewMode = mode;
+		if (browser) {
+			localStorage.setItem('catalog-browse-view-mode', mode);
+		}
+	}
+
+	function buildUrl(overrides: Record<string, string | number | null> = {}) {
+		const params = new URLSearchParams();
+
+		const search = overrides.search !== undefined ? overrides.search : searchInput;
+		const sort = overrides.sort !== undefined ? overrides.sort : selectedSort;
+		const spirit = overrides.spirit !== undefined ? overrides.spirit : selectedSpirit;
+		const show = overrides.show !== undefined ? overrides.show : selectedShowFilter;
+		const pp = overrides.perPage !== undefined ? overrides.perPage : perPage;
+		const pageNum = overrides.page !== undefined ? overrides.page : 1;
+		const mood = overrides.mood !== undefined ? overrides.mood : selectedMood;
+
+		params.set('page', String(pageNum));
+		if (search) params.set('search', String(search));
+		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
+		if (spirit && spirit !== 'all') params.set('spirit', String(spirit));
+		if (show && show !== 'all') params.set('show', String(show));
+		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
+		if (mood) params.set('mood', String(mood));
+
+		// preserve advanced filter params
+		for (const key of advancedParamKeys) {
+			const val = overrides[key] !== undefined ? overrides[key] : data.filters[key];
+			if (val) params.set(key, String(val));
+		}
+
+		const queryString = params.toString();
+		return queryString ? `/catalog?${queryString}` : '/catalog';
+	}
+
+	function handleMoodChange(moodId: string) {
+		selectedMood = selectedMood === moodId ? '' : moodId;
+		goto(buildUrl({ mood: selectedMood || null, page: 1 }), { keepFocus: true });
+	}
 
 	function handleSearch(e: Event) {
 		e.preventDefault();
-		if (searchQuery.trim()) {
-			goto(`/catalog/browse?search=${encodeURIComponent(searchQuery.trim())}`);
-		}
+		goto(buildUrl({ page: 1 }), { keepFocus: true });
 	}
 
-	// Bartender tips - rotating educational content
-	const bartenderTips: { title: string; tip: string; source: string }[] = tips;
-
-	// Pick a random tip
-	function getRandomTip() {
-		return bartenderTips[Math.floor(Math.random() * bartenderTips.length)];
+	function handleSortChange(value: string) {
+		selectedSort = value;
+		goto(buildUrl({ sort: value, page: 1 }), { keepFocus: true });
 	}
-	let currentTip = $state(getRandomTip());
 
-	function showNewTip() {
-		let newTip = getRandomTip();
-		// Ensure we get a different tip if possible
-		while (bartenderTips.length > 1 && newTip.title === currentTip.title) {
-			newTip = getRandomTip();
+	function handleSpiritChange(value: string) {
+		selectedSpirit = value;
+		goto(buildUrl({ spirit: value, page: 1 }), { keepFocus: true });
+	}
+
+	function handleShowFilterChange(value: string) {
+		selectedShowFilter = value;
+		goto(buildUrl({ show: value, page: 1 }), { keepFocus: true });
+	}
+
+	function handlePerPageChange(value: string) {
+		perPage = value;
+		goto(buildUrl({ perPage: value, page: 1 }), { keepFocus: true });
+	}
+
+	function clearSearch() {
+		searchInput = '';
+		goto(buildUrl({ search: '' }), { keepFocus: true });
+	}
+
+	function handleAdvancedSearch(params: Record<string, string>) {
+		const overrides: Record<string, string | number | null> = { page: 1 };
+		// clear all advanced params first
+		for (const key of advancedParamKeys) {
+			overrides[key] = null;
 		}
-		currentTip = newTip;
+		// apply new ones
+		for (const [key, val] of Object.entries(params)) {
+			overrides[key] = val;
+		}
+		goto(buildUrl(overrides));
+	}
+
+	function clearAdvancedFilter(...keys: string[]) {
+		const overrides: Record<string, string | number | null> = { page: 1 };
+		for (const key of keys) {
+			overrides[key] = null;
+		}
+		goto(buildUrl(overrides));
+	}
+
+	function clearAllAdvancedFilters() {
+		const overrides: Record<string, string | number | null> = { page: 1 };
+		for (const key of advancedParamKeys) {
+			overrides[key] = null;
+		}
+		goto(buildUrl(overrides));
+	}
+
+	function navigatePage(pageNum: number) {
+		goto(buildUrl({ page: pageNum }));
+	}
+
+	// Update local state when page data changes
+	$effect(() => {
+		searchInput = data.filters.search || '';
+		selectedSort = data.filters.sort || 'name-asc';
+		selectedSpirit = data.filters.spiritId || 'all';
+		selectedShowFilter = data.filters.showFilter || 'all';
+		perPage = String(data.filters.perPage ?? 24);
+		favorites = new Set(data.favoriteRecipeIds);
+		featured = new Set(data.featuredRecipeIds);
+	});
+
+	function handleToggleFavorite(id: number) {
+		const newFavorites = new Set(favorites);
+		if (newFavorites.has(id)) {
+			newFavorites.delete(id);
+		} else {
+			newFavorites.add(id);
+		}
+		favorites = newFavorites;
+	}
+
+	function handleToggleFeatured(id: number) {
+		const newFeatured = new Set(featured);
+		if (newFeatured.has(id)) {
+			newFeatured.delete(id);
+		} else {
+			newFeatured.add(id);
+		}
+		featured = newFeatured;
 	}
 </script>
 
 <svelte:head>
 	<title>Catalog - Busser</title>
-	<meta name="description" content="Browse our curated collection of classic and modern cocktail recipes. Find your next favorite drink." />
+	<meta
+		name="description"
+		content="Browse and search our complete collection of cocktail recipes. Filter by spirit, strength, ingredients, and more."
+	/>
 	<meta property="og:title" content="Cocktail Catalog - Busser" />
-	<meta property="og:description" content="Browse our curated collection of classic and modern cocktail recipes." />
+	<meta
+		property="og:description"
+		content="Search and filter cocktail recipes by spirit, strength, ingredients, and more."
+	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://busserapp.com/catalog" />
 	<meta property="og:image" content="https://busserapp.com/og-image.png" />
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
-{#if authenticated && isGlobalCatalog && workspace?.workspaceRole !== 'owner'}
-	<FancyAlert class="mb-6 mt-4">
-		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-		{#snippet children()}
-			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
-		{/snippet}
-		{#snippet action()}
-			<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
-		{/snippet}
-	</FancyAlert>
-{/if}
+<div class="container mx-auto px-4 mt-4">
+	{#if authenticated && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
+		<FancyAlert class="mb-6">
+			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
+			{#snippet children()}
+				<p class="sm:hidden">Viewing global catalog</p>
+				<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
+			{/snippet}
+			{#snippet action()}
+				<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
+			{/snippet}
+		</FancyAlert>
+	{/if}
 
-<!-- Desktop toolbar above hero -->
-<div class="hidden md:flex items-center justify-end gap-2 mb-4 mt-4">
-	<FancyButton onclick={surpriseMe} size="sm">
-		<Shuffle class="h-4 w-4 mr-1" />
-		Surprise Me
-	</FancyButton>
-	<FancyButton href="/catalog/browse" variant="primary" size="sm">
-		<ArrowRight class="h-4 w-4 mr-1" />
-		View All
-	</FancyButton>
-</div>
-
-<!-- Hero Section -->
-<div
-	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 md:mt-0 px-4 py-4 sm:px-6 sm:py-5"
->
-	<!-- Title + Search -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-		<h1 class="text-2xl font-bold">Catalog</h1>
-		<form onsubmit={handleSearch} class="flex gap-2 w-full sm:max-w-xs sm:w-auto">
-			<div class="relative flex-1">
-				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
-				<FancyInput
-					type="text"
-					placeholder="Search cocktails..."
-					bind:value={searchQuery}
-					class="pl-10"
-				/>
-			</div>
-			<FancyButton type="submit" size="sm">Search</FancyButton>
-		</form>
+	<!-- Desktop toolbar above hero -->
+	<div class="hidden md:flex items-center justify-end gap-2 mb-4 mt-4">
+		<FancyButton href="/catalog/explore" size="sm">
+			<Compass class="h-4 w-4 mr-1" />
+			Explore
+		</FancyButton>
+		{#if canModify}
+			<FancyButton href="/catalog/add" variant="primary" size="sm">
+				<Plus class="h-4 w-4 mr-1" />
+				Add Recipe
+			</FancyButton>
+		{/if}
 	</div>
 
-	<!-- Mobile: Surprise Me + View All -->
-	<div class="flex gap-2 md:hidden mb-4">
-		<FancyButton onclick={surpriseMe} size="sm" class="flex-1 justify-center">
-			<Shuffle class="h-4 w-4 mr-1" />
-			Surprise Me
-		</FancyButton>
-		<FancyButton href="/catalog/browse" variant="primary" size="sm" class="flex-1 justify-center">
-			<ArrowRight class="h-4 w-4 mr-1" />
-			View All
-		</FancyButton>
-	</div>
-
-	<!-- Desktop: Smart Action Pills -->
-	<div class="hidden md:flex gap-2 flex-wrap pb-1 -mb-1">
-		<FancyBadge href="/catalog/browse" class="whitespace-nowrap">
-			<FlaskConical class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{totalRecipes}</span>
-			<span class="text-xs text-muted-foreground">Recipes</span>
-		</FancyBadge>
-
-		{#if !isGlobalCatalog}
-			<FancyBadge href="/catalog/browse?readyToMake=true" class="whitespace-nowrap">
-				<Sparkles class="h-4 w-4 text-primary shrink-0" />
-				<span class="text-sm font-bold">{availableCount}</span>
-				<span class="text-xs text-muted-foreground">Ready</span>
-			</FancyBadge>
-
-			{#if almostThereCount > 0}
-				<FancyBadge href="/catalog/browse?almostThere=true" class="whitespace-nowrap">
-					<GlassWater class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{almostThereCount}</span>
-					<span class="text-xs text-muted-foreground">Almost There</span>
+	<!-- Hero Section -->
+	<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5">
+		<!-- Desktop: title + badges below -->
+		<div class="hidden md:block">
+			<h1 class="text-2xl font-bold">Catalog</h1>
+			<p class="text-sm text-muted-foreground mt-0.5 mb-3">
+				{data.pagination.total}
+				{#if $page.data.isGlobalWorkspace}
+					{data.pagination.total === 1
+						? "recipe in Busser's catalog"
+						: "recipes in Busser's catalog"}
+				{:else if workspace?.workspaceRole === 'owner'}
+					{data.pagination.total === 1 ? 'recipe' : 'recipes'} in your catalog
+				{:else}
+					{data.pagination.total === 1 ? 'recipe' : 'recipes'} available
+				{/if}
+			</p>
+			<div class="flex gap-2 flex-wrap">
+				<FancyBadge class="whitespace-nowrap">
+					<FlaskConical class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold">{data.pagination.total}</span>
+					<span class="text-xs text-muted-foreground">Recipes</span>
 				</FancyBadge>
+
+				{#if selectedSpirit && selectedSpirit !== 'all'}
+					{@const spiritObj = data.spirits.find((s) => String(s.recipeCategoryId) === selectedSpirit)}
+					{#if spiritObj}
+						<FancyBadge class="whitespace-nowrap">
+							<span class="text-sm font-bold">{spiritObj.recipeCategoryDescription}</span>
+							<span class="text-xs text-muted-foreground">Spirit</span>
+						</FancyBadge>
+					{/if}
+				{/if}
+
+				{#if advancedFilterCount > 0}
+					<FancyBadge as="button" onclick={clearAllAdvancedFilters} class="whitespace-nowrap">
+						<SlidersHorizontal class="h-4 w-4 text-primary shrink-0" />
+						<span class="text-sm font-bold">{advancedFilterCount}</span>
+						<span class="text-xs text-muted-foreground">Advanced Filter{advancedFilterCount !== 1 ? 's' : ''}</span>
+						<X class="h-3 w-3 text-muted-foreground" />
+					</FancyBadge>
+				{/if}
+			</div>
+		</div>
+
+		<!-- Mobile: title + buttons only (no badges) -->
+		<div class="md:hidden">
+			<h1 class="text-2xl font-bold mb-3">Catalog</h1>
+			<div class="flex gap-2">
+				<FancyButton href="/catalog/explore" size="sm" class="flex-1 justify-center">
+					<Compass class="h-4 w-4 mr-1" />
+					Explore
+				</FancyButton>
+				{#if canModify}
+					<FancyButton href="/catalog/add" variant="primary" size="sm" class="flex-1 justify-center">
+						<Plus class="h-4 w-4 mr-1" />
+						Add Recipe
+					</FancyButton>
+				{/if}
+			</div>
+		</div>
+	</div>
+
+	<!-- Toolbar -->
+	<div class="flex flex-col gap-3 mb-6">
+		<div class="flex items-center gap-2">
+			<!-- Search -->
+			<form onsubmit={handleSearch} class="flex-1 min-w-0">
+				<div class="relative">
+					<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+					<Input
+						type="text"
+						placeholder="Search recipes..."
+						bind:value={searchInput}
+						class="pl-10 pr-10"
+					/>
+					{#if searchInput}
+						<button
+							type="button"
+							onclick={clearSearch}
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+						>
+							<X class="h-4 w-4" />
+						</button>
+					{/if}
+				</div>
+			</form>
+
+			<!-- Filters -->
+			<FilterButton
+				bind:open={filterOpen}
+				activeCount={activeFilterCount + advancedFilterCount}
+				viewModes={['grid', 'list']}
+				activeView={viewMode}
+				onViewChange={setViewMode}
+				onRefresh={invalidateAll}
+			>
+				<CatalogFilterPanel
+					spirits={data.spirits}
+					{selectedSpirit}
+					{selectedShowFilter}
+					{selectedMood}
+					sortOption={selectedSort}
+					{perPage}
+					{advancedFilterCount}
+					onSpiritChange={handleSpiritChange}
+					onShowFilterChange={handleShowFilterChange}
+					onMoodChange={handleMoodChange}
+					onSortChange={handleSortChange}
+					onPerPageChange={handlePerPageChange}
+					onReset={resetPanelFilters}
+					onAdvancedClick={() => {
+						filterOpen = false;
+						advancedSearchOpen = true;
+					}}
+				/>
+			</FilterButton>
+
+			<!-- View toggle -->
+			<ViewToggle modes={['grid', 'list']} active={viewMode} onchange={setViewMode} />
+		</div>
+	</div>
+
+	<!-- Active Advanced Filter Tags -->
+	{#if advancedFilterCount > 0}
+		<div class="flex flex-wrap items-center gap-2 mb-4">
+			<span class="text-sm text-muted-foreground">Filters:</span>
+			{#if data.filters.readyToMake}
+				<Badge variant="secondary" class="gap-1">
+					Ready to Make
+					<button
+						onclick={() => clearAdvancedFilter('readyToMake')}
+						class="ml-1 hover:text-destructive"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
 			{/if}
-		{/if}
-
-		{#if popularSpirit}
-			<FancyBadge
-				href="/catalog/browse/{idToSlug[popularSpirit.recipeCategoryId] ??
-					popularSpirit.recipeCategoryId}"
-				class="whitespace-nowrap"
-			>
-				<TrendingUp class="h-4 w-4 text-primary shrink-0" />
-				<span class="text-sm font-bold truncate">{popularSpirit.recipeCategoryDescription}</span>
-				<span class="text-xs text-muted-foreground">Most Popular</span>
-			</FancyBadge>
-		{:else}
-			<FancyBadge class="whitespace-nowrap">
-				<TrendingUp class="h-4 w-4 text-muted-foreground shrink-0" />
-				<span class="text-sm font-bold">&mdash;</span>
-				<span class="text-xs text-muted-foreground">Most Popular</span>
-			</FancyBadge>
-		{/if}
-
-		{#if topIngredient && !isGlobalCatalog}
-			<FancyBadge href="/inventory" class="whitespace-nowrap">
-				<ShoppingCart class="h-4 w-4 text-primary shrink-0" />
-				<span class="text-sm font-bold">+{topIngredient.unlockableRecipes}</span>
-				<span class="text-xs text-muted-foreground">Buy {topIngredient.ingredientName}</span>
-			</FancyBadge>
-		{/if}
-	</div>
-</div>
-
-<!-- Spirit Cards Section -->
-<section class="mb-10">
-	<div class="flex items-center justify-between mb-6">
-		<h2 class="text-2xl font-bold flex items-center gap-2">
-			<GlassWater class="h-6 w-6 text-primary" />
-			Explore by Spirit
-		</h2>
-	</div>
-
-	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-		{#each spirits as spirit}
-			{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
-			<a
-				href="/catalog/browse/{idToSlug[spirit.recipeCategoryId] ?? spirit.recipeCategoryId}"
-				class="block group"
-			>
-				<Card.Root
-					class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300"
-				>
-					<!-- Background image -->
-					<div class="absolute inset-0">
-						<img
-							src={spirit.recipeCategoryDescriptionImageUrl}
-							alt={spirit.recipeCategoryDescription}
-							class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-						/>
-						<div
-							class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
-						></div>
-					</div>
-
-					<!-- Content -->
-					<div class="absolute inset-0 p-5 flex flex-col justify-end">
-						<div class="flex items-center justify-between">
-							<h3 class="text-xl font-bold text-foreground">
-								{spirit.recipeCategoryDescription}
-							</h3>
-							<Badge variant="secondary" class="bg-background/80 backdrop-blur-sm">
-								{count}
-								{count === 1 ? 'recipe' : 'recipes'}
-							</Badge>
-						</div>
-						<p class="text-sm text-muted-foreground mt-1 line-clamp-2">
-							{spirit.recipeCategoryDescriptionText}
-						</p>
-					</div>
-
-					<!-- Hover arrow indicator -->
-					<div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-						<div class="p-2 rounded-full bg-primary text-primary-foreground">
-							<ArrowRight class="h-4 w-4" />
-						</div>
-					</div>
-				</Card.Root>
-			</a>
-		{/each}
-	</div>
-
-</section>
-
-<!-- Cocktail of the Day + Recipe List -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-	<!-- Cocktail of the Day -->
-	{#if cocktailOfTheDay}
-		<div class="lg:col-span-1">
-			<CocktailOfTheDay recipe={cocktailOfTheDay} />
+			{#if data.filters.ingredientInclude}
+				{@const names = data.filters.ingredientNames || {}}
+				{@const ids = data.filters.ingredientInclude.split(',').map(Number)}
+				<Badge variant="secondary" class="gap-1">
+					Must include: {ids.map((id) => names[id] || id).join(', ')}
+					<button
+						onclick={() => clearAdvancedFilter('ingredientInclude')}
+						class="ml-1 hover:text-destructive"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			{#if data.filters.ingredientAny}
+				{@const names = data.filters.ingredientNames || {}}
+				{@const ids = data.filters.ingredientAny.split(',').map(Number)}
+				<Badge variant="secondary" class="gap-1">
+					Any of: {ids.map((id) => names[id] || id).join(', ')}
+					<button
+						onclick={() => clearAdvancedFilter('ingredientAny')}
+						class="ml-1 hover:text-destructive"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			{#if data.filters.ingredientExclude}
+				{@const names = data.filters.ingredientNames || {}}
+				{@const ids = data.filters.ingredientExclude.split(',').map(Number)}
+				<Badge variant="destructive" class="gap-1">
+					Excludes: {ids.map((id) => names[id] || id).join(', ')}
+					<button
+						onclick={() => clearAdvancedFilter('ingredientExclude')}
+						class="ml-1 hover:text-destructive-foreground"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			{#if data.filters.strengthMin || data.filters.strengthMax}
+				<Badge variant="secondary" class="gap-1">
+					Strength: {data.filters.strengthMin || '0'}-{data.filters.strengthMax || '10'}
+					<button
+						onclick={() => clearAdvancedFilter('strengthMin', 'strengthMax')}
+						class="ml-1 hover:text-destructive"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			{#if data.filters.ingredientCountMin || data.filters.ingredientCountMax}
+				<Badge variant="secondary" class="gap-1">
+					Ingredients: {data.filters.ingredientCountMin || '0'}-{data.filters.ingredientCountMax ||
+						'15'}
+					<button
+						onclick={() => clearAdvancedFilter('ingredientCountMin', 'ingredientCountMax')}
+						class="ml-1 hover:text-destructive"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			{#if data.filters.method}
+				{@const pm = data.preparationMethods.find(
+					(p) => String(p.recipeTechniqueDescriptionId) === data.filters.method
+				)}
+				<Badge variant="secondary" class="gap-1">
+					Method: {pm?.recipeTechniqueDescriptionText || data.filters.method}
+					<button onclick={() => clearAdvancedFilter('method')} class="ml-1 hover:text-destructive">
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			{#if data.filters.ratingMin || data.filters.ratingMax}
+				<Badge variant="secondary" class="gap-1">
+					Rating: {data.filters.ratingMin || '0'}-{data.filters.ratingMax || '10'}
+					<button
+						onclick={() => clearAdvancedFilter('ratingMin', 'ratingMax')}
+						class="ml-1 hover:text-destructive"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				</Badge>
+			{/if}
+			<Button variant="ghost" size="sm" onclick={clearAllAdvancedFilters}>Clear all</Button>
 		</div>
 	{/if}
 
-	<!-- Tabbed Recipe List -->
-	<Card.Root class={cocktailOfTheDay ? 'lg:col-span-2' : 'lg:col-span-3'}>
-		<Card.Header>
-			<div class="flex items-center gap-2">
-				<div class="inline-flex items-center rounded-full backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground">
-					<button
-						class={cn(
-							'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
-							activeTab === 'featured'
-								? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-								: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
-						)}
-						onclick={() => (activeTab = 'featured')}
-					>
-						<Star class="h-3 w-3 inline-block mr-1 -mt-0.5" />
-						Featured
-					</button>
-					{#if authenticated}
-						<button
-							class={cn(
-								'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
-								activeTab === 'favorites'
-									? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-									: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
-							)}
-							onclick={() => (activeTab = 'favorites')}
-						>
-							<Heart class="h-3 w-3 inline-block mr-1 -mt-0.5" />
-							Favorites
-						</button>
-					{/if}
-					<button
-						class={cn(
-							'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
-							activeTab === 'recent'
-								? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-								: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
-						)}
-						onclick={() => (activeTab = 'recent')}
-					>
-						<BookOpen class="h-3 w-3 inline-block mr-1 -mt-0.5" />
-						Recent
-					</button>
+	<!-- Results -->
+	{#if data.recipes.length === 0}
+		<Card.Root class="border-dashed">
+			<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
+				<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+					<FlaskConical class="h-10 w-10 text-muted-foreground/50" />
 				</div>
-			</div>
-		</Card.Header>
-		<Card.Content>
-			{#if tabRecipes.length === 0}
-				<p class="text-muted-foreground text-center py-8">
-					{#if activeTab === 'favorites'}
-						No favorites yet. Browse recipes and tap the heart to save your favorites.
-					{:else if activeTab === 'featured'}
-						No featured cocktails yet.
+				<h3 class="text-xl font-semibold mb-2">No Recipes Found</h3>
+				<p class="text-muted-foreground mb-6 max-w-md">
+					{#if searchInput || advancedFilterCount > 0}
+						No recipes match your filters. Try adjusting your search criteria.
 					{:else}
-						No recipes yet.
+						Your catalog is empty. Start by adding your first recipe!
 					{/if}
 				</p>
-			{:else}
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					{#each tabRecipes.slice(0, 6) as cocktail (cocktail.recipeId)}
-						<a
-							href="/catalog/{cocktail.recipeId}"
-							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
-						>
-							<div class="shrink-0">
-								<SkeletonImage
-									src={cocktail.recipeImageUrl}
-									alt={cocktail.recipeName}
-									variant="recipe"
-									class="w-12 h-12 rounded-lg"
-								/>
-							</div>
-							<div class="flex-1 min-w-0">
-								<p class="font-medium truncate group-hover:text-accent-foreground transition-colors">
-									{cocktail.recipeName}
-								</p>
-								<p class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors">
-									{cocktail.recipeCategoryDescription}
-								</p>
-							</div>
-						</a>
-					{/each}
-				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
-</div>
-
-<!-- Bottom Row: Bartender Tip + Add Recipe CTA -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-	<!-- Bartender Tip -->
-	<Card.Root
-		class="bg-gradient-to-br from-neon-amber-500/10 to-neon-amber-500/5 border-neon-amber-500/20 cursor-pointer hover:border-neon-amber-500/40 transition-colors"
-		onclick={showNewTip}
-	>
-		<Card.Header>
-			<Card.Title class="flex items-center gap-2 text-neon-amber-600 dark:text-neon-amber-400">
-				<Lightbulb class="h-5 w-5" />
-				Bartender's Tip
-			</Card.Title>
-		</Card.Header>
-		<Card.Content>
-			<h4 class="font-semibold mb-2">{currentTip.title}</h4>
-			<p class="text-muted-foreground text-sm leading-relaxed mb-3">
-				"{currentTip.tip}"
-			</p>
-			<p class="text-xs text-muted-foreground/70 italic">
-				— {currentTip.source}
-			</p>
-			<p class="text-xs text-neon-amber-600/50 dark:text-neon-amber-400/50 mt-3">
-				Click for another tip
-			</p>
-		</Card.Content>
-	</Card.Root>
-
-	<!-- Add Recipe CTA -->
-	{#if canModify}
-		<Card.Root class="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-			<Card.Content class="flex flex-col items-center justify-center h-full py-8 text-center">
-				<div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-					<Plus class="h-8 w-8 text-primary" />
-				</div>
-				<h3 class="text-xl font-bold mb-2">Add a New Recipe</h3>
-				<p class="text-muted-foreground text-sm mb-4 max-w-xs">
-					Create a new cocktail recipe from your inventory ingredients.
-				</p>
-				<FancyButton href="/catalog/add" variant="primary" size="md">
-					<Plus class="h-4 w-4 mr-2" />
-					Add Recipe
-				</FancyButton>
+				{#if searchInput || advancedFilterCount > 0}
+					<div class="flex gap-2">
+						{#if searchInput}
+							<Button variant="outline" onclick={clearSearch}>Clear Search</Button>
+						{/if}
+						{#if advancedFilterCount > 0}
+							<Button variant="outline" onclick={clearAllAdvancedFilters}
+								>Clear Advanced Filters</Button
+							>
+						{/if}
+					</div>
+				{:else}
+					<a href="/catalog/add" class={buttonVariants()}> Add Recipe </a>
+				{/if}
 			</Card.Content>
 		</Card.Root>
 	{:else}
-		<Card.Root class="bg-muted/30">
-			<Card.Content class="flex flex-col items-center justify-center h-full py-8 text-center">
-				<BookOpen class="h-12 w-12 text-muted-foreground/50 mb-4" />
-				<h3 class="text-lg font-semibold mb-2">Browse the Collection</h3>
-				<p class="text-muted-foreground text-sm mb-4 max-w-xs">
-					Explore our curated collection of cocktail recipes.
-				</p>
-				<a href="/catalog/browse" class={buttonVariants({ variant: 'outline' })}>
-					Browse All
-					<ArrowRight class="h-4 w-4 ml-2" />
-				</a>
-			</Card.Content>
-		</Card.Root>
+		<div
+			class={cn(
+				viewMode === 'grid'
+					? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+					: 'flex flex-col gap-3'
+			)}
+		>
+			{#each data.recipes as recipe (recipe.recipeId)}
+				<CatalogBrowseCard
+					{recipe}
+					{viewMode}
+					isFavorite={favorites.has(recipe.recipeId)}
+					isFeatured={featured.has(recipe.recipeId)}
+					{canModify}
+					{authenticated}
+					workspaceId={workspace.workspaceId}
+					actionPath="?"
+					onToggleFavorite={handleToggleFavorite}
+					onToggleFeatured={handleToggleFeatured}
+				/>
+			{/each}
+		</div>
+
+		<!-- Pagination -->
+		<Pagination pagination={data.pagination} itemLabel="recipes" onNavigate={navigatePage} />
 	{/if}
 </div>
 
-<!-- Verdict Explanation -->
-<section id="verdict" class="mb-10 scroll-mt-20">
-	<Card.Root>
-		<Card.Header>
-			<Card.Title class="flex items-center gap-2 text-lg">
-				<Award class="h-5 w-5 text-primary" />
-				How the Verdict Works
-			</Card.Title>
-			<Card.Description>
-				The Verdict is a 0–10 score that reflects how well-crafted and balanced a cocktail is.
-				Cocktails with intentional sweet/dry contrast earn a bonus, while one-dimensional or
-				contradictory profiles lose points.
-			</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			<div class="grid gap-4 sm:grid-cols-2">
-				<div class="flex items-start gap-3 p-3 rounded-lg bg-primary-500/10 border border-primary-500/20">
-					<Candy class="h-4 w-4 text-primary-500 mt-0.5 shrink-0" />
-					<div>
-						<p class="text-sm font-medium">Sweetness</p>
-						<p class="text-xs text-muted-foreground">
-							A measure of sugar presence. Most cocktails feature a sweetening agent for brightness
-							and pop — too much is cloying, too little reduces the drink to spirits on the rocks.
-						</p>
-					</div>
-				</div>
-				<div class="flex items-start gap-3 p-3 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20">
-					<Droplets class="h-4 w-4 text-neon-amber-500 mt-0.5 shrink-0" />
-					<div>
-						<p class="text-sm font-medium">Dryness</p>
-						<p class="text-xs text-muted-foreground">
-							A measure of bitterness, tartness, and astringency. Dryness is the opposing force to
-							sweetness — well-groomed cocktails have a counter-punch to bite through the sugar.
-						</p>
-					</div>
-				</div>
-				<div class="flex items-start gap-3 p-3 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20">
-					<Gauge class="h-4 w-4 text-neon-amber-500 mt-0.5 shrink-0" />
-					<div>
-						<p class="text-sm font-medium">Strength</p>
-						<p class="text-xs text-muted-foreground">
-							How well the alcohol integrates with other flavors, not just volume. The base spirit
-							should be present without overstaying its welcome.
-						</p>
-					</div>
-				</div>
-				<div class="flex items-start gap-3 p-3 rounded-lg bg-secondary-500/10 border border-secondary-500/20">
-					<Sparkles class="h-4 w-4 text-secondary-500 mt-0.5 shrink-0" />
-					<div>
-						<p class="text-sm font-medium">Versatility</p>
-						<p class="text-xs text-muted-foreground">
-							How flexible a recipe is — the most important factor. Highly versatile drinks have
-							interchangeable parts and countless spin-offs, making them vital for tending bar.
-						</p>
-					</div>
-				</div>
-			</div>
-		</Card.Content>
-	</Card.Root>
-</section>
-
-<style>
-	.scrollbar-hide {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
-	}
-	.scrollbar-hide::-webkit-scrollbar {
-		display: none;
-	}
-</style>
+<AdvancedSearchDialog
+	bind:open={advancedSearchOpen}
+	preparationMethods={data.preparationMethods}
+	filters={data.filters}
+	{authenticated}
+	onsearch={handleAdvancedSearch}
+/>
