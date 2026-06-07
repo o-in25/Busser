@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
-	import { cn } from '$lib/utils';
 
+	import { Button } from '$lib/components/ui/button';
+
+	// thin alias over ui/button's glass cta tier — keeps the original FancyButton api intact
 	type BaseProps = {
 		variant?: 'default' | 'primary' | 'secondary' | 'danger' | 'warning';
 		size?: 'sm' | 'md' | 'lg';
@@ -14,12 +16,6 @@
 	type AnchorProps = BaseProps & { href: string } & HTMLAnchorAttributes;
 	type ButtonProps = BaseProps & { href?: never } & HTMLButtonAttributes;
 
-	const sizeClasses = {
-		sm: 'glass-cta-sm',
-		md: 'glass-cta-md',
-		lg: '',
-	};
-
 	let {
 		variant = 'default',
 		size = 'lg',
@@ -29,24 +25,38 @@
 		href,
 		...restProps
 	}: AnchorProps | ButtonProps = $props();
+
+	const variantMap = {
+		default: 'glass',
+		primary: 'glass-primary',
+		secondary: 'glass-secondary',
+		danger: 'glass-danger',
+		warning: 'glass-warning',
+	} as const;
+
+	const sizeMap = { sm: 'glass-sm', md: 'glass-md', lg: 'glass' } as const;
 </script>
 
 {#if href}
-	<a
+	<Button
+		variant={variantMap[variant]}
+		size={sizeMap[size]}
 		href={disabled ? undefined : href}
-		class={cn('glass-cta', variant !== 'default' && `glass-cta-${variant}`, sizeClasses[size], className)}
+		class={className}
 		aria-disabled={disabled || undefined}
 		tabindex={disabled ? -1 : undefined}
 		{...restProps as HTMLAnchorAttributes}
 	>
 		{#if children}{@render children()}{/if}
-	</a>
+	</Button>
 {:else}
-	<button
-		class={cn('glass-cta', variant !== 'default' && `glass-cta-${variant}`, sizeClasses[size], className)}
+	<Button
+		variant={variantMap[variant]}
+		size={sizeMap[size]}
 		{disabled}
+		class={className}
 		{...restProps as HTMLButtonAttributes}
 	>
 		{#if children}{@render children()}{/if}
-	</button>
+	</Button>
 {/if}

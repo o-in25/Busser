@@ -70,7 +70,7 @@
 			<button
 				onclick={handleRefresh}
 				disabled={isRefreshing}
-				class="flex items-center gap-2 w-full rounded-lg border border-input/50 px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors disabled:opacity-50"
+				class="flex items-center gap-2 w-full rounded-lg border border-white/30 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 backdrop-blur-md px-3 py-2.5 text-sm hover:bg-white/60 dark:hover:bg-zinc-800/60 transition-colors disabled:opacity-50"
 			>
 				<RefreshCw class={cn('h-4 w-4 text-muted-foreground', isRefreshing && 'animate-spin')} />
 				{isRefreshing ? 'Refreshing...' : 'Refresh results'}
@@ -111,14 +111,16 @@
 						<div class="flex flex-col gap-1.5">
 							<span class="text-sm font-medium text-muted-foreground">View</span>
 							<div
-								class="flex items-center border border-input/50 rounded-lg overflow-hidden w-fit"
+								class="flex items-center border border-white/30 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 backdrop-blur-md rounded-lg overflow-hidden w-fit"
 							>
 								{#each viewModes as mode}
 									{@const Icon = viewIcons[mode]}
 									<button
 										class={cn(
 											'h-10 px-3 flex items-center justify-center gap-1.5 text-sm transition-colors',
-											activeView === mode ? 'bg-accent text-primary-foreground' : 'hover:bg-muted'
+											activeView === mode
+												? 'bg-primary/25 dark:bg-primary/20 text-primary backdrop-blur-sm'
+												: 'hover:bg-white/40 dark:hover:bg-zinc-700/40'
 										)}
 										onclick={() => onViewChange(mode)}
 									>
@@ -134,7 +136,7 @@
 							onclick={handleRefresh}
 							disabled={isRefreshing}
 							class={cn(
-								'h-10 w-10 flex items-center justify-center rounded-lg border border-input/50 hover:bg-accent/50 transition-colors disabled:opacity-50 ml-auto shrink-0'
+								'h-10 w-10 flex items-center justify-center rounded-lg border border-white/30 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 backdrop-blur-md hover:bg-white/60 dark:hover:bg-zinc-800/60 transition-colors disabled:opacity-50 ml-auto shrink-0'
 							)}
 							aria-label="Refresh results"
 						>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RotateCcw, Save, Trash2 } from 'lucide-svelte';
+	import { RotateCcw, Trash2 } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -13,6 +13,7 @@
 		data = $bindable({}),
 		expiryHours = 24,
 		debounceMs = 1000,
+		lastSaved = $bindable(null),
 		onrestore,
 		onclear,
 	}: {
@@ -20,13 +21,13 @@
 		data?: DraftData;
 		expiryHours?: number;
 		debounceMs?: number;
+		lastSaved?: Date | null;
 		onrestore?: (data: DraftData) => void;
 		onclear?: () => void;
 	} = $props();
 
 	let showRestorePrompt = $state(false);
 	let savedDraft: DraftData | null = $state(null);
-	let lastSaved = $state<Date | null>(null);
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	const STORAGE_KEY = $derived(`draft_${draftKey}`);
@@ -133,12 +134,3 @@
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
-
-{#if lastSaved}
-	<div
-		class="mt-3 mx-auto w-fit flex items-center gap-2 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border shadow-sm md:fixed md:bottom-4 md:right-4 md:mt-0 md:mx-0 z-40"
-	>
-		<Save class="h-3 w-3" />
-		<span>Draft saved</span>
-	</div>
-{/if}

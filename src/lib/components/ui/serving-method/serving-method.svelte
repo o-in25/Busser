@@ -76,10 +76,10 @@
 				<button
 					type="button"
 					class={cn(
-						'relative flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-200 text-left',
+						'relative flex items-start gap-4 p-4 rounded-xl border-2 backdrop-blur-md transition-all duration-200 text-left',
 						isSelected
-							? 'border-primary bg-primary/5'
-							: 'border-border hover:border-primary/50 hover:bg-accent/50'
+							? 'border-primary bg-primary/10'
+							: 'border-white/20 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 hover:border-primary/50'
 					)}
 					onclick={() => handleSelect(method)}
 				>

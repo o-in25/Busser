@@ -2,9 +2,7 @@
 	import { GripVertical, X } from 'lucide-svelte';
 
 	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { QuickSelect } from '$lib/components/ui/quick-select';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -18,7 +16,8 @@
 	import type { MatchMode, SelectOption, View } from '$lib/types';
 	import { cn } from '$lib/utils';
 
-	import Autocomplete from './Autocomplete.svelte';
+	import SearchableSelect from './form/SearchableSelect.svelte';
+	import SegmentedNumberInput from './form/SegmentedNumberInput.svelte';
 
 	let {
 		class: className,
@@ -38,7 +37,7 @@
 		[key: string]: unknown;
 	} = $props();
 
-	// Convert productId to/from string for Autocomplete
+	// Convert productId to/from string for SearchableSelect
 	let productIdValue: string | null = $state(step.productId ? String(step.productId) : null);
 
 	$effect(() => {
@@ -178,10 +177,6 @@
 	// get quick options for currently selected unit
 	let quickOptions = $derived(quickOptionsByUnit[selectedUnit] || []);
 
-	function handleQuickSelect(val: string | number) {
-		step.productIdQuantityInMilliliters = parseFloat(String(val));
-	}
-
 	let descriptionLength = $derived(step.recipeStepDescription?.length || 0);
 	const maxDescription = 200;
 </script>
@@ -224,13 +219,14 @@
 		<Card.Content class="space-y-4">
 			<!-- Product name autocomplete -->
 			<div class="space-y-2">
-				<Autocomplete
+				<SearchableSelect
 					label="Item from Inventory"
 					placeholder="Search for an ingredient..."
 					name="productId"
 					fetchUrl="/api/select/products"
 					bind:value={productIdValue}
 					key={step.productName}
+					createKind="product"
 					onselect={handleProductSelect}
 				/>
 			</div>
@@ -300,16 +296,13 @@
 					</div>
 				{:else}
 					<!-- Quantity + Unit inputs -->
-					<div class="flex gap-2">
-						<Input
-							type="number"
+					<div class="flex items-start gap-2">
+						<SegmentedNumberInput
 							class="flex-1"
-							placeholder="0"
-							value={String(step.productIdQuantityInMilliliters)}
-							oninput={(e) =>
-								(step.productIdQuantityInMilliliters = parseFloat(e.currentTarget.value) || 0)}
-							step="0.25"
-							min="0"
+							bind:value={step.productIdQuantityInMilliliters}
+							min={0}
+							step={0.25}
+							presets={quickOptions.map((o) => ({ label: o.label, value: parseFloat(o.value) }))}
 						/>
 						<Select.Root type="single" value={selectedUnit} onValueChange={handleUnitChange}>
 							<Select.Trigger class="w-32">
@@ -322,11 +315,6 @@
 							</Select.Content>
 						</Select.Root>
 					</div>
-
-					<!-- Quick select for current unit -->
-					{#if quickOptions.length > 0}
-						<QuickSelect options={quickOptions} onselect={handleQuickSelect} class="mt-2" />
-					{/if}
 				{/if}
 			</div>
 
