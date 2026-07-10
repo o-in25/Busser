@@ -1,5 +1,3 @@
-const { MAILGUN_KEY, APP_URL } = process.env;
-
 import FormData from 'form-data';
 import Mailgun from 'mailgun.js';
 
@@ -23,12 +21,21 @@ export interface IWorkspaceInvitationEmailParams {
 export class MailClient {
 	private static domain: string = 'busserapp.com';
 	private static from: string = 'The Busser Team <noreply@busserapp.com>';
-	private static baseUrl: string = APP_URL || 'https://busserapp.com';
 	private static mailgun = new Mailgun(FormData);
-	private static client = this.mailgun.client({
-		username: 'api',
-		key: MAILGUN_KEY || '',
-	});
+	private static _client: ReturnType<typeof MailClient.mailgun.client> | null = null;
+
+	private static get client() {
+		if (!this._client) {
+			const key = process.env.MAILGUN_KEY;
+			if (!key) throw new Error('MAILGUN_KEY is not configured');
+			this._client = this.mailgun.client({ username: 'api', key });
+		}
+		return this._client;
+	}
+
+	private static get baseUrl() {
+		return process.env.APP_URL || 'https://busserapp.com';
+	}
 
 	constructor(domain: string = MailClient.domain) {
 		MailClient.domain = domain;
@@ -39,11 +46,6 @@ export class MailClient {
 		{ username, token }: IUserRegistrationEmailParams
 	): Promise<boolean> {
 		try {
-			if (!MAILGUN_KEY) {
-				console.error('MAILGUN_KEY is not configured');
-				throw new Error('Email service is not configured.');
-			}
-
 			await MailClient.client.messages.create(MailClient.domain, {
 				from: MailClient.from,
 				to,
@@ -69,11 +71,6 @@ export class MailClient {
 		{ username, token }: IPasswordResetEmailParams
 	): Promise<boolean> {
 		try {
-			if (!MAILGUN_KEY) {
-				console.error('MAILGUN_KEY is not configured');
-				throw new Error('Email service is not configured.');
-			}
-
 			await MailClient.client.messages.create(MailClient.domain, {
 				from: MailClient.from,
 				to,
@@ -99,11 +96,6 @@ export class MailClient {
 		{ workspaceName, inviterName, invitationCode, role }: IWorkspaceInvitationEmailParams
 	): Promise<boolean> {
 		try {
-			if (!MAILGUN_KEY) {
-				console.error('MAILGUN_KEY is not configured');
-				throw new Error('Email service is not configured.');
-			}
-
 			await MailClient.client.messages.create(MailClient.domain, {
 				from: MailClient.from,
 				to,

@@ -1,14 +1,12 @@
 // shared google service account credentials and auth
 
-const { GOOGLE_SERVICE_KEY } = process.env;
-
 const base64Decode = (str: string) => (str ? Buffer.from(str, 'base64').toString() : '{}');
 
 let cachedCredentials: any = null;
 
 export function getCredentials(): any {
 	if (!cachedCredentials) {
-		cachedCredentials = JSON.parse(base64Decode(GOOGLE_SERVICE_KEY || ''));
+		cachedCredentials = JSON.parse(base64Decode(process.env.GOOGLE_SERVICE_KEY || ''));
 	}
 	return cachedCredentials;
 }

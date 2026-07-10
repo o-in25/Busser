@@ -12,7 +12,7 @@
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"cloudsql:proxy": "cross-env-shell \"./cloud-sql-proxy $INSTANCE_CONNECTION_NAME\"",
+		"cloudsql:proxy": "./cloud-sql-proxy --port 3306",
 		"migrate:core": "tsx node_modules/knex/bin/cli.js migrate:latest --knexfile knexfile.ts --env core",
 		"migrate:user": "tsx node_modules/knex/bin/cli.js migrate:latest --knexfile knexfile.ts --env user",
 		"migrate:rollback:core": "tsx node_modules/knex/bin/cli.js migrate:rollback --knexfile knexfile.ts --env core",
@@ -41,6 +41,7 @@
 		"@types/crypto-js": "^4.2.2",
 		"@types/d3-geo": "^3.1.0",
 		"@types/jsonwebtoken": "^9.0.10",
+		"@types/node": "^26.1.1",
 		"@types/topojson-client": "^3.1.5",
 		"@typescript-eslint/eslint-plugin": "^8.55.0",
 		"@typescript-eslint/parser": "^8.55.0",
@@ -105,23 +106,5 @@
 		"uuid": "^10.0.0",
 		"world-atlas": "^2.0.2",
 		"zod": "^3.25.76"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@parcel/watcher",
-			"bcrypt",
-			"esbuild",
-			"protobufjs",
-			"sharp"
-		],
-		"overrides": {
-			"minimatch@<3.0.5": "3.1.2",
-			"ajv@<6.12.3": "6.12.6",
-			"fast-xml-parser@<4.4.1": "4.5.1",
-			"tar@<6.2.1": "6.2.1",
-			"diff@<5.2.0": "5.2.0",
-			"multer@<1.4.5-lts.2": "1.4.5-lts.2",
-			"cookie@<0.7.0": "0.7.2"
-		}
 	}
 }

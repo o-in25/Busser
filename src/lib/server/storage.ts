@@ -6,20 +6,35 @@ import { DbProvider } from './db';
 import { getCredentials } from './google';
 import { Logger } from './logger';
 
-const { BUCKET } = process.env;
-const { USER_TABLE } = process.env;
+let _storage: Storage | null = null;
+let _bucket: ReturnType<Storage['bucket']> | null = null;
+let _db: DbProvider | null = null;
 
-const { client_email, private_key } = getCredentials();
-const storage = new Storage({
-	credentials: {
-		client_email,
-		private_key,
-	},
-});
+function getStorageClient(): Storage {
+	if (!_storage) {
+		const { client_email, private_key } = getCredentials();
+		_storage = new Storage({ credentials: { client_email, private_key } });
+	}
+	return _storage;
+}
 
-const bucket = storage.bucket(BUCKET || '');
+function getBucket(): ReturnType<Storage['bucket']> {
+	if (!_bucket) {
+		const name = process.env.BUCKET;
+		if (!name) throw new Error('BUCKET is not configured');
+		_bucket = getStorageClient().bucket(name);
+	}
+	return _bucket;
+}
 
-const db = new DbProvider(USER_TABLE || '');
+function getDb(): DbProvider {
+	if (!_db) {
+		const table = process.env.USER_TABLE;
+		if (!table) throw new Error('USER_TABLE is not configured');
+		_db = new DbProvider(table);
+	}
+	return _db;
+}
 
 export type Upload = {
 	uploadId?: string;
@@ -42,7 +57,7 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
 	try {
 		const row = Object.assign(
 			{},
-			await db
+			await getDb()
 				.table<Upload>('upload')
 				.select('name', 'bucket')
 				.where('publicUrl', signedUrl)
@@ -54,9 +69,9 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
 			throw Error('No upload record found for signed URL.');
 		}
 
-		await storage.bucket(row.bucket).file(row.name).delete();
+		await getStorageClient().bucket(row.bucket).file(row.name).delete();
 
-		await db
+		await getDb()
 			.table<Upload>('upload')
 			.where('name', row.name)
 			.andWhere('bucket', row.bucket)
@@ -85,7 +100,7 @@ export async function getSignedUrl(
 	try {
 		const safeName = (fileName || file.name).replace(/[^a-zA-Z0-9._-]+/g, '-');
 		const name = `${kind}/${workspaceId}/${safeName}-${moment().format('MMDDYYYYSS')}`;
-		const newFile = bucket.file(name);
+		const newFile = getBucket().file(name);
 		const blob = await file.arrayBuffer();
 		const data = Buffer.from(blob);
 		await newFile.save(data, {
@@ -95,7 +110,7 @@ export async function getSignedUrl(
 		const publicUrl = newFile.publicUrl();
 		const [metadata] = await newFile.getMetadata();
 		// save a ref of the image so we can delete it later
-		await db.table<Upload>('upload').insert({
+		await getDb().table<Upload>('upload').insert({
 			uploadId: crypto.randomUUID(),
 			externalUploadId: metadata.id,
 			name: metadata.name,
@@ -120,7 +135,7 @@ export async function copyGcsFile(
 	workspaceId: string
 ): Promise<string> {
 	try {
-		const sourceRow = await db
+		const sourceRow = await getDb()
 			.table<Upload>('upload')
 			.select('name', 'bucket', 'contentType')
 			.where('publicUrl', sourceUrl)
@@ -135,15 +150,15 @@ export async function copyGcsFile(
 
 		const basename = sourceRow.name.split('/').pop() || sourceRow.name;
 		const destName = `${kind}/${workspaceId}/${basename}-${moment().format('MMDDYYYYSS')}`;
-		const sourceFile = storage.bucket(sourceRow.bucket).file(sourceRow.name);
-		const destFile = bucket.file(destName);
+		const sourceFile = getStorageClient().bucket(sourceRow.bucket).file(sourceRow.name);
+		const destFile = getBucket().file(destName);
 
 		await sourceFile.copy(destFile);
 
 		const [metadata] = await destFile.getMetadata();
 		const publicUrl = destFile.publicUrl();
 
-		await db.table<Upload>('upload').insert({
+		await getDb().table<Upload>('upload').insert({
 			uploadId: crypto.randomUUID(),
 			externalUploadId: metadata.id,
 			name: metadata.name,
@@ -170,14 +185,14 @@ export async function uploadAvatarBuffer(
 	try {
 		const ext = contentType.includes('svg') ? 'svg' : contentType.split('/')[1] || 'png';
 		const name = `avatars/${userId}/${Date.now()}.${ext}`;
-		const newFile = bucket.file(name);
+		const newFile = getBucket().file(name);
 
 		await newFile.save(buffer, { contentType });
 
 		const publicUrl = newFile.publicUrl();
 		const [metadata] = await newFile.getMetadata();
 
-		await db.table<Upload>('upload').insert({
+		await getDb().table<Upload>('upload').insert({
 			uploadId: crypto.randomUUID(),
 			externalUploadId: metadata.id,
 			name: metadata.name,
@@ -201,7 +216,7 @@ export async function getSignedUrlFromUnsignedUrl(
 ) {
 	const match = unsignedUrl.match(/https:\/\/storage\.googleapis\.com\/[^/]+\/(.+)$/);
 	const fileName = match?.[1] ?? '';
-	const file = bucket.file(fileName);
+	const file = getBucket().file(fileName);
 	const [signedUrl] = await file.getSignedUrl({
 		version: 'v4',
 		action: 'read',
