@@ -38,7 +38,6 @@
 	import FancyCarousel from '$lib/components/FancyCarousel.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
-	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -49,7 +48,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { reveal } from '$lib/actions/reveal';
-	import { idToSlug, moods } from '$lib/spirits';
+	import { moods } from '$lib/spirits';
 	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
@@ -242,85 +241,6 @@
 				</div>
 			</div>
 		{/if}
-	</section>
-
-	<!-- Live Catalog Content -->
-	<section class="py-8 px-4">
-		<div class="max-w-6xl mx-auto">
-			<!-- Cocktail of the Day -->
-			{#if landingData?.cocktailOfTheDay}
-				<div class="mb-8 reveal-on-scroll" use:reveal>
-					<CocktailOfTheDay recipe={landingData.cocktailOfTheDay} />
-				</div>
-			{/if}
-
-			<!-- Browse by Spirit -->
-			{#if landingData?.allSpirits && landingData.allSpirits.length > 0}
-				<div class="mb-8 reveal-on-scroll" use:reveal={{ delay: 100 }}>
-					<div class="flex items-center justify-between mb-4">
-						<h2 class="text-2xl font-bold flex items-center gap-2">
-							<GlassWater class="h-6 w-6 text-primary" />
-							Explore by Spirit
-						</h2>
-						<a href="/catalog" class="text-sm text-primary hover:underline flex items-center gap-1">
-							View All <ArrowRight class="h-3 w-3" />
-						</a>
-					</div>
-					<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-						{#each landingData.allSpirits as spirit}
-							<a
-								href="/catalog/explore/{idToSlug[spirit.recipeCategoryId] ??
-									spirit.recipeCategoryId}"
-								class="block group"
-							>
-								<Card.Root class="relative overflow-hidden h-32 hover:shadow-lg transition-all">
-									{#if spirit.recipeCategoryDescriptionImageUrl}
-										<div class="absolute inset-0">
-											<img
-												src={spirit.recipeCategoryDescriptionImageUrl}
-												alt={spirit.recipeCategoryDescription}
-												class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-											/>
-											<div
-												class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
-											></div>
-										</div>
-									{/if}
-									<div class="absolute inset-0 p-3 flex flex-col justify-end">
-										<h3 class="text-sm font-bold text-foreground">
-											{spirit.recipeCategoryDescription}
-										</h3>
-									</div>
-								</Card.Root>
-							</a>
-						{/each}
-					</div>
-				</div>
-			{/if}
-
-			<!-- Quick Actions -->
-			<div
-				class="flex flex-wrap gap-3 justify-center mb-4 reveal-on-scroll"
-				use:reveal={{ delay: 200 }}
-			>
-				<FancyButton href="/catalog" size="md">
-					<FlaskConical class="h-4 w-4 mr-2" />
-					Browse {landingData?.totalRecipes || ''} {landingData?.totalRecipes === 1 ? 'Recipe' : 'Recipes'}
-				</FancyButton>
-				<FancyButton
-					size="md"
-					onclick={() => {
-						if (recipes.length > 0) {
-							const random = recipes[Math.floor(Math.random() * recipes.length)];
-							goto(`/catalog/${random.recipeId}`);
-						}
-					}}
-				>
-					<Shuffle class="h-4 w-4 mr-2" />
-					Surprise Me
-				</FancyButton>
-			</div>
-		</div>
 	</section>
 
 	<!-- Features Section -->

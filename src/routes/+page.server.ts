@@ -6,7 +6,6 @@ import { hasWorkspaceAccess } from '$lib/server/workspace';
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import { getGlobalWorkspace } from '$lib/server/workspace';
-import { indexFromSeed } from '$lib/math';
 import type { View } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
@@ -175,39 +174,19 @@ export const load = (async ({ locals }) => {
 
 	// Data for unauthenticated landing page
 	let landingData: {
-		totalRecipes: number;
-		spiritCount: number;
 		featuredRecipes: View.BasicRecipe[];
 		inviteOnly: boolean;
-		allSpirits: Awaited<ReturnType<typeof catalogRepo.getSpirits>>;
-		cocktailOfTheDay: View.BasicRecipe | null;
 	} | null = null;
 
 	if (!user) {
-		// Get total catalog count for stats (use global workspace for landing page)
-		const catalogResult = await catalogRepo.findAll(globalWorkspace, 1, 1);
-		const totalRecipes = catalogResult.pagination.total;
-
-		// Get spirits for browse-by-spirit shortcuts
-		const allSpirits = await catalogRepo.getSpirits();
-
 		// get all admin-curated featured recipes for carousel
 		const allFeatured = await catalogRepo.getFeatured(globalWorkspace);
 
 		const inviteOnly = await isInviteOnly();
 
-		// deterministic daily pick from full featured list (must match catalog page pool)
-		const today = new Date();
-		const dateSeed = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-		const cocktailOfTheDay = indexFromSeed(allFeatured, dateSeed);
-
 		landingData = {
-			totalRecipes,
-			spiritCount: allSpirits.length,
 			featuredRecipes: allFeatured,
 			inviteOnly,
-			allSpirits,
-			cocktailOfTheDay,
 		};
 	}
 
