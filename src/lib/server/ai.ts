@@ -9,7 +9,9 @@ import { ZodSchema } from 'zod';
 
 import { getCredentials } from './google';
 
-const { OPENAI_API_KEY } = process.env;
+import { env } from '$env/dynamic/private';
+
+const { OPENAI_API_KEY } = env;
 
 const googleCredentials = getCredentials();
 const LOCATION = 'us-central1';

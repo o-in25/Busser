@@ -6,12 +6,12 @@ import { getWorkspace, getGlobalWorkspace } from '$lib/server/workspace';
 
 import type { LayoutServerLoad } from './$types';
 
-const GLOBAL_WORKSPACE = getGlobalWorkspace();
-
 // routes within (workspace) that can be accessed without auth
 const publicWorkspaceRoutes = ['/catalog/**', '/tools/**', '/inventory', '/assistant'];
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
+	// per-request, not module-load — a top-level call throws at build
+	const globalWorkspace = getGlobalWorkspace();
 	const isPublicRoute = micromatch.isMatch(url.pathname, publicWorkspaceRoutes);
 
 	// unauthenticated users get a read-only global workspace for public routes
@@ -20,7 +20,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 			return {
 				isGlobalWorkspace: true,
 				workspace: {
-					workspaceId: GLOBAL_WORKSPACE,
+					workspaceId: globalWorkspace,
 					workspaceName: 'Global Recipe Catalog',
 					workspaceType: 'shared' as const,
 					workspaceRole: 'viewer' as const,
@@ -44,7 +44,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 			return {
 				isGlobalWorkspace: true,
 				workspace: {
-					workspaceId: GLOBAL_WORKSPACE,
+					workspaceId: globalWorkspace,
 					workspaceName: 'Global Recipe Catalog',
 					workspaceType: 'shared' as const,
 					workspaceRole: 'viewer' as const,
@@ -65,7 +65,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 	}
 
 	return {
-		isGlobalWorkspace: result.data.workspaceId === GLOBAL_WORKSPACE,
+		isGlobalWorkspace: result.data.workspaceId === globalWorkspace,
 		workspace: {
 			workspaceId: result.data.workspaceId,
 			workspaceName: result.data.workspaceName,

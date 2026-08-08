@@ -6,9 +6,11 @@ import { dev } from '$app/environment';
 import type { OAuthProfile, OAuthProvider, OAuthState, QueryResult } from '$lib/types';
 import { getGlobalWorkspace } from '$lib/server/workspace';
 
+import { env } from '$env/dynamic/private';
+
 export type { OAuthProfile, OAuthProvider, OAuthState };
 
-const { GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, APP_URL } = process.env;
+const { GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, APP_URL } = env;
 
 const baseUrl = APP_URL || 'https://busserapp.com';
 
@@ -250,6 +252,7 @@ export async function handleCallback(
 // sets username, clears onboarding flag, renames personal workspace
 export async function completeOnboarding(userId: string, username: string): Promise<QueryResult> {
 	const { db } = await import('./auth');
+	const { Logger } = await import('./logger');
 
 	try {
 		await db.query.transaction(async (trx: any) => {
@@ -273,7 +276,7 @@ export async function completeOnboarding(userId: string, username: string): Prom
 
 		return { status: 'success' };
 	} catch (error: any) {
-		console.error('Failed to complete onboarding:', error.message);
+		await Logger.error(`Onboarding failed for user ${userId}: ${error.message}`, error.stack);
 
 		return {
 			status: 'error',

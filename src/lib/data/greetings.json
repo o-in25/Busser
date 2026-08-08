@@ -1,0 +1,63 @@
+{
+	"morning": [
+		"Good morning",
+		"Rise and shine",
+		"Morning, barkeep",
+		"A fresh day at the bar",
+		"Up and at 'em",
+		"First pour of the day?",
+		"A little something to start the day",
+		"The morning shift is calling",
+		"Fresh day, fresh pour"
+	],
+	"afternoon": [
+		"Good afternoon",
+		"Afternoon, barkeep",
+		"The bar is open",
+		"Midday mixer",
+		"Somewhere it's five o'clock",
+		"Time for an afternoon pour",
+		"A little afternoon pick-me-up?",
+		"The day's halfway there",
+		"Perfect time for a little something"
+	],
+	"evening": [
+		"Good evening",
+		"Evening, barkeep",
+		"Golden hour, glass in hand",
+		"Time to unwind",
+		"The bar is open",
+		"Clocked out, cocktails on",
+		"The day's done. Pour something good.",
+		"Evening calls for a proper drink",
+		"Time to shake things up"
+	],
+	"lateNight": [
+		"Nightcap time",
+		"Burning the midnight oil?",
+		"One for the road?",
+		"The night is young",
+		"Last call, or just getting started?",
+		"Still at the bar?",
+		"A nightcap sounds about right",
+		"For those who aren't calling it a night",
+		"One more won't hurt... right?"
+	],
+	"weekend": [
+		"Weekend's here — what are we mixing?",
+		"Cheers to the weekend",
+		"Weekend mode: engaged",
+		"No work tomorrow — make it a good one",
+		"The weekend starts at the bar",
+		"Time to put the week on ice",
+		"Two days. Plenty of cocktails.",
+		"The weekend is yours",
+		"What are we pouring this weekend?"
+	],
+	"moods": [
+		{ "text": "Feeling something bold?", "mood": "bold-complex" },
+		{ "text": "In the mood for something strong & dry?", "mood": "strong-dry" },
+		{ "text": "Craving something sweet?", "mood": "sweet-easy" },
+		{ "text": "Looking for something balanced?", "mood": "balanced" }
+	]
+}

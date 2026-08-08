@@ -343,9 +343,10 @@
 					variant="primary"
 					size="sm"
 					href="{basePath}/add"
-					class="shrink-0 w-10 px-0 sm:w-auto sm:px-4"
+					class="shrink-0 h-10 !rounded-xl px-3 sm:px-4"
 				>
-					<Plus class="h-4 w-4 sm:mr-2" />
+					<Plus class="h-4 w-4 mr-1.5 sm:mr-2" />
+					<span class="sm:hidden">Add</span>
 					<span class="hidden sm:inline">Add Product</span>
 				</FancyButton>
 			{/if}

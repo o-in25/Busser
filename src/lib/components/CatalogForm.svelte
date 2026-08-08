@@ -4,15 +4,15 @@
 		BookOpen,
 		Candy,
 		Droplet,
-		EqualApproximately,
 		FlaskConical,
 		Gauge,
 		Image,
+		Martini,
 		Plus,
 		Sparkles,
 		Wand2,
 	} from 'lucide-svelte';
-	import { getContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { dndzone, type DndEvent } from 'svelte-dnd-action';
 	import { v4 as uuidv4 } from 'uuid';
@@ -20,8 +20,8 @@
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { CollapsibleSection } from '$lib/components/ui/collapsible';
+	import { FormShell } from '$lib/components/form';
+	import NestedCreateSheet from '$lib/components/form/NestedCreateSheet.svelte';
 	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
 	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
@@ -30,10 +30,10 @@
 	import { SpiritCard } from '$lib/components/ui/spirit-card';
 	import { Switch } from '$lib/components/ui/switch';
 	import { calculateOverallScore, convertFromMl, convertToMl } from '$lib/math';
+	import { NESTED_CREATE_KEY, NestedCreateStack } from '$lib/stores/nestedCreate.svelte';
 	import type { PreparationMethod, Spirit, View } from '$lib/types';
 
 	import { notificationStore } from '../../stores';
-	import CatalogFormWizard from './CatalogFormWizard.svelte';
 	import CocktailMetrics from './CocktailMetrics.svelte';
 	import FormDraftManager from './FormDraftManager.svelte';
 	import ImagePrompt from './ImagePrompt.svelte';
@@ -55,6 +55,10 @@
 
 	// Make recipe deeply reactive for two-way binding on properties
 	let recipe = $state(initialRecipe);
+
+	// provide the nested-create stack so any SearchableSelect "+" can open a stacked sheet
+	const nestedStack = new NestedCreateStack();
+	setContext(NESTED_CREATE_KEY, nestedStack);
 
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
@@ -156,7 +160,6 @@
 			}
 		}
 
-		// sort each group by price (cheapest first)
 		const byPrice = (a: View.BasicRecipeStep, b: View.BasicRecipeStep) =>
 			a.productPricePerUnit - b.productPricePerUnit;
 
@@ -191,7 +194,6 @@
 			dragDisabled: disabled,
 		}) as any;
 
-	// minimal dnd handlers
 	type StepWithId = View.BasicRecipeStep & { id: string };
 	function handleDndConsider(e: CustomEvent<DndEvent<StepWithId>>) {
 		steps = e.detail.items as StepWithId[];
@@ -201,7 +203,7 @@
 		steps = e.detail.items as StepWithId[];
 	}
 
-	// form props - these are $state because they can be modified by user selection or draft restore
+	// form props - $state because they can be modified by user selection or draft restore
 	let selectedSpiritId: number | undefined = $state(undefined);
 	let selectedPrepMethodId: number | undefined = $state(undefined);
 	$effect.pre(() => {
@@ -221,12 +223,10 @@
 	let strengthRating = $state(recipe.recipeStrengthRating || 5);
 	let ratingsGenerating = $state(false);
 
-	// Calculate preview score based on current ratings
 	const previewScore = $derived(
 		calculateOverallScore(versatilityRating, sweetnessRating, drynessRating, strengthRating)
 	);
 
-	// Rating label and color based on score
 	const ratingsMap = [
 		{ max: 0, label: 'No Rating', bg: 'bg-gray-500' },
 		{ max: 2, label: 'Needs Work', bg: 'bg-red-500' },
@@ -242,7 +242,6 @@
 		ratingsMap.find((r) => previewScore <= r.max) || ratingsMap[ratingsMap.length - 1]
 	);
 
-	// Generate ratings with AI
 	async function generateRatings() {
 		if (!recipe.recipeName || steps.length === 0) {
 			$notificationStore.error = {
@@ -298,13 +297,9 @@
 	// AI insights toggle
 	let insightsEnabled = $state(initialRecipe.insightsEnabled ?? true);
 
-	// Collapsible state - closed by default in add mode
-	let descriptionOpen = $state(!isAddMode);
-	let ratingsOpen = $state(!isAddMode);
-
 	// Form state
 	let disabled = $state(false);
-	let wizardStep = $state(0);
+	let currentStep = $state(0);
 	let reorderMode = $state(false);
 
 	// Validation state
@@ -316,7 +311,7 @@
 			: '',
 	});
 
-	// Step-based validation for wizard
+	// Step-based validation
 	const stepValid = $derived({
 		0: !!recipe.recipeName?.trim(), // name required
 		1: true, // description optional
@@ -324,13 +319,22 @@
 		3: true, // ratings optional
 		4: true, // prep method has default
 	});
-	const canProceedWizard = $derived(stepValid[wizardStep as keyof typeof stepValid] ?? true);
+	const canProceed = $derived(stepValid[currentStep as keyof typeof stepValid] ?? true);
 	const isFormValid = $derived(stepValid[0] && stepValid[2]);
 
-	// Draft manager reference
-	let draftManager = $state<FormDraftManager>();
+	// step config for the shell
+	const formSteps = [
+		{ title: 'Details', icon: BookOpen },
+		{ title: 'Description', icon: Image, optional: true },
+		{ title: 'Ingredients', icon: FlaskConical },
+		{ title: 'Ratings', icon: Gauge, optional: true },
+		{ title: 'Preparation', icon: Martini },
+	];
 
-	// Draft data for autosave
+	// Draft manager + last-saved timestamp (drives the autosave pill in the shell footer)
+	let draftManager = $state<FormDraftManager>();
+	let draftLastSaved = $state<Date | null>(null);
+
 	let draftData = $derived({
 		recipeName: recipe.recipeName,
 		recipeDescription: recipe.recipeDescription,
@@ -343,7 +347,6 @@
 		steps: steps,
 	});
 
-	// Restore draft handler
 	function handleRestoreDraft(data: Record<string, unknown>) {
 		if (data.recipeName) recipe.recipeName = data.recipeName as string;
 		if (data.recipeDescription) recipe.recipeDescription = data.recipeDescription as string;
@@ -358,7 +361,7 @@
 	}
 </script>
 
-<div class="px-2 sm:px-4 pt-1 pb-4 md:py-4 md:mt-3">
+<div class="px-2 pb-4 pt-1 sm:px-4 md:mt-3 md:py-4">
 	<form
 		class="relative"
 		method="POST"
@@ -366,7 +369,18 @@
 		use:enhance={async ({ formData }) => {
 			disabled = true;
 
-			// Upload pending image if any (held in memory until now)
+			// scalar fields are serialized from state so submission works from any step
+			formData.set('recipeName', recipe.recipeName ?? '');
+			formData.set('recipeCategoryId', String(selectedSpiritId ?? ''));
+			formData.set('recipeDescription', recipe.recipeDescription ?? '');
+			formData.set('recipeTechniqueDescriptionId', String(selectedPrepMethodId ?? ''));
+			formData.set('recipeSweetnessRating', String(sweetnessRating));
+			formData.set('recipeDrynessRating', String(drynessRating));
+			formData.set('recipeStrengthRating', String(strengthRating));
+			formData.set('recipeVersatilityRating', String(versatilityRating));
+			formData.set('insightsEnabled', String(insightsEnabled));
+
+			// resolve the image: new upload, cleared, or keep existing
 			if (pendingImageFile) {
 				const uploadData = new FormData();
 				uploadData.append('file', pendingImageFile);
@@ -378,6 +392,8 @@
 				}
 			} else if (imageCleared) {
 				formData.set('recipeImageCleared', 'true');
+			} else if (recipe.recipeImageUrl) {
+				formData.set('recipeImageUrl', recipe.recipeImageUrl);
 			}
 
 			let json = steps.map((step) => ({
@@ -387,10 +403,10 @@
 					step.productIdQuantityInMilliliters
 				),
 			}));
-			formData.append('recipeSteps', JSON.stringify(json));
+			formData.set('recipeSteps', JSON.stringify(json));
+
 			return async ({ result }) => {
 				if (result.type === 'redirect') {
-					// Clear draft on successful submit
 					if (isAddMode && draftManager) {
 						draftManager.clearDraft();
 					}
@@ -413,8 +429,17 @@
 			};
 		}}
 	>
-		<!-- Mobile wizard view -->
-		<CatalogFormWizard bind:currentStep={wizardStep} canProceed={canProceedWizard} cancelHref="/catalog">
+		<FormShell
+			steps={formSteps}
+			bind:currentStep
+			{canProceed}
+			isValid={isFormValid}
+			submitting={disabled}
+			lastSaved={draftLastSaved}
+			cancelHref="/catalog"
+			eyebrow="New Recipe"
+			submitLabel="Save Recipe"
+		>
 			{#snippet children({ step })}
 				{#if step === 0}
 					<!-- Step 1: Details (Name + Spirit Category) -->
@@ -439,9 +464,8 @@
 						</div>
 
 						<div>
-							<Label class="mb-3 text-base font-medium block">Spirit Category</Label>
-							<input type="hidden" name="recipeCategoryId" value={selectedSpiritId} />
-							<div class="grid grid-cols-2 gap-3">
+							<Label class="mb-3 block text-base font-medium">Spirit Category</Label>
+							<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
 								{#each spirits as spirit}
 									<SpiritCard
 										{spirit}
@@ -451,11 +475,12 @@
 								{/each}
 							</div>
 						</div>
+
 						<!-- AI Insights toggle -->
-						<div class="flex items-center justify-between rounded-lg border p-3">
+						<div class="glass-surface flex items-center justify-between rounded-xl p-3">
 							<div class="space-y-0.5">
-								<Label class="text-sm font-medium flex items-center gap-1.5">
-									<Sparkles class="w-4 h-4 text-primary" />
+								<Label class="flex items-center gap-1.5 text-sm font-medium">
+									<Sparkles class="h-4 w-4 text-primary" />
 									AI Insights
 								</Label>
 								<p class="text-xs text-muted-foreground">
@@ -463,32 +488,27 @@
 								</p>
 							</div>
 							<Switch bind:checked={insightsEnabled} />
-							<input type="hidden" name="insightsEnabled" value={String(insightsEnabled)} />
 						</div>
 					</div>
 				{:else if step === 1}
 					<!-- Step 2: Description + Image -->
 					<div class="space-y-6">
-						<div>
-							<Prompt
-								bind:value={recipe.recipeDescription}
-								trigger={recipe.recipeName}
-								id="recipeDescription"
-								name="recipeDescription"
-								url="/api/generator/recipe"
-							/>
-						</div>
-						<div>
-							<ImagePrompt
-								name="recipeImageUrl"
-								bind:signedUrl={recipe.recipeImageUrl}
-								bind:pendingFile={pendingImageFile}
-								bind:imageCleared
-								trigger={recipe.recipeName}
-								ingredients={imageIngredients}
-								technique={imageTechnique}
-							/>
-						</div>
+						<Prompt
+							bind:value={recipe.recipeDescription}
+							trigger={recipe.recipeName}
+							id="recipeDescription"
+							name="recipeDescription"
+							url="/api/generator/recipe"
+						/>
+						<ImagePrompt
+							name="recipeImageUrl"
+							bind:signedUrl={recipe.recipeImageUrl}
+							bind:pendingFile={pendingImageFile}
+							bind:imageCleared
+							trigger={recipe.recipeName}
+							ingredients={imageIngredients}
+							technique={imageTechnique}
+						/>
 					</div>
 				{:else if step === 2}
 					<!-- Step 3: Ingredients -->
@@ -505,7 +525,7 @@
 								class="flex-1"
 								onclick={() => (reorderMode = !reorderMode)}
 							>
-								<ArrowUpDown class="w-4 h-4 mr-2" />
+								<ArrowUpDown class="mr-2 h-4 w-4" />
 								{reorderMode ? 'Done' : 'Reorder'}
 							</Button>
 							{#if reorderMode}
@@ -516,7 +536,7 @@
 									class="flex-1"
 									onclick={autoReorderSteps}
 								>
-									<Wand2 class="w-4 h-4 mr-2" />
+									<Wand2 class="mr-2 h-4 w-4" />
 									Auto
 								</Button>
 							{/if}
@@ -541,19 +561,20 @@
 							{/each}
 						</div>
 
-						<Button type="button" variant="outline" class="w-full" onclick={addStep}>
-							<Plus class="w-4 h-4 mr-2" />
-							Add Ingredient
-						</Button>
+						<div class="flex justify-center pt-1">
+							<Button type="button" variant="outline" class="rounded-full" onclick={addStep}>
+								<Plus class="mr-2 h-5 w-5" />
+								Add Ingredient
+							</Button>
+						</div>
 					</div>
 				{:else if step === 3}
 					<!-- Step 4: Flavor Ratings -->
 					<div class="space-y-6">
-						<!-- Score Preview -->
-						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+						<div class="glass-surface flex items-center justify-between rounded-xl p-3">
 							<span class="text-sm text-muted-foreground">Overall Score</span>
 							<div class="flex items-center gap-2">
-								<span class={`px-2 py-0.5 rounded text-xs font-medium text-white ${scoreLabel.bg}`}>
+								<span class={`rounded px-2 py-0.5 text-xs font-medium text-white ${scoreLabel.bg}`}>
 									{scoreLabel.label}
 								</span>
 								<span class="text-lg font-bold tabular-nums">{previewScore.toFixed(1)}</span>
@@ -566,42 +587,44 @@
 							onclick={generateRatings}
 							disabled={ratingsGenerating}
 						>
-							<Sparkles class="w-4 h-4 mr-2" />
+							<Sparkles class="mr-2 h-4 w-4" />
 							{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
 						</Button>
-						<FlavorSlider
-							label="Sweetness"
-							name="recipeSweetnessRating"
-							bind:value={sweetnessRating}
-							icon={Candy}
-							color="pink"
-						/>
-						<FlavorSlider
-							label="Dryness"
-							name="recipeDrynessRating"
-							bind:value={drynessRating}
-							icon={Droplet}
-							color="amber"
-						/>
-						<FlavorSlider
-							label="Versatility"
-							name="recipeVersatilityRating"
-							bind:value={versatilityRating}
-							icon={Sparkles}
-							color="purple"
-						/>
-						<FlavorSlider
-							label="Strength"
-							name="recipeStrengthRating"
-							bind:value={strengthRating}
-							icon={Gauge}
-							color="orange"
-						/>
+						<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+							<FlavorSlider
+								label="Sweetness"
+								name="recipeSweetnessRating"
+								bind:value={sweetnessRating}
+								icon={Candy}
+								color="pink"
+							/>
+							<FlavorSlider
+								label="Dryness"
+								name="recipeDrynessRating"
+								bind:value={drynessRating}
+								icon={Droplet}
+								color="amber"
+							/>
+							<FlavorSlider
+								label="Versatility"
+								name="recipeVersatilityRating"
+								bind:value={versatilityRating}
+								icon={Sparkles}
+								color="purple"
+							/>
+							<FlavorSlider
+								label="Strength"
+								name="recipeStrengthRating"
+								bind:value={strengthRating}
+								icon={Gauge}
+								color="orange"
+							/>
+						</div>
 					</div>
 				{:else if step === 4}
 					<!-- Step 5: Preparation Method -->
 					<div class="space-y-4">
-						<Label class="text-base font-medium block">How is it served?</Label>
+						<Label class="block text-base font-medium">How is it served?</Label>
 						<ServingMethodToggle
 							methods={preparationMethods}
 							bind:value={selectedPrepMethodId}
@@ -612,245 +635,23 @@
 					</div>
 				{/if}
 			{/snippet}
-		</CatalogFormWizard>
-
-		<!-- Desktop view (all sections visible) -->
-		<div class="hidden md:block space-y-6">
-			<!-- Section 1: Recipe Details (not collapsible) -->
-			<Card.Root>
-				<Card.Header class="pb-4">
-					<Card.Title class="flex items-center gap-2 text-lg">
-						<BookOpen class="h-5 w-5 text-primary" />
-						Recipe Details
-					</Card.Title>
-				</Card.Header>
-				<Card.Content class="space-y-6">
-					<!-- Name -->
-					<div>
-						<Label for="recipeName" class="mb-2">
-							Name <span class="text-destructive">*</span>
-						</Label>
-						<Input
-							type="text"
-							id="recipeName"
-							name="recipeName"
-							placeholder="e.g., Old Fashioned"
-							bind:value={recipe.recipeName}
-							onblur={() => (touched.recipeName = true)}
-							class={touched.recipeName && errors.recipeName ? 'border-destructive' : ''}
-							required
-						/>
-						{#if touched.recipeName && errors.recipeName}
-							<Helper color="red">{errors.recipeName}</Helper>
-						{/if}
-					</div>
-
-					<!-- Spirit Category -->
-					<div>
-						<Label class="mb-3 block">Spirit Category</Label>
-						<input type="hidden" name="recipeCategoryId" value={selectedSpiritId} />
-						<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-							{#each spirits as spirit}
-								<SpiritCard
-									{spirit}
-									selected={spirit.recipeCategoryId === selectedSpiritId}
-									onselect={(s) => (selectedSpiritId = s.recipeCategoryId)}
-								/>
-							{/each}
-						</div>
-					</div>
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Section 2: Description (collapsible) -->
-			<CollapsibleSection title="Description" icon={Image} bind:open={descriptionOpen}>
-				<div class="space-y-6">
-					<Prompt
-						bind:value={recipe.recipeDescription}
-						trigger={recipe.recipeName}
-						id="recipeDescription"
-						name="recipeDescription"
-						url="/api/generator/catalog"
-					/>
-					<ImagePrompt
-						name="recipeImageUrl"
-						bind:signedUrl={recipe.recipeImageUrl}
-						bind:pendingFile={pendingImageFile}
-						bind:imageCleared
-						trigger={recipe.recipeName}
-						ingredients={imageIngredients}
-						technique={imageTechnique}
-					/>
-				</div>
-			</CollapsibleSection>
-
-			<!-- AI Insights toggle -->
-			<div class="flex items-center justify-between rounded-lg border p-4">
-				<div class="space-y-0.5">
-					<Label class="text-sm font-medium flex items-center gap-1.5">
-						<Sparkles class="w-4 h-4 text-primary" />
-						AI Insights
-					</Label>
-					<p class="text-xs text-muted-foreground">
-						generate cocktail history, tips, and pairings with AI
-					</p>
-				</div>
-				<Switch bind:checked={insightsEnabled} />
-				<input type="hidden" name="insightsEnabled" value={String(insightsEnabled)} />
-			</div>
-
-			<!-- Section 3: Flavor Profile (collapsible) -->
-			<CollapsibleSection title="Flavor Profile" icon={Gauge} bind:open={ratingsOpen}>
-				<div class="space-y-4">
-					<!-- Score Preview -->
-					<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
-						<span class="text-sm text-muted-foreground">Overall Score</span>
-						<div class="flex items-center gap-2">
-							<span class={`px-2 py-0.5 rounded text-xs font-medium text-white ${scoreLabel.bg}`}>
-								{scoreLabel.label}
-							</span>
-							<span class="text-lg font-bold tabular-nums">{previewScore.toFixed(1)}</span>
-						</div>
-					</div>
-					<Button
-						type="button"
-						variant="outline"
-						onclick={generateRatings}
-						disabled={ratingsGenerating}
-					>
-						<Sparkles class="w-4 h-4 mr-2" />
-						{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
-					</Button>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<FlavorSlider
-							label="Sweetness"
-							name="recipeSweetnessRating"
-							bind:value={sweetnessRating}
-							icon={Candy}
-							color="pink"
-						/>
-						<FlavorSlider
-							label="Dryness"
-							name="recipeDrynessRating"
-							bind:value={drynessRating}
-							icon={Droplet}
-							color="amber"
-						/>
-						<FlavorSlider
-							label="Versatility"
-							name="recipeVersatilityRating"
-							bind:value={versatilityRating}
-							icon={EqualApproximately}
-							color="purple"
-						/>
-						<FlavorSlider
-							label="Strength"
-							name="recipeStrengthRating"
-							bind:value={strengthRating}
-							icon={Gauge}
-							color="orange"
-						/>
-					</div>
-				</div>
-			</CollapsibleSection>
-
-			<!-- Section 4: Ingredients (not collapsible) -->
-			<Card.Root>
-				<Card.Header class="pb-4">
-					<Card.Title class="flex items-center gap-2 text-lg">
-						<FlaskConical class="h-5 w-5 text-primary" />
-						Ingredients
-					</Card.Title>
-				</Card.Header>
-				<Card.Content class="space-y-4">
-					{#if errors.ingredients}
-						<Helper color="red">{errors.ingredients}</Helper>
-					{/if}
-
-					<!-- Metrics display -->
-					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
-
-					<!-- Reorder toggle -->
-					<div class="flex gap-2">
-						<Button
-							type="button"
-							variant={reorderMode ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => (reorderMode = !reorderMode)}
-						>
-							<ArrowUpDown class="w-4 h-4 mr-2" />
-							{reorderMode ? 'Done' : 'Reorder'}
-						</Button>
-						{#if reorderMode}
-							<Button type="button" variant="outline" size="sm" onclick={autoReorderSteps}>
-								<Wand2 class="w-4 h-4 mr-2" />
-								Auto-Reorder
-							</Button>
-						{/if}
-					</div>
-
-					<!-- Recipe steps -->
-					<div
-						use:dndzone={getDndOptions(steps, !reorderMode)}
-						onconsider={handleDndConsider as any}
-						onfinalize={handleDndFinalize as any}
-						class="space-y-4"
-					>
-						{#each steps as step, stepNumber (step.id)}
-							<div animate:flip={{ duration: 200 }}>
-								<RecipeStepCard
-									bind:step={steps[stepNumber]}
-									{stepNumber}
-									onremove={removeStep}
-									canRemove={steps.length > 1}
-									{reorderMode}
-								/>
-							</div>
-						{/each}
-					</div>
-
-					<!-- Add step button -->
-					<div class="flex justify-center pt-2">
-						<Button type="button" variant="outline" class="rounded-full" onclick={addStep}>
-							<Plus class="w-5 h-5 mr-2" />
-							Add Ingredient
-						</Button>
-					</div>
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Section 5: Preparation Method (not collapsible) -->
-			<Card.Root>
-				<Card.Header class="pb-4">
-					<Card.Title class="flex items-center gap-2 text-lg">
-						<FlaskConical class="h-5 w-5 text-primary" />
-						Preparation Method
-					</Card.Title>
-				</Card.Header>
-				<Card.Content class="space-y-4">
-					<ServingMethodToggle methods={preparationMethods} bind:value={selectedPrepMethodId} />
-					<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Action buttons (desktop only) -->
-			<div class="flex justify-end gap-3">
-				<Button type="submit" disabled={disabled || !isFormValid}>Save</Button>
-			</div>
-		</div>
+		</FormShell>
 	</form>
-
-	</div>
+</div>
 
 <!-- Draft manager (add mode only) -->
 {#if isAddMode}
 	<FormDraftManager
 		bind:this={draftManager}
+		bind:lastSaved={draftLastSaved}
 		draftKey="catalog-form"
 		data={draftData}
 		onrestore={handleRestoreDraft}
 	/>
 {/if}
+
+<!-- Nested product/category creation sheets -->
+<NestedCreateSheet />
 
 <style>
 	/* placeholder shown where dragged item will be inserted */

@@ -726,6 +726,28 @@ export class UserRepository extends BaseRepository {
 			.first();
 	}
 
+	// atomic throttle: consumes a verification-send slot, false once the 24h cap is hit
+	async tryConsumeVerificationSend(userId: string): Promise<boolean> {
+		const MAX = 3;
+		const windowExpired =
+			'verificationEmailWindowStart IS NULL OR verificationEmailWindowStart < (NOW() - INTERVAL 24 HOUR)';
+
+		const rowsAffected = await this.db
+			.table('user')
+			.where({ userId })
+			.andWhereRaw(`(${windowExpired} OR verificationEmailsSent < ?)`, [MAX])
+			.update({
+				verificationEmailsSent: this.db.query.raw(
+					`IF(${windowExpired}, 1, verificationEmailsSent + 1)`
+				),
+				verificationEmailWindowStart: this.db.query.raw(
+					`IF(${windowExpired}, NOW(), verificationEmailWindowStart)`
+				),
+			});
+
+		return rowsAffected === 1;
+	}
+
 	// preferred workspace
 	async getPreferredWorkspaceId(userId: string): Promise<string | null> {
 		try {

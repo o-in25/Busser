@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 import { handleCallback } from '$lib/server/oauth';
+import { Logger } from '$lib/server/logger';
 import type { OAuthProvider } from '$lib/types';
 import type { RequestHandler } from './$types';
 
@@ -22,7 +23,8 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 		// re-throw redirects
 		if (err && typeof err === 'object' && 'status' in err) throw err;
 
-		console.error('OAuth callback error:', err);
+		const error = err instanceof Error ? err : new Error(String(err));
+		await Logger.error(`OAuth callback (${provider}) failed: ${error.message}`, error.stack);
 		const params = new URLSearchParams({ error: 'Authentication failed. Please try again.' });
 		redirect(StatusCodes.TEMPORARY_REDIRECT, `/signup?${params}`);
 	}
@@ -47,7 +49,8 @@ export const POST: RequestHandler = async ({ params, request, cookies }) => {
 	} catch (err) {
 		if (err && typeof err === 'object' && 'status' in err) throw err;
 
-		console.error('OAuth callback error:', err);
+		const error = err instanceof Error ? err : new Error(String(err));
+		await Logger.error(`OAuth callback (${provider}) failed: ${error.message}`, error.stack);
 		const params = new URLSearchParams({ error: 'Authentication failed. Please try again.' });
 		redirect(StatusCodes.TEMPORARY_REDIRECT, `/signup?${params}`);
 	}

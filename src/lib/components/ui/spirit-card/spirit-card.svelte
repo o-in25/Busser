@@ -34,11 +34,10 @@
 	/>
 	<div
 		class={cn(
-			'relative flex items-center justify-center rounded-xl border-2 transition-all duration-200 px-4 py-5 min-h-[72px] text-center',
-			'bg-background',
+			'relative flex items-center justify-center rounded-xl border-2 transition-all duration-200 px-4 py-5 min-h-[72px] text-center backdrop-blur-md',
 			selected
-				? 'border-primary ring-4 ring-primary/20 shadow-lg shadow-primary/10'
-				: 'border-transparent hover:border-primary/50'
+				? 'border-primary bg-primary/10 ring-4 ring-primary/20 shadow-lg shadow-primary/10'
+				: 'border-white/20 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 hover:border-primary/50'
 		)}
 	>
 		<span

@@ -6,22 +6,8 @@ FROM node:${NODE_VERSION}-slim AS base
 
 LABEL fly_launch_runtime="SvelteKit"
 
-# Declare build arguments for secrets
-ARG DB_HOSTNAME
-ARG DB_USER
-ARG DB_PASSWORD
-ARG DB_PORT
-ARG BUCKET
-ARG GOOGLE_SERVICE_KEY
-ARG OPENAI_API_KEY
-ARG INSTANCE_CONNECTION_NAME
-ARG JWT_SIGNING_KEY
-ARG MAILGUN_KEY
-ARG APP_URL
-ARG APP_VERSION
-ARG GOOGLE_OAUTH_CLIENT_ID
-ARG GOOGLE_OAUTH_CLIENT_SECRET
-ARG GLOBAL_WORKSPACE
+# Secrets are NOT build args — they are injected at runtime by Fly.io (fly secrets)
+# and read from process.env when the server starts. See startup.sh / $env/dynamic/private.
 
 # SvelteKit app lives here
 WORKDIR /app
@@ -30,8 +16,8 @@ WORKDIR /app
 ENV NODE_ENV="production"
 ENV BODY_SIZE_LIMIT="10M"
 
-# Install pnpm
-ARG PNPM_VERSION=8.15.6
+# Install pnpm (kept in sync with package.json "packageManager")
+ARG PNPM_VERSION=9.15.9
 RUN npm install -g pnpm@$PNPM_VERSION
 
 # Install dependencies required for Cloud SQL Auth Proxy
@@ -60,8 +46,10 @@ RUN pnpm install --prod=false --no-frozen-lockfile
 # Copy application code
 COPY . .
 
-# Build application
-RUN DB_HOSTNAME=$DB_HOSTNAME DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD DB_PORT=$DB_PORT BUCKET=$BUCKET GOOGLE_SERVICE_KEY=$GOOGLE_SERVICE_KEY OPENAI_API_KEY=$OPENAI_API_KEY JWT_SIGNING_KEY=$JWT_SIGNING_KEY MAILGUN_KEY=$MAILGUN_KEY APP_URL=$APP_URL INSTANCE_CONNECTION_NAME=$INSTANCE_CONNECTION_NAME APP_VERSION=$APP_VERSION GOOGLE_OAUTH_CLIENT_ID=$GOOGLE_OAUTH_CLIENT_ID GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_OAUTH_CLIENT_SECRET GLOBAL_WORKSPACE=$GLOBAL_WORKSPACE npm run build
+# APP_VERSION is the only build-time value (inlined via $env/static/private).
+# Re-declared here because ARGs don't carry across build stages.
+ARG APP_VERSION
+RUN APP_VERSION=$APP_VERSION npm run build
 RUN echo "Contents of /app after build:" && ls -al /app
 
 

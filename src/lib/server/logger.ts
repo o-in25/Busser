@@ -4,7 +4,9 @@ import { type Log } from '$lib/types';
 
 import { DbProvider } from './db';
 
-const { USER_TABLE } = process.env;
+import { env } from '$env/dynamic/private';
+
+const { USER_TABLE } = env;
 
 export class Logger {
 	private static db = new DbProvider(USER_TABLE || '');
@@ -36,6 +38,7 @@ export class Logger {
 	}
 
 	static now() {
-		return moment().format('YYYY-MM-DD HH:mm:ss');
+		// utc so stored timestamps are tz-independent (paired with db.ts timezone: 'Z')
+		return moment.utc().format('YYYY-MM-DD HH:mm:ss');
 	}
 }

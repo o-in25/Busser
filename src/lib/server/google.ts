@@ -1,6 +1,8 @@
 // shared google service account credentials and auth
 
-const { GOOGLE_SERVICE_KEY } = process.env;
+import { env } from '$env/dynamic/private';
+
+const { GOOGLE_SERVICE_KEY } = env;
 
 const base64Decode = (str: string) => (str ? Buffer.from(str, 'base64').toString() : '{}');
 
