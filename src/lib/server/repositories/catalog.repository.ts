@@ -178,6 +178,7 @@ export class CatalogRepository extends BaseRepository {
 			return { data: result, pagination };
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { data: [], pagination: emptyPagination };
 		}
 	}
@@ -192,6 +193,7 @@ export class CatalogRepository extends BaseRepository {
 			return Number(result?.count) || 0;
 		} catch (error: any) {
 			console.error('Failed to get recipe count:', error.message);
+			Logger.error(`Failed to get recipe count: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return 0;
 		}
 	}
@@ -276,6 +278,7 @@ export class CatalogRepository extends BaseRepository {
 			return { status: 'success', data };
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Unable to get recipes.' };
 		}
 	}
@@ -318,8 +321,9 @@ export class CatalogRepository extends BaseRepository {
 			);
 
 			return recipesWithMissing;
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Failed to get almost-there recipes:', e);
+			Logger.error(`Failed to get almost-there recipes: ${e.sqlMessage || e.message}`, e.sql || e.stackTrace);
 			return [];
 		}
 	}
@@ -362,8 +366,9 @@ export class CatalogRepository extends BaseRepository {
 				.select()
 				.orderBy('recipeCategoryDescription');
 			return dbResult as Spirit[];
-		} catch (error) {
+		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return [];
 		}
 	}
@@ -374,8 +379,9 @@ export class CatalogRepository extends BaseRepository {
 			const [result] = dbResult as Spirit[];
 			if (!result) throw Error('Spirit not found.');
 			return result;
-		} catch (error) {
+		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return null;
 		}
 	}
@@ -804,9 +810,10 @@ export class CatalogRepository extends BaseRepository {
 			}
 
 			// clean up cached generated content
-			deleteCachedContent('recipe-insights', recipeId).catch((err) =>
-				console.error('failed to clean up cached content:', err)
-			);
+			deleteCachedContent('recipe-insights', recipeId).catch((err) => {
+				console.error('failed to clean up cached content:', err);
+				Logger.error(`failed to clean up cached content: ${err.message}`, err.stack);
+			});
 
 			return { status: 'success', data: deletedRows };
 		} catch (error: any) {
@@ -830,6 +837,7 @@ export class CatalogRepository extends BaseRepository {
 			return dbResult as View.BasicRecipe[];
 		} catch (error: any) {
 			console.error('Error getting featured recipes:', error.message);
+			Logger.error(`Error getting featured recipes: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return [];
 		}
 	}
@@ -855,6 +863,7 @@ export class CatalogRepository extends BaseRepository {
 				return { status: 'error', error: 'Recipe is already featured.' };
 			}
 			console.error('Error adding featured recipe:', error.message);
+			Logger.error(`Error adding featured recipe: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to add featured recipe.' };
 		}
 	}
@@ -871,6 +880,7 @@ export class CatalogRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Error removing featured recipe:', error.message);
+			Logger.error(`Error removing featured recipe: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to remove featured recipe.' };
 		}
 	}
@@ -884,6 +894,7 @@ export class CatalogRepository extends BaseRepository {
 			return !!dbResult;
 		} catch (error: any) {
 			console.error('Error checking featured:', error.message);
+			Logger.error(`Error checking featured: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return false;
 		}
 	}
@@ -905,6 +916,7 @@ export class CatalogRepository extends BaseRepository {
 			}
 		} catch (error: any) {
 			console.error('Error toggling featured:', error.message);
+			Logger.error(`Error toggling featured: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to toggle featured.' };
 		}
 	}
@@ -920,6 +932,7 @@ export class CatalogRepository extends BaseRepository {
 			return dbResult as View.BasicRecipe[];
 		} catch (error: any) {
 			console.error('Error getting recipes by ids:', error.message);
+			Logger.error(`Error getting recipes by ids: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return [];
 		}
 	}
@@ -954,8 +967,9 @@ export class CatalogRepository extends BaseRepository {
 				ingredientName: row.ingredientName,
 				unlockableRecipes: Number(row.unlockableRecipes),
 			}));
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Failed to get highest impact ingredients:', e);
+			Logger.error(`Failed to get highest impact ingredients: ${e.sqlMessage || e.message}`, e.sql || e.stackTrace);
 			return [];
 		}
 	}
@@ -998,8 +1012,9 @@ export class CatalogRepository extends BaseRepository {
 				recipeImageUrl: row.recipeImageUrl || null,
 				estimatedCost: Number(row.estimatedCost) || 0,
 			}));
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Failed to get recipe costs:', e);
+			Logger.error(`Failed to get recipe costs: ${e.sqlMessage || e.message}`, e.sql || e.stackTrace);
 			return [];
 		}
 	}
@@ -1016,6 +1031,7 @@ export class CatalogRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Error reordering featured recipes:', error.message);
+			Logger.error(`Error reordering featured recipes: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to reorder featured recipes.' };
 		}
 	}

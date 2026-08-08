@@ -31,6 +31,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return workspaceUser.workspaceRole;
 		} catch (error: any) {
 			console.error('Error checking workspace access:', error.message);
+			Logger.error(`Error checking workspace access: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return null;
 		}
 	}
@@ -57,6 +58,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: workspaces };
 		} catch (error: any) {
 			console.error('Error getting user workspaces:', error.message);
+			Logger.error(`Error getting user workspaces: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -78,6 +80,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: workspace };
 		} catch (error: any) {
 			console.error('Error getting workspace info:', error.message);
+			Logger.error(`Error getting workspace info: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -108,6 +111,7 @@ export class WorkspaceRepository extends BaseRepository {
 			};
 		} catch (error: any) {
 			console.error('Error getting workspace:', error.message);
+			Logger.error(`Error getting workspace: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -161,6 +165,7 @@ export class WorkspaceRepository extends BaseRepository {
 			};
 		} catch (error: any) {
 			console.error('Error creating workspace:', error.message);
+			Logger.error(`Error creating workspace: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 
 			if (error.message?.includes('ER_DUP_ENTRY')) {
 				return { status: 'error', error: 'A workspace with this name already exists.' };
@@ -183,6 +188,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: workspaces };
 		} catch (error: any) {
 			console.error('Error getting all workspaces:', error.message);
+			Logger.error(`Error getting all workspaces: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -218,6 +224,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: workspace };
 		} catch (error: any) {
 			console.error('Error updating workspace:', error.message);
+			Logger.error(`Error updating workspace: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 
 			if (error.message?.includes('ER_DUP_ENTRY')) {
 				return { status: 'error', error: 'A workspace with this name already exists.' };
@@ -245,6 +252,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: true };
 		} catch (error: any) {
 			console.error('Error deleting workspace:', error.message);
+			Logger.error(`Error deleting workspace: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message || 'Failed to delete workspace.' };
 		}
 	}
@@ -274,6 +282,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: members };
 		} catch (error: any) {
 			console.error('Error getting workspace members:', error.message);
+			Logger.error(`Error getting workspace members: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -306,6 +315,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: member };
 		} catch (error: any) {
 			console.error('Error adding workspace member:', error.message);
+			Logger.error(`Error adding workspace member: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 
 			if (error.message?.includes('ER_DUP_ENTRY')) {
 				return { status: 'error', error: 'User is already a member of this workspace.' };
@@ -327,6 +337,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: true };
 		} catch (error: any) {
 			console.error('Error removing workspace member:', error.message);
+			Logger.error(`Error removing workspace member: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to remove member from workspace.' };
 		}
 	}
@@ -361,6 +372,7 @@ export class WorkspaceRepository extends BaseRepository {
 			return { status: 'success', data: member };
 		} catch (error: any) {
 			console.error('Error updating workspace member role:', error.message);
+			Logger.error(`Error updating workspace member role: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to update member role.' };
 		}
 	}

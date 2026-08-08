@@ -165,7 +165,16 @@
 		>
 			{@render trigger()}
 		</Popover.Trigger>
-		<Popover.Content align="start" class="w-80">
+		<!-- force downward so it never flips up under the nav; align end keeps it on-screen
+		     (avoidCollisions off also disables horizontal shift, so anchor to the right edge).
+		     cap height to the space below the trigger and scroll — handles short viewports. -->
+		<Popover.Content
+			align="end"
+			side="bottom"
+			avoidCollisions={false}
+			collisionPadding={8}
+			class="w-80 max-h-[var(--bits-popover-content-available-height)] overflow-y-auto overscroll-contain"
+		>
 			{@render children()}
 			{@render refreshButton()}
 		</Popover.Content>

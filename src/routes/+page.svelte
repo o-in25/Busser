@@ -34,7 +34,6 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import logo from '$lib/assets/logo.png';
 	import FancyCarousel from '$lib/components/FancyCarousel.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
@@ -222,14 +221,6 @@
 		</div>
 
 		<div class="max-w-4xl mx-auto text-center px-4">
-			<!-- Logo -->
-			<img
-				src={logo}
-				alt="Busser"
-				class="h-28 md:h-36 lg:h-44 mx-auto mb-3 hero-enter-glow"
-				style="--delay: 0ms"
-			/>
-
 			<!-- Headline -->
 			<h1
 				class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight hero-enter text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
@@ -1373,25 +1364,6 @@
 		background-size: 24px 24px;
 	}
 
-	@keyframes glow {
-		0%,
-		100% {
-			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
-		}
-		50% {
-			filter: drop-shadow(0 0 24px rgba(248, 78, 128, 0.5));
-		}
-	}
-
-	/* logo: entrance + glow combined so neither overrides the other */
-	.hero-enter-glow {
-		opacity: 0;
-		animation:
-			hero-fade-up 0.7s ease-out forwards,
-			glow 3s ease-in-out infinite;
-		animation-delay: var(--delay, 0ms), var(--delay, 0ms);
-	}
-
 	/* staggered entrance animation */
 	.hero-enter {
 		opacity: 0;
@@ -1524,8 +1496,7 @@
 
 	/* reduced motion: disable all hero animations */
 	@media (prefers-reduced-motion: reduce) {
-		.hero-enter,
-		.hero-enter-glow {
+		.hero-enter {
 			animation: none;
 			opacity: 1;
 		}
