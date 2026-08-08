@@ -6,6 +6,9 @@ vi.hoisted(() => {
 	process.env.USER_TABLE ??= 'user_d';
 });
 
+// auth.ts reads config via $env/dynamic/private — map it to process.env so the hoisted env above applies
+vi.mock('$env/dynamic/private', () => ({ env: process.env }));
+
 vi.mock('bcrypt', () => ({
 	hash: vi.fn(),
 	compare: vi.fn(),
