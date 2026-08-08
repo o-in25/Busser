@@ -1,7 +1,10 @@
-const { DB_HOSTNAME, DB_USER, DB_PASSWORD, DB_PORT } = process.env;
 import { camelCase } from 'change-case';
 import knex from 'knex';
 import { attachPaginate } from 'knex-paginate';
+
+import { env } from '$env/dynamic/private';
+
+const { DB_HOSTNAME, DB_USER, DB_PASSWORD, DB_PORT } = env;
 
 export class DbProvider {
 	private static instances = new Map<string, DbProvider>();
@@ -28,6 +31,8 @@ export class DbProvider {
 				user: DB_USER,
 				password: DB_PASSWORD,
 				database,
+				// treat naive DATETIME values as UTC on read/write, independent of process tz
+				timezone: 'Z',
 				typeCast: function (field: any, next: () => any) {
 					if (field.type === 'NEWDECIMAL') {
 						const val = field.string();

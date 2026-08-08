@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertCircle, Eye, Mail, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
+	import { AlertCircle, Eye, Mail, MailCheck, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
 	import moment from 'moment';
 
 	import { toast } from 'svelte-sonner';
@@ -21,6 +21,15 @@
 	const deleteUser = async (userId: string): Promise<any> => {
 		let response = await fetch(`/api/user/${userId}/delete`, {
 			method: 'DELETE',
+		});
+		response = await response.json();
+		return response;
+	};
+
+	// resend the verification email to a user who signed up but never verified
+	const resendVerification = async (userId: string): Promise<any> => {
+		let response = await fetch(`/api/user/${userId}/resend-verification`, {
+			method: 'POST',
 		});
 		response = await response.json();
 		return response;
@@ -93,6 +102,14 @@
 										{#if user.userId === currentUser?.userId}
 											<Badge variant="secondary" class="text-xs">You</Badge>
 										{/if}
+										{#if user.verified !== 1}
+											<Badge
+												variant="outline"
+												class="text-xs border-amber-500/50 text-amber-400"
+											>
+												Unverified
+											</Badge>
+										{/if}
 									</div>
 									<p class="text-sm text-muted-foreground truncate sm:hidden">
 										{user.email}
@@ -145,6 +162,22 @@
 								>
 									<Pencil class="w-4 h-4" />
 								</a>
+
+								{#if user.verified !== 1}
+									<Button
+										variant="outline"
+										size="icon"
+										class="h-8 w-8 bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500 hover:text-white"
+										onclick={async () => {
+											const { success, error } = await resendVerification(user.userId);
+											if (error) toast.error(error);
+											if (success) toast.success(success);
+										}}
+										title="Resend verification email"
+									>
+										<MailCheck class="w-4 h-4" />
+									</Button>
+								{/if}
 
 								{#if user.userId !== currentUser?.userId}
 									<Button

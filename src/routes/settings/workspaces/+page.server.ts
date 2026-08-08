@@ -14,8 +14,6 @@ import { getGlobalWorkspace } from '$lib/server/workspace';
 
 import type { Actions, PageServerLoad } from './$types';
 
-const GLOBAL_WORKSPACE = getGlobalWorkspace();
-
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {
 		error(StatusCodes.UNAUTHORIZED, {
@@ -77,6 +75,8 @@ export const actions: Actions = {
 	},
 
 	update: async ({ locals, request, url }) => {
+		// per-request, not module-load — a top-level call throws at build
+		const globalWorkspace = getGlobalWorkspace();
 		if (!locals.user) {
 			return fail(StatusCodes.UNAUTHORIZED, {
 				error: 'Authentication required.',
@@ -96,7 +96,7 @@ export const actions: Actions = {
 		}
 
 		// prevent editing the global workspace
-		if (workspaceId === GLOBAL_WORKSPACE) {
+		if (workspaceId === globalWorkspace) {
 			return fail(StatusCodes.FORBIDDEN, {
 				error: 'The global workspace cannot be modified.',
 			});
@@ -178,6 +178,7 @@ export const actions: Actions = {
 	},
 
 	delete: async ({ locals, request, url }) => {
+		const globalWorkspace = getGlobalWorkspace();
 		if (!locals.user) {
 			return fail(StatusCodes.UNAUTHORIZED, {
 				error: 'Authentication required.',
@@ -195,7 +196,7 @@ export const actions: Actions = {
 		}
 
 		// prevent deletion of the global workspace
-		if (workspaceId === GLOBAL_WORKSPACE) {
+		if (workspaceId === globalWorkspace) {
 			return fail(StatusCodes.FORBIDDEN, {
 				error: 'The global workspace cannot be deleted.',
 			});

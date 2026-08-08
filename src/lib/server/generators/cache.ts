@@ -2,7 +2,9 @@ import { DbProvider } from '../db';
 import { generate } from './generator-factory';
 import type { GeneratorMap, GeneratorType } from '$lib/types/generators';
 
-const db = new DbProvider(process.env.CORE_TABLE || '');
+import { env } from '$env/dynamic/private';
+
+const db = new DbProvider(env.CORE_TABLE || '');
 
 export async function getCachedContent(
 	type: string,

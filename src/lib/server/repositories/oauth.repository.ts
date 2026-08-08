@@ -126,7 +126,7 @@ export class OAuthRepository extends BaseRepository {
 
 			return this.userRepo.findById(user.userId);
 		} catch (error: any) {
-			console.error('Failed to register OAuth user:', error.message);
+			await Logger.error(`OAuth registration failed for ${profile.email}: ${error.message}`, error.stack);
 
 			const friendlyMessages = [
 				'Email already taken.',

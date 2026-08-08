@@ -50,19 +50,48 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { reveal } from '$lib/actions/reveal';
 	import { idToSlug, moods } from '$lib/spirits';
+	import { indexFromSeed } from '$lib/math';
+	import greetings from '$lib/data/greetings.json';
 	import { cn } from '$lib/utils';
 
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	function getGreeting() {
-		const hour = new Date().getHours();
-		if (hour < 12) return 'Good morning';
-		if (hour < 17) return 'Good afternoon';
-		if (hour < 24) return 'Good evening';
-		return 'Welcome back';
-	}
+	// deterministic per-login greeting: stable across reloads, but fresh each login and per user.
+	// time/day pick the heading; a separate pick supplies the mood suggestion subline.
+	// jwt iat is added at sign time — stable per login, new on each login, unique per user.
+	const loginSeed = (() => {
+		const u = $page.data.user as (typeof $page.data.user & { iat?: number }) | undefined;
+		return `${u?.userId ?? 'anon'}-${u?.iat ?? 0}`;
+	})();
+
+	// heading: always a time-of-day line (weekend lines join the pool on fri/sat evenings)
+	const greeting = (() => {
+		const now = new Date();
+		const hour = now.getHours();
+		const day = now.getDay(); // 0 sun ... 6 sat
+
+		let bucket: 'morning' | 'afternoon' | 'evening' | 'lateNight';
+		if (hour >= 22 || hour < 5) bucket = 'lateNight';
+		else if (hour < 12) bucket = 'morning';
+		else if (hour < 17) bucket = 'afternoon';
+		else bucket = 'evening';
+
+		const isWeekendEvening = (day === 5 || day === 6) && hour >= 17;
+		const pool = [...greetings[bucket], ...(isWeekendEvening ? greetings.weekend : [])];
+		return indexFromSeed(pool, loginSeed) ?? pool[0];
+	})();
+
+	// subline: a mood suggestion that links into the catalog filter.
+	// only moods that map to a real filter are eligible, so the link always resolves.
+	const moodSuggestion = (() => {
+		const linkable = greetings.moods.filter((m) => moods.some((real) => real.id === m.mood));
+		if (linkable.length === 0) return null;
+		const pick = indexFromSeed(linkable, `${loginSeed}-mood`);
+		if (!pick) return null;
+		return { text: pick.text, mood: moods.find((real) => real.id === pick.mood)! };
+	})();
 
 	// Invitation request modal state
 	let requestModalOpen = $state(false);
@@ -251,50 +280,6 @@
 			{#if landingData?.cocktailOfTheDay}
 				<div class="mb-8 reveal-on-scroll" use:reveal>
 					<CocktailOfTheDay recipe={landingData.cocktailOfTheDay} />
-				</div>
-			{/if}
-
-			<!-- Browse by Spirit -->
-			{#if landingData?.allSpirits && landingData.allSpirits.length > 0}
-				<div class="mb-8 reveal-on-scroll" use:reveal={{ delay: 100 }}>
-					<div class="flex items-center justify-between mb-4">
-						<h2 class="text-2xl font-bold flex items-center gap-2">
-							<GlassWater class="h-6 w-6 text-primary" />
-							Explore by Spirit
-						</h2>
-						<a href="/catalog" class="text-sm text-primary hover:underline flex items-center gap-1">
-							View All <ArrowRight class="h-3 w-3" />
-						</a>
-					</div>
-					<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-						{#each landingData.allSpirits as spirit}
-							<a
-								href="/catalog/explore/{idToSlug[spirit.recipeCategoryId] ??
-									spirit.recipeCategoryId}"
-								class="block group"
-							>
-								<Card.Root class="relative overflow-hidden h-32 hover:shadow-lg transition-all">
-									{#if spirit.recipeCategoryDescriptionImageUrl}
-										<div class="absolute inset-0">
-											<img
-												src={spirit.recipeCategoryDescriptionImageUrl}
-												alt={spirit.recipeCategoryDescription}
-												class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-											/>
-											<div
-												class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
-											></div>
-										</div>
-									{/if}
-									<div class="absolute inset-0 p-3 flex flex-col justify-end">
-										<h3 class="text-sm font-bold text-foreground">
-											{spirit.recipeCategoryDescription}
-										</h3>
-									</div>
-								</Card.Root>
-							</a>
-						{/each}
-					</div>
 				</div>
 			{/if}
 
@@ -731,13 +716,23 @@
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 				<div>
 					<h1 class="text-3xl md:text-4xl font-bold mb-2">
-						{getGreeting()}
+						{greeting}
 					</h1>
-					<p class="text-muted-foreground">
-						{isOwner
-							? "Here's what's happening with your home bar."
-							: "Explore recipes in Busser's catalog."}
-					</p>
+					{#if moodSuggestion}
+						<a
+							href="/catalog?mood={moodSuggestion.mood.id}"
+							class="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+						>
+							{moodSuggestion.text}
+							<ArrowRight class="h-4 w-4" />
+						</a>
+					{:else}
+						<p class="text-muted-foreground">
+							{isOwner
+								? "Here's what's happening with your home bar."
+								: "Explore recipes in Busser's catalog."}
+						</p>
+					{/if}
 				</div>
 
 				<!-- Quick Stats Cards -->

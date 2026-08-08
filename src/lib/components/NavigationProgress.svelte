@@ -4,9 +4,12 @@
 	let {
 		color = '#e5195f',
 		displayThresholdMs = 150,
+		variant = 'top',
 	}: {
 		color?: string;
 		displayThresholdMs?: number;
+		// 'top' = fixed to the viewport top; 'bottom' = absolute, sits above the bottom nav pill
+		variant?: 'top' | 'bottom';
 	} = $props();
 
 	let width = $state(0);
@@ -69,7 +72,7 @@
 
 {#if running || width > 0}
 	<div
-		class="nav-progress"
+		class="nav-progress nav-progress-{variant}"
 		class:hiding
 		style="width: {width * 100}%; background-color: {color};"
 	>
@@ -79,12 +82,23 @@
 
 <style>
 	.nav-progress {
-		position: absolute;
-		bottom: 0;
 		left: 0;
-		height: 2px;
+		top: 0;
+		height: 3px;
 		transition: width 0.21s ease-in-out;
+	}
+
+	/* fixed to the viewport top — the always-visible global bar */
+	.nav-progress-top {
+		position: fixed;
+		z-index: 100;
+	}
+
+	/* absolute within the bottom nav container — thumb-proximity feedback on mobile */
+	.nav-progress-bottom {
+		position: absolute;
 		z-index: 1;
+		border-radius: 9999px;
 	}
 
 	.nav-progress.hiding {
@@ -96,7 +110,7 @@
 		position: absolute;
 		top: 0;
 		right: 0;
-		height: 2px;
+		height: 3px;
 		width: 80px;
 		box-shadow: 0 0 6px currentColor;
 	}

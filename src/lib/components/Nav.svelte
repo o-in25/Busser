@@ -288,11 +288,12 @@
 	<a href="/" class="mobile-header-logo">
 		<img src={logoNav} class="h-10" alt="Busser" />
 	</a>
-	<NavigationProgress />
 </div>
 
 <!-- Mobile Bottom Navigation (visible on small screens) -->
 <nav class="mobile-nav-container flex md:hidden" class:nav-hidden={keyboardOpen}>
+	<!-- thin progress line above the pill — feedback near the thumb when tapping the bottom nav -->
+	<NavigationProgress variant="bottom" />
 	<div class="mobile-nav-pill">
 		{#each navItems as item}
 			<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
@@ -361,7 +362,6 @@
 			</a>
 		{/if}
 	</div>
-	<NavigationProgress />
 </nav>
 
 <!-- Switch Workspace Modal -->
@@ -417,6 +417,10 @@
 		top: 0;
 		z-index: 50;
 		align-items: center;
+		/* min-height must fit the 2.5rem logo — without it the header collapses to the
+		   hamburger height and the taller logo clips against the header edge when the
+		   safe-area inset is 0 (i.e. non-pwa safari) */
+		min-height: calc(4rem + env(safe-area-inset-top, 0px));
 		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
@@ -433,6 +437,9 @@
 	.mobile-header-logo {
 		position: absolute;
 		left: 50%;
+		/* anchor to the content start (below the safe area); logo height == content height
+		   so it stays vertically centered against the hamburger regardless of the inset */
+		top: calc(0.75rem + env(safe-area-inset-top, 0px));
 		transform: translateX(-50%);
 	}
 

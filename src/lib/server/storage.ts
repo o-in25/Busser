@@ -6,8 +6,9 @@ import { DbProvider } from './db';
 import { getCredentials } from './google';
 import { Logger } from './logger';
 
-const { BUCKET } = process.env;
-const { USER_TABLE } = process.env;
+import { env } from '$env/dynamic/private';
+
+const { BUCKET, USER_TABLE } = env;
 
 const { client_email, private_key } = getCredentials();
 const storage = new Storage({
@@ -17,7 +18,15 @@ const storage = new Storage({
 	},
 });
 
-const bucket = storage.bucket(BUCKET || '');
+// lazy: gcs throws on an empty bucket name, and the build's analyse step imports this module
+let _bucket: ReturnType<typeof storage.bucket> | null = null;
+function getBucket() {
+	if (!_bucket) {
+		if (!BUCKET) throw new Error('BUCKET is not configured');
+		_bucket = storage.bucket(BUCKET);
+	}
+	return _bucket;
+}
 
 const db = new DbProvider(USER_TABLE || '');
 
@@ -85,7 +94,7 @@ export async function getSignedUrl(
 	try {
 		const safeName = (fileName || file.name).replace(/[^a-zA-Z0-9._-]+/g, '-');
 		const name = `${kind}/${workspaceId}/${safeName}-${moment().format('MMDDYYYYSS')}`;
-		const newFile = bucket.file(name);
+		const newFile = getBucket().file(name);
 		const blob = await file.arrayBuffer();
 		const data = Buffer.from(blob);
 		await newFile.save(data, {
@@ -136,7 +145,7 @@ export async function copyGcsFile(
 		const basename = sourceRow.name.split('/').pop() || sourceRow.name;
 		const destName = `${kind}/${workspaceId}/${basename}-${moment().format('MMDDYYYYSS')}`;
 		const sourceFile = storage.bucket(sourceRow.bucket).file(sourceRow.name);
-		const destFile = bucket.file(destName);
+		const destFile = getBucket().file(destName);
 
 		await sourceFile.copy(destFile);
 
@@ -170,7 +179,7 @@ export async function uploadAvatarBuffer(
 	try {
 		const ext = contentType.includes('svg') ? 'svg' : contentType.split('/')[1] || 'png';
 		const name = `avatars/${userId}/${Date.now()}.${ext}`;
-		const newFile = bucket.file(name);
+		const newFile = getBucket().file(name);
 
 		await newFile.save(buffer, { contentType });
 
@@ -201,7 +210,7 @@ export async function getSignedUrlFromUnsignedUrl(
 ) {
 	const match = unsignedUrl.match(/https:\/\/storage\.googleapis\.com\/[^/]+\/(.+)$/);
 	const fileName = match?.[1] ?? '';
-	const file = bucket.file(fileName);
+	const file = getBucket().file(fileName);
 	const [signedUrl] = await file.getSignedUrl({
 		version: 'v4',
 		action: 'read',

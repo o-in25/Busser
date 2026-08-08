@@ -70,6 +70,9 @@
 					height: 100%;
 					overflow-y: auto;
 					-webkit-overflow-scrolling: touch;
+					/* kill ios rubber-band so it doesn't run alongside our custom pull-to-refresh
+					   (the "double scroll"); native ptr in the browser tab is untouched */
+					overscroll-behavior-y: contain;
 				}
 			}
 			button, a, [role="button"] {

@@ -4,7 +4,10 @@
 import { DbProvider } from './db';
 import { CatalogRepository } from './repositories/catalog.repository';
 import { InventoryRepository } from './repositories/inventory.repository';
-const { CORE_TABLE } = process.env;
+
+import { env } from '$env/dynamic/private';
+
+const { CORE_TABLE } = env;
 
 // re-export utilities from base
 export { titleCase } from './repositories/base.repository';

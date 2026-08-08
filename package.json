@@ -2,6 +2,7 @@
 	"name": "busser",
 	"version": "0.0.1",
 	"private": true,
+	"packageManager": "pnpm@9.15.9",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -25,6 +26,12 @@
 		"seed:user": "tsx node_modules/knex/bin/cli.js seed:run --knexfile knexfile.ts --env user",
 		"test": "vitest run",
 		"test:watch": "vitest",
+		"docker:build": "./.build.sh build",
+		"docker:smoke": "./.build.sh smoke",
+		"docker:run": "./.build.sh run",
+		"docker:run:db": "./.build.sh run --db",
+		"docker:logs": "./.build.sh logs",
+		"docker:stop": "./.build.sh stop",
 		"prepare": "husky"
 	},
 	"devDependencies": {

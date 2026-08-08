@@ -19,7 +19,9 @@ import { UserRepository } from './repositories/user.repository';
 import { OAuthRepository } from './repositories/oauth.repository';
 import { getGlobalWorkspace } from './workspace';
 
-const { JWT_SIGNING_KEY, USER_TABLE } = process.env;
+import { env } from '$env/dynamic/private';
+
+const { JWT_SIGNING_KEY, USER_TABLE } = env;
 const HASH_ROUNDS = 10;
 
 // singletons
@@ -191,6 +193,9 @@ export async function registerUser(
 			exp: tokenExpiration.unix(),
 		});
 
+		// record the signup email as send #1 and start the 24h throttle window
+		await userRepo.tryConsumeVerificationSend(user.userId);
+
 		await mailClient.sendUserRegistrationEmail([user.email], {
 			username: user.username,
 			token,
@@ -198,7 +203,8 @@ export async function registerUser(
 
 		return { status: 'success' };
 	} catch (error: any) {
-		console.error(error);
+		// persist to db log so it survives machine restarts
+		await Logger.error(`Registration failed for ${email}: ${error.message}`, error.stack);
 
 		const getFriendlyError = (message: string): string => {
 			if (message.includes('ER_DUP_ENTRY') && message.includes('email')) {
@@ -239,6 +245,7 @@ export async function verifyUser(registrationToken: string): Promise<QueryResult
 
 		return userRepo.setVerified(payload.userId);
 	} catch (error: any) {
+		await Logger.error(`Email verification failed: ${error.message}`, error.stack);
 		return { status: 'error', error: error.message };
 	}
 }
@@ -250,6 +257,11 @@ export async function resendVerificationEmail(userId: string): Promise<QueryResu
 		if (!dbResult) throw new Error('User not found.');
 		if (dbResult.verified === 1) throw new Error('User is already verified.');
 
+		const allowed = await userRepo.tryConsumeVerificationSend(dbResult.userId);
+		if (!allowed) {
+			throw new Error('You have reached the maximum number of verification emails. Please try again later.');
+		}
+
 		const now = moment();
 		const tokenExpiration = moment().add(24, 'hours');
 
@@ -266,6 +278,7 @@ export async function resendVerificationEmail(userId: string): Promise<QueryResu
 
 		return { status: 'success' };
 	} catch (error: any) {
+		await Logger.error(`Resend verification email failed for user ${userId}: ${error.message}`, error.stack);
 		return { status: 'error', error: error.message };
 	}
 }
@@ -277,6 +290,11 @@ export async function resendVerificationEmailByEmail(email: string): Promise<Que
 		if (!dbResult) throw new Error('No account found with this email address.');
 		if (dbResult.verified === 1) throw new Error('This account is already verified. You can log in.');
 
+		const allowed = await userRepo.tryConsumeVerificationSend(dbResult.userId);
+		if (!allowed) {
+			throw new Error('You have reached the maximum number of verification emails. Please try again later.');
+		}
+
 		const now = moment();
 		const tokenExpiration = moment().add(24, 'hours');
 
@@ -293,6 +311,7 @@ export async function resendVerificationEmailByEmail(email: string): Promise<Que
 
 		return { status: 'success' };
 	} catch (error: any) {
+		await Logger.error(`Resend verification email failed for ${email}: ${error.message}`, error.stack);
 		return { status: 'error', error: error.message };
 	}
 }
@@ -324,7 +343,7 @@ export async function requestPasswordReset(email: string): Promise<QueryResult> 
 
 		return { status: 'success' };
 	} catch (error: any) {
-		console.error('Password reset request error:', error);
+		await Logger.error(`Password reset request failed for ${email}: ${error.message}`, error.stack);
 		return {
 			status: 'error',
 			error: 'Failed to process password reset request. Please try again.',
@@ -353,6 +372,7 @@ export async function resetPasswordWithToken(token: string, newPassword: string)
 
 		return { status: 'success' };
 	} catch (error: any) {
+		await Logger.error(`Password reset failed: ${error.message}`, error.stack);
 		return { status: 'error', error: error.message };
 	}
 }

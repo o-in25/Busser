@@ -1,10 +1,31 @@
 import { json } from '@sveltejs/kit';
 
-import { deleteUser, getUsers } from '$lib/server/user';
+import { hasGlobalPermission } from '$lib/server/auth';
+import { deleteUser, getUsers, resendVerificationEmail } from '$lib/server/user';
 
 import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async () => {
 	return new Response();
+};
+
+export const POST: RequestHandler = async ({ params, locals }) => {
+	const { id, slug } = params;
+	switch (slug) {
+		case 'resend-verification': {
+			if (!hasGlobalPermission(locals.user, 'edit_admin')) {
+				return json({ error: 'You do not have permission to perform this action.' });
+			}
+
+			// already rejects verified and missing users
+			const result = await resendVerificationEmail(id);
+			if (result.status === 'error') {
+				return json({ error: result.error });
+			}
+			return json({ success: 'Verification email sent.' });
+		}
+		default:
+			return json({ message: 'Route not found!' });
+	}
 };
 
 export const DELETE: RequestHandler = async ({ params, locals }) => {

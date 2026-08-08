@@ -2,7 +2,9 @@
 import { DbProvider } from './db';
 import { WorkspaceRepository } from './repositories/workspace.repository';
 
-const { USER_TABLE } = process.env;
+import { env } from '$env/dynamic/private';
+
+const { USER_TABLE } = env;
 const db = new DbProvider(USER_TABLE || '');
 const workspaceRepo = new WorkspaceRepository(db);
 
@@ -35,7 +37,7 @@ export async function isWorkspaceOwner(userId: string, workspaceId: string): Pro
 }
 
 export function getGlobalWorkspace(): string {
-	const id = process.env.GLOBAL_WORKSPACE;
+	const id = env.GLOBAL_WORKSPACE;
 	if (!id) throw new Error('GLOBAL_WORKSPACE env var is not set');
 	return id;
 }
