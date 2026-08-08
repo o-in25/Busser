@@ -1,4 +1,3 @@
-import { PredictionServiceClient, helpers } from '@google-cloud/aiplatform';
 import OpenAI from 'openai';
 import type {
 	ChatCompletionMessageParam,
@@ -7,34 +6,18 @@ import type {
 import { zodResponseFormat } from 'openai/helpers/zod.mjs';
 import { ZodSchema } from 'zod';
 
-import { getCredentials } from './google';
-
 import { env } from '$env/dynamic/private';
 
 const { OPENAI_API_KEY } = env;
 
-const googleCredentials = getCredentials();
-const LOCATION = 'us-central1';
-
 // clients (initialized lazily on first use)
 let openai: OpenAI | null = null;
-let vertexClient: PredictionServiceClient | null = null;
 
 function getOpenAI(): OpenAI {
 	if (!openai) {
 		openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 	}
 	return openai;
-}
-
-function getVertexClient(): PredictionServiceClient {
-	if (!vertexClient) {
-		vertexClient = new PredictionServiceClient({
-			credentials: googleCredentials,
-			apiEndpoint: `${LOCATION}-aiplatform.googleapis.com`,
-		});
-	}
-	return vertexClient;
 }
 
 // image generation options
@@ -213,64 +196,46 @@ export async function runAssistantChat(
 	});
 }
 
-// image generation using google imagen 3
+// maps supported aspect ratios to gpt-image-1 sizes
+const sizeByRatio: Record<
+	NonNullable<ImageOptions['aspectRatio']>,
+	'1024x1024' | '1536x1024' | '1024x1536'
+> = {
+	'1:1': '1024x1024',
+	'16:9': '1536x1024',
+	'4:3': '1536x1024',
+	'9:16': '1024x1536',
+	'3:4': '1024x1536',
+};
+
+// image generation using openai gpt-image-1
 export async function generateImage(
 	prompt: string,
 	options: ImageOptions = {}
 ): Promise<ImageResult> {
-	// const { aspectRatio = '1:1', numberOfImages = 1, negativePrompt, referenceImageBase64 } = options;
 	const { aspectRatio = '1:1', numberOfImages = 1, negativePrompt } = options;
 
-	// 002 is significantly better at isolated products
-	const endpoint = `projects/${googleCredentials.project_id}/locations/${LOCATION}/publishers/google/models/imagen-3.0-generate-002`;
+	// gpt-image-1 has no negative prompt field, so fold it into the prompt
+	const fullPrompt = negativePrompt ? `${prompt}\n\nAvoid: ${negativePrompt}` : prompt;
 
-	const instances: any[] = [{ prompt }];
-
-	//  we have a goal.png, we add it as a style reference
-	// if (referenceImageBase64) {
-	// 	instances[0].referenceImages = [
-	// 		{
-	// 			referenceId: 1,
-	// 			referenceType: 'REFERENCE_TYPE_STYLE',
-	// 			image: { bytesBase64Encoded: referenceImageBase64 },
-	// 		},
-	// 	];
-	// 	// update prompt to refer to the style [1]
-	// 	instances[0].prompt = `${prompt} [1]`;
-	// }
-
-	const parameters = helpers.toValue({
-		sampleCount: numberOfImages,
-		aspectRatio,
-		negativePrompt: negativePrompt || undefined,
-		enhancePrompt: false,
-		safetySetting: 'block_only_high',
+	const client = getOpenAI();
+	const response = await client.images.generate({
+		model: 'gpt-image-1',
+		prompt: fullPrompt,
+		n: numberOfImages,
+		size: sizeByRatio[aspectRatio],
 	});
 
-	const client = getVertexClient();
-	const [response] = await client.predict({
-		endpoint,
-		instances: instances.map((inst) => helpers.toValue(inst)!),
-		parameters,
-	});
-
-	const { predictions } = response;
-	if (!predictions || predictions.length === 0) {
-		throw new Error('No image generated from Imagen');
+	const image = response.data?.[0];
+	if (!image?.b64_json) {
+		throw new Error('No image generated from OpenAI');
 	}
 
-	const prediction = predictions[0];
-	const structValue = prediction?.structValue;
-	if (!structValue?.fields) {
-		throw new Error('Invalid response structure from Imagen');
-	}
-
-	const bytesBase64Encoded = structValue.fields['bytesBase64Encoded']?.stringValue || '';
-	const mimeType = structValue.fields['mimeType']?.stringValue || 'image/png';
-
+	// gpt-image-1 returns png base64
+	const mimeType = 'image/png';
 	return {
-		url: `data:${mimeType};base64,${bytesBase64Encoded}`,
+		url: `data:${mimeType};base64,${image.b64_json}`,
 		mimeType,
-		bytesBase64Encoded,
+		bytesBase64Encoded: image.b64_json,
 	};
 }

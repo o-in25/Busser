@@ -7,7 +7,7 @@
 		NESTED_CREATE_KEY,
 		type NestedCreateKind,
 		type NestedCreateStack,
-	} from '$lib/stores/nestedCreate.svelte';
+	} from './nestedCreate.svelte';
 	import type { SelectOption } from '$lib/types';
 	import { cn } from '$lib/utils';
 

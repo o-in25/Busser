@@ -28,6 +28,7 @@ export class OAuthRepository extends BaseRepository {
 			return this.userRepo.findById(link.userId);
 		} catch (error: any) {
 			console.error('Failed to find OAuth account:', error.message);
+			Logger.error(`Failed to find OAuth account: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -51,6 +52,7 @@ export class OAuthRepository extends BaseRepository {
 				return { status: 'error', error: 'This OAuth account is already linked.' };
 			}
 			console.error('Failed to link OAuth account:', error.message);
+			Logger.error(`Failed to link OAuth account: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -152,6 +154,7 @@ export class OAuthRepository extends BaseRepository {
 			return !!user?.password;
 		} catch (error: any) {
 			console.error('Failed to check password:', error.message);
+			Logger.error(`Failed to check password: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return false;
 		}
 	}
@@ -166,6 +169,7 @@ export class OAuthRepository extends BaseRepository {
 			return { status: 'success', data: rows as LinkedOAuthAccount[] };
 		} catch (error: any) {
 			console.error('Failed to get linked accounts:', error.message);
+			Logger.error(`Failed to get linked accounts: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -191,6 +195,7 @@ export class OAuthRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Failed to unlink OAuth account:', error.message);
+			Logger.error(`Failed to unlink OAuth account: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}

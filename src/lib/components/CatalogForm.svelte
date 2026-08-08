@@ -30,7 +30,7 @@
 	import { SpiritCard } from '$lib/components/ui/spirit-card';
 	import { Switch } from '$lib/components/ui/switch';
 	import { calculateOverallScore, convertFromMl, convertToMl } from '$lib/math';
-	import { NESTED_CREATE_KEY, NestedCreateStack } from '$lib/stores/nestedCreate.svelte';
+	import { NESTED_CREATE_KEY, NestedCreateStack } from './form/nestedCreate.svelte';
 	import type { PreparationMethod, Spirit, View } from '$lib/types';
 
 	import { notificationStore } from '../../stores';

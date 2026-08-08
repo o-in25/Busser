@@ -2,7 +2,7 @@
 	import { getContext } from 'svelte';
 
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { NESTED_CREATE_KEY, type NestedCreateStack } from '$lib/stores/nestedCreate.svelte';
+	import { NESTED_CREATE_KEY, type NestedCreateStack } from './nestedCreate.svelte';
 
 	import CategoryCreateSheet from './CategoryCreateSheet.svelte';
 	import ProductCreateSheet from './ProductCreateSheet.svelte';

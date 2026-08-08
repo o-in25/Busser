@@ -29,6 +29,7 @@ export class UserRepository extends BaseRepository {
 			return users.map((user) => Object.assign({}, user));
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return [];
 		}
 	}
@@ -78,6 +79,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: user };
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -131,8 +133,9 @@ export class UserRepository extends BaseRepository {
 			if (!userId) return null;
 			const result = await this.findById(userId);
 			return result.status === 'success' ? result.data || null : null;
-		} catch (error) {
+		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return null;
 		}
 	}
@@ -161,6 +164,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: user };
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -180,6 +184,7 @@ export class UserRepository extends BaseRepository {
 			}
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			response.error = error.message || 'An error occurred.';
 		} finally {
 			response.refresh = await this.findAll();
@@ -198,6 +203,7 @@ export class UserRepository extends BaseRepository {
 				return { status: 'error', error: 'A role with this name already exists.' };
 			}
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -209,6 +215,7 @@ export class UserRepository extends BaseRepository {
 			return roles.map(({ roleId, roleName }) => ({ name: roleName, value: roleId }));
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return [];
 		}
 	}
@@ -236,6 +243,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: grants };
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -280,6 +288,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: [] };
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -292,6 +301,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: invitations };
 		} catch (error: any) {
 			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error };
 		}
 	}
@@ -324,6 +334,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: invitation };
 		} catch (error: any) {
 			console.error('Failed to create invitation:', error.message);
+			Logger.error(`Failed to create invitation: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -339,6 +350,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: invitations };
 		} catch (error: any) {
 			console.error('Failed to get workspace invitations:', error.message);
+			Logger.error(`Failed to get workspace invitations: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -350,6 +362,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: rowsDeleted };
 		} catch (error: any) {
 			console.error('Failed to delete invitation:', error.message);
+			Logger.error(`Failed to delete invitation: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -364,6 +377,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: invitation };
 		} catch (error: any) {
 			console.error('Failed to get invitation:', error.message);
+			Logger.error(`Failed to get invitation: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -422,6 +436,7 @@ export class UserRepository extends BaseRepository {
 			});
 		} catch (error: any) {
 			console.error('Failed to accept invitation:', error.message);
+			Logger.error(`Failed to accept invitation: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -478,6 +493,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Failed to create invitation request:', error.message);
+			Logger.error(`Failed to create invitation request: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to submit your request. Please try again.' };
 		}
 	}
@@ -495,6 +511,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success', data: requests };
 		} catch (error: any) {
 			console.error('Failed to get invitation requests:', error.message);
+			Logger.error(`Failed to get invitation requests: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -510,6 +527,7 @@ export class UserRepository extends BaseRepository {
 			return Number(result?.count || 0);
 		} catch (error: any) {
 			console.error('Failed to get pending request count:', error.message);
+			Logger.error(`Failed to get pending request count: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return 0;
 		}
 	}
@@ -528,6 +546,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Failed to fulfill invitation request:', error.message);
+			Logger.error(`Failed to fulfill invitation request: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -546,6 +565,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Failed to reject invitation request:', error.message);
+			Logger.error(`Failed to reject invitation request: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -763,6 +783,7 @@ export class UserRepository extends BaseRepository {
 			return result.preferredWorkspaceId;
 		} catch (error: any) {
 			console.error('Error getting preferred workspace:', error.message);
+			Logger.error(`Error getting preferred workspace: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return null;
 		}
 	}
@@ -781,6 +802,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Error setting preferred workspace:', error.message);
+			Logger.error(`Error setting preferred workspace: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to set preferred workspace.' };
 		}
 	}
@@ -802,6 +824,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Error updating avatar URL:', error.message);
+			Logger.error(`Error updating avatar URL: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to update avatar.' };
 		}
 	}
@@ -850,6 +873,7 @@ export class UserRepository extends BaseRepository {
 			return users;
 		} catch (error: any) {
 			console.error('Error getting users in owned workspaces:', error.message);
+			Logger.error(`Error getting users in owned workspaces: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return [];
 		}
 	}
@@ -894,6 +918,7 @@ export class UserRepository extends BaseRepository {
 			return users;
 		} catch (error: any) {
 			console.error('Error getting invitable users:', error.message);
+			Logger.error(`Error getting invitable users: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return [];
 		}
 	}
@@ -909,6 +934,7 @@ export class UserRepository extends BaseRepository {
 			return dbResult as UserFavorite[];
 		} catch (error: any) {
 			console.error('Error getting favorites:', error.message);
+			Logger.error(`Error getting favorites: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return [];
 		}
 	}
@@ -929,6 +955,7 @@ export class UserRepository extends BaseRepository {
 				return { status: 'error', error: 'Recipe is already in favorites.' };
 			}
 			console.error('Error adding favorite:', error.message);
+			Logger.error(`Error adding favorite: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to add favorite.' };
 		}
 	}
@@ -942,6 +969,7 @@ export class UserRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Error removing favorite:', error.message);
+			Logger.error(`Error removing favorite: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to remove favorite.' };
 		}
 	}
@@ -952,6 +980,7 @@ export class UserRepository extends BaseRepository {
 			return !!dbResult;
 		} catch (error: any) {
 			console.error('Error checking favorite:', error.message);
+			Logger.error(`Error checking favorite: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return false;
 		}
 	}
@@ -974,6 +1003,7 @@ export class UserRepository extends BaseRepository {
 			}
 		} catch (error: any) {
 			console.error('Error toggling favorite:', error.message);
+			Logger.error(`Error toggling favorite: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Failed to toggle favorite.' };
 		}
 	}

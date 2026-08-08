@@ -826,6 +826,7 @@
 				{#each savedSuppliers as supplier (supplier.supplierId)}
 					<SupplierCard
 						{supplier}
+						{canModify}
 						productCount={supplierProductCounts.get(supplier.supplierId) || 0}
 						onRemove={canModify ? handleRemoveSupplier : undefined}
 					/>
