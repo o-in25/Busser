@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowRight, Sparkles } from 'lucide-svelte';
+	import { ArrowRight } from 'lucide-svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -17,8 +17,6 @@
 			recipe.recipeVersatilityRating >= 6 && 'Versatile',
 		].filter(Boolean) as string[]
 	);
-
-	const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 </script>
 
 <Card.Root class="overflow-hidden h-full">
@@ -34,18 +32,12 @@
 			/>
 
 			<!-- gradient overlay -->
-			<div class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/30"></div>
+			<div
+				class="absolute inset-0 bg-linear-to-t from-background via-background/80 to-background/30"
+			></div>
 
 			<!-- content overlay -->
 			<div class="relative z-10 p-5 flex flex-col justify-end h-full">
-				<div class="flex items-center gap-2 mb-2">
-					<Badge variant="secondary" class="gap-1 bg-background/80 backdrop-blur-sm text-[10px]">
-						<Sparkles class="h-3 w-3" />
-						Cocktail of the Day
-					</Badge>
-					<Badge variant="outline" class="bg-background/60 backdrop-blur-sm text-[10px] text-foreground/70">{today}</Badge>
-				</div>
-
 				<h3 class="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
 					{recipe.recipeName}
 				</h3>
@@ -67,7 +59,9 @@
 				<div class="flex items-center gap-2 flex-wrap">
 					{#if flavorBadges.length > 0}
 						{#each flavorBadges as label}
-							<Badge variant="outline" class="text-[10px] bg-background/50 backdrop-blur-sm">{label}</Badge>
+							<Badge variant="outline" class="text-[10px] bg-background/50 backdrop-blur-sm"
+								>{label}</Badge
+							>
 						{/each}
 					{/if}
 					<span class={cn(buttonVariants({ size: 'sm' }), 'gap-1.5 ml-auto text-xs h-7')}>

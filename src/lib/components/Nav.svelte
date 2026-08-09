@@ -140,6 +140,10 @@
 		{ href: '/assistant', icon: Sparkles, label: 'Busser AI' },
 		{ href: '/tools', icon: Ruler, label: 'Tools' },
 	];
+
+	// logged-out users only see what they can actually use — inventory/ai are dead-ends for them
+	const publicHrefs = new Set(['/', '/catalog', '/tools']);
+	const items = $derived(user ? navItems : navItems.filter((i) => publicHrefs.has(i.href)));
 </script>
 
 <!-- Mobile Top Logo (visible on small screens) -->
@@ -282,12 +286,15 @@
 			</Sheet.Content>
 		</Sheet.Root>
 	{:else}
-		<!-- placeholder to maintain layout when logged out -->
+		<!-- placeholder keeps the logo centered; sign-in affordance lives on the right -->
 		<div class="mobile-header-left w-8 h-8"></div>
 	{/if}
 	<a href="/" class="mobile-header-logo">
 		<img src={logoNav} class="h-10" alt="Busser" />
 	</a>
+	{#if !user}
+		<a href="/login" class="mobile-header-signin">Sign In</a>
+	{/if}
 </div>
 
 <!-- Mobile Bottom Navigation (visible on small screens) -->
@@ -295,7 +302,7 @@
 	<!-- thin progress line above the pill — feedback near the thumb when tapping the bottom nav -->
 	<NavigationProgress variant="bottom" />
 	<div class="mobile-nav-pill">
-		{#each navItems as item}
+		{#each items as item}
 			<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
 				<item.icon class="h-5 w-5" />
 				<span class="mobile-nav-label">{item.label}</span>
@@ -314,7 +321,7 @@
 
 		<!-- Center nav pill -->
 		<div class="desktop-nav-pill">
-			{#each navItems as item}
+			{#each items as item}
 				<a href={item.href} class="desktop-nav-item {isActive(item.href) ? 'active' : ''}">
 					<item.icon class="h-4 w-4" />
 					<span>{item.label}</span>
@@ -357,9 +364,10 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		{:else}
-			<a href="/login" class="glass-cta !py-2 !px-5 !text-sm">
-				Sign In
-			</a>
+			<div class="flex items-center gap-2">
+				<a href="/login" class="desktop-nav-item">Log In</a>
+				<a href="/signup" class="glass-cta !py-2 !px-5 !text-sm">Sign Up</a>
+			</div>
 		{/if}
 	</div>
 </nav>
@@ -432,6 +440,16 @@
 	.mobile-header-left {
 		position: relative;
 		z-index: 1;
+	}
+
+	.mobile-header-signin {
+		position: relative;
+		z-index: 1;
+		margin-left: auto;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: rgba(232, 25, 95, 1);
+		text-decoration: none;
 	}
 
 	.mobile-header-logo {

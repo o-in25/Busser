@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowRight, Compass, FlaskConical, Globe, Plus, Search, SlidersHorizontal, X } from 'lucide-svelte';
+	import { ArrowRight, Compass, FlaskConical, Globe, Plus, Search, SlidersHorizontal, Sparkles, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -253,6 +253,19 @@
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4">
+	{#if !authenticated}
+		<FancyAlert class="mb-6">
+			{#snippet icon()}<Sparkles class="h-5 w-5 text-primary" />{/snippet}
+			{#snippet children()}
+				<p class="sm:hidden">Sign up to save favorites</p>
+				<p class="hidden sm:block">Sign up to <strong>save favorites</strong> and build your own bar — Busser tells you what you can actually make.</p>
+			{/snippet}
+			{#snippet action()}
+				<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
+			{/snippet}
+		</FancyAlert>
+	{/if}
+
 	{#if authenticated && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
 		<FancyAlert class="mb-6">
 			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
@@ -286,23 +299,27 @@
 		<div class="hidden md:block">
 			<h1 class="text-2xl font-bold">Catalog</h1>
 			<p class="text-sm text-muted-foreground mt-0.5 mb-3">
-				{data.pagination.total}
 				{#if $page.data.isGlobalWorkspace}
-					{data.pagination.total === 1
-						? "recipe in Busser's catalog"
-						: "recipes in Busser's catalog"}
+					Browse Busser's cocktail catalog
 				{:else if workspace?.workspaceRole === 'owner'}
-					{data.pagination.total === 1 ? 'recipe' : 'recipes'} in your catalog
+					{data.pagination.total} {data.pagination.total === 1 ? 'recipe' : 'recipes'} in your catalog
 				{:else}
-					{data.pagination.total === 1 ? 'recipe' : 'recipes'} available
+					{data.pagination.total} {data.pagination.total === 1 ? 'recipe' : 'recipes'} available
 				{/if}
 			</p>
 			<div class="flex gap-2 flex-wrap">
-				<FancyBadge class="whitespace-nowrap">
-					<FlaskConical class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{data.pagination.total}</span>
-					<span class="text-xs text-muted-foreground">Recipes</span>
-				</FancyBadge>
+				{#if $page.data.isGlobalWorkspace}
+					<FancyBadge class="whitespace-nowrap">
+						<FlaskConical class="h-4 w-4 text-primary shrink-0" />
+						<span class="text-sm font-bold">Catalog</span>
+					</FancyBadge>
+				{:else}
+					<FancyBadge class="whitespace-nowrap">
+						<FlaskConical class="h-4 w-4 text-primary shrink-0" />
+						<span class="text-sm font-bold">{data.pagination.total}</span>
+						<span class="text-xs text-muted-foreground">Recipes</span>
+					</FancyBadge>
+				{/if}
 
 				{#if selectedSpirit && selectedSpirit !== 'all'}
 					{@const spiritObj = data.spirits.find((s) => String(s.recipeCategoryId) === selectedSpirit)}
