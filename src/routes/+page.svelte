@@ -37,7 +37,6 @@
 	import FancyCarousel from '$lib/components/FancyCarousel.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
-	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -254,49 +253,18 @@
 		{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
 			<div class="mt-4 w-full hero-enter" style="--delay: 800ms">
 				<FancyCarousel recipes={landingData.featuredRecipes} />
+				<!-- secondary browse affordance — kept lightweight so it doesn't compete with sign up -->
 				<div class="mt-3 text-center">
-					<FancyButton href="/catalog" class="!py-2 !px-5 !text-sm">
-						Browse Catalog
+					<a
+						href="/catalog"
+						class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+					>
+						Browse the catalog
 						<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
-					</FancyButton>
+					</a>
 				</div>
 			</div>
 		{/if}
-	</section>
-
-	<!-- Live Catalog Content -->
-	<section class="py-8 px-4">
-		<div class="max-w-6xl mx-auto">
-			<!-- Cocktail of the Day -->
-			{#if landingData?.cocktailOfTheDay}
-				<div class="mb-8 reveal-on-scroll" use:reveal>
-					<CocktailOfTheDay recipe={landingData.cocktailOfTheDay} />
-				</div>
-			{/if}
-
-			<!-- Quick Actions -->
-			<div
-				class="flex flex-wrap gap-3 justify-center mb-4 reveal-on-scroll"
-				use:reveal={{ delay: 200 }}
-			>
-				<FancyButton href="/catalog" size="md">
-					<FlaskConical class="h-4 w-4 mr-2" />
-					Browse {landingData?.totalRecipes || ''} {landingData?.totalRecipes === 1 ? 'Recipe' : 'Recipes'}
-				</FancyButton>
-				<FancyButton
-					size="md"
-					onclick={() => {
-						if (recipes.length > 0) {
-							const random = recipes[Math.floor(Math.random() * recipes.length)];
-							goto(`/catalog/${random.recipeId}`);
-						}
-					}}
-				>
-					<Shuffle class="h-4 w-4 mr-2" />
-					Surprise Me
-				</FancyButton>
-			</div>
-		</div>
 	</section>
 
 	<!-- Features Section -->
