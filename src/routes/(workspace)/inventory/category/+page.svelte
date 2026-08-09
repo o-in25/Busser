@@ -157,12 +157,7 @@
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
-			<FancyButton
-				variant="primary"
-				size="sm"
-				href="/inventory/category/add"
-				class="shrink-0 h-10 !rounded-xl px-3 sm:px-4"
-			>
+			<FancyButton variant="primary" size="sm" href="/inventory/category/add" class="shrink-0">
 				<Plus class="h-4 w-4 mr-1.5 sm:mr-2" />
 				<span class="sm:hidden">Add</span>
 				<span class="hidden sm:inline">Add Category</span>
@@ -185,7 +180,7 @@
 {/if}
 
 <!-- Hero Section -->
-<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 px-4 py-4 sm:px-6 sm:py-5">
+<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5">
 	<h1 class="text-2xl font-bold mb-3">Categories</h1>
 	<!-- Mobile -->
 	<div class="flex gap-2 sm:hidden">

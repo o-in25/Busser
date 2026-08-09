@@ -10,7 +10,6 @@
 	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Hero from '$lib/components/Hero.svelte';
-	import logo from '$lib/assets/logo.png';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
 	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
@@ -339,12 +338,7 @@
 	<InventoryNav>
 		{#snippet action()}
 			{#if canModify}
-				<FancyButton
-					variant="primary"
-					size="sm"
-					href="{basePath}/add"
-					class="shrink-0 h-10 !rounded-xl px-3 sm:px-4"
-				>
+				<FancyButton variant="primary" size="sm" href="{basePath}/add" class="shrink-0">
 					<Plus class="h-4 w-4 mr-1.5 sm:mr-2" />
 					<span class="sm:hidden">Add</span>
 					<span class="hidden sm:inline">Add Product</span>
@@ -358,7 +352,10 @@
 			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
 			{#snippet children()}
 				<p class="sm:hidden">Viewing global catalog</p>
-				<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
+				<p class="hidden sm:block">
+					You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
+					switch to your workspace.
+				</p>
 			{/snippet}
 			{#snippet action()}
 				<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
