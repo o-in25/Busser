@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { Globe, Sparkles } from 'lucide-svelte';
+	import { FlaskConical, GalleryHorizontalEnd, Globe, Package, Sparkles } from 'lucide-svelte';
 	import { page } from '$app/stores';
 
 	import AiAssistant from '$lib/components/AiAssistant.svelte';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
+	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Hero from '$lib/components/Hero.svelte';
 	import logo from '$lib/assets/logo.png';
-	import { Badge } from '$lib/components/ui/badge';
 	import { workspaceSwitcherOpen } from '../../../stores';
 
 	let { data } = $props();
@@ -18,41 +17,46 @@
 </svelte:head>
 
 {#if data.authenticated}
-	<div class="flex flex-col max-w-3xl mx-auto {data.canModify ? 'h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)]' : ''}">
-		<!-- hero -->
+	<div class="flex flex-col {data.canModify ? 'h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)]' : ''}">
+		<!-- Hero Section -->
 		<div
-			class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-background to-secondary/5 border border-primary/10 mb-4 mt-2"
+			class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5"
 		>
-			<div class="relative px-5 py-5 flex items-center gap-4">
-				<div
-					class="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0"
-				>
-					<Sparkles class="h-5 w-5 text-white" />
-				</div>
-				<div>
-					<div class="flex items-center gap-2">
-						<h1 class="text-xl font-bold">Busser AI</h1>
-						<Badge
-							variant="secondary"
-							class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5">Beta</Badge
-						>
-					</div>
-					<p class="text-sm text-muted-foreground mt-0.5">
-						Describe a cocktail and Busser AI will check your inventory, suggest ingredients, and
-						add it to your catalog.
-					</p>
-				</div>
+			<div class="flex items-center gap-2">
+				<h1 class="text-2xl font-bold">Busser AI</h1>
+			</div>
+			<p class="text-sm text-muted-foreground mt-0.5 mb-3">
+				Describe a cocktail and Busser AI will check your inventory, suggest ingredients, and add it
+				to your catalog.
+			</p>
+			<div class="flex gap-2 flex-wrap">
+				{#if data.workspaceName}
+					<FancyBadge class="whitespace-nowrap">
+						<GalleryHorizontalEnd class="h-4 w-4 text-primary shrink-0" />
+						<span class="text-sm font-bold">{data.workspaceName}</span>
+					</FancyBadge>
+				{/if}
+				<FancyBadge class="whitespace-nowrap">
+					<FlaskConical class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold">{data.recipeCount}</span>
+					<span class="text-xs text-muted-foreground">Recipes</span>
+				</FancyBadge>
+				<FancyBadge class="whitespace-nowrap">
+					<Package class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold">{data.productCount}</span>
+					<span class="text-xs text-muted-foreground">Products</span>
+				</FancyBadge>
 			</div>
 		</div>
 
 		{#if data.canModify}
 			<!-- chat container -->
-			<div class="glass-panel flex-1 min-h-0 overflow-hidden">
+			<div class="glass-panel flex-1 min-h-0 overflow-hidden w-full max-w-3xl mx-auto">
 				<AiAssistant userAvatarUrl={$page.data.user?.avatarImageUrl} />
 			</div>
 		{:else}
 			<!-- switch workspace prompt -->
-			<div class="glass-panel overflow-hidden flex items-center justify-center p-6">
+			<div class="glass-panel overflow-hidden flex items-center justify-center p-6 w-full max-w-3xl mx-auto">
 				<div class="text-center max-w-sm space-y-6">
 					<div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
 						<Sparkles class="h-8 w-8 text-primary" />

@@ -1,4 +1,5 @@
 import { type Handle, redirect } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { StatusCodes } from 'http-status-codes';
 import micromatch from 'micromatch';
 
@@ -24,11 +25,7 @@ const publicRoutes = [
 ];
 
 // routes accessible during onboarding (before user completes profile)
-const onboardingAllowedRoutes = [
-	'/onboarding',
-	'/logout',
-	'/api/oauth/**',
-];
+const onboardingAllowedRoutes = ['/onboarding', '/logout', '/api/oauth/**'];
 
 // Routes that don't require workspace selection (for authenticated users)
 const workspaceExemptRoutes = [
@@ -134,7 +131,9 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	response.headers.set('X-Frame-Options', 'SAMEORIGIN');
 	response.headers.set('X-Content-Type-Options', 'nosniff');
 	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-	response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	// dont send hsts over http dev browsers ignore it anyway, and it can cache badly in safari
+	// eslint-disable-next-line prettier/prettier
+	if (!dev) response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 	response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
 	return response;
