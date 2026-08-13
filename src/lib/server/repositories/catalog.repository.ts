@@ -5,7 +5,6 @@ import type {
 	PaginationResult,
 	PreparationMethod,
 	QueryRequest,
-	IngredientRole,
 	QueryResult,
 	Spirit,
 	StepExtras,
@@ -26,51 +25,9 @@ type InventoryRow = {
 	productName: string;
 	categoryId: number;
 	parentCategoryId: number | null;
-	categoryGroupId: number | null;
 	productImageUrl: string | null;
 	productInStockQuantity: number;
 };
-
-// maps the inventory category groups onto the classic cocktail build roles
-// (base → modifier → balance → accent → finish). null means "no group assigned".
-function roleFromGroup(groupId: number | null | undefined): IngredientRole | null {
-	switch (groupId) {
-		case 1:
-			return 'base'; // Spirits
-		case 2:
-		case 3:
-			return 'modifier'; // Liqueurs, Fortified & Aromatized
-		case 5:
-		case 6:
-			return 'balance'; // Sweeteners, Juices
-		case 4:
-			return 'accent'; // Bitters
-		case 7:
-		case 8:
-			return 'build'; // Mixers & Sodas, Other
-		default:
-			return null;
-	}
-}
-
-// ~11% of catalog categories have no category group; fall back to the category/parent name.
-// order matters: bitters and sweet/sour are checked before spirits so e.g. "agave syrup"
-// doesn't read as a base spirit.
-function roleFromName(step: View.BasicRecipeStep): IngredientRole {
-	const hay = `${step.parentCategoryName ?? ''} ${step.categoryName}`.toLowerCase();
-	if (/bitters/.test(hay)) return 'accent';
-	if (/syrup|juice|sugar|honey|agave|grenadine|cordial|sour|sweeten|cream|orgeat|falernum/.test(hay))
-		return 'balance';
-	if (/liqueur|vermouth|fortified|amaro|aperitif|aperol|campari|chartreuse|lillet|sherry|port|triple sec|curacao|curaçao|absinthe/.test(hay))
-		return 'modifier';
-	if (/gin|vodka|rum|whisk|tequila|brandy|cognac|mezcal|pisco|cacha|scotch|bourbon|rye|spirit/.test(hay))
-		return 'base';
-	return 'build'; // soda, tonic, champagne, garnish, etc.
-}
-
-function classifyRole(step: View.BasicRecipeStep, groupId: number | null | undefined): IngredientRole {
-	return roleFromGroup(groupId) ?? roleFromName(step);
-}
 
 // step extras with nothing resolved — used as a graceful fallback
 function emptyExtras(step: View.BasicRecipeStep): StepExtras {
@@ -78,7 +35,6 @@ function emptyExtras(step: View.BasicRecipeStep): StepExtras {
 		recipeStepId: step.recipeStepId ?? 0,
 		productImageUrl: null,
 		matchLabel: null,
-		role: 'build',
 		substitutes: [],
 	};
 }
@@ -364,16 +320,12 @@ export class CatalogRepository extends BaseRepository {
 					'productName',
 					'categoryId',
 					'parentCategoryId',
-					'categoryGroupId',
 					'productImageUrl',
 					'productInStockQuantity'
 				)) as InventoryRow[];
 
 			const imageByProduct = new Map<number, string | null>(
 				rows.map((r) => [r.productId, r.productImageUrl])
-			);
-			const groupByProduct = new Map<number, number | null>(
-				rows.map((r) => [r.productId, r.categoryGroupId])
 			);
 
 			return steps.map((step) => {
@@ -416,9 +368,7 @@ export class CatalogRepository extends BaseRepository {
 								: 1
 					);
 
-				const role = classifyRole(step, groupByProduct.get(step.productId));
-
-				return { recipeStepId: step.recipeStepId ?? 0, productImageUrl, matchLabel, role, substitutes };
+				return { recipeStepId: step.recipeStepId ?? 0, productImageUrl, matchLabel, substitutes };
 			});
 		} catch (error: any) {
 			console.error(error);

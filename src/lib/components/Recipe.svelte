@@ -29,7 +29,7 @@
 
 	// Props using $props()
 	import type { Snippet } from 'svelte';
-	import type { IngredientRole, StepExtras } from '$lib/types';
+	import type { StepExtras } from '$lib/types';
 
 	let {
 		recipe,
@@ -48,16 +48,6 @@
 		new Map((stepExtras ?? []).map((e) => [e.recipeStepId, e]))
 	);
 
-	// group ingredients by the role they play in the build (base → modifier → …)
-	const ROLE_ORDER: IngredientRole[] = ['base', 'modifier', 'balance', 'accent', 'build'];
-	const ROLE_LABEL: Record<IngredientRole, string> = {
-		base: 'Base',
-		modifier: 'Modifiers',
-		balance: 'Sweet & Sour',
-		accent: 'Bitters & Accents',
-		build: 'Top & Garnish',
-	};
-
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
@@ -69,22 +59,6 @@
 
 	// steps with checked state
 	let steps = $derived(initialRecipeSteps.map((step) => ({ ...step, checked: false })));
-
-	// steps bucketed by role, preserving original index for check-state binding.
-	// only surface headers when the drink actually spans more than one role.
-	let ingredientGroups = $derived.by(() => {
-		const withIndex = steps.map((step, index) => ({
-			step,
-			index,
-			role: extrasByStep.get(step.recipeStepId ?? -1)?.role ?? ('build' as IngredientRole),
-		}));
-		return ROLE_ORDER.map((role) => ({
-			role,
-			label: ROLE_LABEL[role],
-			items: withIndex.filter((s) => s.role === role),
-		})).filter((g) => g.items.length > 0);
-	});
-	let showRoleHeaders = $derived(ingredientGroups.length > 1);
 
 	// Lightbox state
 	let lightboxOpen = $state(false);
@@ -356,29 +330,20 @@
 						No ingredients listed for this recipe.
 					</p>
 				{:else}
-					<div class="space-y-4">
-						{#each ingredientGroups as group (group.role)}
-							<div class="space-y-1">
-								{#if showRoleHeaders}
-									<p class="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
-										{group.label}
-									</p>
-								{/if}
-								{#each group.items as { step, index } (step.recipeStepId ?? index)}
-									{@const extras = extrasByStep.get(step.recipeStepId ?? -1)}
-									<RecipeIngredientStep
-										categoryName={step.categoryName}
-										productName={step.productName}
-										quantity={step.productIdQuantityInMilliliters}
-										unit={step.productIdQuantityUnit}
-										description={step.recipeStepDescription}
-										productImageUrl={extras?.productImageUrl ?? null}
-										matchLabel={extras?.matchLabel ?? null}
-										substitutes={extras?.substitutes ?? []}
-										bind:checked={completed[index]}
-									/>
-								{/each}
-							</div>
+					<div class="space-y-1">
+						{#each steps as step, index (step.recipeStepId ?? index)}
+							{@const extras = extrasByStep.get(step.recipeStepId ?? -1)}
+							<RecipeIngredientStep
+								categoryName={step.categoryName}
+								productName={step.productName}
+								quantity={step.productIdQuantityInMilliliters}
+								unit={step.productIdQuantityUnit}
+								description={step.recipeStepDescription}
+								productImageUrl={extras?.productImageUrl ?? null}
+								matchLabel={extras?.matchLabel ?? null}
+								substitutes={extras?.substitutes ?? []}
+								bind:checked={completed[index]}
+							/>
 						{/each}
 					</div>
 

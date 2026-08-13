@@ -32,16 +32,12 @@ export type Substitute = {
 	inStock: boolean;
 };
 
-// the role an ingredient plays in the build, à la the classic spirit/modifier/accent framework
-export type IngredientRole = 'base' | 'modifier' | 'balance' | 'accent' | 'build';
-
-// per-step presentation data resolved from inventory (images + role + acceptable substitutes).
+// per-step presentation data resolved from inventory (images + acceptable substitutes).
 // keyed to a step via recipeStepId; kept separate from the step view which has no image column.
 export type StepExtras = {
 	recipeStepId: number;
 	productImageUrl: string | null;
 	matchLabel: string | null; // e.g. "Any Orange Bitters" — null for exact-product steps
-	role: IngredientRole;
 	substitutes: Substitute[];
 };
 

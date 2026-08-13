@@ -203,6 +203,7 @@ export const load = (async ({ locals }) => {
 		recipes,
 		dashboardData,
 		landingData,
+		isGlobalCatalog,
 	};
 }) satisfies PageServerLoad;
 
