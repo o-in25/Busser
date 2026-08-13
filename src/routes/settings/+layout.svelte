@@ -100,6 +100,8 @@
 	</li>
 </ul>
 </nav>
-<div class="p-4 glass-surface">
+<!-- transparent wrapper on purpose: nesting glass-surface here would blur the page mesh to
+     flat white behind the cards, so their own frost renders solid. let cards glass the mesh directly -->
+<div class="px-0.5 md:px-1">
 	<slot />
 </div>

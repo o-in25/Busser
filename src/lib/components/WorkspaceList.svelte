@@ -22,11 +22,12 @@
 
 {#if workspaces.length > 0}
 	<div class="space-y-2">
-		{#each workspaces as workspace (workspace.workspaceId)}
+		{#each workspaces as workspace, i (workspace.workspaceId)}
 			<button
 				type="button"
 				onclick={() => onSelect(workspace.workspaceId)}
-				class="w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all {activeWorkspaceId ===
+				style="animation-delay: {i * 60}ms"
+				class="workspace-item w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all focus:outline-none focus-visible:outline-none {activeWorkspaceId ===
 				workspace.workspaceId
 					? 'border-primary bg-primary/5'
 					: 'border-transparent bg-muted/30 hover:bg-muted/50'}"
@@ -84,3 +85,27 @@
 		</p>
 	</div>
 {/if}
+
+<style>
+	/* spring bounce-in matching our glass dropdown easing */
+	.workspace-item {
+		animation: workspace-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+	}
+
+	@keyframes workspace-pop {
+		0% {
+			opacity: 0;
+			transform: translateY(6px) scale(0.96);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.workspace-item {
+			animation: none;
+		}
+	}
+</style>

@@ -4,12 +4,20 @@ import recipes from './data/global-catalog-recipes.json';
 const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
 const SUPPLIER_ID = 1;
 
-// parent categories for new ingredient categories
+// parent categories for new ingredient categories (kept in sync with the taxonomy
+// fixed by migration 20260813000000 — flavour-specific syrups are children of "Syrup"
+// so ANY_IN_CATEGORY matching scopes per-flavour, not the whole syrup bucket)
 const PARENT_CATEGORY_MAP: Record<string, string> = {
 	'Maraschino Liqueur': 'Liqueur',
 	'Green Chartreuse': 'Herbal Liqueur',
 	'Yellow Chartreuse': 'Herbal Liqueur',
 	'Raspberry Syrup': 'Syrup',
+	'Ginger Syrup': 'Syrup',
+	'Honey Syrup': 'Syrup',
+	'Agave Syrup': 'Syrup',
+	'Orgeat Syrup': 'Syrup',
+	'Cinnamon Syrup': 'Syrup',
+	'Simple Syrup': 'Syrup',
 	'Scotch Whisky': 'Whiskey',
 	'Cachaça': 'Rum',
 	'Pisco': 'Brandy',
@@ -17,6 +25,7 @@ const PARENT_CATEGORY_MAP: Record<string, string> = {
 	'Lillet Blanc': 'Fortified wine',
 	'Amaretto': 'Liqueur',
 	'Aperol': 'Liqueur',
+	Campari: 'Liqueur',
 	'Drambuie': 'Liqueur',
 	'Crème de Violette': 'Liqueur',
 	'Crème de Cacao': 'Liqueur',
@@ -37,20 +46,26 @@ async function resolveCategory(knex: Knex, categoryName: string): Promise<number
 		.first();
 	if (existing) return existing.CategoryId;
 
-	// resolve parent if one is mapped
+	// resolve parent if one is mapped, and inherit its group so we don't create
+	// null-group categories (the root cause of the role-grouping bug fixed in 20260813)
 	let parentId: number | null = null;
+	let groupId: number | null = null;
 	const parentName = PARENT_CATEGORY_MAP[categoryName];
 	if (parentName) {
 		const parent = await knex('category')
 			.where({ CategoryName: parentName, WorkspaceId: WORKSPACE })
 			.first();
-		if (parent) parentId = parent.CategoryId;
+		if (parent) {
+			parentId = parent.CategoryId;
+			groupId = parent.CategoryGroupId ?? null;
+		}
 	}
 
 	const [id] = await knex('category').insert({
 		WorkspaceId: WORKSPACE,
 		CategoryName: categoryName,
 		ParentCategoryId: parentId,
+		CategoryGroupId: groupId,
 	});
 	return id;
 }
@@ -131,6 +146,7 @@ export async function seed(knex: Knex): Promise<void> {
 				RecipeCategoryId: spiritRow.RecipeCategoryId,
 				RecipeDescriptionId: descId,
 				RecipeName: recipe.name,
+				Published: false, // seed as draft — review + publish from the ui
 			});
 
 			await trx('recipetechnique').insert({

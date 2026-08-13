@@ -349,8 +349,8 @@
 
 <ShoppingListHeader summary={data.summary} stats={data.stats} />
 
-<!-- Items to Restock -->
-<Card.Root class="mb-6">
+<!-- Items to Restock — bare: this section holds a grid of cards, so it must not frost -->
+<Card.Root bare class="mb-6">
 	<Card.Header class="pb-4">
 		<Card.Title>Items to Restock</Card.Title>
 		<p class="text-sm text-muted-foreground">
@@ -812,8 +812,8 @@
 	</Card.Content>
 </Card.Root>
 
-<!-- Saved Suppliers -->
-<Card.Root class="mb-6">
+<!-- Saved Suppliers — bare: holds a grid of SupplierCards, so it must not frost -->
+<Card.Root bare class="mb-6">
 	<Card.Header class="pb-4">
 		<Card.Title>Saved Suppliers</Card.Title>
 		<p class="text-sm text-muted-foreground">

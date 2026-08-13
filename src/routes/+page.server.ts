@@ -30,7 +30,10 @@ export const load = (async ({ locals }) => {
 	const workspaceRole = user && locals.activeWorkspaceId
 		? await hasWorkspaceAccess(user.userId, workspaceId)
 		: null;
-	const isOwner = workspaceRole === 'owner';
+	// the global catalog has no per-user inventory (everything reads as in stock), so the
+	// bar dashboard is meaningless there — treat it as a plain browse view, not an owned bar
+	const isGlobalCatalog = workspaceId === globalWorkspace;
+	const isOwner = workspaceRole === 'owner' && !isGlobalCatalog;
 
 	// owners see available (ready to make) recipes; non-owners see full catalog
 	let recipes: View.BasicRecipe[] = [];
@@ -200,6 +203,7 @@ export const load = (async ({ locals }) => {
 		recipes,
 		dashboardData,
 		landingData,
+		isGlobalCatalog,
 	};
 }) satisfies PageServerLoad;
 

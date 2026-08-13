@@ -4,16 +4,19 @@
 
 	import { cn } from '$lib/utils';
 
+	// `bare` = transparent container (no frost). use it for a SECTION that itself holds
+	// cards — stacking glass-card inside glass-card blurs the page mesh to flat white
 	let {
 		class: className,
+		bare = false,
 		children,
 		...restProps
-	}: HTMLAttributes<HTMLDivElement> & { children?: Snippet } = $props();
+	}: HTMLAttributes<HTMLDivElement> & { bare?: boolean; children?: Snippet } = $props();
 </script>
 
 <div
 	class={cn(
-		'rounded-xl border border-white/20 dark:border-zinc-700/30 bg-white/65 dark:bg-zinc-800/45 backdrop-blur-xl text-card-foreground shadow-lg transition-all duration-300 hover:bg-white/75 dark:hover:bg-zinc-800/55 hover:shadow-xl isolate',
+		bare ? 'text-card-foreground' : 'glass-card text-card-foreground isolate',
 		className
 	)}
 	{...restProps}

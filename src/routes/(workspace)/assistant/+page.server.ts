@@ -1,3 +1,4 @@
+import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { getUserWorkspaces } from '$lib/server/workspace';
 
 import type { PageServerLoad } from './$types';
@@ -11,6 +12,12 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 
 	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
 
+	// hero stats — same counts the catalog/inventory pages surface
+	const [recipeCount, inventoryStats] = await Promise.all([
+		catalogRepo.getRecipeCount(workspace.workspaceId),
+		inventoryRepo.getStats(workspace.workspaceId),
+	]);
+
 	let editableWorkspaces: Array<{ workspaceId: string; workspaceName: string }> = [];
 
 	if (!canModify && locals.user) {
@@ -22,5 +29,12 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 		}
 	}
 
-	return { authenticated: true as const, canModify, editableWorkspaces };
+	return {
+		authenticated: true as const,
+		canModify,
+		editableWorkspaces,
+		workspaceName: workspace.workspaceName,
+		recipeCount,
+		productCount: inventoryStats.total,
+	};
 };

@@ -1,153 +1,139 @@
 <script lang="ts">
-	import { Check, Layers, Sparkles } from 'lucide-svelte';
+	import { ArrowLeftRight, Check } from 'lucide-svelte';
+	import IngredientThumb from '$lib/components/IngredientThumb.svelte';
+	import * as Popover from '$lib/components/ui/popover';
 	import { convertFromMl, getUnits, topOffPresets } from '$lib/math';
-	import type { MatchMode } from '$lib/types';
+	import type { Substitute } from '$lib/types';
 	import { cn } from '$lib/utils';
 
 	let {
 		class: className,
-		stepNumber,
 		categoryName,
 		productName,
 		quantity,
 		unit,
 		description,
-		matchMode = 'EXACT_PRODUCT',
-		parentCategoryName,
+		productImageUrl = null,
+		matchLabel = null,
+		substitutes = [],
 		checked = $bindable(false),
-		...restProps
 	}: {
 		class?: string;
-		stepNumber: number;
 		categoryName: string;
 		productName: string;
 		quantity: number;
 		unit: string;
 		description?: string | null;
-		matchMode?: MatchMode;
-		parentCategoryName?: string | null;
+		productImageUrl?: string | null;
+		matchLabel?: string | null;
+		substitutes?: Substitute[];
 		checked?: boolean;
-		[key: string]: unknown;
 	} = $props();
 
 	const units = getUnits();
 	const displayQuantity = $derived(convertFromMl(unit, quantity));
 	const unitLabel = $derived(units[unit]?.i18n(displayQuantity) || unit);
 
-	// Format the ingredient line based on unit type
-	const formattedIngredient = $derived.by(() => {
+	// the measure that leads the row, e.g. "2 dashes", "2oz", "Splash with"
+	const amount = $derived.by(() => {
 		const unitLower = unit.toLowerCase();
-
-		// "Top off" uses preset labels
 		if (unitLower === 'top off') {
 			const preset = topOffPresets.find((p) => p.ml === quantity);
-			const presetLabel = preset?.label || 'Top off';
-			return { prefix: `${presetLabel} with`, ingredient: categoryName };
+			return `${preset?.label || 'Top off'} with`;
 		}
-
-		// Countable discrete units - use space before unit, no "of"
-		const countableUnits = ['dash', 'cube', 'barspoon', 'egg white', 'egg yolk', 'whole egg'];
-		if (countableUnits.includes(unitLower)) {
-			return { prefix: `${Math.round(displayQuantity)} ${unitLabel}`, ingredient: categoryName };
-		}
-
-		// Volumetric units (oz, ml, tsp, tbsp) - no space, no "of"
-		return { prefix: `${displayQuantity}${unitLabel}`, ingredient: categoryName };
+		const countable = ['dash', 'cube', 'barspoon', 'egg white', 'egg yolk', 'whole egg'];
+		if (countable.includes(unitLower)) return `${Math.round(displayQuantity)} ${unitLabel}`;
+		return `${displayQuantity}${unitLabel}`;
 	});
 
-	// Determine what to display based on match mode
-	const isFlexible = $derived(matchMode !== 'EXACT_PRODUCT');
-	const flexibleLabel = $derived.by(() => {
-		if (matchMode === 'ANY_IN_CATEGORY') return `Any ${categoryName}`;
-		if (matchMode === 'ANY_IN_PARENT_CATEGORY' && parentCategoryName)
-			return `Any ${parentCategoryName}`;
-		return null;
-	});
-
-	function handleToggle() {
-		checked = !checked; // propagates to parent
-	}
+	// show the specific bottle only when it adds something over the generic name
+	const showProduct = $derived(!!productName && productName !== categoryName);
 </script>
 
-<button
-	type="button"
+<div
 	class={cn(
-		'w-full flex items-start gap-3 p-4 rounded-lg transition-all duration-200 text-left group',
-		checked
-			? 'bg-primary/5 border border-primary/20'
-			: 'bg-card border border-border hover:border-primary/30 hover:bg-accent/30',
+		'flex items-start gap-3 rounded-xl p-3 transition-colors duration-200',
+		checked ? 'bg-primary/5 border border-primary/20' : 'border border-transparent hover:bg-accent/40',
 		className
 	)}
-	onclick={handleToggle}
-	{...restProps}
 >
-	<!-- Step number / Check indicator -->
-	<div
-		class={cn(
-			'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-200',
-			checked
-				? 'bg-primary text-primary-foreground'
-				: 'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary'
-		)}
+	<!-- tile doubles as the check target for the whole ingredient -->
+	<button
+		type="button"
+		class="flex flex-1 items-start gap-3 text-left min-w-0"
+		aria-pressed={checked}
+		onclick={() => (checked = !checked)}
 	>
-		{#if checked}
-			<Check class="w-4 h-4" />
-		{:else}
-			{stepNumber}
-		{/if}
-	</div>
-
-	<!-- Content -->
-	<div class="flex-1 min-w-0 space-y-1">
-		<!-- Top line -->
-		{#if checked}
-			<s class="text-foreground font-semibold">
-				{formattedIngredient.prefix}
-				<span class="text-muted-foreground">{formattedIngredient.ingredient}</span>
-			</s>
-		{:else}
-			<div class="text-foreground font-semibold">
-				{formattedIngredient.prefix}
-				<span class="text-muted-foreground">{formattedIngredient.ingredient}</span>
-			</div>
-		{/if}
-
-		<!-- Product name with flexible matching indicator -->
-		{#if isFlexible && flexibleLabel}
-			<div class="flex items-center gap-1.5 mt-0.5">
-				{#if matchMode === 'ANY_IN_PARENT_CATEGORY'}
-					<Sparkles class="w-3 h-3 text-neon-amber-500" />
-				{:else}
-					<Layers class="w-3 h-3 text-blue-500" />
-				{/if}
-				{#if checked}
-					<s class="text-xs text-muted-foreground">{flexibleLabel}</s>
-				{:else}
-					<span class="text-xs text-muted-foreground">{flexibleLabel}</span>
-				{/if}
-			</div>
-			{#if productName && productName !== categoryName}
-				{#if checked}
-					<s class="text-xs text-muted-foreground/60 mt-0.5 block">Using: {productName}</s>
-				{:else}
-					<p class="text-xs text-muted-foreground/60 mt-0.5">Using: {productName}</p>
-				{/if}
-			{/if}
-		{:else if productName && productName !== categoryName}
+		<div class="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-border/60 shadow-sm">
+			<IngredientThumb
+				src={productImageUrl}
+				name={categoryName}
+				class={cn('h-full w-full text-lg transition-all', checked && 'opacity-40 grayscale')}
+			/>
 			{#if checked}
-				<s class="text-sm text-muted-foreground mt-0.5 block">{productName}</s>
-			{:else}
-				<p class="text-sm text-muted-foreground mt-0.5">{productName}</p>
+				<div class="absolute inset-0 flex items-center justify-center bg-primary/70">
+					<Check class="h-5 w-5 text-primary-foreground" />
+				</div>
 			{/if}
-		{/if}
+		</div>
 
-		<!-- Description -->
-		{#if description}
-			{#if checked}
-				<s class="text-xs text-muted-foreground/70 italic mt-1 block">{description}</s>
-			{:else}
-				<p class="text-xs text-muted-foreground/70 italic mt-1">{description}</p>
+		<div class="min-w-0 flex-1 space-y-0.5">
+			<!-- primary: muted amount + emphasised ingredient name -->
+			<p class={cn('text-base leading-snug', checked && 'line-through opacity-50')}>
+				<span class="tabular-nums text-muted-foreground">{amount}</span>
+				<span class="font-semibold text-foreground">{categoryName}</span>
+			</p>
+
+			<!-- secondary: the specific bottle, plain (no "Using:") -->
+			{#if showProduct}
+				<p class={cn('text-sm text-muted-foreground', checked && 'line-through opacity-50')}>
+					{productName}
+				</p>
 			{/if}
-		{/if}
-	</div>
-</button>
+
+			<!-- description reads as body, not tertiary -->
+			{#if description}
+				<p class={cn('text-sm text-foreground/80', checked && 'line-through opacity-50')}>
+					{description}
+				</p>
+			{/if}
+		</div>
+	</button>
+
+	<!-- substitutions replace the old icon legend: only shown when the user's bar has options -->
+	{#if substitutes.length > 0}
+		<Popover.Root>
+			<Popover.Trigger
+				class="mt-0.5 inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-border/70 px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+			>
+				<ArrowLeftRight class="h-3.5 w-3.5" />
+				<span class="hidden sm:inline">Substitute</span>
+			</Popover.Trigger>
+			<Popover.Content align="end" class="w-72">
+				{#if matchLabel}
+					<p class="mb-2 text-xs font-medium text-muted-foreground">{matchLabel} works</p>
+				{/if}
+				<ul class="space-y-1">
+					{#each substitutes as sub (sub.productId)}
+						<li class="flex items-center gap-2.5 rounded-lg p-1.5">
+							<IngredientThumb
+								src={sub.imageUrl}
+								name={sub.productName}
+								class="h-8 w-8 flex-shrink-0 rounded-md border border-border/60 text-xs"
+							/>
+							<span class="min-w-0 flex-1 truncate text-sm text-foreground">{sub.productName}</span>
+							{#if sub.inStock}
+								<span class="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+									<Check class="h-3 w-3" />
+									In stock
+								</span>
+							{:else}
+								<span class="flex-shrink-0 text-[11px] text-muted-foreground">Not stocked</span>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			</Popover.Content>
+		</Popover.Root>
+	{/if}
+</div>

@@ -23,6 +23,7 @@
 		"seed:core": "tsx node_modules/knex/bin/cli.js seed:run --knexfile knexfile.ts --env core",
 		"unseed:core": "tsx scripts/unseed-catalog.ts",
 		"seed:images": "tsx scripts/seed-catalog-images.ts",
+		"import:cocktaildb": "tsx scripts/import-cocktaildb.ts",
 		"seed:user": "tsx node_modules/knex/bin/cli.js seed:run --knexfile knexfile.ts --env user",
 		"test": "vitest run",
 		"test:watch": "vitest",

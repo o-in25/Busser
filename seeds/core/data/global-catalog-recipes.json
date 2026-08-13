@@ -633,5 +633,88 @@
 			{ "category": "Sugar", "qty": 5, "unit": "cube", "desc": "Place 1 sugar cube in glass" },
 			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Soak sugar cube with 2 dashes Angostura bitters" }
 		]
+	},
+	{
+		"name": "Dry Martini",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A classic cocktail made with gin and dry vermouth, the Dry Martini is known for its crisp, clean taste. Typically garnished with an olive or a twist of lemon, it epitomizes sophistication and simplicity.",
+		"ratings": { "sweetness": 2.0, "dryness": 8.0, "strength": 8.0, "versatility": 9.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 50, "unit": "ml", "desc": "Add 1.7oz gin" },
+			{ "category": "Dry Vermouth", "qty": 10, "unit": "ml", "desc": "Add 0.3oz dry vermouth" }
+		]
+	},
+	{
+		"name": "French Connection",
+		"spirit": "Brandy",
+		"technique": "Stirred",
+		"description": "This cocktail features equal parts of Cognac and Amaretto, creating a rich and nutty flavor profile. Served over ice in an old fashioned glass, it offers a smooth and indulgent experience.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Cognac", "qty": 45, "unit": "ml", "desc": "Add 1.5oz cognac" },
+			{ "category": "Amaretto", "qty": 23, "unit": "ml", "desc": "Add 0.8oz amaretto" }
+		]
+	},
+	{
+		"name": "Godfather",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A simple yet sophisticated blend of Scotch and Amaretto served over ice. The Godfather cocktail combines the smoky notes of whiskey with the sweet, nutty flavor of almond liqueur for a smooth, approachable drink.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 45, "unit": "ml", "desc": "Add 1.5oz scotch" },
+			{ "category": "Amaretto", "qty": 23, "unit": "ml", "desc": "Add 0.8oz amaretto" }
+		]
+	},
+	{
+		"name": "Kamikaze",
+		"spirit": "Vodka",
+		"technique": "Shaken",
+		"description": "A vibrant mix of vodka, triple sec, and fresh lime juice. This refreshing cocktail is served chilled, making it perfect for a lively gathering.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 30, "unit": "ml", "desc": "Add 1oz vodka" },
+			{ "category": "Orange Liqueur", "qty": 30, "unit": "ml", "desc": "Add 1oz triple sec" },
+			{ "category": "Lime Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lime juice" }
+		]
+	},
+	{
+		"name": "Long Island Iced Tea",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A potent blend of equal parts vodka, tequila, light rum, and gin, topped with a splash of Coca-Cola for color. This refreshing and sweet concoction is served over ice and garnished with a lemon or lime twist.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 9.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 15, "unit": "ml", "desc": "Add 0.5oz vodka" },
+			{ "category": "Blanco Tequila", "qty": 15, "unit": "ml", "desc": "Add 0.5oz tequila" },
+			{ "category": "White Rum", "qty": 15, "unit": "ml", "desc": "Add 0.5oz light rum" },
+			{ "category": "London Dry Gin", "qty": 15, "unit": "ml", "desc": "Add 0.5oz gin" },
+			{ "category": "Cola", "qty": 1, "unit": "dash", "desc": "Add 1 dash coca-cola" }
+		]
+	},
+	{
+		"name": "Sea breeze",
+		"spirit": "Vodka",
+		"technique": "Stirred",
+		"description": "A refreshing blend of vodka, cranberry juice, and grapefruit juice. Served over ice in a highball glass, it offers a perfect balance of sweet and tart flavors, garnished with a lime wedge.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 45, "unit": "ml", "desc": "Add 1.5oz vodka" },
+			{ "category": "Cranberry Juice", "qty": 120, "unit": "ml", "desc": "Top with cranberry juice" },
+			{ "category": "Grapefruit Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz grapefruit juice" }
+		]
+	},
+	{
+		"name": "White Lady",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing blend of gin, triple sec, and fresh lemon juice. The White Lady is a classic cocktail that perfectly balances the brightness of citrus with the botanical notes of gin.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 40, "unit": "ml", "desc": "Add 1.3oz gin" },
+			{ "category": "Orange Liqueur", "qty": 30, "unit": "ml", "desc": "Add 1oz triple sec" },
+			{ "category": "Lemon Juice", "qty": 20, "unit": "ml", "desc": "Add 0.7oz lemon juice" }
+		]
 	}
 ]

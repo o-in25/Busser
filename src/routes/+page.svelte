@@ -109,7 +109,8 @@
 	// workspace role determines resource access (viewer can only read)
 	const workspaceRole = $derived(dashboardData?.workspaceRole);
 	const canModify = $derived(workspaceRole === 'owner' || workspaceRole === 'editor');
-	const isOwner = $derived(workspaceRole === 'owner');
+	// global catalog has no per-user inventory, so it's never treated as an owned bar
+	const isOwner = $derived(workspaceRole === 'owner' && !data.isGlobalCatalog);
 
 	// Gallery setup for authenticated users
 	const gallery = $derived(

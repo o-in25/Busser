@@ -11,6 +11,9 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const { workspaceId } = workspace;
 	const userId = locals.user?.userId;
 
+	// owners/editors see drafts (badged) for review; viewers don't
+	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
+
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const perPage = parseInt(url.searchParams.get('perPage') || '24');
 	const search = url.searchParams.get('search') || '';
@@ -85,7 +88,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			page,
 			perPage,
 			Object.keys(filter).length > 0 ? filter : null,
-			hasAdvancedFilter ? advancedFilter : null
+			hasAdvancedFilter ? advancedFilter : null,
+			canModify
 		),
 		catalogRepo.getSpirits(),
 		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
@@ -184,6 +188,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		pagination,
 		spirits,
 		preparationMethods,
+		canModify,
 		favoriteRecipeIds: [...favoriteRecipeIds],
 		featuredRecipeIds: [...featuredRecipeIds],
 		filters: {

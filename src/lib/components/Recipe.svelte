@@ -6,10 +6,8 @@
 		Expand,
 		FlaskConical,
 		GlassWater,
-		Layers,
 		Martini,
 		Percent,
-		Sparkles,
 		X,
 	} from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
@@ -31,16 +29,24 @@
 
 	// Props using $props()
 	import type { Snippet } from 'svelte';
+	import type { StepExtras } from '$lib/types';
 
 	let {
 		recipe,
 		recipeSteps: initialRecipeSteps,
+		stepExtras,
 		actions,
 	}: {
 		recipe: View.BasicRecipe;
 		recipeSteps: View.BasicRecipeStep[];
+		stepExtras?: StepExtras[];
 		actions?: Snippet;
 	} = $props();
+
+	// resolve per-step image/substitute data by step id (absent in preview contexts)
+	const extrasByStep = $derived(
+		new Map((stepExtras ?? []).map((e) => [e.recipeStepId, e]))
+	);
 
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
@@ -70,17 +76,6 @@
 	let ingredientCount = $derived(initialRecipeSteps.length);
 	let completedSteps = $derived(completed.filter((c) => c).length);
 	let allStepsCompleted = $derived(completedSteps === steps.length && steps.length > 0);
-
-	// Check for flexible matching ingredients
-	let hasFlexibleIngredients = $derived(
-		initialRecipeSteps.some((step) => step.matchMode && step.matchMode !== 'EXACT_PRODUCT')
-	);
-	let hasCategoryMatch = $derived(
-		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_CATEGORY')
-	);
-	let hasParentCategoryMatch = $derived(
-		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_PARENT_CATEGORY')
-	);
 
 	// dilution and volume calculations
 	let dilutionInfo = $derived(
@@ -328,23 +323,6 @@
 						</Badge>
 					{/if}
 				</div>
-				<!-- Flexible matching legend -->
-				{#if hasFlexibleIngredients}
-					<div class="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
-						{#if hasCategoryMatch}
-							<span class="flex items-center gap-1">
-								<Layers class="w-3 h-3 text-blue-500" />
-								Any in category
-							</span>
-						{/if}
-						{#if hasParentCategoryMatch}
-							<span class="flex items-center gap-1">
-								<Sparkles class="w-3 h-3 text-neon-amber-500" />
-								Any in parent category
-							</span>
-						{/if}
-					</div>
-				{/if}
 			</Card.Header>
 			<Card.Content>
 				{#if steps.length === 0}
@@ -352,17 +330,18 @@
 						No ingredients listed for this recipe.
 					</p>
 				{:else}
-					<div class="space-y-2">
-						{#each steps as step, index}
+					<div class="space-y-1">
+						{#each steps as step, index (step.recipeStepId ?? index)}
+							{@const extras = extrasByStep.get(step.recipeStepId ?? -1)}
 							<RecipeIngredientStep
-								stepNumber={index + 1}
 								categoryName={step.categoryName}
 								productName={step.productName}
 								quantity={step.productIdQuantityInMilliliters}
 								unit={step.productIdQuantityUnit}
 								description={step.recipeStepDescription}
-								matchMode={step.matchMode}
-								parentCategoryName={step.parentCategoryName}
+								productImageUrl={extras?.productImageUrl ?? null}
+								matchLabel={extras?.matchLabel ?? null}
+								substitutes={extras?.substitutes ?? []}
 								bind:checked={completed[index]}
 							/>
 						{/each}

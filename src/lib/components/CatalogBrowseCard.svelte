@@ -89,7 +89,7 @@
 			{/if}
 
 			<!-- Glass surface -->
-			<div class="relative h-full flex flex-col bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-white/40 dark:border-white/10 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300">
+			<div class="relative h-full flex flex-col bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_16px_40px_-20px_rgba(31,20,60,0.28)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_22px_48px_-20px_rgba(31,20,60,0.34)] transition-all duration-300">
 				<!-- Image area -->
 				<div class="relative h-44 overflow-hidden rounded-t-2xl">
 					<SkeletonImage
@@ -106,6 +106,13 @@
 					<span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/15 text-foreground shadow-sm">
 						{recipe.recipeCategoryDescription}
 					</span>
+
+					<!-- Draft badge (owners/editors only) -->
+					{#if canModify && recipe.published === false}
+						<span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-500/90 text-white shadow">
+							Draft
+						</span>
+					{/if}
 
 					<!-- Verdict pill (top right) -->
 					{#if hasRatings}
@@ -221,7 +228,7 @@
 			{/if}
 
 			<!-- Glass surface -->
-			<div class="relative flex items-center gap-3 p-3 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl backdrop-saturate-150 border border-white/40 dark:border-white/10 rounded-2xl shadow-sm hover:shadow-md hover:bg-white/90 dark:hover:bg-zinc-900/80 transition-all duration-200">
+			<div class="relative flex items-center gap-3 p-3 bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_10px_28px_-16px_rgba(31,20,60,0.25)] hover:bg-white/60 dark:hover:bg-white/[0.09] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_14px_32px_-16px_rgba(31,20,60,0.3)] transition-all duration-200">
 				<!-- Thumbnail with verdict overlay -->
 				<div class="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-md ring-1 ring-black/5 dark:ring-white/10">
 					<SkeletonImage
@@ -251,6 +258,11 @@
 				<div class="flex-1 min-w-0">
 					<h3 class="font-semibold text-[15px] text-foreground truncate group-hover:text-primary transition-colors">
 						{recipe.recipeName}
+						{#if canModify && recipe.published === false}
+							<span class="ml-1 align-middle px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide bg-amber-500/90 text-white">
+								Draft
+							</span>
+						{/if}
 					</h3>
 					<p class="text-sm text-muted-foreground/80 truncate">
 						{recipe.recipeDescription || 'A delicious cocktail recipe'}
