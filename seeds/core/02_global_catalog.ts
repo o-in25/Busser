@@ -131,6 +131,7 @@ export async function seed(knex: Knex): Promise<void> {
 				RecipeCategoryId: spiritRow.RecipeCategoryId,
 				RecipeDescriptionId: descId,
 				RecipeName: recipe.name,
+				Published: false, // seed as draft — review + publish from the ui
 			});
 
 			await trx('recipetechnique').insert({

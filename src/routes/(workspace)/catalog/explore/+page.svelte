@@ -328,7 +328,7 @@
 	<Card.Root class={cocktailOfTheDay ? 'lg:col-span-2' : 'lg:col-span-3'}>
 		<Card.Header>
 			<div class="flex items-center gap-2">
-				<div class="inline-flex items-center rounded-full backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground">
+				<div class="inline-flex items-center rounded-full bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground">
 					<button
 						class={cn(
 							'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',

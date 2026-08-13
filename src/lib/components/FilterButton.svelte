@@ -111,7 +111,7 @@
 						<div class="flex flex-col gap-1.5">
 							<span class="text-sm font-medium text-muted-foreground">View</span>
 							<div
-								class="flex items-center border border-white/30 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 backdrop-blur-md rounded-lg overflow-hidden w-fit"
+								class="flex items-center border border-white/30 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 rounded-lg overflow-hidden w-fit"
 							>
 								{#each viewModes as mode}
 									{@const Icon = viewIcons[mode]}

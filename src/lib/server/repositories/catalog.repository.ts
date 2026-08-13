@@ -5,8 +5,11 @@ import type {
 	PaginationResult,
 	PreparationMethod,
 	QueryRequest,
+	IngredientRole,
 	QueryResult,
 	Spirit,
+	StepExtras,
+	Substitute,
 	Table,
 	View,
 } from '$lib/types';
@@ -16,6 +19,69 @@ import { deleteCachedContent } from '../generators/cache';
 import { Logger } from '../logger';
 import { copyGcsFile, deleteSignedUrl } from '../storage';
 import { BaseRepository, emptyPagination } from './base.repository';
+
+// inventory rows we read while resolving step images + substitutes
+type InventoryRow = {
+	productId: number;
+	productName: string;
+	categoryId: number;
+	parentCategoryId: number | null;
+	categoryGroupId: number | null;
+	productImageUrl: string | null;
+	productInStockQuantity: number;
+};
+
+// maps the inventory category groups onto the classic cocktail build roles
+// (base → modifier → balance → accent → finish). null means "no group assigned".
+function roleFromGroup(groupId: number | null | undefined): IngredientRole | null {
+	switch (groupId) {
+		case 1:
+			return 'base'; // Spirits
+		case 2:
+		case 3:
+			return 'modifier'; // Liqueurs, Fortified & Aromatized
+		case 5:
+		case 6:
+			return 'balance'; // Sweeteners, Juices
+		case 4:
+			return 'accent'; // Bitters
+		case 7:
+		case 8:
+			return 'build'; // Mixers & Sodas, Other
+		default:
+			return null;
+	}
+}
+
+// ~11% of catalog categories have no category group; fall back to the category/parent name.
+// order matters: bitters and sweet/sour are checked before spirits so e.g. "agave syrup"
+// doesn't read as a base spirit.
+function roleFromName(step: View.BasicRecipeStep): IngredientRole {
+	const hay = `${step.parentCategoryName ?? ''} ${step.categoryName}`.toLowerCase();
+	if (/bitters/.test(hay)) return 'accent';
+	if (/syrup|juice|sugar|honey|agave|grenadine|cordial|sour|sweeten|cream|orgeat|falernum/.test(hay))
+		return 'balance';
+	if (/liqueur|vermouth|fortified|amaro|aperitif|aperol|campari|chartreuse|lillet|sherry|port|triple sec|curacao|curaçao|absinthe/.test(hay))
+		return 'modifier';
+	if (/gin|vodka|rum|whisk|tequila|brandy|cognac|mezcal|pisco|cacha|scotch|bourbon|rye|spirit/.test(hay))
+		return 'base';
+	return 'build'; // soda, tonic, champagne, garnish, etc.
+}
+
+function classifyRole(step: View.BasicRecipeStep, groupId: number | null | undefined): IngredientRole {
+	return roleFromGroup(groupId) ?? roleFromName(step);
+}
+
+// step extras with nothing resolved — used as a graceful fallback
+function emptyExtras(step: View.BasicRecipeStep): StepExtras {
+	return {
+		recipeStepId: step.recipeStepId ?? 0,
+		productImageUrl: null,
+		matchLabel: null,
+		role: 'build',
+		substitutes: [],
+	};
+}
 
 export class CatalogRepository extends BaseRepository {
 	constructor(db: DbProvider) {
@@ -27,10 +93,14 @@ export class CatalogRepository extends BaseRepository {
 		currentPage: number,
 		perPage: number = 25,
 		filter: (Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep>) | null = null,
-		advancedFilter: AdvancedFilter | null = null
+		advancedFilter: AdvancedFilter | null = null,
+		includeUnpublished: boolean = false
 	): Promise<PaginationResult<View.BasicRecipe[]>> {
 		try {
 			let query = this.db.table('basicrecipe as r').select().where('r.workspaceId', workspaceId);
+
+			// hide drafts from everyone except workspace owners/editors
+			if (!includeUnpublished) query = query.where('r.published', true);
 
 			if (filter?.productInStockQuantity) {
 				query = query.whereIn(
@@ -188,6 +258,7 @@ export class CatalogRepository extends BaseRepository {
 			const result = (await this.db
 				.table('basicrecipe')
 				.where('workspaceId', workspaceId)
+				.where('published', true)
 				.count('* as count')
 				.first()) as { count: number } | undefined;
 			return Number(result?.count) || 0;
@@ -234,14 +305,18 @@ export class CatalogRepository extends BaseRepository {
 
 	async findById(
 		workspaceId: string,
-		recipeId: string
+		recipeId: string,
+		includeUnpublished: boolean = false
 	): Promise<QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[] }>> {
 		try {
 			let recipe: View.BasicRecipe | undefined;
 			let recipeSteps: View.BasicRecipeStep[] | undefined;
 
 			await this.db.query.transaction(async (trx) => {
-				let [dbResult] = await trx('basicrecipe').select().where({ recipeId, workspaceId });
+				// drafts resolve only for owners/editors; others get the not-found path
+				const recipeQuery = trx('basicrecipe').select().where({ recipeId, workspaceId });
+				if (!includeUnpublished) recipeQuery.where({ published: true });
+				let [dbResult] = await recipeQuery;
 				recipe = dbResult as View.BasicRecipe;
 				if (!recipe) throw Error('Recipe not found in this workspace.');
 				dbResult = await trx('basicrecipestep')
@@ -263,11 +338,101 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
+	// resolves per-step images + acceptable substitutes from the workspace inventory.
+	// one query covers the whole recipe; failures degrade to empty extras (images/subs just hide).
+	async getStepExtras(
+		workspaceId: string,
+		steps: View.BasicRecipeStep[]
+	): Promise<StepExtras[]> {
+		try {
+			const categoryIds = [...new Set(steps.map((s) => s.categoryId).filter((id): id is number => !!id))];
+			const parentIds = [...new Set(steps.map((s) => s.parentCategoryId).filter((id): id is number => !!id))];
+
+			if (categoryIds.length === 0 && parentIds.length === 0) {
+				return steps.map((s) => emptyExtras(s));
+			}
+
+			const rows = (await this.db
+				.table('inventory')
+				.where('workspaceId', workspaceId)
+				.where(function () {
+					if (categoryIds.length) this.whereIn('categoryId', categoryIds);
+					if (parentIds.length) this.orWhereIn('parentCategoryId', parentIds);
+				})
+				.select(
+					'productId',
+					'productName',
+					'categoryId',
+					'parentCategoryId',
+					'categoryGroupId',
+					'productImageUrl',
+					'productInStockQuantity'
+				)) as InventoryRow[];
+
+			const imageByProduct = new Map<number, string | null>(
+				rows.map((r) => [r.productId, r.productImageUrl])
+			);
+			const groupByProduct = new Map<number, number | null>(
+				rows.map((r) => [r.productId, r.categoryGroupId])
+			);
+
+			return steps.map((step) => {
+				const matchMode = step.matchMode ?? 'EXACT_PRODUCT';
+
+				// prefer the step's own product image, but many products have none — fall back to any
+				// sibling in the same category so e.g. a generic "Lime Juice" step still shows the
+				// category's bottle rather than an empty tile. empty strings count as "no image".
+				const own = imageByProduct.get(step.productId);
+				const productImageUrl =
+					(own && own.trim()) ||
+					rows.find((r) => r.categoryId === step.categoryId && r.productImageUrl?.trim())
+						?.productImageUrl ||
+					null;
+
+				let matchLabel: string | null = null;
+				let candidates: InventoryRow[] = [];
+				if (matchMode === 'ANY_IN_CATEGORY') {
+					matchLabel = `Any ${step.categoryName}`;
+					candidates = rows.filter((r) => r.categoryId === step.categoryId);
+				} else if (matchMode === 'ANY_IN_PARENT_CATEGORY' && step.parentCategoryId) {
+					matchLabel = `Any ${step.parentCategoryName ?? step.categoryName}`;
+					candidates = rows.filter((r) => r.parentCategoryId === step.parentCategoryId);
+				}
+
+				// drop the step's own product; in-stock first, then alphabetical
+				const substitutes: Substitute[] = candidates
+					.filter((r) => r.productId !== step.productId)
+					.map((r) => ({
+						productId: r.productId,
+						productName: r.productName,
+						imageUrl: r.productImageUrl,
+						inStock: r.productInStockQuantity > 0,
+					}))
+					.sort((a, b) =>
+						a.inStock === b.inStock
+							? a.productName.localeCompare(b.productName)
+							: a.inStock
+								? -1
+								: 1
+					);
+
+				const role = classifyRole(step, groupByProduct.get(step.productId));
+
+				return { recipeStepId: step.recipeStepId ?? 0, productImageUrl, matchLabel, role, substitutes };
+			});
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return steps.map((s) => emptyExtras(s));
+		}
+	}
+
 	async getAvailableRecipes(workspaceId: string): Promise<QueryResult<View.BasicRecipe[]>> {
 		try {
 			let dbResult = await this.db
 				.table('basicrecipe')
 				.where('WorkspaceId', workspaceId)
+				.where('Published', true)
 				.whereIn('RecipeId', function () {
 					this.select('RecipeId')
 						.from('availablerecipes')
@@ -333,7 +498,10 @@ export class CatalogRepository extends BaseRepository {
 		recipeCategoryId: number | string | null = null
 	): Promise<QueryResult<BasicRecipe[]>> {
 		try {
-			let query = this.db.table<BasicRecipe>('basicrecipe').where('workspaceId', workspaceId);
+			let query = this.db
+				.table<BasicRecipe>('basicrecipe')
+				.where('workspaceId', workspaceId)
+				.where('published', true);
 			if (recipeCategoryId) {
 				query.where('recipeCategoryId', recipeCategoryId);
 			}
@@ -585,6 +753,8 @@ export class CatalogRepository extends BaseRepository {
 				const [sourceRecipe] = await trx('basicrecipe')
 					.where({ RecipeId: sourceRecipeId, WorkspaceId: sourceWorkspaceId });
 				if (!sourceRecipe) throw new Error('Source recipe not found.');
+				// can't import a draft — it's not live yet
+				if (!sourceRecipe.published) throw new Error('Source recipe is not published.');
 
 				const sourceSteps = await trx('basicrecipestep')
 					.where({ RecipeId: sourceRecipeId, WorkspaceId: sourceWorkspaceId })
@@ -832,6 +1002,7 @@ export class CatalogRepository extends BaseRepository {
 					this.on('r.RecipeId', '=', 'wf.recipeId').andOn('r.WorkspaceId', '=', 'wf.workspaceId');
 				})
 				.where('wf.workspaceId', workspaceId)
+				.where('r.Published', true)
 				.orderBy('wf.featuredOrder', 'asc')
 				.select('r.*');
 			return dbResult as View.BasicRecipe[];
@@ -921,12 +1092,38 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
+	// flip a recipe between draft and published
+	async togglePublished(
+		workspaceId: string,
+		recipeId: number
+	): Promise<QueryResult<{ published: boolean }>> {
+		try {
+			const row = await this.db
+				.table('recipe')
+				.where({ RecipeId: recipeId, WorkspaceId: workspaceId })
+				.first();
+			if (!row) return { status: 'error', error: 'Recipe not found.' };
+
+			const published = !row.published;
+			await this.db
+				.table('recipe')
+				.where({ RecipeId: recipeId, WorkspaceId: workspaceId })
+				.update({ Published: published });
+			return { status: 'success', data: { published } };
+		} catch (error: any) {
+			console.error('Error toggling published:', error.message);
+			Logger.error(`Error toggling published: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Failed to toggle published.' };
+		}
+	}
+
 	async getRecipesByIds(workspaceId: string, recipeIds: number[]): Promise<View.BasicRecipe[]> {
 		if (recipeIds.length === 0) return [];
 		try {
 			const dbResult = await this.db
 				.table('basicrecipe')
 				.where('WorkspaceId', workspaceId)
+				.where('Published', true)
 				.whereIn('RecipeId', recipeIds)
 				.select();
 			return dbResult as View.BasicRecipe[];
@@ -985,6 +1182,7 @@ export class CatalogRepository extends BaseRepository {
 					this.on('rs.RecipeId', '=', 'r.RecipeId').andOn('rs.WorkspaceId', '=', 'r.WorkspaceId');
 				})
 				.where('rs.WorkspaceId', workspaceId)
+				.where('r.Published', true)
 				.whereIn('rs.RecipeId', function () {
 					this.select('RecipeId')
 						.from('availablerecipes')

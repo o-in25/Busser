@@ -24,6 +24,27 @@ export type AdvancedFilter = {
 // - ANY_IN_PARENT_CATEGORY: Any product whose category shares the same parent satisfies the step
 export type MatchMode = 'EXACT_PRODUCT' | 'ANY_IN_CATEGORY' | 'ANY_IN_PARENT_CATEGORY';
 
+// a product that can stand in for a recipe step, drawn from the workspace's inventory
+export type Substitute = {
+	productId: number;
+	productName: string;
+	imageUrl: string | null;
+	inStock: boolean;
+};
+
+// the role an ingredient plays in the build, à la the classic spirit/modifier/accent framework
+export type IngredientRole = 'base' | 'modifier' | 'balance' | 'accent' | 'build';
+
+// per-step presentation data resolved from inventory (images + role + acceptable substitutes).
+// keyed to a step via recipeStepId; kept separate from the step view which has no image column.
+export type StepExtras = {
+	recipeStepId: number;
+	productImageUrl: string | null;
+	matchLabel: string | null; // e.g. "Any Orange Bitters" — null for exact-product steps
+	role: IngredientRole;
+	substitutes: Substitute[];
+};
+
 // workspacefeatured table - curated featured cocktails per workspace
 export interface WorkspaceFeatured {
 	featuredId: number;
@@ -234,6 +255,7 @@ export namespace View {
 		recipeStrengthRating: number;
 		recipeVersatilityRating: number;
 		insightsEnabled: boolean;
+		published: boolean;
 		workspaceId: string;
 		sourceRecipeId: number | null;
 		sourceWorkspaceId: string | null;

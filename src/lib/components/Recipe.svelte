@@ -6,10 +6,8 @@
 		Expand,
 		FlaskConical,
 		GlassWater,
-		Layers,
 		Martini,
 		Percent,
-		Sparkles,
 		X,
 	} from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
@@ -31,16 +29,34 @@
 
 	// Props using $props()
 	import type { Snippet } from 'svelte';
+	import type { IngredientRole, StepExtras } from '$lib/types';
 
 	let {
 		recipe,
 		recipeSteps: initialRecipeSteps,
+		stepExtras,
 		actions,
 	}: {
 		recipe: View.BasicRecipe;
 		recipeSteps: View.BasicRecipeStep[];
+		stepExtras?: StepExtras[];
 		actions?: Snippet;
 	} = $props();
+
+	// resolve per-step image/substitute data by step id (absent in preview contexts)
+	const extrasByStep = $derived(
+		new Map((stepExtras ?? []).map((e) => [e.recipeStepId, e]))
+	);
+
+	// group ingredients by the role they play in the build (base → modifier → …)
+	const ROLE_ORDER: IngredientRole[] = ['base', 'modifier', 'balance', 'accent', 'build'];
+	const ROLE_LABEL: Record<IngredientRole, string> = {
+		base: 'Base',
+		modifier: 'Modifiers',
+		balance: 'Sweet & Sour',
+		accent: 'Bitters & Accents',
+		build: 'Top & Garnish',
+	};
 
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
@@ -53,6 +69,22 @@
 
 	// steps with checked state
 	let steps = $derived(initialRecipeSteps.map((step) => ({ ...step, checked: false })));
+
+	// steps bucketed by role, preserving original index for check-state binding.
+	// only surface headers when the drink actually spans more than one role.
+	let ingredientGroups = $derived.by(() => {
+		const withIndex = steps.map((step, index) => ({
+			step,
+			index,
+			role: extrasByStep.get(step.recipeStepId ?? -1)?.role ?? ('build' as IngredientRole),
+		}));
+		return ROLE_ORDER.map((role) => ({
+			role,
+			label: ROLE_LABEL[role],
+			items: withIndex.filter((s) => s.role === role),
+		})).filter((g) => g.items.length > 0);
+	});
+	let showRoleHeaders = $derived(ingredientGroups.length > 1);
 
 	// Lightbox state
 	let lightboxOpen = $state(false);
@@ -70,17 +102,6 @@
 	let ingredientCount = $derived(initialRecipeSteps.length);
 	let completedSteps = $derived(completed.filter((c) => c).length);
 	let allStepsCompleted = $derived(completedSteps === steps.length && steps.length > 0);
-
-	// Check for flexible matching ingredients
-	let hasFlexibleIngredients = $derived(
-		initialRecipeSteps.some((step) => step.matchMode && step.matchMode !== 'EXACT_PRODUCT')
-	);
-	let hasCategoryMatch = $derived(
-		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_CATEGORY')
-	);
-	let hasParentCategoryMatch = $derived(
-		initialRecipeSteps.some((step) => step.matchMode === 'ANY_IN_PARENT_CATEGORY')
-	);
 
 	// dilution and volume calculations
 	let dilutionInfo = $derived(
@@ -328,23 +349,6 @@
 						</Badge>
 					{/if}
 				</div>
-				<!-- Flexible matching legend -->
-				{#if hasFlexibleIngredients}
-					<div class="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
-						{#if hasCategoryMatch}
-							<span class="flex items-center gap-1">
-								<Layers class="w-3 h-3 text-blue-500" />
-								Any in category
-							</span>
-						{/if}
-						{#if hasParentCategoryMatch}
-							<span class="flex items-center gap-1">
-								<Sparkles class="w-3 h-3 text-neon-amber-500" />
-								Any in parent category
-							</span>
-						{/if}
-					</div>
-				{/if}
 			</Card.Header>
 			<Card.Content>
 				{#if steps.length === 0}
@@ -352,19 +356,29 @@
 						No ingredients listed for this recipe.
 					</p>
 				{:else}
-					<div class="space-y-2">
-						{#each steps as step, index}
-							<RecipeIngredientStep
-								stepNumber={index + 1}
-								categoryName={step.categoryName}
-								productName={step.productName}
-								quantity={step.productIdQuantityInMilliliters}
-								unit={step.productIdQuantityUnit}
-								description={step.recipeStepDescription}
-								matchMode={step.matchMode}
-								parentCategoryName={step.parentCategoryName}
-								bind:checked={completed[index]}
-							/>
+					<div class="space-y-4">
+						{#each ingredientGroups as group (group.role)}
+							<div class="space-y-1">
+								{#if showRoleHeaders}
+									<p class="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+										{group.label}
+									</p>
+								{/if}
+								{#each group.items as { step, index } (step.recipeStepId ?? index)}
+									{@const extras = extrasByStep.get(step.recipeStepId ?? -1)}
+									<RecipeIngredientStep
+										categoryName={step.categoryName}
+										productName={step.productName}
+										quantity={step.productIdQuantityInMilliliters}
+										unit={step.productIdQuantityUnit}
+										description={step.recipeStepDescription}
+										productImageUrl={extras?.productImageUrl ?? null}
+										matchLabel={extras?.matchLabel ?? null}
+										substitutes={extras?.substitutes ?? []}
+										bind:checked={completed[index]}
+									/>
+								{/each}
+							</div>
 						{/each}
 					</div>
 

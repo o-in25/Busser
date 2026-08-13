@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { ChevronLeft, EllipsisVertical, Heart, Pencil, Plus, Star, Check, Trash2, Download, Loader2 } from 'lucide-svelte';
+	import { ChevronLeft, EllipsisVertical, Eye, EyeOff, Heart, Pencil, Plus, Star, Check, Trash2 } from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
-	import { enhance } from '$app/forms';
+	import { deserialize, enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import FancyButton from '$lib/components/FancyButton.svelte';
@@ -26,20 +26,48 @@
 	// local state for optimistic updates
 	let isFavorite = $state(data.isFavorite);
 	let isFeatured = $state(data.isFeatured);
-	let importingTo = $state<string | null>(null);
+	let isPublished = $state(!!data.recipe.published);
 
 	$effect(() => {
 		isFavorite = data.isFavorite;
 		isFeatured = data.isFeatured;
+		isPublished = !!data.recipe.published;
 	});
+
+	// publish toggle only applies to the global catalog
+	const canPublish = $derived(canModify && data.isGlobalCatalog);
+	let publishing = $state(false);
+
+	async function togglePublish() {
+		if (publishing) return;
+		publishing = true;
+		const prev = isPublished;
+		isPublished = !isPublished; // optimistic
+		try {
+			const body = new FormData();
+			body.set('recipeId', String(data.recipe.recipeId));
+			body.set('workspaceId', data.recipe.workspaceId);
+			const res = await fetch('?/togglePublished', { method: 'POST', body });
+			const result = deserialize(await res.text());
+			if (result.type === 'success' && (result.data as any)?.success) {
+				await invalidateAll();
+				toast.success(isPublished ? 'Recipe published' : 'Recipe moved to draft');
+			} else {
+				isPublished = prev;
+				toast.error('Could not update publish state');
+			}
+		} catch {
+			isPublished = prev;
+			toast.error('Could not update publish state');
+		} finally {
+			publishing = false;
+		}
+	}
 
 	// import helpers
 	const importData = $derived(data.importData);
 	const showImport = $derived(
 		authenticated && importData && importData.eligible && importData.editableWorkspaces.length > 0
-	);
-	const singleWorkspace = $derived(
-		importData?.editableWorkspaces.length === 1 ? importData.editableWorkspaces[0] : null
 	);
 
 	// json-ld structured data for search engines
@@ -95,10 +123,17 @@
 <div class="container mx-auto max-w-6xl px-4">
 	<!-- Desktop toolbar above hero -->
 	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
-		<FancyButton href="/catalog" size="sm">
-			<ChevronLeft class="h-4 w-4 mr-1" />
-			Back to Catalog
-		</FancyButton>
+		<div class="flex items-center gap-3">
+			<FancyButton href="/catalog" size="sm">
+				<ChevronLeft class="h-4 w-4 mr-1" />
+				Back to Catalog
+			</FancyButton>
+			{#if canPublish && !isPublished}
+				<span class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+					Draft
+				</span>
+			{/if}
+		</div>
 
 		<div class="flex items-center gap-2">
 			{#if authenticated}
@@ -147,85 +182,43 @@
 				</form>
 			{/if}
 
-			{#if canModify}
+			{#if canModify || (showImport && importData)}
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger class="glass-cta glass-cta-sm">
 						<EllipsisVertical class="h-4 w-4 mr-1" />
 						More
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content align="end">
-						<DropdownMenu.Item onclick={() => goto(`/catalog/${data.recipe.recipeId}/edit`)}>
-							<Pencil class="h-4 w-4 mr-2" />
-							Edit Recipe
-						</DropdownMenu.Item>
-						<DropdownMenu.Separator />
-						<DropdownMenu.Item
-							class="text-destructive data-[highlighted]:text-destructive data-[highlighted]:bg-destructive/10"
-							onclick={() => (deleteModalOpen = true)}
-						>
-							<Trash2 class="h-4 w-4 mr-2" />
-							Delete Recipe
-						</DropdownMenu.Item>
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
-			{/if}
-
-			{#if showImport}
-				{#if singleWorkspace}
-					{@const alreadyImported = importData?.importedTo.includes(singleWorkspace.workspaceId)}
-					<form
-						method="POST"
-						action="?/importToWorkspace"
-						use:enhance={() => {
-							importingTo = singleWorkspace.workspaceId;
-							return async ({ result }) => {
-								importingTo = null;
-								if (result.type === 'success' && result.data) {
-									const d = result.data as any;
-									if (d.alreadyImported) {
-										toast.info('Already imported to your workspace');
-									} else if (d.success) {
-										toast.success(`Imported to ${singleWorkspace.workspaceName}`);
-										invalidateAll();
-									}
-								} else {
-									toast.error('Failed to import recipe');
-								}
-							};
-						}}
-					>
-						<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
-						<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
-						<input type="hidden" name="targetWorkspaceId" value={singleWorkspace.workspaceId} />
-						<FancyButton type="submit" variant={alreadyImported ? 'default' : 'primary'} size="sm" disabled={!!alreadyImported || !!importingTo}>
-							{#if importingTo === singleWorkspace.workspaceId}
-								<Loader2 class="h-4 w-4 mr-1 animate-spin" />
-								Importing...
-							{:else if alreadyImported}
-								<Check class="h-4 w-4 mr-1" />
-								Imported
-							{:else}
-								<Plus class="h-4 w-4 mr-1" />
-								Add to Workspace
+						{#if canModify}
+							<DropdownMenu.Item onclick={() => goto(`/catalog/${data.recipe.recipeId}/edit`)}>
+								<Pencil class="h-4 w-4 mr-2" />
+								Edit Recipe
+							</DropdownMenu.Item>
+							{#if canPublish}
+								<DropdownMenu.Item disabled={publishing} onclick={togglePublish}>
+									{#if isPublished}
+										<EyeOff class="h-4 w-4 mr-2" />
+										Unpublish
+									{:else}
+										<Eye class="h-4 w-4 mr-2" />
+										Publish
+									{/if}
+								</DropdownMenu.Item>
 							{/if}
-						</FancyButton>
-					</form>
-				{:else if importData}
-					<DropdownMenu.Root>
-						<DropdownMenu.Trigger class="glass-cta glass-cta-primary glass-cta-sm">
-							<Plus class="h-4 w-4 mr-1" />
-							Import
-						</DropdownMenu.Trigger>
-						<DropdownMenu.Content align="end">
+						{/if}
+
+						{#if showImport && importData}
+							{#if canModify}
+								<DropdownMenu.Separator />
+							{/if}
+							<DropdownMenu.Label class="text-xs text-muted-foreground">Add to workspace</DropdownMenu.Label>
 							{#each importData.editableWorkspaces as ws}
 								{@const alreadyImported = importData.importedTo.includes(ws.workspaceId)}
 								<form
 									method="POST"
 									action="?/importToWorkspace"
 									use:enhance={() => {
-										importingTo = ws.workspaceId;
 										return async ({ result }) => {
-											importingTo = null;
 											if (result.type === 'success' && result.data) {
 												const d = result.data as any;
 												if (d.alreadyImported) {
@@ -233,6 +226,8 @@
 												} else if (d.success) {
 													toast.success(`Imported to ${ws.workspaceName}`);
 													invalidateAll();
+												} else {
+													toast.error(d.error || 'Failed to import recipe');
 												}
 											} else {
 												toast.error('Failed to import recipe');
@@ -243,33 +238,40 @@
 									<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
 									<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
 									<input type="hidden" name="targetWorkspaceId" value={ws.workspaceId} />
-									<DropdownMenu.Item disabled={alreadyImported || importingTo === ws.workspaceId} class="cursor-pointer">
-										<button type="submit" class="flex items-center gap-2 w-full" disabled={alreadyImported || importingTo === ws.workspaceId}>
-											{#if importingTo === ws.workspaceId}
-												<Loader2 class="h-4 w-4 animate-spin" />
-											{:else if alreadyImported}
+									<DropdownMenu.Item disabled={alreadyImported} class="cursor-pointer">
+										<button type="submit" class="flex items-center gap-2 w-full" disabled={alreadyImported}>
+											{#if alreadyImported}
 												<Check class="h-4 w-4 text-muted-foreground" />
 											{:else}
-												<Download class="h-4 w-4" />
+												<Plus class="h-4 w-4" />
 											{/if}
 											{ws.workspaceName}
-											{#if importingTo === ws.workspaceId}
-												<span class="text-xs text-muted-foreground ml-auto">importing...</span>
-											{:else if alreadyImported}
+											{#if alreadyImported}
 												<span class="text-xs text-muted-foreground ml-auto">imported</span>
 											{/if}
 										</button>
 									</DropdownMenu.Item>
 								</form>
 							{/each}
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
-				{/if}
+						{/if}
+
+						{#if canModify}
+							<DropdownMenu.Separator />
+							<DropdownMenu.Item
+								class="text-destructive data-[highlighted]:text-destructive data-[highlighted]:bg-destructive/10"
+								onclick={() => (deleteModalOpen = true)}
+							>
+								<Trash2 class="h-4 w-4 mr-2" />
+								Delete Recipe
+							</DropdownMenu.Item>
+						{/if}
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
 			{/if}
 		</div>
 	</div>
 
-	<Recipe recipe={data.recipe} recipeSteps={data.recipeSteps}>
+	<Recipe recipe={data.recipe} recipeSteps={data.recipeSteps} stepExtras={data.stepExtras}>
 		{#snippet actions()}
 			{#if authenticated && canModify}
 				<div class="grid grid-cols-2 gap-2 w-full">
