@@ -38,7 +38,10 @@ export async function up(knex: Knex): Promise<void> {
 
 	if (removedIds.length) {
 		await knex('rolePermission')
-			.whereIn('permissionId', removedIds.map((r: any) => r.permissionId))
+			.whereIn(
+				'permissionId',
+				removedIds.map((r: any) => r.permissionId)
+			)
 			.del();
 	}
 
@@ -75,7 +78,5 @@ export async function down(knex: Knex): Promise<void> {
 	await knex('role').where({ roleId: OWNER_ROLE_ID }).del();
 
 	// remove new permissions
-	await knex('permission')
-		.whereIn('permissionName', ['force_reset_password', 'create_role'])
-		.del();
+	await knex('permission').whereIn('permissionName', ['force_reset_password', 'create_role']).del();
 }

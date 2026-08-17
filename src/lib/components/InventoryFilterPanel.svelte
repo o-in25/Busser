@@ -161,11 +161,7 @@
 	<!-- per page -->
 	<div class="flex flex-col gap-1.5">
 		<span class="text-sm font-medium text-muted-foreground">Per Page</span>
-		<Select.Root
-			type="single"
-			value={perPage}
-			onValueChange={(v) => onPerPageChange(v ?? '20')}
-		>
+		<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '20')}>
 			<Select.Trigger class="w-full">
 				<List class="h-4 w-4 mr-2" />
 				<Select.Value placeholder="20 per page">{perPageLabel}</Select.Value>

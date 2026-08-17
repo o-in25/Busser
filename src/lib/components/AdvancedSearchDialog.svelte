@@ -125,9 +125,11 @@
 	function handleApply() {
 		const params: Record<string, string> = {};
 		if (readyToMake) params.readyToMake = '1';
-		if (includeIngredients.length) params.ingredientInclude = includeIngredients.map((t) => t.value).join(',');
+		if (includeIngredients.length)
+			params.ingredientInclude = includeIngredients.map((t) => t.value).join(',');
 		if (anyIngredients.length) params.ingredientAny = anyIngredients.map((t) => t.value).join(',');
-		if (excludeIngredients.length) params.ingredientExclude = excludeIngredients.map((t) => t.value).join(',');
+		if (excludeIngredients.length)
+			params.ingredientExclude = excludeIngredients.map((t) => t.value).join(',');
 		if (strengthMin > 0) params.strengthMin = String(strengthMin);
 		if (strengthMax < 10) params.strengthMax = String(strengthMax);
 		if (ingredientCountMin > 0) params.ingredientCountMin = String(ingredientCountMin);
@@ -178,7 +180,11 @@
 							{#each includeIngredients as tag}
 								<Badge variant="secondary" class="gap-1">
 									{tag.name}
-									<button onclick={() => (includeIngredients = removeIngredient(includeIngredients, tag.value))} class="ml-0.5 hover:text-destructive">
+									<button
+										onclick={() =>
+											(includeIngredients = removeIngredient(includeIngredients, tag.value))}
+										class="ml-0.5 hover:text-destructive"
+									>
 										<X class="h-3 w-3" />
 									</button>
 								</Badge>
@@ -200,7 +206,10 @@
 							{#each anyIngredients as tag}
 								<Badge variant="secondary" class="gap-1">
 									{tag.name}
-									<button onclick={() => (anyIngredients = removeIngredient(anyIngredients, tag.value))} class="ml-0.5 hover:text-destructive">
+									<button
+										onclick={() => (anyIngredients = removeIngredient(anyIngredients, tag.value))}
+										class="ml-0.5 hover:text-destructive"
+									>
 										<X class="h-3 w-3" />
 									</button>
 								</Badge>
@@ -222,7 +231,11 @@
 							{#each excludeIngredients as tag}
 								<Badge variant="destructive" class="gap-1">
 									{tag.name}
-									<button onclick={() => (excludeIngredients = removeIngredient(excludeIngredients, tag.value))} class="ml-0.5 hover:text-destructive-foreground">
+									<button
+										onclick={() =>
+											(excludeIngredients = removeIngredient(excludeIngredients, tag.value))}
+										class="ml-0.5 hover:text-destructive-foreground"
+									>
 										<X class="h-3 w-3" />
 									</button>
 								</Badge>
@@ -333,4 +346,3 @@
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
-

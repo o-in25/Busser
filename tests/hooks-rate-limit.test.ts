@@ -15,7 +15,8 @@ vi.mock('$lib/server/user', () => ({
 }));
 
 vi.mock('$lib/server/rate-limit', async () => {
-	const actual = await vi.importActual<typeof import('$lib/server/rate-limit')>('$lib/server/rate-limit');
+	const actual =
+		await vi.importActual<typeof import('$lib/server/rate-limit')>('$lib/server/rate-limit');
 	return { ...actual, checkRateLimit: vi.fn(actual.checkRateLimit) };
 });
 

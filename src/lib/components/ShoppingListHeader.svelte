@@ -12,12 +12,12 @@
 		stats: InventoryStats;
 	} = $props();
 
-	const progress = $derived(
-		stats.total > 0 ? Math.round((stats.inStock / stats.total) * 100) : 0
-	);
+	const progress = $derived(stats.total > 0 ? Math.round((stats.inStock / stats.total) * 100) : 0);
 </script>
 
-<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 px-4 py-4 sm:px-6 sm:py-5">
+<div
+	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 px-4 py-4 sm:px-6 sm:py-5"
+>
 	<h1 class="text-2xl font-bold mb-3">Shopping List</h1>
 
 	{#if stats.total > 0}

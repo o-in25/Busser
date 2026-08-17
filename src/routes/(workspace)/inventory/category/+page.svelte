@@ -111,7 +111,7 @@
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 		const perPage =
-			overrides.perPage !== undefined ? overrides.perPage : data.filters?.perPage ?? 50;
+			overrides.perPage !== undefined ? overrides.perPage : (data.filters?.perPage ?? 50);
 
 		params.set('page', String(pageNum));
 		if (search) params.set('search', String(search));
@@ -171,7 +171,10 @@
 		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
 		{#snippet children()}
 			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
+			<p class="hidden sm:block">
+				You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
+				switch to your workspace.
+			</p>
 		{/snippet}
 		{#snippet action()}
 			<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
@@ -180,7 +183,9 @@
 {/if}
 
 <!-- Hero Section -->
-<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5">
+<div
+	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5"
+>
 	<h1 class="text-2xl font-bold mb-3">Categories</h1>
 	<!-- Mobile -->
 	<div class="flex gap-2 sm:hidden">
@@ -342,9 +347,7 @@
 								? 'y'
 								: 'ies'} in "{activeGroup}"
 						{:else}
-							{filteredCategories.length} categor{filteredCategories.length === 1
-								? 'y'
-								: 'ies'} total
+							{filteredCategories.length} categor{filteredCategories.length === 1 ? 'y' : 'ies'} total
 						{/if}
 					</Card.Description>
 				</div>
@@ -411,8 +414,7 @@
 												variant="outline"
 												size="icon"
 												class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
-												onclick={() =>
-													openDeleteDialog(category.categoryId, category.categoryName)}
+												onclick={() => openDeleteDialog(category.categoryId, category.categoryName)}
 												title="Delete category"
 												disabled={category.productCount > 0}
 											>
@@ -432,10 +434,7 @@
 	<!-- List View -->
 	<div class="flex flex-col gap-3">
 		{#each filteredCategories as category (category.categoryId)}
-			<button
-				class="w-full text-left"
-				onclick={() => openDrawer(category)}
-			>
+			<button class="w-full text-left" onclick={() => openDrawer(category)}>
 				<Card.Root class="hover:border-primary/30 transition-colors">
 					<Card.Content class="p-4">
 						<div class="flex flex-col gap-2">
@@ -454,7 +453,8 @@
 								<span
 									class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium"
 								>
-									{category.productCount} {category.productCount === 1 ? 'product' : 'products'}
+									{category.productCount}
+									{category.productCount === 1 ? 'product' : 'products'}
 								</span>
 								{#if canModify}
 									<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -478,8 +478,7 @@
 											variant="outline"
 											size="icon"
 											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
-											onclick={() =>
-												openDeleteDialog(category.categoryId, category.categoryName)}
+											onclick={() => openDeleteDialog(category.categoryId, category.categoryName)}
 											title="Delete category"
 											disabled={category.productCount > 0}
 										>

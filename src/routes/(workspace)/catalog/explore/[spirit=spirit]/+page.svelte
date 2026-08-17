@@ -6,7 +6,6 @@
 		FlaskConical,
 		Globe,
 		Layers,
-		Martini,
 		Plus,
 		Search,
 		X,
@@ -34,7 +33,6 @@
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -65,14 +63,6 @@
 	// track favorites/featured for optimistic updates
 	let favorites = $state(new Set(data.favoriteRecipeIds));
 	let featured = $state(new Set(data.featuredRecipeIds));
-
-	// sort options
-	const sortOptions = [
-		{ value: 'name-asc', label: 'Name (A-Z)' },
-		{ value: 'name-desc', label: 'Name (Z-A)' },
-		{ value: 'newest', label: 'Newest First' },
-		{ value: 'oldest', label: 'Oldest First' },
-	];
 
 	// base path for this spirit's browse page
 	const basePath = $derived(`/catalog/explore/${data.spiritContent.slug}`);
@@ -248,7 +238,11 @@
 
 			<!-- Mobile buttons inside hero -->
 			<div class="flex gap-2 md:hidden">
-				<FancyButton href="/catalog/explore" size="sm" class="flex-1 justify-center whitespace-nowrap">
+				<FancyButton
+					href="/catalog/explore"
+					size="sm"
+					class="flex-1 justify-center whitespace-nowrap"
+				>
 					<ChevronLeft class="h-4 w-4 mr-1" />
 					Back
 				</FancyButton>
@@ -264,7 +258,12 @@
 				</FancyButton>
 
 				{#if canModify}
-					<FancyButton href="/catalog/add" variant="primary" size="sm" class="flex-1 justify-center whitespace-nowrap">
+					<FancyButton
+						href="/catalog/add"
+						variant="primary"
+						size="sm"
+						class="flex-1 justify-center whitespace-nowrap"
+					>
 						<Plus class="h-4 w-4 mr-1" />
 						Add
 					</FancyButton>

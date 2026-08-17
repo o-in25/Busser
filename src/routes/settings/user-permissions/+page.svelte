@@ -320,9 +320,7 @@
 						<div class="flex justify-end pt-4 border-t">
 							<input type="hidden" name="formData" bind:this={formDataInput} />
 							<input type="hidden" name="roleId" bind:this={roleIdInput} />
-							<Button type="submit" class="min-w-[120px]">
-								Save
-							</Button>
+							<Button type="submit" class="min-w-[120px]">Save</Button>
 						</div>
 					</form>
 				</Card.Content>

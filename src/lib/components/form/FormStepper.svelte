@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { Check } from 'lucide-svelte';
-	import type { Component } from 'svelte';
 
 	import { cn } from '$lib/utils';
+
+	// lucide icons are legacy component classes, hence `typeof Check` rather than svelte's `Component`
+	type Icon = typeof Check;
 
 	// thin checkmark progress rail — completed steps filled + glow, current ringed, future muted
 	let {
@@ -11,7 +13,7 @@
 		canProceed = true,
 		onstep,
 	}: {
-		steps: { title: string; icon?: Component }[];
+		steps: { title: string; icon?: Icon }[];
 		currentStep?: number;
 		canProceed?: boolean;
 		onstep?: (index: number) => void;

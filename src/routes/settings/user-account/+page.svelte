@@ -28,7 +28,7 @@
 
 	import type { ActionData, PageData } from './$types';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData; form: ActionData } = $props();
 
 	let isSigningOut = $state(false);
 	let isDeleting = $state(false);
@@ -163,7 +163,8 @@
 				{#if data.currentWorkspace}
 					<div class="flex items-center gap-3">
 						<div
-							class="p-2 rounded-lg {data.currentWorkspace.workspaceId === $page.data.globalWorkspaceId
+							class="p-2 rounded-lg {data.currentWorkspace.workspaceId ===
+							$page.data.globalWorkspaceId
 								? 'bg-blue-500/10'
 								: data.currentWorkspace.workspaceType === 'personal'
 									? 'bg-secondary-500/10'
@@ -205,7 +206,9 @@
 					<Shield class="h-5 w-5" />
 					System Access
 				</Card.Title>
-				<Card.Description>Your administrative permissions for system-level features</Card.Description>
+				<Card.Description
+					>Your administrative permissions for system-level features</Card.Description
+				>
 			</Card.Header>
 			<Card.Content>
 				<div class="space-y-3">
@@ -307,7 +310,13 @@
 								<div class="w-full space-y-3">
 									<p class="text-sm text-destructive">{unlinkError}</p>
 									<div class="flex justify-end gap-2">
-										<Button variant="outline" onclick={() => { unlinkDialogOpen = false; unlinkError = ''; }}>Cancel</Button>
+										<Button
+											variant="outline"
+											onclick={() => {
+												unlinkDialogOpen = false;
+												unlinkError = '';
+											}}>Cancel</Button
+										>
 										<a
 											href="/settings/users/{data.user?.userId}/edit"
 											class={cn(buttonVariants({ variant: 'default' }))}
@@ -318,7 +327,13 @@
 									</div>
 								</div>
 							{:else}
-								<Button variant="outline" onclick={() => { unlinkDialogOpen = false; unlinkError = ''; }}>Cancel</Button>
+								<Button
+									variant="outline"
+									onclick={() => {
+										unlinkDialogOpen = false;
+										unlinkError = '';
+									}}>Cancel</Button
+								>
 								<form
 									method="POST"
 									action="?/unlinkAccount"
@@ -438,7 +453,13 @@
 								<p class="text-sm text-destructive">{deleteError}</p>
 							{/if}
 							<Dialog.Footer>
-								<Button variant="outline" onclick={() => { deleteDialogOpen = false; deleteError = ''; }}>Cancel</Button>
+								<Button
+									variant="outline"
+									onclick={() => {
+										deleteDialogOpen = false;
+										deleteError = '';
+									}}>Cancel</Button
+								>
 								<form
 									method="POST"
 									action="?/deleteAccount"

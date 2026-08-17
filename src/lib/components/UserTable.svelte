@@ -16,7 +16,6 @@
 
 	let target: string | undefined = undefined;
 	let isOpened = false;
-	let result: any = {};
 
 	const deleteUser = async (userId: string): Promise<any> => {
 		let response = await fetch(`/api/user/${userId}/delete`, {
@@ -61,7 +60,6 @@
 	$: targetUser = users?.find(({ userId }) => target === userId);
 </script>
 
-
 {#if users && users.length > 0}
 	<div class="overflow-x-auto">
 		<Table.Root>
@@ -103,10 +101,7 @@
 											<Badge variant="secondary" class="text-xs">You</Badge>
 										{/if}
 										{#if user.verified !== 1}
-											<Badge
-												variant="outline"
-												class="text-xs border-amber-500/50 text-amber-400"
-											>
+											<Badge variant="outline" class="text-xs border-amber-500/50 text-amber-400">
 												Unverified
 											</Badge>
 										{/if}

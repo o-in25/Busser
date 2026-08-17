@@ -20,16 +20,14 @@ export const load = (async ({ locals }) => {
 	const { user } = locals;
 	const globalWorkspace = getGlobalWorkspace();
 	// Use user's active workspace for authenticated users, global for landing page
-	const workspaceId =
-		user && locals.activeWorkspaceId ? locals.activeWorkspaceId : globalWorkspace;
+	const workspaceId = user && locals.activeWorkspaceId ? locals.activeWorkspaceId : globalWorkspace;
 
 	// Get spirits for filter chips
 	const baseSpiritsQuery = await catalogRepo.getCategories();
 
 	// check role early so we can decide which recipes to load
-	const workspaceRole = user && locals.activeWorkspaceId
-		? await hasWorkspaceAccess(user.userId, workspaceId)
-		: null;
+	const workspaceRole =
+		user && locals.activeWorkspaceId ? await hasWorkspaceAccess(user.userId, workspaceId) : null;
 	// the global catalog has no per-user inventory (everything reads as in stock), so the
 	// bar dashboard is meaningless there — treat it as a plain browse view, not an owned bar
 	const isGlobalCatalog = workspaceId === globalWorkspace;
@@ -80,15 +78,24 @@ export const load = (async ({ locals }) => {
 		} | null;
 		costBreakdown: {
 			averageCost: number;
-			cheapest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
-			priciest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
+			cheapest: {
+				recipeName: string;
+				recipeId: number;
+				recipeImageUrl: string | null;
+				cost: number;
+			} | null;
+			priciest: {
+				recipeName: string;
+				recipeId: number;
+				recipeImageUrl: string | null;
+				cost: number;
+			} | null;
 			barValue: number;
 			barValueByCategory: { groupName: string; value: number }[];
 		} | null;
 	} | null = null;
 
 	if (user && locals.activeWorkspaceId) {
-
 		// Get inventory count
 		const inventoryResult = await inventoryRepo.findAll(workspaceId, 1, 1);
 		const inventoryCount = inventoryResult.pagination.total;
@@ -113,20 +120,34 @@ export const load = (async ({ locals }) => {
 		const userName = user.username || user.email?.split('@')[0] || 'there';
 
 		// taste profile: average ratings across available recipes
-		const tasteProfile = recipes.length > 0 ? {
-			sweetness: recipes.reduce((s, r) => s + r.recipeSweetnessRating, 0) / recipes.length,
-			dryness: recipes.reduce((s, r) => s + r.recipeDrynessRating, 0) / recipes.length,
-			strength: recipes.reduce((s, r) => s + r.recipeStrengthRating, 0) / recipes.length,
-			versatility: recipes.reduce((s, r) => s + r.recipeVersatilityRating, 0) / recipes.length,
-		} : null;
+		const tasteProfile =
+			recipes.length > 0
+				? {
+						sweetness: recipes.reduce((s, r) => s + r.recipeSweetnessRating, 0) / recipes.length,
+						dryness: recipes.reduce((s, r) => s + r.recipeDrynessRating, 0) / recipes.length,
+						strength: recipes.reduce((s, r) => s + r.recipeStrengthRating, 0) / recipes.length,
+						versatility:
+							recipes.reduce((s, r) => s + r.recipeVersatilityRating, 0) / recipes.length,
+					}
+				: null;
 
 		// cost breakdown from available recipe steps
 		const recipeCosts = await catalogRepo.getRecipeCosts(workspaceId);
 		const pricedRecipes = recipeCosts.filter((r) => r.estimatedCost > 0);
 		let costBreakdown: {
 			averageCost: number;
-			cheapest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
-			priciest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
+			cheapest: {
+				recipeName: string;
+				recipeId: number;
+				recipeImageUrl: string | null;
+				cost: number;
+			} | null;
+			priciest: {
+				recipeName: string;
+				recipeId: number;
+				recipeImageUrl: string | null;
+				cost: number;
+			} | null;
 			barValue: number;
 			barValueByCategory: { groupName: string; value: number }[];
 		} | null = null;
@@ -153,8 +174,18 @@ export const load = (async ({ locals }) => {
 
 			costBreakdown = {
 				averageCost: totalCost / pricedRecipes.length,
-				cheapest: { recipeName: cheapest.recipeName, recipeId: cheapest.recipeId, recipeImageUrl: cheapest.recipeImageUrl, cost: cheapest.estimatedCost },
-				priciest: { recipeName: priciest.recipeName, recipeId: priciest.recipeId, recipeImageUrl: priciest.recipeImageUrl, cost: priciest.estimatedCost },
+				cheapest: {
+					recipeName: cheapest.recipeName,
+					recipeId: cheapest.recipeId,
+					recipeImageUrl: cheapest.recipeImageUrl,
+					cost: cheapest.estimatedCost,
+				},
+				priciest: {
+					recipeName: priciest.recipeName,
+					recipeId: priciest.recipeId,
+					recipeImageUrl: priciest.recipeImageUrl,
+					cost: priciest.estimatedCost,
+				},
 				barValue,
 				barValueByCategory,
 			};
@@ -212,7 +243,7 @@ export const actions: Actions = {
 		// Rate limit check
 		const clientIp = getClientIp(request);
 		const rateLimitKey = `invite-request:${clientIp}`;
-		const rateLimit = checkRateLimit(rateLimitKey, INVITE_REQUEST_RATE_LIMIT);
+		const rateLimit = await checkRateLimit(rateLimitKey, INVITE_REQUEST_RATE_LIMIT);
 
 		if (!rateLimit.allowed) {
 			const minutesRemaining = Math.ceil((rateLimit.retryAfterMs || 0) / 60000);

@@ -157,7 +157,13 @@
 							</Button>
 						{:else}
 							<!-- Generate/Upload buttons when no pending change -->
-							<Button type="button" variant="outline" size="sm" class="whitespace-nowrap" onclick={generateRandom}>
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								class="whitespace-nowrap"
+								onclick={generateRandom}
+							>
 								<Dices class="h-4 w-4 mr-2 shrink-0" />
 								Generate Random
 							</Button>
@@ -170,13 +176,18 @@
 								class="hidden"
 								onchange={handleFileSelect}
 							/>
-							<Button type="button" variant="outline" size="sm" class="whitespace-nowrap" onclick={() => fileInput.click()}>
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								class="whitespace-nowrap"
+								onclick={() => fileInput.click()}
+							>
 								<Upload class="h-4 w-4 mr-2 shrink-0" />
 								Upload Image
 							</Button>
 						{/if}
 					</div>
-
 				</div>
 			</div>
 		</Card.Content>
@@ -192,7 +203,9 @@
 			<Card.Description>Customize how Busser looks on your device</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<div class="flex items-center justify-between p-4 rounded-xl bg-black/[0.03] dark:bg-black/20 border border-white/30 dark:border-white/[0.05] shadow-[inset_0_1px_2px_0_rgba(31,20,60,0.06)] dark:shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.35)]">
+			<div
+				class="flex items-center justify-between p-4 rounded-xl bg-black/[0.03] dark:bg-black/20 border border-white/30 dark:border-white/[0.05] shadow-[inset_0_1px_2px_0_rgba(31,20,60,0.06)] dark:shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.35)]"
+			>
 				<div class="space-y-1">
 					<p class="font-medium">Theme</p>
 					<p class="text-sm text-muted-foreground">Switch between light and dark mode</p>
@@ -212,7 +225,9 @@
 			<Card.Description>Application information</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<div class="p-4 rounded-xl bg-black/[0.03] dark:bg-black/20 border border-white/30 dark:border-white/[0.05] shadow-[inset_0_1px_2px_0_rgba(31,20,60,0.06)] dark:shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.35)]">
+			<div
+				class="p-4 rounded-xl bg-black/[0.03] dark:bg-black/20 border border-white/30 dark:border-white/[0.05] shadow-[inset_0_1px_2px_0_rgba(31,20,60,0.06)] dark:shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.35)]"
+			>
 				<p class="text-sm text-muted-foreground mb-1">Version</p>
 				<p class="font-semibold">{data.appVersion}</p>
 			</div>

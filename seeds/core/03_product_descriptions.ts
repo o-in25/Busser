@@ -20,10 +20,7 @@ export async function seed(knex: Knex): Promise<void> {
 		ProductDescriptionText: r.ProductDescription || null,
 	}));
 
-	await knex('productdescription')
-		.insert(descriptions)
-		.onConflict('ProductId')
-		.merge();
+	await knex('productdescription').insert(descriptions).onConflict('ProductId').merge();
 
 	console.log(`  ${descriptions.length} product descriptions seeded`);
 }

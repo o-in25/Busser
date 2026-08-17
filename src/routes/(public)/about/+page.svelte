@@ -27,7 +27,10 @@
 
 <svelte:head>
 	<title>About - Busser</title>
-	<meta name="description" content="Learn about Busser — a home bar management app for tracking your inventory, discovering cocktail recipes, and collaborating with friends." />
+	<meta
+		name="description"
+		content="Learn about Busser — a home bar management app for tracking your inventory, discovering cocktail recipes, and collaborating with friends."
+	/>
 </svelte:head>
 
 <!-- Hero Section -->

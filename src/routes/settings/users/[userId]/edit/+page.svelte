@@ -28,9 +28,11 @@
 	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 	let emailTouched = $state(false);
 	let emailValue = $state(data.user?.email || '');
-	let emailInvalid = $derived(emailTouched && emailValue.length > 0 && !emailRegex.test(emailValue));
+	let emailInvalid = $derived(
+		emailTouched && emailValue.length > 0 && !emailRegex.test(emailValue)
+	);
 
-	const isSelf = data.isSelf;
+	const { isSelf } = data;
 	const needsOldPassword = isSelf && data.hasPassword;
 
 	// password section
@@ -47,13 +49,18 @@
 		{ label: 'One uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
 		{ label: 'One lowercase letter', test: (pw: string) => /[a-z]/.test(pw) },
 		{ label: 'One number', test: (pw: string) => /\d/.test(pw) },
-		{ label: 'One special character', test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]\/`~;']/.test(pw) },
+		{
+			label: 'One special character',
+			test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]/`~;']/.test(pw),
+		},
 	];
 
 	let ruleResults = $derived(rules.map((rule) => ({ ...rule, met: rule.test(newPassword) })));
 	let allRulesMet = $derived(ruleResults.every((r) => r.met));
 	let passwordsMatch = $derived(newPassword === confirmPassword && newPassword.length > 0);
-	let passwordMismatch = $derived(confirmTouched && confirmPassword.length > 0 && newPassword !== confirmPassword);
+	let passwordMismatch = $derived(
+		confirmTouched && confirmPassword.length > 0 && newPassword !== confirmPassword
+	);
 
 	function handleRoleChange(value: string | undefined) {
 		selectedRole = value || '';
@@ -144,7 +151,10 @@
 					{/if}
 				</div>
 				<div class="space-y-2">
-					<Label for="email" class={errors?.email?.hasError || emailInvalid ? 'text-destructive' : ''}>
+					<Label
+						for="email"
+						class={errors?.email?.hasError || emailInvalid ? 'text-destructive' : ''}
+					>
 						Email <span class="text-destructive">*</span>
 					</Label>
 					<Input
@@ -200,9 +210,7 @@
 
 		<!-- save button -->
 		<div class="flex justify-end">
-			<Button type="submit" class="w-full sm:w-auto">
-				Save
-			</Button>
+			<Button type="submit" class="w-full sm:w-auto">Save</Button>
 		</div>
 	</form>
 
@@ -241,12 +249,7 @@
 						<Label for="oldPassword">
 							Current Password <span class="text-destructive">*</span>
 						</Label>
-						<Input
-							type="password"
-							id="oldPassword"
-							name="oldPassword"
-							required
-						/>
+						<Input type="password" id="oldPassword" name="oldPassword" required />
 					</div>
 				{/if}
 
@@ -305,14 +308,14 @@
 					<Button
 						variant="outline"
 						type="button"
-						onclick={() => { passwordOpen = false; resetPasswordFields(); }}
+						onclick={() => {
+							passwordOpen = false;
+							resetPasswordFields();
+						}}
 					>
 						Cancel
 					</Button>
-					<Button
-						type="submit"
-						disabled={isSubmittingPassword || !allRulesMet || !passwordsMatch}
-					>
+					<Button type="submit" disabled={isSubmittingPassword || !allRulesMet || !passwordsMatch}>
 						{#if isSubmittingPassword}
 							Saving...
 						{:else if data.hasPassword}

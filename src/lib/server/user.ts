@@ -27,7 +27,13 @@ export const roleSelect = userRepo.getRoleOptions.bind(userRepo);
 export const getGrants = userRepo.getGrants.bind(userRepo);
 export const updateGrants = userRepo.updateGrants.bind(userRepo);
 
-export { registerUser, verifyUser, resendVerificationEmail, resendVerificationEmailByEmail, requestPasswordReset };
+export {
+	registerUser,
+	verifyUser,
+	resendVerificationEmail,
+	resendVerificationEmailByEmail,
+	requestPasswordReset,
+};
 
 export const createInvitation = userRepo.createInvitation.bind(userRepo);
 export const getWorkspaceInvitations = userRepo.getWorkspaceInvitations.bind(userRepo);

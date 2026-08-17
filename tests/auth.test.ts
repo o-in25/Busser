@@ -52,23 +52,33 @@ function autoStub() {
 }
 
 vi.mock('$lib/server/db', () => ({
-	DbProvider: vi.fn(function () { return autoStub(); }),
+	DbProvider: vi.fn(function () {
+		return autoStub();
+	}),
 }));
 
 vi.mock('$lib/server/repositories/user.repository', () => ({
-	UserRepository: vi.fn(function () { return autoStub(); }),
+	UserRepository: vi.fn(function () {
+		return autoStub();
+	}),
 }));
 
 vi.mock('$lib/server/repositories/workspace.repository', () => ({
-	WorkspaceRepository: vi.fn(function () { return autoStub(); }),
+	WorkspaceRepository: vi.fn(function () {
+		return autoStub();
+	}),
 }));
 
 vi.mock('$lib/server/repositories/settings.repository', () => ({
-	SettingsRepository: vi.fn(function () { return autoStub(); }),
+	SettingsRepository: vi.fn(function () {
+		return autoStub();
+	}),
 }));
 
 vi.mock('$lib/server/repositories/oauth.repository', () => ({
-	OAuthRepository: vi.fn(function () { return autoStub(); }),
+	OAuthRepository: vi.fn(function () {
+		return autoStub();
+	}),
 }));
 
 import { hash, compare } from 'bcrypt';
@@ -116,18 +126,14 @@ describe('auth - token operations', () => {
 	});
 
 	it('verifyToken resolves with decoded payload', async () => {
-		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) =>
-			cb(null, { userId: 'u1' })
-		);
+		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, { userId: 'u1' }));
 
 		const result = await verifyToken<{ userId: string }>('some-token');
 		expect(result).toEqual({ userId: 'u1' });
 	});
 
 	it('verifyToken rejects on invalid token', async () => {
-		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) =>
-			cb(new Error('invalid'))
-		);
+		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(new Error('invalid')));
 
 		await expect(verifyToken('bad-token')).rejects.toThrow('invalid');
 	});
@@ -171,9 +177,7 @@ describe('auth - authenticate', () => {
 	});
 
 	it('returns null when token verification fails', async () => {
-		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) =>
-			cb(new Error('expired'))
-		);
+		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(new Error('expired')));
 
 		const result = await authenticate('expired-token');
 		expect(result).toBeNull();
@@ -287,9 +291,7 @@ describe('auth - verifyRegistrationToken', () => {
 	});
 
 	it('returns invalid result for malformed token', async () => {
-		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) =>
-			cb(new Error('malformed'))
-		);
+		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(new Error('malformed')));
 
 		const result = await verifyRegistrationToken('bad');
 		expect(result).toEqual({ valid: false, expired: false });
@@ -302,7 +304,13 @@ describe('auth - verifyPasswordResetToken', () => {
 	});
 
 	it('returns valid when token has correct type', async () => {
-		const payload = { userId: 'u1', email: 'a@b.com', type: 'password-reset', iat: 1, exp: 9999999999 };
+		const payload = {
+			userId: 'u1',
+			email: 'a@b.com',
+			type: 'password-reset',
+			iat: 1,
+			exp: 9999999999,
+		};
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, payload));
 
 		const result = await verifyPasswordResetToken('token');
@@ -327,7 +335,13 @@ describe('auth - resetPasswordWithToken', () => {
 	});
 
 	it('resets password with valid token', async () => {
-		const payload = { userId: 'u1', email: 'a@b.com', type: 'password-reset', iat: 1, exp: 9999999999 };
+		const payload = {
+			userId: 'u1',
+			email: 'a@b.com',
+			type: 'password-reset',
+			iat: 1,
+			exp: 9999999999,
+		};
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, payload));
 		vi.mocked(hash).mockResolvedValue('new-hash' as never);
 		vi.mocked(userRepo.updatePassword).mockResolvedValue(1 as any);
@@ -337,16 +351,20 @@ describe('auth - resetPasswordWithToken', () => {
 	});
 
 	it('returns error for invalid token', async () => {
-		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) =>
-			cb(new Error('invalid'))
-		);
+		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(new Error('invalid')));
 
 		const result = await resetPasswordWithToken('bad', 'new-pass');
 		expect(result.status).toBe('error');
 	});
 
 	it('returns error when user not found', async () => {
-		const payload = { userId: 'u1', email: 'a@b.com', type: 'password-reset', iat: 1, exp: 9999999999 };
+		const payload = {
+			userId: 'u1',
+			email: 'a@b.com',
+			type: 'password-reset',
+			iat: 1,
+			exp: 9999999999,
+		};
 		vi.mocked(jwt.verify).mockImplementation((_t, _s, cb: any) => cb(null, payload));
 		vi.mocked(hash).mockResolvedValue('new-hash' as never);
 		vi.mocked(userRepo.updatePassword).mockResolvedValue(0 as any);

@@ -1,5 +1,10 @@
 <script lang="ts">
-	const { sweetness, dryness, strength, versatility }: {
+	const {
+		sweetness,
+		dryness,
+		strength,
+		versatility,
+	}: {
 		sweetness: number;
 		dryness: number;
 		strength: number;
@@ -24,12 +29,9 @@
 	}
 
 	const polygon = $derived(
-		[
-			point(0, sweetness),
-			point(90, strength),
-			point(180, dryness),
-			point(270, versatility),
-		].join(' ')
+		[point(0, sweetness), point(90, strength), point(180, dryness), point(270, versatility)].join(
+			' '
+		)
 	);
 
 	const axes = [
@@ -82,7 +84,15 @@
 
 			<!-- guide rings -->
 			{#each rings as r}
-				<circle {cx} {cy} {r} fill="none" stroke="currentColor" stroke-opacity="0.08" stroke-width="0.5" />
+				<circle
+					{cx}
+					{cy}
+					{r}
+					fill="none"
+					stroke="currentColor"
+					stroke-opacity="0.08"
+					stroke-width="0.5"
+				/>
 			{/each}
 
 			<!-- axis lines -->
@@ -159,7 +169,9 @@
 						style="width: {(axis.value / 10) * 100}%"
 					></div>
 				</div>
-				<span class="text-[11px] font-semibold w-7 text-right tabular-nums">{axis.value.toFixed(1)}</span>
+				<span class="text-[11px] font-semibold w-7 text-right tabular-nums"
+					>{axis.value.toFixed(1)}</span
+				>
 			</div>
 		{/each}
 	</div>

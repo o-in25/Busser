@@ -86,9 +86,7 @@
 			{/if}
 		</Button>
 		{#if resendStatus === 'error'}
-			<p class="mt-2 text-sm text-destructive">
-				Failed to resend email. Please try again.
-			</p>
+			<p class="mt-2 text-sm text-destructive">Failed to resend email. Please try again.</p>
 		{/if}
 		{#if !data.userId}
 			<p class="mt-2 text-sm text-muted-foreground">

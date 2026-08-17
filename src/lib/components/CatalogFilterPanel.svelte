@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { ArrowUpDown, ChevronRight, Filter, GlassWater, Rows3, SlidersHorizontal } from 'lucide-svelte';
+	import {
+		ArrowUpDown,
+		ChevronRight,
+		Filter,
+		GlassWater,
+		Rows3,
+		SlidersHorizontal,
+	} from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -196,11 +203,7 @@
 	{#if onPerPageChange}
 		<div class="flex flex-col gap-1.5">
 			<span class="text-sm font-medium text-muted-foreground">Page Size</span>
-			<Select.Root
-				type="single"
-				value={perPage}
-				onValueChange={(v) => onPerPageChange(v ?? '24')}
-			>
+			<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '24')}>
 				<Select.Trigger class="w-full">
 					<Rows3 class="h-4 w-4 mr-2" />
 					<Select.Value placeholder="24 per page">{perPageLabel}</Select.Value>

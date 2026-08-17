@@ -37,7 +37,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		return json({ success: true });
-	} catch (err: any) {
+	} catch {
 		return json({ success: true });
 	}
 };

@@ -8,7 +8,7 @@ on:
       - main
 jobs:
   test:
-    name: Run tests
+    name: Test and type-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +23,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm test
+
+      # APP_VERSION is a build-time build-arg in prod; supply a placeholder so
+      # svelte-kit sync generates its $env/static/private type for the check.
+      - run: pnpm run check
+        env:
+          APP_VERSION: ci
 
   deploy:
     name: Deploy app

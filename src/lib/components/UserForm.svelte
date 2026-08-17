@@ -59,7 +59,10 @@
 		{ label: 'One uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
 		{ label: 'One lowercase letter', test: (pw: string) => /[a-z]/.test(pw) },
 		{ label: 'One number', test: (pw: string) => /\d/.test(pw) },
-		{ label: 'One special character', test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]\/`~;']/.test(pw) },
+		{
+			label: 'One special character',
+			test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]/`~;']/.test(pw),
+		},
 	];
 
 	let passwordTouched = $state(false);
@@ -72,11 +75,15 @@
 	let ruleResults = $derived(rules.map((rule) => ({ ...rule, met: rule.test(password) })));
 	let allRulesMet = $derived(ruleResults.every((r) => r.met));
 	let passwordsMatch = $derived(password === passwordConfirm && password.length > 0);
-	let emailInvalid = $derived(emailTouched && emailValue.length > 0 && !emailRegex.test(emailValue));
-	let passwordMismatch = $derived(passwordConfirmTouched && passwordConfirm.length > 0 && password !== passwordConfirm);
+	let emailInvalid = $derived(
+		emailTouched && emailValue.length > 0 && !emailRegex.test(emailValue)
+	);
+	let passwordMismatch = $derived(
+		passwordConfirmTouched && passwordConfirm.length > 0 && password !== passwordConfirm
+	);
 	let submitDisabled = $derived(
 		(needsPasswordCheck && (!allRulesMet || !passwordsMatch)) ||
-		(action === 'register' && !tosAccepted)
+			(action === 'register' && !tosAccepted)
 	);
 
 	function handleRoleChange(value: string | undefined) {
@@ -298,12 +305,7 @@
 
 <!-- submit -->
 {#if action === 'register' || action === 'login'}
-	<Button
-		type="submit"
-		size="lg"
-		class="w-full"
-		disabled={submitDisabled}
-	>
+	<Button type="submit" size="lg" class="w-full" disabled={submitDisabled}>
 		{action === 'register' ? 'Sign up' : 'Log in'}
 	</Button>
 {:else}

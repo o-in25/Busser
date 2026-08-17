@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		Flame,
-		FlaskConical,
-		PackageCheck,
-		Search,
-		ShoppingCart,
-		X,
-	} from 'lucide-svelte';
+	import { Flame, FlaskConical, PackageCheck, Search, ShoppingCart, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -25,7 +18,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Checkbox } from '$lib/components/ui/checkbox';
-	import { Indicator } from '$lib/components/ui/indicator';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
@@ -67,10 +59,6 @@
 	let selectedIds = $state<number[]>([]);
 	let bulkActionLoading = $state(false);
 
-	function handleSelectionChange(ids: number[]) {
-		selectedIds = ids;
-	}
-
 	function clearSelection() {
 		selectedIds = [];
 	}
@@ -92,7 +80,11 @@
 
 	// impact level helper
 	function getImpactLevel(item: ShoppingListItem): number {
-		return item.unlockableRecipes >= 3 ? 3 : item.unlockableRecipes >= 1 ? item.unlockableRecipes : 0;
+		return item.unlockableRecipes >= 3
+			? 3
+			: item.unlockableRecipes >= 1
+				? item.unlockableRecipes
+				: 0;
 	}
 
 	// url building
@@ -100,7 +92,8 @@
 		const params = new URLSearchParams();
 
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
-		const category = overrides.categoryGroupId !== undefined ? overrides.categoryGroupId : selectedCategory;
+		const category =
+			overrides.categoryGroupId !== undefined ? overrides.categoryGroupId : selectedCategory;
 		const supplier = overrides.supplierId !== undefined ? overrides.supplierId : selectedSupplier;
 		const sort = overrides.sort !== undefined ? overrides.sort : sortOption;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
@@ -234,7 +227,8 @@
 	// table selection helpers
 	function toggleSelection(productId: number) {
 		const idx = selectedIds.indexOf(productId);
-		const next = idx >= 0 ? selectedIds.filter((id) => id !== productId) : [...selectedIds, productId];
+		const next =
+			idx >= 0 ? selectedIds.filter((id) => id !== productId) : [...selectedIds, productId];
 		selectedIds = next;
 	}
 
@@ -330,8 +324,12 @@
 		return sup?.supplierName || 'All Suppliers';
 	});
 
-	const sortLabel = $derived(sortOptions.find((o) => o.value === sortOption)?.label || 'Name (A-Z)');
-	const perPageLabel = $derived(perPageOptions.find((o) => o.value === perPage)?.label || '20 per page');
+	const sortLabel = $derived(
+		sortOptions.find((o) => o.value === sortOption)?.label || 'Name (A-Z)'
+	);
+	const perPageLabel = $derived(
+		perPageOptions.find((o) => o.value === perPage)?.label || '20 per page'
+	);
 
 	const hasNonDefaultFilters = $derived(
 		(selectedCategory && selectedCategory !== 'all') ||
@@ -364,7 +362,9 @@
 				<!-- Search -->
 				<form onsubmit={handleSearch} class="flex-1 min-w-0">
 					<div class="relative">
-						<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+						<Search
+							class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+						/>
 						<Input
 							type="text"
 							placeholder="Search items..."
@@ -501,22 +501,31 @@
 				{#if searchInput}
 					<Badge variant="secondary" class="gap-1">
 						Search: "{searchInput}"
-						<button onclick={clearSearch} class="ml-1 hover:text-destructive"><X class="h-3 w-3" /></button>
+						<button onclick={clearSearch} class="ml-1 hover:text-destructive"
+							><X class="h-3 w-3" /></button
+						>
 					</Badge>
 				{/if}
 				{#if selectedCategory && selectedCategory !== 'all'}
 					<Badge variant="secondary" class="gap-1">
 						Category: {categoryLabel}
-						<button onclick={() => handleCategoryChange('all')} class="ml-1 hover:text-destructive"><X class="h-3 w-3" /></button>
+						<button onclick={() => handleCategoryChange('all')} class="ml-1 hover:text-destructive"
+							><X class="h-3 w-3" /></button
+						>
 					</Badge>
 				{/if}
 				{#if selectedSupplier && selectedSupplier !== 'all'}
 					<Badge variant="secondary" class="gap-1">
 						Supplier: {supplierLabel}
-						<button onclick={() => handleSupplierChange('all')} class="ml-1 hover:text-destructive"><X class="h-3 w-3" /></button>
+						<button onclick={() => handleSupplierChange('all')} class="ml-1 hover:text-destructive"
+							><X class="h-3 w-3" /></button
+						>
 					</Badge>
 				{/if}
-				<button onclick={clearAllFilters} class="text-sm text-muted-foreground hover:text-foreground underline">
+				<button
+					onclick={clearAllFilters}
+					class="text-sm text-muted-foreground hover:text-foreground underline"
+				>
 					Clear all
 				</button>
 			</div>
@@ -593,7 +602,10 @@
 								<Table.Head class="w-10">
 									<!-- svelte-ignore a11y_click_events_have_key_events -->
 									<!-- svelte-ignore a11y_no_static_element_interactions -->
-									<div class="flex items-center justify-center" onclick={(e) => e.stopPropagation()}>
+									<div
+										class="flex items-center justify-center"
+										onclick={(e) => e.stopPropagation()}
+									>
 										<Checkbox checked={allSelected} onchange={toggleAll} />
 									</div>
 								</Table.Head>
@@ -616,7 +628,10 @@
 									<Table.Cell class="w-10">
 										<!-- svelte-ignore a11y_click_events_have_key_events -->
 										<!-- svelte-ignore a11y_no_static_element_interactions -->
-										<div class="flex items-center justify-center" onclick={(e) => e.stopPropagation()}>
+										<div
+											class="flex items-center justify-center"
+											onclick={(e) => e.stopPropagation()}
+										>
 											<Checkbox
 												checked={selectedIds.includes(item.productId)}
 												onchange={() => toggleSelection(item.productId)}
@@ -635,7 +650,9 @@
 								</Table.Cell>
 								<Table.Cell class="text-center hidden sm:table-cell">
 									{#if item.recipeCount > 0}
-										<span class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium">
+										<span
+											class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium"
+										>
 											{item.recipeCount}
 										</span>
 									{:else}
@@ -644,12 +661,19 @@
 								</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell">
 									{#if impact > 0}
-										<div class="flex justify-center gap-0.5" title="Unlocks {item.unlockableRecipes} recipe(s)">
+										<div
+											class="flex justify-center gap-0.5"
+											title="Unlocks {item.unlockableRecipes} recipe(s)"
+										>
 											{#each Array(impact) as _}
 												<Flame
 													class={cn(
 														'h-3.5 w-3.5',
-														impact === 3 ? 'text-red-500' : impact === 2 ? 'text-orange-500' : 'text-yellow-500'
+														impact === 3
+															? 'text-red-500'
+															: impact === 2
+																? 'text-orange-500'
+																: 'text-yellow-500'
 													)}
 												/>
 											{/each}
@@ -703,7 +727,12 @@
 					{@const isRestocking = restockingIds.has(item.productId)}
 
 					{#if viewMode === 'grid'}
-						<Card.Root class={cn('overflow-hidden transition-all duration-300', isRestocking && 'opacity-50')}>
+						<Card.Root
+							class={cn(
+								'overflow-hidden transition-all duration-300',
+								isRestocking && 'opacity-50'
+							)}
+						>
 							<div class="relative h-36 overflow-hidden">
 								<SkeletonImage
 									src={item.productImageUrl}
@@ -711,16 +740,26 @@
 									variant="product"
 									class="h-full w-full"
 								/>
-								<Badge variant="secondary" class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm">
+								<Badge
+									variant="secondary"
+									class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm"
+								>
 									{item.categoryName}
 								</Badge>
 								{#if impact > 0}
-									<div class="absolute top-3 right-3 flex gap-0.5" title="Unlocks {item.unlockableRecipes} recipe(s)">
+									<div
+										class="absolute top-3 right-3 flex gap-0.5"
+										title="Unlocks {item.unlockableRecipes} recipe(s)"
+									>
 										{#each Array(impact) as _}
 											<Flame
 												class={cn(
 													'h-4 w-4',
-													impact === 3 ? 'text-red-500' : impact === 2 ? 'text-orange-500' : 'text-yellow-500'
+													impact === 3
+														? 'text-red-500'
+														: impact === 2
+															? 'text-orange-500'
+															: 'text-yellow-500'
 												)}
 											/>
 										{/each}
@@ -728,7 +767,12 @@
 								{/if}
 							</div>
 							<Card.Content class="p-4">
-								<h3 class={cn('font-bold text-base mb-1 line-clamp-1', isRestocking && 'line-through')}>
+								<h3
+									class={cn(
+										'font-bold text-base mb-1 line-clamp-1',
+										isRestocking && 'line-through'
+									)}
+								>
 									{item.productName}
 								</h3>
 								<div class="flex items-center justify-between mt-2">
@@ -739,11 +783,18 @@
 											</span>
 										{/if}
 										{#if item.productPricePerUnit > 0}
-											<span class="text-sm font-medium tabular-nums">${item.productPricePerUnit.toFixed(2)}</span>
+											<span class="text-sm font-medium tabular-nums"
+												>${item.productPricePerUnit.toFixed(2)}</span
+											>
 										{/if}
 									</div>
 									{#if canModify && !isRestocking}
-										<Button variant="outline" size="sm" class="h-7 text-xs" onclick={() => handleToggle(item.productId)}>
+										<Button
+											variant="outline"
+											size="sm"
+											class="h-7 text-xs"
+											onclick={() => handleToggle(item.productId)}
+										>
 											<PackageCheck class="h-3.5 w-3.5 mr-1" />
 											Restock
 										</Button>
@@ -780,7 +831,11 @@
 													<Flame
 														class={cn(
 															'h-3 w-3',
-															impact === 3 ? 'text-red-500' : impact === 2 ? 'text-orange-500' : 'text-yellow-500'
+															impact === 3
+																? 'text-red-500'
+																: impact === 2
+																	? 'text-orange-500'
+																	: 'text-yellow-500'
 														)}
 													/>
 												{/each}
@@ -790,10 +845,17 @@
 								</div>
 								<div class="flex items-center gap-3 shrink-0">
 									{#if item.productPricePerUnit > 0}
-										<span class="text-sm font-medium tabular-nums">${item.productPricePerUnit.toFixed(2)}</span>
+										<span class="text-sm font-medium tabular-nums"
+											>${item.productPricePerUnit.toFixed(2)}</span
+										>
 									{/if}
 									{#if canModify && !isRestocking}
-										<Button variant="outline" size="sm" class="h-7 text-xs" onclick={() => handleToggle(item.productId)}>
+										<Button
+											variant="outline"
+											size="sm"
+											class="h-7 text-xs"
+											onclick={() => handleToggle(item.productId)}
+										>
 											<PackageCheck class="h-3.5 w-3.5 mr-1" />
 											Restock
 										</Button>
@@ -816,9 +878,7 @@
 <Card.Root bare class="mb-6">
 	<Card.Header class="pb-4">
 		<Card.Title>Saved Suppliers</Card.Title>
-		<p class="text-sm text-muted-foreground">
-			Your saved stores and suppliers
-		</p>
+		<p class="text-sm text-muted-foreground">Your saved stores and suppliers</p>
 	</Card.Header>
 	<Card.Content>
 		{#if savedSuppliers.length > 0}

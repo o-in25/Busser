@@ -107,9 +107,7 @@
 				Manage access to <span class="font-medium">{data.workspace.workspaceName}</span>
 			</p>
 		</div>
-		<Button onclick={() => (inviteDialogOpen = true)}>
-			Invite Member
-		</Button>
+		<Button onclick={() => (inviteDialogOpen = true)}>Invite Member</Button>
 	</div>
 
 	<!-- Members Card -->
@@ -484,9 +482,7 @@
 				<Button type="button" variant="outline" onclick={() => (inviteDialogOpen = false)}>
 					Cancel
 				</Button>
-				<Button type="submit" disabled={!inviteEmail}>
-					Send
-				</Button>
+				<Button type="submit" disabled={!inviteEmail}>Send</Button>
 			</Dialog.Footer>
 		</form>
 	</Dialog.Content>

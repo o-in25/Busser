@@ -12,7 +12,7 @@
 		Sparkles,
 		Wand2,
 	} from 'lucide-svelte';
-	import { getContext, setContext } from 'svelte';
+	import { setContext } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { dndzone, type DndEvent } from 'svelte-dnd-action';
 	import { v4 as uuidv4 } from 'uuid';
@@ -59,10 +59,6 @@
 	// provide the nested-create stack so any SearchableSelect "+" can open a stacked sheet
 	const nestedStack = new NestedCreateStack();
 	setContext(NESTED_CREATE_KEY, nestedStack);
-
-	// get workspace role for permission checks
-	const workspace = getContext<{ workspaceRole?: string }>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	// Determine if this is add mode (for draft functionality)
 	const isAddMode = !recipe.recipeId;

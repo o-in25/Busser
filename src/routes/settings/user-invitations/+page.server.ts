@@ -116,5 +116,4 @@ export const actions: Actions = {
 
 		return { success: true, rejected: true };
 	},
-
 };

@@ -33,8 +33,8 @@
 
 	const categoryName = $derived(
 		hasCategory
-			? categories.find((c) => String(c.categoryGroupId) === categoryGroupId)
-					?.categoryGroupName || categoryGroupId
+			? categories.find((c) => String(c.categoryGroupId) === categoryGroupId)?.categoryGroupName ||
+					categoryGroupId
 			: ''
 	);
 

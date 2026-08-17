@@ -17,7 +17,16 @@ import type { Knex } from 'knex';
 const GLOBAL = 'ws-global-catalog';
 
 // categorygroup ids (stable, seeded)
-const GROUP = { SPIRITS: 1, LIQUEURS: 2, FORTIFIED: 3, BITTERS: 4, SWEETENERS: 5, JUICES: 6, MIXERS: 7, OTHER: 8 };
+const GROUP = {
+	SPIRITS: 1,
+	LIQUEURS: 2,
+	FORTIFIED: 3,
+	BITTERS: 4,
+	SWEETENERS: 5,
+	JUICES: 6,
+	MIXERS: 7,
+	OTHER: 8,
+};
 
 const SYRUP_PARENT = 20; // existing "Syrup" category, becomes a true parent
 const LIQUEUR_PARENT = 95; // existing "Liqueur" category
@@ -117,10 +126,10 @@ export async function up(knex: Knex): Promise<void> {
 	`,
 		[GLOBAL]
 	);
-	await knex.raw(`UPDATE category SET ParentCategoryId = ? WHERE WorkspaceId = ? AND CategoryId = 51`, [
-		SYRUP_PARENT,
-		GLOBAL,
-	]);
+	await knex.raw(
+		`UPDATE category SET ParentCategoryId = ? WHERE WorkspaceId = ? AND CategoryId = 51`,
+		[SYRUP_PARENT, GLOBAL]
+	);
 
 	// --- 3: backfill null category groups ---
 	// most null-group categories can inherit their parent's group
@@ -151,14 +160,14 @@ export async function up(knex: Knex): Promise<void> {
 	`,
 		[GLOBAL]
 	);
-	await knex.raw(`UPDATE category SET CategoryGroupId = ? WHERE WorkspaceId = ? AND CategoryName = 'Champagne' AND CategoryGroupId IS NULL`, [
-		GROUP.MIXERS,
-		GLOBAL,
-	]);
-	await knex.raw(`UPDATE category SET CategoryGroupId = ? WHERE WorkspaceId = ? AND CategoryName = 'Coconut Cream' AND CategoryGroupId IS NULL`, [
-		GROUP.SWEETENERS,
-		GLOBAL,
-	]);
+	await knex.raw(
+		`UPDATE category SET CategoryGroupId = ? WHERE WorkspaceId = ? AND CategoryName = 'Champagne' AND CategoryGroupId IS NULL`,
+		[GROUP.MIXERS, GLOBAL]
+	);
+	await knex.raw(
+		`UPDATE category SET CategoryGroupId = ? WHERE WorkspaceId = ? AND CategoryName = 'Coconut Cream' AND CategoryGroupId IS NULL`,
+		[GROUP.SWEETENERS, GLOBAL]
+	);
 }
 
 export async function down(knex: Knex): Promise<void> {

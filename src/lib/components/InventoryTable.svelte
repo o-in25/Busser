@@ -6,12 +6,10 @@
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Indicator } from '$lib/components/ui/indicator';
 	import * as Table from '$lib/components/ui/table';
 	import type { PaginationData, Product } from '$lib/types';
-	import { cn } from '$lib/utils';
 
 	export let products: Product[];
 	export let paginationData: PaginationData;
@@ -62,7 +60,6 @@
 		});
 		goto(`/${route}?${urlParams.toString()}`);
 	};
-
 </script>
 
 <!-- mobile select-all -->

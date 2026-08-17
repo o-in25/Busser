@@ -55,7 +55,6 @@
 		category={data.category}
 		parentCategories={data.parentCategories}
 		categoryGroups={data.categoryGroups}
-		productCount={data.productCount}
 		bind:modalOpen
 	/>
 </div>

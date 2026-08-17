@@ -6,7 +6,6 @@
 	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Hero from '$lib/components/Hero.svelte';
-	import logo from '$lib/assets/logo.png';
 	import { workspaceSwitcherOpen } from '../../../stores';
 
 	let { data } = $props();
@@ -56,7 +55,9 @@
 			</div>
 		{:else}
 			<!-- switch workspace prompt -->
-			<div class="glass-panel overflow-hidden flex items-center justify-center p-6 w-full max-w-3xl mx-auto">
+			<div
+				class="glass-panel overflow-hidden flex items-center justify-center p-6 w-full max-w-3xl mx-auto"
+			>
 				<div class="text-center max-w-sm space-y-6">
 					<div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
 						<Sparkles class="h-8 w-8 text-primary" />
@@ -64,7 +65,8 @@
 					<div>
 						<h2 class="text-lg font-semibold mb-1">Switch to your workspace</h2>
 						<p class="text-sm text-muted-foreground">
-							Busser AI needs write access to your catalog and inventory. Switch to a workspace you own to get started.
+							Busser AI needs write access to your catalog and inventory. Switch to a workspace you
+							own to get started.
 						</p>
 					</div>
 					<FancyButton size="md" variant="primary" onclick={() => ($workspaceSwitcherOpen = true)}>

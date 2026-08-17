@@ -21,7 +21,6 @@
 	import { calculateAbv, getDilutionInfo } from '$lib/math';
 	import type { View } from '$lib/types';
 	import type { RecipeInsightsOutput } from '$lib/types/generators';
-	import { cn } from '$lib/utils';
 
 	import RecipeIngredientStep from './RecipeIngredientStep.svelte';
 	import RecipeInsights from './RecipeInsights.svelte';
@@ -44,9 +43,7 @@
 	} = $props();
 
 	// resolve per-step image/substitute data by step id (absent in preview contexts)
-	const extrasByStep = $derived(
-		new Map((stepExtras ?? []).map((e) => [e.recipeStepId, e]))
-	);
+	const extrasByStep = $derived(new Map((stepExtras ?? []).map((e) => [e.recipeStepId, e])));
 
 	// get workspace role for permission checks
 	const workspace = getContext<{ workspaceRole?: string }>('workspace');
@@ -197,12 +194,7 @@
 			</button>
 		{:else}
 			<div class="absolute inset-0 w-full">
-				<SkeletonImage
-					src={null}
-					alt={recipe.recipeName}
-					variant="recipe"
-					class="h-full w-full"
-				/>
+				<SkeletonImage src={null} alt={recipe.recipeName} variant="recipe" class="h-full w-full" />
 				<div
 					class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"
 				></div>

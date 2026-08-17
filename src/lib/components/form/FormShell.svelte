@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ChevronLeft, ChevronRight, X } from 'lucide-svelte';
-	import type { Component, Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { fly } from 'svelte/transition';
 
 	import { goto } from '$app/navigation';
@@ -10,7 +10,8 @@
 	import FormStepper from './FormStepper.svelte';
 
 	// one stepped flow for all breakpoints — big step title, thin stepper, sticky glass footer
-	type StepDef = { id?: string; title: string; icon?: Component; optional?: boolean };
+	// lucide icons are legacy component classes, hence `typeof ChevronLeft` rather than svelte's `Component`
+	type StepDef = { id?: string; title: string; icon?: typeof ChevronLeft; optional?: boolean };
 
 	let {
 		steps,
@@ -104,7 +105,12 @@
 		</div>
 
 		{#if isLast}
-			<Button type="submit" variant="glass-primary" size="glass-md" disabled={submitting || !isValid}>
+			<Button
+				type="submit"
+				variant="glass-primary"
+				size="glass-md"
+				disabled={submitting || !isValid}
+			>
 				{submitting ? 'Saving…' : submitLabel}
 			</Button>
 		{:else}

@@ -29,11 +29,7 @@
 		checked && 'opacity-50 scale-[0.98]'
 	)}
 >
-	<Checkbox
-		checked={checked}
-		onCheckedChange={(v) => onToggle(item.productId, !!v)}
-		class="shrink-0"
-	/>
+	<Checkbox {checked} onCheckedChange={(v) => onToggle(item.productId, !!v)} class="shrink-0" />
 
 	<SkeletonImage
 		src={item.productImageUrl}

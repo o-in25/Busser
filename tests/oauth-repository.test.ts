@@ -13,7 +13,17 @@ import { OAuthRepository } from '$lib/server/repositories/oauth.repository';
 // helper: chainable knex mock
 function mockTable() {
 	const chain: any = {};
-	const methods = ['where', 'whereNot', 'select', 'first', 'update', 'insert', 'del', 'distinct', 'whereIn'];
+	const methods = [
+		'where',
+		'whereNot',
+		'select',
+		'first',
+		'update',
+		'insert',
+		'del',
+		'distinct',
+		'whereIn',
+	];
 	for (const m of methods) {
 		chain[m] = vi.fn().mockReturnValue(chain);
 	}
@@ -39,7 +49,9 @@ function makeTrx(chain: any) {
 
 function makeUserRepo(overrides: Record<string, any> = {}) {
 	return {
-		findById: vi.fn().mockResolvedValue({ status: 'success', data: { userId: 'u1', username: 'testuser' } }),
+		findById: vi
+			.fn()
+			.mockResolvedValue({ status: 'success', data: { userId: 'u1', username: 'testuser' } }),
 		findByEmail: vi.fn(),
 		register: vi.fn(),
 		...overrides,
@@ -223,13 +235,14 @@ describe('OAuthRepository - unlinkOAuthAccount', () => {
 		userChain.first.mockResolvedValue({ password: null });
 		oauthListChain.where.mockResolvedValue([{ provider: 'google' }]);
 
-		db.table
-			.mockReturnValueOnce(userChain)
-			.mockReturnValueOnce(oauthListChain);
+		db.table.mockReturnValueOnce(userChain).mockReturnValueOnce(oauthListChain);
 
 		const result = await repo.unlinkOAuthAccount('u1', 'google');
 		expect(result.status).toBe('error');
-		expect(result).toHaveProperty('error', 'Cannot unlink your only login method. Set a password first.');
+		expect(result).toHaveProperty(
+			'error',
+			'Cannot unlink your only login method. Set a password first.'
+		);
 	});
 
 	it('returns error when linked account not found', async () => {
@@ -271,20 +284,31 @@ describe('OAuthRepository - registerOAuth', () => {
 		const made = makeDb();
 		trxChain = made.trxChain;
 		userRepo = makeUserRepo({
-			register: vi.fn().mockResolvedValue({ userId: 'u1', username: 'user-abc', email: 'test@test.com' }),
-			findById: vi.fn().mockResolvedValue({ status: 'success', data: { userId: 'u1', username: 'user-abc' } }),
+			register: vi
+				.fn()
+				.mockResolvedValue({ userId: 'u1', username: 'user-abc', email: 'test@test.com' }),
+			findById: vi
+				.fn()
+				.mockResolvedValue({ status: 'success', data: { userId: 'u1', username: 'user-abc' } }),
 		});
 		repo = new OAuthRepository(made.db, userRepo);
 		vi.clearAllMocks();
 		// re-apply after clearAllMocks
-		userRepo.register.mockResolvedValue({ userId: 'u1', username: 'user-abc', email: 'test@test.com' });
-		userRepo.findById.mockResolvedValue({ status: 'success', data: { userId: 'u1', username: 'user-abc' } });
+		userRepo.register.mockResolvedValue({
+			userId: 'u1',
+			username: 'user-abc',
+			email: 'test@test.com',
+		});
+		userRepo.findById.mockResolvedValue({
+			status: 'success',
+			data: { userId: 'u1', username: 'user-abc' },
+		});
 	});
 
 	it('registers new user without invitation', async () => {
 		trxChain.insert.mockResolvedValue([1]);
 
-		const result = await repo.registerOAuth(profile, null);
+		const result = await repo.registerOAuth(profile, null, 'global-ws');
 
 		expect(result.status).toBe('success');
 		expect(userRepo.register).toHaveBeenCalled();
@@ -303,7 +327,7 @@ describe('OAuthRepository - registerOAuth', () => {
 		trxChain.insert.mockResolvedValue([1]);
 		trxChain.update.mockResolvedValue(1);
 
-		const result = await repo.registerOAuth(profile, 'INVITE-CODE');
+		const result = await repo.registerOAuth(profile, 'INVITE-CODE', 'global-ws');
 
 		expect(result.status).toBe('success');
 	});
@@ -317,7 +341,7 @@ describe('OAuthRepository - registerOAuth', () => {
 		});
 		trxChain.insert.mockResolvedValue([1]);
 
-		const result = await repo.registerOAuth(profile, 'USED-CODE');
+		const result = await repo.registerOAuth(profile, 'USED-CODE', 'global-ws');
 
 		expect(result.status).toBe('error');
 	});
@@ -331,7 +355,7 @@ describe('OAuthRepository - registerOAuth', () => {
 		});
 		trxChain.insert.mockResolvedValue([1]);
 
-		const result = await repo.registerOAuth(profile, 'CODE');
+		const result = await repo.registerOAuth(profile, 'CODE', 'global-ws');
 
 		expect(result.status).toBe('error');
 	});
@@ -339,7 +363,7 @@ describe('OAuthRepository - registerOAuth', () => {
 	it('returns friendly error on registration failure', async () => {
 		userRepo.register.mockRejectedValue(new Error('Some unexpected DB error'));
 
-		const result = await repo.registerOAuth(profile, null);
+		const result = await repo.registerOAuth(profile, null, 'global-ws');
 
 		expect(result.status).toBe('error');
 		if (result.status === 'error') {
@@ -350,7 +374,7 @@ describe('OAuthRepository - registerOAuth', () => {
 	it('returns specific error for known messages', async () => {
 		userRepo.register.mockRejectedValue(new Error('Email already taken.'));
 
-		const result = await repo.registerOAuth(profile, null);
+		const result = await repo.registerOAuth(profile, null, 'global-ws');
 
 		expect(result.status).toBe('error');
 		if (result.status === 'error') {
@@ -358,4 +382,3 @@ describe('OAuthRepository - registerOAuth', () => {
 		}
 	});
 });
-

@@ -54,7 +54,10 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				Generate Image
-				<Badge variant="secondary" class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0">Beta</Badge>
+				<Badge
+					variant="secondary"
+					class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0">Beta</Badge
+				>
 			</Dialog.Title>
 			<Dialog.Description>
 				Choose how to generate the image for "{trigger}"

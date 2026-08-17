@@ -35,15 +35,29 @@
 </script>
 
 {#if href}
-	<Badge variant={variantMap[variant]} {href} class={className} {...restProps as HTMLAnchorAttributes}>
+	<Badge
+		variant={variantMap[variant]}
+		{href}
+		class={className}
+		{...(restProps as any)}
+	>
 		{#if children}{@render children()}{/if}
 	</Badge>
 {:else if as === 'button'}
-	<Badge variant={variantMap[variant]} as="button" class={className} {...restProps as HTMLButtonAttributes}>
+	<Badge
+		variant={variantMap[variant]}
+		as="button"
+		class={className}
+		{...(restProps as any)}
+	>
 		{#if children}{@render children()}{/if}
 	</Badge>
 {:else}
-	<Badge variant={variantMap[variant]} class={className} {...restProps as HTMLAttributes<HTMLDivElement>}>
+	<Badge
+		variant={variantMap[variant]}
+		class={className}
+		{...(restProps as any)}
+	>
 		{#if children}{@render children()}{/if}
 	</Badge>
 {/if}

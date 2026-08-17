@@ -17,7 +17,9 @@
 		<BackButton fallback="/catalog" />
 		<div>
 			<h1 class="text-lg md:text-2xl font-bold">Add New Recipe</h1>
-			<p class="text-muted-foreground hidden md:block">Create a new cocktail recipe for your catalog</p>
+			<p class="text-muted-foreground hidden md:block">
+				Create a new cocktail recipe for your catalog
+			</p>
 		</div>
 	</div>
 

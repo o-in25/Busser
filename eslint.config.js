@@ -30,7 +30,18 @@ export default [
 		languageOptions: {
 			parser: tsparser,
 			parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-			globals: { ...globals.browser, ...globals.node },
+			globals: {
+				...globals.browser,
+				...globals.node,
+				...globals.serviceworker,
+				// svelte 5 runes used in .svelte.ts files
+				$state: 'readonly',
+				$derived: 'readonly',
+				$effect: 'readonly',
+				$props: 'readonly',
+				$bindable: 'readonly',
+				$inspect: 'readonly',
+			},
 		},
 		plugins: {
 			'@typescript-eslint': tseslint,

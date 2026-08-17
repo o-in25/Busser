@@ -150,7 +150,10 @@
 <div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
 	{#if user}
 		<Sheet.Root bind:open={mobileMenuOpen}>
-			<Sheet.Trigger class="mobile-header-left w-8 h-8 flex items-center justify-center" aria-label="Open menu">
+			<Sheet.Trigger
+				class="mobile-header-left w-8 h-8 flex items-center justify-center"
+				aria-label="Open menu"
+			>
 				<Menu class="h-5 w-5 text-muted-foreground" />
 			</Sheet.Trigger>
 			<Sheet.Content side="left" class="flex flex-col">
@@ -303,7 +306,11 @@
 	<NavigationProgress variant="bottom" />
 	<div class="mobile-nav-pill">
 		{#each items as item}
-			<a href={item.href} class="mobile-nav-item {isActive(item.href) ? 'active' : ''}" onclick={() => haptics.light()}>
+			<a
+				href={item.href}
+				class="mobile-nav-item {isActive(item.href) ? 'active' : ''}"
+				onclick={() => haptics.light()}
+			>
 				<item.icon class="h-5 w-5" />
 				<span class="mobile-nav-label">{item.label}</span>
 			</a>
@@ -351,7 +358,10 @@
 						Settings
 					</DropdownMenu.Item>
 					{#if workspaces.length > 1}
-						<DropdownMenu.Item onclick={() => ($workspaceSwitcherOpen = true)} class="cursor-pointer">
+						<DropdownMenu.Item
+							onclick={() => ($workspaceSwitcherOpen = true)}
+							class="cursor-pointer"
+						>
 							<GalleryHorizontalEnd class="mr-2 h-4 w-4" />
 							Switch Workspace
 						</DropdownMenu.Item>
@@ -396,11 +406,7 @@
 			</div>
 		{:else}
 			<div class="max-h-72 overflow-y-auto">
-				<WorkspaceList
-					{workspaces}
-					{activeWorkspaceId}
-					onSelect={(id) => switchWorkspace(id)}
-				/>
+				<WorkspaceList {workspaces} {activeWorkspaceId} onSelect={(id) => switchWorkspace(id)} />
 			</div>
 			<div class="pt-3 mt-3 border-t border-border/50">
 				<button
@@ -544,7 +550,7 @@
 		color: rgba(63, 63, 70, 1);
 	}
 
-.mobile-nav-item.active {
+	.mobile-nav-item.active {
 		background: rgba(232, 25, 95, 0.25);
 		color: rgba(232, 25, 95, 1);
 		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
@@ -560,8 +566,8 @@
 	}
 
 	:global(.dark) .mobile-nav-item.active {
-		background: rgba(248, 78, 128, 0.20);
-		border: 1px solid rgba(248, 78, 128, 0.30);
+		background: rgba(248, 78, 128, 0.2);
+		border: 1px solid rgba(248, 78, 128, 0.3);
 		color: rgba(248, 78, 128, 1);
 		box-shadow:
 			0 0 12px rgba(248, 78, 128, 0.25),
@@ -662,8 +668,8 @@
 	}
 
 	:global(.dark) .desktop-nav-item.active {
-		background: rgba(248, 78, 128, 0.20);
-		border: 1px solid rgba(248, 78, 128, 0.30);
+		background: rgba(248, 78, 128, 0.2);
+		border: 1px solid rgba(248, 78, 128, 0.3);
 		color: rgba(248, 78, 128, 1);
 		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
 	}
@@ -685,7 +691,8 @@
 	}
 
 	@keyframes drawer-glow {
-		0%, 100% {
+		0%,
+		100% {
 			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
 		}
 		50% {

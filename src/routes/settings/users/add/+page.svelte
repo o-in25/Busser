@@ -27,7 +27,9 @@
 	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 	let emailTouched = $state(false);
 	let emailValue = $state('');
-	let emailInvalid = $derived(emailTouched && emailValue.length > 0 && !emailRegex.test(emailValue));
+	let emailInvalid = $derived(
+		emailTouched && emailValue.length > 0 && !emailRegex.test(emailValue)
+	);
 
 	let password = $state('');
 	let passwordConfirm = $state('');
@@ -39,13 +41,18 @@
 		{ label: 'One uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
 		{ label: 'One lowercase letter', test: (pw: string) => /[a-z]/.test(pw) },
 		{ label: 'One number', test: (pw: string) => /\d/.test(pw) },
-		{ label: 'One special character', test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]\/`~;']/.test(pw) },
+		{
+			label: 'One special character',
+			test: (pw: string) => /[!@#$%^&*(),.?":{}|<>\-_=+\\[\]/`~;']/.test(pw),
+		},
 	];
 
 	let ruleResults = $derived(rules.map((rule) => ({ ...rule, met: rule.test(password) })));
 	let allRulesMet = $derived(ruleResults.every((r) => r.met));
 	let passwordsMatch = $derived(password === passwordConfirm && password.length > 0);
-	let passwordMismatch = $derived(passwordConfirmTouched && passwordConfirm.length > 0 && password !== passwordConfirm);
+	let passwordMismatch = $derived(
+		passwordConfirmTouched && passwordConfirm.length > 0 && password !== passwordConfirm
+	);
 
 	function handleRoleChange(value: string | undefined) {
 		selectedRole = value || '';
@@ -84,8 +91,7 @@
 						$notificationStore.error = {
 							message: result?.data?.error?.toString() || '',
 						};
-					if (result.type === 'success')
-						$notificationStore.success = { message: 'User created.' };
+					if (result.type === 'success') $notificationStore.success = { message: 'User created.' };
 				}
 			};
 		}}
@@ -116,7 +122,10 @@
 					{/if}
 				</div>
 				<div class="space-y-2">
-					<Label for="email" class={errors?.email?.hasError || emailInvalid ? 'text-destructive' : ''}>
+					<Label
+						for="email"
+						class={errors?.email?.hasError || emailInvalid ? 'text-destructive' : ''}
+					>
 						Email <span class="text-destructive">*</span>
 					</Label>
 					<Input
@@ -191,7 +200,9 @@
 						id="passwordConfirm"
 						name="passwordConfirm"
 						required
-						class={errors?.passwordConfirm?.hasError || passwordMismatch ? 'border-destructive' : ''}
+						class={errors?.passwordConfirm?.hasError || passwordMismatch
+							? 'border-destructive'
+							: ''}
 						bind:value={passwordConfirm}
 						onblur={() => (passwordConfirmTouched = true)}
 					/>

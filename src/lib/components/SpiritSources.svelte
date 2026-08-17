@@ -7,7 +7,7 @@
 </script>
 
 <ol class="list-decimal list-inside space-y-1.5">
-	{#each sources as source, i}
+	{#each sources as source}
 		<li class="text-sm text-muted-foreground">
 			<a
 				href={source.url}
