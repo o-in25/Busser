@@ -68,7 +68,13 @@ beforeEach(() => {
 	vi.mocked(hasWorkspaceAccess).mockResolvedValue('editor');
 	vi.mocked(getUserWorkspaces).mockResolvedValue({ status: 'success', data: [] });
 	vi.mocked(getPreferredWorkspaceId).mockResolvedValue(null);
-	vi.mocked(checkRateLimit).mockClear();
+	// default to allowed so tests don't hit real upstash — the 429 case overrides this
+	vi.mocked(checkRateLimit).mockReset();
+	vi.mocked(checkRateLimit).mockResolvedValue({
+		allowed: true,
+		remaining: 4,
+		resetAt: Date.now() + 3600000,
+	});
 });
 
 describe('hooks rate limiting', () => {
