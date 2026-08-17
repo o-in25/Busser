@@ -1,24 +1,6 @@
-// simple in-memory rate limiter
-// resets on server restart and doesnt work across multiple instances
-type RateLimitEntry = {
-	count: number;
-	resetAt: number;
-};
+import { Ratelimit } from '@upstash/ratelimit';
 
-const rateLimitStore = new Map<string, RateLimitEntry>();
-
-// clean up expired entries periodically (every 5 minutes)
-setInterval(
-	() => {
-		const now = Date.now();
-		for (const [key, entry] of rateLimitStore.entries()) {
-			if (entry.resetAt < now) {
-				rateLimitStore.delete(key);
-			}
-		}
-	},
-	5 * 60 * 1000
-);
+import { getRedis } from '$lib/server/redis';
 
 export type RateLimitConfig = {
 	maxRequests: number;
@@ -32,49 +14,58 @@ export type RateLimitResult = {
 	retryAfterMs?: number;
 };
 
-// check if a request is allowed under the rate limit
-export function checkRateLimit(key: string, config: RateLimitConfig): RateLimitResult {
-	const now = Date.now();
-	const entry = rateLimitStore.get(key);
+// what to do when redis is unreachable and we cant verify the count.
+// 'block' for paid resources (ai, storage, email) — rather reject than risk unmetered spend.
+// 'allow' for core resources (auth) — dont break the app over our own outage.
+type FallbackMode = 'block' | 'allow';
 
-	// if no entry or entry has expired, create a new one
-	if (!entry || entry.resetAt < now) {
-		rateLimitStore.set(key, {
-			count: 1,
-			resetAt: now + config.windowMs,
+// cache limiters by window+limit so the ephemeral cache is shared across requests
+const limiters = new Map<string, Ratelimit>();
+
+function getLimiter(config: RateLimitConfig): Ratelimit {
+	const cacheKey = `${config.maxRequests}:${config.windowMs}`;
+	let limiter = limiters.get(cacheKey);
+	if (!limiter) {
+		limiter = new Ratelimit({
+			redis: getRedis(),
+			limiter: Ratelimit.slidingWindow(config.maxRequests, `${config.windowMs} ms`),
+			prefix: 'busser',
+			ephemeralCache: new Map(),
 		});
-		return {
-			allowed: true,
-			remaining: config.maxRequests - 1,
-			resetAt: now + config.windowMs,
-		};
+		limiters.set(cacheKey, limiter);
 	}
-
-	// check if under limit
-	if (entry.count < config.maxRequests) {
-		entry.count++;
-		return {
-			allowed: true,
-			remaining: config.maxRequests - entry.count,
-			resetAt: entry.resetAt,
-		};
-	}
-
-	// over limit
-	return {
-		allowed: false,
-		remaining: 0,
-		resetAt: entry.resetAt,
-		retryAfterMs: entry.resetAt - now,
-	};
+	return limiter;
 }
 
-// get client ip from SvelteKit request event
+export async function checkRateLimit(
+	key: string,
+	config: RateLimitConfig,
+	onError: FallbackMode = 'block'
+): Promise<RateLimitResult> {
+	try {
+		const { success, remaining, reset } = await getLimiter(config).limit(key);
+		return {
+			allowed: success,
+			remaining,
+			resetAt: reset,
+			retryAfterMs: success ? undefined : reset - Date.now(),
+		};
+	} catch {
+		// cant reach redis so cant verify the count — decide statically by resource cost
+		const allowed = onError === 'allow';
+		return {
+			allowed,
+			remaining: 0,
+			resetAt: Date.now() + config.windowMs,
+			retryAfterMs: allowed ? undefined : config.windowMs,
+		};
+	}
+}
+
 export function getClientIp(request: Request): string {
-	// Check common proxy headers
 	const forwardedFor = request.headers.get('x-forwarded-for');
 	if (forwardedFor) {
-		// can contain multiple ips so first one is the client
+		// may contain multiple ips, first is the client
 		return forwardedFor.split(',')[0].trim();
 	}
 
@@ -83,7 +74,6 @@ export function getClientIp(request: Request): string {
 		return realIp;
 	}
 
-	// fly.io stuff
 	const flyClientIp = request.headers.get('fly-client-ip');
 	if (flyClientIp) {
 		return flyClientIp;

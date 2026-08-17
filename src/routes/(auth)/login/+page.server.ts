@@ -22,7 +22,11 @@ export const load = (async ({ locals, url }) => {
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const ip = getClientIp(request);
-		const rateLimit = checkRateLimit(`login:${ip}`, { maxRequests: 5, windowMs: 10 * 60 * 1000 });
+		const rateLimit = await checkRateLimit(
+			`login:${ip}`,
+			{ maxRequests: 5, windowMs: 10 * 60 * 1000 },
+			'allow'
+		);
 		if (!rateLimit.allowed) {
 			return fail(StatusCodes.TOO_MANY_REQUESTS, {
 				error: 'Too many login attempts. Please try again later.',

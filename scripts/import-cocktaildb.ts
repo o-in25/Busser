@@ -21,6 +21,7 @@ const API = 'https://www.thecocktaildb.com/api/json/v1/1';
 
 const args = process.argv.slice(2);
 const DRY = args.includes('--dry');
+const ALL = args.includes('--all'); // ignore the IBA gate — see everything the mappers accept
 const limitArg = args.find((a) => a.startsWith('--limit='));
 const LIMIT = limitArg ? parseInt(limitArg.split('=')[1]) : Infinity;
 
@@ -396,7 +397,7 @@ async function main() {
 			skippedExisting++;
 			continue;
 		}
-		if (!detail.strIBA) {
+		if (!ALL && !detail.strIBA) {
 			skippedNonIba++;
 			continue;
 		}

@@ -84,7 +84,7 @@ describe('hooks rate limiting', () => {
 	});
 
 	it('returns 429 when rate limit exceeded', async () => {
-		vi.mocked(checkRateLimit).mockReturnValue({
+		vi.mocked(checkRateLimit).mockResolvedValue({
 			allowed: false,
 			remaining: 0,
 			resetAt: Date.now() + 30000,
@@ -140,6 +140,7 @@ describe('hooks rate limiting', () => {
 			'/api/generator/inventory',
 			'/api/generator/category',
 			'/api/generator/rating',
+			'/api/generator/product-rating',
 		];
 
 		for (const route of routes) {
@@ -178,5 +179,24 @@ describe('hooks rate limiting', () => {
 			maxRequests: 20,
 			windowMs: 3600000,
 		});
+	});
+
+	it('rate limits the places GET endpoint', async () => {
+		const event = makeEvent('/api/suppliers/nearby', 'GET');
+		const resolve = mockResolve();
+		await handle({ event: event as any, resolve });
+
+		expect(checkRateLimit).toHaveBeenCalledWith('rate:user-1:places', {
+			maxRequests: 15,
+			windowMs: 3600000,
+		});
+	});
+
+	it('does not rate limit the places route on the wrong method', async () => {
+		const event = makeEvent('/api/suppliers/nearby', 'POST');
+		const resolve = mockResolve();
+		await handle({ event: event as any, resolve });
+
+		expect(checkRateLimit).not.toHaveBeenCalled();
 	});
 });

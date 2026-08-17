@@ -69,6 +69,8 @@ pnpm run prepare    # Install Husky pre-commit hooks
 | `INSTANCE_CONNECTION_NAME`   | Cloud SQL instance                        |
 | `OPENAI_API_KEY`             | OpenAI API key                            |
 | `MAILGUN_KEY`                | Mailgun API key                           |
+| `UPSTASH_REDIS_REST_URL`     | Upstash Redis REST URL (rate limiting)    |
+| `UPSTASH_REDIS_REST_TOKEN`   | Upstash Redis REST token (rate limiting)  |
 | `APP_URL`                    | Public app URL                            |
 | `GOOGLE_OAUTH_CLIENT_ID`     | Google OAuth client ID                    |
 | `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth secret                       |

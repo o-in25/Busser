@@ -1,77 +1,34 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 
-// ---- checkRateLimit ----
+// force the redis path to fail so we exercise the fallback decision
+vi.mock('$lib/server/redis', () => ({
+	getRedis: () => {
+		throw new Error('no redis in tests');
+	},
+}));
 
-describe('checkRateLimit', () => {
-	beforeEach(() => {
-		vi.useFakeTimers();
-	});
+// ---- checkRateLimit (redis-down fallback) ----
 
-	afterEach(() => {
-		vi.useRealTimers();
-	});
-
+describe('checkRateLimit fallback', () => {
 	const config = { maxRequests: 3, windowMs: 60_000 };
 
-	it('first request is allowed with remaining = maxRequests - 1', () => {
-		const result = checkRateLimit('test-key-1', config);
+	it('blocks by default when redis is down (paid resources)', async () => {
+		const result = await checkRateLimit('paid-key', config);
+		expect(result.allowed).toBe(false);
+		expect(result.retryAfterMs).toBe(config.windowMs);
+	});
+
+	it("blocks when onError is 'block'", async () => {
+		const result = await checkRateLimit('paid-key', config, 'block');
+		expect(result.allowed).toBe(false);
+	});
+
+	it("allows when onError is 'allow' (core resources)", async () => {
+		const result = await checkRateLimit('core-key', config, 'allow');
 		expect(result.allowed).toBe(true);
-		expect(result.remaining).toBe(2);
-	});
-
-	it('subsequent requests decrement remaining count', () => {
-		const key = 'test-key-2';
-		checkRateLimit(key, config);
-		const second = checkRateLimit(key, config);
-		expect(second.allowed).toBe(true);
-		expect(second.remaining).toBe(1);
-
-		const third = checkRateLimit(key, config);
-		expect(third.allowed).toBe(true);
-		expect(third.remaining).toBe(0);
-	});
-
-	it('request at limit is blocked', () => {
-		const key = 'test-key-3';
-		checkRateLimit(key, config);
-		checkRateLimit(key, config);
-		checkRateLimit(key, config);
-
-		const blocked = checkRateLimit(key, config);
-		expect(blocked.allowed).toBe(false);
-		expect(blocked.remaining).toBe(0);
-	});
-
-	it('returns retryAfterMs when blocked', () => {
-		const key = 'test-key-4';
-		checkRateLimit(key, config);
-		checkRateLimit(key, config);
-		checkRateLimit(key, config);
-
-		const blocked = checkRateLimit(key, config);
-		expect(blocked.retryAfterMs).toBeDefined();
-		expect(blocked.retryAfterMs).toBeGreaterThan(0);
-		expect(blocked.retryAfterMs).toBeLessThanOrEqual(config.windowMs);
-	});
-
-	it('allows requests again after window expires', () => {
-		const key = 'test-key-5';
-		checkRateLimit(key, config);
-		checkRateLimit(key, config);
-		checkRateLimit(key, config);
-
-		// blocked
-		expect(checkRateLimit(key, config).allowed).toBe(false);
-
-		// advance past the window
-		vi.advanceTimersByTime(config.windowMs + 1);
-
-		// should be allowed again
-		const result = checkRateLimit(key, config);
-		expect(result.allowed).toBe(true);
-		expect(result.remaining).toBe(2);
+		expect(result.retryAfterMs).toBeUndefined();
 	});
 });
 
