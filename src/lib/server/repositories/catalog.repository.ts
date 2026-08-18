@@ -19,6 +19,10 @@ import { Logger } from '../logger';
 import { copyGcsFile, deleteSignedUrl } from '../storage';
 import { BaseRepository, emptyPagination } from './base.repository';
 
+// imported categories must always land in a group (a null group broke role grouping — see
+// defects.md). the source is grouped, so this only catches a source that's somehow null.
+const FALLBACK_GROUP = 8; // "Other"
+
 // inventory rows we read while resolving step images + substitutes
 type InventoryRow = {
 	productId: number;
@@ -752,7 +756,7 @@ export class CatalogRepository extends BaseRepository {
 					if (!cat) {
 						// look up source category to preserve group assignment
 						const sourceCat = await trx('category').where({ CategoryId: step.categoryId }).first();
-						const categoryGroupId = sourceCat?.categoryGroupId ?? null;
+						const categoryGroupId = sourceCat?.categoryGroupId ?? FALLBACK_GROUP;
 
 						// resolve parent category if source step has one
 						let parentCategoryId: number | null = null;
@@ -768,7 +772,7 @@ export class CatalogRepository extends BaseRepository {
 								const [parentId] = await trx('category').insert({
 									WorkspaceId: targetWorkspaceId,
 									CategoryName: step.parentCategoryName,
-									CategoryGroupId: sourceParent?.categoryGroupId ?? null,
+									CategoryGroupId: sourceParent?.categoryGroupId ?? FALLBACK_GROUP,
 								});
 								parentCategoryId = parentId;
 							} else {

@@ -1,7 +1,7 @@
 import type { Knex } from 'knex';
 
 // fixes three taxonomy defects in the global catalog that make recipe ingredient
-// substitutions and role grouping wrong. see .claude/backlog/defects.md for the audit.
+// substitutions and role grouping wrong.
 //
 //   1. the generic "Syrup" bucket (cat 20) lumps 5 flavour-distinct syrups together, so
 //      ANY_IN_CATEGORY matching offers e.g. orgeat as a sub for ginger. we split it into

@@ -200,8 +200,9 @@
 
 {#if !$page.data.user}
 	<!-- Hero Section -->
+	<!-- mobile reserves extra height for the fixed bottom nav so the carousel stays above the fold -->
 	<section
-		class="relative overflow-hidden h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl"
+		class="relative overflow-hidden h-[calc(100dvh-10rem)] md:h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl"
 	>
 		<!-- Animated background gradient -->
 		<div class="absolute inset-0 hero-gradient-bg -z-10 rounded-2xl"></div>

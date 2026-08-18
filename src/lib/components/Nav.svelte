@@ -320,11 +320,13 @@
 
 <!-- Desktop Top Navigation (visible on medium+ screens) -->
 <nav class="desktop-nav hidden md:block">
-	<div class="mx-auto flex max-w-7xl items-center justify-between px-4">
-		<!-- Logo (left) -->
-		<a href="/" class="flex-shrink-0">
-			<img src={logoNav} class="h-10" alt="Busser" />
-		</a>
+	<div class="mx-auto flex max-w-7xl items-center px-4">
+		<!-- Logo (left) — flex-1 keeps the center pill balanced against the wider right side -->
+		<div class="flex flex-1 justify-start">
+			<a href="/" class="flex-shrink-0">
+				<img src={logoNav} class="h-10" alt="Busser" />
+			</a>
+		</div>
 
 		<!-- Center nav pill -->
 		<div class="desktop-nav-pill">
@@ -336,49 +338,51 @@
 			{/each}
 		</div>
 
-		<!-- Avatar (right) or Sign In -->
-		{#if user}
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger class="desktop-avatar-button">
-					<Placeholder id="avatar-desktop" src={user?.avatarImageUrl} />
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
-					<DropdownMenu.Label>
-						<div class="flex flex-col space-y-1">
-							<p class="text-sm font-medium">{user?.username}</p>
-							<p class="text-xs text-muted-foreground">{user?.email}</p>
-							{#if workspaceName}
-								<p class="text-xs text-muted-foreground/70">{workspaceName}</p>
-							{/if}
-						</div>
-					</DropdownMenu.Label>
-					<DropdownMenu.Separator />
-					<DropdownMenu.Item onclick={() => goto('/settings')} class="cursor-pointer">
-						<Settings class="mr-2 h-4 w-4" />
-						Settings
-					</DropdownMenu.Item>
-					{#if workspaces.length > 1}
-						<DropdownMenu.Item
-							onclick={() => ($workspaceSwitcherOpen = true)}
-							class="cursor-pointer"
-						>
-							<GalleryHorizontalEnd class="mr-2 h-4 w-4" />
-							Switch Workspace
+		<!-- Avatar (right) or Sign In — matching flex-1 mirrors the logo side -->
+		<div class="flex flex-1 justify-end">
+			{#if user}
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger class="desktop-avatar-button">
+						<Placeholder id="avatar-desktop" src={user?.avatarImageUrl} />
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
+						<DropdownMenu.Label>
+							<div class="flex flex-col space-y-1">
+								<p class="text-sm font-medium">{user?.username}</p>
+								<p class="text-xs text-muted-foreground">{user?.email}</p>
+								{#if workspaceName}
+									<p class="text-xs text-muted-foreground/70">{workspaceName}</p>
+								{/if}
+							</div>
+						</DropdownMenu.Label>
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item onclick={() => goto('/settings')} class="cursor-pointer">
+							<Settings class="mr-2 h-4 w-4" />
+							Settings
 						</DropdownMenu.Item>
-					{/if}
-					<DropdownMenu.Separator />
-					<DropdownMenu.Item onclick={logout} class="cursor-pointer">
-						<LogOut class="mr-2 h-4 w-4" />
-						Sign out
-					</DropdownMenu.Item>
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
-		{:else}
-			<div class="flex items-center gap-2">
-				<a href="/login" class="desktop-nav-item">Log In</a>
-				<a href="/signup" class="glass-cta !py-2 !px-5 !text-sm">Sign Up</a>
-			</div>
-		{/if}
+						{#if workspaces.length > 1}
+							<DropdownMenu.Item
+								onclick={() => ($workspaceSwitcherOpen = true)}
+								class="cursor-pointer"
+							>
+								<GalleryHorizontalEnd class="mr-2 h-4 w-4" />
+								Switch Workspace
+							</DropdownMenu.Item>
+						{/if}
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item onclick={logout} class="cursor-pointer">
+							<LogOut class="mr-2 h-4 w-4" />
+							Sign out
+						</DropdownMenu.Item>
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+			{:else}
+				<div class="flex items-center gap-2">
+					<a href="/login" class="desktop-nav-item">Log In</a>
+					<a href="/signup" class="glass-cta !py-2 !px-5 !text-sm">Sign Up</a>
+				</div>
+			{/if}
+		</div>
 	</div>
 </nav>
 
