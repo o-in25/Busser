@@ -63,6 +63,14 @@
 				-moz-osx-font-smoothing: grayscale;
 				touch-action: manipulation;
 			}
+			/* html paints the overscroll (rubber-band) region — give it the gradient's base
+			   tone so pulling past the page shows page color, not the default white */
+			html {
+				background: #ece6f4;
+			}
+			html.dark {
+				background: #08070e;
+			}
 			/* single scroll container — standalone PWA only */
 			@media (display-mode: standalone) {
 				html {
