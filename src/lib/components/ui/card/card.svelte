@@ -15,10 +15,7 @@
 </script>
 
 <div
-	class={cn(
-		bare ? 'text-card-foreground' : 'glass-card text-card-foreground isolate',
-		className
-	)}
+	class={cn(bare ? 'text-card-foreground' : 'glass-card text-card-foreground isolate', className)}
 	{...restProps}
 >
 	{#if children}

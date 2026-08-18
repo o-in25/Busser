@@ -20,13 +20,11 @@
 		Star,
 		TrendingUp,
 	} from 'lucide-svelte';
-	import { enhance } from '$app/forms';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
 	import { idToSlug, spirits as spiritContent } from '$lib/spirits';
 	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyBadge from '$lib/components/FancyBadge.svelte';
@@ -57,20 +55,10 @@
 	const almostThereCount = $derived(data.args.almostThereCount);
 	const topIngredient = $derived(data.args.topIngredient);
 
-	// local optimistic state, resynced when server data changes
-	let favorites = $state(new Set(data.args.favoriteRecipeIds));
-	let featured = $state(new Set(data.args.featuredRecipeIds));
-	$effect(() => {
-		favorites = new Set(data.args.favoriteRecipeIds);
-	});
-	$effect(() => {
-		featured = new Set(data.args.featuredRecipeIds);
-	});
-
 	// read workspace from page store so it stays current after switches
 	const workspace = $derived($page.data.workspace as WorkspaceWithRole);
 	const canModify = $derived(
-		workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor',
+		workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor'
 	);
 	const isGlobalCatalog = $derived($page.data.isGlobalWorkspace);
 	const authenticated = $derived(!!$page.data.user);
@@ -121,9 +109,15 @@
 
 <svelte:head>
 	<title>Explore - Busser</title>
-	<meta name="description" content="Discover cocktails by spirit, see today's pick, and explore featured recipes from the Busser catalog." />
+	<meta
+		name="description"
+		content="Discover cocktails by spirit, see today's pick, and explore featured recipes from the Busser catalog."
+	/>
 	<meta property="og:title" content="Explore Cocktails - Busser" />
-	<meta property="og:description" content="Discover cocktails by spirit, see today's pick, and explore featured recipes." />
+	<meta
+		property="og:description"
+		content="Discover cocktails by spirit, see today's pick, and explore featured recipes."
+	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://busserapp.com/catalog/explore" />
 	<meta property="og:image" content="https://busserapp.com/og-image.png" />
@@ -135,7 +129,10 @@
 		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
 		{#snippet children()}
 			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
+			<p class="hidden sm:block">
+				You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
+				switch to your workspace.
+			</p>
 		{/snippet}
 		{#snippet action()}
 			<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
@@ -170,7 +167,9 @@
 		<h1 class="text-2xl font-bold">Explore</h1>
 		<form onsubmit={handleSearch} class="flex gap-2 w-full sm:max-w-xs sm:w-auto">
 			<div class="relative flex-1">
-				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+				<Search
+					class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none"
+				/>
 				<FancyInput
 					type="text"
 					placeholder="Search cocktails..."
@@ -261,10 +260,7 @@
 			{@const slug = idToSlug[spirit.recipeCategoryId]}
 			{@const spotlight = spiritSpotlightImages[spirit.recipeCategoryId]}
 			{@const accent = slug ? spiritContent[slug]?.accentColor.gradient : null}
-			<a
-				href="/catalog/explore/{slug ?? spirit.recipeCategoryId}"
-				class="block group"
-			>
+			<a href="/catalog/explore/{slug ?? spirit.recipeCategoryId}" class="block group">
 				<Card.Root
 					class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300"
 				>
@@ -277,9 +273,13 @@
 								class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
 							/>
 						{:else if accent}
-							<div class="h-full w-full bg-gradient-to-br {accent} transition-transform duration-300 group-hover:scale-110"></div>
+							<div
+								class="h-full w-full bg-gradient-to-br {accent} transition-transform duration-300 group-hover:scale-110"
+							></div>
 						{:else}
-							<div class="h-full w-full bg-muted transition-transform duration-300 group-hover:scale-110"></div>
+							<div
+								class="h-full w-full bg-muted transition-transform duration-300 group-hover:scale-110"
+							></div>
 						{/if}
 						<div
 							class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
@@ -312,7 +312,6 @@
 			</a>
 		{/each}
 	</div>
-
 </section>
 
 <!-- Cocktail of the Day + Recipe List -->
@@ -328,7 +327,9 @@
 	<Card.Root class={cocktailOfTheDay ? 'lg:col-span-2' : 'lg:col-span-3'}>
 		<Card.Header>
 			<div class="flex items-center gap-2">
-				<div class="inline-flex items-center rounded-full bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground">
+				<div
+					class="inline-flex items-center rounded-full bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
+				>
 					<button
 						class={cn(
 							'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
@@ -397,10 +398,14 @@
 								/>
 							</div>
 							<div class="flex-1 min-w-0">
-								<p class="font-medium truncate group-hover:text-accent-foreground transition-colors">
+								<p
+									class="font-medium truncate group-hover:text-accent-foreground transition-colors"
+								>
 									{cocktail.recipeName}
 								</p>
-								<p class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors">
+								<p
+									class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors"
+								>
 									{cocktail.recipeCategoryDescription}
 								</p>
 							</div>
@@ -489,7 +494,9 @@
 		</Card.Header>
 		<Card.Content>
 			<div class="grid gap-4 sm:grid-cols-2">
-				<div class="flex items-start gap-3 p-3 rounded-lg bg-primary-500/10 border border-primary-500/20">
+				<div
+					class="flex items-start gap-3 p-3 rounded-lg bg-primary-500/10 border border-primary-500/20"
+				>
 					<Candy class="h-4 w-4 text-primary-500 mt-0.5 shrink-0" />
 					<div>
 						<p class="text-sm font-medium">Sweetness</p>
@@ -499,7 +506,9 @@
 						</p>
 					</div>
 				</div>
-				<div class="flex items-start gap-3 p-3 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20">
+				<div
+					class="flex items-start gap-3 p-3 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20"
+				>
 					<Droplets class="h-4 w-4 text-neon-amber-500 mt-0.5 shrink-0" />
 					<div>
 						<p class="text-sm font-medium">Dryness</p>
@@ -509,7 +518,9 @@
 						</p>
 					</div>
 				</div>
-				<div class="flex items-start gap-3 p-3 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20">
+				<div
+					class="flex items-start gap-3 p-3 rounded-lg bg-neon-amber-500/10 border border-neon-amber-500/20"
+				>
 					<Gauge class="h-4 w-4 text-neon-amber-500 mt-0.5 shrink-0" />
 					<div>
 						<p class="text-sm font-medium">Strength</p>
@@ -519,7 +530,9 @@
 						</p>
 					</div>
 				</div>
-				<div class="flex items-start gap-3 p-3 rounded-lg bg-secondary-500/10 border border-secondary-500/20">
+				<div
+					class="flex items-start gap-3 p-3 rounded-lg bg-secondary-500/10 border border-secondary-500/20"
+				>
 					<Sparkles class="h-4 w-4 text-secondary-500 mt-0.5 shrink-0" />
 					<div>
 						<p class="text-sm font-medium">Versatility</p>

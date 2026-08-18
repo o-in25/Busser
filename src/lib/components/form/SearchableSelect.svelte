@@ -81,9 +81,7 @@
 		value = exact ? String(exact.value) : null;
 	});
 
-	const showCreate = $derived(
-		!!createKind && !!stack && (!grant || permissions.includes(grant))
-	);
+	const showCreate = $derived(!!createKind && !!stack && (!grant || permissions.includes(grant)));
 
 	function open() {
 		show = true;
@@ -184,7 +182,8 @@
 				</div>
 			{:else if show && display.trim() && !filtered.length}
 				<div class="glass-dropdown absolute z-50 mt-1 w-full p-3 text-sm text-muted-foreground">
-					No matches{#if showCreate} — tap + to create “{display.trim()}”{/if}
+					No matches{#if showCreate}
+						— tap + to create “{display.trim()}”{/if}
 				</div>
 			{/if}
 		</div>

@@ -10,12 +10,10 @@
 		Palette,
 		Percent,
 		Sparkles,
-		Store,
 		Wand2,
 		Trash2,
 		Wind,
 	} from 'lucide-svelte';
-	import { getContext } from 'svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -47,10 +45,6 @@
 		product = null,
 		modalOpen = $bindable(false),
 	}: { action: ComponentAction; product?: Product | null; modalOpen?: boolean } = $props();
-
-	// get workspace role for permission checks
-	const workspace = getContext<{ workspaceRole?: string }>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	let slug = $page.params.id;
 	let productName = $state('');
@@ -869,7 +863,6 @@
 		<div class="hidden md:flex justify-end gap-3 mt-6">
 			<Button type="submit" disabled={!isFormValid}>Save</Button>
 		</div>
-
 	</form>
 
 	<Dialog.Root bind:open={modalOpen}>
@@ -878,7 +871,11 @@
 				<Dialog.Title>Confirm Delete</Dialog.Title>
 				<Dialog.Description>
 					Delete <span class="font-semibold">{product?.productName}</span> from inventory?
-					<p class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20">Once deleted, it can't be recovered.</p>
+					<p
+						class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
+					>
+						Once deleted, it can't be recovered.
+					</p>
 				</Dialog.Description>
 			</Dialog.Header>
 			<Dialog.Footer>

@@ -40,7 +40,6 @@
 	let isGenerating = $state(false);
 	let errorMessage = $state('');
 	let generationProgress = $state(0);
-	let lightboxOpen = $state(false);
 	let generateModalOpen = $state(false);
 
 	let src = $derived(signedUrl || '');
@@ -163,7 +162,6 @@
 
 	function openLightbox() {
 		if (lightboxInstance) return;
-		lightboxOpen = true;
 		document.body.style.overflow = 'hidden';
 		lightboxTarget = document.createElement('div');
 		document.body.appendChild(lightboxTarget);
@@ -177,7 +175,6 @@
 	}
 
 	function closeLightbox() {
-		lightboxOpen = false;
 		document.body.style.overflow = '';
 		if (lightboxInstance) {
 			unmount(lightboxInstance);
@@ -309,7 +306,10 @@
 			{:else}
 				<Sparkles class="w-4 h-4" />
 				Generate with AI
-				<Badge variant="secondary" class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0 ml-1">Beta</Badge>
+				<Badge
+					variant="secondary"
+					class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0 ml-1">Beta</Badge
+				>
 			{/if}
 		</Button>
 

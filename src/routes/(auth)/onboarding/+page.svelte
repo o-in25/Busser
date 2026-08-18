@@ -32,9 +32,7 @@
 			<UserPlus class="h-6 w-6 text-primary" />
 		</div>
 		<h3 class="text-xl font-medium">Complete Your Profile</h3>
-		<p class="mt-2 text-sm text-muted-foreground">
-			Just a few more details to get you started.
-		</p>
+		<p class="mt-2 text-sm text-muted-foreground">Just a few more details to get you started.</p>
 	</div>
 
 	{#if form?.message}
@@ -45,16 +43,19 @@
 		</Alert.Root>
 	{/if}
 
-	<form class="space-y-6" method="POST" use:enhance={() => {
-		return async ({ result, update }) => {
-			if (result.type === 'redirect') {
-				window.location.href = result.location;
-				return;
-			}
-			await update();
-		};
-	}}>
-
+	<form
+		class="space-y-6"
+		method="POST"
+		use:enhance={() => {
+			return async ({ result, update }) => {
+				if (result.type === 'redirect') {
+					window.location.href = result.location;
+					return;
+				}
+				await update();
+			};
+		}}
+	>
 		<!-- email (read-only, from oauth provider) -->
 		<div class="space-y-2">
 			<Label for="email">Email</Label>

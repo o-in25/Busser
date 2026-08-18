@@ -268,9 +268,7 @@
 				</div>
 				<div class="glass-surface px-4 py-3 rounded-2xl rounded-bl-md">
 					<div class="flex gap-1.5 items-center h-5">
-						<span
-							class="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-typing-dot"
-						></span>
+						<span class="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-typing-dot"></span>
 						<span
 							class="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-typing-dot"
 							style="animation-delay: 0.15s"
@@ -312,4 +310,3 @@
 		</form>
 	</div>
 </div>
-

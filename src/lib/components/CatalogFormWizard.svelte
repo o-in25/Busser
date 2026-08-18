@@ -50,7 +50,10 @@
 	let direction = $state(1);
 
 	function prevStep() {
-		if (currentStep > 0) { direction = -1; currentStep--; }
+		if (currentStep > 0) {
+			direction = -1;
+			currentStep--;
+		}
 	}
 
 	function nextStep() {

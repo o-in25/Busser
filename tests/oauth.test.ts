@@ -14,11 +14,7 @@ vi.mock('$lib/server/auth', () => ({
 	},
 }));
 
-import {
-	generateOAuthState,
-	parseOAuthState,
-	getAuthorizationUrl,
-} from '$lib/server/oauth';
+import { generateOAuthState, parseOAuthState, getAuthorizationUrl } from '$lib/server/oauth';
 
 // --- generateOAuthState ---
 
@@ -112,15 +108,7 @@ describe('getAuthorizationUrl', () => {
 // --- handleCallback ---
 
 describe('handleCallback', () => {
-	let signToken: any;
-	let oauthRepo: any;
-	let userRepo: any;
-
-	beforeEach(async () => {
-		const authModule = await import('$lib/server/auth');
-		signToken = authModule.signToken;
-		oauthRepo = authModule.oauthRepo;
-		userRepo = authModule.userRepo;
+	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
@@ -139,9 +127,9 @@ describe('handleCallback', () => {
 		const { handleCallback } = await import('$lib/server/oauth');
 		const cookies = makeCookies(null);
 
-		await expect(
-			handleCallback('google', 'auth-code', 'state-param', cookies)
-		).rejects.toThrow('Missing OAuth state cookie.');
+		await expect(handleCallback('google', 'auth-code', 'state-param', cookies)).rejects.toThrow(
+			'Missing OAuth state cookie.'
+		);
 	});
 
 	it('throws when CSRF token does not match', async () => {
@@ -149,8 +137,8 @@ describe('handleCallback', () => {
 		const state = generateOAuthState();
 		const cookies = makeCookies('different-csrf-token');
 
-		await expect(
-			handleCallback('google', 'auth-code', state, cookies)
-		).rejects.toThrow('Invalid OAuth state.');
+		await expect(handleCallback('google', 'auth-code', state, cookies)).rejects.toThrow(
+			'Invalid OAuth state.'
+		);
 	});
 });

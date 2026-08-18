@@ -1,13 +1,25 @@
 <script lang="ts">
-	import { GlassWater, Wallet } from 'lucide-svelte';
+	import { Wallet } from 'lucide-svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 
-	const { costBreakdown }: {
+	const {
+		costBreakdown,
+	}: {
 		costBreakdown: {
 			averageCost: number;
-			cheapest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
-			priciest: { recipeName: string; recipeId: number; recipeImageUrl: string | null; cost: number } | null;
+			cheapest: {
+				recipeName: string;
+				recipeId: number;
+				recipeImageUrl: string | null;
+				cost: number;
+			} | null;
+			priciest: {
+				recipeName: string;
+				recipeId: number;
+				recipeImageUrl: string | null;
+				cost: number;
+			} | null;
 			barValue: number;
 			barValueByCategory: { groupName: string; value: number }[];
 		};
@@ -32,9 +44,7 @@
 	});
 
 	const maxCategoryValue = $derived(
-		costBreakdown.barValueByCategory.length > 0
-			? costBreakdown.barValueByCategory[0].value
-			: 1
+		costBreakdown.barValueByCategory.length > 0 ? costBreakdown.barValueByCategory[0].value : 1
 	);
 </script>
 
@@ -48,7 +58,9 @@
 	<!-- price range bar -->
 	{#if costBreakdown.cheapest && costBreakdown.priciest && costBreakdown.cheapest.cost !== costBreakdown.priciest.cost}
 		<div class="px-1">
-			<div class="relative h-2 rounded-full bg-gradient-to-r from-neon-green-500/30 via-neon-amber-500/30 to-primary/30">
+			<div
+				class="relative h-2 rounded-full bg-gradient-to-r from-neon-green-500/30 via-neon-amber-500/30 to-primary/30"
+			>
 				<!-- average marker -->
 				<div
 					class="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-foreground border-2 border-background shadow-sm"
@@ -65,7 +77,10 @@
 	<!-- cheapest & priciest side by side -->
 	{#if costBreakdown.cheapest && costBreakdown.priciest}
 		<div class="grid grid-cols-2 gap-2">
-			<a href="/catalog/{costBreakdown.cheapest.recipeId}" class="group rounded-lg overflow-hidden bg-muted/50 hover:bg-muted transition-colors">
+			<a
+				href="/catalog/{costBreakdown.cheapest.recipeId}"
+				class="group rounded-lg overflow-hidden bg-muted/50 hover:bg-muted transition-colors"
+			>
 				<div class="relative h-20">
 					<SkeletonImage
 						src={costBreakdown.cheapest.recipeImageUrl}
@@ -74,17 +89,24 @@
 						class="h-full w-full"
 					/>
 					<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
-					<Badge class="absolute top-1.5 right-1.5 bg-neon-green-500/90 text-white text-[10px] px-1.5 py-0">
+					<Badge
+						class="absolute top-1.5 right-1.5 bg-neon-green-500/90 text-white text-[10px] px-1.5 py-0"
+					>
 						{fmt(costBreakdown.cheapest.cost)}
 					</Badge>
 				</div>
 				<div class="p-2">
 					<p class="text-[10px] text-neon-green-500 font-medium">Best value</p>
-					<p class="text-xs font-medium truncate group-hover:text-primary transition-colors">{costBreakdown.cheapest.recipeName}</p>
+					<p class="text-xs font-medium truncate group-hover:text-primary transition-colors">
+						{costBreakdown.cheapest.recipeName}
+					</p>
 				</div>
 			</a>
 
-			<a href="/catalog/{costBreakdown.priciest.recipeId}" class="group rounded-lg overflow-hidden bg-muted/50 hover:bg-muted transition-colors">
+			<a
+				href="/catalog/{costBreakdown.priciest.recipeId}"
+				class="group rounded-lg overflow-hidden bg-muted/50 hover:bg-muted transition-colors"
+			>
 				<div class="relative h-20">
 					<SkeletonImage
 						src={costBreakdown.priciest.recipeImageUrl}
@@ -93,13 +115,17 @@
 						class="h-full w-full"
 					/>
 					<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
-					<Badge class="absolute top-1.5 right-1.5 bg-neon-amber-500/90 text-white text-[10px] px-1.5 py-0">
+					<Badge
+						class="absolute top-1.5 right-1.5 bg-neon-amber-500/90 text-white text-[10px] px-1.5 py-0"
+					>
 						{fmt(costBreakdown.priciest.cost)}
 					</Badge>
 				</div>
 				<div class="p-2">
 					<p class="text-[10px] text-neon-amber-500 font-medium">Top shelf</p>
-					<p class="text-xs font-medium truncate group-hover:text-primary transition-colors">{costBreakdown.priciest.recipeName}</p>
+					<p class="text-xs font-medium truncate group-hover:text-primary transition-colors">
+						{costBreakdown.priciest.recipeName}
+					</p>
 				</div>
 			</a>
 		</div>
@@ -114,7 +140,9 @@
 					<Wallet class="h-4 w-4" />
 					<span class="text-sm">Bar Value</span>
 				</div>
-				<span class="inline-flex items-center gap-1 rounded-full bg-neon-green-500/15 text-neon-green-500 border border-neon-green-500/30 px-2.5 py-0.5 text-sm font-bold">
+				<span
+					class="inline-flex items-center gap-1 rounded-full bg-neon-green-500/15 text-neon-green-500 border border-neon-green-500/30 px-2.5 py-0.5 text-sm font-bold"
+				>
 					{fmt(costBreakdown.barValue)}
 				</span>
 			</div>
@@ -124,14 +152,18 @@
 				<div class="space-y-1.5">
 					{#each costBreakdown.barValueByCategory as cat}
 						<div class="flex items-center gap-2">
-							<span class="text-[10px] text-muted-foreground w-20 truncate shrink-0">{cat.groupName}</span>
+							<span class="text-[10px] text-muted-foreground w-20 truncate shrink-0"
+								>{cat.groupName}</span
+							>
 							<div class="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
 								<div
 									class="h-full rounded-full bg-neon-green-500/60 transition-all duration-500"
 									style="width: {(cat.value / maxCategoryValue) * 100}%"
 								></div>
 							</div>
-							<span class="inline-flex items-center rounded-full bg-muted px-1.5 py-0 text-[10px] font-semibold tabular-nums shrink-0">
+							<span
+								class="inline-flex items-center rounded-full bg-muted px-1.5 py-0 text-[10px] font-semibold tabular-nums shrink-0"
+							>
 								{fmtShort(cat.value)}
 							</span>
 						</div>

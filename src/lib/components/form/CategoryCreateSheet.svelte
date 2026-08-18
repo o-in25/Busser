@@ -79,7 +79,12 @@
 
 		<div>
 			<Label class="mb-2 block">Notes</Label>
-			<Textarea bind:value={description} rows={2} placeholder="Optional description…" class="resize-none" />
+			<Textarea
+				bind:value={description}
+				rows={2}
+				placeholder="Optional description…"
+				class="resize-none"
+			/>
 		</div>
 
 		{#if errorMsg}

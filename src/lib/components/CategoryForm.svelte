@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { GitBranch, Layers, Tags } from 'lucide-svelte';
-	import { getContext } from 'svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -21,20 +20,14 @@
 		category = {} as Table.Category,
 		parentCategories = [],
 		categoryGroups = [],
-		productCount = 0,
 		modalOpen = $bindable(false),
 	}: {
 		action?: ComponentAction;
 		category?: Table.Category;
 		parentCategories?: Table.Category[];
 		categoryGroups?: SelectOption[];
-		productCount?: number;
 		modalOpen?: boolean;
 	} = $props();
-
-	// get workspace role for permission checks
-	const workspace = getContext<{ workspaceRole?: string }>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	// Form state
 	let categoryName = $state(category.categoryName ?? '');
@@ -212,7 +205,6 @@
 				{isSubmitting ? 'Saving...' : action === 'add' ? 'Create' : 'Save'}
 			</Button>
 		</div>
-
 	</form>
 
 	<!-- Delete confirmation dialog -->
@@ -223,7 +215,11 @@
 					<Dialog.Title>Confirm Delete</Dialog.Title>
 					<Dialog.Description>
 						Delete <span class="font-semibold">{category.categoryName}</span>?
-						<p class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20">Once deleted, it can't be recovered.</p>
+						<p
+							class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
+						>
+							Once deleted, it can't be recovered.
+						</p>
 					</Dialog.Description>
 				</Dialog.Header>
 				<Dialog.Footer>

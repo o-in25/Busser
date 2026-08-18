@@ -1,5 +1,16 @@
 <script lang="ts">
-	import { ChevronLeft, EllipsisVertical, Eye, EyeOff, Heart, Pencil, Plus, Star, Check, Trash2 } from 'lucide-svelte';
+	import {
+		ChevronLeft,
+		EllipsisVertical,
+		Eye,
+		EyeOff,
+		Heart,
+		Loader2,
+		Pencil,
+		Plus,
+		Star,
+		Trash2,
+	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
 	import { deserialize, enhance } from '$app/forms';
@@ -64,11 +75,19 @@
 		}
 	}
 
-	// import helpers
+	// import helpers — only offer workspaces the recipe isn't already in
 	const importData = $derived(data.importData);
-	const showImport = $derived(
-		authenticated && importData && importData.eligible && importData.editableWorkspaces.length > 0
+	const importableWorkspaces = $derived(
+		importData
+			? importData.editableWorkspaces.filter((ws) => !importData.importedTo.includes(ws.workspaceId))
+			: []
 	);
+	const showImport = $derived(
+		authenticated && importData && importData.eligible && importableWorkspaces.length > 0
+	);
+
+	// workspace ids with an import in flight — keeps their row disabled/spinning
+	let importing = $state(new Set<string>());
 
 	// json-ld structured data for search engines
 	const jsonLd = $derived({
@@ -103,9 +122,16 @@
 
 <svelte:head>
 	<title>{data.recipe.recipeName} - Catalog</title>
-	<meta name="description" content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe on Busser.`} />
+	<meta
+		name="description"
+		content={data.recipe.recipeDescription ||
+			`View the ${data.recipe.recipeName} cocktail recipe on Busser.`}
+	/>
 	<meta property="og:title" content="{data.recipe.recipeName} - Busser" />
-	<meta property="og:description" content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`} />
+	<meta
+		property="og:description"
+		content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`}
+	/>
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content="https://busserapp.com/catalog/{data.recipe.recipeId}" />
 	{#if data.recipe.recipeImageUrl}
@@ -113,11 +139,14 @@
 	{/if}
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="{data.recipe.recipeName} - Busser" />
-	<meta name="twitter:description" content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`} />
+	<meta
+		name="twitter:description"
+		content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`}
+	/>
 	{#if data.recipe.recipeImageUrl}
 		<meta name="twitter:image" content={data.recipe.recipeImageUrl} />
 	{/if}
-	{@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
+	{@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</scr` + `ipt>`}
 </svelte:head>
 
 <div class="container mx-auto max-w-6xl px-4">
@@ -129,7 +158,9 @@
 				Back to Catalog
 			</FancyButton>
 			{#if canPublish && !isPublished}
-				<span class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+				<span
+					class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+				>
 					Draft
 				</span>
 			{/if}
@@ -211,26 +242,31 @@
 							{#if canModify}
 								<DropdownMenu.Separator />
 							{/if}
-							<DropdownMenu.Label class="text-xs text-muted-foreground">Add to workspace</DropdownMenu.Label>
-							{#each importData.editableWorkspaces as ws}
-								{@const alreadyImported = importData.importedTo.includes(ws.workspaceId)}
+							<DropdownMenu.Label class="text-xs text-muted-foreground"
+								>Add to workspace</DropdownMenu.Label
+							>
+							{#each importableWorkspaces as ws}
+								{@const isImporting = importing.has(ws.workspaceId)}
 								<form
 									method="POST"
 									action="?/importToWorkspace"
 									use:enhance={() => {
+										const toastId = toast.loading(`Importing to ${ws.workspaceName}...`);
+										importing = new Set(importing).add(ws.workspaceId);
 										return async ({ result }) => {
+											importing = new Set([...importing].filter((id) => id !== ws.workspaceId));
 											if (result.type === 'success' && result.data) {
 												const d = result.data as any;
 												if (d.alreadyImported) {
-													toast.info(`Already imported to ${ws.workspaceName}`);
+													toast.info(`Already imported to ${ws.workspaceName}`, { id: toastId });
 												} else if (d.success) {
-													toast.success(`Imported to ${ws.workspaceName}`);
+													toast.success(`Imported to ${ws.workspaceName}`, { id: toastId });
 													invalidateAll();
 												} else {
-													toast.error(d.error || 'Failed to import recipe');
+													toast.error(d.error || 'Failed to import recipe', { id: toastId });
 												}
 											} else {
-												toast.error('Failed to import recipe');
+												toast.error('Failed to import recipe', { id: toastId });
 											}
 										};
 									}}
@@ -238,16 +274,24 @@
 									<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
 									<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
 									<input type="hidden" name="targetWorkspaceId" value={ws.workspaceId} />
-									<DropdownMenu.Item disabled={alreadyImported} class="cursor-pointer">
-										<button type="submit" class="flex items-center gap-2 w-full" disabled={alreadyImported}>
-											{#if alreadyImported}
-												<Check class="h-4 w-4 text-muted-foreground" />
+									<DropdownMenu.Item
+										disabled={isImporting}
+										closeOnSelect={false}
+										class="cursor-pointer"
+									>
+										<button
+											type="submit"
+											class="flex items-center gap-2 w-full"
+											disabled={isImporting}
+										>
+											{#if isImporting}
+												<Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
 											{:else}
 												<Plus class="h-4 w-4" />
 											{/if}
 											{ws.workspaceName}
-											{#if alreadyImported}
-												<span class="text-xs text-muted-foreground ml-auto">imported</span>
+											{#if isImporting}
+												<span class="text-xs text-muted-foreground ml-auto">importing…</span>
 											{/if}
 										</button>
 									</DropdownMenu.Item>
@@ -301,23 +345,55 @@
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>
 
-					<form class="contents" method="POST" action="?/toggleFavorite"
-						use:enhance={() => { isFavorite = !isFavorite; return async ({ result }) => { if (result.type === 'failure') { isFavorite = !isFavorite; invalidateAll(); } }; }}
+					<form
+						class="contents"
+						method="POST"
+						action="?/toggleFavorite"
+						use:enhance={() => {
+							isFavorite = !isFavorite;
+							return async ({ result }) => {
+								if (result.type === 'failure') {
+									isFavorite = !isFavorite;
+									invalidateAll();
+								}
+							};
+						}}
 					>
 						<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
 						<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-						<FancyButton type="submit" variant={isFavorite ? 'danger' : 'default'} size="sm" class="w-full justify-center">
+						<FancyButton
+							type="submit"
+							variant={isFavorite ? 'danger' : 'default'}
+							size="sm"
+							class="w-full justify-center"
+						>
 							<Heart class={cn('h-4 w-4 mr-1', isFavorite && 'fill-current')} />
 							{isFavorite ? 'Favorited' : 'Favorite'}
 						</FancyButton>
 					</form>
 
-					<form class="contents" method="POST" action="?/toggleFeatured"
-						use:enhance={() => { isFeatured = !isFeatured; return async ({ result }) => { if (result.type === 'failure') { isFeatured = !isFeatured; invalidateAll(); } }; }}
+					<form
+						class="contents"
+						method="POST"
+						action="?/toggleFeatured"
+						use:enhance={() => {
+							isFeatured = !isFeatured;
+							return async ({ result }) => {
+								if (result.type === 'failure') {
+									isFeatured = !isFeatured;
+									invalidateAll();
+								}
+							};
+						}}
 					>
 						<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
 						<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-						<FancyButton type="submit" variant={isFeatured ? 'warning' : 'default'} size="sm" class="w-full justify-center">
+						<FancyButton
+							type="submit"
+							variant={isFeatured ? 'warning' : 'default'}
+							size="sm"
+							class="w-full justify-center"
+						>
 							<Star class={cn('h-4 w-4 mr-1', isFeatured && 'fill-current')} />
 							{isFeatured ? 'Featured' : 'Feature'}
 						</FancyButton>
@@ -330,12 +406,28 @@
 						Back
 					</FancyButton>
 					{#if authenticated}
-						<form class="flex-1" method="POST" action="?/toggleFavorite"
-							use:enhance={() => { isFavorite = !isFavorite; return async ({ result }) => { if (result.type === 'failure') { isFavorite = !isFavorite; invalidateAll(); } }; }}
+						<form
+							class="flex-1"
+							method="POST"
+							action="?/toggleFavorite"
+							use:enhance={() => {
+								isFavorite = !isFavorite;
+								return async ({ result }) => {
+									if (result.type === 'failure') {
+										isFavorite = !isFavorite;
+										invalidateAll();
+									}
+								};
+							}}
 						>
 							<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
 							<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-							<FancyButton type="submit" variant={isFavorite ? 'danger' : 'default'} size="sm" class="w-full justify-center">
+							<FancyButton
+								type="submit"
+								variant={isFavorite ? 'danger' : 'default'}
+								size="sm"
+								class="w-full justify-center"
+							>
 								<Heart class={cn('h-4 w-4 mr-1', isFavorite && 'fill-current')} />
 								{isFavorite ? 'Favorited' : 'Favorite'}
 							</FancyButton>
@@ -355,14 +447,22 @@
 				<Dialog.Title>Confirm Delete</Dialog.Title>
 				<Dialog.Description>
 					Delete <span class="font-semibold">{data.recipe.recipeName}</span> from catalog?
-					<p class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20">
+					<p
+						class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
+					>
 						Once deleted, it can't be recovered.
 					</p>
 				</Dialog.Description>
 			</Dialog.Header>
 			<Dialog.Footer>
 				<Button variant="outline" onclick={() => (deleteModalOpen = false)}>Cancel</Button>
-				<Button variant="destructive" onclick={async () => { await deleteRecipe(); deleteModalOpen = false; }}>Delete</Button>
+				<Button
+					variant="destructive"
+					onclick={async () => {
+						await deleteRecipe();
+						deleteModalOpen = false;
+					}}>Delete</Button
+				>
 			</Dialog.Footer>
 		</Dialog.Content>
 	</Dialog.Root>

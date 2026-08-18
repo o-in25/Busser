@@ -19,6 +19,10 @@ import { Logger } from '../logger';
 import { copyGcsFile, deleteSignedUrl } from '../storage';
 import { BaseRepository, emptyPagination } from './base.repository';
 
+// imported categories must always land in a group (a null group broke role grouping — see
+// defects.md). the source is grouped, so this only catches a source that's somehow null.
+const FALLBACK_GROUP = 8; // "Other"
+
 // inventory rows we read while resolving step images + substitutes
 type InventoryRow = {
 	productId: number;
@@ -178,7 +182,7 @@ export class CatalogRepository extends BaseRepository {
 					const moodSql: Record<string, string> = {
 						'strong-dry': '(r.recipeStrengthRating >= 6 AND r.recipeDrynessRating >= 6)',
 						'sweet-easy': '(r.recipeSweetnessRating >= 6 AND r.recipeStrengthRating <= 5)',
-						'balanced': `(
+						balanced: `(
 							ABS(r.recipeSweetnessRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
 							AND ABS(r.recipeDrynessRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
 							AND ABS(r.recipeStrengthRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
@@ -220,7 +224,10 @@ export class CatalogRepository extends BaseRepository {
 			return Number(result?.count) || 0;
 		} catch (error: any) {
 			console.error('Failed to get recipe count:', error.message);
-			Logger.error(`Failed to get recipe count: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get recipe count: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return 0;
 		}
 	}
@@ -296,13 +303,14 @@ export class CatalogRepository extends BaseRepository {
 
 	// resolves per-step images + acceptable substitutes from the workspace inventory.
 	// one query covers the whole recipe; failures degrade to empty extras (images/subs just hide).
-	async getStepExtras(
-		workspaceId: string,
-		steps: View.BasicRecipeStep[]
-	): Promise<StepExtras[]> {
+	async getStepExtras(workspaceId: string, steps: View.BasicRecipeStep[]): Promise<StepExtras[]> {
 		try {
-			const categoryIds = [...new Set(steps.map((s) => s.categoryId).filter((id): id is number => !!id))];
-			const parentIds = [...new Set(steps.map((s) => s.parentCategoryId).filter((id): id is number => !!id))];
+			const categoryIds = [
+				...new Set(steps.map((s) => s.categoryId).filter((id): id is number => !!id)),
+			];
+			const parentIds = [
+				...new Set(steps.map((s) => s.parentCategoryId).filter((id): id is number => !!id)),
+			];
 
 			if (categoryIds.length === 0 && parentIds.length === 0) {
 				return steps.map((s) => emptyExtras(s));
@@ -438,7 +446,10 @@ export class CatalogRepository extends BaseRepository {
 			return recipesWithMissing;
 		} catch (e: any) {
 			console.error('Failed to get almost-there recipes:', e);
-			Logger.error(`Failed to get almost-there recipes: ${e.sqlMessage || e.message}`, e.sql || e.stackTrace);
+			Logger.error(
+				`Failed to get almost-there recipes: ${e.sqlMessage || e.message}`,
+				e.sql || e.stackTrace
+			);
 			return [];
 		}
 	}
@@ -676,9 +687,19 @@ export class CatalogRepository extends BaseRepository {
 		targetWorkspaceId: string,
 		sourceRecipeId: number,
 		sourceWorkspaceId: string
-	): Promise<QueryResult<{ recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[]; alreadyImported?: boolean }>> {
+	): Promise<
+		QueryResult<{
+			recipe: View.BasicRecipe;
+			recipeSteps: View.BasicRecipeStep[];
+			alreadyImported?: boolean;
+		}>
+	> {
 		try {
-			let result: { recipe: View.BasicRecipe; recipeSteps: View.BasicRecipeStep[]; alreadyImported?: boolean } = {
+			let result: {
+				recipe: View.BasicRecipe;
+				recipeSteps: View.BasicRecipeStep[];
+				alreadyImported?: boolean;
+			} = {
 				recipe: {} as View.BasicRecipe,
 				recipeSteps: [],
 			};
@@ -693,22 +714,26 @@ export class CatalogRepository extends BaseRepository {
 					})
 					.first();
 				if (existing) {
-					const [imported] = await trx('basicrecipe')
-						.where({ RecipeId: existing.recipeId, WorkspaceId: targetWorkspaceId });
+					const [imported] = await trx('basicrecipe').where({
+						RecipeId: existing.recipeId,
+						WorkspaceId: targetWorkspaceId,
+					});
 					result = { recipe: imported as View.BasicRecipe, recipeSteps: [], alreadyImported: true };
 					return;
 				}
 
 				// 2. fetch source recipe + steps
-				const [sourceRecipe] = await trx('basicrecipe')
-					.where({ RecipeId: sourceRecipeId, WorkspaceId: sourceWorkspaceId });
+				const [sourceRecipe] = await trx('basicrecipe').where({
+					RecipeId: sourceRecipeId,
+					WorkspaceId: sourceWorkspaceId,
+				});
 				if (!sourceRecipe) throw new Error('Source recipe not found.');
 				// can't import a draft — it's not live yet
 				if (!sourceRecipe.published) throw new Error('Source recipe is not published.');
 
-				const sourceSteps = await trx('basicrecipestep')
+				const sourceSteps = (await trx('basicrecipestep')
 					.where({ RecipeId: sourceRecipeId, WorkspaceId: sourceWorkspaceId })
-					.orderBy('RecipeStepId', 'asc') as View.BasicRecipeStep[];
+					.orderBy('RecipeStepId', 'asc')) as View.BasicRecipeStep[];
 
 				// 3. validate eligibility — all steps must use category matching
 				const ineligible = sourceSteps.find(
@@ -730,10 +755,8 @@ export class CatalogRepository extends BaseRepository {
 
 					if (!cat) {
 						// look up source category to preserve group assignment
-						const sourceCat = await trx('category')
-							.where({ CategoryId: step.categoryId })
-							.first();
-						const categoryGroupId = sourceCat?.categoryGroupId ?? null;
+						const sourceCat = await trx('category').where({ CategoryId: step.categoryId }).first();
+						const categoryGroupId = sourceCat?.categoryGroupId ?? FALLBACK_GROUP;
 
 						// resolve parent category if source step has one
 						let parentCategoryId: number | null = null;
@@ -749,7 +772,7 @@ export class CatalogRepository extends BaseRepository {
 								const [parentId] = await trx('category').insert({
 									WorkspaceId: targetWorkspaceId,
 									CategoryName: step.parentCategoryName,
-									CategoryGroupId: sourceParent?.categoryGroupId ?? null,
+									CategoryGroupId: sourceParent?.categoryGroupId ?? FALLBACK_GROUP,
 								});
 								parentCategoryId = parentId;
 							} else {
@@ -819,7 +842,7 @@ export class CatalogRepository extends BaseRepository {
 										canonical.productDescriptionImageUrl,
 										'ingredients',
 										targetWorkspaceId
-								  )
+									)
 								: null;
 							await trx('productdetail').insert({
 								ProductId: productId,
@@ -882,8 +905,10 @@ export class CatalogRepository extends BaseRepository {
 				}
 
 				// 7. fetch the created recipe back via views
-				const [newRecipe] = await trx('basicrecipe')
-					.where({ RecipeId: newRecipeId, WorkspaceId: targetWorkspaceId });
+				const [newRecipe] = await trx('basicrecipe').where({
+					RecipeId: newRecipeId,
+					WorkspaceId: targetWorkspaceId,
+				});
 				const newSteps = await trx('basicrecipestep')
 					.where({ RecipeId: newRecipeId, WorkspaceId: targetWorkspaceId })
 					.orderBy('RecipeStepId', 'asc');
@@ -958,7 +983,10 @@ export class CatalogRepository extends BaseRepository {
 			return dbResult as View.BasicRecipe[];
 		} catch (error: any) {
 			console.error('Error getting featured recipes:', error.message);
-			Logger.error(`Error getting featured recipes: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Error getting featured recipes: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return [];
 		}
 	}
@@ -984,7 +1012,10 @@ export class CatalogRepository extends BaseRepository {
 				return { status: 'error', error: 'Recipe is already featured.' };
 			}
 			console.error('Error adding featured recipe:', error.message);
-			Logger.error(`Error adding featured recipe: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Error adding featured recipe: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: 'Failed to add featured recipe.' };
 		}
 	}
@@ -1001,7 +1032,10 @@ export class CatalogRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Error removing featured recipe:', error.message);
-			Logger.error(`Error removing featured recipe: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Error removing featured recipe: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: 'Failed to remove featured recipe.' };
 		}
 	}
@@ -1015,7 +1049,10 @@ export class CatalogRepository extends BaseRepository {
 			return !!dbResult;
 		} catch (error: any) {
 			console.error('Error checking featured:', error.message);
-			Logger.error(`Error checking featured: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Error checking featured: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return false;
 		}
 	}
@@ -1037,7 +1074,10 @@ export class CatalogRepository extends BaseRepository {
 			}
 		} catch (error: any) {
 			console.error('Error toggling featured:', error.message);
-			Logger.error(`Error toggling featured: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Error toggling featured: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: 'Failed to toggle featured.' };
 		}
 	}
@@ -1062,7 +1102,10 @@ export class CatalogRepository extends BaseRepository {
 			return { status: 'success', data: { published } };
 		} catch (error: any) {
 			console.error('Error toggling published:', error.message);
-			Logger.error(`Error toggling published: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Error toggling published: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: 'Failed to toggle published.' };
 		}
 	}
@@ -1079,7 +1122,10 @@ export class CatalogRepository extends BaseRepository {
 			return dbResult as View.BasicRecipe[];
 		} catch (error: any) {
 			console.error('Error getting recipes by ids:', error.message);
-			Logger.error(`Error getting recipes by ids: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Error getting recipes by ids: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return [];
 		}
 	}
@@ -1116,7 +1162,10 @@ export class CatalogRepository extends BaseRepository {
 			}));
 		} catch (e: any) {
 			console.error('Failed to get highest impact ingredients:', e);
-			Logger.error(`Failed to get highest impact ingredients: ${e.sqlMessage || e.message}`, e.sql || e.stackTrace);
+			Logger.error(
+				`Failed to get highest impact ingredients: ${e.sqlMessage || e.message}`,
+				e.sql || e.stackTrace
+			);
 			return [];
 		}
 	}
@@ -1124,7 +1173,9 @@ export class CatalogRepository extends BaseRepository {
 	// batch compute estimated cost per available recipe in one query
 	async getRecipeCosts(
 		workspaceId: string
-	): Promise<{ recipeId: number; recipeName: string; recipeImageUrl: string | null; estimatedCost: number }[]> {
+	): Promise<
+		{ recipeId: number; recipeName: string; recipeImageUrl: string | null; estimatedCost: number }[]
+	> {
 		try {
 			const result = await this.db
 				.table('basicrecipestep as rs')
@@ -1162,7 +1213,10 @@ export class CatalogRepository extends BaseRepository {
 			}));
 		} catch (e: any) {
 			console.error('Failed to get recipe costs:', e);
-			Logger.error(`Failed to get recipe costs: ${e.sqlMessage || e.message}`, e.sql || e.stackTrace);
+			Logger.error(
+				`Failed to get recipe costs: ${e.sqlMessage || e.message}`,
+				e.sql || e.stackTrace
+			);
 			return [];
 		}
 	}
@@ -1179,7 +1233,10 @@ export class CatalogRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Error reordering featured recipes:', error.message);
-			Logger.error(`Error reordering featured recipes: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Error reordering featured recipes: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: 'Failed to reorder featured recipes.' };
 		}
 	}

@@ -60,9 +60,15 @@
 	}
 
 	@keyframes hero-shift {
-		0% { background-position: 0% 50%; }
-		50% { background-position: 100% 50%; }
-		100% { background-position: 0% 50%; }
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
 	}
 
 	.hero-orbs {
@@ -103,21 +109,42 @@
 	}
 
 	@keyframes hero-float-1 {
-		0%, 100% { transform: translate(0, 0); }
-		33% { transform: translate(30px, -20px); }
-		66% { transform: translate(-20px, 15px); }
+		0%,
+		100% {
+			transform: translate(0, 0);
+		}
+		33% {
+			transform: translate(30px, -20px);
+		}
+		66% {
+			transform: translate(-20px, 15px);
+		}
 	}
 
 	@keyframes hero-float-2 {
-		0%, 100% { transform: translate(0, 0); }
-		33% { transform: translate(-25px, 20px); }
-		66% { transform: translate(15px, -25px); }
+		0%,
+		100% {
+			transform: translate(0, 0);
+		}
+		33% {
+			transform: translate(-25px, 20px);
+		}
+		66% {
+			transform: translate(15px, -25px);
+		}
 	}
 
 	@keyframes hero-float-3 {
-		0%, 100% { transform: translate(0, 0); }
-		33% { transform: translate(20px, 15px); }
-		66% { transform: translate(-30px, -10px); }
+		0%,
+		100% {
+			transform: translate(0, 0);
+		}
+		33% {
+			transform: translate(20px, 15px);
+		}
+		66% {
+			transform: translate(-30px, -10px);
+		}
 	}
 
 	/* logo glow animation */
@@ -126,7 +153,8 @@
 	}
 
 	@keyframes hero-glow {
-		0%, 100% {
+		0%,
+		100% {
 			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
 		}
 		50% {
@@ -135,8 +163,15 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.hero-gradient { animation: none; }
-		.hero-orb { animation-play-state: paused; }
-		.hero-logo-glow { animation: none; filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3)); }
+		.hero-gradient {
+			animation: none;
+		}
+		.hero-orb {
+			animation-play-state: paused;
+		}
+		.hero-logo-glow {
+			animation: none;
+			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
+		}
 	}
 </style>

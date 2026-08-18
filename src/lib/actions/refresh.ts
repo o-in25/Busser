@@ -160,6 +160,6 @@ export const refresh: Action<HTMLElement> = (node) => {
 			document.removeEventListener('touchend', onTouchEnd);
 			indicator.remove();
 			node.style.transform = '';
-		}
+		},
 	};
 };

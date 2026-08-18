@@ -16,10 +16,12 @@
 	<SpiritWorldMap {regions} {accentColor} />
 
 	<div class="space-y-3 mt-6">
-		{#each regions as region, i}
+		{#each regions as region}
 			<div class="glass-card p-4 md:p-5">
 				<div class="flex items-center gap-3 mb-2">
-					<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-muted/50 overflow-hidden">
+					<div
+						class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-muted/50 overflow-hidden"
+					>
 						<img
 							src="https://flagcdn.com/w80/{region.countryCode.toLowerCase()}.png"
 							alt="{region.name} flag"

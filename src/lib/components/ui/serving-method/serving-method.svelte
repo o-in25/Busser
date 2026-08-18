@@ -128,7 +128,9 @@
 		</div>
 	{:else}
 		<!-- Toggle variant (default) -->
-		<div class="grid grid-cols-2 sm:flex rounded-full backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 gap-0.5">
+		<div
+			class="grid grid-cols-2 sm:flex rounded-full backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 gap-0.5"
+		>
 			{#each methods as method}
 				{@const isSelected = method.recipeTechniqueDescriptionId === value}
 				{@const MethodIcon = iconMap[method.recipeTechniqueDescriptionText] || Martini}

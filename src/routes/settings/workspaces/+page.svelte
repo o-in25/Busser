@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		Check,
 		Crown,
 		Globe,
 		GalleryHorizontalEnd,
@@ -39,7 +38,6 @@
 		if (form?.error) toast.error(form.error);
 		if (form?.success) toast.success('Operation completed successfully.');
 	});
-
 
 	// preferred workspace state
 	let selectedPreferredId = $state<string | null>(data.preferredWorkspaceId || null);
@@ -119,7 +117,10 @@
 	}
 
 	// role descriptions
-	const roleDescriptions: Record<string, { label: string; description: string; color: string; bg: string }> = {
+	const roleDescriptions: Record<
+		string,
+		{ label: string; description: string; color: string; bg: string }
+	> = {
 		owner: {
 			label: 'Owner',
 			description: 'Full access. Can manage members, settings, and all content.',
@@ -187,7 +188,6 @@
 		</Button>
 	</div>
 
-
 	<!-- Workspace Types -->
 	<div class="grid gap-3 sm:grid-cols-3">
 		<div class="flex items-start gap-3 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
@@ -199,7 +199,9 @@
 				</p>
 			</div>
 		</div>
-		<div class="flex items-start gap-3 p-4 rounded-lg bg-secondary-500/10 border border-secondary-500/20">
+		<div
+			class="flex items-start gap-3 p-4 rounded-lg bg-secondary-500/10 border border-secondary-500/20"
+		>
 			<User class="h-4 w-4 text-secondary-500 mt-0.5 shrink-0" />
 			<div>
 				<p class="text-sm font-medium">Personal</p>
@@ -208,7 +210,9 @@
 				</p>
 			</div>
 		</div>
-		<div class="flex items-start gap-3 p-4 rounded-lg bg-neon-green-500/10 border border-neon-green-500/20">
+		<div
+			class="flex items-start gap-3 p-4 rounded-lg bg-neon-green-500/10 border border-neon-green-500/20"
+		>
 			<Users class="h-4 w-4 text-neon-green-500 mt-0.5 shrink-0" />
 			<div>
 				<p class="text-sm font-medium">Shared</p>
@@ -443,9 +447,7 @@
 						<Button
 							type="submit"
 							class="w-full sm:w-auto"
-							disabled={!preferredChanged ||
-								isPreferredSubmitting ||
-								data.workspaces.length === 1}
+							disabled={!preferredChanged || isPreferredSubmitting || data.workspaces.length === 1}
 						>
 							{#if isPreferredSubmitting}
 								Saving...

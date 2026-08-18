@@ -33,7 +33,13 @@
 	}
 
 	const buttonClass = $derived(
-		cn(buttonVariants({ variant, size: label ? size : 'icon' }), label && 'gap-2', 'shrink-0', 'max-sm:min-h-10 max-sm:min-w-10', className)
+		cn(
+			buttonVariants({ variant, size: label ? size : 'icon' }),
+			label && 'gap-2',
+			'shrink-0',
+			'max-sm:min-h-10 max-sm:min-w-10',
+			className
+		)
 	);
 </script>
 

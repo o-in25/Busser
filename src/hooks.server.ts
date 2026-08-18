@@ -52,9 +52,11 @@ const rateLimitTiers: Record<string, RateLimitConfig> = {
 	'ai-chat': { maxRequests: 15, windowMs: HOUR },
 	'text-gen': { maxRequests: 30, windowMs: HOUR },
 	upload: { maxRequests: 20, windowMs: HOUR },
+	places: { maxRequests: 15, windowMs: HOUR },
 };
 
-const rateLimitRoutes: Array<{ path: string; tier: string }> = [
+// paid-resource routes we meter. method defaults to POST; set it for anything else.
+const rateLimitRoutes: Array<{ path: string; tier: string; method?: string }> = [
 	{ path: '/api/generator/image', tier: 'image-gen' },
 	{ path: '/api/assistant/chat', tier: 'ai-chat' },
 	{ path: '/api/inventory/scan', tier: 'ai-chat' },
@@ -63,7 +65,9 @@ const rateLimitRoutes: Array<{ path: string; tier: string }> = [
 	{ path: '/api/generator/inventory', tier: 'text-gen' },
 	{ path: '/api/generator/category', tier: 'text-gen' },
 	{ path: '/api/generator/rating', tier: 'text-gen' },
+	{ path: '/api/generator/product-rating', tier: 'text-gen' },
 	{ path: '/api/upload/image', tier: 'upload' },
+	{ path: '/api/suppliers/nearby', tier: 'places', method: 'GET' },
 ];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
@@ -105,12 +109,14 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		}
 	}
 
-	// rate limit AI and upload endpoints for non-admin users
-	if (event.locals.user && event.request.method === 'POST') {
-		const match = rateLimitRoutes.find((r) => slug === r.path);
+	// rate limit paid-resource endpoints for non-admin users
+	if (event.locals.user) {
+		const match = rateLimitRoutes.find(
+			(r) => slug === r.path && (r.method ?? 'POST') === event.request.method
+		);
 		if (match && !hasGlobalPermission(event.locals.user, 'edit_admin')) {
 			const key = `rate:${event.locals.user.userId}:${match.tier}`;
-			const result = checkRateLimit(key, rateLimitTiers[match.tier]);
+			const result = await checkRateLimit(key, rateLimitTiers[match.tier]);
 			if (!result.allowed) {
 				return new Response(
 					JSON.stringify({

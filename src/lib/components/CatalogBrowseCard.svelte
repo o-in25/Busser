@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FlaskConical, ThumbsUp, GlassWater, Heart, Martini, Star } from 'lucide-svelte';
+	import { FlaskConical, GlassWater, Heart, Martini, Star } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -89,7 +89,9 @@
 			{/if}
 
 			<!-- Glass surface -->
-			<div class="relative h-full flex flex-col bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_16px_40px_-20px_rgba(31,20,60,0.28)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_22px_48px_-20px_rgba(31,20,60,0.34)] transition-all duration-300">
+			<div
+				class="relative h-full flex flex-col bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_16px_40px_-20px_rgba(31,20,60,0.28)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_22px_48px_-20px_rgba(31,20,60,0.34)] transition-all duration-300"
+			>
 				<!-- Image area -->
 				<div class="relative h-44 overflow-hidden rounded-t-2xl">
 					<SkeletonImage
@@ -103,13 +105,17 @@
 					<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
 
 					<!-- Category pill (top left) -->
-					<span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/15 text-foreground shadow-sm">
+					<span
+						class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/15 text-foreground shadow-sm"
+					>
 						{recipe.recipeCategoryDescription}
 					</span>
 
 					<!-- Draft badge (owners/editors only) -->
 					{#if canModify && recipe.published === false}
-						<span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-500/90 text-white shadow">
+						<span
+							class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-500/90 text-white shadow"
+						>
 							Draft
 						</span>
 					{/if}
@@ -123,14 +129,23 @@
 							)}
 							title={rating.label}
 						>
-							<span class="text-[8px] font-semibold uppercase tracking-wider opacity-80 leading-none">verdict</span>
+							<span
+								class="text-[8px] font-semibold uppercase tracking-wider opacity-80 leading-none"
+								>verdict</span
+							>
 							<span class="text-sm font-bold leading-tight">{score.toFixed(1)}</span>
 						</span>
 					{/if}
 
 					<!-- Action icons (bottom right, over image) -->
 					{#if authenticated && workspaceId}
-						<div class="absolute bottom-2 right-2 flex items-center gap-1" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.preventDefault()} role="toolbar" tabindex="-1">
+						<div
+							class="absolute bottom-2 right-2 flex items-center gap-1"
+							onclick={(e) => e.preventDefault()}
+							onkeydown={(e) => e.preventDefault()}
+							role="toolbar"
+							tabindex="-1"
+						>
 							<form
 								method="POST"
 								action="{actionPath}/toggleFavorite"
@@ -152,9 +167,7 @@
 									<Heart
 										class={cn(
 											'h-4 w-4 transition-colors',
-											isFavorite
-												? 'fill-red-500 text-red-500'
-												: 'text-white/80 hover:text-red-400'
+											isFavorite ? 'fill-red-500 text-red-500' : 'text-white/80 hover:text-red-400'
 										)}
 									/>
 								</button>
@@ -195,7 +208,9 @@
 
 				<!-- Text content -->
 				<div class="flex-1 flex flex-col p-4 pt-3">
-					<h3 class="font-semibold text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+					<h3
+						class="font-semibold text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors"
+					>
 						{recipe.recipeName}
 					</h3>
 					<p class="text-sm text-muted-foreground/80 line-clamp-2 mt-1">
@@ -228,9 +243,13 @@
 			{/if}
 
 			<!-- Glass surface -->
-			<div class="relative flex items-center gap-3 p-3 bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_10px_28px_-16px_rgba(31,20,60,0.25)] hover:bg-white/60 dark:hover:bg-white/[0.09] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_14px_32px_-16px_rgba(31,20,60,0.3)] transition-all duration-200">
+			<div
+				class="relative flex items-center gap-3 p-3 bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_10px_28px_-16px_rgba(31,20,60,0.25)] hover:bg-white/60 dark:hover:bg-white/[0.09] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_14px_32px_-16px_rgba(31,20,60,0.3)] transition-all duration-200"
+			>
 				<!-- Thumbnail with verdict overlay -->
-				<div class="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-md ring-1 ring-black/5 dark:ring-white/10">
+				<div
+					class="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-md ring-1 ring-black/5 dark:ring-white/10"
+				>
 					<SkeletonImage
 						src={recipe.recipeImageUrl}
 						alt={recipe.recipeName}
@@ -240,7 +259,9 @@
 
 					<!-- Verdict pill overlaid on image bottom -->
 					{#if hasRatings}
-						<div class="absolute inset-x-0 bottom-0 flex justify-center pb-1 bg-gradient-to-t from-black/60 to-transparent pt-3">
+						<div
+							class="absolute inset-x-0 bottom-0 flex justify-center pb-1 bg-gradient-to-t from-black/60 to-transparent pt-3"
+						>
 							<span
 								class={cn(
 									'px-1.5 py-px rounded-full text-[10px] font-bold text-white leading-tight',
@@ -256,10 +277,14 @@
 
 				<!-- Text content — gets full remaining width -->
 				<div class="flex-1 min-w-0">
-					<h3 class="font-semibold text-[15px] text-foreground truncate group-hover:text-primary transition-colors">
+					<h3
+						class="font-semibold text-[15px] text-foreground truncate group-hover:text-primary transition-colors"
+					>
 						{recipe.recipeName}
 						{#if canModify && recipe.published === false}
-							<span class="ml-1 align-middle px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide bg-amber-500/90 text-white">
+							<span
+								class="ml-1 align-middle px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide bg-amber-500/90 text-white"
+							>
 								Draft
 							</span>
 						{/if}
@@ -283,7 +308,13 @@
 
 				<!-- Compact action icons -->
 				{#if authenticated && workspaceId}
-					<div class="flex items-center gap-0.5 shrink-0" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.preventDefault()} role="toolbar" tabindex="-1">
+					<div
+						class="flex items-center gap-0.5 shrink-0"
+						onclick={(e) => e.preventDefault()}
+						onkeydown={(e) => e.preventDefault()}
+						role="toolbar"
+						tabindex="-1"
+					>
 						<form
 							method="POST"
 							action="{actionPath}/toggleFavorite"

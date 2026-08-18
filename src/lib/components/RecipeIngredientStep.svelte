@@ -53,7 +53,9 @@
 <div
 	class={cn(
 		'flex items-start gap-3 rounded-xl p-3 transition-colors duration-200',
-		checked ? 'bg-primary/5 border border-primary/20' : 'border border-transparent hover:bg-accent/40',
+		checked
+			? 'bg-primary/5 border border-primary/20'
+			: 'border border-transparent hover:bg-accent/40',
 		className
 	)}
 >
@@ -64,7 +66,9 @@
 		aria-pressed={checked}
 		onclick={() => (checked = !checked)}
 	>
-		<div class="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-border/60 shadow-sm">
+		<div
+			class="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-border/60 shadow-sm"
+		>
 			<IngredientThumb
 				src={productImageUrl}
 				name={categoryName}
@@ -123,7 +127,9 @@
 							/>
 							<span class="min-w-0 flex-1 truncate text-sm text-foreground">{sub.productName}</span>
 							{#if sub.inStock}
-								<span class="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+								<span
+									class="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400"
+								>
 									<Check class="h-3 w-3" />
 									In stock
 								</span>

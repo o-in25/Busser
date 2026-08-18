@@ -45,7 +45,7 @@
 		class={className}
 		aria-disabled={disabled || undefined}
 		tabindex={disabled ? -1 : undefined}
-		{...restProps as HTMLAnchorAttributes}
+		{...(restProps as any)}
 	>
 		{#if children}{@render children()}{/if}
 	</Button>
@@ -55,7 +55,7 @@
 		size={sizeMap[size]}
 		{disabled}
 		class={className}
-		{...restProps as HTMLButtonAttributes}
+		{...(restProps as any)}
 	>
 		{#if children}{@render children()}{/if}
 	</Button>

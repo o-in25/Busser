@@ -35,9 +35,7 @@
 		onclick={() => (open = !open)}
 	>
 		<div class="flex items-center gap-2">
-			<ChevronDown
-				class={cn('h-4 w-4 transition-transform duration-200', open && 'rotate-180')}
-			/>
+			<ChevronDown class={cn('h-4 w-4 transition-transform duration-200', open && 'rotate-180')} />
 			<span class="font-semibold">{label}</span>
 			<span class="text-sm text-muted-foreground">
 				({checkedCount}/{items.length})
@@ -69,11 +67,7 @@
 					</div>
 				{/if}
 				{#each items as item (item.productId)}
-					<ShoppingListItemComponent
-						{item}
-						checked={checkedIds.has(item.productId)}
-						{onToggle}
-					/>
+					<ShoppingListItemComponent {item} checked={checkedIds.has(item.productId)} {onToggle} />
 				{/each}
 			</div>
 		</div>

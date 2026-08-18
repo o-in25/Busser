@@ -28,8 +28,7 @@
 	const scale = $derived(0.95 + 0.1 * progress);
 
 	const reducedMotion =
-		typeof window !== 'undefined' &&
-		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 </script>
 
 <a
@@ -39,9 +38,7 @@
 		isActive && 'fancy-card-active',
 		className
 	)}
-	style={reducedMotion
-		? undefined
-		: `transform: scale(${scale});`}
+	style={reducedMotion ? undefined : `transform: scale(${scale});`}
 >
 	<div class="aspect-[16/9] relative">
 		<SkeletonImage
@@ -52,9 +49,7 @@
 		/>
 
 		<!-- gradient overlay -->
-		<div
-			class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"
-		></div>
+		<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
 
 		<!-- specular highlight -->
 		<div class="fancy-card-specular"></div>

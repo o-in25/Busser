@@ -8,7 +8,7 @@
 		"steps": [
 			{ "category": "London Dry Gin", "qty": 30, "unit": "ml", "desc": "Add 1oz gin" },
 			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
-			{ "category": "Amaro", "qty": 30, "unit": "ml", "desc": "Add 1oz Campari" }
+			{ "category": "Campari", "qty": 30, "unit": "ml", "desc": "Add 1oz Campari" }
 		]
 	},
 	{
@@ -136,7 +136,7 @@
 		"steps": [
 			{ "category": "Bourbon Whiskey", "qty": 45, "unit": "ml", "desc": "Add 1.5oz bourbon" },
 			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
-			{ "category": "Amaro", "qty": 30, "unit": "ml", "desc": "Add 1oz Campari" }
+			{ "category": "Campari", "qty": 30, "unit": "ml", "desc": "Add 1oz Campari" }
 		]
 	},
 	{

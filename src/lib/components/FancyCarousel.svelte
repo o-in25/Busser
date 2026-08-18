@@ -20,8 +20,7 @@
 	let slideProgress: number[] = $state(recipes.map(() => 0));
 
 	const reducedMotion =
-		typeof window !== 'undefined' &&
-		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	const autoplayPlugin = reducedMotion
 		? []
@@ -107,14 +106,8 @@
 		>
 			<Carousel.Content class="-ml-6 py-2">
 				{#each recipes as recipe, i}
-					<Carousel.Item
-						class="pl-6 basis-[75%] sm:basis-[45%] lg:basis-[31%]"
-					>
-						<FancyCard
-							{recipe}
-							isActive={selectedIndex === i}
-							progress={slideProgress[i] ?? 0}
-						/>
+					<Carousel.Item class="pl-6 basis-[75%] sm:basis-[45%] lg:basis-[31%]">
+						<FancyCard {recipe} isActive={selectedIndex === i} progress={slideProgress[i] ?? 0} />
 					</Carousel.Item>
 				{/each}
 			</Carousel.Content>
@@ -134,10 +127,7 @@
 				<button
 					type="button"
 					aria-label="Go to slide {i + 1}"
-					class={cn(
-						'carousel-dot',
-						selectedIndex === i && 'carousel-dot-active'
-					)}
+					class={cn('carousel-dot', selectedIndex === i && 'carousel-dot-active')}
 					onclick={() => scrollTo(i)}
 				></button>
 			{/each}

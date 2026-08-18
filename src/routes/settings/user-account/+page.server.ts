@@ -32,7 +32,8 @@ export const load = (async ({ locals, url }) => {
 
 	// load linked oauth accounts
 	const linkedAccountsResult = await oauthRepo.getLinkedAccounts(userId);
-	const linkedAccounts = linkedAccountsResult.status === 'success' ? linkedAccountsResult.data || [] : [];
+	const linkedAccounts =
+		linkedAccountsResult.status === 'success' ? linkedAccountsResult.data || [] : [];
 
 	return { user, workspaces, currentWorkspace, linkedAccounts };
 }) satisfies PageServerLoad;

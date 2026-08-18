@@ -46,7 +46,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const user = queryResult.data;
 
 	const workspacesResult = await getUserWorkspaces(userId);
-	const workspaces = workspacesResult.status === 'success' ? (workspacesResult.data || []) : [];
+	const workspaces = workspacesResult.status === 'success' ? workspacesResult.data || [] : [];
 
 	// fetch resource counts per workspace
 	const workspaceCounts = await Promise.all(

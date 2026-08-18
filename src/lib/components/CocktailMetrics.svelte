@@ -88,7 +88,10 @@
 </script>
 
 <div
-	class={cn('grid grid-cols-2 md:grid-cols-4 gap-1.5 p-2 rounded-lg bg-muted/30 border border-border/50', className)}
+	class={cn(
+		'grid grid-cols-2 md:grid-cols-4 gap-1.5 p-2 rounded-lg bg-muted/30 border border-border/50',
+		className
+	)}
 	{...restProps}
 >
 	<CalculatedBadge label="ABV" value={abv().replace('% abv', '%')} icon={Percent} />

@@ -11,18 +11,14 @@ const IMAGE_CACHE = 'busser-images';
 const MAX_CACHED_IMAGES = 200;
 
 // app shell assets to pre-cache on install
-const PRECACHE_ASSETS = [
-	...build,
-	'/offline.html',
-	'/favicon.png',
-];
+const PRECACHE_ASSETS = [...build, '/offline.html', '/favicon.png'];
 
 sw.addEventListener('install', (event) => {
 	event.waitUntil(
 		caches
 			.open(CACHE_NAME)
 			.then((cache) => cache.addAll(PRECACHE_ASSETS))
-			.then(() => sw.skipWaiting()),
+			.then(() => sw.skipWaiting())
 	);
 });
 
@@ -32,9 +28,11 @@ sw.addEventListener('activate', (event) => {
 			.keys()
 			.then((keys) =>
 				// keep the image cache across deploys, only purge old app caches
-				Promise.all(keys.filter((k) => k !== CACHE_NAME && k !== IMAGE_CACHE).map((k) => caches.delete(k))),
+				Promise.all(
+					keys.filter((k) => k !== CACHE_NAME && k !== IMAGE_CACHE).map((k) => caches.delete(k))
+				)
 			)
-			.then(() => sw.clients.claim()),
+			.then(() => sw.clients.claim())
 	);
 });
 
@@ -71,8 +69,8 @@ sw.addEventListener('fetch', (event) => {
 					return response;
 				})
 				.catch(() =>
-					caches.match(request).then((cached) => cached || new Response('', { status: 504 })),
-				),
+					caches.match(request).then((cached) => cached || new Response('', { status: 504 }))
+				)
 		);
 		return;
 	}
@@ -90,7 +88,9 @@ sw.addEventListener('fetch', (event) => {
 					caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
 					return response;
 				})
-				.catch(() => caches.match('/offline.html').then((r) => r || new Response('Offline', { status: 503 }))),
+				.catch(() =>
+					caches.match('/offline.html').then((r) => r || new Response('Offline', { status: 503 }))
+				)
 		);
 		return;
 	}
@@ -105,8 +105,8 @@ sw.addEventListener('fetch', (event) => {
 						const clone = response.clone();
 						caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
 						return response;
-					}),
-			),
+					})
+			)
 		);
 	}
 });

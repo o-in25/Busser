@@ -36,7 +36,13 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const ratingMax = url.searchParams.get('ratingMax') || '';
 
 	// parse comma-separated ingredient ID lists
-	const parseIds = (s: string) => s ? s.split(',').map(Number).filter((n) => !isNaN(n) && n > 0) : [];
+	const parseIds = (s: string) =>
+		s
+			? s
+					.split(',')
+					.map(Number)
+					.filter((n) => !isNaN(n) && n > 0)
+			: [];
 	const includeIds = parseIds(ingredientInclude);
 	const anyIds = parseIds(ingredientAny);
 	const excludeIds = parseIds(ingredientExclude);

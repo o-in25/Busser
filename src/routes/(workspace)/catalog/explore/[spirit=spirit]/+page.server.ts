@@ -31,13 +31,26 @@ export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
 		filter.recipeName = search;
 	}
 
-	// get spirits, recipes, favorites, and featured in parallel
-	const [allSpirits, catalogResult, userFavorites, featuredRecipes] = await Promise.all([
-		catalogRepo.getSpirits(),
-		catalogRepo.findAll(workspaceId, page, perPage, filter),
-		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
-		catalogRepo.getFeatured(workspaceId),
-	]);
+	// get spirits, recipes, favorites, featured, and category recipes in parallel
+	const [allSpirits, catalogResult, userFavorites, featuredRecipes, categoryRecipes] =
+		await Promise.all([
+			catalogRepo.getSpirits(),
+			catalogRepo.findAll(workspaceId, page, perPage, filter),
+			userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
+			catalogRepo.getFeatured(workspaceId),
+			catalogRepo.getRecipesByCategory(workspaceId, recipeCategoryId),
+		]);
+
+	// spotlight image: prefer a featured recipe in this category, else first category recipe with an image
+	const categoryImages =
+		categoryRecipes.status === 'success' ? (categoryRecipes.data ?? []) : [];
+	const featuredInCategory = featuredRecipes.find(
+		(r) => r.recipeCategoryId === recipeCategoryId && r.recipeImageUrl
+	);
+	const spotlightImage =
+		featuredInCategory?.recipeImageUrl ??
+		categoryImages.find((r) => r.recipeImageUrl)?.recipeImageUrl ??
+		null;
 
 	const spirit = allSpirits.find((s) => s.recipeCategoryId === recipeCategoryId);
 
@@ -80,6 +93,7 @@ export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
 		pagination,
 		favoriteRecipeIds: [...favoriteRecipeIds],
 		featuredRecipeIds: [...featuredRecipeIds],
+		spotlightImage,
 		spiritContent,
 		filters: {
 			search,

@@ -301,7 +301,9 @@
 				<div class="space-y-1">
 					<p class="font-medium">Invite-Only Mode</p>
 					<p class="text-sm text-muted-foreground">
-						{inviteOnly ? 'Users must have a valid invitation code to register' : 'Anyone can register without an invitation'}
+						{inviteOnly
+							? 'Users must have a valid invitation code to register'
+							: 'Anyone can register without an invitation'}
 					</p>
 				</div>
 				<form
@@ -331,7 +333,8 @@
 							checked={inviteOnly}
 							onCheckedChange={(checked) => {
 								inviteOnly = checked;
-								const input = toggleFormRef.querySelector<HTMLInputElement>('input[name="enabled"]');
+								const input =
+									toggleFormRef.querySelector<HTMLInputElement>('input[name="enabled"]');
 								if (input) input.value = String(checked);
 								toggleFormRef.requestSubmit();
 							}}

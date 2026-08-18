@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Crown, GalleryHorizontalEnd, Globe, User, Users } from 'lucide-svelte';
+	import { Crown, GalleryHorizontalEnd, Globe, User, Users } from 'lucide-svelte';
 
 	import { page } from '$app/stores';
 	import { Badge } from '$lib/components/ui/badge';
@@ -80,9 +80,7 @@
 			<GalleryHorizontalEnd class="h-6 w-6 text-muted-foreground/50" />
 		</div>
 		<h3 class="font-semibold mb-1">No Workspaces Available</h3>
-		<p class="text-muted-foreground text-sm">
-			You don't have access to any workspaces yet.
-		</p>
+		<p class="text-muted-foreground text-sm">You don't have access to any workspaces yet.</p>
 	</div>
 {/if}
 

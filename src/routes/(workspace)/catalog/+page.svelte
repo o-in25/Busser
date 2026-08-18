@@ -1,5 +1,15 @@
 <script lang="ts">
-	import { ArrowRight, Compass, FlaskConical, GalleryHorizontalEnd, Globe, Plus, Search, SlidersHorizontal, Sparkles, Wine, X } from 'lucide-svelte';
+	import {
+		Compass,
+		FlaskConical,
+		Globe,
+		Plus,
+		Search,
+		SlidersHorizontal,
+		Sparkles,
+		Wine,
+		X,
+	} from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -12,9 +22,11 @@
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
+	import CatalogResultsSkeleton from '$lib/components/CatalogResultsSkeleton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
+	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -22,7 +34,7 @@
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
-	import { workspaceSwitcherOpen } from '../../../stores';
+	import { workspaceSwitcherOpen, workspaceSwitching } from '../../../stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -252,13 +264,16 @@
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
-<div class="container mx-auto px-4 mt-4">
+<div>
 	{#if !authenticated}
 		<FancyAlert class="mb-6">
 			{#snippet icon()}<Sparkles class="h-5 w-5 text-primary" />{/snippet}
 			{#snippet children()}
 				<p class="sm:hidden">Sign up to save favorites</p>
-				<p class="hidden sm:block">Sign up to <strong>save favorites</strong> and build your own bar — Busser tells you what you can actually make.</p>
+				<p class="hidden sm:block">
+					Sign up to <strong>save favorites</strong> and build your own bar — Busser tells you what you
+					can actually make.
+				</p>
 			{/snippet}
 			{#snippet action()}
 				<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
@@ -271,7 +286,10 @@
 			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
 			{#snippet children()}
 				<p class="sm:hidden">Viewing global catalog</p>
-				<p class="hidden sm:block">You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory, switch to your workspace.</p>
+				<p class="hidden sm:block">
+					You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
+					switch to your workspace.
+				</p>
 			{/snippet}
 			{#snippet action()}
 				<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
@@ -281,7 +299,10 @@
 
 	{#if authenticated}
 		<!-- Desktop toolbar above hero -->
-		<div class="hidden md:flex items-center justify-end gap-2 mb-4 mt-4">
+		<div class="hidden md:flex items-center justify-end gap-2 mb-4">
+			{#if workspace?.workspaceName}
+				<WorkspaceSwitcherBadge workspaceName={workspace.workspaceName} />
+			{/if}
 			<FancyButton href="/catalog/explore" size="sm">
 				<Compass class="h-4 w-4 mr-1" />
 				Explore
@@ -295,7 +316,9 @@
 		</div>
 
 		<!-- Hero Section -->
-		<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5">
+		<div
+			class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5"
+		>
 			<!-- Desktop: title + badges below -->
 			<div class="hidden md:block">
 				<h1 class="text-2xl font-bold">Catalog</h1>
@@ -312,25 +335,16 @@
 					{/if}
 				</p>
 				<div class="flex gap-2 flex-wrap">
-					{#if workspace?.workspaceName}
-						<FancyBadge class="whitespace-nowrap">
-							<GalleryHorizontalEnd class="h-4 w-4 text-primary shrink-0" />
-							<span class="text-sm font-bold">{workspace.workspaceName}</span>
-						</FancyBadge>
-					{/if}
 					<FancyBadge class="whitespace-nowrap">
-						<FlaskConical class="h-4 w-4 text-primary shrink-0" />
+						<Wine class="h-4 w-4 text-primary shrink-0" />
 						<span class="text-sm font-bold">{data.pagination.total}</span>
 						<span class="text-xs text-muted-foreground">Recipes</span>
 					</FancyBadge>
-					<FancyBadge class="whitespace-nowrap">
-						<Wine class="h-4 w-4 text-primary shrink-0" />
-						<span class="text-sm font-bold">{data.spirits.length}</span>
-						<span class="text-xs text-muted-foreground">Spirits</span>
-					</FancyBadge>
 
 					{#if selectedSpirit && selectedSpirit !== 'all'}
-						{@const spiritObj = data.spirits.find((s) => String(s.recipeCategoryId) === selectedSpirit)}
+						{@const spiritObj = data.spirits.find(
+							(s) => String(s.recipeCategoryId) === selectedSpirit
+						)}
 						{#if spiritObj}
 							<FancyBadge class="whitespace-nowrap">
 								<span class="text-sm font-bold">{spiritObj.recipeCategoryDescription}</span>
@@ -343,7 +357,9 @@
 						<FancyBadge as="button" onclick={clearAllAdvancedFilters} class="whitespace-nowrap">
 							<SlidersHorizontal class="h-4 w-4 text-primary shrink-0" />
 							<span class="text-sm font-bold">{advancedFilterCount}</span>
-							<span class="text-xs text-muted-foreground">Advanced Filter{advancedFilterCount !== 1 ? 's' : ''}</span>
+							<span class="text-xs text-muted-foreground"
+								>Advanced Filter{advancedFilterCount !== 1 ? 's' : ''}</span
+							>
 							<X class="h-3 w-3 text-muted-foreground" />
 						</FancyBadge>
 					{/if}
@@ -359,7 +375,12 @@
 						Explore
 					</FancyButton>
 					{#if canModify}
-						<FancyButton href="/catalog/add" variant="primary" size="sm" class="flex-1 justify-center">
+						<FancyButton
+							href="/catalog/add"
+							variant="primary"
+							size="sm"
+							class="flex-1 justify-center"
+						>
 							<Plus class="h-4 w-4 mr-1" />
 							Add Recipe
 						</FancyButton>
@@ -536,7 +557,9 @@
 	{/if}
 
 	<!-- Results -->
-	{#if data.recipes.length === 0}
+	{#if $workspaceSwitching}
+		<CatalogResultsSkeleton {viewMode} count={data.recipes.length || 8} />
+	{:else if data.recipes.length === 0}
 		<Card.Root class="border-dashed">
 			<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
 				<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">

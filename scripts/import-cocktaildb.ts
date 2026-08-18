@@ -21,6 +21,7 @@ const API = 'https://www.thecocktaildb.com/api/json/v1/1';
 
 const args = process.argv.slice(2);
 const DRY = args.includes('--dry');
+const ALL = args.includes('--all'); // ignore the IBA gate — see everything the mappers accept
 const limitArg = args.find((a) => a.startsWith('--limit='));
 const LIMIT = limitArg ? parseInt(limitArg.split('=')[1]) : Infinity;
 
@@ -188,7 +189,11 @@ function parseMeasure(raw: string | null): { qty: number; unit: string; oz: numb
 	// barspoon / tsp / tbsp
 	if (/bar\s*spoon|barspoon/.test(s)) {
 		m = s.match(/^([\d./\s]+)/);
-		return { qty: m ? Math.max(1, Math.round(parseFraction(m[1]))) : 1, unit: 'barspoon', oz: null };
+		return {
+			qty: m ? Math.max(1, Math.round(parseFraction(m[1]))) : 1,
+			unit: 'barspoon',
+			oz: null,
+		};
 	}
 	if (/tsp|teaspoon/.test(s)) {
 		m = s.match(/^([\d./\s]+)/);
@@ -254,7 +259,8 @@ function parseFraction(input: string): number {
 // human-readable step desc matching existing convention ("Add 1.5oz gin")
 function stepDesc(oz: number | null, unit: string, qty: number, ingredient: string): string {
 	if (unit === 'dash') return `Add ${qty} ${qty === 1 ? 'dash' : 'dashes'} ${ingredient}`;
-	if (unit === 'barspoon') return `Add ${qty} ${qty === 1 ? 'barspoon' : 'barspoons'} ${ingredient}`;
+	if (unit === 'barspoon')
+		return `Add ${qty} ${qty === 1 ? 'barspoon' : 'barspoons'} ${ingredient}`;
 	if (unit === 'tsp') return `Add ${qty} tsp ${ingredient}`;
 	if (oz && oz >= 2) return `Top with ${ingredient}`;
 	if (oz) return `Add ${round1(oz)}oz ${ingredient}`;
@@ -314,7 +320,7 @@ Return:
 		messages: [{ role: 'user', content: prompt }],
 		response_format: zodResponseFormat(MetaSchema, 'meta'),
 	});
-	const parsed = completion.choices[0].message.parsed;
+	const { parsed } = completion.choices[0].message;
 	if (!parsed) throw new Error('no meta returned');
 	return parsed;
 }
@@ -396,7 +402,7 @@ async function main() {
 			skippedExisting++;
 			continue;
 		}
-		if (!detail.strIBA) {
+		if (!ALL && !detail.strIBA) {
 			skippedNonIba++;
 			continue;
 		}
@@ -451,7 +457,14 @@ async function main() {
 
 		if (DRY) {
 			console.log(`  + ${name} [${spirit}] ${steps.map((s) => s.category).join(', ')}`);
-			added.push({ name, spirit, technique: 'Shaken', description: '', ratings: { sweetness: 0, dryness: 0, strength: 0, versatility: 0 }, steps });
+			added.push({
+				name,
+				spirit,
+				technique: 'Shaken',
+				description: '',
+				ratings: { sweetness: 0, dryness: 0, strength: 0, versatility: 0 },
+				steps,
+			});
 			existingNames.add(normalize(name));
 			continue;
 		}
@@ -459,7 +472,12 @@ async function main() {
 		// gpt fills description/technique/ratings
 		let meta: Meta;
 		try {
-			meta = await fillMeta(name, spirit, rawPairs.map((p) => p.ing), detail.strInstructions || '');
+			meta = await fillMeta(
+				name,
+				spirit,
+				rawPairs.map((p) => p.ing),
+				detail.strInstructions || ''
+			);
 		} catch (e: any) {
 			console.log(`  ! ${name} (gpt failed: ${e.message})`);
 			continue;

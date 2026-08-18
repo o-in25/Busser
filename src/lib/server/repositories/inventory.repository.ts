@@ -255,9 +255,7 @@ export class InventoryRepository extends BaseRepository {
 					.select('ProductImageUrl')
 					.whereIn('ProductId', ownedIds)) as Array<{ productImageUrl: string | null }>;
 
-				const urls = detailRows
-					.map((r) => r.productImageUrl)
-					.filter((url): url is string => !!url);
+				const urls = detailRows.map((r) => r.productImageUrl).filter((url): url is string => !!url);
 
 				const rows = await trx<Product>('product')
 					.whereIn('ProductId', ownedIds)
@@ -275,7 +273,8 @@ export class InventoryRepository extends BaseRepository {
 			if (error?.code === 'ER_ROW_IS_REFERENCED_2' || error?.errno === 1451) {
 				return {
 					status: 'error',
-					error: 'One or more of the selected items are used in recipes. Remove them from those recipes first, then try again.',
+					error:
+						'One or more of the selected items are used in recipes. Remove them from those recipes first, then try again.',
 				};
 			}
 			console.error(error);
@@ -312,7 +311,8 @@ export class InventoryRepository extends BaseRepository {
 			if (error?.code === 'ER_ROW_IS_REFERENCED_2' || error?.errno === 1451) {
 				return {
 					status: 'error',
-					error: 'This item is used in one or more recipes. Remove it from those recipes first, then try again.',
+					error:
+						'This item is used in one or more recipes. Remove it from those recipes first, then try again.',
 				};
 			}
 			console.error(error);
@@ -399,7 +399,10 @@ export class InventoryRepository extends BaseRepository {
 			};
 		} catch (error: any) {
 			console.error('Failed to get inventory stats:', error);
-			Logger.error(`Failed to get inventory stats: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get inventory stats: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { total: 0, inStock: 0, outOfStock: 0, categoryBreakdown: [] };
 		}
 	}
@@ -422,7 +425,10 @@ export class InventoryRepository extends BaseRepository {
 			}));
 		} catch (error: any) {
 			console.error('Failed to get category groups:', error);
-			Logger.error(`Failed to get category groups: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get category groups: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return [];
 		}
 	}
@@ -447,7 +453,10 @@ export class InventoryRepository extends BaseRepository {
 			return usageMap;
 		} catch (error: any) {
 			console.error('Failed to get recipe usage:', error);
-			Logger.error(`Failed to get recipe usage: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get recipe usage: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return new Map();
 		}
 	}
@@ -723,7 +732,10 @@ export class InventoryRepository extends BaseRepository {
 			return { data: categories, pagination };
 		} catch (error: any) {
 			console.error('Failed to get all categories:', error);
-			Logger.error(`Failed to get all categories: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get all categories: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { data: [], pagination: emptyPagination };
 		}
 	}
@@ -771,7 +783,10 @@ export class InventoryRepository extends BaseRepository {
 			}));
 		} catch (error: any) {
 			console.error('Failed to get subcategories:', error);
-			Logger.error(`Failed to get subcategories: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get subcategories: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return [];
 		}
 	}
@@ -788,7 +803,10 @@ export class InventoryRepository extends BaseRepository {
 			return result as Product[];
 		} catch (error: any) {
 			console.error('Failed to get products by category:', error);
-			Logger.error(`Failed to get products by category: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get products by category: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return [];
 		}
 	}
@@ -880,7 +898,10 @@ export class InventoryRepository extends BaseRepository {
 			return { data: items, pagination };
 		} catch (error: any) {
 			console.error('Failed to get shopping list:', error);
-			Logger.error(`Failed to get shopping list: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get shopping list: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { data: [], pagination: emptyPagination };
 		}
 	}
@@ -906,7 +927,10 @@ export class InventoryRepository extends BaseRepository {
 			};
 		} catch (error: any) {
 			console.error('Failed to get shopping list totals:', error);
-			Logger.error(`Failed to get shopping list totals: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get shopping list totals: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { totalCost: 0, totalItems: 0 };
 		}
 	}
@@ -944,7 +968,10 @@ export class InventoryRepository extends BaseRepository {
 			return map;
 		} catch (error: any) {
 			console.error('Failed to get shopping list impact:', error);
-			Logger.error(`Failed to get shopping list impact: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get shopping list impact: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return new Map();
 		}
 	}
@@ -976,7 +1003,10 @@ export class InventoryRepository extends BaseRepository {
 			return result as Supplier[];
 		} catch (error: any) {
 			console.error('Failed to get suppliers:', error);
-			Logger.error(`Failed to get suppliers: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get suppliers: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return [];
 		}
 	}

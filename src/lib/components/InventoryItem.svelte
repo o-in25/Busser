@@ -171,7 +171,9 @@
 					class="h-full w-full"
 				/>
 			</div>
-			<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+			<div
+				class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
+			></div>
 
 			<!-- Name + category over image -->
 			<div class="absolute inset-x-0 bottom-0 p-4">
@@ -219,7 +221,10 @@
 						<span
 							class="shrink-0 flex flex-col items-center px-2.5 py-1.5 rounded-xl text-white shadow-lg {overallRating.style}"
 						>
-							<span class="text-[9px] font-semibold uppercase tracking-wider opacity-80 leading-none">verdict</span>
+							<span
+								class="text-[9px] font-semibold uppercase tracking-wider opacity-80 leading-none"
+								>verdict</span
+							>
 							<span class="text-lg font-bold leading-tight">{overallRating.score}</span>
 							<span class="text-[10px] opacity-80 leading-none">{overallRating.label}</span>
 						</span>
@@ -239,7 +244,9 @@
 			{#if recipeCount > 0}
 				<FancyBadge href="/catalog?ingredientInclude={product.productId}">
 					<FlaskConical class="h-3.5 w-3.5 text-primary" />
-					<span class="text-xs text-muted-foreground">Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span>
+					<span class="text-xs text-muted-foreground"
+						>Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span
+					>
 				</FancyBadge>
 			{/if}
 		</div>
@@ -262,7 +269,9 @@
 				<FancyBadge>
 					<Flame class="h-3.5 w-3.5 text-neon-amber-500" />
 					<span class="text-xs font-semibold">
-						{product.productProof}° {#if abvPercent}<span class="font-normal text-muted-foreground">({abvPercent}%)</span>{/if}
+						{product.productProof}° {#if abvPercent}<span class="font-normal text-muted-foreground"
+								>({abvPercent}%)</span
+							>{/if}
 					</span>
 				</FancyBadge>
 			{/if}
@@ -276,7 +285,9 @@
 
 		<!-- Flavor Profile -->
 		{#if hasFlavorProfile}
-			<div class="rounded-xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-sm border border-white/20 dark:border-white/10 p-3 space-y-2.5">
+			<div
+				class="rounded-xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-sm border border-white/20 dark:border-white/10 p-3 space-y-2.5"
+			>
 				<h3 class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
 					Flavor Profile
 				</h3>
@@ -292,7 +303,9 @@
 									style="width: {(flavor.value / 10) * 100}%"
 								></div>
 							</div>
-							<span class="text-xs font-medium w-7 text-right text-muted-foreground">{flavor.value.toFixed(1)}</span>
+							<span class="text-xs font-medium w-7 text-right text-muted-foreground"
+								>{flavor.value.toFixed(1)}</span
+							>
 						</div>
 					{/if}
 				{/each}
@@ -334,7 +347,5 @@
 		</div>
 	</div>
 {:else}
-	<div class="flex items-center justify-center h-32 text-muted-foreground">
-		No product data
-	</div>
+	<div class="flex items-center justify-center h-32 text-muted-foreground">No product data</div>
 {/if}

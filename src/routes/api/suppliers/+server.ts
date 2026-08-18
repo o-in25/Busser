@@ -9,7 +9,11 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ locals }) => {
 	const workspaceId = locals.activeWorkspaceId;
 	if (!workspaceId || !locals.user) {
-		error(StatusCodes.UNAUTHORIZED, { reason: 'Unauthorized', code: StatusCodes.UNAUTHORIZED, message: 'Workspace context required' });
+		error(StatusCodes.UNAUTHORIZED, {
+			reason: 'Unauthorized',
+			code: StatusCodes.UNAUTHORIZED,
+			message: 'Workspace context required',
+		});
 	}
 
 	const suppliers = await inventoryRepo.getSuppliers(workspaceId);
@@ -19,12 +23,20 @@ export const GET: RequestHandler = async ({ locals }) => {
 export const POST: RequestHandler = async ({ locals, request }) => {
 	const workspaceId = locals.activeWorkspaceId;
 	if (!workspaceId || !locals.user) {
-		error(StatusCodes.UNAUTHORIZED, { reason: 'Unauthorized', code: StatusCodes.UNAUTHORIZED, message: 'Workspace context required' });
+		error(StatusCodes.UNAUTHORIZED, {
+			reason: 'Unauthorized',
+			code: StatusCodes.UNAUTHORIZED,
+			message: 'Workspace context required',
+		});
 	}
 
 	const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
 	if (!canModify) {
-		error(StatusCodes.FORBIDDEN, { reason: getReasonPhrase(StatusCodes.FORBIDDEN), code: StatusCodes.FORBIDDEN, message: 'You need editor or owner access to add suppliers.' });
+		error(StatusCodes.FORBIDDEN, {
+			reason: getReasonPhrase(StatusCodes.FORBIDDEN),
+			code: StatusCodes.FORBIDDEN,
+			message: 'You need editor or owner access to add suppliers.',
+		});
 	}
 
 	const body = await request.json();
@@ -39,7 +51,11 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 	});
 
 	if (result.status === 'error') {
-		error(StatusCodes.INTERNAL_SERVER_ERROR, { reason: 'Server Error', code: StatusCodes.INTERNAL_SERVER_ERROR, message: result.error });
+		error(StatusCodes.INTERNAL_SERVER_ERROR, {
+			reason: 'Server Error',
+			code: StatusCodes.INTERNAL_SERVER_ERROR,
+			message: result.error,
+		});
 	}
 
 	return json(result.data, { status: 201 });
@@ -48,22 +64,38 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 export const DELETE: RequestHandler = async ({ locals, url }) => {
 	const workspaceId = locals.activeWorkspaceId;
 	if (!workspaceId || !locals.user) {
-		error(StatusCodes.UNAUTHORIZED, { reason: 'Unauthorized', code: StatusCodes.UNAUTHORIZED, message: 'Workspace context required' });
+		error(StatusCodes.UNAUTHORIZED, {
+			reason: 'Unauthorized',
+			code: StatusCodes.UNAUTHORIZED,
+			message: 'Workspace context required',
+		});
 	}
 
 	const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
 	if (!canModify) {
-		error(StatusCodes.FORBIDDEN, { reason: getReasonPhrase(StatusCodes.FORBIDDEN), code: StatusCodes.FORBIDDEN, message: 'You need editor or owner access to remove suppliers.' });
+		error(StatusCodes.FORBIDDEN, {
+			reason: getReasonPhrase(StatusCodes.FORBIDDEN),
+			code: StatusCodes.FORBIDDEN,
+			message: 'You need editor or owner access to remove suppliers.',
+		});
 	}
 
 	const supplierId = Number(url.searchParams.get('id'));
 	if (!supplierId || isNaN(supplierId)) {
-		error(StatusCodes.BAD_REQUEST, { reason: 'Bad Request', code: StatusCodes.BAD_REQUEST, message: 'Supplier ID is required.' });
+		error(StatusCodes.BAD_REQUEST, {
+			reason: 'Bad Request',
+			code: StatusCodes.BAD_REQUEST,
+			message: 'Supplier ID is required.',
+		});
 	}
 
 	const result = await inventoryRepo.deleteSupplier(workspaceId, supplierId);
 	if (result.status === 'error') {
-		error(StatusCodes.BAD_REQUEST, { reason: 'Bad Request', code: StatusCodes.BAD_REQUEST, message: result.error });
+		error(StatusCodes.BAD_REQUEST, {
+			reason: 'Bad Request',
+			code: StatusCodes.BAD_REQUEST,
+			message: result.error,
+		});
 	}
 
 	return json({ deleted: result.data });

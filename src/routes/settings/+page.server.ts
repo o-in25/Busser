@@ -77,5 +77,4 @@ export const actions: Actions = {
 			return fail(500, { error: 'Failed to save avatar' });
 		}
 	},
-
 };

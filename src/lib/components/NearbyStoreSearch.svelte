@@ -33,14 +33,9 @@
 			const { latitude, longitude } = position.coords;
 
 			// cache coords
-			localStorage.setItem(
-				'busser-location',
-				JSON.stringify({ lat: latitude, lng: longitude })
-			);
+			localStorage.setItem('busser-location', JSON.stringify({ lat: latitude, lng: longitude }));
 
-			const res = await fetch(
-				`/api/suppliers/nearby?lat=${latitude}&lng=${longitude}`
-			);
+			const res = await fetch(`/api/suppliers/nearby?lat=${latitude}&lng=${longitude}`);
 
 			if (!res.ok) throw new Error('Search failed');
 			results = await res.json();
@@ -70,12 +65,7 @@
 <div class="space-y-4">
 	<div class="flex items-center justify-between">
 		<h2 class="text-lg font-semibold">Nearby Stores</h2>
-		<Button
-			variant="outline"
-			size="sm"
-			onclick={searchNearby}
-			disabled={loading}
-		>
+		<Button variant="outline" size="sm" onclick={searchNearby} disabled={loading}>
 			{#if loading}
 				<Loader2 class="h-4 w-4 mr-2 animate-spin" />
 				Searching...

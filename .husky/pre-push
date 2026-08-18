@@ -1,1 +1,5 @@
 pnpm test
+
+# APP_VERSION is a build-time build-arg in prod; default it so the type check
+# resolves $env/static/private locally the same way CI does.
+APP_VERSION=${APP_VERSION:-dev} pnpm run check

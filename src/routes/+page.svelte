@@ -2,26 +2,20 @@
 	import {
 		AlertCircle,
 		ArrowRight,
-		Bell,
 		BookOpen,
 		CheckCircle2,
-		ChefHat,
-		ChevronDown,
 		ChevronRight,
 		FlaskConical,
 		GlassWater,
-		Lightbulb,
 		Loader2,
 		LogIn,
 		Mail,
 		Package,
 		Plus,
-		Search,
 		Send,
 		ShoppingCart,
 		Shuffle,
 		Sparkles,
-		Star,
 		Users,
 		BarChart3,
 		DollarSign,
@@ -29,7 +23,7 @@
 		SwatchBook,
 		MapPin,
 	} from 'lucide-svelte';
-	import { fade, slide } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
@@ -47,7 +41,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { reveal } from '$lib/actions/reveal';
-	import { idToSlug, moods } from '$lib/spirits';
+	import { moods } from '$lib/spirits';
 	import { indexFromSeed } from '$lib/math';
 	import greetings from '$lib/data/greetings.json';
 	import { cn } from '$lib/utils';
@@ -206,8 +200,9 @@
 
 {#if !$page.data.user}
 	<!-- Hero Section -->
+	<!-- mobile reserves extra height for the fixed bottom nav so the carousel stays above the fold -->
 	<section
-		class="relative overflow-hidden h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl"
+		class="relative overflow-hidden h-[calc(100dvh-10rem)] md:h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl"
 	>
 		<!-- Animated background gradient -->
 		<div class="absolute inset-0 hero-gradient-bg -z-10 rounded-2xl"></div>
@@ -740,7 +735,10 @@
 							</div>
 							<div>
 								<p class="font-medium">Browse Catalog</p>
-								<p class="text-xs text-muted-foreground">{dashboardData.totalRecipes} {dashboardData.totalRecipes === 1 ? 'recipe' : 'recipes'}</p>
+								<p class="text-xs text-muted-foreground">
+									{dashboardData.totalRecipes}
+									{dashboardData.totalRecipes === 1 ? 'recipe' : 'recipes'}
+								</p>
 							</div>
 						</div>
 					</Card.Root>

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import '../app.css';
 
-
 	import { onMount, setContext } from 'svelte';
 
 	import { page } from '$app/stores';
@@ -83,7 +82,8 @@
 
 			// only treat viewport shrink as keyboard open when an input is focused
 			const el = document.activeElement;
-			const inputFocused = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT');
+			const inputFocused =
+				el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT');
 			keyboardOpen = inputFocused ? vp.height < initialHeight - 100 : false;
 
 			// keyboard dismissed (viewport grew back) — blur the active input
@@ -130,7 +130,10 @@
 	<link rel="canonical" href={$canonical} />
 </svelte:head>
 
-<div class="flex flex-col min-h-[100dvh]" style:padding-top={showNav ? undefined : 'env(safe-area-inset-top, 0px)'}>
+<div
+	class="flex flex-col min-h-[100dvh]"
+	style:padding-top={showNav ? undefined : 'env(safe-area-inset-top, 0px)'}
+>
 	<!-- nav progress: top bar on desktop only — mobile shows it above the bottom nav instead (see Nav.svelte) -->
 	<div class="hidden md:block">
 		<NavigationProgress />
@@ -144,7 +147,10 @@
 	<!-- page content with bottom padding on mobile for fixed nav.
 	     pull-to-refresh transforms only this wrapper — never the root — so the fixed/sticky nav
 	     doesn't get captured as its containing block on ios -->
-	<div class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}" use:refresh>
+	<div
+		class="container mx-auto px-2 py-3 md:px-4 md:py-4 {showNav ? 'pb-24 md:pb-4' : ''}"
+		use:refresh
+	>
 		<slot />
 	</div>
 

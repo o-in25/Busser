@@ -231,7 +231,10 @@
 			{:else}
 				<Sparkles class="w-4 h-4" />
 				Generate with AI
-				<Badge variant="secondary" class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0 ml-1">Beta</Badge>
+				<Badge
+					variant="secondary"
+					class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0 ml-1">Beta</Badge
+				>
 			{/if}
 		</Button>
 

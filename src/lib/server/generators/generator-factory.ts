@@ -206,10 +206,7 @@ const generators: { [T in GeneratorType]: GeneratorConfig<T> } = {
 				.replace('[NAME]', input.productName)
 				.replace('[CATEGORY]', input.categoryName)
 				.replace('[PROOF]', input.proof ? `PROOF: ${input.proof}\n` : '')
-				.replace(
-					'[DESCRIPTION]',
-					input.description ? `DESCRIPTION: ${input.description}` : ''
-				);
+				.replace('[DESCRIPTION]', input.description ? `DESCRIPTION: ${input.description}` : '');
 		},
 	},
 

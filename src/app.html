@@ -8,7 +8,10 @@
 			name="viewport"
 			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
 		/>
-		<meta name="description" content="Manage your home bar — track inventory, discover cocktails, and collaborate with friends." />
+		<meta
+			name="description"
+			content="Manage your home bar — track inventory, discover cocktails, and collaborate with friends."
+		/>
 
 		<!-- PWA -->
 		<link rel="manifest" href="/manifest.json" />
@@ -19,7 +22,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="Busser" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png" />
 
 		<!-- Inter Font -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,26 +37,39 @@
 			body {
 				background:
 					radial-gradient(ellipse 75% 60% at 10% 4%, rgba(253, 111, 148, 0.34) 0%, transparent 60%),
-					radial-gradient(ellipse 70% 60% at 92% 8%, rgba(165, 125, 213, 0.30) 0%, transparent 60%),
-					radial-gradient(ellipse 85% 70% at 78% 96%, rgba(150, 190, 230, 0.20) 0%, transparent 64%),
+					radial-gradient(ellipse 70% 60% at 92% 8%, rgba(165, 125, 213, 0.3) 0%, transparent 60%),
+					radial-gradient(ellipse 85% 70% at 78% 96%, rgba(150, 190, 230, 0.2) 0%, transparent 64%),
 					linear-gradient(160deg, #ece6f4 0%, #f4ecf0 52%, #e7eef6 100%);
 				background-attachment: fixed;
 			}
 			/* dark mode -- calm pink->purple wash, kept subtle so it doesn't compete with content */
 			.dark body {
 				background:
-					radial-gradient(ellipse 85% 60% at 12% 2%, rgba(226, 30, 96, 0.20) 0%, transparent 62%),
+					radial-gradient(ellipse 85% 60% at 12% 2%, rgba(226, 30, 96, 0.2) 0%, transparent 62%),
 					radial-gradient(ellipse 80% 60% at 90% 6%, rgba(122, 78, 190, 0.18) 0%, transparent 62%),
-					radial-gradient(ellipse 100% 70% at 50% 104%, rgba(96, 66, 156, 0.12) 0%, transparent 66%),
+					radial-gradient(
+						ellipse 100% 70% at 50% 104%,
+						rgba(96, 66, 156, 0.12) 0%,
+						transparent 66%
+					),
 					linear-gradient(160deg, #08070e 0%, #0a0911 60%, #08080e 100%);
 				background-attachment: fixed;
 			}
 			/* baseline — safe for all contexts */
-			html, body {
+			html,
+			body {
 				-webkit-tap-highlight-color: transparent;
 				-webkit-font-smoothing: antialiased;
 				-moz-osx-font-smoothing: grayscale;
 				touch-action: manipulation;
+			}
+			/* html paints the overscroll (rubber-band) region — give it the gradient's base
+			   tone so pulling past the page shows page color, not the default white */
+			html {
+				background: #ece6f4;
+			}
+			html.dark {
+				background: #08070e;
 			}
 			/* single scroll container — standalone PWA only */
 			@media (display-mode: standalone) {
@@ -70,21 +86,33 @@
 					overscroll-behavior-y: contain;
 				}
 			}
-			button, a, [role="button"] {
+			button,
+			a,
+			[role='button'] {
 				-webkit-touch-callout: none;
 				user-select: none;
 			}
 		</style>
-		<!-- OG Meta Tags -->
+		<!-- OG Meta Tags — absolute image url so linkedin/slack/imessage scrapers resolve it -->
+		<meta property="og:site_name" content="Busser" />
 		<meta property="og:title" content="Busser — Home Bar Management" />
-		<meta property="og:description" content="From shelf to shaker. Manage your home bar inventory, discover cocktails, and collaborate with friends." />
-		<meta property="og:image" content="/og-image.png" />
+		<meta
+			property="og:description"
+			content="From shelf to shaker. Manage your home bar inventory, discover cocktails, and collaborate with friends."
+		/>
+		<meta property="og:image" content="https://busserapp.com/og-image.png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content="Busser — from shelf to shaker" />
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content="https://busserapp.com" />
 		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:image" content="/og-image.png" />
+		<meta name="twitter:title" content="Busser — Home Bar Management" />
+		<meta
+			name="twitter:description"
+			content="From shelf to shaker. Manage your home bar inventory, discover cocktails, and collaborate with friends."
+		/>
+		<meta name="twitter:image" content="https://busserapp.com/og-image.png" />
 		%sveltekit.head%
 		<script>
 			if (localStorage.getItem('color-theme')) {

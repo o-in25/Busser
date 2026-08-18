@@ -69,12 +69,15 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 
 			for (const ws of editableWorkspaces) {
 				const imported = await catalogRepo.findImportedRecipe(
-					ws.workspaceId, Number(recipeId), globalWorkspace
+					ws.workspaceId,
+					Number(recipeId),
+					globalWorkspace
 				);
 				if (imported) importedTo.push(ws.workspaceId);
 
 				const nameMatch = await catalogRepo.findByName(
-					ws.workspaceId, result.data.recipe.recipeName
+					ws.workspaceId,
+					result.data.recipe.recipeName
 				);
 				if (nameMatch) nameCollisions.push(ws.workspaceId);
 			}

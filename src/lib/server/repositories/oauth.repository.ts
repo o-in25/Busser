@@ -28,7 +28,10 @@ export class OAuthRepository extends BaseRepository {
 			return this.userRepo.findById(link.userId);
 		} catch (error: any) {
 			console.error('Failed to find OAuth account:', error.message);
-			Logger.error(`Failed to find OAuth account: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to find OAuth account: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -52,7 +55,10 @@ export class OAuthRepository extends BaseRepository {
 				return { status: 'error', error: 'This OAuth account is already linked.' };
 			}
 			console.error('Failed to link OAuth account:', error.message);
-			Logger.error(`Failed to link OAuth account: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to link OAuth account: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -68,14 +74,18 @@ export class OAuthRepository extends BaseRepository {
 				const suffix = Math.random().toString(36).substring(2, 10);
 				const username = `user-${suffix}`;
 
-				const user = await this.userRepo.register(trx, {
-					username,
-					email: profile.email,
-					password: null,
-					verified: 1,
-					needsOnboarding: 1,
-					avatarUrl: profile.avatarUrl,
-				}, globalWorkspaceId);
+				const user = await this.userRepo.register(
+					trx,
+					{
+						username,
+						email: profile.email,
+						password: null,
+						verified: 1,
+						needsOnboarding: 1,
+						avatarUrl: profile.avatarUrl,
+					},
+					globalWorkspaceId
+				);
 
 				await trx('oauthUser').insert({
 					provider: profile.provider,
@@ -128,7 +138,10 @@ export class OAuthRepository extends BaseRepository {
 
 			return this.userRepo.findById(user.userId);
 		} catch (error: any) {
-			await Logger.error(`OAuth registration failed for ${profile.email}: ${error.message}`, error.stack);
+			await Logger.error(
+				`OAuth registration failed for ${profile.email}: ${error.message}`,
+				error.stack
+			);
 
 			const friendlyMessages = [
 				'Email already taken.',
@@ -154,7 +167,10 @@ export class OAuthRepository extends BaseRepository {
 			return !!user?.password;
 		} catch (error: any) {
 			console.error('Failed to check password:', error.message);
-			Logger.error(`Failed to check password: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to check password: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return false;
 		}
 	}
@@ -169,7 +185,10 @@ export class OAuthRepository extends BaseRepository {
 			return { status: 'success', data: rows as LinkedOAuthAccount[] };
 		} catch (error: any) {
 			console.error('Failed to get linked accounts:', error.message);
-			Logger.error(`Failed to get linked accounts: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to get linked accounts: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: error.message };
 		}
 	}
@@ -195,7 +214,10 @@ export class OAuthRepository extends BaseRepository {
 			return { status: 'success' };
 		} catch (error: any) {
 			console.error('Failed to unlink OAuth account:', error.message);
-			Logger.error(`Failed to unlink OAuth account: ${error.sqlMessage || error.message}`, error.sql || error.stackTrace);
+			Logger.error(
+				`Failed to unlink OAuth account: ${error.sqlMessage || error.message}`,
+				error.sql || error.stackTrace
+			);
 			return { status: 'error', error: error.message };
 		}
 	}

@@ -1,6 +1,9 @@
 <svelte:head>
 	<title>Privacy Policy - Busser</title>
-	<meta name="description" content="Read how Busser collects, uses, and protects your personal information." />
+	<meta
+		name="description"
+		content="Read how Busser collects, uses, and protects your personal information."
+	/>
 </svelte:head>
 
 <h1 class="text-3xl font-bold mb-6">Privacy Policy</h1>

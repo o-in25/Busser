@@ -25,13 +25,13 @@
 	};
 
 	// bottom sheets need safe-area-inset-bottom (home indicator), not top (notch)
-	const contentStyle = side === 'bottom'
-		? 'padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));'
-		: 'padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));';
+	const contentStyle =
+		side === 'bottom'
+			? 'padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));'
+			: 'padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));';
 
-	const closeStyle = side === 'bottom'
-		? 'top: 1.25rem;'
-		: 'top: calc(1.25rem + env(safe-area-inset-top, 0px));';
+	const closeStyle =
+		side === 'bottom' ? 'top: 1.25rem;' : 'top: calc(1.25rem + env(safe-area-inset-top, 0px));';
 </script>
 
 <SheetPrimitive.Portal>

@@ -43,17 +43,16 @@
 	const showImage = $derived(!!src && !errored);
 </script>
 
-<div class={cn('relative overflow-hidden', className)} style={transitionName ? `view-transition-name: ${transitionName}` : undefined}>
+<div
+	class={cn('relative overflow-hidden', className)}
+	style={transitionName ? `view-transition-name: ${transitionName}` : undefined}
+>
 	{#if showImage && !loaded}
 		<div class="absolute inset-0 bg-muted skeleton-delayed"></div>
 	{/if}
 
 	{#if showImage && loaded}
-		<img
-			{src}
-			{alt}
-			class={cn('h-full w-full object-cover', imgClass)}
-		/>
+		<img {src} {alt} class={cn('h-full w-full object-cover', imgClass)} />
 	{:else if !showImage}
 		<ImagePlaceholder {variant} class="w-20 h-20" />
 	{/if}

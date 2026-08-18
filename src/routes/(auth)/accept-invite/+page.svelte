@@ -41,9 +41,7 @@
 
 <div class="flex flex-col space-y-6">
 	<div class="text-center">
-		<div
-			class="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center"
-		>
+		<div class="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
 			<GalleryHorizontalEnd class="h-6 w-6 text-primary" />
 		</div>
 		<h3 class="text-2xl font-semibold">Workspace Invitation</h3>
@@ -58,9 +56,7 @@
 				<AlertCircle class="h-6 w-6 text-destructive" />
 			</div>
 			<p class="text-muted-foreground">{data.error}</p>
-			<a href="/" class={cn(buttonVariants({ variant: 'outline' }), 'mt-4')}>
-				Go Home
-			</a>
+			<a href="/" class={cn(buttonVariants({ variant: 'outline' }), 'mt-4')}> Go Home </a>
 		</div>
 	{:else if data.invitation && data.workspace}
 		<!-- Invitation details -->

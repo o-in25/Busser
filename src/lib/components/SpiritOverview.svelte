@@ -24,9 +24,7 @@
 	></div>
 
 	<!-- history panel -->
-	<div
-		class="glass-surface p-6 md:p-8 rounded-xl mb-6 relative overflow-hidden"
-	>
+	<div class="glass-surface p-6 md:p-8 rounded-xl mb-6 relative overflow-hidden">
 		<div
 			class="absolute inset-0 opacity-[0.04] pointer-events-none"
 			style="background: linear-gradient(135deg, {accentColor.hex}, transparent)"

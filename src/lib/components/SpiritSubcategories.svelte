@@ -23,8 +23,7 @@
 	let scrollSnaps: number[] = $state([]);
 
 	const reducedMotion =
-		typeof window !== 'undefined' &&
-		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	const autoplayPlugin = reducedMotion
 		? []
@@ -84,7 +83,7 @@
 				class="w-full group/carousel"
 			>
 				<Carousel.Content class="-ml-4">
-					{#each rest as sub, i}
+					{#each rest as sub}
 						<Carousel.Item class="pl-4 basis-[75%] sm:basis-[45%] lg:basis-[33%]">
 							<div
 								class="glass-surface p-5 rounded-xl h-full border-t-2"
@@ -117,10 +116,7 @@
 				<button
 					type="button"
 					aria-label="Go to slide {i + 1}"
-					class={cn(
-						'carousel-dot',
-						selectedIndex === i && 'carousel-dot-active'
-					)}
+					class={cn('carousel-dot', selectedIndex === i && 'carousel-dot-active')}
 					onclick={() => scrollTo(i)}
 				></button>
 			{/each}

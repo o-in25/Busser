@@ -54,7 +54,9 @@
 {#if viewMode === 'grid'}
 	<!-- Grid View Card -->
 	<a href="/inventory/{product.productId}/edit" class="block group" onclick={handleClick}>
-		<Card.Root class="overflow-hidden hover:shadow-lg transition-all duration-300 h-full dark:hover:shadow-glow-purple">
+		<Card.Root
+			class="overflow-hidden hover:shadow-lg transition-all duration-300 h-full dark:hover:shadow-glow-purple"
+		>
 			<!-- Image -->
 			<div class="relative h-44 overflow-hidden">
 				<SkeletonImage
@@ -77,7 +79,13 @@
 				<!-- Stock status badge -->
 				{#if showStock}
 					<div class="absolute top-3 right-3">
-						<Badge variant={stockStatus.variant} class={cn('bg-background/80 backdrop-blur-sm', stockStatus.variant === 'default' && 'dark:shadow-glow-green')}>
+						<Badge
+							variant={stockStatus.variant}
+							class={cn(
+								'bg-background/80 backdrop-blur-sm',
+								stockStatus.variant === 'default' && 'dark:shadow-glow-green'
+							)}
+						>
 							<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
 							{stockStatus.label}
 						</Badge>
@@ -98,7 +106,11 @@
 				{#if recipeCount > 0}
 					<button
 						class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-						onclick={(e) => { e.preventDefault(); e.stopPropagation(); goto(`/catalog?ingredientInclude=${product.productId}`); }}
+						onclick={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							goto(`/catalog?ingredientInclude=${product.productId}`);
+						}}
 					>
 						<FlaskConical class="h-3.5 w-3.5" />
 						<span>Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span>
@@ -150,7 +162,11 @@
 						{#if recipeCount > 0}
 							<button
 								class="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-								onclick={(e) => { e.preventDefault(); e.stopPropagation(); goto(`/catalog?ingredientInclude=${product.productId}`); }}
+								onclick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									goto(`/catalog?ingredientInclude=${product.productId}`);
+								}}
 							>
 								<FlaskConical class="h-3.5 w-3.5" />
 								Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}

@@ -4,15 +4,30 @@
 	import { cn } from '$lib/utils';
 	import { idToSlug } from '$lib/spirits';
 
-	const { topSpirit, spiritCounts, availableCount, allSpirits }: {
-		topSpirit: { recipeCategoryId: number; recipeCategoryDescription: string | null; recipeCategoryDescriptionImageUrl: string | null };
+	const {
+		topSpirit,
+		spiritCounts,
+		availableCount,
+		allSpirits,
+	}: {
+		topSpirit: {
+			recipeCategoryId: number;
+			recipeCategoryDescription: string | null;
+			recipeCategoryDescriptionImageUrl: string | null;
+		};
 		spiritCounts: Record<number, number>;
 		availableCount: number;
-		allSpirits: { recipeCategoryId: number; recipeCategoryDescription: string | null; recipeCategoryDescriptionImageUrl: string | null }[];
+		allSpirits: {
+			recipeCategoryId: number;
+			recipeCategoryDescription: string | null;
+			recipeCategoryDescriptionImageUrl: string | null;
+		}[];
 	} = $props();
 
 	const topCount = $derived(spiritCounts[topSpirit.recipeCategoryId] || 0);
-	const percentage = $derived(availableCount > 0 ? Math.round((topCount / availableCount) * 100) : 0);
+	const percentage = $derived(
+		availableCount > 0 ? Math.round((topCount / availableCount) * 100) : 0
+	);
 
 	// circumference for the ring indicator
 	const ringR = 36;
@@ -26,7 +41,9 @@
 			.sort((a, b) => b.count - a.count);
 	});
 
-	const maxCount = $derived(allSorted.length > 0 && allSorted[0].count > 0 ? allSorted[0].count : 1);
+	const maxCount = $derived(
+		allSorted.length > 0 && allSorted[0].count > 0 ? allSorted[0].count : 1
+	);
 </script>
 
 <div class="space-y-3">
@@ -99,20 +116,26 @@
 					{:else}
 						<div class="w-5 h-5 rounded-full bg-muted shrink-0"></div>
 					{/if}
-					<span class="text-[10px] text-muted-foreground w-14 truncate shrink-0">{spirit.recipeCategoryDescription}</span>
+					<span class="text-[10px] text-muted-foreground w-14 truncate shrink-0"
+						>{spirit.recipeCategoryDescription}</span
+					>
 					<div class="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
 						<div
 							class={cn(
 								'h-full rounded-full transition-all duration-500',
-								spirit.recipeCategoryId === topSpirit.recipeCategoryId ? 'bg-primary' : 'bg-primary/40'
+								spirit.recipeCategoryId === topSpirit.recipeCategoryId
+									? 'bg-primary'
+									: 'bg-primary/40'
 							)}
 							style="width: {spirit.count > 0 ? (spirit.count / maxCount) * 100 : 0}%"
 						></div>
 					</div>
-					<span class={cn(
-						'text-[10px] font-semibold w-4 text-right tabular-nums',
-						spirit.count === 0 ? 'text-muted-foreground/40' : ''
-					)}>{spirit.count}</span>
+					<span
+						class={cn(
+							'text-[10px] font-semibold w-4 text-right tabular-nums',
+							spirit.count === 0 ? 'text-muted-foreground/40' : ''
+						)}>{spirit.count}</span
+					>
 				</div>
 			{/each}
 		</div>
@@ -122,7 +145,10 @@
 	<div class="pt-2 border-t border-border/50">
 		<a
 			href="/catalog/explore/{idToSlug[topSpirit.recipeCategoryId] ?? topSpirit.recipeCategoryId}"
-			class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full justify-center gap-2 h-7 text-xs')}
+			class={cn(
+				buttonVariants({ variant: 'outline', size: 'sm' }),
+				'w-full justify-center gap-2 h-7 text-xs'
+			)}
 		>
 			Explore {topSpirit.recipeCategoryDescription} Cocktails
 			<ArrowRight class="h-3.5 w-3.5" />

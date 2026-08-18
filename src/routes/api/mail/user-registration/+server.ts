@@ -12,7 +12,10 @@ export const GET: RequestHandler = async () => {
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const ip = getClientIp(request);
-		const rateLimit = checkRateLimit(`mail-resend:${ip}`, { maxRequests: 3, windowMs: 60 * 1000 });
+		const rateLimit = await checkRateLimit(`mail-resend:${ip}`, {
+			maxRequests: 3,
+			windowMs: 60 * 1000,
+		});
 		if (!rateLimit.allowed) {
 			return json({ success: true });
 		}
@@ -34,7 +37,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		return json({ success: true });
-	} catch (err: any) {
+	} catch {
 		return json({ success: true });
 	}
 };

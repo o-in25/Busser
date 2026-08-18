@@ -44,5 +44,11 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		}
 	}
 
-	return { user, workspaceName, workspaces, activeWorkspaceId, globalWorkspaceId: getGlobalWorkspace() };
+	return {
+		user,
+		workspaceName,
+		workspaces,
+		activeWorkspaceId,
+		globalWorkspaceId: getGlobalWorkspace(),
+	};
 };

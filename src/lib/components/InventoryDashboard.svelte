@@ -17,7 +17,9 @@
 	}
 </script>
 
-<div class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5">
+<div
+	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5"
+>
 	<h1 class="text-2xl font-bold mb-3">Inventory</h1>
 	<!-- Mobile -->
 	<div class="flex gap-2 sm:hidden">
@@ -28,7 +30,11 @@
 				<span class="text-xs text-muted-foreground">In Stock</span>
 			</FancyBadge>
 
-			<FancyBadge as="button" onclick={() => applyFilter('out-of-stock')} class="flex-1 justify-center">
+			<FancyBadge
+				as="button"
+				onclick={() => applyFilter('out-of-stock')}
+				class="flex-1 justify-center"
+			>
 				<XCircle class="h-4 w-4 text-red-500 shrink-0" />
 				<span class="text-sm font-bold">{stats.outOfStock}</span>
 				<span class="text-xs text-muted-foreground">Out of Stock</span>

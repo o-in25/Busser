@@ -29,7 +29,10 @@
 	}
 
 	function start() {
-		if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+		if (hideTimeout) {
+			clearTimeout(hideTimeout);
+			hideTimeout = null;
+		}
 		hiding = false;
 		width = 0.08;
 		running = true;
@@ -37,13 +40,22 @@
 		interval = setInterval(() => {
 			const step = getIncrement(width) + Math.random() * 0.01;
 			width = Math.min(width + step, 0.994);
-			if (width >= 0.994 && interval) { clearInterval(interval); interval = null; }
+			if (width >= 0.994 && interval) {
+				clearInterval(interval);
+				interval = null;
+			}
 		}, 700);
 	}
 
 	function complete() {
-		if (startTimeout) { clearTimeout(startTimeout); startTimeout = null; }
-		if (interval) { clearInterval(interval); interval = null; }
+		if (startTimeout) {
+			clearTimeout(startTimeout);
+			startTimeout = null;
+		}
+		if (interval) {
+			clearInterval(interval);
+			interval = null;
+		}
 		if (!running) return;
 		width = 1;
 		running = false;
@@ -56,7 +68,10 @@
 	}
 
 	beforeNavigate((nav) => {
-		if (startTimeout) { clearTimeout(startTimeout); startTimeout = null; }
+		if (startTimeout) {
+			clearTimeout(startTimeout);
+			startTimeout = null;
+		}
 		if (nav.to?.route.id) {
 			if (displayThresholdMs > 0) {
 				startTimeout = setTimeout(() => start(), displayThresholdMs);
@@ -102,7 +117,9 @@
 	}
 
 	.nav-progress.hiding {
-		transition: width 0.21s ease-in-out, opacity 0.4s ease;
+		transition:
+			width 0.21s ease-in-out,
+			opacity 0.4s ease;
 		opacity: 0;
 	}
 

@@ -17,10 +17,25 @@
 
 	// map alpha-2 country codes to ISO 3166-1 numeric
 	const alpha2ToNumeric: Record<string, string> = {
-		US: '840', MX: '484', JM: '388', CU: '192', BB: '052',
-		TT: '780', GY: '328', PE: '604', CL: '152', GB: '826',
-		IE: '372', NL: '528', FR: '250', ES: '724', IT: '380',
-		PL: '616', RU: '643', SE: '752', JP: '392',
+		US: '840',
+		MX: '484',
+		JM: '388',
+		CU: '192',
+		BB: '052',
+		TT: '780',
+		GY: '328',
+		PE: '604',
+		CL: '152',
+		GB: '826',
+		IE: '372',
+		NL: '528',
+		FR: '250',
+		ES: '724',
+		IT: '380',
+		PL: '616',
+		RU: '643',
+		SE: '752',
+		JP: '392',
 	};
 
 	const activeNumericIds = $derived(
@@ -47,10 +62,9 @@
 	const pathGenerator = geoPath(projection);
 
 	// extract geojson features from topojson
-	const countries = (topojson.feature(
-		worldData as any,
-		(worldData as any).objects.countries
-	) as any).features;
+	const countries = (
+		topojson.feature(worldData as any, (worldData as any).objects.countries) as any
+	).features;
 
 	// land outline for subtle border
 	const land = topojson.mesh(worldData as any, (worldData as any).objects.land);
@@ -60,17 +74,11 @@
 <div class="hidden md:block relative">
 	<svg viewBox="0 0 960 500" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
 		<!-- land outline -->
-		<path
-			d={landPath}
-			fill="none"
-			stroke="currentColor"
-			stroke-opacity="0.1"
-			stroke-width="0.5"
-		/>
+		<path d={landPath} fill="none" stroke="currentColor" stroke-opacity="0.1" stroke-width="0.5" />
 
 		<!-- country fills -->
 		{#each countries as country}
-			{@const id = country.id}
+			{@const { id } = country}
 			{@const d = pathGenerator(country) ?? ''}
 			{@const active = activeNumericIds.has(id)}
 			{@const hovered = hoveredRegion === id}
@@ -89,12 +97,7 @@
 					aria-label={regionName(id)}
 				/>
 			{:else}
-				<path
-					{d}
-					fill="currentColor"
-					fill-opacity="0.06"
-					stroke="none"
-				/>
+				<path {d} fill="currentColor" fill-opacity="0.06" stroke="none" />
 			{/if}
 		{/each}
 	</svg>
@@ -104,9 +107,7 @@
 		{@const name = regionName(hoveredRegion)}
 		{@const highlight = regionHighlight(hoveredRegion)}
 		{#if name}
-			<div
-				class="absolute top-4 right-4 glass-surface px-3 py-2 text-sm pointer-events-none z-10"
-			>
+			<div class="absolute top-4 right-4 glass-surface px-3 py-2 text-sm pointer-events-none z-10">
 				<p class="font-semibold" style="color: {accentColor.hex}">{name}</p>
 				<p class="text-muted-foreground text-xs">{highlight}</p>
 			</div>

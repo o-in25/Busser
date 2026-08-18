@@ -39,12 +39,14 @@
 		'glass-verdict': 'border-white/20 text-white shadow-lg',
 	} as const;
 	export const glassBadgeHover = {
-		glass: 'hover:bg-white/80 dark:hover:bg-zinc-800/60 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10',
+		glass:
+			'hover:bg-white/80 dark:hover:bg-zinc-800/60 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10',
 		'glass-primary':
 			'hover:bg-primary/35 dark:hover:bg-primary/30 hover:shadow-[0_0_16px_rgba(248,78,128,0.35)]',
 		'glass-secondary':
 			'hover:bg-secondary/35 dark:hover:bg-secondary/30 hover:shadow-[0_0_16px_rgba(165,125,213,0.35)]',
-		'glass-danger': 'hover:bg-red-500/35 dark:hover:bg-red-500/30 hover:shadow-[0_0_16px_rgba(239,68,68,0.35)]',
+		'glass-danger':
+			'hover:bg-red-500/35 dark:hover:bg-red-500/30 hover:shadow-[0_0_16px_rgba(239,68,68,0.35)]',
 		'glass-warning':
 			'hover:bg-amber-500/35 dark:hover:bg-amber-500/30 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)]',
 		'glass-verdict': '',

@@ -1,11 +1,5 @@
 <script lang="ts">
-	import {
-		AlertCircle,
-		ArrowRight,
-		HelpCircle,
-		GalleryHorizontalEnd,
-		LogOut,
-	} from 'lucide-svelte';
+	import { AlertCircle, ArrowRight, HelpCircle, GalleryHorizontalEnd, LogOut } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -60,9 +54,7 @@
 					Workspaces let you organize your bar separately, each with its own inventory, recipes, and
 					catalog.
 				</p>
-				<a href="/settings/workspaces" class="text-xs text-primary hover:underline">
-					Learn more
-				</a>
+				<a href="/settings/workspaces" class="text-xs text-primary hover:underline"> Learn more </a>
 			</Popover.Content>
 		</Popover.Root>
 	</div>

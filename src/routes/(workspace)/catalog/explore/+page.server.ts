@@ -2,7 +2,6 @@ import { catalogRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
 import { getFavoriteRecipes } from '$lib/server/user-settings';
 import { indexFromSeed } from '$lib/math';
-import type { View } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -54,7 +53,10 @@ export const load = (async ({ parent, locals }) => {
 
 	// cocktail of the day: deterministic daily pick from featured recipes
 	const today = new Date();
-	const cocktailOfTheDay = indexFromSeed(featuredCocktails, `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`);
+	const cocktailOfTheDay = indexFromSeed(
+		featuredCocktails,
+		`${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
+	);
 
 	// Get user's favorites for this workspace
 	const userFavorites = userId ? await userRepo.getFavorites(userId, workspaceId) : [];
