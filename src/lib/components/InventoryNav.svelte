@@ -4,6 +4,7 @@
 	import { Package, Store, Tags } from 'lucide-svelte';
 
 	import { page } from '$app/stores';
+	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import { cn } from '$lib/utils';
 
 	let { action }: { action?: Snippet } = $props();
@@ -55,9 +56,13 @@
 			</a>
 		{/each}
 	</div>
-	{#if action}
-		<div class="ml-auto shrink-0">
+	<div class="ml-auto flex items-center gap-2 shrink-0">
+		<!-- desktop-only; flex wrapper (not block) so the button has no baseline strut and matches sibling button height -->
+		<span class="hidden md:flex items-center">
+			<WorkspaceSwitcherBadge workspaceName={$page.data.workspace?.workspaceName} />
+		</span>
+		{#if action}
 			{@render action()}
-		</div>
-	{/if}
+		{/if}
+	</div>
 </nav>

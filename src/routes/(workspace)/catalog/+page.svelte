@@ -2,7 +2,6 @@
 	import {
 		Compass,
 		FlaskConical,
-		GalleryHorizontalEnd,
 		Globe,
 		Plus,
 		Search,
@@ -23,9 +22,11 @@
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
+	import CatalogResultsSkeleton from '$lib/components/CatalogResultsSkeleton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
+	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -33,7 +34,7 @@
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
-	import { workspaceSwitcherOpen } from '../../../stores';
+	import { workspaceSwitcherOpen, workspaceSwitching } from '../../../stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -263,7 +264,7 @@
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
-<div class="container mx-auto px-4 mt-4">
+<div>
 	{#if !authenticated}
 		<FancyAlert class="mb-6">
 			{#snippet icon()}<Sparkles class="h-5 w-5 text-primary" />{/snippet}
@@ -298,7 +299,10 @@
 
 	{#if authenticated}
 		<!-- Desktop toolbar above hero -->
-		<div class="hidden md:flex items-center justify-end gap-2 mb-4 mt-4">
+		<div class="hidden md:flex items-center justify-end gap-2 mb-4">
+			{#if workspace?.workspaceName}
+				<WorkspaceSwitcherBadge workspaceName={workspace.workspaceName} />
+			{/if}
 			<FancyButton href="/catalog/explore" size="sm">
 				<Compass class="h-4 w-4 mr-1" />
 				Explore
@@ -331,21 +335,10 @@
 					{/if}
 				</p>
 				<div class="flex gap-2 flex-wrap">
-					{#if workspace?.workspaceName}
-						<FancyBadge class="whitespace-nowrap">
-							<GalleryHorizontalEnd class="h-4 w-4 text-primary shrink-0" />
-							<span class="text-sm font-bold">{workspace.workspaceName}</span>
-						</FancyBadge>
-					{/if}
-					<FancyBadge class="whitespace-nowrap">
-						<FlaskConical class="h-4 w-4 text-primary shrink-0" />
-						<span class="text-sm font-bold">{data.pagination.total}</span>
-						<span class="text-xs text-muted-foreground">Recipes</span>
-					</FancyBadge>
 					<FancyBadge class="whitespace-nowrap">
 						<Wine class="h-4 w-4 text-primary shrink-0" />
-						<span class="text-sm font-bold">{data.spirits.length}</span>
-						<span class="text-xs text-muted-foreground">Spirits</span>
+						<span class="text-sm font-bold">{data.pagination.total}</span>
+						<span class="text-xs text-muted-foreground">Recipes</span>
 					</FancyBadge>
 
 					{#if selectedSpirit && selectedSpirit !== 'all'}
@@ -564,7 +557,9 @@
 	{/if}
 
 	<!-- Results -->
-	{#if data.recipes.length === 0}
+	{#if $workspaceSwitching}
+		<CatalogResultsSkeleton {viewMode} count={data.recipes.length || 8} />
+	{:else if data.recipes.length === 0}
 		<Card.Root class="border-dashed">
 			<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
 				<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">

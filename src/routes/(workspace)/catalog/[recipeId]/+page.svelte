@@ -5,10 +5,10 @@
 		Eye,
 		EyeOff,
 		Heart,
+		Loader2,
 		Pencil,
 		Plus,
 		Star,
-		Check,
 		Trash2,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
@@ -75,11 +75,19 @@
 		}
 	}
 
-	// import helpers
+	// import helpers — only offer workspaces the recipe isn't already in
 	const importData = $derived(data.importData);
-	const showImport = $derived(
-		authenticated && importData && importData.eligible && importData.editableWorkspaces.length > 0
+	const importableWorkspaces = $derived(
+		importData
+			? importData.editableWorkspaces.filter((ws) => !importData.importedTo.includes(ws.workspaceId))
+			: []
 	);
+	const showImport = $derived(
+		authenticated && importData && importData.eligible && importableWorkspaces.length > 0
+	);
+
+	// workspace ids with an import in flight — keeps their row disabled/spinning
+	let importing = $state(new Set<string>());
 
 	// json-ld structured data for search engines
 	const jsonLd = $derived({
@@ -237,25 +245,28 @@
 							<DropdownMenu.Label class="text-xs text-muted-foreground"
 								>Add to workspace</DropdownMenu.Label
 							>
-							{#each importData.editableWorkspaces as ws}
-								{@const alreadyImported = importData.importedTo.includes(ws.workspaceId)}
+							{#each importableWorkspaces as ws}
+								{@const isImporting = importing.has(ws.workspaceId)}
 								<form
 									method="POST"
 									action="?/importToWorkspace"
 									use:enhance={() => {
+										const toastId = toast.loading(`Importing to ${ws.workspaceName}...`);
+										importing = new Set(importing).add(ws.workspaceId);
 										return async ({ result }) => {
+											importing = new Set([...importing].filter((id) => id !== ws.workspaceId));
 											if (result.type === 'success' && result.data) {
 												const d = result.data as any;
 												if (d.alreadyImported) {
-													toast.info(`Already imported to ${ws.workspaceName}`);
+													toast.info(`Already imported to ${ws.workspaceName}`, { id: toastId });
 												} else if (d.success) {
-													toast.success(`Imported to ${ws.workspaceName}`);
+													toast.success(`Imported to ${ws.workspaceName}`, { id: toastId });
 													invalidateAll();
 												} else {
-													toast.error(d.error || 'Failed to import recipe');
+													toast.error(d.error || 'Failed to import recipe', { id: toastId });
 												}
 											} else {
-												toast.error('Failed to import recipe');
+												toast.error('Failed to import recipe', { id: toastId });
 											}
 										};
 									}}
@@ -263,20 +274,24 @@
 									<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
 									<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
 									<input type="hidden" name="targetWorkspaceId" value={ws.workspaceId} />
-									<DropdownMenu.Item disabled={alreadyImported} class="cursor-pointer">
+									<DropdownMenu.Item
+										disabled={isImporting}
+										closeOnSelect={false}
+										class="cursor-pointer"
+									>
 										<button
 											type="submit"
 											class="flex items-center gap-2 w-full"
-											disabled={alreadyImported}
+											disabled={isImporting}
 										>
-											{#if alreadyImported}
-												<Check class="h-4 w-4 text-muted-foreground" />
+											{#if isImporting}
+												<Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
 											{:else}
 												<Plus class="h-4 w-4" />
 											{/if}
 											{ws.workspaceName}
-											{#if alreadyImported}
-												<span class="text-xs text-muted-foreground ml-auto">imported</span>
+											{#if isImporting}
+												<span class="text-xs text-muted-foreground ml-auto">importing…</span>
 											{/if}
 										</button>
 									</DropdownMenu.Item>

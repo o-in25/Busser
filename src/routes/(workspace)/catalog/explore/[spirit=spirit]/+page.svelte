@@ -69,6 +69,9 @@
 
 	const hex = $derived(data.spiritContent.accentColor.hex);
 
+	// hero image: featured recipe from the category, falling back to the category's own image
+	const heroImage = $derived(data.spotlightImage ?? data.spirit.recipeCategoryDescriptionImageUrl);
+
 	// restore view mode from localStorage
 	onMount(() => {
 		const savedViewMode = localStorage.getItem('catalog-browse-view-mode');
@@ -216,10 +219,10 @@
 
 	<!-- Hero Section -->
 	<div class="relative overflow-hidden rounded-xl mb-8 mt-4 md:mt-0">
-		{#if data.spirit.recipeCategoryDescriptionImageUrl}
+		{#if heroImage}
 			<div class="absolute inset-0">
 				<img
-					src={data.spirit.recipeCategoryDescriptionImageUrl}
+					src={heroImage}
 					alt={data.spiritContent.displayName}
 					class="w-full h-full object-cover"
 				/>

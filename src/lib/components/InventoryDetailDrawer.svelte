@@ -20,12 +20,13 @@
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content side="right" class="w-full sm:max-w-md overflow-y-auto p-0">
+	<Sheet.Content side="right" class="w-full sm:max-w-md p-0 flex flex-col">
 		<Sheet.Header class="sr-only">
 			<Sheet.Title>Product Details</Sheet.Title>
 		</Sheet.Header>
 
-		<div class="p-4">
+		<!-- scroll on the inner wrapper, not Content — keeps the pinned close button unclipped -->
+		<div class="flex-1 min-h-0 overflow-y-auto p-4">
 			{#if product}
 				<InventoryItem {product} {recipeCount} {showStock} {onStockChange} />
 			{:else}

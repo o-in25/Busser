@@ -13,6 +13,9 @@ export const themeStore = writable<string>(
 // workspace switcher dialog
 export const workspaceSwitcherOpen = writable(false);
 
+// true while a workspace switch is resolving — pages show a skeleton, switchers disable
+export const workspaceSwitching = writable(false);
+
 const notification = () => {
 	if (!browser || !localStorage) return {};
 	let storage = localStorage.getItem('notification') || '{}';
