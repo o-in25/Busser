@@ -334,18 +334,19 @@
 		</div>
 	</Hero>
 {:else}
-	<!-- Inventory Section Navigation -->
+	<!-- Section nav + primary action above the hero -->
 	<InventoryNav>
 		{#snippet action()}
 			{#if canModify}
 				<FancyButton variant="primary" size="sm" href="{basePath}/add" class="shrink-0">
-					<Plus class="h-4 w-4 mr-1.5 sm:mr-2" />
-					<span class="sm:hidden">Add</span>
-					<span class="hidden sm:inline">Add Product</span>
+					<Plus class="h-4 w-4 mr-1" />
+					Add Product
 				</FancyButton>
 			{/if}
 		{/snippet}
 	</InventoryNav>
+
+	<InventoryDashboard stats={data.stats} {showStock} />
 
 	{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
 		<FancyAlert class="mb-6 mt-4">
@@ -362,9 +363,6 @@
 			{/snippet}
 		</FancyAlert>
 	{/if}
-
-	<!-- Dashboard Header -->
-	<InventoryDashboard stats={data.stats} {showStock} />
 
 	<!-- Toolbar -->
 	<div class="flex flex-col gap-3 mb-6">

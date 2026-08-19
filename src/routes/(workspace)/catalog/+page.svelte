@@ -24,9 +24,10 @@
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
 	import CatalogResultsSkeleton from '$lib/components/CatalogResultsSkeleton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
+	import PageHero from '$lib/components/PageHero.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
+	import SubNav from '$lib/components/SubNav.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
-	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -298,96 +299,59 @@
 	{/if}
 
 	{#if authenticated}
-		<!-- Desktop toolbar above hero -->
-		<div class="hidden md:flex items-center justify-end gap-2 mb-4">
-			{#if workspace?.workspaceName}
-				<WorkspaceSwitcherBadge workspaceName={workspace.workspaceName} />
-			{/if}
-			<FancyButton href="/catalog/explore" size="sm">
-				<Compass class="h-4 w-4 mr-1" />
-				Explore
-			</FancyButton>
-			{#if canModify}
-				<FancyButton href="/catalog/add" variant="primary" size="sm">
-					<Plus class="h-4 w-4 mr-1" />
-					Add Recipe
-				</FancyButton>
-			{/if}
-		</div>
+		<!-- Section nav + primary action above the hero; explore lives here as a tab -->
+		<SubNav
+			tabs={[
+				{ href: '/catalog', label: 'Recipes', icon: Wine, match: (p) => p === '/catalog' },
+				{ href: '/catalog/explore', label: 'Explore', icon: Compass }
+			]}
+		>
+			{#snippet action()}
+				{#if canModify}
+					<FancyButton href="/catalog/add" variant="primary" size="sm" class="shrink-0">
+						<Plus class="h-4 w-4 mr-1" />
+						Add Recipe
+					</FancyButton>
+				{/if}
+			{/snippet}
+		</SubNav>
 
 		<!-- Hero Section -->
-		<div
-			class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5"
+		<PageHero
+			title="Catalog"
+			subtitle={`${data.pagination.total} ${data.pagination.total === 1 ? 'recipe' : 'recipes'}${$page.data.isGlobalWorkspace ? " in Busser's catalog" : workspace?.workspaceRole === 'owner' ? ' in your catalog' : ' available'}`}
 		>
-			<!-- Desktop: title + badges below -->
-			<div class="hidden md:block">
-				<h1 class="text-2xl font-bold">Catalog</h1>
-				<p class="text-sm text-muted-foreground mt-0.5 mb-3">
-					{data.pagination.total}
-					{#if $page.data.isGlobalWorkspace}
-						{data.pagination.total === 1
-							? "recipe in Busser's catalog"
-							: "recipes in Busser's catalog"}
-					{:else if workspace?.workspaceRole === 'owner'}
-						{data.pagination.total === 1 ? 'recipe' : 'recipes'} in your catalog
-					{:else}
-						{data.pagination.total === 1 ? 'recipe' : 'recipes'} available
-					{/if}
-				</p>
-				<div class="flex gap-2 flex-wrap">
-					<FancyBadge class="whitespace-nowrap">
-						<Wine class="h-4 w-4 text-primary shrink-0" />
-						<span class="text-sm font-bold">{data.pagination.total}</span>
-						<span class="text-xs text-muted-foreground">Recipes</span>
-					</FancyBadge>
+			<div class="flex gap-2 flex-wrap pb-1 -mb-1">
+				<FancyBadge class="whitespace-nowrap">
+					<Wine class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold">{data.pagination.total}</span>
+					<span class="text-xs text-muted-foreground">Recipes</span>
+				</FancyBadge>
 
-					{#if selectedSpirit && selectedSpirit !== 'all'}
-						{@const spiritObj = data.spirits.find(
-							(s) => String(s.recipeCategoryId) === selectedSpirit
-						)}
-						{#if spiritObj}
-							<FancyBadge class="whitespace-nowrap">
-								<span class="text-sm font-bold">{spiritObj.recipeCategoryDescription}</span>
-								<span class="text-xs text-muted-foreground">Spirit</span>
-							</FancyBadge>
-						{/if}
-					{/if}
-
-					{#if advancedFilterCount > 0}
-						<FancyBadge as="button" onclick={clearAllAdvancedFilters} class="whitespace-nowrap">
-							<SlidersHorizontal class="h-4 w-4 text-primary shrink-0" />
-							<span class="text-sm font-bold">{advancedFilterCount}</span>
-							<span class="text-xs text-muted-foreground"
-								>Advanced Filter{advancedFilterCount !== 1 ? 's' : ''}</span
-							>
-							<X class="h-3 w-3 text-muted-foreground" />
+				{#if selectedSpirit && selectedSpirit !== 'all'}
+					{@const spiritObj = data.spirits.find(
+						(s) => String(s.recipeCategoryId) === selectedSpirit
+					)}
+					{#if spiritObj}
+						<FancyBadge class="whitespace-nowrap">
+							<span class="text-sm font-bold">{spiritObj.recipeCategoryDescription}</span>
+							<span class="text-xs text-muted-foreground">Spirit</span>
 						</FancyBadge>
 					{/if}
-				</div>
-			</div>
+				{/if}
 
-			<!-- Mobile: title + buttons only (no badges) -->
-			<div class="md:hidden">
-				<h1 class="text-2xl font-bold mb-3">Catalog</h1>
-				<div class="flex gap-2">
-					<FancyButton href="/catalog/explore" size="sm" class="flex-1 justify-center">
-						<Compass class="h-4 w-4 mr-1" />
-						Explore
-					</FancyButton>
-					{#if canModify}
-						<FancyButton
-							href="/catalog/add"
-							variant="primary"
-							size="sm"
-							class="flex-1 justify-center"
+				{#if advancedFilterCount > 0}
+					<FancyBadge as="button" onclick={clearAllAdvancedFilters} class="whitespace-nowrap">
+						<SlidersHorizontal class="h-4 w-4 text-primary shrink-0" />
+						<span class="text-sm font-bold">{advancedFilterCount}</span>
+						<span class="text-xs text-muted-foreground"
+							>Advanced Filter{advancedFilterCount !== 1 ? 's' : ''}</span
 						>
-							<Plus class="h-4 w-4 mr-1" />
-							Add Recipe
-						</FancyButton>
-					{/if}
-				</div>
+						<X class="h-3 w-3 text-muted-foreground" />
+					</FancyBadge>
+				{/if}
 			</div>
-		</div>
+		</PageHero>
 	{:else}
 		<!-- logged-out: hero hidden to create a curiosity gap around catalog size; keep a heading for seo/a11y -->
 		<h1 class="sr-only">Cocktail Catalog</h1>

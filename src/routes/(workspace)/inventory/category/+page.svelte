@@ -13,6 +13,7 @@
 	import CategoryFilterPanel from '$lib/components/CategoryFilterPanel.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
+	import PageHero from '$lib/components/PageHero.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -153,57 +154,21 @@
 	<title>Manage Categories - Inventory</title>
 </svelte:head>
 
-<!-- Inventory Section Navigation -->
+<!-- Section nav + primary action above the hero -->
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
 			<FancyButton variant="primary" size="sm" href="/inventory/category/add" class="shrink-0">
-				<Plus class="h-4 w-4 mr-1.5 sm:mr-2" />
-				<span class="sm:hidden">Add</span>
-				<span class="hidden sm:inline">Add Category</span>
+				<Plus class="h-4 w-4 mr-1" />
+				Add Category
 			</FancyButton>
 		{/if}
 	{/snippet}
 </InventoryNav>
 
-{#if $page.data.user && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
-	<FancyAlert class="mb-6 mt-4">
-		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-		{#snippet children()}
-			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">
-				You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
-				switch to your workspace.
-			</p>
-		{/snippet}
-		{#snippet action()}
-			<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
-		{/snippet}
-	</FancyAlert>
-{/if}
-
 <!-- Hero Section -->
-<div
-	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5"
->
-	<h1 class="text-2xl font-bold mb-3">Categories</h1>
-	<!-- Mobile -->
-	<div class="flex gap-2 sm:hidden">
-		<FancyBadge class="flex-1 justify-center">
-			<Package class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{data.totalProducts}</span>
-			<span class="text-xs text-muted-foreground">Products</span>
-		</FancyBadge>
-
-		<FancyBadge class="flex-1 justify-center">
-			<Layers class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{categoryGroups.length}</span>
-			<span class="text-xs text-muted-foreground">Groups</span>
-		</FancyBadge>
-	</div>
-
-	<!-- Desktop -->
-	<div class="hidden sm:flex gap-2 flex-wrap pb-1 -mb-1">
+<PageHero title="Categories">
+	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		<FancyBadge class="whitespace-nowrap">
 			<Tags class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{data.pagination.total}</span>
@@ -222,7 +187,23 @@
 			<span class="text-xs text-muted-foreground">Groups</span>
 		</FancyBadge>
 	</div>
-</div>
+</PageHero>
+
+{#if $page.data.user && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
+	<FancyAlert class="mb-6 mt-4">
+		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
+		{#snippet children()}
+			<p class="sm:hidden">Viewing global catalog</p>
+			<p class="hidden sm:block">
+				You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
+				switch to your workspace.
+			</p>
+		{/snippet}
+		{#snippet action()}
+			<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
+		{/snippet}
+	</FancyAlert>
+{/if}
 
 <!-- Search Bar & Filters -->
 <div class="flex items-center gap-2 mb-6">

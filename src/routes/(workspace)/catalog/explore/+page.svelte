@@ -4,7 +4,7 @@
 		Award,
 		BookOpen,
 		Candy,
-		ChevronLeft,
+		Compass,
 		Droplets,
 		FlaskConical,
 		Gauge,
@@ -19,6 +19,7 @@
 		Sparkles,
 		Star,
 		TrendingUp,
+		Wine,
 	} from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -31,7 +32,9 @@
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import FancyInput from '$lib/components/FancyInput.svelte';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
+	import PageHero from '$lib/components/PageHero.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
+	import SubNav from '$lib/components/SubNav.svelte';
 	import tips from '$lib/data/tips.json';
 	import { cn } from '$lib/utils';
 
@@ -140,61 +143,25 @@
 	</FancyAlert>
 {/if}
 
-<!-- Desktop toolbar above hero -->
-<div class="hidden md:flex items-center justify-between gap-2 mb-4 mt-4">
-	<FancyButton href="/catalog" size="sm">
-		<ChevronLeft class="h-4 w-4 mr-1" />
-		Back to Catalog
-	</FancyButton>
-	<div class="flex items-center gap-2">
-		<FancyButton onclick={surpriseMe} size="sm">
+<!-- Section nav + primary action above the hero; this is the Explore tab -->
+<SubNav
+	tabs={[
+		{ href: '/catalog', label: 'Recipes', icon: Wine, match: (p) => p === '/catalog' },
+		{ href: '/catalog/explore', label: 'Explore', icon: Compass }
+	]}
+>
+	{#snippet action()}
+		<FancyButton onclick={surpriseMe} size="sm" class="shrink-0">
 			<Shuffle class="h-4 w-4 mr-1" />
 			Surprise Me
 		</FancyButton>
-		<FancyButton href="/catalog" variant="primary" size="sm">
-			<ArrowRight class="h-4 w-4 mr-1" />
-			View All
-		</FancyButton>
-	</div>
-</div>
+	{/snippet}
+</SubNav>
 
 <!-- Hero Section -->
-<div
-	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 md:mt-0 px-4 py-4 sm:px-6 sm:py-5"
->
-	<!-- Title + Search -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-		<h1 class="text-2xl font-bold">Explore</h1>
-		<form onsubmit={handleSearch} class="flex gap-2 w-full sm:max-w-xs sm:w-auto">
-			<div class="relative flex-1">
-				<Search
-					class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none"
-				/>
-				<FancyInput
-					type="text"
-					placeholder="Search cocktails..."
-					bind:value={searchQuery}
-					class="pl-10"
-				/>
-			</div>
-			<FancyButton type="submit" size="sm">Search</FancyButton>
-		</form>
-	</div>
-
-	<!-- Mobile: Back + Surprise Me + View All -->
-	<div class="flex gap-2 md:hidden mb-4">
-		<FancyButton href="/catalog" size="sm" class="flex-1 justify-center">
-			<ChevronLeft class="h-4 w-4 mr-1" />
-			Catalog
-		</FancyButton>
-		<FancyButton onclick={surpriseMe} size="sm" class="flex-1 justify-center">
-			<Shuffle class="h-4 w-4 mr-1" />
-			Surprise Me
-		</FancyButton>
-	</div>
-
-	<!-- Desktop: Smart Action Pills -->
-	<div class="hidden md:flex gap-2 flex-wrap pb-1 -mb-1">
+<PageHero title="Explore">
+	<!-- Smart Action Pills -->
+	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		<FancyBadge href="/catalog" class="whitespace-nowrap">
 			<FlaskConical class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{totalRecipes}</span>
@@ -243,7 +210,23 @@
 			</FancyBadge>
 		{/if}
 	</div>
-</div>
+</PageHero>
+
+<!-- Search -->
+<form onsubmit={handleSearch} class="flex gap-2 mb-8">
+	<div class="relative flex-1">
+		<Search
+			class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none"
+		/>
+		<FancyInput
+			type="text"
+			placeholder="Search cocktails..."
+			bind:value={searchQuery}
+			class="pl-10"
+		/>
+	</div>
+	<FancyButton type="submit" size="sm">Search</FancyButton>
+</form>
 
 <!-- Spirit Cards Section -->
 <section class="mb-10">

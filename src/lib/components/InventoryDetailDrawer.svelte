@@ -26,7 +26,7 @@
 		</Sheet.Header>
 
 		<!-- scroll on the inner wrapper, not Content — keeps the pinned close button unclipped -->
-		<div class="flex-1 min-h-0 overflow-y-auto p-4">
+		<div class="flex-1 min-h-0 overflow-y-auto p-4 pt-14">
 			{#if product}
 				<InventoryItem {product} {recipeCount} {showStock} {onStockChange} />
 			{:else}
