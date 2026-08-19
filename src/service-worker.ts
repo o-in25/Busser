@@ -11,7 +11,7 @@ const IMAGE_CACHE = 'busser-images';
 const MAX_CACHED_IMAGES = 200;
 
 // app shell assets to pre-cache on install
-const PRECACHE_ASSETS = [...build, '/offline.html', '/favicon.png'];
+const PRECACHE_ASSETS = [...build, '/offline.html', '/favicon.png', '/offline-logo.png'];
 
 sw.addEventListener('install', (event) => {
 	event.waitUntil(
