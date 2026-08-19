@@ -8,7 +8,7 @@
 		title,
 		subtitle,
 		children,
-		class: className
+		class: className,
 	}: {
 		title: string;
 		subtitle?: string;

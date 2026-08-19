@@ -17,7 +17,7 @@
 		tabs,
 		action,
 		workspaceSwitcher = true,
-		class: className
+		class: className,
 	}: { tabs: Tab[]; action?: Snippet; workspaceSwitcher?: boolean; class?: string } = $props();
 
 	function isActive(tab: Tab): boolean {

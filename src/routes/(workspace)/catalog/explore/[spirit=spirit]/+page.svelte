@@ -327,7 +327,8 @@
 			{#if data.totalCount > data.recipes.length}
 				<div class="mt-6 flex justify-center">
 					<FancyButton href={catalogLink} size="sm">
-						View all {data.totalCount} {data.spiritContent.displayName} cocktails
+						View all {data.totalCount}
+						{data.spiritContent.displayName} cocktails
 						<ArrowRight class="h-4 w-4 ml-1" />
 					</FancyButton>
 				</div>

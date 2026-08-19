@@ -8,6 +8,7 @@ import { uploadAvatarBuffer } from '$lib/server/storage';
 import type { Actions, PageServerLoad } from './$types';
 
 // admins can see which schemas the app is wired to — confirms whether we're on prod (_p) or dev (_d)
+// eslint-disable-next-line no-undef
 function connectedDatabases(user: App.Locals['user']) {
 	if (!hasGlobalPermission(user, 'view_admin')) return null;
 	return { core: env.CORE_TABLE || null, user: env.USER_TABLE || null };

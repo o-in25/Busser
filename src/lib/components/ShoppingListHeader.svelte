@@ -7,7 +7,7 @@
 
 	let {
 		summary,
-		stats
+		stats,
 	}: {
 		summary: ShoppingListSummary;
 		stats: InventoryStats;

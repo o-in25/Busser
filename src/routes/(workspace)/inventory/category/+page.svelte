@@ -268,7 +268,11 @@
 
 <!-- Categories Table -->
 {#if $workspaceSwitching}
-	<InventoryResultsSkeleton viewMode={viewMode === 'list' ? 'list' : 'table'} count={filteredCategories.length || 8} showStock={false} />
+	<InventoryResultsSkeleton
+		viewMode={viewMode === 'list' ? 'list' : 'table'}
+		count={filteredCategories.length || 8}
+		showStock={false}
+	/>
 {:else if data.categories.length === 0}
 	<Card.Root class="border-dashed">
 		<Card.Content class="flex flex-col items-center justify-center py-16 text-center">

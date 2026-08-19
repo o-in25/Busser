@@ -44,7 +44,9 @@ export const actions: Actions = {
 		const recipeCategoryId = slugToId[slug];
 
 		const formData = await request.formData();
-		const descriptionText = ((formData.get('recipeCategoryDescriptionText') as string) ?? '').trim();
+		const descriptionText = (
+			(formData.get('recipeCategoryDescriptionText') as string) ?? ''
+		).trim();
 		const imageUrl = (formData.get('recipeCategoryDescriptionImageUrl') as string) || '';
 		const imageCleared = formData.get('recipeCategoryDescriptionImageCleared') === 'true';
 

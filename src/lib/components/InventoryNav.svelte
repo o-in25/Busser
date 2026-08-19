@@ -19,13 +19,13 @@
 				p === '/inventory' ||
 				(p.startsWith('/inventory/') &&
 					!p.startsWith('/inventory/category') &&
-					!p.startsWith('/inventory/suppliers'))
+					!p.startsWith('/inventory/suppliers')),
 		},
 		{
 			href: '/inventory/category',
 			label: 'Categories',
 			icon: Tags,
-			match: (p: string) => p.startsWith('/inventory/category')
+			match: (p: string) => p.startsWith('/inventory/category'),
 		},
 		...(isOwner
 			? [
@@ -33,10 +33,10 @@
 						href: '/inventory/suppliers',
 						label: 'Suppliers',
 						icon: Store,
-						match: (p: string) => p.startsWith('/inventory/suppliers')
-					}
+						match: (p: string) => p.startsWith('/inventory/suppliers'),
+					},
 				]
-			: [])
+			: []),
 	]);
 </script>
 
