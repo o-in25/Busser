@@ -3,6 +3,7 @@
 
 	import { onMount, setContext } from 'svelte';
 
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { derived } from 'svelte/store';
 
@@ -21,7 +22,7 @@
 
 	export let data: LayoutData;
 
-	// Auth routes where we don't show the navbar
+	// auth routes where we don't show the navbar
 	const authRoutes = [
 		'/login',
 		'/logout',
@@ -53,6 +54,21 @@
 	let isMobile = false;
 	let keyboardOpen = false;
 	onMount(() => {
+		// sink when another tab logs out
+		const authChannel = new BroadcastChannel('auth');
+		authChannel.onmessage = (e) => {
+			if (e.data === 'logout' && user) {
+				invalidateAll();
+				goto('/');
+			}
+		};
+
+		// revalidate on refocus so an expired token is caught (hook redirects guarded routes)
+		function handleVisibility() {
+			if (document.visibilityState === 'visible' && user) invalidateAll();
+		}
+		document.addEventListener('visibilitychange', handleVisibility);
+
 		const mql = window.matchMedia('(max-width: 767px)');
 		isMobile = mql.matches;
 		const handler = (e: MediaQueryListEvent) => (isMobile = e.matches);
@@ -86,7 +102,8 @@
 				el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT');
 			keyboardOpen = inputFocused ? vp.height < initialHeight - 100 : false;
 
-			// keyboard dismissed (viewport grew back) — blur the active input
+			// keyboard dismissed (viewport grew back)
+			// blur the active input
 			const grew = vp.height > lastVpHeight + 50;
 			lastVpHeight = vp.height;
 			if (grew && inputFocused) {
@@ -96,6 +113,8 @@
 		window.visualViewport?.addEventListener('resize', handleViewportResize);
 
 		return () => {
+			authChannel.close();
+			document.removeEventListener('visibilitychange', handleVisibility);
 			mql.removeEventListener('change', handler);
 			window.removeEventListener('focusin', handleFocusIn);
 			window.removeEventListener('scroll', handleScroll);

@@ -3,8 +3,12 @@
 
 	import { goto } from '$app/navigation';
 
-	// If someone navigates here directly via GET, redirect to home
 	onMount(() => {
+		// notify other tabs
+		const authChannel = new BroadcastChannel('auth');
+		authChannel.postMessage('logout');
+		authChannel.close();
+
 		goto('/');
 	});
 </script>

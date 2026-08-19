@@ -1,19 +1,27 @@
 import { fail } from '@sveltejs/kit';
 
+import { env } from '$env/dynamic/private';
 import { APP_VERSION } from '$env/static/private';
-import { userRepo } from '$lib/server/auth';
+import { hasGlobalPermission, userRepo } from '$lib/server/auth';
 import { uploadAvatarBuffer } from '$lib/server/storage';
 
 import type { Actions, PageServerLoad } from './$types';
 
+// admins can see which schemas the app is wired to — confirms whether we're on prod (_p) or dev (_d)
+function connectedDatabases(user: App.Locals['user']) {
+	if (!hasGlobalPermission(user, 'view_admin')) return null;
+	return { core: env.CORE_TABLE || null, user: env.USER_TABLE || null };
+}
+
 export const load: PageServerLoad = async ({ locals }) => {
 	const userId = locals.user?.userId || '';
-	if (!userId) return { avatarImageUrl: null, appVersion: APP_VERSION || 'dev' };
+	if (!userId) return { avatarImageUrl: null, appVersion: APP_VERSION || 'dev', databases: null };
 
 	const result = await userRepo.findById(userId);
 	return {
 		avatarImageUrl: result.status === 'success' ? result.data?.avatarImageUrl : null,
 		appVersion: APP_VERSION || 'dev',
+		databases: connectedDatabases(locals.user),
 	};
 };
 

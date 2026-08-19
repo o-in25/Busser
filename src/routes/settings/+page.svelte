@@ -224,13 +224,34 @@
 			</Card.Title>
 			<Card.Description>Application information</Card.Description>
 		</Card.Header>
-		<Card.Content>
+		<Card.Content class="space-y-3">
 			<div
 				class="p-4 rounded-xl bg-black/[0.03] dark:bg-black/20 border border-white/30 dark:border-white/[0.05] shadow-[inset_0_1px_2px_0_rgba(31,20,60,0.06)] dark:shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.35)]"
 			>
 				<p class="text-sm text-muted-foreground mb-1">Version</p>
 				<p class="font-semibold">{data.appVersion}</p>
 			</div>
+
+			<!-- admin-only: which db schemas the app is connected to -->
+			{#if data.databases}
+				{@const isProd = data.databases.core?.endsWith('_p')}
+				<div
+					class="p-4 rounded-xl bg-black/[0.03] dark:bg-black/20 border border-white/30 dark:border-white/[0.05] shadow-[inset_0_1px_2px_0_rgba(31,20,60,0.06)] dark:shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.35)]"
+				>
+					<div class="flex items-center justify-between mb-2">
+						<p class="text-sm text-muted-foreground">Database</p>
+						<span
+							class="text-xs font-semibold px-2 py-0.5 rounded-full {isProd
+								? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+								: 'bg-amber-500/15 text-amber-600 dark:text-amber-400'}"
+						>
+							{isProd ? 'Production' : 'Development'}
+						</span>
+					</div>
+					<p class="font-mono text-sm">core: {data.databases.core}</p>
+					<p class="font-mono text-sm">user: {data.databases.user}</p>
+				</div>
+			{/if}
 		</Card.Content>
 	</Card.Root>
 </div>
