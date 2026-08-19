@@ -79,7 +79,8 @@ pnpm run prepare    # Install Husky pre-commit hooks
 
 ### Migrations
 
-Two separate migration directories match the two databases.
+Two separate migration directories match the two databases. Each command has a `:prod` variant that
+targets the production schemas (`app_p`/`user_p`); the bare command targets dev (`app_d`/`user_d`).
 
 ```bash
 pnpm migrate:core              # Run pending migrations on app_d (inventory, catalog, recipes)
@@ -88,10 +89,17 @@ pnpm migrate:rollback:core     # Rollback last batch on app_d
 pnpm migrate:rollback:user     # Rollback last batch on user_d
 pnpm migrate:status:core       # Show migration status for app_d
 pnpm migrate:status:user       # Show migration status for user_d
+
+pnpm migrate:core:prod         # Same, against prod app_p
+pnpm migrate:user:prod         # Same, against prod user_p
+pnpm migrate:status:core:prod  # Prod migration status (app_p)
+# ...rollback:*:prod likewise
 ```
 
-Migration files live in `migrations/core/` and `migrations/user/`, named with a
-`YYYYMMDD000000_description.ts` timestamp convention.
+The schema is chosen by the `CORE_DATABASE`/`USER_DATABASE` env vars, which each script pins via
+`cross-env` (dev→`_d`, prod→`_p`), so a stale shell env can't redirect a migration. Migration files
+live in `migrations/core/` and `migrations/user/`, named with a `YYYYMMDD000000_description.ts`
+timestamp convention.
 
 ## Deployment
 

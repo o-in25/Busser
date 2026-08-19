@@ -1,39 +1,37 @@
 <script lang="ts">
 	import {
+		ArrowRight,
 		BookOpen,
 		ChevronLeft,
+		EllipsisVertical,
 		ExternalLink,
 		FlaskConical,
 		Globe,
 		Layers,
+		Pencil,
 		Plus,
-		Search,
-		X,
 	} from 'lucide-svelte';
-	import { getContext, onMount } from 'svelte';
+	import { getContext } from 'svelte';
 
-	import { browser } from '$app/environment';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
-	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
-	import FilterButton from '$lib/components/FilterButton.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import CatalogResultsSkeleton from '$lib/components/CatalogResultsSkeleton.svelte';
 	import SpiritOverview from '$lib/components/SpiritOverview.svelte';
 	import SpiritRegions from '$lib/components/SpiritRegions.svelte';
 	import SpiritSources from '$lib/components/SpiritSources.svelte';
 	import SpiritSubcategories from '$lib/components/SpiritSubcategories.svelte';
-	import ViewToggle from '$lib/components/ViewToggle.svelte';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import CollapsibleSection from '$lib/components/ui/collapsible/collapsible.svelte';
-	import { Input } from '$lib/components/ui/input';
 	import { reveal } from '$lib/actions/reveal';
+	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
-	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
 	import FancyButton from '$lib/components/FancyButton.svelte';
+	import { workspaceSwitching } from '../../../../../stores';
 
 	let { data }: { data: PageData } = $props();
 
@@ -41,104 +39,45 @@
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 	const authenticated = $derived(!!$page.data.user);
 
-	// view mode
-	let viewMode = $state<'grid' | 'list'>('grid');
-
-	// filter state
-	let searchInput = $state(data.filters.search ?? '');
-	let selectedSort = $state(data.filters.sort ?? 'name-asc');
-	let perPage = $state(String(data.filters.perPage ?? 24));
-
-	// filter panel state
-	let filterOpen = $state(false);
-
-	// filter panel count (sort + perPage, spirit is hidden)
-	const activeFilterCount = $derived.by(() => {
-		let count = 0;
-		if (selectedSort !== 'name-asc') count++;
-		if (perPage !== '24') count++;
-		return count;
-	});
+	// spirit category description/image is global — only admins may edit it
+	const permissions: string[] = getContext('permissions') || [];
+	const canEditCategory = permissions.includes('edit_admin');
 
 	// track favorites/featured for optimistic updates
 	let favorites = $state(new Set(data.favoriteRecipeIds));
 	let featured = $state(new Set(data.featuredRecipeIds));
 
-	// base path for this spirit's browse page
+	// base path for this spirit's explore page
 	const basePath = $derived(`/catalog/explore/${data.spiritContent.slug}`);
+
+	// deep-link into the main catalog, pre-filtered to this spirit
+	const catalogLink = $derived(`/catalog?spirit=${data.spirit.recipeCategoryId}`);
 
 	const hex = $derived(data.spiritContent.accentColor.hex);
 
 	// hero image: featured recipe from the category, falling back to the category's own image
 	const heroImage = $derived(data.spotlightImage ?? data.spirit.recipeCategoryDescriptionImageUrl);
 
-	// restore view mode from localStorage
-	onMount(() => {
-		const savedViewMode = localStorage.getItem('catalog-browse-view-mode');
-		if (savedViewMode === 'list' || savedViewMode === 'grid') {
-			viewMode = savedViewMode;
-		}
-	});
-
-	function setViewMode(mode: 'grid' | 'list') {
-		viewMode = mode;
-		if (browser) {
-			localStorage.setItem('catalog-browse-view-mode', mode);
-		}
-	}
-
-	function buildUrl(overrides: Record<string, string | number | null> = {}) {
-		const params = new URLSearchParams();
-
-		const search = overrides.search !== undefined ? overrides.search : searchInput;
-		const sort = overrides.sort !== undefined ? overrides.sort : selectedSort;
-		const pp = overrides.perPage !== undefined ? overrides.perPage : perPage;
-		const pageNum = overrides.page !== undefined ? overrides.page : 1;
-
-		params.set('page', String(pageNum));
-		if (search) params.set('search', String(search));
-		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
-		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
-
-		const queryString = params.toString();
-		return queryString ? `${basePath}?${queryString}` : basePath;
-	}
-
-	function handleSearch(e: Event) {
-		e.preventDefault();
-		goto(buildUrl({ page: 1 }), { keepFocus: true });
-	}
-
-	function handleSortChange(value: string) {
-		selectedSort = value;
-		goto(buildUrl({ sort: value, page: 1 }), { keepFocus: true });
-	}
-
-	function handlePerPageChange(value: string) {
-		perPage = value;
-		goto(buildUrl({ perPage: value, page: 1 }), { keepFocus: true });
-	}
-
-	function clearSearch() {
-		searchInput = '';
-		goto(buildUrl({ search: '' }), { keepFocus: true });
-	}
-
-	function navigatePage(pageNum: number) {
-		goto(buildUrl({ page: pageNum }));
-	}
-
-	function resetPanelFilters() {
-		selectedSort = 'name-asc';
-		perPage = '24';
-		goto(buildUrl({ sort: 'name-asc', perPage: '24', page: 1 }), { keepFocus: true });
-	}
+	// json-ld ItemList of every recipe in the category — keeps the full listing crawlable
+	// even though the page only renders a preview strip
+	const SITE = 'https://busserapp.com';
+	const jsonLd = $derived(
+		JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'ItemList',
+			name: `${data.spiritContent.displayName} Cocktails`,
+			numberOfItems: data.totalCount,
+			itemListElement: data.recipeIndex.map((r, i) => ({
+				'@type': 'ListItem',
+				position: i + 1,
+				name: r.recipeName,
+				url: `${SITE}/catalog/${r.recipeId}`,
+			})),
+		})
+	);
 
 	// update local state when page data changes
 	$effect(() => {
-		searchInput = data.filters.search ?? '';
-		selectedSort = data.filters.sort ?? 'name-asc';
-		perPage = String(data.filters.perPage ?? 24);
 		favorites = new Set(data.favoriteRecipeIds);
 		featured = new Set(data.featuredRecipeIds);
 	});
@@ -186,6 +125,8 @@
 		content={data.spirit.recipeCategoryDescriptionImageUrl || 'https://busserapp.com/og-image.png'}
 	/>
 	<meta name="twitter:card" content="summary_large_image" />
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+	{@html `<script type="application/ld+json">${jsonLd}</` + `script>`}
 </svelte:head>
 
 <div class="container mx-auto px-4 mt-4 relative overflow-hidden">
@@ -200,19 +141,27 @@
 			Back to Explore
 		</FancyButton>
 		<div class="flex items-center gap-2">
-			<FancyButton
-				size="sm"
-				onclick={() =>
-					document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })}
-			>
-				<BookOpen class="h-4 w-4 mr-1" />
-				Spirit Guide
-			</FancyButton>
-			{#if canModify}
-				<FancyButton href="/catalog/add" variant="primary" size="sm">
-					<Plus class="h-4 w-4 mr-1" />
-					Add Recipe
-				</FancyButton>
+			{#if canModify || canEditCategory}
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger class="glass-cta glass-cta-sm">
+						<EllipsisVertical class="h-4 w-4 mr-1" />
+						More
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end">
+						{#if canModify}
+							<DropdownMenu.Item onclick={() => goto('/catalog/add')}>
+								<Plus class="h-4 w-4 mr-2" />
+								Add recipe
+							</DropdownMenu.Item>
+						{/if}
+						{#if canEditCategory}
+							<DropdownMenu.Item onclick={() => goto(`${basePath}/edit`)}>
+								<Pencil class="h-4 w-4 mr-2" />
+								Edit category
+							</DropdownMenu.Item>
+						{/if}
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
 			{/if}
 		</div>
 	</div>
@@ -250,165 +199,32 @@
 					Back
 				</FancyButton>
 
-				<FancyButton
-					size="sm"
-					onclick={() =>
-						document.querySelector('#spirit-guide')?.scrollIntoView({ behavior: 'smooth' })}
-					class="flex-1 justify-center whitespace-nowrap"
-				>
-					<BookOpen class="h-4 w-4 mr-1" />
-					Guide
-				</FancyButton>
-
-				{#if canModify}
-					<FancyButton
-						href="/catalog/add"
-						variant="primary"
-						size="sm"
-						class="flex-1 justify-center whitespace-nowrap"
-					>
-						<Plus class="h-4 w-4 mr-1" />
-						Add
-					</FancyButton>
+				{#if canModify || canEditCategory}
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger class="glass-cta glass-cta-sm shrink-0">
+							<EllipsisVertical class="h-4 w-4" />
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content align="end">
+							{#if canModify}
+								<DropdownMenu.Item onclick={() => goto('/catalog/add')}>
+									<Plus class="h-4 w-4 mr-2" />
+									Add recipe
+								</DropdownMenu.Item>
+							{/if}
+							{#if canEditCategory}
+								<DropdownMenu.Item onclick={() => goto(`${basePath}/edit`)}>
+									<Pencil class="h-4 w-4 mr-2" />
+									Edit category
+								</DropdownMenu.Item>
+							{/if}
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
 				{/if}
 			</div>
 		</div>
 	</div>
 
-	<!-- Recipe Browsing Section -->
-	<section class="mb-2">
-		<div class="mb-6">
-			<h2 class="text-2xl font-bold">{data.spiritContent.displayName} Cocktails</h2>
-			<p class="text-muted-foreground">
-				{data.pagination.total}
-				{data.pagination.total === 1 ? 'recipe' : 'recipes'}
-			</p>
-		</div>
-
-		<!-- Toolbar -->
-		<div class="flex flex-col gap-3 mb-6">
-			<div class="flex items-center gap-2">
-				<!-- Search -->
-				<form onsubmit={handleSearch} class="flex-1 min-w-0">
-					<div class="relative">
-						<Search
-							class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-						/>
-						<Input
-							type="text"
-							placeholder="Search {data.spiritContent.displayName.toLowerCase()} recipes..."
-							bind:value={searchInput}
-							class="pl-10 pr-10"
-						/>
-						{#if searchInput}
-							<button
-								type="button"
-								onclick={clearSearch}
-								class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-							>
-								<X class="h-4 w-4" />
-							</button>
-						{/if}
-					</div>
-				</form>
-
-				<!-- Filters -->
-				<FilterButton
-					bind:open={filterOpen}
-					activeCount={activeFilterCount}
-					viewModes={['grid', 'list']}
-					activeView={viewMode}
-					onViewChange={setViewMode}
-					onRefresh={invalidateAll}
-				>
-					<CatalogFilterPanel
-						spirits={data.spirits}
-						selectedSpirit={String(data.spirit.recipeCategoryId)}
-						selectedShowFilter="all"
-						sortOption={selectedSort}
-						{perPage}
-						hideSpirit={true}
-						onSpiritChange={() => {}}
-						onShowFilterChange={() => {}}
-						onSortChange={handleSortChange}
-						onPerPageChange={handlePerPageChange}
-						onReset={resetPanelFilters}
-					/>
-				</FilterButton>
-
-				<!-- View toggle -->
-				<ViewToggle modes={['grid', 'list']} active={viewMode} onchange={setViewMode} />
-			</div>
-		</div>
-
-		<!-- Results count -->
-		<p class="text-sm text-muted-foreground mb-4">
-			{#if searchInput}
-				Showing {data.recipes.length} of {data.pagination.total} recipes matching "{searchInput}"
-			{:else}
-				Showing {data.recipes.length} of {data.pagination.total}
-				{data.pagination.total === 1 ? 'recipe' : 'recipes'}
-			{/if}
-		</p>
-
-		<!-- Results -->
-		{#if data.recipes.length === 0}
-			<Card.Root class="border-dashed">
-				<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
-					<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
-						<FlaskConical class="h-10 w-10 text-muted-foreground/50" />
-					</div>
-					<h3 class="text-xl font-semibold mb-2">
-						{#if searchInput}
-							No Recipes Found
-						{:else}
-							No {data.spiritContent.displayName} Recipes
-						{/if}
-					</h3>
-					<p class="text-muted-foreground mb-6 max-w-md">
-						{#if searchInput}
-							No recipes match your search. Try adjusting your search terms.
-						{:else}
-							You haven't added any {data.spiritContent.displayName.toLowerCase()} cocktails yet.
-						{/if}
-					</p>
-					{#if searchInput}
-						<Button variant="outline" onclick={clearSearch}>Clear Search</Button>
-					{:else if canModify}
-						<a href="/catalog/add" class={buttonVariants()}>Add Recipe</a>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-		{:else}
-			<div
-				class={cn(
-					viewMode === 'grid'
-						? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-						: 'flex flex-col gap-3'
-				)}
-			>
-				{#each data.recipes as recipe (recipe.recipeId)}
-					<CatalogBrowseCard
-						{recipe}
-						{viewMode}
-						isFavorite={favorites.has(recipe.recipeId)}
-						isFeatured={featured.has(recipe.recipeId)}
-						{canModify}
-						{authenticated}
-						workspaceId={workspace.workspaceId}
-						actionPath="?"
-						onToggleFavorite={handleToggleFavorite}
-						onToggleFeatured={handleToggleFeatured}
-					/>
-				{/each}
-			</div>
-
-			<!-- Pagination -->
-			<Pagination pagination={data.pagination} itemLabel="recipes" onNavigate={navigatePage} />
-		{/if}
-	</section>
-
-	<!-- Spirit Guide (educational content) -->
+	<!-- Spirit Guide (educational content) — the heart of the page -->
 	<div id="spirit-guide" class="scroll-mt-4 mb-12">
 		<h2 class="text-2xl font-bold flex items-center gap-2 mb-6">
 			<BookOpen class="h-5 w-5 text-primary" />
@@ -451,6 +267,86 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Recipe Preview Section — the payoff: now go make something with what you learned -->
+	<section class="mb-12">
+		<div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+			<div>
+				<h2 class="text-2xl font-bold">Now Make One</h2>
+				<p class="text-muted-foreground">
+					{data.totalCount}
+					{data.totalCount === 1 ? 'recipe' : 'recipes'} to try
+				</p>
+			</div>
+			<div class="flex items-center gap-2 shrink-0">
+				<WorkspaceSwitcherBadge variant="pill" />
+				{#if data.totalCount > 0}
+					<FancyButton href={catalogLink} variant="primary" size="sm" class="whitespace-nowrap">
+						View all
+						<ArrowRight class="h-4 w-4 ml-1" />
+					</FancyButton>
+				{/if}
+			</div>
+		</div>
+
+		{#if $workspaceSwitching}
+			<CatalogResultsSkeleton viewMode="grid" count={data.recipes.length || 6} />
+		{:else if data.recipes.length === 0}
+			<Card.Root class="border-dashed">
+				<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
+					<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+						<FlaskConical class="h-10 w-10 text-muted-foreground/50" />
+					</div>
+					<h3 class="text-xl font-semibold mb-2">No {data.spiritContent.displayName} Recipes</h3>
+					<p class="text-muted-foreground mb-6 max-w-md">
+						You haven't added any {data.spiritContent.displayName.toLowerCase()} cocktails yet.
+					</p>
+					{#if canModify}
+						<a href="/catalog/add" class={buttonVariants()}>Add Recipe</a>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		{:else}
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				{#each data.recipes as recipe (recipe.recipeId)}
+					<CatalogBrowseCard
+						{recipe}
+						viewMode="grid"
+						isFavorite={favorites.has(recipe.recipeId)}
+						isFeatured={featured.has(recipe.recipeId)}
+						{canModify}
+						{authenticated}
+						workspaceId={workspace.workspaceId}
+						actionPath="?"
+						onToggleFavorite={handleToggleFavorite}
+						onToggleFeatured={handleToggleFeatured}
+					/>
+				{/each}
+			</div>
+
+			{#if data.totalCount > data.recipes.length}
+				<div class="mt-6 flex justify-center">
+					<FancyButton href={catalogLink} size="sm">
+						View all {data.totalCount}
+						{data.spiritContent.displayName} cocktails
+						<ArrowRight class="h-4 w-4 ml-1" />
+					</FancyButton>
+				</div>
+			{/if}
+		{/if}
+
+		<!-- full crawlable listing for no-js clients; hidden for everyone else (json-ld covers the rest) -->
+		{#if data.recipeIndex.length > 0}
+			<noscript>
+				<h3>All {data.spiritContent.displayName} cocktails</h3>
+				<ul>
+					{#each data.recipeIndex as recipe (recipe.recipeId)}
+						<li><a href="/catalog/{recipe.recipeId}">{recipe.recipeName}</a></li>
+					{/each}
+				</ul>
+			</noscript>
+		{/if}
+	</section>
 </div>
 
 <style>

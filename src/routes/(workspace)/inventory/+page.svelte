@@ -16,6 +16,7 @@
 	import InventoryDetailDrawer from '$lib/components/InventoryDetailDrawer.svelte';
 	import InventoryFilterPanel from '$lib/components/InventoryFilterPanel.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
+	import InventoryResultsSkeleton from '$lib/components/InventoryResultsSkeleton.svelte';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
@@ -27,7 +28,7 @@
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
-	import { notificationStore, workspaceSwitcherOpen } from '../../../stores';
+	import { notificationStore, workspaceSwitcherOpen, workspaceSwitching } from '../../../stores';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	let { data }: { data: PageData } = $props();
@@ -334,18 +335,19 @@
 		</div>
 	</Hero>
 {:else}
-	<!-- Inventory Section Navigation -->
+	<!-- Section nav + primary action above the hero -->
 	<InventoryNav>
 		{#snippet action()}
 			{#if canModify}
 				<FancyButton variant="primary" size="sm" href="{basePath}/add" class="shrink-0">
-					<Plus class="h-4 w-4 mr-1.5 sm:mr-2" />
-					<span class="sm:hidden">Add</span>
-					<span class="hidden sm:inline">Add Product</span>
+					<Plus class="h-4 w-4 mr-1" />
+					Add Product
 				</FancyButton>
 			{/if}
 		{/snippet}
 	</InventoryNav>
+
+	<InventoryDashboard stats={data.stats} {showStock} />
 
 	{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
 		<FancyAlert class="mb-6 mt-4">
@@ -362,9 +364,6 @@
 			{/snippet}
 		</FancyAlert>
 	{/if}
-
-	<!-- Dashboard Header -->
-	<InventoryDashboard stats={data.stats} {showStock} />
 
 	<!-- Toolbar -->
 	<div class="flex flex-col gap-3 mb-6">
@@ -442,7 +441,14 @@
 	</div>
 
 	<!-- Content Area -->
-	{#if data.data.length === 0}
+	{#if $workspaceSwitching}
+		<InventoryResultsSkeleton
+			{viewMode}
+			count={data.data.length || 8}
+			{showStock}
+			selectable={canModify}
+		/>
+	{:else if data.data.length === 0}
 		<!-- Empty State -->
 		<Card.Root class="border-dashed">
 			<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
@@ -558,7 +564,7 @@
 	{/if}
 
 	<!-- Recently Added Section -->
-	{#if data.recentlyAdded.length > 0 && !hasActiveFilters}
+	{#if data.recentlyAdded.length > 0 && !hasActiveFilters && !$workspaceSwitching}
 		<div class="mt-12">
 			<h2 class="text-2xl font-bold mb-4">Recently Added</h2>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">

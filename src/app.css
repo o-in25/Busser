@@ -1011,10 +1011,13 @@ input[type='range']::-moz-range-thumb {
 .ptr-indicator {
 	--ptr-progress: 0;
 	position: fixed;
-	top: env(safe-area-inset-top, 0px);
+	/* anchor at the mobile header's bottom edge (4rem tall) so the spinner slides out
+	   from underneath it — tucked up behind the header at rest via translateY */
+	top: calc(4rem + env(safe-area-inset-top, 0px));
 	left: 50%;
-	transform: translateX(-50%) translateY(-28px);
-	z-index: 9998;
+	transform: translateX(-50%) translateY(-48px);
+	/* below the mobile header (z-index 50) so it emerges from beneath the frosted glass */
+	z-index: 40;
 	opacity: 0;
 	pointer-events: none;
 	will-change: transform, opacity;

@@ -60,7 +60,15 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
 		);
 
 		if (!row?.name || !row?.bucket) {
-			throw Error('No upload record found for signed URL.');
+			// legacy/backfilled image without an upload row — nothing tracked to delete, so skip.
+			// don't touch the untracked gcs object (could be shared/seeded).
+			const message = `deleteSignedUrl: no active upload record for ${signedUrl}, skipping cleanup`;
+			console.warn(message);
+			await Logger.info(message);
+			return {
+				status: 'success',
+				message: 'No upload record; nothing to delete.',
+			} satisfies UploadResult;
 		}
 
 		await storage.bucket(row.bucket).file(row.name).delete();

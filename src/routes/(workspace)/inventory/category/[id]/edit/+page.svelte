@@ -33,7 +33,7 @@
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content align="end">
 					<DropdownMenu.Item
-						class="text-destructive data-[highlighted]:text-destructive data-[highlighted]:bg-destructive/10"
+						class="text-destructive dark:text-red-400 data-[highlighted]:text-destructive dark:data-[highlighted]:text-red-400 data-[highlighted]:bg-destructive/10"
 						disabled={data.productCount > 0}
 						onclick={() => (modalOpen = true)}
 					>

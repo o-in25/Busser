@@ -240,6 +240,10 @@
 					aria-hidden="true"
 					class="absolute inset-0 w-full h-full object-cover scale-150 blur-3xl opacity-40 dark:opacity-30 saturate-150 pointer-events-none"
 				/>
+				<!-- dark scrim so the colored tint stays but text keeps contrast (dark mode only) -->
+				<div
+					class="absolute inset-0 rounded-2xl dark:bg-gradient-to-b dark:from-black/30 dark:to-black/45 pointer-events-none"
+				></div>
 			{/if}
 
 			<!-- Glass surface -->
@@ -289,7 +293,7 @@
 							</span>
 						{/if}
 					</h3>
-					<p class="text-sm text-muted-foreground/80 truncate">
+					<p class="text-sm text-muted-foreground dark:text-white/70 truncate">
 						{recipe.recipeDescription || 'A delicious cocktail recipe'}
 					</p>
 					<div class="flex items-center gap-1.5 mt-1">

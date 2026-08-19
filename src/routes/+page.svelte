@@ -30,6 +30,7 @@
 	import { page } from '$app/stores';
 	import FancyCarousel from '$lib/components/FancyCarousel.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
+	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
@@ -105,6 +106,13 @@
 	const canModify = $derived(workspaceRole === 'owner' || workspaceRole === 'editor');
 	// global catalog has no per-user inventory, so it's never treated as an owned bar
 	const isOwner = $derived(workspaceRole === 'owner' && !data.isGlobalCatalog);
+
+	// a workspace switcher tile only appears when there's somewhere to switch to.
+	// when it shows, it takes the (nav-redundant) browse tile's slot on mobile.
+	const canSwitch = $derived((($page.data.workspaces as unknown[])?.length ?? 0) > 1);
+	const actionGridCols = $derived(
+		isOwner ? (canSwitch ? 'md:grid-cols-5' : 'md:grid-cols-4') : canSwitch ? 'md:grid-cols-3' : ''
+	);
 
 	// Gallery setup for authenticated users
 	const gallery = $derived(
@@ -691,41 +699,44 @@
 				</div>
 
 				<!-- Quick Stats Cards -->
-				<div class="{isOwner ? 'grid grid-cols-2 gap-3' : 'flex'} w-full md:w-auto">
-					<Card.Root class="px-4 py-3 md:min-w-[180px]">
-						<div class="flex items-center gap-3">
-							<div class="p-2 rounded-full bg-neon-green-500/10">
-								<CheckCircle2 class="h-5 w-5 text-neon-green-500" />
-							</div>
-							<div>
-								<p class="text-2xl font-bold">{dashboardData.availableCount}</p>
-								<p class="text-xs text-muted-foreground">
-									{isOwner ? 'Recipes Ready' : 'Total Recipes'}
-								</p>
-							</div>
-						</div>
-					</Card.Root>
-					{#if isOwner}
+				{#if !data.isGlobalCatalog}
+					<div class="{isOwner ? 'grid grid-cols-2 gap-3' : 'flex'} w-full md:w-auto">
 						<Card.Root class="px-4 py-3 md:min-w-[180px]">
 							<div class="flex items-center gap-3">
-								<div class="p-2 rounded-full bg-primary/10">
-									<Package class="h-5 w-5 text-primary" />
+								<div class="p-2 rounded-full bg-neon-green-500/10">
+									<CheckCircle2 class="h-5 w-5 text-neon-green-500" />
 								</div>
 								<div>
-									<p class="text-2xl font-bold">{dashboardData.inventoryCount}</p>
-									<p class="text-xs text-muted-foreground">Bottles in Stock</p>
+									<p class="text-2xl font-bold">{dashboardData.availableCount}</p>
+									<p class="text-xs text-muted-foreground">
+										{isOwner ? 'Recipes Ready' : 'Total Recipes'}
+									</p>
 								</div>
 							</div>
 						</Card.Root>
-					{/if}
-				</div>
+						{#if isOwner}
+							<Card.Root class="px-4 py-3 md:min-w-[180px]">
+								<div class="flex items-center gap-3">
+									<div class="p-2 rounded-full bg-primary/10">
+										<Package class="h-5 w-5 text-primary" />
+									</div>
+									<div>
+										<p class="text-2xl font-bold">{dashboardData.inventoryCount}</p>
+										<p class="text-xs text-muted-foreground">Bottles in Stock</p>
+									</div>
+								</div>
+							</Card.Root>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		</section>
 
 		<!-- Quick Actions -->
 		<section class="mb-8">
-			<div class="grid grid-cols-2 {isOwner ? 'md:grid-cols-4' : ''} gap-3">
-				<a href="/catalog" class="block">
+			<div class="grid grid-cols-2 {actionGridCols} gap-3">
+				<!-- browse is redundant with the nav, so it yields its mobile slot to the switcher -->
+				<a href="/catalog" class={canSwitch ? 'hidden md:block' : 'block'}>
 					<Card.Root
 						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
 					>
@@ -735,7 +746,7 @@
 							</div>
 							<div>
 								<p class="font-medium">Browse Catalog</p>
-								<p class="text-xs text-muted-foreground">
+								<p class="hidden md:block text-xs text-muted-foreground">
 									{dashboardData.totalRecipes}
 									{dashboardData.totalRecipes === 1 ? 'recipe' : 'recipes'}
 								</p>
@@ -743,6 +754,8 @@
 						</div>
 					</Card.Root>
 				</a>
+
+				<WorkspaceSwitcherBadge variant="card" />
 
 				{#if isOwner}
 					<a href="/inventory?page=1&stockFilter=out-of-stock" class="block">
@@ -796,7 +809,7 @@
 							</div>
 							<div>
 								<p class="font-medium">Surprise Me!</p>
-								<p class="text-xs text-muted-foreground">
+								<p class="hidden md:block text-xs text-muted-foreground">
 									{gallery.length > 0 ? 'Random cocktail' : 'No recipes yet'}
 								</p>
 							</div>

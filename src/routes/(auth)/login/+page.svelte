@@ -170,5 +170,5 @@
 		</svg>
 		Sign in with Apple
 	</a>
-	-->
+	 -->
 </div>

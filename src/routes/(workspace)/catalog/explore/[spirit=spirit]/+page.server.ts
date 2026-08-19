@@ -8,7 +8,7 @@ import type { View, SpiritSlug } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
+export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
 	const slug = params.spirit as SpiritSlug;
@@ -17,40 +17,16 @@ export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
 	const recipeCategoryId = slugToId[slug];
 	const spiritContent = spirits[slug];
 
-	// parse query params
-	const page = parseInt(url.searchParams.get('page') || '1');
-	const perPage = parseInt(url.searchParams.get('perPage') || '24');
-	const search = url.searchParams.get('search') || '';
-	const sort = url.searchParams.get('sort') || 'name-asc';
+	// number of recipes shown in the preview strip; the rest live in the filtered catalog
+	const PREVIEW_LIMIT = 6;
 
-	// build filter - always include the spirit category
-	const filter: Record<string, any> = {
-		recipeCategoryId,
-	};
-	if (search) {
-		filter.recipeName = search;
-	}
-
-	// get spirits, recipes, favorites, featured, and category recipes in parallel
-	const [allSpirits, catalogResult, userFavorites, featuredRecipes, categoryRecipes] =
-		await Promise.all([
-			catalogRepo.getSpirits(),
-			catalogRepo.findAll(workspaceId, page, perPage, filter),
-			userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
-			catalogRepo.getFeatured(workspaceId),
-			catalogRepo.getRecipesByCategory(workspaceId, recipeCategoryId),
-		]);
-
-	// spotlight image: prefer a featured recipe in this category, else first category recipe with an image
-	const categoryImages =
-		categoryRecipes.status === 'success' ? (categoryRecipes.data ?? []) : [];
-	const featuredInCategory = featuredRecipes.find(
-		(r) => r.recipeCategoryId === recipeCategoryId && r.recipeImageUrl
-	);
-	const spotlightImage =
-		featuredInCategory?.recipeImageUrl ??
-		categoryImages.find((r) => r.recipeImageUrl)?.recipeImageUrl ??
-		null;
+	// get spirits, favorites, featured, and this category's recipes in parallel
+	const [allSpirits, userFavorites, featuredRecipes, categoryRecipes] = await Promise.all([
+		catalogRepo.getSpirits(),
+		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
+		catalogRepo.getFeatured(workspaceId),
+		catalogRepo.getRecipesByCategory(workspaceId, recipeCategoryId),
+	]);
 
 	const spirit = allSpirits.find((s) => s.recipeCategoryId === recipeCategoryId);
 
@@ -62,45 +38,47 @@ export const load: PageServerLoad = async ({ params, url, parent, locals }) => {
 		});
 	}
 
-	let { data, pagination } = catalogResult;
+	const allCategoryRecipes =
+		categoryRecipes.status === 'success' ? (categoryRecipes.data ?? []) : [];
 
 	// build sets for quick lookup
 	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
 	const featuredRecipeIds = new Set(featuredRecipes.map((f) => f.recipeId));
 
-	// apply client-side sorting
-	switch (sort) {
-		case 'name-asc':
-			data.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
-			break;
-		case 'name-desc':
-			data.sort((a, b) => b.recipeName.localeCompare(a.recipeName));
-			break;
-		case 'newest':
-			data.sort((a, b) => b.recipeId - a.recipeId);
-			break;
-		case 'oldest':
-			data.sort((a, b) => a.recipeId - b.recipeId);
-			break;
-	}
+	// preview strip: featured-first, then alphabetical, capped at PREVIEW_LIMIT
+	const previewRecipes = [...allCategoryRecipes]
+		.sort((a, b) => {
+			const aFeatured = featuredRecipeIds.has(a.recipeId) ? 0 : 1;
+			const bFeatured = featuredRecipeIds.has(b.recipeId) ? 0 : 1;
+			if (aFeatured !== bFeatured) return aFeatured - bFeatured;
+			return (a.recipeName ?? '').localeCompare(b.recipeName ?? '');
+		})
+		.slice(0, PREVIEW_LIMIT) as View.BasicRecipe[];
 
-	const recipes = data as View.BasicRecipe[];
+	// spotlight image: prefer the category's own image, then a featured recipe, then any category recipe
+	const featuredInCategory = featuredRecipes.find(
+		(r) => r.recipeCategoryId === recipeCategoryId && r.recipeImageUrl
+	);
+	const spotlightImage =
+		spirit.recipeCategoryDescriptionImageUrl ??
+		featuredInCategory?.recipeImageUrl ??
+		allCategoryRecipes.find((r) => r.recipeImageUrl)?.recipeImageUrl ??
+		null;
+
+	// lightweight full list for seo (json-ld + noscript) — names/urls only, no card payload
+	const recipeIndex = allCategoryRecipes
+		.map((r) => ({ recipeId: r.recipeId, recipeName: r.recipeName ?? '' }))
+		.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
 
 	return {
 		spirit,
-		spirits: allSpirits,
-		recipes,
-		pagination,
+		recipes: previewRecipes,
+		recipeIndex,
+		totalCount: allCategoryRecipes.length,
 		favoriteRecipeIds: [...favoriteRecipeIds],
 		featuredRecipeIds: [...featuredRecipeIds],
 		spotlightImage,
 		spiritContent,
-		filters: {
-			search,
-			sort,
-			page,
-			perPage,
-		},
 	};
 };
 

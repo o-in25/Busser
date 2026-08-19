@@ -4,9 +4,8 @@
 		Award,
 		BookOpen,
 		Candy,
-		ChevronLeft,
+		Compass,
 		Droplets,
-		FlaskConical,
 		Gauge,
 		GlassWater,
 		Globe,
@@ -19,6 +18,7 @@
 		Sparkles,
 		Star,
 		TrendingUp,
+		Wine,
 	} from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -31,13 +31,16 @@
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import FancyInput from '$lib/components/FancyInput.svelte';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
+	import ExploreSkeleton from '$lib/components/ExploreSkeleton.svelte';
+	import PageHero from '$lib/components/PageHero.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
+	import SubNav from '$lib/components/SubNav.svelte';
 	import tips from '$lib/data/tips.json';
 	import { cn } from '$lib/utils';
 
 	import type { PageData } from './$types';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
-	import { workspaceSwitcherOpen } from '../../../../stores';
+	import { workspaceSwitcherOpen, workspaceSwitching } from '../../../../stores';
 
 	let { data }: { data: PageData } = $props();
 
@@ -49,10 +52,7 @@
 	const featuredCocktails = $derived(data.args.featuredCocktails);
 	const cocktailOfTheDay = $derived(data.args.cocktailOfTheDay);
 	const favoriteRecipes = $derived(data.args.favoriteRecipes);
-	const totalRecipes = $derived(data.args.totalRecipes);
 	const popularSpirit = $derived(data.args.popularSpirit);
-	const availableCount = $derived(data.args.availableCount);
-	const almostThereCount = $derived(data.args.almostThereCount);
 	const topIngredient = $derived(data.args.topIngredient);
 
 	// read workspace from page store so it stays current after switches
@@ -140,83 +140,25 @@
 	</FancyAlert>
 {/if}
 
-<!-- Desktop toolbar above hero -->
-<div class="hidden md:flex items-center justify-between gap-2 mb-4 mt-4">
-	<FancyButton href="/catalog" size="sm">
-		<ChevronLeft class="h-4 w-4 mr-1" />
-		Back to Catalog
-	</FancyButton>
-	<div class="flex items-center gap-2">
-		<FancyButton onclick={surpriseMe} size="sm">
+<!-- Section nav + primary action above the hero; this is the Explore tab -->
+<SubNav
+	tabs={[
+		{ href: '/catalog', label: 'Browse', icon: Wine, match: (p) => p === '/catalog' },
+		{ href: '/catalog/explore', label: 'Explore', icon: Compass },
+	]}
+>
+	{#snippet action()}
+		<FancyButton onclick={surpriseMe} size="sm" class="shrink-0">
 			<Shuffle class="h-4 w-4 mr-1" />
 			Surprise Me
 		</FancyButton>
-		<FancyButton href="/catalog" variant="primary" size="sm">
-			<ArrowRight class="h-4 w-4 mr-1" />
-			View All
-		</FancyButton>
-	</div>
-</div>
+	{/snippet}
+</SubNav>
 
 <!-- Hero Section -->
-<div
-	class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-8 mt-4 md:mt-0 px-4 py-4 sm:px-6 sm:py-5"
->
-	<!-- Title + Search -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-		<h1 class="text-2xl font-bold">Explore</h1>
-		<form onsubmit={handleSearch} class="flex gap-2 w-full sm:max-w-xs sm:w-auto">
-			<div class="relative flex-1">
-				<Search
-					class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none"
-				/>
-				<FancyInput
-					type="text"
-					placeholder="Search cocktails..."
-					bind:value={searchQuery}
-					class="pl-10"
-				/>
-			</div>
-			<FancyButton type="submit" size="sm">Search</FancyButton>
-		</form>
-	</div>
-
-	<!-- Mobile: Back + Surprise Me + View All -->
-	<div class="flex gap-2 md:hidden mb-4">
-		<FancyButton href="/catalog" size="sm" class="flex-1 justify-center">
-			<ChevronLeft class="h-4 w-4 mr-1" />
-			Catalog
-		</FancyButton>
-		<FancyButton onclick={surpriseMe} size="sm" class="flex-1 justify-center">
-			<Shuffle class="h-4 w-4 mr-1" />
-			Surprise Me
-		</FancyButton>
-	</div>
-
-	<!-- Desktop: Smart Action Pills -->
-	<div class="hidden md:flex gap-2 flex-wrap pb-1 -mb-1">
-		<FancyBadge href="/catalog" class="whitespace-nowrap">
-			<FlaskConical class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{totalRecipes}</span>
-			<span class="text-xs text-muted-foreground">Recipes</span>
-		</FancyBadge>
-
-		{#if !isGlobalCatalog}
-			<FancyBadge href="/catalog?readyToMake=true" class="whitespace-nowrap">
-				<Sparkles class="h-4 w-4 text-primary shrink-0" />
-				<span class="text-sm font-bold">{availableCount}</span>
-				<span class="text-xs text-muted-foreground">Ready</span>
-			</FancyBadge>
-
-			{#if almostThereCount > 0}
-				<FancyBadge href="/catalog?almostThere=true" class="whitespace-nowrap">
-					<GlassWater class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{almostThereCount}</span>
-					<span class="text-xs text-muted-foreground">Almost There</span>
-				</FancyBadge>
-			{/if}
-		{/if}
-
+<PageHero title="Explore">
+	<!-- Smart Action Pills -->
+	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		{#if popularSpirit}
 			<FancyBadge
 				href="/catalog/explore/{idToSlug[popularSpirit.recipeCategoryId] ??
@@ -243,179 +185,203 @@
 			</FancyBadge>
 		{/if}
 	</div>
-</div>
+</PageHero>
 
-<!-- Spirit Cards Section -->
-<section class="mb-10">
-	<div class="flex items-center justify-between mb-6">
-		<h2 class="text-2xl font-bold flex items-center gap-2">
-			<GlassWater class="h-6 w-6 text-primary" />
-			Explore by Spirit
-		</h2>
+<!-- Search -->
+<form onsubmit={handleSearch} class="flex gap-2 mb-8">
+	<div class="relative flex-1">
+		<Search
+			class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none"
+		/>
+		<FancyInput
+			type="text"
+			placeholder="Search cocktails..."
+			bind:value={searchQuery}
+			class="pl-10"
+		/>
 	</div>
+	<FancyButton type="submit" size="sm">Search</FancyButton>
+</form>
 
-	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-		{#each spirits as spirit}
-			{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
-			{@const slug = idToSlug[spirit.recipeCategoryId]}
-			{@const spotlight = spiritSpotlightImages[spirit.recipeCategoryId]}
-			{@const accent = slug ? spiritContent[slug]?.accentColor.gradient : null}
-			<a href="/catalog/explore/{slug ?? spirit.recipeCategoryId}" class="block group">
-				<Card.Root
-					class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300"
-				>
-					<!-- Backdrop: featured recipe image when available, accent gradient otherwise -->
-					<div class="absolute inset-0">
-						{#if spotlight}
-							<img
-								src={spotlight}
-								alt=""
-								class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-							/>
-						{:else if accent}
-							<div
-								class="h-full w-full bg-gradient-to-br {accent} transition-transform duration-300 group-hover:scale-110"
-							></div>
-						{:else}
-							<div
-								class="h-full w-full bg-muted transition-transform duration-300 group-hover:scale-110"
-							></div>
-						{/if}
-						<div
-							class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
-						></div>
-					</div>
-
-					<!-- Content -->
-					<div class="absolute inset-0 p-5 flex flex-col justify-end">
-						<div class="flex items-center justify-between">
-							<h3 class="text-xl font-bold text-foreground">
-								{spirit.recipeCategoryDescription}
-							</h3>
-							<Badge variant="secondary" class="bg-background/80 backdrop-blur-sm">
-								{count}
-								{count === 1 ? 'recipe' : 'recipes'}
-							</Badge>
-						</div>
-						<p class="text-sm text-muted-foreground mt-1 line-clamp-2">
-							{spirit.recipeCategoryDescriptionText}
-						</p>
-					</div>
-
-					<!-- Hover arrow indicator -->
-					<div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-						<div class="p-2 rounded-full bg-primary text-primary-foreground">
-							<ArrowRight class="h-4 w-4" />
-						</div>
-					</div>
-				</Card.Root>
-			</a>
-		{/each}
-	</div>
-</section>
-
-<!-- Cocktail of the Day + Recipe List -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-	<!-- Cocktail of the Day -->
-	{#if cocktailOfTheDay}
-		<div class="lg:col-span-1">
-			<CocktailOfTheDay recipe={cocktailOfTheDay} />
+{#if $workspaceSwitching}
+	<ExploreSkeleton />
+{:else}
+	<!-- Spirit Cards Section -->
+	<section class="mb-10">
+		<div class="flex items-center justify-between mb-6">
+			<h2 class="text-2xl font-bold flex items-center gap-2">
+				<GlassWater class="h-6 w-6 text-primary" />
+				Explore by Spirit
+			</h2>
 		</div>
-	{/if}
 
-	<!-- Tabbed Recipe List -->
-	<Card.Root class={cocktailOfTheDay ? 'lg:col-span-2' : 'lg:col-span-3'}>
-		<Card.Header>
-			<div class="flex items-center gap-2">
-				<div
-					class="inline-flex items-center rounded-full bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
-				>
-					<button
-						class={cn(
-							'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
-							activeTab === 'featured'
-								? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-								: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
-						)}
-						onclick={() => (activeTab = 'featured')}
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			{#each spirits as spirit}
+				{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
+				{@const slug = idToSlug[spirit.recipeCategoryId]}
+				{@const spotlight =
+					spirit.recipeCategoryDescriptionImageUrl ??
+					spiritSpotlightImages[spirit.recipeCategoryId]}
+				{@const accent = slug ? spiritContent[slug]?.accentColor.gradient : null}
+				<a href="/catalog/explore/{slug ?? spirit.recipeCategoryId}" class="block group">
+					<Card.Root
+						class="relative overflow-hidden h-48 hover:shadow-lg transition-all duration-300"
 					>
-						<Star class="h-3 w-3 inline-block mr-1 -mt-0.5" />
-						Featured
-					</button>
-					{#if authenticated}
+						<!-- Backdrop: featured recipe image when available, accent gradient otherwise -->
+						<div class="absolute inset-0">
+							{#if spotlight}
+								<img
+									src={spotlight}
+									alt=""
+									class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+								/>
+							{:else if accent}
+								<div
+									class="h-full w-full bg-gradient-to-br {accent} transition-transform duration-300 group-hover:scale-110"
+								></div>
+							{:else}
+								<div
+									class="h-full w-full bg-muted transition-transform duration-300 group-hover:scale-110"
+								></div>
+							{/if}
+							<div
+								class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
+							></div>
+						</div>
+
+						<!-- Content -->
+						<div class="absolute inset-0 p-5 flex flex-col justify-end">
+							<div class="flex items-center justify-between">
+								<h3 class="text-xl font-bold text-foreground">
+									{spirit.recipeCategoryDescription}
+								</h3>
+								<Badge variant="secondary" class="bg-background/80 backdrop-blur-sm">
+									{count}
+									{count === 1 ? 'recipe' : 'recipes'}
+								</Badge>
+							</div>
+							<p class="text-sm text-muted-foreground mt-1 line-clamp-2">
+								{spirit.recipeCategoryDescriptionText}
+							</p>
+						</div>
+
+						<!-- Hover arrow indicator -->
+						<div
+							class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+						>
+							<div class="p-2 rounded-full bg-primary text-primary-foreground">
+								<ArrowRight class="h-4 w-4" />
+							</div>
+						</div>
+					</Card.Root>
+				</a>
+			{/each}
+		</div>
+	</section>
+
+	<!-- Cocktail of the Day + Recipe List -->
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+		<!-- Cocktail of the Day -->
+		{#if cocktailOfTheDay}
+			<div class="lg:col-span-1">
+				<CocktailOfTheDay recipe={cocktailOfTheDay} />
+			</div>
+		{/if}
+
+		<!-- Tabbed Recipe List -->
+		<Card.Root class={cocktailOfTheDay ? 'lg:col-span-2' : 'lg:col-span-3'}>
+			<Card.Header>
+				<div class="flex items-center gap-2">
+					<div
+						class="inline-flex items-center rounded-full bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
+					>
 						<button
 							class={cn(
 								'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
-								activeTab === 'favorites'
+								activeTab === 'featured'
 									? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
 									: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
 							)}
-							onclick={() => (activeTab = 'favorites')}
+							onclick={() => (activeTab = 'featured')}
 						>
-							<Heart class="h-3 w-3 inline-block mr-1 -mt-0.5" />
-							Favorites
+							<Star class="h-3 w-3 inline-block mr-1 -mt-0.5" />
+							Featured
 						</button>
-					{/if}
-					<button
-						class={cn(
-							'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
-							activeTab === 'recent'
-								? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-								: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
-						)}
-						onclick={() => (activeTab = 'recent')}
-					>
-						<BookOpen class="h-3 w-3 inline-block mr-1 -mt-0.5" />
-						Recent
-					</button>
-				</div>
-			</div>
-		</Card.Header>
-		<Card.Content>
-			{#if tabRecipes.length === 0}
-				<p class="text-muted-foreground text-center py-8">
-					{#if activeTab === 'favorites'}
-						No favorites yet. Browse recipes and tap the heart to save your favorites.
-					{:else if activeTab === 'featured'}
-						No featured cocktails yet.
-					{:else}
-						No recipes yet.
-					{/if}
-				</p>
-			{:else}
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					{#each tabRecipes.slice(0, 6) as cocktail (cocktail.recipeId)}
-						<a
-							href="/catalog/{cocktail.recipeId}"
-							class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
+						{#if authenticated}
+							<button
+								class={cn(
+									'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
+									activeTab === 'favorites'
+										? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
+										: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
+								)}
+								onclick={() => (activeTab = 'favorites')}
+							>
+								<Heart class="h-3 w-3 inline-block mr-1 -mt-0.5" />
+								Favorites
+							</button>
+						{/if}
+						<button
+							class={cn(
+								'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
+								activeTab === 'recent'
+									? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
+									: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
+							)}
+							onclick={() => (activeTab = 'recent')}
 						>
-							<div class="shrink-0">
-								<SkeletonImage
-									src={cocktail.recipeImageUrl}
-									alt={cocktail.recipeName}
-									variant="recipe"
-									class="w-12 h-12 rounded-lg"
-								/>
-							</div>
-							<div class="flex-1 min-w-0">
-								<p
-									class="font-medium truncate group-hover:text-accent-foreground transition-colors"
-								>
-									{cocktail.recipeName}
-								</p>
-								<p
-									class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors"
-								>
-									{cocktail.recipeCategoryDescription}
-								</p>
-							</div>
-						</a>
-					{/each}
+							<BookOpen class="h-3 w-3 inline-block mr-1 -mt-0.5" />
+							Recent
+						</button>
+					</div>
 				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
-</div>
+			</Card.Header>
+			<Card.Content>
+				{#if tabRecipes.length === 0}
+					<p class="text-muted-foreground text-center py-8">
+						{#if activeTab === 'favorites'}
+							No favorites yet. Browse recipes and tap the heart to save your favorites.
+						{:else if activeTab === 'featured'}
+							No featured cocktails yet.
+						{:else}
+							No recipes yet.
+						{/if}
+					</p>
+				{:else}
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+						{#each tabRecipes.slice(0, 6) as cocktail (cocktail.recipeId)}
+							<a
+								href="/catalog/{cocktail.recipeId}"
+								class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors group"
+							>
+								<div class="shrink-0">
+									<SkeletonImage
+										src={cocktail.recipeImageUrl}
+										alt={cocktail.recipeName}
+										variant="recipe"
+										class="w-12 h-12 rounded-lg"
+									/>
+								</div>
+								<div class="flex-1 min-w-0">
+									<p
+										class="font-medium truncate group-hover:text-accent-foreground transition-colors"
+									>
+										{cocktail.recipeName}
+									</p>
+									<p
+										class="text-xs text-muted-foreground group-hover:text-accent-foreground/70 transition-colors"
+									>
+										{cocktail.recipeCategoryDescription}
+									</p>
+								</div>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			</Card.Content>
+		</Card.Root>
+	</div>
+{/if}
 
 <!-- Bottom Row: Bartender Tip + Add Recipe CTA -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">

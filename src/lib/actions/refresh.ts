@@ -34,7 +34,7 @@ export const refresh: Action<HTMLElement> = (node) => {
 	function applyTransform(dy: number) {
 		currentDy = dy;
 		node.style.transform = `translateY(${dy}px)`;
-		indicator.style.transform = `translateX(-50%) translateY(${dy - 28}px)`;
+		indicator.style.transform = `translateX(-50%) translateY(${dy - 48}px)`;
 	}
 
 	function clearTransitions() {
