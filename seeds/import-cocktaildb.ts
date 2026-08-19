@@ -13,10 +13,10 @@ const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
 // read-only ingest: walks thecocktaildb, transforms IBA classics into busser's
 // recipe json shape, and APPENDS new ones to global-catalog-recipes.json.
 // never touches the db — seed:core inserts them later (as drafts).
-// run: npx tsx scripts/import-cocktaildb.ts [--limit=N] [--dry]
+// run: pnpm import:cocktaildb [--limit=N] [--dry]
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RECIPES_PATH = path.join(__dirname, '../seeds/core/data/global-catalog-recipes.json');
+const RECIPES_PATH = path.join(__dirname, './core/data/global-catalog-recipes.json');
 const API = 'https://www.thecocktaildb.com/api/json/v1/1';
 
 const args = process.argv.slice(2);

@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import knex from 'knex';
 import config from '../knexfile';
-import recipes from '../seeds/core/data/global-catalog-recipes.json';
+import recipes from './core/data/global-catalog-recipes.json';
 
 const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
 
