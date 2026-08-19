@@ -515,6 +515,51 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
+	// updates the global recipecategorydescription row for a spirit (admin-only, gated at the route)
+	async updateSpirit(
+		recipeCategoryId: number,
+		descriptionText: string | null,
+		imageUrl: string = '',
+		imageCleared: boolean = false
+	): Promise<QueryResult<Spirit>> {
+		try {
+			const existing = await this.db
+				.table('recipecategorydescription')
+				.select('RecipeCategoryDescriptionImageUrl')
+				.where('RecipeCategoryId', recipeCategoryId)
+				.first();
+
+			if (!existing) {
+				return { status: 'error', error: 'Category not found.' };
+			}
+
+			const update: Record<string, unknown> = {
+				RecipeCategoryDescriptionText: descriptionText,
+			};
+
+			// only touch the image column when a new one was uploaded or it was cleared
+			if (imageCleared || imageUrl) {
+				if (existing.recipeCategoryDescriptionImageUrl) {
+					await deleteSignedUrl(existing.recipeCategoryDescriptionImageUrl);
+				}
+				update.RecipeCategoryDescriptionImageUrl = imageCleared ? null : imageUrl;
+			}
+
+			await this.db
+				.table('recipecategorydescription')
+				.where('RecipeCategoryId', recipeCategoryId)
+				.update(update);
+
+			const updated = await this.getSpiritById(recipeCategoryId);
+			if (!updated) return { status: 'error', error: 'Category not found.' };
+			return { status: 'success', data: updated };
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not update category.' };
+		}
+	}
+
 	async getPreparationMethods(): Promise<QueryResult<PreparationMethod[]>> {
 		try {
 			const dbResult = await this.db.table<PreparationMethod>('preparationmethod');

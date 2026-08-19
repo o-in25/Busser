@@ -303,7 +303,7 @@
 		<SubNav
 			tabs={[
 				{ href: '/catalog', label: 'Recipes', icon: Wine, match: (p) => p === '/catalog' },
-				{ href: '/catalog/explore', label: 'Explore', icon: Compass }
+				{ href: '/catalog/explore', label: 'Explore', icon: Compass },
 			]}
 		>
 			{#snippet action()}

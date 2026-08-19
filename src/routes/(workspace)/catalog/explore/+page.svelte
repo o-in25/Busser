@@ -32,6 +32,7 @@
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import FancyInput from '$lib/components/FancyInput.svelte';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
+	import ExploreSkeleton from '$lib/components/ExploreSkeleton.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import SubNav from '$lib/components/SubNav.svelte';
@@ -40,7 +41,7 @@
 
 	import type { PageData } from './$types';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
-	import { workspaceSwitcherOpen } from '../../../../stores';
+	import { workspaceSwitcherOpen, workspaceSwitching } from '../../../../stores';
 
 	let { data }: { data: PageData } = $props();
 
@@ -228,6 +229,9 @@
 	<FancyButton type="submit" size="sm">Search</FancyButton>
 </form>
 
+{#if $workspaceSwitching}
+	<ExploreSkeleton />
+{:else}
 <!-- Spirit Cards Section -->
 <section class="mb-10">
 	<div class="flex items-center justify-between mb-6">
@@ -241,7 +245,9 @@
 		{#each spirits as spirit}
 			{@const count = spiritCounts[spirit.recipeCategoryId] || 0}
 			{@const slug = idToSlug[spirit.recipeCategoryId]}
-			{@const spotlight = spiritSpotlightImages[spirit.recipeCategoryId]}
+			{@const spotlight =
+				spirit.recipeCategoryDescriptionImageUrl ??
+				spiritSpotlightImages[spirit.recipeCategoryId]}
 			{@const accent = slug ? spiritContent[slug]?.accentColor.gradient : null}
 			<a href="/catalog/explore/{slug ?? spirit.recipeCategoryId}" class="block group">
 				<Card.Root
@@ -399,6 +405,7 @@
 		</Card.Content>
 	</Card.Root>
 </div>
+{/if}
 
 <!-- Bottom Row: Bartender Tip + Add Recipe CTA -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">

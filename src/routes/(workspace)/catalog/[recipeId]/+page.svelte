@@ -79,7 +79,9 @@
 	const importData = $derived(data.importData);
 	const importableWorkspaces = $derived(
 		importData
-			? importData.editableWorkspaces.filter((ws) => !importData.importedTo.includes(ws.workspaceId))
+			? importData.editableWorkspaces.filter(
+					(ws) => !importData.importedTo.includes(ws.workspaceId)
+				)
 			: []
 	);
 	const showImport = $derived(
@@ -96,7 +98,22 @@
 		name: data.recipe.recipeName,
 		description: data.recipe.recipeDescription || `${data.recipe.recipeName} cocktail recipe.`,
 		...(data.recipe.recipeImageUrl && { image: data.recipe.recipeImageUrl }),
+		author: { '@type': 'Organization', name: 'Busser', url: 'https://busserapp.com' },
 		recipeCategory: data.recipe.recipeCategoryDescription,
+		recipeCuisine: 'Cocktail',
+		// cocktails are quick — flat estimate covers measuring (prep) + shake/stir/build (cook)
+		prepTime: 'PT3M',
+		cookTime: 'PT2M',
+		totalTime: 'PT5M',
+		keywords: [
+			data.recipe.recipeName,
+			data.recipe.recipeCategoryDescription,
+			data.recipe.recipeTechniqueDescriptionText,
+			'cocktail',
+			...data.recipeSteps.map((s) => s.productName),
+		]
+			.filter(Boolean)
+			.join(', '),
 		recipeIngredient: data.recipeSteps.map(
 			(s) => `${s.productIdQuantityInMilliliters} ${s.productIdQuantityUnit} ${s.productName}`
 		),
@@ -302,7 +319,7 @@
 						{#if canModify}
 							<DropdownMenu.Separator />
 							<DropdownMenu.Item
-								class="text-destructive data-[highlighted]:text-destructive data-[highlighted]:bg-destructive/10"
+								class="text-destructive dark:text-red-400 data-[highlighted]:text-destructive dark:data-[highlighted]:text-red-400 data-[highlighted]:bg-destructive/10"
 								onclick={() => (deleteModalOpen = true)}
 							>
 								<Trash2 class="h-4 w-4 mr-2" />
@@ -336,7 +353,7 @@
 							</DropdownMenu.Item>
 							<DropdownMenu.Separator />
 							<DropdownMenu.Item
-								class="text-destructive data-[highlighted]:text-destructive data-[highlighted]:bg-destructive/10"
+								class="text-destructive dark:text-red-400 data-[highlighted]:text-destructive dark:data-[highlighted]:text-red-400 data-[highlighted]:bg-destructive/10"
 								onclick={() => (deleteModalOpen = true)}
 							>
 								<Trash2 class="h-4 w-4 mr-2" />

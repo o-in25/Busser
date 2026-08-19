@@ -8,6 +8,7 @@
 	import { haptics } from '$lib/utils/haptics';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
+	import InventoryResultsSkeleton from '$lib/components/InventoryResultsSkeleton.svelte';
 	import NearbyStoreSearch from '$lib/components/NearbyStoreSearch.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import ShoppingListHeader from '$lib/components/ShoppingListHeader.svelte';
@@ -26,7 +27,7 @@
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
 	import type { PageData } from './$types';
-	import { notificationStore } from '../../../../stores';
+	import { notificationStore, workspaceSwitching } from '../../../../stores';
 
 	let { data }: { data: PageData } = $props();
 
@@ -558,7 +559,14 @@
 		{/if}
 
 		<!-- Content -->
-		{#if data.items.length === 0}
+		{#if $workspaceSwitching}
+			<InventoryResultsSkeleton
+				{viewMode}
+				count={data.items.length || 8}
+				showStock={false}
+				selectable={canModify}
+			/>
+		{:else if data.items.length === 0}
 			<div class="flex flex-col items-center justify-center py-16 text-center">
 				<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
 					<ShoppingCart class="h-10 w-10 text-muted-foreground/50" />
