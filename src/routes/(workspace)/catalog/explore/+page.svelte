@@ -6,7 +6,6 @@
 		Candy,
 		Compass,
 		Droplets,
-		FlaskConical,
 		Gauge,
 		GlassWater,
 		Globe,
@@ -53,10 +52,7 @@
 	const featuredCocktails = $derived(data.args.featuredCocktails);
 	const cocktailOfTheDay = $derived(data.args.cocktailOfTheDay);
 	const favoriteRecipes = $derived(data.args.favoriteRecipes);
-	const totalRecipes = $derived(data.args.totalRecipes);
 	const popularSpirit = $derived(data.args.popularSpirit);
-	const availableCount = $derived(data.args.availableCount);
-	const almostThereCount = $derived(data.args.almostThereCount);
 	const topIngredient = $derived(data.args.topIngredient);
 
 	// read workspace from page store so it stays current after switches
@@ -147,7 +143,7 @@
 <!-- Section nav + primary action above the hero; this is the Explore tab -->
 <SubNav
 	tabs={[
-		{ href: '/catalog', label: 'Recipes', icon: Wine, match: (p) => p === '/catalog' },
+		{ href: '/catalog', label: 'Browse', icon: Wine, match: (p) => p === '/catalog' },
 		{ href: '/catalog/explore', label: 'Explore', icon: Compass }
 	]}
 >
@@ -163,28 +159,6 @@
 <PageHero title="Explore">
 	<!-- Smart Action Pills -->
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
-		<FancyBadge href="/catalog" class="whitespace-nowrap">
-			<FlaskConical class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{totalRecipes}</span>
-			<span class="text-xs text-muted-foreground">Recipes</span>
-		</FancyBadge>
-
-		{#if !isGlobalCatalog}
-			<FancyBadge href="/catalog?readyToMake=true" class="whitespace-nowrap">
-				<Sparkles class="h-4 w-4 text-primary shrink-0" />
-				<span class="text-sm font-bold">{availableCount}</span>
-				<span class="text-xs text-muted-foreground">Ready</span>
-			</FancyBadge>
-
-			{#if almostThereCount > 0}
-				<FancyBadge href="/catalog?almostThere=true" class="whitespace-nowrap">
-					<GlassWater class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{almostThereCount}</span>
-					<span class="text-xs text-muted-foreground">Almost There</span>
-				</FancyBadge>
-			{/if}
-		{/if}
-
 		{#if popularSpirit}
 			<FancyBadge
 				href="/catalog/explore/{idToSlug[popularSpirit.recipeCategoryId] ??

@@ -87,6 +87,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		favoriteRecipes,
 		featuredRecipes,
 		prepMethodsResult,
+		availableResult,
+		almostThereRecipes,
 		...ingredientEntries
 	] = await Promise.all([
 		catalogRepo.findAll(
@@ -102,8 +104,15 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		userId ? getFavoriteRecipes(userId, workspaceId) : Promise.resolve([]),
 		catalogRepo.getFeatured(workspaceId),
 		catalogRepo.getPreparationMethods(),
+		catalogRepo.getAvailableRecipes(workspaceId),
+		catalogRepo.getAlmostThereRecipes(workspaceId),
 		...ingredientNameLookups,
 	]);
+
+	// ready-to-make and almost-there counts for the hero stat badges
+	const availableCount =
+		availableResult.status === 'success' ? (availableResult.data?.length ?? 0) : 0;
+	const almostThereCount = almostThereRecipes.length;
 
 	const ingredientNames = Object.fromEntries(ingredientEntries) as Record<number, string>;
 
@@ -195,6 +204,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		spirits,
 		preparationMethods,
 		canModify,
+		availableCount,
+		almostThereCount,
 		favoriteRecipeIds: [...favoriteRecipeIds],
 		featuredRecipeIds: [...featuredRecipeIds],
 		filters: {

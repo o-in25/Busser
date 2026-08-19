@@ -13,6 +13,7 @@
 	import CategoryFilterPanel from '$lib/components/CategoryFilterPanel.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
+	import InventoryResultsSkeleton from '$lib/components/InventoryResultsSkeleton.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
@@ -25,7 +26,7 @@
 	import type { Category } from '$lib/types';
 	import { cn } from '$lib/utils';
 
-	import { notificationStore, workspaceSwitcherOpen } from '../../../../stores';
+	import { notificationStore, workspaceSwitcherOpen, workspaceSwitching } from '../../../../stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -266,7 +267,9 @@
 </div>
 
 <!-- Categories Table -->
-{#if data.categories.length === 0}
+{#if $workspaceSwitching}
+	<InventoryResultsSkeleton viewMode={viewMode === 'list' ? 'list' : 'table'} count={filteredCategories.length || 8} showStock={false} />
+{:else if data.categories.length === 0}
 	<Card.Root class="border-dashed">
 		<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
 			<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
@@ -476,7 +479,7 @@
 	</div>
 {/if}
 
-{#if data.categories.length > 0 && filteredCategories.length > 0}
+{#if data.categories.length > 0 && filteredCategories.length > 0 && !$workspaceSwitching}
 	<Pagination
 		pagination={data.pagination}
 		itemLabel={data.pagination.total === 1 ? 'category' : 'categories'}

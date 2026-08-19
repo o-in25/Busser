@@ -2,6 +2,7 @@
 	import {
 		Compass,
 		FlaskConical,
+		GlassWater,
 		Globe,
 		Plus,
 		Search,
@@ -302,7 +303,7 @@
 		<!-- Section nav + primary action above the hero; explore lives here as a tab -->
 		<SubNav
 			tabs={[
-				{ href: '/catalog', label: 'Recipes', icon: Wine, match: (p) => p === '/catalog' },
+				{ href: '/catalog', label: 'Browse', icon: Wine, match: (p) => p === '/catalog' },
 				{ href: '/catalog/explore', label: 'Explore', icon: Compass },
 			]}
 		>
@@ -317,16 +318,31 @@
 		</SubNav>
 
 		<!-- Hero Section -->
-		<PageHero
-			title="Catalog"
-			subtitle={`${data.pagination.total} ${data.pagination.total === 1 ? 'recipe' : 'recipes'}${$page.data.isGlobalWorkspace ? " in Busser's catalog" : workspace?.workspaceRole === 'owner' ? ' in your catalog' : ' available'}`}
-		>
+		<PageHero title="Catalog">
 			<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 				<FancyBadge class="whitespace-nowrap">
 					<Wine class="h-4 w-4 text-primary shrink-0" />
 					<span class="text-sm font-bold">{data.pagination.total}</span>
 					<span class="text-xs text-muted-foreground">Recipes</span>
 				</FancyBadge>
+
+				<!-- todo: make these badges filter the catalog (readyToMake=1, and an almostThere filter that
+				     doesn't exist yet). links dropped for now so they're stat-only, not dead clicks. -->
+				{#if !$page.data.isGlobalWorkspace}
+					<FancyBadge class="whitespace-nowrap">
+						<Sparkles class="h-4 w-4 text-primary shrink-0" />
+						<span class="text-sm font-bold">{data.availableCount}</span>
+						<span class="text-xs text-muted-foreground">Ready</span>
+					</FancyBadge>
+
+					{#if data.almostThereCount > 0}
+						<FancyBadge class="whitespace-nowrap">
+							<GlassWater class="h-4 w-4 text-primary shrink-0" />
+							<span class="text-sm font-bold">{data.almostThereCount}</span>
+							<span class="text-xs text-muted-foreground">Almost There</span>
+						</FancyBadge>
+					{/if}
+				{/if}
 
 				{#if selectedSpirit && selectedSpirit !== 'all'}
 					{@const spiritObj = data.spirits.find(
