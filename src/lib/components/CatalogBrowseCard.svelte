@@ -4,6 +4,7 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { haptics } from '$lib/utils/haptics';
+	import { cdnSrc } from '$lib/utils/image';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { calculateOverallScore } from '$lib/math';
 	import type { View } from '$lib/types';
@@ -81,7 +82,7 @@
 			<!-- Blurred background glow from recipe image -->
 			{#if recipe.recipeImageUrl}
 				<img
-					src={recipe.recipeImageUrl}
+					src={cdnSrc(recipe.recipeImageUrl, 64)}
 					alt=""
 					aria-hidden="true"
 					class="absolute inset-0 w-full h-full object-cover scale-150 blur-3xl opacity-40 dark:opacity-30 saturate-150 pointer-events-none"
@@ -235,7 +236,7 @@
 			<!-- Blurred background image -->
 			{#if recipe.recipeImageUrl}
 				<img
-					src={recipe.recipeImageUrl}
+					src={cdnSrc(recipe.recipeImageUrl, 64)}
 					alt=""
 					aria-hidden="true"
 					class="absolute inset-0 w-full h-full object-cover scale-150 blur-3xl opacity-40 dark:opacity-30 saturate-150 pointer-events-none"

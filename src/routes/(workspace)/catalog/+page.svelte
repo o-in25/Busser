@@ -36,7 +36,7 @@
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 	import { cn } from '$lib/utils';
 
-	import { workspaceSwitcherOpen, workspaceSwitching } from '../../../stores';
+	import { workspaceSwitching } from '../../../stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -267,56 +267,39 @@
 </svelte:head>
 
 <div>
-	{#if !authenticated}
-		<FancyAlert class="mb-6">
-			{#snippet icon()}<Sparkles class="h-5 w-5 text-primary" />{/snippet}
-			{#snippet children()}
-				<p class="sm:hidden">Sign up to save favorites</p>
-				<p class="hidden sm:block">
-					Sign up to <strong>save favorites</strong> and build your own bar — Busser tells you what you
-					can actually make.
-				</p>
-			{/snippet}
-			{#snippet action()}
-				<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
-			{/snippet}
-		</FancyAlert>
-	{/if}
-
 	{#if authenticated && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
 		<FancyAlert class="mb-6">
 			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
 			{#snippet children()}
 				<p class="sm:hidden">Viewing global catalog</p>
 				<p class="hidden sm:block">
-					You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
-					switch to your workspace.
+					You're viewing <strong>Busser's global catalog</strong>. Use the workspace switcher to
+					switch to your own and manage your inventory.
 				</p>
-			{/snippet}
-			{#snippet action()}
-				<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
 			{/snippet}
 		</FancyAlert>
 	{/if}
 
-	{#if authenticated}
-		<!-- Section nav + primary action above the hero; explore lives here as a tab -->
-		<SubNav
-			tabs={[
-				{ href: '/catalog', label: 'Browse', icon: Wine, match: (p) => p === '/catalog' },
-				{ href: '/catalog/explore', label: 'Explore', icon: Compass },
-			]}
-		>
-			{#snippet action()}
-				{#if canModify}
-					<FancyButton href="/catalog/add" variant="primary" size="sm" class="shrink-0">
-						<Plus class="h-4 w-4 mr-1" />
-						Add Recipe
-					</FancyButton>
-				{/if}
-			{/snippet}
-		</SubNav>
+	<!-- Section nav + primary action above the hero; explore lives here as a tab. shown to
+	     logged-out users too so explore is reachable from the nav, not just deep links -->
+	<SubNav
+		tabs={[
+			{ href: '/catalog', label: 'Browse', icon: Wine, match: (p) => p === '/catalog' },
+			{ href: '/catalog/explore', label: 'Explore', icon: Compass },
+		]}
+		workspaceSwitcher={authenticated}
+	>
+		{#snippet action()}
+			{#if canModify}
+				<FancyButton href="/catalog/add" variant="primary" size="sm" class="shrink-0">
+					<Plus class="h-4 w-4 mr-1" />
+					Add Recipe
+				</FancyButton>
+			{/if}
+		{/snippet}
+	</SubNav>
 
+	{#if authenticated}
 		<!-- Hero Section -->
 		<PageHero title="Catalog">
 			<div class="flex gap-2 flex-wrap pb-1 -mb-1">
@@ -336,7 +319,8 @@
 					</FancyBadge>
 
 					{#if data.almostThereCount > 0}
-						<FancyBadge class="whitespace-nowrap">
+						<!-- secondary stats hidden on mobile so the hero stays a single row -->
+						<FancyBadge class="hidden md:inline-flex whitespace-nowrap">
 							<GlassWater class="h-4 w-4 text-primary shrink-0" />
 							<span class="text-sm font-bold">{data.almostThereCount}</span>
 							<span class="text-xs text-muted-foreground">Almost There</span>
@@ -349,7 +333,7 @@
 						(s) => String(s.recipeCategoryId) === selectedSpirit
 					)}
 					{#if spiritObj}
-						<FancyBadge class="whitespace-nowrap">
+						<FancyBadge class="hidden md:inline-flex whitespace-nowrap">
 							<span class="text-sm font-bold">{spiritObj.recipeCategoryDescription}</span>
 							<span class="text-xs text-muted-foreground">Spirit</span>
 						</FancyBadge>
@@ -357,7 +341,11 @@
 				{/if}
 
 				{#if advancedFilterCount > 0}
-					<FancyBadge as="button" onclick={clearAllAdvancedFilters} class="whitespace-nowrap">
+					<FancyBadge
+						as="button"
+						onclick={clearAllAdvancedFilters}
+						class="hidden md:inline-flex whitespace-nowrap"
+					>
 						<SlidersHorizontal class="h-4 w-4 text-primary shrink-0" />
 						<span class="text-sm font-bold">{advancedFilterCount}</span>
 						<span class="text-xs text-muted-foreground"
@@ -369,8 +357,21 @@
 			</div>
 		</PageHero>
 	{:else}
-		<!-- logged-out: hero hidden to create a curiosity gap around catalog size; keep a heading for seo/a11y -->
+		<!-- logged-out: banner sits in the hero's slot; keep a heading for seo/a11y -->
 		<h1 class="sr-only">Cocktail Catalog</h1>
+		<FancyAlert class="mb-6">
+			{#snippet icon()}<Sparkles class="h-5 w-5 text-primary" />{/snippet}
+			{#snippet children()}
+				<p class="sm:hidden">Sign up to save favorites</p>
+				<p class="hidden sm:block">
+					Sign up to <strong>save favorites</strong> and build your own bar — Busser tells you what you
+					can actually make.
+				</p>
+			{/snippet}
+			{#snippet action()}
+				<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
+			{/snippet}
+		</FancyAlert>
 	{/if}
 
 	<!-- Toolbar -->

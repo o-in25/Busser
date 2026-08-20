@@ -33,7 +33,7 @@
 
 	async function select(id: string) {
 		if ($workspaceSwitching || id === activeWorkspaceId) return;
-		await switchWorkspace(id, $page.url.pathname);
+		await switchWorkspace(id);
 	}
 </script>
 

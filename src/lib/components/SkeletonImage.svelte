@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ImagePlaceholder from '$lib/components/ImagePlaceholder.svelte';
 	import { cn } from '$lib/utils';
+	import { cdnSrc, cdnSrcset } from '$lib/utils/image';
 
 	let {
 		src,
@@ -9,6 +10,7 @@
 		class: className = '',
 		imgClass = '',
 		transitionName = '',
+		sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px',
 	}: {
 		src?: string | null;
 		alt: string;
@@ -16,14 +18,20 @@
 		class?: string;
 		imgClass?: string;
 		transitionName?: string;
+		sizes?: string;
 	} = $props();
+
+	// resized variants served from the cloudflare edge; passes non-gcs urls through
+	const srcset = $derived(cdnSrcset(src));
+	const displaySrc = $derived(src ? cdnSrc(src, 768) : src);
 
 	let loaded = $state(false);
 	let errored = $state(false);
 	let prevSrc: string | null | undefined = undefined;
 
 	// preload image off-screen so the browser fully decodes it
-	// before we ever add an <img> to the DOM
+	// before we ever add an <img> to the DOM. mirror srcset/sizes so it
+	// preloads the same variant the <img> will pick.
 	$effect(() => {
 		if (!src) return;
 
@@ -37,7 +45,11 @@
 		const img = new Image();
 		img.onload = () => (loaded = true);
 		img.onerror = () => (errored = true);
-		img.src = src;
+		if (srcset) {
+			img.sizes = sizes;
+			img.srcset = srcset;
+		}
+		img.src = displaySrc as string;
 	});
 
 	const showImage = $derived(!!src && !errored);
@@ -52,7 +64,13 @@
 	{/if}
 
 	{#if showImage && loaded}
-		<img {src} {alt} class={cn('h-full w-full object-cover', imgClass)} />
+		<img
+			src={displaySrc}
+			{srcset}
+			{sizes}
+			{alt}
+			class={cn('h-full w-full object-cover', imgClass)}
+		/>
 	{:else if !showImage}
 		<ImagePlaceholder {variant} class="w-20 h-20" />
 	{/if}

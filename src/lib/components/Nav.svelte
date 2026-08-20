@@ -7,83 +7,40 @@
 		Github,
 		House,
 		Info,
-		GalleryHorizontalEnd,
 		LayoutGrid,
-		Loader2,
+		LifeBuoy,
+		LogIn,
 		LogOut,
 		Menu,
 		Ruler,
 		Settings,
 		Shield,
 		Sparkles,
+		UserPlus,
 	} from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
 	import logoNav from '$lib/assets/logo-nav.png';
 	import { haptics } from '$lib/utils/haptics';
 	import NavigationProgress from './NavigationProgress.svelte';
-	import WorkspaceList from '$lib/components/WorkspaceList.svelte';
-	import * as Dialog from '$lib/components/ui/dialog';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import type { User } from '$lib/types/auth';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
-	import { workspaceSwitcherOpen } from '../../stores';
 	import Placeholder from './Placeholder.svelte';
 
 	let mobileMenuOpen = $state(false);
-	let isSwitching = $state(false);
 
 	let {
 		user,
 		activeUrl,
 		workspaceName,
-		workspaces = [],
-		activeWorkspaceId = null,
 		keyboardOpen = false,
 	}: {
 		user: User | null;
 		activeUrl: string;
 		workspaceName?: string | null;
-		workspaces?: WorkspaceWithRole[];
-		activeWorkspaceId?: string | null;
 		keyboardOpen?: boolean;
 	} = $props();
-
-	function redirectTargetForWorkspaceSwitch(pathname: string): string | null {
-		// workspace-scoped detail routes that will 404 in another workspace
-		if (/^\/catalog\/(?!browse|add|explore)[^/]+/.test(pathname)) return '/catalog';
-		if (/^\/inventory\/category\/(?!add)[^/]+\/edit/.test(pathname)) return '/inventory/category';
-		if (/^\/inventory\/(?!category|suppliers|add)[^/]+\/edit/.test(pathname)) return '/inventory';
-		return null;
-	}
-
-	async function switchWorkspace(workspaceId: string) {
-		if (isSwitching) return;
-		if (workspaceId === activeWorkspaceId) {
-			$workspaceSwitcherOpen = false;
-			return;
-		}
-		isSwitching = true;
-		try {
-			const res = await fetch('/api/workspace/switch', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ workspaceId }),
-			});
-			if (!res.ok) return;
-			const target = redirectTargetForWorkspaceSwitch($page.url.pathname);
-			if (target) {
-				await goto(target, { invalidateAll: true });
-			} else {
-				await invalidateAll();
-			}
-			$workspaceSwitcherOpen = false;
-		} finally {
-			isSwitching = false;
-		}
-	}
 
 	// scroll direction tracking for mobile header
 	let lastScrollY = $state(0);
@@ -148,16 +105,18 @@
 
 <!-- Mobile Top Logo (visible on small screens) -->
 <div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
-	{#if user}
-		<Sheet.Root bind:open={mobileMenuOpen}>
-			<Sheet.Trigger
-				class="mobile-header-left w-8 h-8 flex items-center justify-center"
-				aria-label="Open menu"
-			>
-				<Menu class="h-5 w-5 text-muted-foreground" />
-			</Sheet.Trigger>
-			<Sheet.Content side="left" class="flex flex-col">
-				<Sheet.Header class="text-left shrink-0">
+	<!-- drawer is available to everyone — guests still need to reach help/legal/about (the footer is
+	     hidden on mobile so the bottom nav can own that space) -->
+	<Sheet.Root bind:open={mobileMenuOpen}>
+		<Sheet.Trigger
+			class="mobile-header-left w-8 h-8 flex items-center justify-center"
+			aria-label="Open menu"
+		>
+			<Menu class="h-5 w-5 text-muted-foreground" />
+		</Sheet.Trigger>
+		<Sheet.Content side="left" class="flex flex-col">
+			<Sheet.Header class="text-left shrink-0">
+				{#if user}
 					<div class="flex items-center gap-3">
 						<div class="w-10 h-10 rounded-full flex-shrink-0">
 							<Placeholder id="avatar-drawer" src={user?.avatarImageUrl} />
@@ -172,12 +131,19 @@
 							{/if}
 						</div>
 					</div>
-				</Sheet.Header>
+				{:else}
+					<Sheet.Title class="text-sm font-medium">Menu</Sheet.Title>
+					<Sheet.Description class="text-xs text-muted-foreground">
+						Sign in to manage your bar
+					</Sheet.Description>
+				{/if}
+			</Sheet.Header>
 
-				<div class="h-px bg-border my-4 shrink-0"></div>
+			<div class="h-px bg-border my-4 shrink-0"></div>
 
-				<!-- scrollable content -->
-				<div class="flex-1 overflow-y-auto min-h-0">
+			<!-- scrollable content -->
+			<div class="flex-1 overflow-y-auto min-h-0">
+				{#if user}
 					<!-- Main -->
 					<div class="flex flex-col gap-1">
 						<button
@@ -190,21 +156,10 @@
 							<Settings class="h-4 w-4 text-muted-foreground" />
 							Settings
 						</button>
-						{#if workspaces.length > 1}
-							<button
-								class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
-								onclick={() => {
-									mobileMenuOpen = false;
-									$workspaceSwitcherOpen = true;
-								}}
-							>
-								<GalleryHorizontalEnd class="h-4 w-4 text-muted-foreground" />
-								Switch Workspace
-							</button>
-						{/if}
 					</div>
 
 					<div class="h-px bg-border my-4"></div>
+				{/if}
 
 					<!-- Legal -->
 					<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
@@ -251,6 +206,16 @@
 					</p>
 					<div class="flex flex-col gap-1">
 						<a
+							href="/help"
+							onclick={() => {
+								mobileMenuOpen = false;
+							}}
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+						>
+							<LifeBuoy class="h-4 w-4 text-muted-foreground" />
+							Help Center
+						</a>
+						<a
 							href="/about"
 							onclick={() => {
 								mobileMenuOpen = false;
@@ -273,31 +238,49 @@
 					</div>
 				</div>
 
-				<!-- sign out pinned to bottom -->
+				<!-- pinned to bottom: sign out for members, sign in/up for guests -->
 				<div class="shrink-0 pt-4 border-t border-border">
-					<button
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
-						onclick={() => {
-							mobileMenuOpen = false;
-							logout();
-						}}
-					>
-						<LogOut class="h-4 w-4 text-muted-foreground" />
-						Sign out
-					</button>
+					{#if user}
+						<button
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
+							onclick={() => {
+								mobileMenuOpen = false;
+								logout();
+							}}
+						>
+							<LogOut class="h-4 w-4 text-muted-foreground" />
+							Sign out
+						</button>
+					{:else}
+						<div class="flex flex-col gap-2">
+							<a
+								href="/login"
+								onclick={() => {
+									mobileMenuOpen = false;
+								}}
+								class="flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground border border-border hover:bg-muted transition-colors focus:outline-none"
+							>
+								<LogIn class="h-4 w-4" />
+								Log In
+							</a>
+							<a
+								href="/signup"
+								onclick={() => {
+									mobileMenuOpen = false;
+								}}
+								class="flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground border border-border hover:bg-muted transition-colors focus:outline-none"
+							>
+								<UserPlus class="h-4 w-4" />
+								Sign Up
+							</a>
+						</div>
+					{/if}
 				</div>
 			</Sheet.Content>
 		</Sheet.Root>
-	{:else}
-		<!-- placeholder keeps the logo centered; sign-in affordance lives on the right -->
-		<div class="mobile-header-left w-8 h-8"></div>
-	{/if}
 	<a href="/" class="mobile-header-logo">
 		<img src={logoNav} class="h-10" alt="Busser" />
 	</a>
-	{#if !user}
-		<a href="/login" class="mobile-header-signin">Sign In</a>
-	{/if}
 </div>
 
 <!-- Mobile Bottom Navigation (visible on small screens) -->
@@ -342,7 +325,9 @@
 		<div class="flex flex-1 justify-end">
 			{#if user}
 				<DropdownMenu.Root>
-					<DropdownMenu.Trigger class="desktop-avatar-button">
+					<DropdownMenu.Trigger
+						class="cursor-pointer rounded-full transition-all duration-200 hover:opacity-80"
+					>
 						<Placeholder id="avatar-desktop" src={user?.avatarImageUrl} />
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
@@ -360,15 +345,6 @@
 							<Settings class="mr-2 h-4 w-4" />
 							Settings
 						</DropdownMenu.Item>
-						{#if workspaces.length > 1}
-							<DropdownMenu.Item
-								onclick={() => ($workspaceSwitcherOpen = true)}
-								class="cursor-pointer"
-							>
-								<GalleryHorizontalEnd class="mr-2 h-4 w-4" />
-								Switch Workspace
-							</DropdownMenu.Item>
-						{/if}
 						<DropdownMenu.Separator />
 						<DropdownMenu.Item onclick={logout} class="cursor-pointer">
 							<LogOut class="mr-2 h-4 w-4" />
@@ -386,48 +362,6 @@
 	</div>
 </nav>
 
-<!-- Switch Workspace Modal -->
-<Dialog.Root
-	open={$workspaceSwitcherOpen}
-	onOpenChange={(v) => {
-		if (!isSwitching) $workspaceSwitcherOpen = v;
-	}}
->
-	<Dialog.Content class="sm:max-w-md">
-		<Dialog.Header>
-			<Dialog.Title class="flex items-center gap-2">
-				<GalleryHorizontalEnd class="h-5 w-5" />
-				Switch Workspace
-			</Dialog.Title>
-			<Dialog.Description>
-				{isSwitching ? 'Loading the new workspace...' : 'Select a workspace to switch to'}
-			</Dialog.Description>
-		</Dialog.Header>
-		{#if isSwitching}
-			<div class="flex flex-col items-center justify-center py-10 gap-3">
-				<Loader2 class="h-8 w-8 animate-spin text-primary" />
-				<p class="text-sm text-muted-foreground">Switching workspaces...</p>
-			</div>
-		{:else}
-			<div class="max-h-72 overflow-y-auto">
-				<WorkspaceList {workspaces} {activeWorkspaceId} onSelect={(id) => switchWorkspace(id)} />
-			</div>
-			<div class="pt-3 mt-3 border-t border-border/50">
-				<button
-					class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
-					onclick={() => {
-						$workspaceSwitcherOpen = false;
-						goto('/settings/workspaces');
-					}}
-				>
-					<Settings class="h-4 w-4" />
-					Manage Workspaces
-				</button>
-			</div>
-		{/if}
-	</Dialog.Content>
-</Dialog.Root>
-
 <style>
 	/* mobile top logo */
 	.mobile-logo-header {
@@ -442,24 +376,17 @@
 		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+		/* tinted to the page mesh (not pure white) + lower opacity so the header dissolves into
+		   the page the way the dark one does — keeps light/dark feeling consistent */
+		background: linear-gradient(180deg, rgba(248, 242, 250, 0.6) 0%, rgba(245, 240, 249, 0.42) 100%);
+		border-bottom: 1px solid rgba(226, 218, 240, 0.35);
 		transition: transform 0.3s ease;
 	}
 
-	.mobile-header-left {
+	/* global — applied to Sheet.Trigger (a component), so svelte can't see the usage in-template */
+	:global(.mobile-header-left) {
 		position: relative;
 		z-index: 1;
-	}
-
-	.mobile-header-signin {
-		position: relative;
-		z-index: 1;
-		margin-left: auto;
-		font-size: 0.8125rem;
-		font-weight: 600;
-		color: rgba(232, 25, 95, 1);
-		text-decoration: none;
 	}
 
 	.mobile-header-logo {
@@ -595,8 +522,9 @@
 		padding: 0.75rem 0;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+		/* matches the mobile header: page-tinted glass so the bar dissolves instead of reading white */
+		background: linear-gradient(180deg, rgba(248, 242, 250, 0.6) 0%, rgba(245, 240, 249, 0.42) 100%);
+		border-bottom: 1px solid rgba(226, 218, 240, 0.35);
 	}
 
 	:global(.dark) .desktop-nav {
@@ -678,36 +606,4 @@
 		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
 	}
 
-	/* desktop avatar button */
-	.desktop-avatar-button {
-		cursor: pointer;
-		border-radius: 9999px;
-		transition: all 0.2s ease;
-	}
-
-	.desktop-avatar-button:hover {
-		opacity: 0.8;
-	}
-
-	/* drawer logo glow (matches home page hero) */
-	.drawer-logo-glow {
-		animation: drawer-glow 3s ease-in-out infinite;
-	}
-
-	@keyframes drawer-glow {
-		0%,
-		100% {
-			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
-		}
-		50% {
-			filter: drop-shadow(0 0 20px rgba(248, 78, 128, 0.5));
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.drawer-logo-glow {
-			animation: none;
-			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
-		}
-	}
 </style>

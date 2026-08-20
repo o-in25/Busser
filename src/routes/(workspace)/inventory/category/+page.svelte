@@ -26,7 +26,7 @@
 	import type { Category } from '$lib/types';
 	import { cn } from '$lib/utils';
 
-	import { notificationStore, workspaceSwitcherOpen, workspaceSwitching } from '../../../../stores';
+	import { notificationStore, workspaceSwitching } from '../../../../stores';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -196,12 +196,9 @@
 		{#snippet children()}
 			<p class="sm:hidden">Viewing global catalog</p>
 			<p class="hidden sm:block">
-				You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
-				switch to your workspace.
+				You're viewing <strong>Busser's global catalog</strong>. Use the workspace switcher to
+				switch to your own and manage your inventory.
 			</p>
-		{/snippet}
-		{#snippet action()}
-			<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
 		{/snippet}
 	</FancyAlert>
 {/if}

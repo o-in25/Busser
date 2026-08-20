@@ -16,6 +16,7 @@
 
 	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
+	import { cdnSrc } from '$lib/utils/image';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { calculateAbv, getDilutionInfo } from '$lib/math';
@@ -182,6 +183,7 @@
 					variant="recipe"
 					class="h-full w-full"
 					imgClass="transition-transform duration-300 group-hover:scale-105"
+					sizes="(max-width: 768px) 100vw, 720px"
 				/>
 				<!-- Gradient overlay -->
 				<div
@@ -285,7 +287,7 @@
 				<button type="button" onclick={closeLightbox} class="block" aria-label="Close lightbox">
 					<img
 						class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-						src={recipe.recipeImageUrl}
+						src={cdnSrc(recipe.recipeImageUrl, 1600, { fit: 'scale-down' })}
 						alt={recipe.recipeName}
 					/>
 				</button>

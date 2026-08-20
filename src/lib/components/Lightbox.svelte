@@ -2,8 +2,12 @@
 	import { X } from 'lucide-svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
+	import { cdnSrc } from '$lib/utils/image';
 
 	let { src, onclose }: { src: string; onclose: () => void } = $props();
+
+	// full-screen view — one large edge-resized variant (passes data-url previews through)
+	const fullSrc = $derived(cdnSrc(src, 1600, { fit: 'scale-down' }));
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') onclose();
@@ -43,7 +47,7 @@
 		<button type="button" onclick={onclose} class="block" aria-label="Close lightbox">
 			<img
 				class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-				{src}
+				src={fullSrc}
 				alt="Full preview"
 			/>
 		</button>

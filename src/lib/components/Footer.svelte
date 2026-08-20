@@ -63,6 +63,16 @@
 					<ul class="text-sm text-muted-foreground space-y-2">
 						<li>
 							<a
+								href="/help"
+								class="hover:text-foreground transition-colors {isActive('/help')
+									? 'text-primary font-medium'
+									: ''}"
+							>
+								Help Center
+							</a>
+						</li>
+						<li>
+							<a
 								href="/about"
 								class="hover:text-foreground transition-colors {isActive('/about')
 									? 'text-primary font-medium'

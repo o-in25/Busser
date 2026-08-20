@@ -54,8 +54,9 @@ sw.addEventListener('fetch', (event) => {
 
 	const url = new URL(request.url);
 
-	// gcs images — network-first, cache successful responses
-	if (url.hostname === 'storage.googleapis.com') {
+	// images — network-first, cache successful responses. covers both raw gcs
+	// urls and cloudflare-resized variants (/cdn-cgi/image/... same-origin).
+	if (url.hostname === 'storage.googleapis.com' || url.pathname.startsWith('/cdn-cgi/image/')) {
 		event.respondWith(
 			fetch(request)
 				.then((response) => {

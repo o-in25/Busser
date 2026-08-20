@@ -20,8 +20,6 @@ const publicRoutes = [
 	'/api/oauth/**',
 	'/catalog/**',
 	'/tools/**',
-	'/inventory',
-	'/assistant',
 ];
 
 // routes accessible during onboarding (before user completes profile)
@@ -41,8 +39,6 @@ const workspaceExemptRoutes = [
 	'/api/**',
 	'/catalog/**',
 	'/tools/**',
-	'/inventory',
-	'/assistant',
 ];
 
 const HOUR = 60 * 60 * 1000;
