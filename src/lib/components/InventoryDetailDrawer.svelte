@@ -20,7 +20,12 @@
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content side="right" class="w-full sm:max-w-md p-0 flex flex-col">
+	<!-- glass surface matching the nav (translucent + blur lets the page mesh bleed through)
+	     instead of the flat default sheet bg -->
+	<Sheet.Content
+		side="right"
+		class="w-full sm:max-w-md p-0 flex flex-col bg-white/60 dark:bg-white/[0.08] border-white/45 dark:border-white/[0.09] backdrop-saturate-[1.7]"
+	>
 		<Sheet.Header class="sr-only">
 			<Sheet.Title>Product Details</Sheet.Title>
 		</Sheet.Header>

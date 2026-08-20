@@ -7,7 +7,9 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Table from '$lib/components/ui/table';
+	import Pagination from '$lib/components/Pagination.svelte';
 	import type { User as UserType } from '$lib/types/auth';
+	import type { PaginationData } from '$lib/types/shared';
 	import { cn } from '$lib/utils';
 
 	// props
@@ -16,6 +18,27 @@
 
 	let target: string | undefined = undefined;
 	let isOpened = false;
+
+	// client-side pagination (all users are already loaded)
+	const perPage = 10;
+	let currentPage = 1;
+
+	// clamp the page if the list shrinks (e.g. after a delete)
+	$: totalPages = Math.max(1, Math.ceil((users?.length || 0) / perPage));
+	$: if (currentPage > totalPages) currentPage = totalPages;
+
+	$: pagedUsers = (users || []).slice((currentPage - 1) * perPage, currentPage * perPage);
+
+	$: pagination = {
+		total: users?.length || 0,
+		perPage,
+		currentPage,
+		prevPage: currentPage > 1 ? currentPage - 1 : 0,
+		nextPage: currentPage < totalPages ? currentPage + 1 : 0,
+		lastPage: totalPages,
+		from: (currentPage - 1) * perPage + 1,
+		to: Math.min(currentPage * perPage, users?.length || 0),
+	} satisfies PaginationData;
 
 	const deleteUser = async (userId: string): Promise<any> => {
 		let response = await fetch(`/api/user/${userId}/delete`, {
@@ -73,7 +96,7 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each users as user (user.userId)}
+				{#each pagedUsers as user (user.userId)}
 					<Table.Row class="group">
 						<Table.Cell class="pl-6">
 							<div class="flex items-center gap-3">
@@ -195,6 +218,7 @@
 			</Table.Body>
 		</Table.Root>
 	</div>
+	<Pagination {pagination} itemLabel="users" onNavigate={(p) => (currentPage = p)} />
 {:else}
 	<!-- Empty State -->
 	<div class="flex flex-col items-center justify-center py-16 text-center px-6">

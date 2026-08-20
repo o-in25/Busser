@@ -10,9 +10,6 @@ export const themeStore = writable<string>(
 	(browser && localStorage.getItem('color-theme')) || 'dark'
 );
 
-// workspace switcher dialog
-export const workspaceSwitcherOpen = writable(false);
-
 // true while a workspace switch is resolving — pages show a skeleton, switchers disable
 export const workspaceSwitching = writable(false);
 

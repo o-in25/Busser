@@ -126,8 +126,6 @@
 	$: activeUrl = getActiveUrl($page.url.pathname);
 	$: user = data.user;
 	$: workspaceName = data.workspaceName;
-	$: workspaces = data.workspaces || [];
-	$: activeWorkspaceId = data.activeWorkspaceId || null;
 	$: showNav = !isAuthRoute($page.url.pathname);
 
 	$: {
@@ -161,7 +159,7 @@
 
 	<!-- nav (only show when logged in and not on auth routes) -->
 	{#if showNav}
-		<Nav {activeUrl} {user} {workspaceName} {workspaces} {activeWorkspaceId} {keyboardOpen} />
+		<Nav {activeUrl} {user} {workspaceName} {keyboardOpen} />
 	{/if}
 
 	<!-- page content with bottom padding on mobile for fixed nav.

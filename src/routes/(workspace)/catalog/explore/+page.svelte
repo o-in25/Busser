@@ -37,10 +37,11 @@
 	import SubNav from '$lib/components/SubNav.svelte';
 	import tips from '$lib/data/tips.json';
 	import { cn } from '$lib/utils';
+	import { cdnSrc, cdnSrcset } from '$lib/utils/image';
 
 	import type { PageData } from './$types';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
-	import { workspaceSwitcherOpen, workspaceSwitching } from '../../../../stores';
+	import { workspaceSwitching } from '../../../../stores';
 
 	let { data }: { data: PageData } = $props();
 
@@ -130,12 +131,9 @@
 		{#snippet children()}
 			<p class="sm:hidden">Viewing global catalog</p>
 			<p class="hidden sm:block">
-				You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
-				switch to your workspace.
+				You're viewing <strong>Busser's global catalog</strong>. Use the workspace switcher to
+				switch to your own and manage your inventory.
 			</p>
-		{/snippet}
-		{#snippet action()}
-			<FancyButton size="sm" onclick={() => ($workspaceSwitcherOpen = true)}>Switch</FancyButton>
 		{/snippet}
 	</FancyAlert>
 {/if}
@@ -146,6 +144,7 @@
 		{ href: '/catalog', label: 'Browse', icon: Wine, match: (p) => p === '/catalog' },
 		{ href: '/catalog/explore', label: 'Explore', icon: Compass },
 	]}
+	workspaceSwitcher={authenticated}
 >
 	{#snippet action()}
 		<FancyButton onclick={surpriseMe} size="sm" class="shrink-0">
@@ -155,37 +154,55 @@
 	{/snippet}
 </SubNav>
 
-<!-- Hero Section -->
-<PageHero title="Explore">
-	<!-- Smart Action Pills -->
-	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
-		{#if popularSpirit}
-			<FancyBadge
-				href="/catalog/explore/{idToSlug[popularSpirit.recipeCategoryId] ??
-					popularSpirit.recipeCategoryId}"
-				class="whitespace-nowrap"
-			>
-				<TrendingUp class="h-4 w-4 text-primary shrink-0" />
-				<span class="text-sm font-bold truncate">{popularSpirit.recipeCategoryDescription}</span>
-				<span class="text-xs text-muted-foreground">Most Popular</span>
-			</FancyBadge>
-		{:else}
-			<FancyBadge class="whitespace-nowrap">
-				<TrendingUp class="h-4 w-4 text-muted-foreground shrink-0" />
-				<span class="text-sm font-bold">&mdash;</span>
-				<span class="text-xs text-muted-foreground">Most Popular</span>
-			</FancyBadge>
-		{/if}
+{#if authenticated}
+	<!-- Hero Section -->
+	<PageHero title="Explore">
+		<!-- Smart Action Pills -->
+		<div class="flex gap-2 flex-wrap pb-1 -mb-1">
+			{#if popularSpirit}
+				<FancyBadge
+					href="/catalog/explore/{idToSlug[popularSpirit.recipeCategoryId] ??
+						popularSpirit.recipeCategoryId}"
+					class="whitespace-nowrap"
+				>
+					<TrendingUp class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold truncate">{popularSpirit.recipeCategoryDescription}</span>
+					<span class="text-xs text-muted-foreground">Most Popular</span>
+				</FancyBadge>
+			{:else}
+				<FancyBadge class="whitespace-nowrap">
+					<TrendingUp class="h-4 w-4 text-muted-foreground shrink-0" />
+					<span class="text-sm font-bold">&mdash;</span>
+					<span class="text-xs text-muted-foreground">Most Popular</span>
+				</FancyBadge>
+			{/if}
 
-		{#if topIngredient && !isGlobalCatalog}
-			<FancyBadge href="/inventory" class="whitespace-nowrap">
-				<ShoppingCart class="h-4 w-4 text-primary shrink-0" />
-				<span class="text-sm font-bold">+{topIngredient.unlockableRecipes}</span>
-				<span class="text-xs text-muted-foreground">Buy {topIngredient.ingredientName}</span>
-			</FancyBadge>
-		{/if}
-	</div>
-</PageHero>
+			{#if topIngredient && !isGlobalCatalog}
+				<FancyBadge href="/inventory" class="whitespace-nowrap">
+					<ShoppingCart class="h-4 w-4 text-primary shrink-0" />
+					<span class="text-sm font-bold">+{topIngredient.unlockableRecipes}</span>
+					<span class="text-xs text-muted-foreground">Buy {topIngredient.ingredientName}</span>
+				</FancyBadge>
+			{/if}
+		</div>
+	</PageHero>
+{:else}
+	<!-- logged-out: banner sits in the hero's slot to match browse; keep a heading for seo/a11y -->
+	<h1 class="sr-only">Explore Cocktails</h1>
+	<FancyAlert class="mb-6">
+		{#snippet icon()}<Sparkles class="h-5 w-5 text-primary" />{/snippet}
+		{#snippet children()}
+			<p class="sm:hidden">Sign up to save favorites</p>
+			<p class="hidden sm:block">
+				Sign up to <strong>save favorites</strong> and build your own bar — Busser tells you what you
+				can actually make.
+			</p>
+		{/snippet}
+		{#snippet action()}
+			<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
+		{/snippet}
+	</FancyAlert>
+{/if}
 
 <!-- Search -->
 <form onsubmit={handleSearch} class="flex gap-2 mb-8">
@@ -231,7 +248,9 @@
 						<div class="absolute inset-0">
 							{#if spotlight}
 								<img
-									src={spotlight}
+									src={cdnSrc(spotlight, 512)}
+									srcset={cdnSrcset(spotlight, [384, 512, 768])}
+									sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
 									alt=""
 									class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
 								/>

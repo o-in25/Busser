@@ -26,6 +26,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import CollapsibleSection from '$lib/components/ui/collapsible/collapsible.svelte';
 	import { reveal } from '$lib/actions/reveal';
+	import { cdnSrc, cdnSrcset } from '$lib/utils/image';
 	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
@@ -171,7 +172,9 @@
 		{#if heroImage}
 			<div class="absolute inset-0">
 				<img
-					src={heroImage}
+					src={cdnSrc(heroImage, 1024)}
+					srcset={cdnSrcset(heroImage, [640, 1024, 1600])}
+					sizes="100vw"
 					alt={data.spiritContent.displayName}
 					class="w-full h-full object-cover"
 				/>
