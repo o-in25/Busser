@@ -295,25 +295,37 @@
 						</div>
 					</div>
 				{:else}
-					<!-- Quantity + Unit inputs -->
-					<div class="flex items-start gap-2">
+					<!-- Quantity + built-in unit picker -->
+					<div class="space-y-2">
 						<SegmentedNumberInput
-							class="flex-1"
 							bind:value={step.productIdQuantityInMilliliters}
 							min={0}
 							step={0.25}
-							presets={quickOptions.map((o) => ({ label: o.label, value: parseFloat(o.value) }))}
+							unit={selectedUnitLabel}
+							units={unitOptions}
+							onUnitChange={handleUnitChange}
 						/>
-						<Select.Root type="single" value={selectedUnit} onValueChange={handleUnitChange}>
-							<Select.Trigger class="w-32">
-								{selectedUnitLabel}
-							</Select.Trigger>
-							<Select.Content>
-								{#each unitOptions as unit}
-									<Select.Item value={unit.value} label={unit.label} />
+
+						<!-- quick amounts span the full width so they don't wrap under the number field -->
+						{#if quickOptions.length}
+							<div class="flex flex-wrap gap-1.5">
+								{#each quickOptions as o}
+									{@const val = parseFloat(o.value)}
+									<button
+										type="button"
+										onclick={() => (step.productIdQuantityInMilliliters = val)}
+										class={cn(
+											'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+											step.productIdQuantityInMilliliters === val
+												? 'border-primary/40 bg-primary/20 text-primary'
+												: 'glass-surface text-muted-foreground hover:text-foreground'
+										)}
+									>
+										{o.label}
+									</button>
 								{/each}
-							</Select.Content>
-						</Select.Root>
+							</div>
+						{/if}
 					</div>
 				{/if}
 			</div>

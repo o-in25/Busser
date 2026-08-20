@@ -22,6 +22,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm run lint
+
       - run: pnpm test
 
       # APP_VERSION is a build-time build-arg in prod; supply a placeholder so

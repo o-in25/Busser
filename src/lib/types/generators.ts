@@ -64,6 +64,24 @@ export type RecipeInsightsOutput = {
 	similarCocktails: string[];
 };
 
+// real catalog data resolved for the AI insights section — grounds the AI's text
+// suggestions in actual recipes/products so they become links instead of dead text.
+// computed per-request (not cached with the AI output).
+export type RecipeInsightLinks = {
+	// ai similar-cocktail names matched against the accessible catalog
+	similar: { name: string; recipeId: number | null; imageUrl: string | null }[];
+	// ai variation riffs, with a recipe link when one exists in the catalog
+	variations: { name: string; description: string; recipeId: number | null }[];
+	// real recipes in the same category (base spirit), always linkable
+	related: { recipeId: number; recipeName: string; imageUrl: string | null }[];
+	// real substitutes per ingredient, derived from the category/parent-category graph
+	substitutions: {
+		ingredient: string;
+		category: string;
+		options: { productId: number; productName: string; inStock: boolean }[];
+	}[];
+};
+
 export type RecipeRatingsOutput = {
 	sweetnessRating: number;
 	drynessRating: number;

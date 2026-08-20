@@ -138,12 +138,64 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			})),
 		];
 
-		// Step 4: Create the recipe
+		// Step 4: Resolve + validate model-supplied lookup ids before they hit the db.
+		// the assistant can confuse an ingredient categoryId with a recipeCategoryId, which
+		// blows up the recipe insert on a foreign key. resolve by id first, then by name.
+		const resolveId = (id: any, name: string, rows: any[], idKey: string, nameKey: string) => {
+			if (rows.some((r) => r[idKey] === id)) return id;
+			const byName = rows.find((r) => r[nameKey]?.toLowerCase() === name?.toLowerCase());
+			return byName ? byName[idKey] : null;
+		};
+
+		const categoriesResult = await catalogRepo.getCategories();
+		const methodsResult = await catalogRepo.getPreparationMethods();
+		if (categoriesResult.status === 'error' || methodsResult.status === 'error') {
+			return json(
+				{ status: 'error', error: 'Could not load recipe categories or techniques.' },
+				{ status: StatusCodes.INTERNAL_SERVER_ERROR }
+			);
+		}
+
+		const recipeCategoryId = resolveId(
+			proposal.recipeCategoryId,
+			proposal.recipeCategoryName,
+			categoriesResult.data || [],
+			'recipeCategoryId',
+			'recipeCategoryDescription'
+		);
+		if (recipeCategoryId === null) {
+			return json(
+				{
+					status: 'error',
+					error: `Could not match recipe category "${proposal.recipeCategoryName}" (id ${proposal.recipeCategoryId}) to a valid category.`,
+				},
+				{ status: StatusCodes.UNPROCESSABLE_ENTITY }
+			);
+		}
+
+		const preparationMethodId = resolveId(
+			proposal.preparationMethodId,
+			proposal.preparationMethodName,
+			methodsResult.data || [],
+			'recipeTechniqueDescriptionId',
+			'recipeTechniqueDescriptionText'
+		);
+		if (preparationMethodId === null) {
+			return json(
+				{
+					status: 'error',
+					error: `Could not match preparation method "${proposal.preparationMethodName}" (id ${proposal.preparationMethodId}) to a valid technique.`,
+				},
+				{ status: StatusCodes.UNPROCESSABLE_ENTITY }
+			);
+		}
+
+		// Step 5: Create the recipe
 		const recipe = {
 			recipeName: proposal.recipeName,
 			recipeDescription: proposal.recipeDescription,
-			recipeCategoryId: proposal.recipeCategoryId,
-			recipeTechniqueDescriptionId: proposal.preparationMethodId,
+			recipeCategoryId,
+			recipeTechniqueDescriptionId: preparationMethodId,
 			recipeSweetnessRating: proposal.ratings.sweetness,
 			recipeDrynessRating: proposal.ratings.dryness,
 			recipeStrengthRating: proposal.ratings.strength,
@@ -165,10 +217,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	} catch (err: any) {
 		console.error('Failed to confirm recipe:', err);
-		error(StatusCodes.INTERNAL_SERVER_ERROR, {
-			reason: 'Internal Server Error',
-			code: StatusCodes.INTERNAL_SERVER_ERROR,
-			message: err.message || 'Failed to create recipe',
-		});
+		return json(
+			{ status: 'error', error: err.message ?? 'Failed to create recipe' },
+			{ status: StatusCodes.INTERNAL_SERVER_ERROR }
+		);
 	}
 };

@@ -3,7 +3,6 @@
 	import { fade, fly } from 'svelte/transition';
 	import { mount, unmount } from 'svelte';
 
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import GenerateImageModal from './GenerateImageModal.svelte';
@@ -201,7 +200,7 @@
 	<!-- image preview area -->
 	<div class="relative group">
 		<div
-			class="glass-surface overflow-hidden rounded-2xl aspect-video max-w-md mx-auto relative {isGenerating
+			class="glass-surface overflow-hidden rounded-2xl min-h-48 relative {isGenerating
 				? 'ring-2 ring-primary/30'
 				: ''}"
 		>
@@ -305,11 +304,7 @@
 				Generating...
 			{:else}
 				<Sparkles class="w-4 h-4" />
-				Generate with AI
-				<Badge
-					variant="secondary"
-					class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0 ml-1">Beta</Badge
-				>
+				Auto-Generate
 			{/if}
 		</Button>
 

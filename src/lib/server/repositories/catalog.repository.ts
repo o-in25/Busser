@@ -12,6 +12,7 @@ import type {
 	Table,
 	View,
 } from '$lib/types';
+import type { RecipeInsightLinks } from '$lib/types/generators';
 
 import { DbProvider } from '../db';
 import { deleteCachedContent } from '../generators/cache';
@@ -263,6 +264,160 @@ export class CatalogRepository extends BaseRepository {
 			return (result as View.BasicRecipe) || null;
 		} catch {
 			return null;
+		}
+	}
+
+	// resolves the AI insights' text suggestions into real catalog links:
+	// - similar/variation names -> matching recipes in this workspace or the global catalog
+	// - related recipes -> real recipes sharing the base spirit
+	// - substitutions -> sibling products from the category/parent-category graph
+	// degrades to empty arrays on any failure so the insights section still renders.
+	async getInsightLinks(
+		workspaceId: string,
+		globalWorkspaceId: string,
+		recipeId: number,
+		aiSimilar: string[],
+		aiVariations: { name: string; description: string }[]
+	): Promise<RecipeInsightLinks> {
+		const empty: RecipeInsightLinks = {
+			similar: aiSimilar.map((name) => ({ name, recipeId: null, imageUrl: null })),
+			variations: aiVariations.map((v) => ({ ...v, recipeId: null })),
+			related: [],
+			substitutions: [],
+		};
+
+		try {
+			const workspaceIds = [...new Set([workspaceId, globalWorkspaceId].filter(Boolean))];
+			const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+			const current = (await this.db
+				.table('basicrecipe')
+				.where({ recipeId, workspaceId })
+				.first()) as View.BasicRecipe | undefined;
+
+			const steps = (await this.db
+				.table('basicrecipestep')
+				.where({ recipeId, workspaceId })) as View.BasicRecipeStep[];
+
+			const recipes = (await this.db
+				.table('basicrecipe')
+				.whereIn('workspaceId', workspaceIds)
+				.where('published', true)
+				.select(
+					'recipeId',
+					'recipeName',
+					'recipeCategoryId',
+					'recipeImageUrl',
+					'workspaceId'
+				)) as View.BasicRecipe[];
+
+			// name -> recipe map for matching AI suggestions; prefer this workspace over global
+			const byName = new Map<string, View.BasicRecipe>();
+			for (const r of recipes) {
+				if (r.recipeId === recipeId) continue;
+				const key = norm(r.recipeName);
+				const existing = byName.get(key);
+				if (!existing || r.workspaceId === workspaceId) byName.set(key, r);
+			}
+
+			const similar = aiSimilar.map((name) => {
+				const m = byName.get(norm(name));
+				return { name, recipeId: m?.recipeId ?? null, imageUrl: m?.recipeImageUrl ?? null };
+			});
+
+			const variations = aiVariations.map((v) => {
+				const m = byName.get(norm(v.name));
+				return { name: v.name, description: v.description, recipeId: m?.recipeId ?? null };
+			});
+
+			// real recipes sharing the base spirit — always linkable, deduped by name
+			const related: RecipeInsightLinks['related'] = [];
+			const seen = new Set<string>();
+			for (const r of recipes) {
+				if (r.recipeId === recipeId) continue;
+				if (current && r.recipeCategoryId !== current.recipeCategoryId) continue;
+				const key = norm(r.recipeName);
+				if (seen.has(key)) continue;
+				seen.add(key);
+				related.push({
+					recipeId: r.recipeId,
+					recipeName: r.recipeName,
+					imageUrl: r.recipeImageUrl ?? null,
+				});
+				if (related.length >= 8) break;
+			}
+
+			// sibling products for substitutions, from the same category then parent category
+			const categoryIds = [...new Set(steps.map((s) => s.categoryId).filter(Boolean))];
+			const parentIds = [...new Set(steps.map((s) => s.parentCategoryId).filter(Boolean))];
+
+			let products: InventoryRow[] = [];
+			if (categoryIds.length || parentIds.length) {
+				products = (await this.db
+					.table('inventory')
+					.whereIn('workspaceId', workspaceIds)
+					.where(function (this: any) {
+						if (categoryIds.length) this.whereIn('categoryId', categoryIds);
+						if (parentIds.length) this.orWhereIn('parentCategoryId', parentIds);
+					})
+					.select(
+						'productId',
+						'productName',
+						'categoryId',
+						'parentCategoryId',
+						'productInStockQuantity'
+					)) as InventoryRow[];
+			}
+
+			const substitutions = steps
+				.map((step) => {
+					let pool = products.filter(
+						(p) => p.categoryId === step.categoryId && p.productId !== step.productId
+					);
+					// fall back to the wider parent category when a category has no siblings
+					if (pool.length === 0 && step.parentCategoryId) {
+						pool = products.filter(
+							(p) => p.parentCategoryId === step.parentCategoryId && p.productId !== step.productId
+						);
+					}
+
+					// dedupe by name, in-stock first, cap at 4
+					const byProductName = new Map<string, InventoryRow>();
+					for (const p of pool) {
+						const key = norm(p.productName);
+						const existing = byProductName.get(key);
+						if (!existing || (p.productInStockQuantity > 0 && existing.productInStockQuantity <= 0))
+							byProductName.set(key, p);
+					}
+					const options = [...byProductName.values()]
+						.sort((a, b) =>
+							a.productInStockQuantity > 0 === b.productInStockQuantity > 0
+								? a.productName.localeCompare(b.productName)
+								: a.productInStockQuantity > 0
+									? -1
+									: 1
+						)
+						.slice(0, 4)
+						.map((p) => ({
+							productId: p.productId,
+							productName: p.productName,
+							inStock: p.productInStockQuantity > 0,
+						}));
+
+					if (options.length === 0) return null;
+					return {
+						ingredient: step.productName || step.categoryName,
+						category: step.categoryName,
+						options,
+					};
+				})
+				.filter((s): s is RecipeInsightLinks['substitutions'][number] => s !== null);
+
+			return { similar, variations, related, substitutions };
+		} catch (error: any) {
+			console.error('Failed to build insight links:', error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return empty;
 		}
 	}
 

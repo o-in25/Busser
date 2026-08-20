@@ -1,3 +1,4 @@
+pnpm run lint
 pnpm test
 
 # APP_VERSION is a build-time build-arg in prod; default it so the type check

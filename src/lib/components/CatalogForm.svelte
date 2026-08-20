@@ -461,7 +461,7 @@
 
 						<div>
 							<Label class="mb-3 block text-base font-medium">Spirit Category</Label>
-							<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+							<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3">
 								{#each spirits as spirit}
 									<SpiritCard
 										{spirit}

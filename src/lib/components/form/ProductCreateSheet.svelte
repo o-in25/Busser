@@ -68,7 +68,6 @@
 <div class="flex h-full flex-col">
 	<Sheet.Header>
 		<Sheet.Title>New Product</Sheet.Title>
-		<Sheet.Description>Add an ingredient without leaving your recipe.</Sheet.Description>
 	</Sheet.Header>
 
 	<div class="flex-1 space-y-5 overflow-y-auto py-5">
@@ -90,28 +89,28 @@
 		<div class="grid grid-cols-2 gap-3">
 			<div>
 				<Label class="mb-2 block">Proof</Label>
-				<SegmentedNumberInput bind:value={proof} unit="°" min={0} max={200} step={1} />
+				<SegmentedNumberInput bind:value={proof} min={0} max={200} step={1} />
 			</div>
 			<div>
-				<Label class="mb-2 block">Size</Label>
-				<SegmentedNumberInput
-					bind:value={unitSize}
-					unit="ml"
-					min={0}
-					step={50}
-					presets={[
-						{ label: '375', value: 375 },
-						{ label: '500', value: 500 },
-						{ label: '750', value: 750 },
-						{ label: '1000', value: 1000 },
-					]}
-				/>
+				<Label class="mb-2 block">Price</Label>
+				<SegmentedNumberInput bind:value={price} unit="$" min={0} step={1} />
 			</div>
 		</div>
 
 		<div>
-			<Label class="mb-2 block">Price</Label>
-			<SegmentedNumberInput bind:value={price} unit="$" min={0} step={1} />
+			<Label class="mb-2 block">Size</Label>
+			<SegmentedNumberInput
+				bind:value={unitSize}
+				unit="ml"
+				min={0}
+				step={50}
+				presets={[
+					{ label: '375', value: 375 },
+					{ label: '500', value: 500 },
+					{ label: '750', value: 750 },
+					{ label: '1000', value: 1000 },
+				]}
+			/>
 		</div>
 
 		<div>
