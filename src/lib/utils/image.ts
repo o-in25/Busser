@@ -20,12 +20,20 @@ function transformable(url?: string | null): url is string {
 
 type Opts = { quality?: number; fit?: 'cover' | 'contain' | 'scale-down' };
 
-export function cdnSrc(url: string, width: number, { quality = 82, fit = 'cover' }: Opts = {}): string {
+export function cdnSrc(
+	url: string,
+	width: number,
+	{ quality = 82, fit = 'cover' }: Opts = {}
+): string {
 	if (!transformable(url)) return url;
 	return `${CDN_ZONE}/cdn-cgi/image/width=${width},quality=${quality},format=auto,fit=${fit}/${url}`;
 }
 
-export function cdnSrcset(url?: string | null, widths = DEFAULT_WIDTHS, opts?: Opts): string | undefined {
+export function cdnSrcset(
+	url?: string | null,
+	widths = DEFAULT_WIDTHS,
+	opts?: Opts
+): string | undefined {
 	if (!transformable(url)) return undefined;
 	return widths.map((w) => `${cdnSrc(url, w, opts)} ${w}w`).join(', ');
 }
