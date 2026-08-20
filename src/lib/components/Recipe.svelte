@@ -19,8 +19,9 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { calculateAbv, getDilutionInfo } from '$lib/math';
+	import { cn } from '$lib/utils';
 	import type { View } from '$lib/types';
-	import type { RecipeInsightsOutput } from '$lib/types/generators';
+	import type { RecipeInsightLinks, RecipeInsightsOutput } from '$lib/types/generators';
 
 	import RecipeIngredientStep from './RecipeIngredientStep.svelte';
 	import RecipeInsights from './RecipeInsights.svelte';
@@ -50,6 +51,7 @@
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 
 	let content: RecipeInsightsOutput | null = $state(null);
+	let links: RecipeInsightLinks | null = $state(null);
 	let contentLoading = $state(true);
 	let contentCached = $state(false);
 	let regenerating = $state(false);
@@ -119,6 +121,7 @@
 			});
 			const response = await result.json();
 			content = response;
+			links = response.links ?? null;
 			contentCached = response.cached ?? false;
 		} catch (e) {
 			console.error('Failed to load recipe insights:', e);
@@ -368,7 +371,12 @@
 	{/if}
 
 	<!-- Row 3: Preparation, Volume & Dilution, Cost Estimate -->
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+	<div
+		class={cn(
+			'grid grid-cols-1 gap-6 mb-6',
+			estimatedCost > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'
+		)}
+	>
 		<!-- Preparation card -->
 		<Card.Root>
 			<Card.Header class="pb-3">
@@ -417,16 +425,16 @@
 			</Card.Content>
 		</Card.Root>
 
-		<!-- Cost Estimate card -->
-		<Card.Root>
-			<Card.Header class="pb-3">
-				<Card.Title class="flex items-center gap-2 text-base">
-					<DollarSign class="h-5 w-5 text-primary" />
-					Cost Estimate
-				</Card.Title>
-			</Card.Header>
-			<Card.Content class="space-y-3">
-				{#if estimatedCost > 0}
+		<!-- Cost Estimate card — hidden entirely when no cost data (rather than showing an empty state) -->
+		{#if estimatedCost > 0}
+			<Card.Root>
+				<Card.Header class="pb-3">
+					<Card.Title class="flex items-center gap-2 text-base">
+						<DollarSign class="h-5 w-5 text-primary" />
+						Cost Estimate
+					</Card.Title>
+				</Card.Header>
+				<Card.Content class="space-y-3">
 					<div class="flex items-center justify-between">
 						<span class="text-sm text-muted-foreground">Per drink</span>
 						<span class="text-sm font-bold">${estimatedCost.toFixed(2)}</span>
@@ -437,17 +445,16 @@
 							>${(estimatedCost / parseFloat(finalVolumeOz)).toFixed(2)}</span
 						>
 					</div>
-				{:else}
-					<p class="text-sm text-muted-foreground italic">No cost data available</p>
-				{/if}
-			</Card.Content>
-		</Card.Root>
+				</Card.Content>
+			</Card.Root>
+		{/if}
 	</div>
 
 	<!-- Row 4: Cocktail Insights -->
 	{#if recipe.insightsEnabled && canModify}
 		<RecipeInsights
 			{content}
+			{links}
 			loading={contentLoading}
 			cached={contentCached}
 			{regenerating}

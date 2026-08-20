@@ -26,6 +26,10 @@ const SYSTEM_PROMPT = `You are a cocktail recipe assistant for a bar management 
 4. Use get_preparation_methods to find the right technique (Shaken, Stirred, Built, etc.).
 5. Once you have all the information, call propose_recipe with the complete recipe.
 
+## Ingredient categories vs recipe category — do not confuse them
+
+Ingredient categories (from search_categories/list_categories) classify products and are ONLY used for ingredient matching. The recipe's recipeCategoryId is different — it must be one of the small set of spirit-type ids returned by get_recipe_categories. Never use an ingredient categoryId as recipeCategoryId.
+
 ## Rules
 
 - ALWAYS search inventory before proposing. Never guess product IDs.

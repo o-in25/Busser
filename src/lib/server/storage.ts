@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import moment from 'moment';
 
 import { DbProvider } from './db';
+import { compressImage } from './image';
 import { getCredentials } from './google';
 import { Logger } from './logger';
 
@@ -100,14 +101,16 @@ export async function getSignedUrl(
 	workspaceId: string
 ): Promise<string> {
 	try {
-		const safeName = (fileName || file.name).replace(/[^a-zA-Z0-9._-]+/g, '-');
-		const name = `${kind}/${workspaceId}/${safeName}-${moment().format('MMDDYYYYSS')}`;
-		const newFile = getBucket().file(name);
 		const blob = await file.arrayBuffer();
-		const data = Buffer.from(blob);
-		await newFile.save(data, {
-			contentType: 'image.jpeg',
-		});
+		const { data, contentType } = await compressImage(Buffer.from(blob));
+		const ext = contentType === 'image/svg+xml' ? 'svg' : 'webp';
+		// drop the original extension — the stored bytes are webp now
+		const safeName = (fileName || file.name)
+			.replace(/[^a-zA-Z0-9._-]+/g, '-')
+			.replace(/\.[^.]+$/, '');
+		const name = `${kind}/${workspaceId}/${safeName}-${moment().format('MMDDYYYYSS')}.${ext}`;
+		const newFile = getBucket().file(name);
+		await newFile.save(data, { contentType });
 
 		const publicUrl = newFile.publicUrl();
 		const [metadata] = await newFile.getMetadata();

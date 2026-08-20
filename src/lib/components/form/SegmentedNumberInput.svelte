@@ -1,13 +1,17 @@
 <script lang="ts">
-	import { Minus, Plus } from 'lucide-svelte';
+	import { ChevronDown, Minus, Plus } from 'lucide-svelte';
 
+	import * as Popover from '$lib/components/ui/popover';
 	import { cn } from '$lib/utils';
 
-	// glass digit-style number field with unit suffix + optional preset chips.
+	// glass digit-style number field with a built-in unit + optional preset chips.
+	// unit is either a static suffix (pass `unit`) or a picker (also pass `units` + `onUnitChange`).
 	// keeps a local text buffer so decimals like "0." can be typed without the value clobbering them.
 	let {
 		value = $bindable(0),
 		unit,
+		units,
+		onUnitChange,
 		min,
 		max,
 		step = 1,
@@ -19,6 +23,8 @@
 	}: {
 		value?: number;
 		unit?: string;
+		units?: { label: string; value: string }[];
+		onUnitChange?: (v: string) => void;
 		min?: number;
 		max?: number;
 		step?: number;
@@ -28,6 +34,8 @@
 		class?: string;
 		onchange?: (v: number) => void;
 	} = $props();
+
+	let unitOpen = $state(false);
 
 	let text = $state(value != null ? String(value) : '');
 	let lastEmitted = value;
@@ -81,9 +89,10 @@
 	}
 </script>
 
-<div class={cn('space-y-2', className)}>
+<div class={cn('relative space-y-2', className)}>
+	<!-- h-10 to match Select triggers and text inputs for a consistent field scale -->
 	<div
-		class="glass-surface flex items-stretch overflow-hidden rounded-xl transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/30 dark:focus-within:shadow-glow-cyan"
+		class="glass-surface flex h-10 items-stretch overflow-hidden rounded-xl transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/30 dark:focus-within:shadow-glow-cyan"
 	>
 		<button
 			type="button"
@@ -101,9 +110,36 @@
 			value={text}
 			oninput={onInput}
 			onkeydown={onKey}
-			class="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-center text-2xl font-semibold tabular-nums tracking-wide outline-none"
+			class="min-w-0 flex-1 border-0 bg-transparent text-center text-base font-semibold tabular-nums outline-none"
 		/>
-		{#if unit}
+		{#if units?.length}
+			<!-- built-in unit picker; portaled content escapes the field/card clip + z-index -->
+			<Popover.Root bind:open={unitOpen}>
+				<Popover.Trigger
+					class="flex shrink-0 items-center gap-1 border-l border-white/20 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground dark:border-zinc-700/40"
+				>
+					{unit}
+					<ChevronDown class="h-3.5 w-3.5 opacity-60" />
+				</Popover.Trigger>
+				<Popover.Content align="end" class="max-h-64 w-40 overflow-y-auto p-1">
+					{#each units as u}
+						<button
+							type="button"
+							onclick={() => {
+								onUnitChange?.(u.value);
+								unitOpen = false;
+							}}
+							class={cn(
+								'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors',
+								u.label === unit ? 'bg-primary/15 text-primary' : 'hover:bg-accent/60'
+							)}
+						>
+							{u.label}
+						</button>
+					{/each}
+				</Popover.Content>
+			</Popover.Root>
+		{:else if unit}
 			<span
 				class="flex items-center border-l border-white/20 px-3 text-sm font-medium text-muted-foreground dark:border-zinc-700/40"
 			>

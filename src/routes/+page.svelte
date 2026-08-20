@@ -738,7 +738,7 @@
 				<!-- browse is redundant with the nav, so it yields its mobile slot to the switcher -->
 				<a href="/catalog" class={canSwitch ? 'hidden md:block' : 'block'}>
 					<Card.Root
-						class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
+						class="flex items-center min-h-[76px] p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
 					>
 						<div class="flex items-center gap-3">
 							<div class="p-2 rounded-lg bg-primary/10">
@@ -760,7 +760,7 @@
 				{#if isOwner}
 					<a href="/inventory?page=1&stockFilter=out-of-stock" class="block">
 						<Card.Root
-							class="p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
+							class="flex items-center min-h-[76px] p-4 hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer h-full dark:hover:shadow-glow-pink"
 						>
 							<div class="flex items-center gap-3">
 								<div class="p-2 rounded-lg bg-primary/10">
@@ -768,7 +768,7 @@
 								</div>
 								<div>
 									<p class="font-medium">Shopping List</p>
-									<p class="text-xs text-muted-foreground">What you need</p>
+									<p class="hidden md:block text-xs text-muted-foreground">What you need</p>
 								</div>
 							</div>
 						</Card.Root>
@@ -777,7 +777,7 @@
 					{#if canModify}
 						<a href="/inventory/add" class="block">
 							<Card.Root
-								class="p-4 hover:shadow-md transition-shadow hover:border-neon-green-500/50 cursor-pointer h-full dark:hover:shadow-glow-green"
+								class="flex items-center min-h-[76px] p-4 hover:shadow-md transition-shadow hover:border-neon-green-500/50 cursor-pointer h-full dark:hover:shadow-glow-green"
 							>
 								<div class="flex items-center gap-3">
 									<div class="p-2 rounded-lg bg-neon-green-500/10">
@@ -785,7 +785,7 @@
 									</div>
 									<div>
 										<p class="font-medium">Add Ingredient</p>
-										<p class="text-xs text-muted-foreground">Update inventory</p>
+										<p class="hidden md:block text-xs text-muted-foreground">Update inventory</p>
 									</div>
 								</div>
 							</Card.Root>
@@ -799,7 +799,7 @@
 					class="block text-left w-full disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					<Card.Root
-						class="p-4 h-full transition-shadow {gallery.length > 0
+						class="flex items-center min-h-[76px] p-4 h-full transition-shadow {gallery.length > 0
 							? 'hover:shadow-md hover:border-neon-amber-500/50 cursor-pointer dark:hover:shadow-glow-amber'
 							: ''}"
 					>

@@ -75,30 +75,41 @@
 		return info.dilutionOz;
 	});
 
-	// Format helpers
-	let displayVolume = $derived(totalVolumeOz > 0 ? totalVolumeOz.toFixed(1) : '--');
-	let displayCost = $derived(estimatedCost > 0 ? `$${estimatedCost.toFixed(2)}` : '--');
-	let displayDilution = $derived(() => {
-		const oz = dilutionOz();
-		if (oz > 0) {
-			return `+${oz.toFixed(1)}`;
-		}
-		return '--';
-	});
+	// only surface metrics we actually have data for — a live "--" placeholder reads as broken.
+	// abv() returns the '--% abv' sentinel when no step has proof; cost/dilution are 0 without data.
+	let metrics = $derived(
+		[
+			abv() !== '--% abv'
+				? { label: 'ABV', value: abv().replace('% abv', '%'), icon: Percent }
+				: null,
+			totalVolumeOz > 0
+				? { label: 'Volume', value: totalVolumeOz.toFixed(1), unit: 'oz', icon: Droplets }
+				: null,
+			dilutionOz() > 0
+				? { label: 'Dilution', value: `+${dilutionOz().toFixed(1)}`, unit: 'oz', icon: GlassWater }
+				: null,
+			estimatedCost > 0
+				? { label: 'Est. Cost', value: `$${estimatedCost.toFixed(2)}`, icon: DollarSign }
+				: null,
+		].filter((m) => m !== null)
+	);
 </script>
 
-<div
-	class={cn(
-		'grid grid-cols-2 md:grid-cols-4 gap-1.5 p-2 rounded-lg bg-muted/30 border border-border/50',
-		className
-	)}
-	{...restProps}
->
-	<CalculatedBadge label="ABV" value={abv().replace('% abv', '%')} icon={Percent} />
-
-	<CalculatedBadge label="Volume" value={displayVolume} unit="oz" icon={Droplets} />
-
-	<CalculatedBadge label="Dilution" value={displayDilution()} unit="oz" icon={GlassWater} />
-
-	<CalculatedBadge label="Est. Cost" value={displayCost} icon={DollarSign} />
-</div>
+{#if metrics.length > 0}
+	<div
+		class={cn(
+			'grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-2 rounded-lg bg-muted/30 border border-border/50',
+			className
+		)}
+		{...restProps}
+	>
+		{#each metrics as metric}
+			<CalculatedBadge
+				label={metric.label}
+				value={metric.value}
+				unit={metric.unit}
+				icon={metric.icon}
+			/>
+		{/each}
+	</div>
+{/if}

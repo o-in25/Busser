@@ -34,15 +34,34 @@
 	/>
 	<div
 		class={cn(
-			'relative flex items-center justify-center rounded-xl border-2 transition-all duration-200 px-4 py-5 min-h-[72px] text-center backdrop-blur-md',
+			'relative flex h-24 flex-col justify-end overflow-hidden rounded-xl border-2 transition-all duration-200 backdrop-blur-md',
 			selected
-				? 'border-primary bg-primary/10 ring-4 ring-primary/20 shadow-lg shadow-primary/10'
-				: 'border-white/20 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 hover:border-primary/50'
+				? 'border-primary ring-4 ring-primary/20 shadow-lg shadow-primary/10'
+				: 'border-white/20 dark:border-zinc-700/40 hover:border-primary/50'
 		)}
 	>
+		<!-- backdrop: category image faded into the card, glass fallback when none -->
+		<div class="absolute inset-0">
+			{#if spirit.recipeCategoryDescriptionImageUrl}
+				<img
+					src={spirit.recipeCategoryDescriptionImageUrl}
+					alt=""
+					class="h-full w-full object-cover"
+				/>
+			{:else}
+				<div class="h-full w-full bg-white/40 dark:bg-zinc-800/40"></div>
+			{/if}
+			<div
+				class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
+			></div>
+			{#if selected}
+				<div class="absolute inset-0 bg-primary/10"></div>
+			{/if}
+		</div>
+
 		<span
 			class={cn(
-				'text-sm font-medium transition-colors',
+				'relative z-10 px-3 pb-2 text-left text-sm font-semibold transition-colors',
 				selected ? 'text-primary' : 'text-foreground'
 			)}
 		>
@@ -51,7 +70,7 @@
 
 		{#if selected}
 			<div
-				class="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-md"
+				class="absolute top-2 right-2 z-10 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-md"
 			>
 				<svg class="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
 					<path

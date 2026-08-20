@@ -138,7 +138,8 @@ export const assistantTools: ChatCompletionTool[] = [
 					},
 					recipeCategoryId: {
 						type: 'number',
-						description: 'Recipe category ID (from get_recipe_categories)',
+						description:
+							"Recipe category ID — the cocktail's primary spirit type. MUST be one of the small set of ids returned by get_recipe_categories. This is NOT an ingredient categoryId from search_categories/list_categories; never use one of those here.",
 					},
 					recipeCategoryName: {
 						type: 'string',
@@ -146,7 +147,8 @@ export const assistantTools: ChatCompletionTool[] = [
 					},
 					preparationMethodId: {
 						type: 'number',
-						description: 'Preparation method ID (from get_preparation_methods)',
+						description:
+							'Preparation method ID — MUST be one of the ids returned by get_preparation_methods. Not an ingredient or recipe category id.',
 					},
 					preparationMethodName: {
 						type: 'string',

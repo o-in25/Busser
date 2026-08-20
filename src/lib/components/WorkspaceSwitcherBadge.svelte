@@ -46,7 +46,7 @@
 				class="block h-full w-full text-left focus:outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				<Card.Root
-					class="p-4 h-full hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer dark:hover:shadow-glow-pink"
+					class="flex items-center min-h-[76px] p-4 h-full hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer dark:hover:shadow-glow-pink"
 				>
 					<div class="flex items-center gap-3">
 						<div class="p-2 rounded-lg bg-primary/10">

@@ -16,6 +16,8 @@ const sharedRules = {
 		{ enforceForRenamedProperties: false },
 	],
 	'prettier/prettier': 'error',
+	// tsc already checks undefined refs (correctly); no-undef false-positives on ambient globals like App
+	'no-undef': 'off',
 };
 
 export default [

@@ -1,8 +1,10 @@
 import { error, json } from '@sveltejs/kit';
 import { StatusCodes } from 'http-status-codes';
 
+import { catalogRepo } from '$lib/server/core';
 import { generate } from '$lib/server/generators/generator-factory';
 import { generateCached } from '$lib/server/generators/cache';
+import { getGlobalWorkspace } from '$lib/server/workspace';
 
 import type { RequestHandler } from './$types';
 
@@ -39,5 +41,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		Number(recipeId),
 		{ regenerate: !!regenerate }
 	);
-	return json({ ...result, description: result.history });
+
+	// resolve the AI's text suggestions to real catalog links (computed fresh each request)
+	const links = await catalogRepo.getInsightLinks(
+		locals.activeWorkspaceId,
+		getGlobalWorkspace(),
+		Number(recipeId),
+		result.similarCocktails ?? [],
+		result.variations ?? []
+	);
+
+	return json({ ...result, description: result.history, links });
 };
