@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { FlaskConical, GalleryHorizontalEnd, Globe, Package, Sparkles } from 'lucide-svelte';
+	import { Globe, Sparkles } from 'lucide-svelte';
 	import { page } from '$app/stores';
 
 	import AiAssistant from '$lib/components/AiAssistant.svelte';
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Hero from '$lib/components/Hero.svelte';
+	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 	import { workspaceSwitcherOpen } from '../../../stores';
 
 	let { data } = $props();
@@ -23,34 +24,23 @@
 		>
 			<div class="flex items-center gap-2">
 				<h1 class="text-2xl font-bold">Busser AI</h1>
+				<Badge
+					variant="secondary"
+					class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0">Beta</Badge
+				>
 			</div>
 			<p class="text-sm text-muted-foreground mt-0.5 mb-3">
 				Describe a cocktail and Busser AI will check your inventory, suggest ingredients, and add it
 				to your catalog.
 			</p>
 			<div class="flex gap-2 flex-wrap">
-				{#if data.workspaceName}
-					<FancyBadge class="whitespace-nowrap">
-						<GalleryHorizontalEnd class="h-4 w-4 text-primary shrink-0" />
-						<span class="text-sm font-bold">{data.workspaceName}</span>
-					</FancyBadge>
-				{/if}
-				<FancyBadge class="whitespace-nowrap">
-					<FlaskConical class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{data.recipeCount}</span>
-					<span class="text-xs text-muted-foreground">Recipes</span>
-				</FancyBadge>
-				<FancyBadge class="whitespace-nowrap">
-					<Package class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{data.productCount}</span>
-					<span class="text-xs text-muted-foreground">Products</span>
-				</FancyBadge>
+				<WorkspaceSwitcherBadge variant="pill" workspaceName={data.workspaceName} />
 			</div>
 		</div>
 
 		{#if data.canModify}
-			<!-- chat container -->
-			<div class="glass-panel flex-1 min-h-0 overflow-hidden w-full max-w-3xl mx-auto">
+			<!-- chat container — full width to match the hero -->
+			<div class="glass-panel flex-1 min-h-0 overflow-hidden w-full">
 				<AiAssistant userAvatarUrl={$page.data.user?.avatarImageUrl} />
 			</div>
 		{:else}

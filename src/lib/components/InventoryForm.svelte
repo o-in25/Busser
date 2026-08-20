@@ -510,7 +510,7 @@
 										Generating...
 									{:else}
 										<Wand2 class="w-4 h-4 mr-2" />
-										Generate with AI
+										Auto-Generate
 									{/if}
 								</Button>
 							</div>
@@ -778,7 +778,7 @@
 								Generating...
 							{:else}
 								<Wand2 class="w-4 h-4 mr-2" />
-								Generate with AI
+								Auto-Generate
 							{/if}
 						</Button>
 					</div>

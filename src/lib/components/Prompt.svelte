@@ -2,7 +2,6 @@
 	import { AlertCircle, Loader2, Sparkles, Type, Wand2, X } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -230,11 +229,7 @@
 				Generating...
 			{:else}
 				<Sparkles class="w-4 h-4" />
-				Generate with AI
-				<Badge
-					variant="secondary"
-					class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0 ml-1">Beta</Badge
-				>
+				Auto-Generate
 			{/if}
 		</Button>
 
