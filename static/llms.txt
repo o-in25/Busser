@@ -1,0 +1,18 @@
+# Busser
+
+Busser is a home bar management web app. Track your bottle and ingredient inventory,
+discover cocktails you can make with what you have on hand, and collaborate with friends
+in shared workspaces.
+
+## Pages
+
+- [Home](https://busserapp.com/): landing page and browsable cocktail catalog
+- [About](https://busserapp.com/about): what Busser is and who it's for
+- [Sign up](https://busserapp.com/signup): create an account
+- [Log in](https://busserapp.com/login): sign in to an existing account
+
+## Legal
+
+- [Privacy Policy](https://busserapp.com/privacy)
+- [Terms of Service](https://busserapp.com/terms)
+- [Cookie Policy](https://busserapp.com/cookies)
