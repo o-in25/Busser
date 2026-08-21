@@ -8,15 +8,12 @@
 		House,
 		Info,
 		LayoutGrid,
-		LifeBuoy,
-		LogIn,
 		LogOut,
 		Menu,
 		Ruler,
 		Settings,
 		Shield,
 		Sparkles,
-		UserPlus,
 	} from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
@@ -105,18 +102,16 @@
 
 <!-- Mobile Top Logo (visible on small screens) -->
 <div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
-	<!-- drawer is available to everyone — guests still need to reach help/legal/about (the footer is
-	     hidden on mobile so the bottom nav can own that space) -->
-	<Sheet.Root bind:open={mobileMenuOpen}>
-		<Sheet.Trigger
-			class="mobile-header-left w-8 h-8 flex items-center justify-center"
-			aria-label="Open menu"
-		>
-			<Menu class="h-5 w-5 text-muted-foreground" />
-		</Sheet.Trigger>
-		<Sheet.Content side="left" class="flex flex-col">
-			<Sheet.Header class="text-left shrink-0">
-				{#if user}
+	{#if user}
+		<Sheet.Root bind:open={mobileMenuOpen}>
+			<Sheet.Trigger
+				class="mobile-header-left w-8 h-8 flex items-center justify-center"
+				aria-label="Open menu"
+			>
+				<Menu class="h-5 w-5 text-muted-foreground" />
+			</Sheet.Trigger>
+			<Sheet.Content side="left" class="flex flex-col">
+				<Sheet.Header class="text-left shrink-0">
 					<div class="flex items-center gap-3">
 						<div class="w-10 h-10 rounded-full flex-shrink-0">
 							<Placeholder id="avatar-drawer" src={user?.avatarImageUrl} />
@@ -131,19 +126,12 @@
 							{/if}
 						</div>
 					</div>
-				{:else}
-					<Sheet.Title class="text-sm font-medium">Menu</Sheet.Title>
-					<Sheet.Description class="text-xs text-muted-foreground">
-						Sign in to manage your bar
-					</Sheet.Description>
-				{/if}
-			</Sheet.Header>
+				</Sheet.Header>
 
-			<div class="h-px bg-border my-4 shrink-0"></div>
+				<div class="h-px bg-border my-4 shrink-0"></div>
 
-			<!-- scrollable content -->
-			<div class="flex-1 overflow-y-auto min-h-0">
-				{#if user}
+				<!-- scrollable content -->
+				<div class="flex-1 overflow-y-auto min-h-0">
 					<!-- Main -->
 					<div class="flex flex-col gap-1">
 						<button
@@ -159,88 +147,76 @@
 					</div>
 
 					<div class="h-px bg-border my-4"></div>
-				{/if}
 
-				<!-- Legal -->
-				<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-					Legal
-				</p>
-				<div class="flex flex-col gap-1">
-					<a
-						href="/privacy"
-						onclick={() => {
-							mobileMenuOpen = false;
-						}}
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-					>
-						<Shield class="h-4 w-4 text-muted-foreground" />
-						Privacy Policy
-					</a>
-					<a
-						href="/terms"
-						onclick={() => {
-							mobileMenuOpen = false;
-						}}
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-					>
-						<FileText class="h-4 w-4 text-muted-foreground" />
-						Terms of Service
-					</a>
-					<a
-						href="/cookies"
-						onclick={() => {
-							mobileMenuOpen = false;
-						}}
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-					>
-						<Cookie class="h-4 w-4 text-muted-foreground" />
-						Cookie Policy
-					</a>
+					<!-- Legal -->
+					<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+						Legal
+					</p>
+					<div class="flex flex-col gap-1">
+						<a
+							href="/privacy"
+							onclick={() => {
+								mobileMenuOpen = false;
+							}}
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+						>
+							<Shield class="h-4 w-4 text-muted-foreground" />
+							Privacy Policy
+						</a>
+						<a
+							href="/terms"
+							onclick={() => {
+								mobileMenuOpen = false;
+							}}
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+						>
+							<FileText class="h-4 w-4 text-muted-foreground" />
+							Terms of Service
+						</a>
+						<a
+							href="/cookies"
+							onclick={() => {
+								mobileMenuOpen = false;
+							}}
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+						>
+							<Cookie class="h-4 w-4 text-muted-foreground" />
+							Cookie Policy
+						</a>
+					</div>
+
+					<div class="h-px bg-border my-4"></div>
+
+					<!-- Help & Contribute -->
+					<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+						Help & Contribute
+					</p>
+					<div class="flex flex-col gap-1">
+						<a
+							href="/about"
+							onclick={() => {
+								mobileMenuOpen = false;
+							}}
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+						>
+							<Info class="h-4 w-4 text-muted-foreground" />
+							About
+						</a>
+						<a
+							href="https://github.com/o-in25/Busser"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+						>
+							<Github class="h-4 w-4 text-muted-foreground" />
+							GitHub
+							<ExternalLink class="h-3 w-3 text-muted-foreground/50 ml-auto" />
+						</a>
+					</div>
 				</div>
 
-				<div class="h-px bg-border my-4"></div>
-
-				<!-- Help & Contribute -->
-				<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-					Help & Contribute
-				</p>
-				<div class="flex flex-col gap-1">
-					<a
-						href="/help"
-						onclick={() => {
-							mobileMenuOpen = false;
-						}}
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-					>
-						<LifeBuoy class="h-4 w-4 text-muted-foreground" />
-						Help Center
-					</a>
-					<a
-						href="/about"
-						onclick={() => {
-							mobileMenuOpen = false;
-						}}
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-					>
-						<Info class="h-4 w-4 text-muted-foreground" />
-						About
-					</a>
-					<a
-						href="https://github.com/o-in25/Busser"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-					>
-						<Github class="h-4 w-4 text-muted-foreground" />
-						GitHub
-						<ExternalLink class="h-3 w-3 text-muted-foreground/50 ml-auto" />
-					</a>
-				</div>
-			</div>
-
-			<!-- pinned to bottom: sign out for members, sign in/up for guests -->
-			<div class="shrink-0 pt-4 border-t border-border">
-				{#if user}
+				<!-- sign out pinned to bottom -->
+				<div class="shrink-0 pt-4 border-t border-border">
 					<button
 						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
 						onclick={() => {
@@ -251,36 +227,19 @@
 						<LogOut class="h-4 w-4 text-muted-foreground" />
 						Sign out
 					</button>
-				{:else}
-					<div class="flex flex-col gap-2">
-						<a
-							href="/login"
-							onclick={() => {
-								mobileMenuOpen = false;
-							}}
-							class="flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground border border-border hover:bg-muted transition-colors focus:outline-none"
-						>
-							<LogIn class="h-4 w-4" />
-							Log In
-						</a>
-						<a
-							href="/signup"
-							onclick={() => {
-								mobileMenuOpen = false;
-							}}
-							class="flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground border border-border hover:bg-muted transition-colors focus:outline-none"
-						>
-							<UserPlus class="h-4 w-4" />
-							Sign Up
-						</a>
-					</div>
-				{/if}
-			</div>
-		</Sheet.Content>
-	</Sheet.Root>
+				</div>
+			</Sheet.Content>
+		</Sheet.Root>
+	{:else}
+		<!-- placeholder keeps the logo centered; sign-in affordance lives on the right -->
+		<div class="mobile-header-left w-8 h-8"></div>
+	{/if}
 	<a href="/" class="mobile-header-logo">
 		<img src={logoNav} class="h-10" alt="Busser" />
 	</a>
+	{#if !user}
+		<a href="/login" class="mobile-header-signin">Sign In</a>
+	{/if}
 </div>
 
 <!-- Mobile Bottom Navigation (visible on small screens) -->
@@ -325,9 +284,7 @@
 		<div class="flex flex-1 justify-end">
 			{#if user}
 				<DropdownMenu.Root>
-					<DropdownMenu.Trigger
-						class="cursor-pointer rounded-full transition-all duration-200 hover:opacity-80"
-					>
+					<DropdownMenu.Trigger class="desktop-avatar-button">
 						<Placeholder id="avatar-desktop" src={user?.avatarImageUrl} />
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content class="w-56 glass-dropdown" align="end">
@@ -376,21 +333,24 @@
 		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		/* tinted to the page mesh (not pure white) + lower opacity so the header dissolves into
-		   the page the way the dark one does — keeps light/dark feeling consistent */
-		background: linear-gradient(
-			180deg,
-			rgba(248, 242, 250, 0.6) 0%,
-			rgba(245, 240, 249, 0.42) 100%
-		);
-		border-bottom: 1px solid rgba(226, 218, 240, 0.35);
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 		transition: transform 0.3s ease;
 	}
 
-	/* global — applied to Sheet.Trigger (a component), so svelte can't see the usage in-template */
-	:global(.mobile-header-left) {
+	.mobile-header-left {
 		position: relative;
 		z-index: 1;
+	}
+
+	.mobile-header-signin {
+		position: relative;
+		z-index: 1;
+		margin-left: auto;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: rgba(232, 25, 95, 1);
+		text-decoration: none;
 	}
 
 	.mobile-header-logo {
@@ -526,13 +486,8 @@
 		padding: 0.75rem 0;
 		backdrop-filter: blur(20px) saturate(1.5);
 		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		/* matches the mobile header: page-tinted glass so the bar dissolves instead of reading white */
-		background: linear-gradient(
-			180deg,
-			rgba(248, 242, 250, 0.6) 0%,
-			rgba(245, 240, 249, 0.42) 100%
-		);
-		border-bottom: 1px solid rgba(226, 218, 240, 0.35);
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 	}
 
 	:global(.dark) .desktop-nav {
@@ -612,5 +567,38 @@
 		border: 1px solid rgba(248, 78, 128, 0.3);
 		color: rgba(248, 78, 128, 1);
 		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
+	}
+
+	/* desktop avatar button */
+	.desktop-avatar-button {
+		cursor: pointer;
+		border-radius: 9999px;
+		transition: all 0.2s ease;
+	}
+
+	.desktop-avatar-button:hover {
+		opacity: 0.8;
+	}
+
+	/* drawer logo glow (matches home page hero) */
+	.drawer-logo-glow {
+		animation: drawer-glow 3s ease-in-out infinite;
+	}
+
+	@keyframes drawer-glow {
+		0%,
+		100% {
+			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
+		}
+		50% {
+			filter: drop-shadow(0 0 20px rgba(248, 78, 128, 0.5));
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.drawer-logo-glow {
+			animation: none;
+			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
+		}
 	}
 </style>

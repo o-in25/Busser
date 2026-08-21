@@ -3,7 +3,6 @@
 
 	import BacCalculator from '$lib/components/BacCalculator.svelte';
 	import Calculator from '$lib/components/Calculator.svelte';
-	import PageHero from '$lib/components/PageHero.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import * as Popover from '$lib/components/ui/popover';
 
@@ -14,9 +13,13 @@
 	<title>Tools - Busser</title>
 </svelte:head>
 
-<PageHero title="Tools" subtitle="Bartending calculators and utilities" />
-
 <div class="space-y-6">
+	<!-- Header -->
+	<div>
+		<h1 class="text-2xl font-bold">Tools</h1>
+		<p class="text-sm text-muted-foreground mt-1">Bartending calculators and utilities</p>
+	</div>
+
 	<!-- Tools Grid -->
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Super Juice Calculator Card -->
