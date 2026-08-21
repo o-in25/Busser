@@ -12,9 +12,8 @@
 
 		<!-- PWA -->
 		<link rel="manifest" href="/manifest.json" />
-		<!-- match the page mesh's base tone so ios blends the status bar/toolbar into the page -->
-		<meta name="theme-color" content="#08070e" media="(prefers-color-scheme: dark)" />
-		<meta name="theme-color" content="#ece6f4" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
 
 		<!-- iOS standalone -->
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,25 +23,15 @@
 
 		<!-- Inter is self-hosted via @fontsource-variable/inter (imported in +layout.svelte) -->
 		<style>
-			/* flat base on html — matches theme-color exactly so the ios status-bar tint, the page
-			   edges, and the overscroll/rubber-band canvas all read as one continuous color (seamless,
-			   paradox-style). the decorative mesh lives on body so it only paints the content area */
-			html {
-				background: #ece6f4;
-			}
-			html.dark {
-				background: #08070e;
-			}
 			/* light mode -- soft mesh the translucent cards let bleed through as gentle color.
-			   glows are pushed down into the content zone (origins ~mid-page) so the top ~15%
-			   stays on the base tone and meets the status-bar theme-color seamlessly, while the
-			   colour still blooms where it's safe — vibrant page, clean chrome */
+			   fixed layer so cards read against shifting color as you scroll */
 			body {
 				background:
-					radial-gradient(ellipse 75% 44% at 6% 46%, rgba(253, 111, 148, 0.3) 0%, transparent 60%),
-					radial-gradient(ellipse 68% 44% at 95% 42%, rgba(165, 125, 213, 0.26) 0%, transparent 60%),
+					radial-gradient(ellipse 75% 60% at 10% 4%, rgba(253, 111, 148, 0.34) 0%, transparent 60%),
+					radial-gradient(ellipse 70% 60% at 92% 8%, rgba(165, 125, 213, 0.3) 0%, transparent 60%),
 					radial-gradient(ellipse 85% 70% at 78% 96%, rgba(150, 190, 230, 0.2) 0%, transparent 64%),
 					linear-gradient(160deg, #ece6f4 0%, #f4ecf0 52%, #e7eef6 100%);
+				background-attachment: fixed;
 			}
 			/* dark mode -- calm pink->purple wash, kept subtle so it doesn't compete with content */
 			.dark body {
@@ -55,15 +44,7 @@
 						transparent 66%
 					),
 					linear-gradient(160deg, #08070e 0%, #0a0911 60%, #08080e 100%);
-			}
-			/* native scrollbar + browser overscroll canvas follow the theme. without this the
-			   scrollbar track renders light in dark mode (the white strip on the right) and the
-			   rubber-band area falls back to white */
-			html {
-				color-scheme: light;
-			}
-			html.dark {
-				color-scheme: dark;
+				background-attachment: fixed;
 			}
 			/* baseline — safe for all contexts */
 			html,
@@ -72,6 +53,14 @@
 				-webkit-font-smoothing: antialiased;
 				-moz-osx-font-smoothing: grayscale;
 				touch-action: manipulation;
+			}
+			/* html paints the overscroll (rubber-band) region — give it the gradient's base
+			   tone so pulling past the page shows page color, not the default white */
+			html {
+				background: #ece6f4;
+			}
+			html.dark {
+				background: #08070e;
 			}
 			/* single scroll container — standalone PWA only */
 			@media (display-mode: standalone) {
@@ -131,7 +120,7 @@
 		</script>
 	</head>
 
-	<body data-sveltekit-preload-data="hover" class="flex flex-col min-h-[100dvh]">
+	<body data-sveltekit-preload-data="hover" class="flex flex-col min-h-screen">
 		<div style="display: contents" class="flex min-h-full flex-col">%sveltekit.body%</div>
 	</body>
 </html>
