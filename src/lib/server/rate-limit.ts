@@ -1,28 +1,15 @@
-import { Ratelimit } from '@upstash/ratelimit';
 import type { RequestEvent } from '@sveltejs/kit';
 
-import { getRedis } from '$lib/server/redis';
 import { hasGlobalPermission } from '$lib/server/auth';
+// checkRateLimit lives in redis.ts (the redis-backed metering primitive). keeping it in a
+// separate module lets enforceRateLimit call it across a boundary tests can spy on.
+import { checkRateLimit, type RateLimitConfig } from '$lib/server/redis';
 
-type FallbackMode = 'block' | 'allow';
+// re-export so callers keep importing the rate-limit api from one place
+export { checkRateLimit } from '$lib/server/redis';
+export type { RateLimitConfig, RateLimitResult } from '$lib/server/redis';
 
-const limiters = new Map<string, Ratelimit>();
 const HOUR = 60 * 60 * 1000;
-
-function getLimiter(config: RateLimitConfig): Ratelimit {
-	const cacheKey = `${config.maxRequests}:${config.windowMs}`;
-	let limiter = limiters.get(cacheKey);
-	if (!limiter) {
-		limiter = new Ratelimit({
-			redis: getRedis(),
-			limiter: Ratelimit.slidingWindow(config.maxRequests, `${config.windowMs} ms`),
-			prefix: 'busser',
-			ephemeralCache: new Map(),
-		});
-		limiters.set(cacheKey, limiter);
-	}
-	return limiter;
-}
 
 const rateLimitTiers: Record<string, RateLimitConfig> = {
 	'image-gen': { maxRequests: 5, windowMs: HOUR },
@@ -32,6 +19,7 @@ const rateLimitTiers: Record<string, RateLimitConfig> = {
 	places: { maxRequests: 15, windowMs: HOUR },
 };
 
+// paid-resource routes we meter. method defaults to POST; set it for anything else.
 const rateLimitRoutes: Array<{ path: string; tier: string; method?: string }> = [
 	{ path: '/api/generator/image', tier: 'image-gen' },
 	{ path: '/api/assistant/chat', tier: 'ai-chat' },
@@ -67,32 +55,7 @@ export function getClientIp(request: Request): string {
 	return 'unknown';
 }
 
-export async function checkRateLimit(
-	key: string,
-	config: RateLimitConfig,
-	onError: FallbackMode = 'block'
-): Promise<RateLimitResult> {
-	try {
-		const { success, remaining, reset } = await getLimiter(config).limit(key);
-		return {
-			allowed: success,
-			remaining,
-			resetAt: reset,
-			retryAfterMs: success ? undefined : reset - Date.now(),
-		};
-	} catch {
-		// cant reach redis so cant verify the count
-		const allowed = onError === 'allow';
-		return {
-			allowed,
-			remaining: 0,
-			resetAt: Date.now() + config.windowMs,
-			retryAfterMs: allowed ? undefined : config.windowMs,
-		};
-	}
-}
-
-// returns a 429 to or null to let the request through
+// returns a 429 or null to let the request through
 export async function enforceRateLimit(event: RequestEvent): Promise<Response | null> {
 	const { user } = event.locals;
 	if (!user) return null;
@@ -111,15 +74,3 @@ export async function enforceRateLimit(event: RequestEvent): Promise<Response | 
 		{ status: 429, headers: { 'Content-Type': 'application/json' } }
 	);
 }
-
-export type RateLimitConfig = {
-	maxRequests: number;
-	windowMs: number;
-};
-
-export type RateLimitResult = {
-	allowed: boolean;
-	remaining: number;
-	resetAt: number;
-	retryAfterMs?: number;
-};

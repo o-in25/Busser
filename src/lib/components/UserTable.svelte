@@ -1,5 +1,17 @@
 <script lang="ts">
-	import { AlertCircle, ArrowDown, ArrowUp, ArrowUpDown, Eye, Mail, MailCheck, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
+	import {
+		AlertCircle,
+		ArrowDown,
+		ArrowUp,
+		ArrowUpDown,
+		Eye,
+		Mail,
+		MailCheck,
+		Pencil,
+		Trash2,
+		User,
+		UserPlus,
+	} from 'lucide-svelte';
 	import moment from 'moment';
 
 	import { toast } from 'svelte-sonner';
@@ -39,7 +51,8 @@
 	};
 
 	// arrow reflects active column + direction, neutral otherwise
-	const sortIcon = (key: SortKey) => (sortKey !== key ? ArrowUpDown : sortDir === 'asc' ? ArrowUp : ArrowDown);
+	const sortIcon = (key: SortKey) =>
+		sortKey !== key ? ArrowUpDown : sortDir === 'asc' ? ArrowUp : ArrowDown;
 
 	// dates sort by timestamp, strings case-insensitively; nulls always sort last
 	const sortValue = (user: UserType, key: SortKey): number | string => {
@@ -123,27 +136,59 @@
 			<Table.Header>
 				<Table.Row class="hover:bg-transparent">
 					<Table.Head class="pl-6">
-						<button class="flex items-center gap-1.5 hover:text-foreground transition-colors" onclick={() => toggleSort('username')}>
+						<button
+							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							onclick={() => toggleSort('username')}
+						>
 							User
-							<svelte:component this={sortIcon('username')} class="h-3.5 w-3.5 {sortKey === 'username' ? 'text-foreground' : 'text-muted-foreground/50'}" />
+							<svelte:component
+								this={sortIcon('username')}
+								class="h-3.5 w-3.5 {sortKey === 'username'
+									? 'text-foreground'
+									: 'text-muted-foreground/50'}"
+							/>
 						</button>
 					</Table.Head>
 					<Table.Head class="hidden sm:table-cell">
-						<button class="flex items-center gap-1.5 hover:text-foreground transition-colors" onclick={() => toggleSort('email')}>
+						<button
+							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							onclick={() => toggleSort('email')}
+						>
 							Email
-							<svelte:component this={sortIcon('email')} class="h-3.5 w-3.5 {sortKey === 'email' ? 'text-foreground' : 'text-muted-foreground/50'}" />
+							<svelte:component
+								this={sortIcon('email')}
+								class="h-3.5 w-3.5 {sortKey === 'email'
+									? 'text-foreground'
+									: 'text-muted-foreground/50'}"
+							/>
 						</button>
 					</Table.Head>
 					<Table.Head class="hidden lg:table-cell">
-						<button class="flex items-center gap-1.5 hover:text-foreground transition-colors" onclick={() => toggleSort('createdDate')}>
+						<button
+							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							onclick={() => toggleSort('createdDate')}
+						>
 							Joined
-							<svelte:component this={sortIcon('createdDate')} class="h-3.5 w-3.5 {sortKey === 'createdDate' ? 'text-foreground' : 'text-muted-foreground/50'}" />
+							<svelte:component
+								this={sortIcon('createdDate')}
+								class="h-3.5 w-3.5 {sortKey === 'createdDate'
+									? 'text-foreground'
+									: 'text-muted-foreground/50'}"
+							/>
 						</button>
 					</Table.Head>
 					<Table.Head class="hidden md:table-cell">
-						<button class="flex items-center gap-1.5 hover:text-foreground transition-colors" onclick={() => toggleSort('lastActivityDate')}>
+						<button
+							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							onclick={() => toggleSort('lastActivityDate')}
+						>
 							Last Activity
-							<svelte:component this={sortIcon('lastActivityDate')} class="h-3.5 w-3.5 {sortKey === 'lastActivityDate' ? 'text-foreground' : 'text-muted-foreground/50'}" />
+							<svelte:component
+								this={sortIcon('lastActivityDate')}
+								class="h-3.5 w-3.5 {sortKey === 'lastActivityDate'
+									? 'text-foreground'
+									: 'text-muted-foreground/50'}"
+							/>
 						</button>
 					</Table.Head>
 					<Table.Head class="text-right pr-6">Actions</Table.Head>

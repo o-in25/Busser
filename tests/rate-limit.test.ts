@@ -2,10 +2,16 @@ import { describe, it, expect, vi } from 'vitest';
 
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 
-// force the redis path to fail so we exercise the fallback decision
-vi.mock('$lib/server/redis', () => ({
-	getRedis: () => {
-		throw new Error('no redis in tests');
+// force the redis path to fail so we exercise the fallback decision — make the limiter throw
+vi.mock('@upstash/redis', () => ({ Redis: class {} }));
+vi.mock('@upstash/ratelimit', () => ({
+	Ratelimit: class {
+		static slidingWindow() {
+			return {};
+		}
+		limit() {
+			throw new Error('no redis in tests');
+		}
 	},
 }));
 
