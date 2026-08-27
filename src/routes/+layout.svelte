@@ -23,17 +23,6 @@
 
 	export let data: LayoutData;
 
-	// auth routes where we don't show the navbar
-	const authRoutes = [
-		'/login',
-		'/logout',
-		'/signup',
-		'/verify-email',
-		'/forgot-password',
-		'/reset-password',
-		'/workspace/select',
-	];
-
 	const getActiveUrl = (url: string) => {
 		const routes: Record<string, string> = {
 			home: '/',
@@ -48,9 +37,10 @@
 		return routes[activeUrl];
 	};
 
-	const isAuthRoute = (pathname: string) => {
-		return authRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
-	};
+	// hide nav chrome on the whole (auth) route group + workspace select; keyed off route.id
+	// so it can't drift from the actual group membership like a hardcoded path list would
+	const isAuthRoute = (routeId: string | null) =>
+		!!routeId && (routeId.startsWith('/(auth)') || routeId === '/workspace/select');
 
 	let isMobile = false;
 	let keyboardOpen = false;
@@ -126,7 +116,7 @@
 	$: activeUrl = getActiveUrl($page.url.pathname);
 	$: user = data.user;
 	$: workspaceName = data.workspaceName;
-	$: showNav = !isAuthRoute($page.url.pathname);
+	$: showNav = !isAuthRoute($page.route.id);
 
 	$: {
 		setContext('permissions', user?.permissions.map(({ permissionName }) => permissionName) || []);

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Spirit } from '$lib/types';
 	import { cn } from '$lib/utils';
+	import { cdnSrc } from '$lib/utils/image';
 
 	let {
 		class: className,
@@ -44,8 +45,9 @@
 		<div class="absolute inset-0">
 			{#if spirit.recipeCategoryDescriptionImageUrl}
 				<img
-					src={spirit.recipeCategoryDescriptionImageUrl}
+					src={cdnSrc(spirit.recipeCategoryDescriptionImageUrl, 384)}
 					alt=""
+					loading="lazy"
 					class="h-full w-full object-cover"
 				/>
 			{:else}

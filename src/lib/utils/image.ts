@@ -21,10 +21,10 @@ function transformable(url?: string | null): url is string {
 type Opts = { quality?: number; fit?: 'cover' | 'contain' | 'scale-down' };
 
 export function cdnSrc(
-	url: string,
+	url: string | null | undefined,
 	width: number,
 	{ quality = 82, fit = 'cover' }: Opts = {}
-): string {
+): string | null | undefined {
 	if (!transformable(url)) return url;
 	return `${CDN_ZONE}/cdn-cgi/image/width=${width},quality=${quality},format=auto,fit=${fit}/${url}`;
 }

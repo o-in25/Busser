@@ -1,8 +1,6 @@
 import { Redis } from '@upstash/redis';
 import { env } from '$env/dynamic/private';
 
-// lazy singleton — dont construct at module top level, the analyse build step
-// imports server modules with no secrets set
 let client: Redis | null = null;
 
 export function getRedis(): Redis {

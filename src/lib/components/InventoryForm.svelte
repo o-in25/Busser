@@ -20,8 +20,6 @@
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { CalculatedBadge } from '$lib/components/ui/calculated-badge';
-	import * as Card from '$lib/components/ui/card';
-	import { CollapsibleSection } from '$lib/components/ui/collapsible';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
 	import { Helper } from '$lib/components/ui/helper';
@@ -37,8 +35,8 @@
 	import BottleScan from './BottleScan.svelte';
 	import FormDraftManager from './FormDraftManager.svelte';
 	import ImagePrompt from './ImagePrompt.svelte';
-	import InventoryFormWizard from './InventoryFormWizard.svelte';
 	import Prompt from './Prompt.svelte';
+	import FormShell from './form/FormShell.svelte';
 
 	let {
 		action,
@@ -96,10 +94,10 @@
 		}
 	});
 
-	// Use a derived value so it always reflects the latest product
-	let productDetailId = $derived(() => product?.productDetailId);
 	let draftManager = $state<FormDraftManager>();
-	let currentWizardStep = $state(0);
+	let draftLastSaved = $state<Date | null>(null);
+	let currentStep = $state(0);
+	let disabled = $state(false);
 
 	// bottle scan state
 	let scanCategories = $state<SelectOption[]>([]);
@@ -164,12 +162,12 @@
 		{ label: '100', value: '100' },
 	];
 
-	// Wizard steps configuration
-	const wizardSteps = [
+	// step config for the shell
+	const formSteps = [
 		{ title: 'Basic Info', icon: Package },
 		{ title: 'Purchase Details', icon: DollarSign },
-		{ title: 'Flavor Profile', icon: Palette },
-		{ title: 'Description & Image', icon: Image },
+		{ title: 'Flavor Profile', icon: Palette, optional: true },
+		{ title: 'Description & Image', icon: Image, optional: true },
 	];
 
 	// Draft data for autosave
@@ -282,7 +280,7 @@
 		2: true, // flavor profile optional
 		3: true, // description optional
 	});
-	const canProceedWizard = $derived(stepValid[currentWizardStep as keyof typeof stepValid] ?? true);
+	const canProceed = $derived(stepValid[currentStep as keyof typeof stepValid] ?? true);
 	const isFormValid = $derived(stepValid[0] && stepValid[1]);
 
 	// Track categoryId changes to mark as touched
@@ -299,6 +297,22 @@
 		method="POST"
 		action={action === 'add' ? '?/add' : '?/edit'}
 		use:enhance={async ({ formData }) => {
+			disabled = true;
+
+			// scalar fields are serialized from state so submission works from any step
+			formData.set('productName', productName);
+			formData.set('productPricePerUnit', productPricePerUnit);
+			formData.set('productUnitSizeInMilliliters', productUnitSizeInMilliliters);
+			formData.set('productProof', productProof);
+			formData.set('categoryId', categoryId ?? '');
+			formData.set('supplierId', supplierId ?? '');
+			formData.set('productInStockQuantity', String(productInStockQuantity));
+			formData.set('productSweetnessRating', String(productSweetnessRating));
+			formData.set('productDrynessRating', String(productDrynessRating));
+			formData.set('productVersatilityRating', String(productVersatilityRating));
+			formData.set('productStrengthRating', String(productStrengthRating));
+			formData.set('productDescription', productDescription);
+
 			// Upload pending image if any (held in memory until now)
 			if (pendingImageFile) {
 				const uploadData = new FormData();
@@ -320,6 +334,7 @@
 					goto(result.location);
 				} else {
 					await applyAction(result);
+					disabled = false;
 					if (result.type === 'failure')
 						$notificationStore.error = {
 							message: result?.data?.error?.toString() || '',
@@ -333,12 +348,16 @@
 		}}
 		enctype="multipart/form-data"
 	>
-		<!-- Mobile Wizard View -->
-		<InventoryFormWizard
-			steps={wizardSteps}
-			bind:currentStep={currentWizardStep}
-			canProceed={canProceedWizard}
+		<FormShell
+			steps={formSteps}
+			bind:currentStep
+			{canProceed}
+			isValid={isFormValid}
+			submitting={disabled}
+			lastSaved={draftLastSaved}
 			cancelHref="/inventory"
+			eyebrow={action === 'add' ? 'New Item' : 'Edit Item'}
+			submitLabel="Save Item"
 		>
 			{#snippet children({ step })}
 				{#if step === 0}
@@ -385,7 +404,7 @@
 					<!-- Purchase Details Step -->
 					<div class="space-y-4">
 						<div>
-							<Label for="productPricePerUnit-mobile" class="mb-2">
+							<Label for="productPricePerUnit" class="mb-2">
 								Price <span class="text-destructive">*</span>
 							</Label>
 							<div class="relative">
@@ -395,7 +414,7 @@
 								>
 								<Input
 									type="number"
-									id="productPricePerUnit-mobile"
+									id="productPricePerUnit"
 									step="any"
 									required
 									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit
@@ -411,13 +430,13 @@
 							{/if}
 						</div>
 						<div>
-							<Label for="productUnitSizeInMilliliters-mobile" class="mb-2">
+							<Label for="productUnitSizeInMilliliters" class="mb-2">
 								Size <span class="text-destructive">*</span>
 							</Label>
 							<div class="relative">
 								<Input
 									type="number"
-									id="productUnitSizeInMilliliters-mobile"
+									id="productUnitSizeInMilliliters"
 									required
 									class="pr-10 {touched.productUnitSizeInMilliliters &&
 									errors.productUnitSizeInMilliliters
@@ -442,12 +461,12 @@
 							/>
 						</div>
 						<div>
-							<Label for="productProof-mobile" class="mb-2">
+							<Label for="productProof" class="mb-2">
 								Proof <span class="text-destructive">*</span>
 							</Label>
 							<Input
 								type="number"
-								id="productProof-mobile"
+								id="productProof"
 								max="200"
 								required
 								class={touched.productProof && errors.productProof ? 'border-destructive' : ''}
@@ -483,9 +502,9 @@
 							/>
 						</div>
 						<div class="flex items-center justify-end gap-3 pt-2">
-							<Label for="inStock-mobile" class="text-sm">In Stock</Label>
+							<Label for="inStock" class="text-sm">In Stock</Label>
 							<Switch
-								id="inStock-mobile"
+								id="inStock"
 								checked={productInStockQuantity > 0}
 								onCheckedChange={(checked) => {
 									productInStockQuantity = checked ? 1 : 0;
@@ -517,28 +536,28 @@
 							<FlavorSlider
 								bind:value={productSweetnessRating}
 								label="Sweetness"
-								name="productSweetnessRating-mobile"
+								name="productSweetnessRating"
 								icon={Candy}
 								color="pink"
 							/>
 							<FlavorSlider
 								bind:value={productDrynessRating}
 								label="Dryness"
-								name="productDrynessRating-mobile"
+								name="productDrynessRating"
 								icon={Wind}
 								color="amber"
 							/>
 							<FlavorSlider
 								bind:value={productVersatilityRating}
 								label="Versatility"
-								name="productVersatilityRating-mobile"
+								name="productVersatilityRating"
 								icon={Sparkles}
 								color="purple"
 							/>
 							<FlavorSlider
 								bind:value={productStrengthRating}
 								label="Strength"
-								name="productStrengthRating-mobile"
+								name="productStrengthRating"
 								icon={Flame}
 								color="orange"
 							/>
@@ -554,8 +573,8 @@
 						<Prompt
 							bind:value={productDescription}
 							trigger={productName}
-							id="productDescription-mobile"
-							name="productDescription-mobile"
+							id="productDescription"
+							name="productDescription"
 							url="/api/generator/inventory"
 						/>
 						<ImagePrompt
@@ -570,299 +589,7 @@
 					</div>
 				{/if}
 			{/snippet}
-		</InventoryFormWizard>
-
-		<!-- Desktop Card Layout (hidden on mobile) -->
-		<div class="hidden md:block space-y-6">
-			<!-- Basic Information Card -->
-			<Card.Root class="relative z-10">
-				<Card.Header class="pb-4">
-					<div class="flex items-center justify-between">
-						<Card.Title class="flex items-center gap-2 text-lg">
-							<Package class="h-5 w-5 text-primary" />
-							Basic Information
-						</Card.Title>
-						{#if action === 'add'}
-							<BottleScan onscan={handleBottleScan} categories={scanCategories} />
-						{/if}
-					</div>
-				</Card.Header>
-				<Card.Content class="space-y-4">
-					<div class="grid gap-6 md:grid-cols-2">
-						<div>
-							<Label for="productName" class="mb-2">
-								Name <span class="text-destructive">*</span>
-							</Label>
-							<Input
-								type="text"
-								id="productName"
-								name="productName"
-								required
-								bind:value={productName}
-								onblur={() => (touched.productName = true)}
-								class={touched.productName && errors.productName ? 'border-destructive' : ''}
-							/>
-							{#if touched.productName && errors.productName}
-								<Helper color="red">{errors.productName}</Helper>
-							{/if}
-						</div>
-						<div>
-							<Autocomplete
-								label="Category"
-								fetchUrl="/api/select/categories"
-								actionUrl="/inventory/category/add"
-								name="categoryId"
-								grant="add_category"
-								key={product?.categoryName}
-								required={true}
-								bind:value={categoryId}
-								onselect={handleCategorySelect}
-							/>
-							{#if touched.categoryId && errors.categoryId}
-								<Helper color="red">{errors.categoryId}</Helper>
-							{/if}
-						</div>
-					</div>
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Purchase Details Card -->
-			<Card.Root>
-				<Card.Header class="pb-4">
-					<Card.Title class="flex items-center gap-2 text-lg">
-						<DollarSign class="h-5 w-5 text-primary" />
-						Purchase Details
-					</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					<div class="grid gap-6 md:grid-cols-3">
-						<div>
-							<Label for="productPricePerUnit" class="mb-2">
-								Price <span class="text-destructive">*</span>
-							</Label>
-							<div class="relative">
-								<span
-									class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
-									>$</span
-								>
-								<Input
-									type="number"
-									id="productPricePerUnit"
-									name="productPricePerUnit"
-									step="any"
-									required
-									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit
-										? 'border-destructive'
-										: ''}"
-									value={productPricePerUnit}
-									oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
-									onblur={() => (touched.productPricePerUnit = true)}
-								/>
-							</div>
-							{#if touched.productPricePerUnit && errors.productPricePerUnit}
-								<Helper color="red">{errors.productPricePerUnit}</Helper>
-							{/if}
-						</div>
-						<div>
-							<Label for="productUnitSizeInMilliliters" class="mb-2">
-								Size <span class="text-destructive">*</span>
-							</Label>
-							<div class="relative">
-								<Input
-									type="number"
-									id="productUnitSizeInMilliliters"
-									name="productUnitSizeInMilliliters"
-									required
-									class="pr-10 {touched.productUnitSizeInMilliliters &&
-									errors.productUnitSizeInMilliliters
-										? 'border-destructive'
-										: ''}"
-									value={productUnitSizeInMilliliters}
-									oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
-									onblur={() => (touched.productUnitSizeInMilliliters = true)}
-								/>
-								<span
-									class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
-									>mL</span
-								>
-							</div>
-							{#if touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters}
-								<Helper color="red">{errors.productUnitSizeInMilliliters}</Helper>
-							{/if}
-							<QuickSelect
-								options={sizeOptions}
-								bind:value={productUnitSizeInMilliliters}
-								class="mt-2"
-							/>
-						</div>
-						<div>
-							<Label for="productProof" class="mb-2">
-								Proof <span class="text-destructive">*</span>
-							</Label>
-							<Input
-								type="number"
-								id="productProof"
-								name="productProof"
-								max="200"
-								required
-								class={touched.productProof && errors.productProof ? 'border-destructive' : ''}
-								value={productProof}
-								oninput={(e) => (productProof = e.currentTarget.value)}
-								onblur={() => (touched.productProof = true)}
-							/>
-							{#if touched.productProof && errors.productProof}
-								<Helper color="red">{errors.productProof}</Helper>
-							{/if}
-							<QuickSelect options={proofOptions} bind:value={productProof} class="mt-2" />
-						</div>
-					</div>
-
-					<!-- Supplier -->
-					<div class="mt-4">
-						<Autocomplete
-							label="Supplier"
-							fetchUrl="/api/select/suppliers"
-							name="supplierId"
-							grant=""
-							key={product?.supplierName || 'Any'}
-							required={true}
-							bind:value={supplierId}
-						/>
-					</div>
-
-					<!-- Calculated fields and stock -->
-					<div class="flex flex-wrap items-center justify-between mt-6 pt-4 border-t">
-						<div class="flex flex-wrap gap-3">
-							{#if pricePerOunce()}
-								<CalculatedBadge label="Price/oz" value={'$' + pricePerOunce()} icon={Calculator} />
-							{/if}
-							{#if pricePerMl()}
-								<CalculatedBadge label="Price/mL" value={'$' + pricePerMl()} icon={Calculator} />
-							{/if}
-							{#if abvPercent()}
-								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
-							{/if}
-						</div>
-						<div class="flex items-center gap-3">
-							<input
-								name="productInStockQuantity"
-								type="hidden"
-								bind:value={productInStockQuantity}
-							/>
-							<Label for="inStock" class="text-sm">In Stock</Label>
-							<Switch
-								id="inStock"
-								checked={productInStockQuantity > 0}
-								onCheckedChange={(checked) => {
-									productInStockQuantity = checked ? 1 : 0;
-								}}
-							/>
-						</div>
-					</div>
-				</Card.Content>
-			</Card.Root>
-
-			<!-- Flavor Profile Card (Collapsible, spirits only) -->
-			{#if isSpirit}
-				<CollapsibleSection title="Flavor Profile" icon={Palette} open={action === 'edit'}>
-					<div class="flex justify-end mb-4">
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onclick={generateFlavorRatings}
-							disabled={ratingsGenerating}
-						>
-							{#if ratingsGenerating}
-								<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-								Generating...
-							{:else}
-								<Wand2 class="w-4 h-4 mr-2" />
-								Auto-Generate
-							{/if}
-						</Button>
-					</div>
-					<div class="grid gap-6 md:grid-cols-2">
-						<FlavorSlider
-							bind:value={productSweetnessRating}
-							label="Sweetness"
-							name="productSweetnessRating"
-							icon={Candy}
-							color="pink"
-						/>
-						<FlavorSlider
-							bind:value={productDrynessRating}
-							label="Dryness"
-							name="productDrynessRating"
-							icon={Wind}
-							color="amber"
-						/>
-						<FlavorSlider
-							bind:value={productVersatilityRating}
-							label="Versatility"
-							name="productVersatilityRating"
-							icon={Sparkles}
-							color="purple"
-						/>
-						<FlavorSlider
-							bind:value={productStrengthRating}
-							label="Strength"
-							name="productStrengthRating"
-							icon={Flame}
-							color="orange"
-						/>
-					</div>
-				</CollapsibleSection>
-			{/if}
-
-			<!-- Description & Image (Collapsible) -->
-			<CollapsibleSection title="Description & Image" icon={Image} open={action === 'edit'}>
-				<div class="space-y-6">
-					<Prompt
-						bind:value={productDescription}
-						trigger={productName}
-						id="productDescription"
-						name="productDescription"
-						url="/api/generator/inventory"
-					/>
-					<ImagePrompt
-						name="productImageUrl"
-						bind:signedUrl={productImageUrl}
-						bind:pendingFile={pendingImageFile}
-						bind:imageCleared
-						trigger={productName}
-						type="product"
-						description={productDescription}
-					/>
-				</div>
-			</CollapsibleSection>
-		</div>
-
-		<!-- Hidden inputs for form submission (mobile wizard uses these) -->
-		<div class="hidden">
-			<input type="hidden" name="productName" value={productName} />
-			<input type="hidden" name="productPricePerUnit" value={productPricePerUnit} />
-			<input
-				type="hidden"
-				name="productUnitSizeInMilliliters"
-				value={productUnitSizeInMilliliters}
-			/>
-			<input type="hidden" name="productProof" value={productProof} />
-			<input type="hidden" name="categoryId" value={categoryId ?? ''} />
-			<input type="hidden" name="supplierId" value={supplierId ?? ''} />
-			<input type="hidden" name="productInStockQuantity" value={productInStockQuantity} />
-			<input type="hidden" name="productSweetnessRating" value={productSweetnessRating} />
-			<input type="hidden" name="productDrynessRating" value={productDrynessRating} />
-			<input type="hidden" name="productVersatilityRating" value={productVersatilityRating} />
-			<input type="hidden" name="productStrengthRating" value={productStrengthRating} />
-			<input type="hidden" name="productDescription" value={productDescription} />
-			<input type="hidden" value={productDetailId()} />
-		</div>
-
-		<!-- Submit buttons (desktop only - mobile uses wizard buttons) -->
-		<div class="hidden md:flex justify-end gap-3 mt-6">
-			<Button type="submit" disabled={!isFormValid}>Save</Button>
-		</div>
+		</FormShell>
 	</form>
 
 	<Dialog.Root bind:open={modalOpen}>
@@ -898,18 +625,19 @@
 {#if action === 'add'}
 	<FormDraftManager
 		bind:this={draftManager}
+		bind:lastSaved={draftLastSaved}
 		draftKey="inventory-form"
 		data={draftData}
 		onrestore={handleDraftRestore}
 	/>
 {/if}
 
-<!-- Delete pill (edit mode, mobile only) -->
+<!-- Delete pill (edit mode) -->
 {#if action === 'edit'}
 	<button
 		type="button"
 		onclick={() => (modalOpen = true)}
-		class="mt-3 mx-auto w-fit flex items-center gap-2 text-xs text-destructive/60 hover:text-destructive bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-destructive/20 hover:border-destructive/40 shadow-sm transition-colors cursor-pointer md:hidden"
+		class="mt-3 mx-auto w-fit flex items-center gap-2 text-xs text-destructive/60 hover:text-destructive bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-destructive/20 hover:border-destructive/40 shadow-sm transition-colors cursor-pointer"
 	>
 		<Trash2 class="h-3 w-3" />
 		<span>Delete</span>

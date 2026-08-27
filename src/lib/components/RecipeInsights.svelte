@@ -17,6 +17,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { cn } from '$lib/utils';
+	import { cdnSrc } from '$lib/utils/image';
 	import type { RecipeInsightLinks, RecipeInsightsOutput } from '$lib/types/generators';
 
 	let {
@@ -275,8 +276,9 @@
 							>
 								{#if rec.imageUrl}
 									<img
-										src={rec.imageUrl}
+										src={cdnSrc(rec.imageUrl, 96)}
 										alt={rec.recipeName}
+										loading="lazy"
 										class="h-10 w-10 rounded-md object-cover shrink-0"
 									/>
 								{:else}

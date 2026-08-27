@@ -21,8 +21,8 @@
 			"url": "/catalog"
 		},
 		{
-			"name": "Busser AI",
-			"short_name": "Busser AI",
+			"name": "Assistant",
+			"short_name": "Assistant",
 			"url": "/assistant"
 		}
 	]

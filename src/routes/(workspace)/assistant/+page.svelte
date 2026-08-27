@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-	<title>Busser AI - Busser</title>
+	<title>Assistant - Busser</title>
 </svelte:head>
 
 <div class="flex flex-col {data.canModify ? 'h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)]' : ''}">
@@ -19,14 +19,14 @@
 		class="rounded-xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 mb-6 px-4 py-4 sm:px-6 sm:py-5"
 	>
 		<div class="flex items-center gap-2">
-			<h1 class="text-2xl font-bold">Busser AI</h1>
+			<h1 class="text-2xl font-bold">Assistant</h1>
 			<Badge
 				variant="secondary"
 				class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0">Beta</Badge
 			>
 		</div>
 		<p class="text-sm text-muted-foreground mt-0.5 mb-3">
-			Describe a cocktail and Busser AI will check your inventory, suggest ingredients, and add it
+			Describe a cocktail and Assistant will check your inventory, suggest ingredients, and add it
 			to your catalog.
 		</p>
 		<div class="flex gap-2 flex-wrap">
@@ -51,7 +51,7 @@
 				<div>
 					<h2 class="text-lg font-semibold mb-1">Switch to your workspace</h2>
 					<p class="text-sm text-muted-foreground">
-						Busser AI needs write access to your catalog and inventory. Use the workspace switcher
+						Assistant needs write access to your catalog and inventory. Use the workspace switcher
 						above to switch to a workspace you own and get started.
 					</p>
 				</div>

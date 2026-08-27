@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
+	import { cdnSrc } from '$lib/utils/image';
 
 	let {
 		src = null,
@@ -19,7 +20,13 @@
 
 <div class={cn('overflow-hidden', className)}>
 	{#if src && !errored}
-		<img {src} alt={name} class="h-full w-full object-cover" onerror={() => (errored = true)} />
+		<img
+			src={cdnSrc(src, 160)}
+			alt={name}
+			loading="lazy"
+			class="h-full w-full object-cover"
+			onerror={() => (errored = true)}
+		/>
 	{:else}
 		<div
 			class="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-primary/5 font-semibold text-primary/80"

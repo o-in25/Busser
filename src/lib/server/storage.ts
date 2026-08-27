@@ -19,7 +19,7 @@ const storage = new Storage({
 	},
 });
 
-// lazy: gcs throws on an empty bucket name, and the build's analyse step imports this module
+// gcs throws on an empty bucket name
 let _bucket: ReturnType<typeof storage.bucket> | null = null;
 function getBucket() {
 	if (!_bucket) {
@@ -60,8 +60,8 @@ export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> 
 				.first()
 		);
 
+		// check if image without an upload row
 		if (!row?.name || !row?.bucket) {
-			// legacy/backfilled image without an upload row — nothing tracked to delete, so skip.
 			// don't touch the untracked gcs object (could be shared/seeded).
 			const message = `deleteSignedUrl: no active upload record for ${signedUrl}, skipping cleanup`;
 			console.warn(message);
@@ -104,13 +104,16 @@ export async function getSignedUrl(
 		const blob = await file.arrayBuffer();
 		const { data, contentType } = await compressImage(Buffer.from(blob));
 		const ext = contentType === 'image/svg+xml' ? 'svg' : 'webp';
-		// drop the original extension — the stored bytes are webp now
+		// drop the original extension we use webp now
 		const safeName = (fileName || file.name)
 			.replace(/[^a-zA-Z0-9._-]+/g, '-')
 			.replace(/\.[^.]+$/, '');
 		const name = `${kind}/${workspaceId}/${safeName}-${moment().format('MMDDYYYYSS')}.${ext}`;
 		const newFile = getBucket().file(name);
-		await newFile.save(data, { contentType });
+		await newFile.save(data, {
+			contentType,
+			metadata: { cacheControl: 'public, max-age=31536000, immutable' },
+		});
 
 		const publicUrl = newFile.publicUrl();
 		const [metadata] = await newFile.getMetadata();
@@ -131,9 +134,7 @@ export async function getSignedUrl(
 	}
 }
 
-// copies a GCS file to a new workspace-scoped location and returns the new public url.
-// uses gcs server-side copy — no download/upload round-trip.
-// note: runs outside db transactions; a rollback after copy orphans the gcs file.
+// copies a file to a new workspace location and returns the new public url
 export async function copyGcsFile(
 	sourceUrl: string,
 	kind: UploadKind,
@@ -148,7 +149,7 @@ export async function copyGcsFile(
 			.first();
 
 		if (!sourceRow?.name || !sourceRow?.bucket) {
-			// legacy data without an upload row — fall back to sharing the url
+			// fall back to sharing the url
 			console.warn(`copyGcsFile: no upload record for ${sourceUrl}, returning original url`);
 			return sourceUrl;
 		}
