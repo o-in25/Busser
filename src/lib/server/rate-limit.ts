@@ -1,13 +1,7 @@
 import type { RequestEvent } from '@sveltejs/kit';
 
 import { hasGlobalPermission } from '$lib/server/auth';
-// checkRateLimit lives in redis.ts (the redis-backed metering primitive). keeping it in a
-// separate module lets enforceRateLimit call it across a boundary tests can spy on.
 import { checkRateLimit, type RateLimitConfig } from '$lib/server/redis';
-
-// re-export so callers keep importing the rate-limit api from one place
-export { checkRateLimit } from '$lib/server/redis';
-export type { RateLimitConfig, RateLimitResult } from '$lib/server/redis';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -19,7 +13,6 @@ const rateLimitTiers: Record<string, RateLimitConfig> = {
 	places: { maxRequests: 15, windowMs: HOUR },
 };
 
-// paid-resource routes we meter. method defaults to POST; set it for anything else.
 const rateLimitRoutes: Array<{ path: string; tier: string; method?: string }> = [
 	{ path: '/api/generator/image', tier: 'image-gen' },
 	{ path: '/api/assistant/chat', tier: 'ai-chat' },
@@ -74,3 +67,7 @@ export async function enforceRateLimit(event: RequestEvent): Promise<Response | 
 		{ status: 429, headers: { 'Content-Type': 'application/json' } }
 	);
 }
+
+// TODO: refactor these usages instead of re-exporting this
+export { checkRateLimit } from '$lib/server/redis';
+export type { RateLimitConfig, RateLimitResult } from '$lib/server/redis';

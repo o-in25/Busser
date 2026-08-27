@@ -1,16 +1,16 @@
-// rewrites stored gcs image urls through cloudflare's on-the-fly resizer
-// (/cdn-cgi/image). resize + re-encode (avif/webp via format=auto) happens at
-// the edge and is cached there — the db keeps storing full-size gcs urls untouched.
+/* 
+  rewrites stored gcs image urls through cloudflare's on the fly resizer (/cdn-cgi/image)
+  resize + re-encode (avif/webp via format=auto) happens at  the edge and is cached there
+  the db keeps storing full-size gcs urls untouched.
+*/
 
 // absolute so it works both in prod (served from the zone) and in local dev
-// (localhost isn't behind cloudflare, so an origin-relative path wouldn't resolve).
 const CDN_ZONE = 'https://busserapp.com';
 
-// default responsive ladder — covers thumbnails through full-bleed heroes
+// default responsive widths
 export const DEFAULT_WIDTHS = [256, 384, 512, 768, 1024, 1600];
 
-// only gcs-backed rasters go through the resizer; svg is vector and data/blob
-// previews and static assets pass through untouched.
+// only gcs-backed rasters go through the resizer
 function transformable(url?: string | null): url is string {
 	if (!url) return false;
 	if (!url.startsWith('https://storage.googleapis.com/')) return false;

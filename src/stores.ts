@@ -10,7 +10,7 @@ export const themeStore = writable<string>(
 	(browser && localStorage.getItem('color-theme')) || 'dark'
 );
 
-// true while a workspace switch is resolving — pages show a skeleton, switchers disable
+// true while a workspace switch is resolving so pages show a skeleton, switchers disable
 export const workspaceSwitching = writable(false);
 
 const notification = () => {

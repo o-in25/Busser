@@ -1,8 +1,6 @@
-// image compression — no env/sveltekit imports so standalone scripts (backfill) can use it too
 import sharp from 'sharp';
 
-// resize + re-encode to webp so we store small files instead of multi-mb originals.
-// svgs pass through untouched (vector — re-rastering would wreck them), and we never upscale.
+// svgs pass through untouched and we never upscale
 export async function compressImage(
 	input: Buffer,
 	{ maxDimension = 1600, quality = 82 } = {}

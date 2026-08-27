@@ -69,7 +69,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		}
 	}
 
-	// If user is authenticated, resolve active workspace
+	// get workspace when logged in
 	if (event.locals.user) {
 		const activeWorkspaceId = await resolveActiveWorkspace(event.locals.user.userId, cookies);
 		event.locals.activeWorkspaceId = activeWorkspaceId;
@@ -89,9 +89,10 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	response.headers.set('X-Frame-Options', 'SAMEORIGIN');
 	response.headers.set('X-Content-Type-Options', 'nosniff');
 	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-	// dont send hsts over http dev browsers ignore it anyway, and it can cache badly in safari
-	// eslint-disable-next-line prettier/prettier
-	if (!dev) response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	// safari fix
+	if (!dev) {
+		response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	}
 	response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
 	return response;
