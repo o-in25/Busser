@@ -10,6 +10,12 @@ export class DbProvider {
 	private static instances = new Map<string, DbProvider>();
 	private knex!: knex.Knex<any, any[]>;
 
+	// connectivity heartbeat cache (per instance)
+	private static readonly HEALTH_TTL = 3000;
+	private healthCheckedAt = 0;
+	private healthy = true;
+	private healthInFlight: Promise<boolean> | null = null;
+
 	public get query() {
 		return this.knex;
 	}
@@ -31,6 +37,7 @@ export class DbProvider {
 				user: DB_USER,
 				password: DB_PASSWORD,
 				database,
+				connectTimeout: 4000,
 				// treat naive DATETIME values as UTC on read/write, independent of process tz
 				timezone: 'Z',
 				typeCast: function (field: any, next: () => any) {
@@ -42,6 +49,7 @@ export class DbProvider {
 				},
 			},
 			pool: { min: 0, max: 10 },
+			acquireConnectionTimeout: 5000,
 			postProcessResponse: (result) => {
 				const convertRowKeys = (row: Record<string, any>): Record<string, any> => {
 					const out: Record<string, any> = {};
@@ -69,4 +77,25 @@ export class DbProvider {
 			attachPaginate();
 		}
 	}
+
+	async isHealthy(): Promise<boolean> {
+		if (Date.now() - this.healthCheckedAt < DbProvider.HEALTH_TTL) return this.healthy;
+		if (this.healthInFlight) return this.healthInFlight;
+
+		this.healthInFlight = (async () => {
+			try {
+				await this.knex.raw('select 1');
+				this.healthy = true;
+			} catch {
+				this.healthy = false;
+			}
+			this.healthCheckedAt = Date.now();
+			this.healthInFlight = null;
+			return this.healthy;
+		})();
+
+		return this.healthInFlight;
+	}
 }
+
+export const userDb = new DbProvider(env.USER_TABLE || '');

@@ -1,9 +1,10 @@
-import { type Handle, redirect } from '@sveltejs/kit';
+import { type Handle, error, redirect } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import { StatusCodes } from 'http-status-codes';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import micromatch from 'micromatch';
 
 import { authenticate } from '$lib/server/auth';
+import { userDb } from '$lib/server/db';
 import { getUserWorkspaces, hasWorkspaceAccess } from '$lib/server/workspace';
 import { enforceRateLimit } from '$lib/server/rate-limit';
 import { getPreferredWorkspaceId } from '$lib/server/user';
@@ -71,10 +72,18 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 
 	// get workspace when logged in
 	if (event.locals.user) {
+		if (!(await userDb.isHealthy())) {
+			error(StatusCodes.SERVICE_UNAVAILABLE, {
+				reason: getReasonPhrase(StatusCodes.SERVICE_UNAVAILABLE),
+				code: StatusCodes.SERVICE_UNAVAILABLE,
+				message: "We can't reach the database right now. Please try again in a moment.",
+			});
+		}
+
 		const activeWorkspaceId = await resolveActiveWorkspace(event.locals.user.userId, cookies);
 		event.locals.activeWorkspaceId = activeWorkspaceId;
 
-		// If no workspace selected and trying to access a route that requires workspace, redirect to selector
+		// no workspace selected + route needs one -> selector
 		const isWorkspaceExempt = micromatch.isMatch(slug, workspaceExemptRoutes);
 		if (!activeWorkspaceId && !isWorkspaceExempt) {
 			return redirect(StatusCodes.TEMPORARY_REDIRECT, '/workspace/select');
