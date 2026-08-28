@@ -171,11 +171,7 @@
 							role="toolbar"
 							tabindex="-1"
 						>
-							<form
-								method="POST"
-								action="{actionPath}/toggleFavorite"
-								use:enhance={submitFavorite}
-							>
+							<form method="POST" action="{actionPath}/toggleFavorite" use:enhance={submitFavorite}>
 								<input type="hidden" name="recipeId" value={recipe.recipeId} />
 								<input type="hidden" name="workspaceId" value={workspaceId} />
 								<button
@@ -332,11 +328,7 @@
 						role="toolbar"
 						tabindex="-1"
 					>
-						<form
-							method="POST"
-							action="{actionPath}/toggleFavorite"
-							use:enhance={submitFavorite}
-						>
+						<form method="POST" action="{actionPath}/toggleFavorite" use:enhance={submitFavorite}>
 							<input type="hidden" name="recipeId" value={recipe.recipeId} />
 							<input type="hidden" name="workspaceId" value={workspaceId} />
 							<button
@@ -355,11 +347,7 @@
 							</button>
 						</form>
 						{#if canModify}
-							<form
-								method="POST"
-								action="{actionPath}/toggleFeatured"
-								use:enhance={submitFeatured}
-							>
+							<form method="POST" action="{actionPath}/toggleFeatured" use:enhance={submitFeatured}>
 								<input type="hidden" name="recipeId" value={recipe.recipeId} />
 								<input type="hidden" name="workspaceId" value={workspaceId} />
 								<button
