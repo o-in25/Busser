@@ -4,6 +4,7 @@
 		FlaskConical,
 		GlassWater,
 		Globe,
+		Mail,
 		Plus,
 		Search,
 		SlidersHorizontal,
@@ -269,12 +270,11 @@
 <div>
 	{#if !authenticated}
 		<FancyAlert class="mb-6">
-			{#snippet icon()}<Sparkles class="h-5 w-5 text-primary" />{/snippet}
+			{#snippet icon()}<Mail class="h-5 w-5 text-primary" />{/snippet}
 			{#snippet children()}
 				<p class="sm:hidden">Sign up to save favorites</p>
 				<p class="hidden sm:block">
-					Sign up to <strong>save favorites</strong> and build your own bar — Busser tells you what you
-					can actually make.
+					Sign up to <strong>save favorites</strong> and build your own bar.
 				</p>
 			{/snippet}
 			{#snippet action()}
