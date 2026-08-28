@@ -373,7 +373,7 @@
 		<div class="relative">
 			<div class="relative">
 				<Search
-					class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none"
+					class="absolute left-3 top-1/2 -translate-y-1/2 z-10 h-4 w-4 text-muted-foreground pointer-events-none"
 				/>
 				<Input
 					type="text"

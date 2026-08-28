@@ -10,7 +10,6 @@
 		Palette,
 		Percent,
 		Sparkles,
-		Wand2,
 		Trash2,
 		Wind,
 	} from 'lucide-svelte';
@@ -409,7 +408,7 @@
 							</Label>
 							<div class="relative">
 								<span
-									class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
+									class="absolute left-3 top-1/2 -translate-y-1/2 z-10 font-bold text-muted-foreground pointer-events-none"
 									>$</span
 								>
 								<Input
@@ -528,7 +527,7 @@
 										<Loader2 class="w-4 h-4 mr-2 animate-spin" />
 										Generating...
 									{:else}
-										<Wand2 class="w-4 h-4 mr-2" />
+										<Sparkles class="w-4 h-4 mr-2" />
 										Auto-Generate
 									{/if}
 								</Button>

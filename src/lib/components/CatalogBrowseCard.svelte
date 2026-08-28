@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { FlaskConical, GlassWater, Heart, Martini, Star } from 'lucide-svelte';
 
+	import { toast } from 'svelte-sonner';
+
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { haptics } from '$lib/utils/haptics';
@@ -73,6 +75,28 @@
 	);
 
 	const hasRatings = $derived(score > 0);
+
+	// shared submit handlers: optimistic toggle + toast, revert on failure
+	function submitFavorite() {
+		// read state before the optimistic toggle flips the prop
+		const added = !isFavorite;
+		haptics.light();
+		onToggleFavorite?.(recipe.recipeId);
+		toast.success(added ? 'Added to favorites' : 'Removed from favorites');
+		return async ({ result }: { result: { type: string } }) => {
+			if (result.type === 'failure') invalidateAll();
+		};
+	}
+
+	function submitFeatured() {
+		const added = !isFeatured;
+		haptics.light();
+		onToggleFeatured?.(recipe.recipeId);
+		toast.success(added ? 'Added to featured' : 'Removed from featured');
+		return async ({ result }: { result: { type: string } }) => {
+			if (result.type === 'failure') invalidateAll();
+		};
+	}
 </script>
 
 {#if viewMode === 'grid'}
@@ -142,21 +166,15 @@
 					{#if authenticated && workspaceId}
 						<div
 							class="absolute bottom-2 right-2 flex items-center gap-1"
-							onclick={(e) => e.preventDefault()}
-							onkeydown={(e) => e.preventDefault()}
+							onclick={(e) => e.stopPropagation()}
+							onkeydown={(e) => e.stopPropagation()}
 							role="toolbar"
 							tabindex="-1"
 						>
 							<form
 								method="POST"
 								action="{actionPath}/toggleFavorite"
-								use:enhance={() => {
-									haptics.light();
-									onToggleFavorite?.(recipe.recipeId);
-									return async ({ result }) => {
-										if (result.type === 'failure') invalidateAll();
-									};
-								}}
+								use:enhance={submitFavorite}
 							>
 								<input type="hidden" name="recipeId" value={recipe.recipeId} />
 								<input type="hidden" name="workspaceId" value={workspaceId} />
@@ -177,13 +195,7 @@
 								<form
 									method="POST"
 									action="{actionPath}/toggleFeatured"
-									use:enhance={() => {
-										haptics.light();
-										onToggleFeatured?.(recipe.recipeId);
-										return async ({ result }) => {
-											if (result.type === 'failure') invalidateAll();
-										};
-									}}
+									use:enhance={submitFeatured}
 								>
 									<input type="hidden" name="recipeId" value={recipe.recipeId} />
 									<input type="hidden" name="workspaceId" value={workspaceId} />
@@ -315,21 +327,15 @@
 				{#if authenticated && workspaceId}
 					<div
 						class="flex items-center gap-0.5 shrink-0"
-						onclick={(e) => e.preventDefault()}
-						onkeydown={(e) => e.preventDefault()}
+						onclick={(e) => e.stopPropagation()}
+						onkeydown={(e) => e.stopPropagation()}
 						role="toolbar"
 						tabindex="-1"
 					>
 						<form
 							method="POST"
 							action="{actionPath}/toggleFavorite"
-							use:enhance={() => {
-								haptics.light();
-								onToggleFavorite?.(recipe.recipeId);
-								return async ({ result }) => {
-									if (result.type === 'failure') invalidateAll();
-								};
-							}}
+							use:enhance={submitFavorite}
 						>
 							<input type="hidden" name="recipeId" value={recipe.recipeId} />
 							<input type="hidden" name="workspaceId" value={workspaceId} />
@@ -352,13 +358,7 @@
 							<form
 								method="POST"
 								action="{actionPath}/toggleFeatured"
-								use:enhance={() => {
-									haptics.light();
-									onToggleFeatured?.(recipe.recipeId);
-									return async ({ result }) => {
-										if (result.type === 'failure') invalidateAll();
-									};
-								}}
+								use:enhance={submitFeatured}
 							>
 								<input type="hidden" name="recipeId" value={recipe.recipeId} />
 								<input type="hidden" name="workspaceId" value={workspaceId} />
