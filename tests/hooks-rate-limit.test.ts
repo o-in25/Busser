@@ -14,6 +14,10 @@ vi.mock('$lib/server/user', () => ({
 	getPreferredWorkspaceId: vi.fn(),
 }));
 
+vi.mock('$lib/server/db', () => ({
+	userDb: { isHealthy: vi.fn().mockResolvedValue(true) },
+}));
+
 // checkRateLimit lives in redis.ts; enforceRateLimit (rate-limit.ts) calls it across the
 // boundary, so spying here intercepts the call
 vi.mock('$lib/server/redis', async () => {
