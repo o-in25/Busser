@@ -53,6 +53,10 @@
 		list: 'List',
 	};
 
+	// lit treatment matching an active view-tab, keyed to the panel being open
+	const litTrigger =
+		'data-[state=open]:bg-primary/25 data-[state=open]:text-primary data-[state=open]:ring-1 data-[state=open]:ring-inset data-[state=open]:ring-primary/40 data-[state=open]:shadow-[inset_0_0_12px_rgba(248,78,128,0.35)]';
+
 	let isMobile = $state(false);
 
 	onMount(() => {
@@ -96,7 +100,8 @@
 		<Sheet.Trigger
 			class={cn(
 				buttonVariants({ variant: 'outline' }),
-				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4'
+				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4',
+				litTrigger
 			)}
 		>
 			{@render trigger()}
@@ -117,10 +122,10 @@
 									{@const Icon = viewIcons[mode]}
 									<button
 										class={cn(
-											'h-10 px-3 flex items-center justify-center gap-1.5 text-sm transition-colors',
+											'h-10 px-3 flex items-center justify-center gap-1.5 text-sm transition-all',
 											activeView === mode
-												? 'bg-primary/25 dark:bg-primary/20 text-primary backdrop-blur-sm'
-												: 'hover:bg-white/40 dark:hover:bg-zinc-700/40'
+												? 'bg-primary/25 dark:bg-primary/20 text-primary backdrop-blur-sm ring-1 ring-inset ring-primary/40 shadow-[inset_0_0_12px_rgba(248,78,128,0.35)]'
+												: 'text-muted-foreground hover:bg-white/40 dark:hover:bg-zinc-700/40 hover:text-primary'
 										)}
 										onclick={() => onViewChange(mode)}
 									>
@@ -160,7 +165,8 @@
 		<Popover.Trigger
 			class={cn(
 				buttonVariants({ variant: 'outline' }),
-				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4'
+				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4',
+				litTrigger
 			)}
 		>
 			{@render trigger()}

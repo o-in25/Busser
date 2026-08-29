@@ -1,25 +1,47 @@
 <script lang="ts">
-	import { Citrus, HelpCircle, Wine } from 'lucide-svelte';
+	import { Citrus, HelpCircle, Mail, Wine } from 'lucide-svelte';
 
+	import { page } from '$app/stores';
 	import BacCalculator from '$lib/components/BacCalculator.svelte';
 	import Calculator from '$lib/components/Calculator.svelte';
+	import FancyAlert from '$lib/components/FancyAlert.svelte';
+	import FancyButton from '$lib/components/FancyButton.svelte';
+	import PageHero from '$lib/components/PageHero.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import * as Popover from '$lib/components/ui/popover';
 
 	let { data } = $props();
+
+	const authenticated = $derived(!!$page.data.user);
 </script>
 
 <svelte:head>
 	<title>Tools - Busser</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<!-- Header -->
-	<div>
-		<h1 class="text-2xl font-bold">Tools</h1>
-		<p class="text-sm text-muted-foreground mt-1">Bartending calculators and utilities</p>
-	</div>
+{#if !authenticated}
+	<FancyAlert class="mb-6">
+		{#snippet icon()}<Mail class="h-5 w-5 text-primary" />{/snippet}
+		{#snippet children()}
+			<p class="sm:hidden">Sign up to build your own bar</p>
+			<p class="hidden sm:block">
+				Sign up to <strong>build your own bar</strong> and manage your inventory.
+			</p>
+		{/snippet}
+		{#snippet action()}
+			<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
+		{/snippet}
+	</FancyAlert>
+{/if}
 
+{#if authenticated}
+	<PageHero title="Tools" subtitle="Bartending calculators and utilities" />
+{:else}
+	<!-- logged-out: hero swapped for the sign-up banner above; keep a heading for seo/a11y -->
+	<h1 class="sr-only">Bartending Tools</h1>
+{/if}
+
+<div class="space-y-6">
 	<!-- Tools Grid -->
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Super Juice Calculator Card -->

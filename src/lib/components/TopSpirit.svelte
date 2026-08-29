@@ -2,6 +2,7 @@
 	import { ArrowRight, Trophy } from 'lucide-svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
+	import { cdnSrc } from '$lib/utils/image';
 	import { idToSlug } from '$lib/spirits';
 
 	const {
@@ -78,8 +79,9 @@
 			<div class="absolute inset-0 flex items-center justify-center">
 				{#if topSpirit.recipeCategoryDescriptionImageUrl}
 					<img
-						src={topSpirit.recipeCategoryDescriptionImageUrl}
+						src={cdnSrc(topSpirit.recipeCategoryDescriptionImageUrl, 128)}
 						alt={topSpirit.recipeCategoryDescription}
+						loading="lazy"
 						class="w-11 h-11 rounded-full object-cover border-2 border-background"
 					/>
 				{:else}
@@ -109,8 +111,9 @@
 				<div class="flex items-center gap-2">
 					{#if spirit.recipeCategoryDescriptionImageUrl}
 						<img
-							src={spirit.recipeCategoryDescriptionImageUrl}
+							src={cdnSrc(spirit.recipeCategoryDescriptionImageUrl, 64)}
 							alt={spirit.recipeCategoryDescription}
+							loading="lazy"
 							class="w-5 h-5 rounded-full object-cover shrink-0"
 						/>
 					{:else}

@@ -10,7 +10,6 @@
 		Martini,
 		Plus,
 		Sparkles,
-		Wand2,
 	} from 'lucide-svelte';
 	import { setContext } from 'svelte';
 	import { flip } from 'svelte/animate';
@@ -323,8 +322,8 @@
 		{ title: 'Details', icon: BookOpen },
 		{ title: 'Description', icon: Image, optional: true },
 		{ title: 'Ingredients', icon: FlaskConical },
-		{ title: 'Ratings', icon: Gauge, optional: true },
 		{ title: 'Preparation', icon: Martini },
+		{ title: 'Ratings', icon: Gauge, optional: true },
 	];
 
 	// Draft manager + last-saved timestamp (drives the autosave pill in the shell footer)
@@ -471,20 +470,6 @@
 								{/each}
 							</div>
 						</div>
-
-						<!-- AI Insights toggle -->
-						<div class="glass-surface flex items-center justify-between rounded-xl p-3">
-							<div class="space-y-0.5">
-								<Label class="flex items-center gap-1.5 text-sm font-medium">
-									<Sparkles class="h-4 w-4 text-primary" />
-									AI Insights
-								</Label>
-								<p class="text-xs text-muted-foreground">
-									generate cocktail history, tips, and pairings with AI
-								</p>
-							</div>
-							<Switch bind:checked={insightsEnabled} />
-						</div>
 					</div>
 				{:else if step === 1}
 					<!-- Step 2: Description + Image -->
@@ -519,6 +504,7 @@
 								variant={reorderMode ? 'default' : 'outline'}
 								size="sm"
 								class="flex-1"
+								disabled={steps.length < 2}
 								onclick={() => (reorderMode = !reorderMode)}
 							>
 								<ArrowUpDown class="mr-2 h-4 w-4" />
@@ -532,7 +518,7 @@
 									class="flex-1"
 									onclick={autoReorderSteps}
 								>
-									<Wand2 class="mr-2 h-4 w-4" />
+									<Sparkles class="mr-2 h-4 w-4" />
 									Auto
 								</Button>
 							{/if}
@@ -565,7 +551,19 @@
 						</div>
 					</div>
 				{:else if step === 3}
-					<!-- Step 4: Flavor Ratings -->
+					<!-- Step 4: Preparation Method -->
+					<div class="space-y-4">
+						<Label class="block text-base font-medium">How is it served?</Label>
+						<ServingMethodToggle
+							methods={preparationMethods}
+							bind:value={selectedPrepMethodId}
+							variant="cards"
+							{steps}
+						/>
+						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
+					</div>
+				{:else if step === 4}
+					<!-- Step 5: Flavor Ratings -->
 					<div class="space-y-6">
 						<div class="glass-surface flex items-center justify-between rounded-xl p-3">
 							<span class="text-sm text-muted-foreground">Overall Score</span>
@@ -584,7 +582,7 @@
 							disabled={ratingsGenerating}
 						>
 							<Sparkles class="mr-2 h-4 w-4" />
-							{ratingsGenerating ? 'Generating...' : 'Generate with AI'}
+							{ratingsGenerating ? 'Generating...' : 'Auto-Generate'}
 						</Button>
 						<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 							<FlavorSlider
@@ -616,18 +614,20 @@
 								color="orange"
 							/>
 						</div>
-					</div>
-				{:else if step === 4}
-					<!-- Step 5: Preparation Method -->
-					<div class="space-y-4">
-						<Label class="block text-base font-medium">How is it served?</Label>
-						<ServingMethodToggle
-							methods={preparationMethods}
-							bind:value={selectedPrepMethodId}
-							variant="cards"
-							{steps}
-						/>
-						<CocktailMetrics {steps} recipeTechniqueDescriptionId={selectedPrepMethodId} />
+
+						<!-- AI Insights toggle -->
+						<div class="glass-surface flex items-center justify-between rounded-xl p-3">
+							<div class="space-y-0.5">
+								<Label class="flex items-center gap-1.5 text-sm font-medium">
+									<Sparkles class="h-4 w-4 text-primary" />
+									Insights
+								</Label>
+								<p class="text-xs text-muted-foreground">
+									Auto-generate generate cocktail history, tips, and pairings for this recipe.
+								</p>
+							</div>
+							<Switch bind:checked={insightsEnabled} />
+						</div>
 					</div>
 				{/if}
 			{/snippet}

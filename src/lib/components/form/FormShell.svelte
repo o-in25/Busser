@@ -88,7 +88,7 @@
 
 	<!-- sticky glass footer -->
 	<div
-		class="sticky bottom-0 z-10 mt-8 flex items-center gap-3 rounded-t-2xl border-t border-white/15 bg-background/70 px-1 py-3 backdrop-blur-lg dark:border-zinc-700/30 sm:px-2"
+		class="sticky bottom-4 z-10 mb-4 mt-8 flex items-center gap-3 rounded-2xl border border-white/15 bg-background/70 px-2 py-3 backdrop-blur-lg dark:border-zinc-700/30 sm:px-3"
 	>
 		{#if currentStep === 0}
 			<Button type="button" variant="outline" class="rounded-full" onclick={() => goto(cancelHref)}>

@@ -7,7 +7,6 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import FancyAlert from '$lib/components/FancyAlert.svelte';
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import CategoryDetailDrawer from '$lib/components/CategoryDetailDrawer.svelte';
 	import CategoryFilterPanel from '$lib/components/CategoryFilterPanel.svelte';
@@ -15,6 +14,7 @@
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryResultsSkeleton from '$lib/components/InventoryResultsSkeleton.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
+	import StatBadge from '$lib/components/StatBadge.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -170,23 +170,23 @@
 <!-- Hero Section -->
 <PageHero title="Categories">
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
-		<FancyBadge class="whitespace-nowrap">
+		<StatBadge class="whitespace-nowrap">
 			<Tags class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{data.pagination.total}</span>
 			<span class="text-xs text-muted-foreground">Categories</span>
-		</FancyBadge>
+		</StatBadge>
 
-		<FancyBadge class="whitespace-nowrap">
+		<StatBadge class="whitespace-nowrap">
 			<Package class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{data.totalProducts}</span>
 			<span class="text-xs text-muted-foreground">Products</span>
-		</FancyBadge>
+		</StatBadge>
 
-		<FancyBadge class="whitespace-nowrap">
+		<StatBadge class="whitespace-nowrap">
 			<Layers class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{categoryGroups.length}</span>
 			<span class="text-xs text-muted-foreground">Groups</span>
-		</FancyBadge>
+		</StatBadge>
 	</div>
 </PageHero>
 
@@ -207,7 +207,9 @@
 <div class="flex items-center gap-2 mb-6">
 	<form onsubmit={handleSearch} class="flex-1 min-w-0">
 		<div class="relative">
-			<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+			<Search
+				class="absolute left-3 top-1/2 -translate-y-1/2 z-10 h-4 w-4 text-muted-foreground pointer-events-none"
+			/>
 			<Input
 				type="text"
 				placeholder="Search categories..."

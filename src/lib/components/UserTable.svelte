@@ -1,5 +1,17 @@
 <script lang="ts">
-	import { AlertCircle, Eye, Mail, MailCheck, Pencil, Trash2, User, UserPlus } from 'lucide-svelte';
+	import {
+		AlertCircle,
+		ArrowDown,
+		ArrowUp,
+		ArrowUpDown,
+		Eye,
+		Mail,
+		MailCheck,
+		Pencil,
+		Trash2,
+		User,
+		UserPlus,
+	} from 'lucide-svelte';
 	import moment from 'moment';
 
 	import { toast } from 'svelte-sonner';
@@ -7,7 +19,9 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Table from '$lib/components/ui/table';
+	import Pagination from '$lib/components/Pagination.svelte';
 	import type { User as UserType } from '$lib/types/auth';
+	import type { PaginationData } from '$lib/types/shared';
 	import { cn } from '$lib/utils';
 
 	// props
@@ -16,6 +30,62 @@
 
 	let target: string | undefined = undefined;
 	let isOpened = false;
+
+	// client-side pagination (all users are already loaded)
+	const perPage = 10;
+	let currentPage = 1;
+
+	// column sorting (all client-side)
+	type SortKey = 'username' | 'email' | 'createdDate' | 'lastActivityDate';
+	let sortKey: SortKey = 'username';
+	let sortDir: 'asc' | 'desc' = 'asc';
+
+	const toggleSort = (key: SortKey) => {
+		if (sortKey === key) {
+			sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+		} else {
+			sortKey = key;
+			sortDir = 'asc';
+		}
+		currentPage = 1;
+	};
+
+	// arrow reflects active column + direction, neutral otherwise
+	const sortIcon = (key: SortKey) =>
+		sortKey !== key ? ArrowUpDown : sortDir === 'asc' ? ArrowUp : ArrowDown;
+
+	// dates sort by timestamp, strings case-insensitively; nulls always sort last
+	const sortValue = (user: UserType, key: SortKey): number | string => {
+		const value = user[key];
+		if (value == null) return sortDir === 'asc' ? Infinity : -Infinity;
+		if (key === 'createdDate' || key === 'lastActivityDate') return new Date(value).getTime();
+		return String(value).toLowerCase();
+	};
+
+	$: sortedUsers = [...(users || [])].sort((a, b) => {
+		const left = sortValue(a, sortKey);
+		const right = sortValue(b, sortKey);
+		if (left < right) return sortDir === 'asc' ? -1 : 1;
+		if (left > right) return sortDir === 'asc' ? 1 : -1;
+		return 0;
+	});
+
+	// clamp the page if the list shrinks (e.g. after a delete)
+	$: totalPages = Math.max(1, Math.ceil((users?.length || 0) / perPage));
+	$: if (currentPage > totalPages) currentPage = totalPages;
+
+	$: pagedUsers = sortedUsers.slice((currentPage - 1) * perPage, currentPage * perPage);
+
+	$: pagination = {
+		total: users?.length || 0,
+		perPage,
+		currentPage,
+		prevPage: currentPage > 1 ? currentPage - 1 : 0,
+		nextPage: currentPage < totalPages ? currentPage + 1 : 0,
+		lastPage: totalPages,
+		from: (currentPage - 1) * perPage + 1,
+		to: Math.min(currentPage * perPage, users?.length || 0),
+	} satisfies PaginationData;
 
 	const deleteUser = async (userId: string): Promise<any> => {
 		let response = await fetch(`/api/user/${userId}/delete`, {
@@ -65,15 +135,67 @@
 		<Table.Root>
 			<Table.Header>
 				<Table.Row class="hover:bg-transparent">
-					<Table.Head class="pl-6">User</Table.Head>
-					<Table.Head class="hidden sm:table-cell">Email</Table.Head>
-					<Table.Head class="hidden lg:table-cell">Joined</Table.Head>
-					<Table.Head class="hidden md:table-cell">Last Activity</Table.Head>
+					<Table.Head class="pl-6">
+						<button
+							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							onclick={() => toggleSort('username')}
+						>
+							User
+							<svelte:component
+								this={sortIcon('username')}
+								class="h-3.5 w-3.5 {sortKey === 'username'
+									? 'text-foreground'
+									: 'text-muted-foreground/50'}"
+							/>
+						</button>
+					</Table.Head>
+					<Table.Head class="hidden sm:table-cell">
+						<button
+							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							onclick={() => toggleSort('email')}
+						>
+							Email
+							<svelte:component
+								this={sortIcon('email')}
+								class="h-3.5 w-3.5 {sortKey === 'email'
+									? 'text-foreground'
+									: 'text-muted-foreground/50'}"
+							/>
+						</button>
+					</Table.Head>
+					<Table.Head class="hidden lg:table-cell">
+						<button
+							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							onclick={() => toggleSort('createdDate')}
+						>
+							Joined
+							<svelte:component
+								this={sortIcon('createdDate')}
+								class="h-3.5 w-3.5 {sortKey === 'createdDate'
+									? 'text-foreground'
+									: 'text-muted-foreground/50'}"
+							/>
+						</button>
+					</Table.Head>
+					<Table.Head class="hidden md:table-cell">
+						<button
+							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							onclick={() => toggleSort('lastActivityDate')}
+						>
+							Last Activity
+							<svelte:component
+								this={sortIcon('lastActivityDate')}
+								class="h-3.5 w-3.5 {sortKey === 'lastActivityDate'
+									? 'text-foreground'
+									: 'text-muted-foreground/50'}"
+							/>
+						</button>
+					</Table.Head>
 					<Table.Head class="text-right pr-6">Actions</Table.Head>
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each users as user (user.userId)}
+				{#each pagedUsers as user (user.userId)}
 					<Table.Row class="group">
 						<Table.Cell class="pl-6">
 							<div class="flex items-center gap-3">
@@ -195,6 +317,7 @@
 			</Table.Body>
 		</Table.Root>
 	</div>
+	<Pagination {pagination} itemLabel="users" onNavigate={(p) => (currentPage = p)} />
 {:else}
 	<!-- Empty State -->
 	<div class="flex flex-col items-center justify-center py-16 text-center px-6">

@@ -14,16 +14,17 @@ vi.mock('$lib/server/user', () => ({
 	getPreferredWorkspaceId: vi.fn(),
 }));
 
-vi.mock('$lib/server/rate-limit', async () => {
-	const actual =
-		await vi.importActual<typeof import('$lib/server/rate-limit')>('$lib/server/rate-limit');
+// checkRateLimit lives in redis.ts; enforceRateLimit (rate-limit.ts) calls it across the
+// boundary, so spying here intercepts the call
+vi.mock('$lib/server/redis', async () => {
+	const actual = await vi.importActual<typeof import('$lib/server/redis')>('$lib/server/redis');
 	return { ...actual, checkRateLimit: vi.fn(actual.checkRateLimit) };
 });
 
 import { authenticate, hasGlobalPermission } from '$lib/server/auth';
 import { hasWorkspaceAccess, getUserWorkspaces } from '$lib/server/workspace';
 import { getPreferredWorkspaceId } from '$lib/server/user';
-import { checkRateLimit } from '$lib/server/rate-limit';
+import { checkRateLimit } from '$lib/server/redis';
 import { handle } from '../src/hooks.server';
 
 const regularUser = {

@@ -29,10 +29,10 @@
 		{@const Icon = icons[mode]}
 		<button
 			class={cn(
-				'h-10 w-10 flex items-center justify-center transition-colors',
+				'h-10 w-10 flex items-center justify-center transition-all',
 				active === mode
-					? 'bg-primary/25 dark:bg-primary/20 text-primary backdrop-blur-sm'
-					: 'hover:bg-white/40 dark:hover:bg-zinc-700/40'
+					? 'bg-primary/25 dark:bg-primary/20 text-primary backdrop-blur-sm ring-1 ring-inset ring-primary/40 shadow-[inset_0_0_12px_rgba(248,78,128,0.35)]'
+					: 'text-muted-foreground hover:bg-white/40 dark:hover:bg-zinc-700/40 hover:text-primary'
 			)}
 			onclick={() => onchange(mode)}
 			aria-label="{mode} view"

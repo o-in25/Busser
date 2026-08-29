@@ -3,17 +3,21 @@
 		ClipboardList,
 		Cookie,
 		ExternalLink,
+		Facebook,
 		FileText,
 		Github,
 		House,
 		Info,
+		Instagram,
 		LayoutGrid,
+		LogIn,
 		LogOut,
 		Menu,
 		Ruler,
 		Settings,
 		Shield,
 		Sparkles,
+		Twitter,
 	} from 'lucide-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
@@ -91,7 +95,7 @@
 		{ href: '/', icon: House, label: 'Home' },
 		{ href: '/inventory', icon: ClipboardList, label: 'Inventory' },
 		{ href: '/catalog', icon: LayoutGrid, label: 'Catalog' },
-		{ href: '/assistant', icon: Sparkles, label: 'Busser AI' },
+		{ href: '/assistant', icon: Sparkles, label: 'Assistant' },
 		{ href: '/tools', icon: Ruler, label: 'Tools' },
 	];
 
@@ -102,16 +106,16 @@
 
 <!-- Mobile Top Logo (visible on small screens) -->
 <div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
-	{#if user}
-		<Sheet.Root bind:open={mobileMenuOpen}>
-			<Sheet.Trigger
-				class="mobile-header-left w-8 h-8 flex items-center justify-center"
-				aria-label="Open menu"
-			>
-				<Menu class="h-5 w-5 text-muted-foreground" />
-			</Sheet.Trigger>
-			<Sheet.Content side="left" class="flex flex-col">
-				<Sheet.Header class="text-left shrink-0">
+	<Sheet.Root bind:open={mobileMenuOpen}>
+		<Sheet.Trigger
+			class="relative z-10 w-8 h-8 flex items-center justify-center cursor-pointer"
+			aria-label="Open menu"
+		>
+			<Menu class="h-5 w-5 text-muted-foreground" />
+		</Sheet.Trigger>
+		<Sheet.Content side="left" class="flex flex-col">
+			<Sheet.Header class="text-left shrink-0">
+				{#if user}
 					<div class="flex items-center gap-3">
 						<div class="w-10 h-10 rounded-full flex-shrink-0">
 							<Placeholder id="avatar-drawer" src={user?.avatarImageUrl} />
@@ -126,12 +130,24 @@
 							{/if}
 						</div>
 					</div>
-				</Sheet.Header>
+				{:else}
+					<div class="flex items-center gap-3">
+						<img src={logoNav} class="h-9" alt="Busser" />
+						<div class="flex flex-col">
+							<Sheet.Title class="text-sm font-medium">Busser</Sheet.Title>
+							<Sheet.Description class="text-xs text-muted-foreground">
+								Sign in to manage your bar
+							</Sheet.Description>
+						</div>
+					</div>
+				{/if}
+			</Sheet.Header>
 
-				<div class="h-px bg-border my-4 shrink-0"></div>
+			<div class="h-px bg-border my-4 shrink-0"></div>
 
-				<!-- scrollable content -->
-				<div class="flex-1 overflow-y-auto min-h-0">
+			<!-- scrollable content -->
+			<div class="flex-1 overflow-y-auto min-h-0">
+				{#if user}
 					<!-- Main -->
 					<div class="flex flex-col gap-1">
 						<button
@@ -147,76 +163,78 @@
 					</div>
 
 					<div class="h-px bg-border my-4"></div>
+				{/if}
 
-					<!-- Legal -->
-					<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-						Legal
-					</p>
-					<div class="flex flex-col gap-1">
-						<a
-							href="/privacy"
-							onclick={() => {
-								mobileMenuOpen = false;
-							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-						>
-							<Shield class="h-4 w-4 text-muted-foreground" />
-							Privacy Policy
-						</a>
-						<a
-							href="/terms"
-							onclick={() => {
-								mobileMenuOpen = false;
-							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-						>
-							<FileText class="h-4 w-4 text-muted-foreground" />
-							Terms of Service
-						</a>
-						<a
-							href="/cookies"
-							onclick={() => {
-								mobileMenuOpen = false;
-							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-						>
-							<Cookie class="h-4 w-4 text-muted-foreground" />
-							Cookie Policy
-						</a>
-					</div>
-
-					<div class="h-px bg-border my-4"></div>
-
-					<!-- Help & Contribute -->
-					<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-						Help & Contribute
-					</p>
-					<div class="flex flex-col gap-1">
-						<a
-							href="/about"
-							onclick={() => {
-								mobileMenuOpen = false;
-							}}
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-						>
-							<Info class="h-4 w-4 text-muted-foreground" />
-							About
-						</a>
-						<a
-							href="https://github.com/o-in25/Busser"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
-						>
-							<Github class="h-4 w-4 text-muted-foreground" />
-							GitHub
-							<ExternalLink class="h-3 w-3 text-muted-foreground/50 ml-auto" />
-						</a>
-					</div>
+				<!-- Legal -->
+				<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+					Legal
+				</p>
+				<div class="flex flex-col gap-1">
+					<a
+						href="/privacy"
+						onclick={() => {
+							mobileMenuOpen = false;
+						}}
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+					>
+						<Shield class="h-4 w-4 text-muted-foreground" />
+						Privacy Policy
+					</a>
+					<a
+						href="/terms"
+						onclick={() => {
+							mobileMenuOpen = false;
+						}}
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+					>
+						<FileText class="h-4 w-4 text-muted-foreground" />
+						Terms of Service
+					</a>
+					<a
+						href="/cookies"
+						onclick={() => {
+							mobileMenuOpen = false;
+						}}
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+					>
+						<Cookie class="h-4 w-4 text-muted-foreground" />
+						Cookie Policy
+					</a>
 				</div>
 
-				<!-- sign out pinned to bottom -->
-				<div class="shrink-0 pt-4 border-t border-border">
+				<div class="h-px bg-border my-4"></div>
+
+				<!-- Help & Contribute -->
+				<p class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+					Help & Contribute
+				</p>
+				<div class="flex flex-col gap-1">
+					<a
+						href="/about"
+						onclick={() => {
+							mobileMenuOpen = false;
+						}}
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+					>
+						<Info class="h-4 w-4 text-muted-foreground" />
+						About
+					</a>
+					<a
+						href="https://github.com/o-in25/Busser"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors focus:outline-none"
+					>
+						<Github class="h-4 w-4 text-muted-foreground" />
+						GitHub
+						<ExternalLink class="h-3 w-3 text-muted-foreground/50 ml-auto" />
+					</a>
+				</div>
+			</div>
+
+			<!-- pinned to bottom: auth action + socials -->
+			<div class="shrink-0 pt-4 border-t border-border flex flex-col gap-4">
+				{#if user}
 					<button
 						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
 						onclick={() => {
@@ -227,19 +245,55 @@
 						<LogOut class="h-4 w-4 text-muted-foreground" />
 						Sign out
 					</button>
+				{:else}
+					<button
+						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors w-full text-left focus:outline-none"
+						onclick={() => {
+							mobileMenuOpen = false;
+							goto('/login');
+						}}
+					>
+						<LogIn class="h-4 w-4 text-muted-foreground" />
+						Sign in
+					</button>
+				{/if}
+
+				<!-- Social -->
+				<div class="flex items-center gap-4 px-3">
+					<a
+						href="https://instagram.com/busserapp"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="text-muted-foreground hover:text-foreground transition-colors"
+						aria-label="Instagram"
+					>
+						<Instagram class="h-5 w-5" />
+					</a>
+					<a
+						href="https://www.facebook.com/profile.php?id=61588019103189"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="text-muted-foreground hover:text-foreground transition-colors"
+						aria-label="Facebook"
+					>
+						<Facebook class="h-5 w-5" />
+					</a>
+					<a
+						href="https://x.com/busserapp"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="text-muted-foreground hover:text-foreground transition-colors"
+						aria-label="Twitter"
+					>
+						<Twitter class="h-5 w-5" />
+					</a>
 				</div>
-			</Sheet.Content>
-		</Sheet.Root>
-	{:else}
-		<!-- placeholder keeps the logo centered; sign-in affordance lives on the right -->
-		<div class="mobile-header-left w-8 h-8"></div>
-	{/if}
+			</div>
+		</Sheet.Content>
+	</Sheet.Root>
 	<a href="/" class="mobile-header-logo">
 		<img src={logoNav} class="h-10" alt="Busser" />
 	</a>
-	{#if !user}
-		<a href="/login" class="mobile-header-signin">Sign In</a>
-	{/if}
 </div>
 
 <!-- Mobile Bottom Navigation (visible on small screens) -->
@@ -336,21 +390,6 @@
 		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 		transition: transform 0.3s ease;
-	}
-
-	.mobile-header-left {
-		position: relative;
-		z-index: 1;
-	}
-
-	.mobile-header-signin {
-		position: relative;
-		z-index: 1;
-		margin-left: auto;
-		font-size: 0.8125rem;
-		font-weight: 600;
-		color: rgba(232, 25, 95, 1);
-		text-decoration: none;
 	}
 
 	.mobile-header-logo {

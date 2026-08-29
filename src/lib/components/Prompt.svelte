@@ -15,7 +15,7 @@
 		name,
 		rows = 4,
 		url,
-		placeholder = 'Enter a description or generate one with AI...',
+		placeholder = 'Enter a description or auto-generate one...',
 	}: {
 		value?: string;
 		label?: string;

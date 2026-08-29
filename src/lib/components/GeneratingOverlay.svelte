@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Wand2 } from 'lucide-svelte';
+	import { Sparkle } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
 	let {
@@ -26,9 +26,9 @@
 	<div class="relative z-10 flex flex-col items-center gap-4 p-6 text-center">
 		<div class="relative">
 			<div class="absolute inset-0 animate-ping opacity-30">
-				<Wand2 class="{iconSize} text-primary" />
+				<Sparkle class="{iconSize} text-primary" />
 			</div>
-			<Wand2 class="{iconSize} text-primary animate-pulse" />
+			<Sparkle class="{iconSize} text-primary animate-pulse" />
 		</div>
 
 		<div class="space-y-2">

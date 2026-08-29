@@ -4,6 +4,7 @@
 		FlaskConical,
 		GlassWater,
 		Globe,
+		Mail,
 		Plus,
 		Search,
 		SlidersHorizontal,
@@ -26,6 +27,7 @@
 	import CatalogResultsSkeleton from '$lib/components/CatalogResultsSkeleton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
+	import StatBadge from '$lib/components/StatBadge.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import SubNav from '$lib/components/SubNav.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
@@ -269,12 +271,11 @@
 <div>
 	{#if !authenticated}
 		<FancyAlert class="mb-6">
-			{#snippet icon()}<Sparkles class="h-5 w-5 text-primary" />{/snippet}
+			{#snippet icon()}<Mail class="h-5 w-5 text-primary" />{/snippet}
 			{#snippet children()}
 				<p class="sm:hidden">Sign up to save favorites</p>
 				<p class="hidden sm:block">
-					Sign up to <strong>save favorites</strong> and build your own bar — Busser tells you what you
-					can actually make.
+					Sign up to <strong>save favorites</strong> and build your own bar.
 				</p>
 			{/snippet}
 			{#snippet action()}
@@ -317,27 +318,27 @@
 		<!-- Hero Section -->
 		<PageHero title="Catalog">
 			<div class="flex gap-2 flex-wrap pb-1 -mb-1">
-				<FancyBadge class="whitespace-nowrap">
+				<StatBadge class="whitespace-nowrap">
 					<Wine class="h-4 w-4 text-primary shrink-0" />
 					<span class="text-sm font-bold">{data.pagination.total}</span>
 					<span class="text-xs text-muted-foreground">Recipes</span>
-				</FancyBadge>
+				</StatBadge>
 
 				<!-- todo: make these badges filter the catalog (readyToMake=1, and an almostThere filter that
 				     doesn't exist yet). links dropped for now so they're stat-only, not dead clicks. -->
 				{#if !$page.data.isGlobalWorkspace}
-					<FancyBadge class="whitespace-nowrap">
+					<StatBadge class="whitespace-nowrap">
 						<Sparkles class="h-4 w-4 text-primary shrink-0" />
 						<span class="text-sm font-bold">{data.availableCount}</span>
 						<span class="text-xs text-muted-foreground">Ready</span>
-					</FancyBadge>
+					</StatBadge>
 
 					{#if data.almostThereCount > 0}
-						<FancyBadge class="whitespace-nowrap">
+						<StatBadge class="whitespace-nowrap">
 							<GlassWater class="h-4 w-4 text-primary shrink-0" />
 							<span class="text-sm font-bold">{data.almostThereCount}</span>
 							<span class="text-xs text-muted-foreground">Almost There</span>
-						</FancyBadge>
+						</StatBadge>
 					{/if}
 				{/if}
 
@@ -376,7 +377,9 @@
 			<!-- Search -->
 			<form onsubmit={handleSearch} class="flex-1 min-w-0">
 				<div class="relative">
-					<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+					<Search
+						class="absolute left-3 top-1/2 -translate-y-1/2 z-10 h-4 w-4 text-muted-foreground pointer-events-none"
+					/>
 					<Input
 						type="text"
 						placeholder="Search recipes..."
