@@ -53,6 +53,7 @@
 	} = $props();
 
 	// Make recipe deeply reactive for two-way binding on properties
+	// svelte-ignore state_referenced_locally
 	let recipe = $state(initialRecipe);
 
 	// provide the nested-create stack so any SearchableSelect "+" can open a stacked sheet
@@ -290,6 +291,7 @@
 	let imageCleared = $state(false);
 
 	// AI insights toggle
+	// svelte-ignore state_referenced_locally
 	let insightsEnabled = $state(initialRecipe.insightsEnabled ?? true);
 
 	// Form state

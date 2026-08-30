@@ -130,6 +130,16 @@ export class InventoryRepository extends BaseRepository {
 					.merge();
 
 				childRowId = childRow;
+
+				// dual-write overlay when stocked
+				if (product.productInStockQuantity > 0) {
+					await trx('workspacestock').insert({
+						WorkspaceId: workspaceId,
+						ProductId: parentRowId,
+						Quantity: product.productInStockQuantity,
+					});
+				}
+
 				await trx.commit();
 			});
 
@@ -197,6 +207,16 @@ export class InventoryRepository extends BaseRepository {
 						ProductProof: product.productProof,
 					})
 					.onConflict('ProductId')
+					.merge();
+
+				// dual-write overlay
+				await trx('workspacestock')
+					.insert({
+						WorkspaceId: workspaceId,
+						ProductId: product.productId,
+						Quantity: product.productInStockQuantity,
+					})
+					.onConflict(['WorkspaceId', 'ProductId'])
 					.merge();
 
 				await trx('productdetail')
@@ -327,11 +347,28 @@ export class InventoryRepository extends BaseRepository {
 		quantity: number
 	): Promise<QueryResult<number>> {
 		try {
-			const updated = await this.db
-				.table('product')
-				.whereIn('ProductId', productIds)
-				.where('workspaceId', workspaceId)
-				.update({ ProductInStockQuantity: quantity });
+			const updated = await this.db.query.transaction(async (trx) => {
+				const ownedRows = (await trx('product')
+					.select('ProductId')
+					.whereIn('ProductId', productIds)
+					.where('workspaceId', workspaceId)) as Array<{ productId: number }>;
+				const ownedIds = ownedRows.map((r) => r.productId);
+
+				const rows = await trx('product')
+					.whereIn('ProductId', ownedIds)
+					.where('workspaceId', workspaceId)
+					.update({ ProductInStockQuantity: quantity });
+
+				// dual-write overlay for owned products only
+				if (ownedIds.length > 0) {
+					await trx('workspacestock')
+						.insert(ownedIds.map((ProductId) => ({ WorkspaceId: workspaceId, ProductId, Quantity: quantity })))
+						.onConflict(['WorkspaceId', 'ProductId'])
+						.merge();
+				}
+
+				return rows;
+			});
 			return { status: 'success', data: updated };
 		} catch (error: any) {
 			console.error(error);
@@ -352,11 +389,18 @@ export class InventoryRepository extends BaseRepository {
 
 			const newQuantity = existing.productInStockQuantity ? 0 : 1;
 
-			await this.db
-				.table('product')
-				.where('ProductId', productId)
-				.where('workspaceId', workspaceId)
-				.update({ ProductInStockQuantity: newQuantity });
+			await this.db.query.transaction(async (trx) => {
+				await trx('product')
+					.where('ProductId', productId)
+					.where('workspaceId', workspaceId)
+					.update({ ProductInStockQuantity: newQuantity });
+
+				// dual-write overlay
+				await trx('workspacestock')
+					.insert({ WorkspaceId: workspaceId, ProductId: productId, Quantity: newQuantity })
+					.onConflict(['WorkspaceId', 'ProductId'])
+					.merge();
+			});
 
 			const updated = await this.findById(workspaceId, productId);
 			if (!updated) {
