@@ -184,7 +184,11 @@
 			<Button type="button" variant="outline" onclick={() => (createDialogOpen = false)}>
 				Cancel
 			</Button>
-			<Button type="button" onclick={createAndSwitch} disabled={creating || !newWorkspaceName.trim()}>
+			<Button
+				type="button"
+				onclick={createAndSwitch}
+				disabled={creating || !newWorkspaceName.trim()}
+			>
 				{creating ? 'Creating…' : 'Create & switch'}
 			</Button>
 		</Dialog.Footer>

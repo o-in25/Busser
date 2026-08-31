@@ -588,8 +588,8 @@
 					>
 						<Select.Trigger>
 							<Select.Value placeholder="Select type">
-									{editWorkspaceType.charAt(0).toUpperCase() + editWorkspaceType.slice(1)}
-								</Select.Value>
+								{editWorkspaceType.charAt(0).toUpperCase() + editWorkspaceType.slice(1)}
+							</Select.Value>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="shared" label="Shared">
