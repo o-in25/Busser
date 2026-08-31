@@ -1,13 +1,9 @@
 import type { Knex } from 'knex';
 
-// phase 3 catalog-overlay: per-bar hide tombstones + soft-delete for global catalog rows
-const GLOBAL = 'ws-global-catalog';
-
 export async function up(knex: Knex): Promise<void> {
-	// a bar can hide a global recipe from its own union without touching the shared row
 	await knex.schema.createTable('workspacehidden', (t) => {
 		t.string('WorkspaceId', 64).notNullable();
-		t.integer('RecipeId').notNullable(); // signed to match recipe.RecipeId
+		t.integer('RecipeId').notNullable();
 		t.timestamp('createdDate').defaultTo(knex.fn.now());
 		t.primary(['WorkspaceId', 'RecipeId']);
 
@@ -19,7 +15,6 @@ export async function up(knex: Knex): Promise<void> {
 		FOREIGN KEY (WorkspaceId) REFERENCES user_d.workspace(workspaceId) ON DELETE CASCADE
 	`);
 
-	// global rows never hard-delete once bars reference them — retire instead
 	await knex.schema.alterTable('product', (t) => {
 		t.boolean('Retired').notNullable().defaultTo(false);
 	});

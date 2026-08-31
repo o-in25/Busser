@@ -4,11 +4,9 @@ import type { QueryResult, Workspace, WorkspaceUser } from '$lib/types';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
+const WORKSPACE_CAP = 10;
 
 export type WorkspaceRole = 'owner' | 'editor' | 'viewer';
-
-// cheap abuse insurance — max workspaces a user can own
-const WORKSPACE_CAP = 10;
 
 export type WorkspaceWithRole = Workspace & {
 	workspaceRole: WorkspaceRole;
@@ -138,7 +136,6 @@ export class WorkspaceRepository extends BaseRepository {
 		workspaceType: 'personal' | 'shared'
 	): Promise<QueryResult<WorkspaceWithRole>> {
 		try {
-			// enforce the per-user owner cap before creating anything
 			const owned = (await this.db
 				.table('workspaceUser')
 				.where({ userId, workspaceRole: 'owner' })

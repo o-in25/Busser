@@ -46,9 +46,7 @@ export class CatalogRepository extends BaseRepository {
 		super(db);
 	}
 
-	// a bar sees its own recipes unioned with the global catalog, minus: global originals it has
-	// already forked (its copy shadows them), recipes it hid, and retired global rows.
-	private scopeVisible(query: any, alias: string, viewerId: string): any {
+	private baseQuery(query: any, alias: string, viewerId: string): any {
 		const globalId = getGlobalWorkspace();
 		const workspaces = viewerId === globalId ? [globalId] : [viewerId, globalId];
 		return query
@@ -65,7 +63,10 @@ export class CatalogRepository extends BaseRepository {
 				`${alias}.RecipeId`,
 				this.db.table('workspacehidden').select('RecipeId').where('WorkspaceId', viewerId)
 			)
-			.whereNotIn(`${alias}.RecipeId`, this.db.table('recipe').select('RecipeId').where('Retired', true));
+			.whereNotIn(
+				`${alias}.RecipeId`,
+				this.db.table('recipe').select('RecipeId').where('Retired', true)
+			);
 	}
 
 	async findAll(
@@ -77,12 +78,9 @@ export class CatalogRepository extends BaseRepository {
 		includeUnpublished: boolean = false
 	): Promise<PaginationResult<View.BasicRecipe[]>> {
 		try {
-			let query = this.scopeVisible(this.db.table('basicrecipe as r').select(), 'r', workspaceId);
+			let query = this.baseQuery(this.db.table('basicrecipe as r').select(), 'r', workspaceId);
 
-			// hide drafts from everyone except workspace owners/editors
 			if (!includeUnpublished) query = query.where('r.published', true);
-
-			// "available only" — recipes makeable from this bar's overlay stock
 			if (filter?.productInStockQuantity) {
 				query = query.whereIn(
 					'r.RecipeId',
@@ -558,7 +556,7 @@ export class CatalogRepository extends BaseRepository {
 
 	async getAvailableRecipes(workspaceId: string): Promise<QueryResult<View.BasicRecipe[]>> {
 		try {
-			let query = this.scopeVisible(this.db.table('basicrecipe'), 'basicrecipe', workspaceId)
+			let query = this.baseQuery(this.db.table('basicrecipe'), 'basicrecipe', workspaceId)
 				.where('Published', true)
 				.whereIn(
 					'RecipeId',
@@ -573,12 +571,12 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
+	// finds recipes missing only one ingredient
 	async getAlmostThereRecipes(
 		workspaceId: string
 	): Promise<Array<View.BasicRecipe & { missingIngredient: string | null }>> {
 		try {
-			// recipes missing exactly one ingredient for this bar's overlay stock
-			const result = await this.scopeVisible(
+			const result = await this.baseQuery(
 				this.db.table('basicrecipe as r').select('r.*'),
 				'r',
 				workspaceId
@@ -630,7 +628,7 @@ export class CatalogRepository extends BaseRepository {
 		recipeCategoryId: number | string | null = null
 	): Promise<QueryResult<BasicRecipe[]>> {
 		try {
-			let query = this.scopeVisible(
+			let query = this.baseQuery(
 				this.db.table<BasicRecipe>('basicrecipe'),
 				'basicrecipe',
 				workspaceId
@@ -1127,7 +1125,8 @@ export class CatalogRepository extends BaseRepository {
 					.where('RecipeDescriptionId', fork.recipeDescriptionId)
 					.select('RecipeDescriptionImageUrl')
 					.first();
-				if (oldDesc?.recipeDescriptionImageUrl) await deleteSignedUrl(oldDesc.recipeDescriptionImageUrl);
+				if (oldDesc?.recipeDescriptionImageUrl)
+					await deleteSignedUrl(oldDesc.recipeDescriptionImageUrl);
 
 				await trx('recipedescription')
 					.where('RecipeDescriptionId', fork.recipeDescriptionId)
@@ -1364,7 +1363,7 @@ export class CatalogRepository extends BaseRepository {
 	async getRecipesByIds(workspaceId: string, recipeIds: number[]): Promise<View.BasicRecipe[]> {
 		if (recipeIds.length === 0) return [];
 		try {
-			const query = this.scopeVisible(this.db.table('basicrecipe'), 'basicrecipe', workspaceId)
+			const query = this.baseQuery(this.db.table('basicrecipe'), 'basicrecipe', workspaceId)
 				.where('Published', true)
 				.whereIn('RecipeId', recipeIds);
 			return (await query) as View.BasicRecipe[];
@@ -1382,7 +1381,7 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string
 	): Promise<{ ingredientName: string; unlockableRecipes: number }[]> {
 		try {
-			const visibleRecipeIds = this.scopeVisible(
+			const visibleRecipeIds = this.baseQuery(
 				this.db.table('basicrecipe as r'),
 				'r',
 				workspaceId
@@ -1438,7 +1437,7 @@ export class CatalogRepository extends BaseRepository {
 			const base = this.db.table('basicrecipestep as rs').join('basicrecipe as r', function () {
 				this.on('rs.RecipeId', '=', 'r.RecipeId').andOn('rs.WorkspaceId', '=', 'r.WorkspaceId');
 			});
-			const result = await this.scopeVisible(base, 'r', workspaceId)
+			const result = await this.baseQuery(base, 'r', workspaceId)
 				.where('r.Published', true)
 				.whereIn(
 					'rs.RecipeId',

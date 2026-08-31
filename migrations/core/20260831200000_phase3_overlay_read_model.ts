@@ -1,9 +1,7 @@
 import type { Knex } from 'knex';
 
-// phase 3 catalog-overlay: availability keyed on the viewing bar's overlay (see epic doc)
 const GLOBAL = 'ws-global-catalog';
 
-// in-stock predicate for a step, parameterized by the viewing workspace alias `v`
 const inStockForViewer = `
 	CASE
 		WHEN rs.MatchMode = 'EXACT_PRODUCT' THEN
@@ -29,8 +27,6 @@ const inStockForViewer = `
 	END`;
 
 export async function up(knex: Knex): Promise<void> {
-	// inventory: overlay-stocked products (keyed to the stocking bar) + still-owned products (house
-	// items, or the global owner's catalog) that aren't already represented by an overlay row
 	const cols = (qty: string, ws: string) => `
 		p.ProductId, p.CategoryId, p.SupplierId, pd.ProductDetailId, p.ProductName, pd.ProductDescription,
 		c.CategoryName, c.CategoryDescription, c.ParentCategoryId, pc.CategoryName AS ParentCategoryName,
@@ -62,7 +58,6 @@ export async function up(knex: Knex): Promise<void> {
 		)
 	`);
 
-	// basicrecipestep: descriptive only, keyed on the recipe's workspace (availability lives elsewhere now)
 	await knex.raw(`
 		CREATE OR REPLACE VIEW basicrecipestep AS
 		SELECT
@@ -84,7 +79,6 @@ export async function up(knex: Knex): Promise<void> {
 		JOIN supplier s ON p.SupplierId = s.SupplierId
 	`);
 
-	// per-viewer step availability — replaces basicrecipestep.EffectiveInStock
 	await knex.raw(`
 		CREATE OR REPLACE VIEW recipestepstock AS
 		SELECT v.WorkspaceId, rs.RecipeStepId, rs.RecipeId, ${inStockForViewer} AS EffectiveInStock
@@ -96,7 +90,6 @@ export async function up(knex: Knex): Promise<void> {
 		SELECT '${GLOBAL}', rs.RecipeStepId, rs.RecipeId, 1 FROM recipestep rs
 	`);
 
-	// per-viewer makeable recipes — every step in stock for that viewer
 	await knex.raw(`
 		CREATE OR REPLACE VIEW availablerecipes AS
 		SELECT v.WorkspaceId, rs.RecipeId
@@ -111,7 +104,6 @@ export async function up(knex: Knex): Promise<void> {
 	`);
 }
 
-// restore the phase-2 definitions
 export async function down(knex: Knex): Promise<void> {
 	await knex.raw('DROP VIEW IF EXISTS recipestepstock');
 

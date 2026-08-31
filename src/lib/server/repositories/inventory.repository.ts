@@ -993,15 +993,13 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	// per-product count of "almost-there" recipes that would be unlocked
+	// find products that are 1 away from stocking a recipe
 	async getShoppingListImpact(
 		workspaceId: string,
 		productIds: number[]
 	): Promise<Map<number, number>> {
 		try {
 			if (productIds.length === 0) return new Map();
-
-			// find recipes missing exactly 1 ingredient (for this bar's overlay), then count per product
 			const result = await this.db
 				.table('basicrecipestep as rs')
 				.join('recipestepstock as ss', 'rs.RecipeStepId', 'ss.RecipeStepId')

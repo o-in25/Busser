@@ -1,7 +1,5 @@
 import type { Knex } from 'knex';
 
-// phase 4 catalog-overlay: point forked recipe steps at the global canonical category (by name) so
-// ANY_IN_CATEGORY matching resolves — phase 0 collapsed products to global but left categories behind
 const GLOBAL = 'ws-global-catalog';
 
 export async function up(knex: Knex): Promise<void> {

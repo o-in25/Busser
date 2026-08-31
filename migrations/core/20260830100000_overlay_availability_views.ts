@@ -1,6 +1,6 @@
 import type { Knex } from 'knex';
 
-// phase 2 catalog-overlay: derive availability from the workspacestock overlay, not product.ProductInStockQuantity
+// derive availability from the workspacestock overlay, not product.ProductInStockQuantity
 export async function up(knex: Knex): Promise<void> {
 	await knex.raw(`
 		CREATE OR REPLACE VIEW basicrecipestep AS
