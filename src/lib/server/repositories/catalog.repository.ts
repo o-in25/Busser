@@ -18,6 +18,7 @@ import { DbProvider } from '../db';
 import { deleteCachedContent } from '../generators/cache';
 import { Logger } from '../logger';
 import { copyGcsFile, deleteSignedUrl } from '../storage';
+import { getGlobalWorkspace } from '../workspace';
 import { BaseRepository, emptyPagination } from './base.repository';
 
 // imported categories must always land in a group (a null group broke role grouping — see
@@ -49,6 +50,28 @@ export class CatalogRepository extends BaseRepository {
 		super(db);
 	}
 
+	// a bar sees its own recipes unioned with the global catalog, minus: global originals it has
+	// already forked (its copy shadows them), recipes it hid, and retired global rows.
+	private scopeVisible(query: any, alias: string, viewerId: string): any {
+		const globalId = getGlobalWorkspace();
+		const workspaces = viewerId === globalId ? [globalId] : [viewerId, globalId];
+		return query
+			.whereIn(`${alias}.WorkspaceId`, workspaces)
+			.whereNotIn(
+				`${alias}.RecipeId`,
+				this.db
+					.table('recipe')
+					.select('SourceRecipeId')
+					.where('WorkspaceId', viewerId)
+					.whereNotNull('SourceRecipeId')
+			)
+			.whereNotIn(
+				`${alias}.RecipeId`,
+				this.db.table('workspacehidden').select('RecipeId').where('WorkspaceId', viewerId)
+			)
+			.whereNotIn(`${alias}.RecipeId`, this.db.table('recipe').select('RecipeId').where('Retired', true));
+	}
+
 	async findAll(
 		workspaceId: string,
 		currentPage: number,
@@ -58,25 +81,16 @@ export class CatalogRepository extends BaseRepository {
 		includeUnpublished: boolean = false
 	): Promise<PaginationResult<View.BasicRecipe[]>> {
 		try {
-			let query = this.db.table('basicrecipe as r').select().where('r.workspaceId', workspaceId);
+			let query = this.scopeVisible(this.db.table('basicrecipe as r').select(), 'r', workspaceId);
 
 			// hide drafts from everyone except workspace owners/editors
 			if (!includeUnpublished) query = query.where('r.published', true);
 
+			// "available only" — recipes makeable from this bar's overlay stock
 			if (filter?.productInStockQuantity) {
 				query = query.whereIn(
 					'r.RecipeId',
-					this.db
-						.table('basicrecipestep as rs')
-						.select('rs.RecipeId')
-						.where('rs.workspaceId', workspaceId)
-						.groupBy('rs.RecipeId')
-						.having(
-							this.db.query.raw(
-								'COUNT(rs.RecipeStepId) = COUNT(CASE WHEN rs.ProductInStockQuantity = ? THEN 1 END)',
-								[filter.productInStockQuantity]
-							)
-						)
+					this.db.table('availablerecipes').select('RecipeId').where('WorkspaceId', workspaceId)
 				);
 			}
 
@@ -292,12 +306,14 @@ export class CatalogRepository extends BaseRepository {
 
 			const current = (await this.db
 				.table('basicrecipe')
-				.where({ recipeId, workspaceId })
+				.where({ recipeId })
+				.whereIn('workspaceId', workspaceIds)
 				.first()) as View.BasicRecipe | undefined;
 
 			const steps = (await this.db
 				.table('basicrecipestep')
-				.where({ recipeId, workspaceId })) as View.BasicRecipeStep[];
+				.where({ recipeId })
+				.whereIn('workspaceId', workspaceIds)) as View.BasicRecipeStep[];
 
 			const recipes = (await this.db
 				.table('basicrecipe')
@@ -431,17 +447,21 @@ export class CatalogRepository extends BaseRepository {
 			let recipeSteps: View.BasicRecipeStep[] | undefined;
 
 			await this.db.query.transaction(async (trx) => {
+				// resolve from the bar's own recipes or the global catalog it can see
+				const globalId = getGlobalWorkspace();
+				const recipeQuery = trx('basicrecipe')
+					.select()
+					.where({ recipeId })
+					.whereIn('WorkspaceId', workspaceId === globalId ? [globalId] : [workspaceId, globalId]);
 				// drafts resolve only for owners/editors; others get the not-found path
-				const recipeQuery = trx('basicrecipe').select().where({ recipeId, workspaceId });
 				if (!includeUnpublished) recipeQuery.where({ published: true });
-				let [dbResult] = await recipeQuery;
+				const [dbResult] = await recipeQuery;
 				recipe = dbResult as View.BasicRecipe;
 				if (!recipe) throw Error('Recipe not found in this workspace.');
-				dbResult = await trx('basicrecipestep')
+				recipeSteps = (await trx('basicrecipestep')
 					.select()
-					.where({ recipeId, workspaceId })
-					.orderBy('RecipeStepId', 'asc');
-				recipeSteps = dbResult as View.BasicRecipeStep[];
+					.where({ recipeId, workspaceId: recipe.workspaceId })
+					.orderBy('RecipeStepId', 'asc')) as View.BasicRecipeStep[];
 			});
 
 			if (!recipe || !recipeSteps) {
@@ -542,17 +562,13 @@ export class CatalogRepository extends BaseRepository {
 
 	async getAvailableRecipes(workspaceId: string): Promise<QueryResult<View.BasicRecipe[]>> {
 		try {
-			let dbResult = await this.db
-				.table('basicrecipe')
-				.where('WorkspaceId', workspaceId)
+			let query = this.scopeVisible(this.db.table('basicrecipe'), 'basicrecipe', workspaceId)
 				.where('Published', true)
-				.whereIn('RecipeId', function () {
-					this.select('RecipeId')
-						.from('availablerecipes')
-						.where('WorkspaceId', workspaceId)
-						.groupBy('RecipeId');
-				});
-			const data = dbResult as View.BasicRecipe[];
+				.whereIn(
+					'RecipeId',
+					this.db.table('availablerecipes').select('RecipeId').where('WorkspaceId', workspaceId)
+				);
+			const data = (await query) as View.BasicRecipe[];
 			return { status: 'success', data };
 		} catch (error: any) {
 			console.error(error);
@@ -565,31 +581,35 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string
 	): Promise<Array<View.BasicRecipe & { missingIngredient: string | null }>> {
 		try {
-			// Find recipes missing exactly one ingredient (using EffectiveInStock for flexible matching)
-			const result = await this.db
-				.table('basicrecipe as r')
-				.select('r.*')
-				.where('r.workspaceId', workspaceId)
-				.whereIn('r.RecipeId', function () {
-					this.select('rs.RecipeId')
-						.from('basicrecipestep as rs')
-						.groupBy('rs.RecipeId')
-						// EffectiveInStock accounts for flexible matching (ANY_IN_CATEGORY, ANY_IN_PARENT_CATEGORY)
-						.havingRaw('SUM(CASE WHEN rs.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
-						.havingRaw('COUNT(rs.RecipeStepId) > 1');
-				})
+			// recipes missing exactly one ingredient for this bar's overlay stock
+			const result = await this.scopeVisible(
+				this.db.table('basicrecipe as r').select('r.*'),
+				'r',
+				workspaceId
+			)
+				.whereIn(
+					'r.RecipeId',
+					this.db
+						.table('recipestepstock')
+						.select('RecipeId')
+						.where('WorkspaceId', workspaceId)
+						.groupBy('RecipeId')
+						.havingRaw('SUM(CASE WHEN EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
+						.havingRaw('COUNT(RecipeStepId) > 1')
+				)
 				.limit(6);
 			const recipes = result as View.BasicRecipe[];
 
 			const recipesWithMissing = await Promise.all(
 				recipes.map(async (recipe) => {
-					// Find the missing ingredient (the one with EffectiveInStock = 0)
+					// the single out-of-stock step for this bar
 					const missing = await this.db
-						.table('basicrecipestep')
-						.select('ProductName', 'CategoryName', 'MatchMode')
-						.where('RecipeId', recipe.recipeId)
-						.where('WorkspaceId', workspaceId)
-						.where('EffectiveInStock', 0)
+						.table('basicrecipestep as rs')
+						.join('recipestepstock as ss', 'rs.RecipeStepId', 'ss.RecipeStepId')
+						.select('rs.ProductName', 'rs.CategoryName', 'rs.MatchMode')
+						.where('rs.RecipeId', recipe.recipeId)
+						.where('ss.WorkspaceId', workspaceId)
+						.where('ss.EffectiveInStock', 0)
 						.first();
 					// Show category name for flexible matches, product name for exact
 					const ingredientName =
@@ -614,10 +634,11 @@ export class CatalogRepository extends BaseRepository {
 		recipeCategoryId: number | string | null = null
 	): Promise<QueryResult<BasicRecipe[]>> {
 		try {
-			let query = this.db
-				.table<BasicRecipe>('basicrecipe')
-				.where('workspaceId', workspaceId)
-				.where('published', true);
+			let query = this.scopeVisible(
+				this.db.table<BasicRecipe>('basicrecipe'),
+				'basicrecipe',
+				workspaceId
+			).where('published', true);
 			if (recipeCategoryId) {
 				query.where('recipeCategoryId', recipeCategoryId);
 			}
@@ -1313,13 +1334,10 @@ export class CatalogRepository extends BaseRepository {
 	async getRecipesByIds(workspaceId: string, recipeIds: number[]): Promise<View.BasicRecipe[]> {
 		if (recipeIds.length === 0) return [];
 		try {
-			const dbResult = await this.db
-				.table('basicrecipe')
-				.where('WorkspaceId', workspaceId)
+			const query = this.scopeVisible(this.db.table('basicrecipe'), 'basicrecipe', workspaceId)
 				.where('Published', true)
-				.whereIn('RecipeId', recipeIds)
-				.select();
-			return dbResult as View.BasicRecipe[];
+				.whereIn('RecipeId', recipeIds);
+			return (await query) as View.BasicRecipe[];
 		} catch (error: any) {
 			console.error('Error getting recipes by ids:', error.message);
 			Logger.error(
@@ -1334,24 +1352,34 @@ export class CatalogRepository extends BaseRepository {
 		workspaceId: string
 	): Promise<{ ingredientName: string; unlockableRecipes: number }[]> {
 		try {
+			const visibleRecipeIds = this.scopeVisible(
+				this.db.table('basicrecipe as r'),
+				'r',
+				workspaceId
+			).select('r.RecipeId');
+
 			const result = await this.db
 				.table('basicrecipestep as rs')
+				.join('recipestepstock as ss', 'rs.RecipeStepId', 'ss.RecipeStepId')
 				.select(
 					this.db.query.raw(
 						"CASE WHEN rs.MatchMode != 'EXACT_PRODUCT' THEN rs.CategoryName ELSE rs.ProductName END as ingredientName"
 					)
 				)
 				.count('* as unlockableRecipes')
-				.where('rs.WorkspaceId', workspaceId)
-				.where('rs.EffectiveInStock', 0)
-				.whereIn('rs.RecipeId', function () {
-					this.select('sub.RecipeId')
-						.from('basicrecipestep as sub')
-						.where('sub.WorkspaceId', workspaceId)
-						.groupBy('sub.RecipeId')
-						.havingRaw('SUM(CASE WHEN sub.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
-						.havingRaw('COUNT(sub.RecipeStepId) > 1');
-				})
+				.where('ss.WorkspaceId', workspaceId)
+				.where('ss.EffectiveInStock', 0)
+				.whereIn('rs.RecipeId', visibleRecipeIds)
+				.whereIn(
+					'rs.RecipeId',
+					this.db
+						.table('recipestepstock')
+						.select('RecipeId')
+						.where('WorkspaceId', workspaceId)
+						.groupBy('RecipeId')
+						.havingRaw('SUM(CASE WHEN EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
+						.havingRaw('COUNT(RecipeStepId) > 1')
+				)
 				.groupBy('ingredientName')
 				.orderBy('unlockableRecipes', 'desc')
 				.limit(3);
@@ -1377,19 +1405,15 @@ export class CatalogRepository extends BaseRepository {
 		{ recipeId: number; recipeName: string; recipeImageUrl: string | null; estimatedCost: number }[]
 	> {
 		try {
-			const result = await this.db
-				.table('basicrecipestep as rs')
-				.join('basicrecipe as r', function () {
-					this.on('rs.RecipeId', '=', 'r.RecipeId').andOn('rs.WorkspaceId', '=', 'r.WorkspaceId');
-				})
-				.where('rs.WorkspaceId', workspaceId)
+			const base = this.db.table('basicrecipestep as rs').join('basicrecipe as r', function () {
+				this.on('rs.RecipeId', '=', 'r.RecipeId').andOn('rs.WorkspaceId', '=', 'r.WorkspaceId');
+			});
+			const result = await this.scopeVisible(base, 'r', workspaceId)
 				.where('r.Published', true)
-				.whereIn('rs.RecipeId', function () {
-					this.select('RecipeId')
-						.from('availablerecipes')
-						.where('WorkspaceId', workspaceId)
-						.groupBy('RecipeId');
-				})
+				.whereIn(
+					'rs.RecipeId',
+					this.db.table('availablerecipes').select('RecipeId').where('WorkspaceId', workspaceId)
+				)
 				.select(
 					'rs.RecipeId',
 					'r.RecipeName',

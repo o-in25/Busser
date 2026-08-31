@@ -987,21 +987,22 @@ export class InventoryRepository extends BaseRepository {
 		try {
 			if (productIds.length === 0) return new Map();
 
-			// find recipes missing exactly 1 ingredient, then count per product
+			// find recipes missing exactly 1 ingredient (for this bar's overlay), then count per product
 			const result = await this.db
 				.table('basicrecipestep as rs')
+				.join('recipestepstock as ss', 'rs.RecipeStepId', 'ss.RecipeStepId')
 				.select('rs.ProductId')
 				.select(this.db.query.raw('COUNT(DISTINCT rs.RecipeId) as unlockable'))
-				.where('rs.WorkspaceId', workspaceId)
-				.where('rs.EffectiveInStock', 0)
+				.where('ss.WorkspaceId', workspaceId)
+				.where('ss.EffectiveInStock', 0)
 				.whereIn('rs.ProductId', productIds)
 				.whereIn('rs.RecipeId', function () {
-					this.select('sub.RecipeId')
-						.from('basicrecipestep as sub')
-						.where('sub.WorkspaceId', workspaceId)
-						.groupBy('sub.RecipeId')
-						.havingRaw('SUM(CASE WHEN sub.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
-						.havingRaw('COUNT(sub.RecipeStepId) > 1');
+					this.select('RecipeId')
+						.from('recipestepstock')
+						.where('WorkspaceId', workspaceId)
+						.groupBy('RecipeId')
+						.havingRaw('SUM(CASE WHEN EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
+						.havingRaw('COUNT(RecipeStepId) > 1');
 				})
 				.groupBy('rs.ProductId');
 
