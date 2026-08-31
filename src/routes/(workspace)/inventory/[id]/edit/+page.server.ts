@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
-import { canModifyWorkspace } from '$lib/server/workspace';
+import { canModifyWorkspace, getGlobalWorkspace } from '$lib/server/workspace';
 import { inventoryRepo } from '$lib/server/core';
 import type { Product } from '$lib/types';
 
@@ -46,9 +46,15 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
+	// the "stock in new workspaces" flag is only meaningful when curating the global catalog
+	const isGlobal = workspaceId === getGlobalWorkspace();
+	const stockByDefault = isGlobal ? await inventoryRepo.getStockByDefault(Number(id)) : false;
+
 	return {
 		product,
 		categories,
+		isGlobal,
+		stockByDefault,
 	};
 };
 
@@ -124,5 +130,30 @@ export const actions: Actions = {
 		}
 
 		redirect(StatusCodes.SEE_OTHER, '/inventory');
+	},
+
+	toggleDefaultStock: async ({ request, params, locals }) => {
+		const workspaceId = locals.activeWorkspaceId;
+		if (!workspaceId || !locals.user) {
+			return fail(StatusCodes.UNAUTHORIZED, { error: 'Workspace context required.' });
+		}
+
+		// only the global-catalog owner curates this flag
+		if (workspaceId !== getGlobalWorkspace()) {
+			return fail(StatusCodes.FORBIDDEN, { error: 'Only global products can be flagged.' });
+		}
+		const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+		if (!canModify) {
+			return fail(StatusCodes.FORBIDDEN, { error: 'You need owner access to the global catalog.' });
+		}
+
+		const { id } = params;
+		if (!id || isNaN(Number(id))) {
+			return fail(StatusCodes.BAD_REQUEST, { error: 'Invalid product ID.' });
+		}
+
+		const value = (await request.formData()).get('stockByDefault') === 'true';
+		await inventoryRepo.setStockByDefault(Number(id), value);
+		return { success: true, stockByDefault: value };
 	},
 };

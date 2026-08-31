@@ -1,4 +1,3 @@
-// service layer for cross-database user settings queries
 import type { View } from '$lib/types';
 
 import { userRepo } from './auth';

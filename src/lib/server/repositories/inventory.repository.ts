@@ -12,12 +12,14 @@ import type {
 	Table,
 	CategoryGroup,
 } from '$lib/types';
+import { emptyPagination } from '$lib/types';
+import { titleCase } from '$lib/utils';
 
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { deleteSignedUrl } from '../storage';
 import { getGlobalWorkspace } from '../workspace';
-import { BaseRepository, emptyPagination, titleCase } from './base.repository';
+import { BaseRepository } from './base.repository';
 
 export class InventoryRepository extends BaseRepository {
 	constructor(db: DbProvider) {
@@ -169,11 +171,9 @@ export class InventoryRepository extends BaseRepository {
 		try {
 			if (!product?.productId) throw Error('No inventory ID provided.');
 
-			// verify product belongs to workspace
 			const existing = await this.findById(workspaceId, product.productId);
 			if (!existing) throw Error('Product not found in this workspace.');
 
-			// Resolve the image URL: new upload, cleared, or keep existing
 			let resolvedImageUrl: string | null;
 			if (imageCleared) {
 				resolvedImageUrl = null;
@@ -183,7 +183,7 @@ export class InventoryRepository extends BaseRepository {
 				resolvedImageUrl = existing.productImageUrl || null;
 			}
 
-			// Delete old image from storage when replacing or clearing
+			// delete old image from storage when replacing or clearing
 			if (
 				(resolvedImageUrl !== existing.productImageUrl || imageCleared) &&
 				existing.productImageUrl
@@ -284,7 +284,7 @@ export class InventoryRepository extends BaseRepository {
 				return { imageUrls: urls, deleted: rows };
 			});
 
-			// clean up gcs outside the transaction so we don't hold a db connection during storage i/o
+			// clean up gcs outside the transaction so we don't hold a db connection during storage
 			await Promise.all(imageUrls.map((url) => deleteSignedUrl(url)));
 
 			return { status: 'success', data: { deleted } };
@@ -418,6 +418,43 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
+	async getStockByDefault(productId: number): Promise<boolean> {
+		const row = (await this.db
+			.table('product')
+			.where('ProductId', productId)
+			.select('StockByDefault')
+			.first()) as { stockByDefault: number } | undefined;
+		return !!row?.stockByDefault;
+	}
+
+	async setStockByDefault(productId: number, value: boolean): Promise<void> {
+		await this.db.table('product').where('ProductId', productId).update({ StockByDefault: value });
+	}
+
+	async seedDefaultStock(workspaceId: string): Promise<void> {
+		try {
+			const globalId = getGlobalWorkspace();
+			const rows = (await this.db
+				.table('product')
+				.where('WorkspaceId', globalId)
+				.where('StockByDefault', true)
+				.select('ProductId')) as Array<{ productId: number }>;
+			if (rows.length === 0) return;
+
+			await this.db
+				.table('workspacestock')
+				.insert(
+					rows.map((r) => ({ WorkspaceId: workspaceId, ProductId: r.productId, Quantity: 1 }))
+				)
+				.onConflict(['WorkspaceId', 'ProductId'])
+				.ignore();
+		} catch (error: any) {
+			// don't block workspace creation on error
+			console.error('Failed to seed default stock:', error.message);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+		}
+	}
+
 	async getStats(workspaceId: string): Promise<InventoryStats> {
 		try {
 			const statsResult = await this.db
@@ -508,7 +545,6 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	// dropdown options: the bar's own items + the global canonical catalog (prefer global on a name clash)
 	async getProductOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
 			const globalId = getGlobalWorkspace();
@@ -634,7 +670,7 @@ export class InventoryRepository extends BaseRepository {
 		categoryGroupId: number | null = null
 	): Promise<QueryResult<number>> {
 		try {
-			// auto-inherit group from parent when not explicitly set
+			// auto inherits group from parent when not explicitly set
 			if (parentCategoryId && !categoryGroupId) {
 				const parent = await this.db
 					.table('category')
@@ -673,7 +709,7 @@ export class InventoryRepository extends BaseRepository {
 			const { categoryName, categoryDescription, parentCategoryId } = category;
 			let { categoryGroupId } = category;
 
-			// auto-inherit group from parent when not explicitly set
+			// auto inherits group from parent when not explicitly set
 			if (parentCategoryId && !categoryGroupId) {
 				const parent = await this.db
 					.table('category')
@@ -869,7 +905,7 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	// shopping list: out-of-stock items with supplier info and recipe count
+	// get out of stock items with supplier info and recipe count
 	async getShoppingList(
 		workspaceId: string,
 		currentPage: number = 1,
@@ -1139,7 +1175,6 @@ export class InventoryRepository extends BaseRepository {
 
 	async deleteCategory(workspaceId: string, categoryId: number): Promise<QueryResult<number>> {
 		try {
-			// Check if category has products
 			const productCountResult = (await this.db
 				.table('product')
 				.where('CategoryId', categoryId)

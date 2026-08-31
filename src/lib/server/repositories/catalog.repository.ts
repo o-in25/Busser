@@ -1,7 +1,7 @@
-// catalog domain repository
 import type {
 	AdvancedFilter,
 	BasicRecipe,
+	InventoryRow,
 	PaginationResult,
 	PreparationMethod,
 	QueryRequest,
@@ -12,6 +12,7 @@ import type {
 	Table,
 	View,
 } from '$lib/types';
+import { emptyPagination } from '$lib/types';
 import type { RecipeInsightLinks } from '$lib/types/generators';
 
 import { DbProvider } from '../db';
@@ -19,27 +20,7 @@ import { deleteCachedContent } from '../generators/cache';
 import { Logger } from '../logger';
 import { copyGcsFile, deleteSignedUrl } from '../storage';
 import { getGlobalWorkspace } from '../workspace';
-import { BaseRepository, emptyPagination } from './base.repository';
-
-// inventory rows we read while resolving step images + substitutes
-type InventoryRow = {
-	productId: number;
-	productName: string;
-	categoryId: number;
-	parentCategoryId: number | null;
-	productImageUrl: string | null;
-	productInStockQuantity: number;
-};
-
-// step extras with nothing resolved — used as a graceful fallback
-function emptyExtras(step: View.BasicRecipeStep): StepExtras {
-	return {
-		recipeStepId: step.recipeStepId ?? 0,
-		productImageUrl: null,
-		matchLabel: null,
-		substitutes: [],
-	};
-}
+import { BaseRepository } from './base.repository';
 
 export class CatalogRepository extends BaseRepository {
 	constructor(db: DbProvider) {
@@ -482,7 +463,12 @@ export class CatalogRepository extends BaseRepository {
 			];
 
 			if (categoryIds.length === 0 && parentIds.length === 0) {
-				return steps.map((s) => emptyExtras(s));
+				return steps.map((s) => ({
+					recipeStepId: s.recipeStepId ?? 0,
+					productImageUrl: null,
+					matchLabel: null,
+					substitutes: [],
+				}));
 			}
 
 			const rows = (await this.db
@@ -550,7 +536,12 @@ export class CatalogRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
-			return steps.map((s) => emptyExtras(s));
+			return steps.map((s) => ({
+				recipeStepId: s.recipeStepId ?? 0,
+				productImageUrl: null,
+				matchLabel: null,
+				substitutes: [],
+			}));
 		}
 	}
 

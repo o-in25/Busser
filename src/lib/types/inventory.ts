@@ -107,6 +107,16 @@ export type Product = {
 	supplierName: string | null;
 };
 
+// narrow inventory-view projection read while resolving step images + substitutes
+export type InventoryRow = {
+	productId: number;
+	productName: string;
+	categoryId: number;
+	parentCategoryId: number | null;
+	productImageUrl: string | null;
+	productInStockQuantity: number;
+};
+
 // google places result (for nearby store search UI)
 export type PlaceResult = {
 	placeId: string;

@@ -1,4 +1,3 @@
-// user data access
 import moment from 'moment';
 
 import { generateSecureCode } from '$lib/math';
@@ -13,6 +12,7 @@ import type {
 	UserFavorite,
 } from '$lib/types';
 
+import { seedDefaultStock } from '../core';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
@@ -621,7 +621,7 @@ export class UserRepository extends BaseRepository {
 			avatarUrl?: string | null;
 		},
 		globalWorkspaceId: string
-	): Promise<Pick<User, 'userId' | 'username' | 'email'>> {
+	): Promise<Pick<User, 'userId' | 'username' | 'email'> & { personalWorkspaceId: string }> {
 		const { username, email, password, verified, needsOnboarding, avatarUrl } = opts;
 
 		// check username/email uniqueness
@@ -691,7 +691,7 @@ export class UserRepository extends BaseRepository {
 			joinedDate: Logger.now(),
 		});
 
-		return user;
+		return { ...user, personalWorkspaceId: workspaceId };
 	}
 
 	// register with optional invitation consumption
@@ -759,6 +759,8 @@ export class UserRepository extends BaseRepository {
 			return user;
 		});
 
+		// default stock after commit — the cross-db overlay write needs the workspace row to exist
+		await seedDefaultStock(user.personalWorkspaceId);
 		return user;
 	}
 

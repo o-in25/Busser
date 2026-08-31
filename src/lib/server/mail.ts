@@ -1,6 +1,9 @@
 import FormData from 'form-data';
 import Mailgun from 'mailgun.js';
 
+import mailText from '$lib/data/mail.json';
+import { fillText } from '$lib/utils';
+
 import { env } from '$env/dynamic/private';
 
 export interface IUserRegistrationEmailParams {
@@ -53,6 +56,7 @@ export class MailClient {
 				from: MailClient.from,
 				to,
 				subject: 'Welcome to Busser',
+				text: fillText(mailText.registration, { username, token, url: MailClient.baseUrl }),
 				template: 'user-registration-email',
 				'h:X-Mailgun-Variables': JSON.stringify({
 					url: MailClient.baseUrl,
@@ -78,6 +82,7 @@ export class MailClient {
 				from: MailClient.from,
 				to,
 				subject: 'Reset your Busser password',
+				text: fillText(mailText.passwordReset, { username, token, url: MailClient.baseUrl }),
 				template: 'password-reset-email',
 				'h:X-Mailgun-Variables': JSON.stringify({
 					url: MailClient.baseUrl,
@@ -103,6 +108,13 @@ export class MailClient {
 				from: MailClient.from,
 				to,
 				subject: `You've been invited to join ${workspaceName} on Busser`,
+				text: fillText(mailText.workspaceInvitation, {
+					inviterName,
+					workspaceName,
+					role,
+					invitationCode,
+					url: MailClient.baseUrl,
+				}),
 				template: 'workspace-invitation-email',
 				'h:X-Mailgun-Variables': JSON.stringify({
 					url: MailClient.baseUrl,
