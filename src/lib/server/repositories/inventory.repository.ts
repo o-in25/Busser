@@ -16,7 +16,22 @@ import type {
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { deleteSignedUrl } from '../storage';
+import { getGlobalWorkspace } from '../workspace';
 import { BaseRepository, emptyPagination, titleCase } from './base.repository';
+
+// common global products stocked into a new bar so it can make a few recipes right away (matched by name)
+const STARTER_PANTRY = [
+	'Lime Juice',
+	'Lemon Juice',
+	'Simple Syrup',
+	'Beefeater London Dry Gin',
+	"Tito's Handmade Vodka",
+	'Evan Williams Bottled-In-Bond Bourbon',
+	'Angostura Aromatic Bitters',
+	'Cointreau',
+	'Soda Water',
+	'Grenadine',
+];
 
 export class InventoryRepository extends BaseRepository {
 	constructor(db: DbProvider) {
@@ -505,40 +520,42 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	// select options for dropdowns
+	// dropdown options: the bar's own items + the global canonical catalog (prefer global on a name clash)
 	async getProductOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
-			let result = await this.db
+			const globalId = getGlobalWorkspace();
+			const workspaces = workspaceId === globalId ? [globalId] : [workspaceId, globalId];
+			const result = (await this.db
 				.table('product as p')
 				.join('category as c', 'p.CategoryId', 'c.CategoryId')
 				.leftJoin('category as pc', 'c.ParentCategoryId', 'pc.CategoryId')
-				.where('p.workspaceId', workspaceId)
+				.whereIn('p.WorkspaceId', workspaces)
+				.where('p.Retired', false)
 				.select(
 					'p.ProductId',
 					'p.ProductName',
+					'p.WorkspaceId',
 					'c.CategoryId',
 					'c.CategoryName',
 					'c.ParentCategoryId',
 					'pc.CategoryName as ParentCategoryName'
-				);
-			let products = result as any[];
-			return products.map(
-				({
-					productId,
-					productName,
-					categoryId,
-					categoryName,
-					parentCategoryId,
-					parentCategoryName,
-				}) => ({
-					name: productName,
-					value: productId || 0,
-					categoryId,
-					categoryName,
-					parentCategoryId: parentCategoryId ?? null,
-					parentCategoryName: parentCategoryName ?? null,
-				})
-			);
+				)) as any[];
+
+			const byName = new Map<string, any>();
+			for (const r of result) {
+				const key = (r.productName || '').toLowerCase();
+				const existing = byName.get(key);
+				if (!existing || r.workspaceId === globalId) byName.set(key, r);
+			}
+
+			return [...byName.values()].map((r) => ({
+				name: r.productName,
+				value: r.productId || 0,
+				categoryId: r.categoryId,
+				categoryName: r.categoryName,
+				parentCategoryId: r.parentCategoryId ?? null,
+				parentCategoryName: r.parentCategoryName ?? null,
+			}));
 		} catch (error: any) {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
@@ -548,21 +565,53 @@ export class InventoryRepository extends BaseRepository {
 
 	async getCategoryOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
-			let result = await this.db
+			const globalId = getGlobalWorkspace();
+			const workspaces = workspaceId === globalId ? [globalId] : [workspaceId, globalId];
+			const result = (await this.db
 				.table('category as c')
-				.where('c.workspaceId', workspaceId)
-				.select('c.CategoryId', 'c.CategoryName', 'c.CategoryGroupId')
-				.orderBy('c.CategoryName');
-			let categories = result as Category[];
-			return categories.map(({ categoryId, categoryName, categoryGroupId }) => ({
-				name: categoryName,
-				value: categoryId,
-				categoryGroupId: categoryGroupId ?? null,
+				.whereIn('c.WorkspaceId', workspaces)
+				.select('c.CategoryId', 'c.CategoryName', 'c.CategoryGroupId', 'c.WorkspaceId')
+				.orderBy('c.CategoryName')) as any[];
+
+			const byName = new Map<string, any>();
+			for (const r of result) {
+				const key = (r.categoryName || '').toLowerCase();
+				const existing = byName.get(key);
+				if (!existing || r.workspaceId === globalId) byName.set(key, r);
+			}
+
+			return [...byName.values()].map((r) => ({
+				name: r.categoryName,
+				value: r.categoryId,
+				categoryGroupId: r.categoryGroupId ?? null,
 			}));
 		} catch (error: any) {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return [];
+		}
+	}
+
+	// stock a curated starter set of global products into a brand-new bar (best-effort onboarding)
+	async seedStarterPantry(workspaceId: string): Promise<void> {
+		try {
+			const globalId = getGlobalWorkspace();
+			const rows = (await this.db
+				.table('product')
+				.where('WorkspaceId', globalId)
+				.whereIn('ProductName', STARTER_PANTRY)
+				.select('ProductId')) as Array<{ productId: number }>;
+			if (rows.length === 0) return;
+
+			await this.db
+				.table('workspacestock')
+				.insert(rows.map((r) => ({ WorkspaceId: workspaceId, ProductId: r.productId, Quantity: 1 })))
+				.onConflict(['WorkspaceId', 'ProductId'])
+				.ignore();
+		} catch (error: any) {
+			// onboarding nicety — never block workspace creation on it
+			console.error('Failed to seed starter pantry:', error.message);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 		}
 	}
 

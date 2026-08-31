@@ -4,6 +4,7 @@ import moment from 'moment';
 import type { Invitation, OAuthProfile, QueryResult, User } from '$lib/types';
 import type { LinkedOAuthAccount } from '$lib/types/oauth';
 
+import { seedStarterPantry } from '../core';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
@@ -136,6 +137,8 @@ export class OAuthRepository extends BaseRepository {
 				return user;
 			});
 
+			// starter pantry after commit — the cross-db overlay write needs the workspace row to exist
+			await seedStarterPantry(user.personalWorkspaceId);
 			return this.userRepo.findById(user.userId);
 		} catch (error: any) {
 			await Logger.error(
