@@ -45,9 +45,13 @@
 		isPublished = !!data.recipe.published;
 	});
 
+	// a recipe the current bar doesn't own (a global one surfaced via the union) can only be forked
+	const isOwned = $derived(data.isOwned);
+
 	// publish toggle only applies to the global catalog
 	const canPublish = $derived(canModify && data.isGlobalCatalog);
 	let publishing = $state(false);
+	let customizing = $state(false);
 
 	async function togglePublish() {
 		if (publishing) return;
@@ -168,7 +172,7 @@
 
 <!-- shared More menu, rendered by both the desktop toolbar and the mobile hero -->
 {#snippet moreMenuItems()}
-	{#if canModify}
+	{#if canModify && isOwned}
 		<DropdownMenu.Item onclick={() => goto(`/catalog/${data.recipe.recipeId}/edit`)}>
 			<Pencil class="h-4 w-4 mr-2" />
 			Edit Recipe
@@ -184,6 +188,42 @@
 				{/if}
 			</DropdownMenu.Item>
 		{/if}
+	{/if}
+
+	<!-- a global recipe can't be edited in place — fork it into this bar, then open the copy's editor -->
+	{#if canModify && !isOwned}
+		<form
+			method="POST"
+			action="?/importToWorkspace"
+			use:enhance={() => {
+				customizing = true;
+				const toastId = toast.loading('Creating your copy…');
+				return async ({ result }) => {
+					customizing = false;
+					const d = result.type === 'success' ? (result.data as any) : null;
+					if (d && (d.success || d.alreadyImported) && d.importedRecipeId) {
+						toast.success(d.alreadyImported ? 'Opening your copy' : 'Copy created', { id: toastId });
+						goto(`/catalog/${d.importedRecipeId}/edit`);
+					} else {
+						toast.error(d?.error || 'Could not create copy', { id: toastId });
+					}
+				};
+			}}
+		>
+			<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+			<input type="hidden" name="sourceWorkspaceId" value={data.recipe.workspaceId} />
+			<input type="hidden" name="targetWorkspaceId" value={workspace.workspaceId} />
+			<DropdownMenu.Item disabled={customizing} closeOnSelect={false} class="cursor-pointer">
+				<button type="submit" class="flex items-center gap-2 w-full" disabled={customizing}>
+					{#if customizing}
+						<Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
+					{:else}
+						<Pencil class="h-4 w-4" />
+					{/if}
+					Customize
+				</button>
+			</DropdownMenu.Item>
+		</form>
 	{/if}
 
 	{#if showImport && importData}
@@ -237,7 +277,7 @@
 		{/each}
 	{/if}
 
-	{#if canModify}
+	{#if canModify && isOwned}
 		<DropdownMenu.Separator />
 		<DropdownMenu.Item
 			class="text-destructive dark:text-red-400 data-[highlighted]:text-destructive dark:data-[highlighted]:text-red-400 data-[highlighted]:bg-destructive/10"
@@ -290,7 +330,7 @@
 				</form>
 			{/if}
 
-			{#if authenticated && canModify}
+			{#if authenticated && canModify && isOwned}
 				<form
 					method="POST"
 					action="?/toggleFeatured"
@@ -379,7 +419,7 @@
 							</FancyButton>
 						</form>
 
-						{#if canModify}
+						{#if canModify && isOwned}
 							<form
 								class="flex-1"
 								method="POST"

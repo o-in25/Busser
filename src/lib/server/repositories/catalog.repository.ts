@@ -21,10 +21,6 @@ import { copyGcsFile, deleteSignedUrl } from '../storage';
 import { getGlobalWorkspace } from '../workspace';
 import { BaseRepository, emptyPagination } from './base.repository';
 
-// imported categories must always land in a group (a null group broke role grouping — see
-// defects.md). the source is grouped, so this only catches a source that's somehow null.
-const FALLBACK_GROUP = 8; // "Other"
-
 // inventory rows we read while resolving step images + substitutes
 type InventoryRow = {
 	productId: number;
@@ -952,132 +948,12 @@ export class CatalogRepository extends BaseRepository {
 				// can't import a draft — it's not live yet
 				if (!sourceRecipe.published) throw new Error('Source recipe is not published.');
 
-				const sourceSteps = (await trx('basicrecipestep')
-					.where({ RecipeId: sourceRecipeId, WorkspaceId: sourceWorkspaceId })
-					.orderBy('RecipeStepId', 'asc')) as View.BasicRecipeStep[];
+				// steps already point at global canonical products/categories — fork copies them verbatim
+				const sourceSteps = (await trx('recipestep')
+					.where({ RecipeId: sourceRecipeId })
+					.orderBy('RecipeStepId', 'asc')) as Table.RecipeStep[];
 
-				// 3. validate eligibility — all steps must use category matching
-				const ineligible = sourceSteps.find(
-					(s) => s.matchMode !== 'ANY_IN_CATEGORY' && s.matchMode !== 'ANY_IN_PARENT_CATEGORY'
-				);
-				if (ineligible) {
-					throw new Error('Recipe contains EXACT_PRODUCT steps and cannot be imported.');
-				}
-
-				// 4. resolve categories in target workspace
-				const categoryMap = new Map<string, number>();
-				for (const step of sourceSteps) {
-					const catName = step.categoryName;
-					if (!catName || categoryMap.has(catName)) continue;
-
-					let cat = await trx('category')
-						.where({ CategoryName: catName, WorkspaceId: targetWorkspaceId })
-						.first();
-
-					if (!cat) {
-						// look up source category to preserve group assignment
-						const sourceCat = await trx('category').where({ CategoryId: step.categoryId }).first();
-						const categoryGroupId = sourceCat?.categoryGroupId ?? FALLBACK_GROUP;
-
-						// resolve parent category if source step has one
-						let parentCategoryId: number | null = null;
-						if (step.parentCategoryName) {
-							let parent = await trx('category')
-								.where({ CategoryName: step.parentCategoryName, WorkspaceId: targetWorkspaceId })
-								.first();
-							if (!parent) {
-								// look up source parent for its group
-								const sourceParent = await trx('category')
-									.where({ CategoryName: step.parentCategoryName, WorkspaceId: sourceWorkspaceId })
-									.first();
-								const [parentId] = await trx('category').insert({
-									WorkspaceId: targetWorkspaceId,
-									CategoryName: step.parentCategoryName,
-									CategoryGroupId: sourceParent?.categoryGroupId ?? FALLBACK_GROUP,
-								});
-								parentCategoryId = parentId;
-							} else {
-								parentCategoryId = parent.categoryId;
-							}
-						}
-
-						const [catId] = await trx('category').insert({
-							WorkspaceId: targetWorkspaceId,
-							CategoryName: catName,
-							ParentCategoryId: parentCategoryId,
-							CategoryGroupId: categoryGroupId,
-						});
-						categoryMap.set(catName, catId);
-					} else {
-						// backfill missing group assignment from source
-						if (!cat.categoryGroupId) {
-							const sourceCat = await trx('category')
-								.where({ CategoryId: step.categoryId })
-								.first();
-							if (sourceCat?.categoryGroupId) {
-								await trx('category')
-									.where({ CategoryId: cat.categoryId })
-									.update({ CategoryGroupId: sourceCat.categoryGroupId });
-							}
-						}
-						categoryMap.set(catName, cat.categoryId);
-					}
-				}
-
-				// 5. resolve products via category matching
-				const productMap = new Map<number, number>();
-				for (const step of sourceSteps) {
-					const catName = step.categoryName;
-					if (!catName) continue;
-					const targetCategoryId = categoryMap.get(catName);
-					if (!targetCategoryId || productMap.has(targetCategoryId)) continue;
-
-					// check if user already has any product in this category
-					const existingProduct = await trx('product')
-						.where({ CategoryId: targetCategoryId, WorkspaceId: targetWorkspaceId })
-						.first();
-
-					if (existingProduct) {
-						productMap.set(targetCategoryId, existingProduct.productId);
-					} else {
-						// copy source product with stock=0
-						const [productId] = await trx('product').insert({
-							WorkspaceId: targetWorkspaceId,
-							CategoryId: targetCategoryId,
-							SupplierId: 1,
-							ProductName: step.productName || catName,
-							ProductInStockQuantity: 0,
-							ProductPricePerUnit: 0,
-							ProductUnitSizeInMilliliters: 0,
-							ProductProof: step.productProof || 0,
-						});
-
-						// attach canonical product image and description if available
-						const canonical = await trx('productdescription')
-							.where({ ProductId: step.productId })
-							.first();
-						if (canonical?.productDescriptionImageUrl || canonical?.productDescriptionText) {
-							// copy source image into the target workspace so deletes don't cascade
-							const copiedImageUrl = canonical.productDescriptionImageUrl
-								? await copyGcsFile(
-										canonical.productDescriptionImageUrl,
-										'ingredients',
-										targetWorkspaceId
-									)
-								: null;
-							await trx('productdetail').insert({
-								ProductId: productId,
-								ProductImageUrl: copiedImageUrl,
-								ProductDescription: canonical.productDescriptionText || null,
-							});
-						}
-
-						productMap.set(targetCategoryId, productId);
-					}
-				}
-
-				// 6. create recipe chain (sourceRecipe is camelCase from postProcessResponse)
-				// copy source images so delete in target workspace doesn't destroy source gcs objects
+				// copy only the recipe images so deleting the fork can't destroy the source's gcs objects
 				const copiedDescImageUrl = sourceRecipe.recipeDescriptionImageUrl
 					? await copyGcsFile(sourceRecipe.recipeDescriptionImageUrl, 'recipes', targetWorkspaceId)
 					: null;
@@ -1100,6 +976,7 @@ export class CatalogRepository extends BaseRepository {
 					RecipeDescriptionId: descId,
 					RecipeName: sourceRecipe.recipeName,
 					RecipeImageUrl: copiedRecipeImageUrl,
+					Published: true,
 					SourceRecipeId: sourceRecipeId,
 					SourceWorkspaceId: sourceWorkspaceId,
 				});
@@ -1110,15 +987,11 @@ export class CatalogRepository extends BaseRepository {
 				});
 
 				for (const step of sourceSteps) {
-					const targetCategoryId = categoryMap.get(step.categoryName || '');
-					const targetProductId = targetCategoryId ? productMap.get(targetCategoryId) : null;
-					if (!targetCategoryId || !targetProductId) continue;
-
 					await trx('recipestep').insert({
 						RecipeId: newRecipeId,
-						ProductId: targetProductId,
-						CategoryId: targetCategoryId,
-						MatchMode: 'ANY_IN_CATEGORY',
+						ProductId: step.productId,
+						CategoryId: step.categoryId,
+						MatchMode: step.matchMode,
 						ProductIdQuantityInMilliliters: step.productIdQuantityInMilliliters,
 						ProductIdQuantityUnit: step.productIdQuantityUnit,
 						RecipeStepDescription: step.recipeStepDescription,

@@ -91,6 +91,9 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		}
 	}
 
+	// a recipe surfaced via the union but owned by the global catalog can only be customized (forked), not edited in place
+	const isOwned = result.data.recipe.workspaceId === workspaceId;
+
 	return {
 		recipe: result.data.recipe,
 		recipeSteps: result.data.recipeSteps,
@@ -100,6 +103,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		importData,
 		canModify,
 		isGlobalCatalog,
+		isOwned,
 	};
 };
 
