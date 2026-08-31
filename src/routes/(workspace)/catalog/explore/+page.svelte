@@ -139,7 +139,7 @@
 </SubNav>
 
 <!-- Hero Section -->
-<PageHero title="Explore">
+<PageHero title="Explore" subtitle="Discover new cocktails by spirit, mood, and popularity.">
 	<!-- Smart Action Pills -->
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		{#if popularSpirit}

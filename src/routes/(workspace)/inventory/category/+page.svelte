@@ -166,7 +166,10 @@
 </InventoryNav>
 
 <!-- Hero Section -->
-<PageHero title="Categories">
+<PageHero
+	title="Categories"
+	subtitle="Group your ingredients so recipes and inventory stay organized."
+>
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		<StatBadge class="whitespace-nowrap">
 			<Tags class="h-4 w-4 text-primary shrink-0" />

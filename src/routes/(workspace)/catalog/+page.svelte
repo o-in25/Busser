@@ -302,7 +302,10 @@
 		</SubNav>
 
 		<!-- Hero Section -->
-		<PageHero title="Catalog">
+		<PageHero
+			title="Catalog"
+			subtitle="Browse cocktails and find what you can make with what's on hand."
+		>
 			<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 				<StatBadge class="whitespace-nowrap">
 					<Wine class="h-4 w-4 text-primary shrink-0" />
