@@ -187,7 +187,10 @@
 												}}
 											>
 												<Select.Trigger class="w-32">
-													<Select.Value placeholder="Select role" />
+													<Select.Value placeholder="Select role">
+														{member.workspaceRole.charAt(0).toUpperCase() +
+															member.workspaceRole.slice(1)}
+													</Select.Value>
 												</Select.Trigger>
 												<Select.Content>
 													<Select.Item value="owner" label="Owner">
@@ -452,7 +455,9 @@
 						onValueChange={(v) => (inviteRole = (v as 'owner' | 'editor' | 'viewer') ?? 'viewer')}
 					>
 						<Select.Trigger>
-							<Select.Value placeholder="Select role" />
+							<Select.Value placeholder="Select role">
+								{inviteRole.charAt(0).toUpperCase() + inviteRole.slice(1)}
+							</Select.Value>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="viewer" label="Viewer">

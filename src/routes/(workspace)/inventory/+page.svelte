@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Globe, Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
+	import { Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -7,7 +7,6 @@
 	import { haptics } from '$lib/utils/haptics';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
@@ -329,19 +328,6 @@
 </InventoryNav>
 
 <InventoryDashboard stats={data.stats} {showStock} />
-
-{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
-	<FancyAlert class="mb-6 mt-4">
-		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-		{#snippet children()}
-			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">
-				You're viewing <strong>Busser's global catalog</strong>. Use the workspace switcher to
-				switch to your own and manage your inventory.
-			</p>
-		{/snippet}
-	</FancyAlert>
-{/if}
 
 <!-- Toolbar -->
 <div class="flex flex-col gap-3 mb-6">

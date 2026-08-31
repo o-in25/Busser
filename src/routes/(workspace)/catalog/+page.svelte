@@ -3,7 +3,6 @@
 		Compass,
 		FlaskConical,
 		GlassWater,
-		Globe,
 		Mail,
 		Plus,
 		Search,
@@ -280,19 +279,6 @@
 			{/snippet}
 			{#snippet action()}
 				<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
-			{/snippet}
-		</FancyAlert>
-	{/if}
-
-	{#if authenticated && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
-		<FancyAlert class="mb-6">
-			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-			{#snippet children()}
-				<p class="sm:hidden">Viewing global catalog</p>
-				<p class="hidden sm:block">
-					You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
-					switch to your workspace.
-				</p>
 			{/snippet}
 		</FancyAlert>
 	{/if}

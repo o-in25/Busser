@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { Globe, Layers, Package, Pencil, Plus, Search, Tags, Trash2, X } from 'lucide-svelte';
+	import { Layers, Package, Pencil, Plus, Search, Tags, Trash2, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import CategoryDetailDrawer from '$lib/components/CategoryDetailDrawer.svelte';
 	import CategoryFilterPanel from '$lib/components/CategoryFilterPanel.svelte';
@@ -189,19 +187,6 @@
 		</StatBadge>
 	</div>
 </PageHero>
-
-{#if $page.data.user && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
-	<FancyAlert class="mb-6 mt-4">
-		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-		{#snippet children()}
-			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">
-				You're viewing <strong>Busser's global catalog</strong>. Use the workspace switcher to
-				switch to your own and manage your inventory.
-			</p>
-		{/snippet}
-	</FancyAlert>
-{/if}
 
 <!-- Search Bar & Filters -->
 <div class="flex items-center gap-2 mb-6">

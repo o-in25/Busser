@@ -8,7 +8,6 @@
 		Droplets,
 		Gauge,
 		GlassWater,
-		Globe,
 		Heart,
 		Lightbulb,
 		Plus,
@@ -26,7 +25,6 @@
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { idToSlug, spirits as spiritContent } from '$lib/spirits';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import FancyInput from '$lib/components/FancyInput.svelte';
@@ -124,19 +122,6 @@
 	<meta property="og:image" content="https://busserapp.com/og-image.png" />
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
-
-{#if authenticated && isGlobalCatalog && workspace?.workspaceRole !== 'owner'}
-	<FancyAlert class="mb-6 mt-4">
-		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-		{#snippet children()}
-			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">
-				You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
-				switch to your workspace.
-			</p>
-		{/snippet}
-	</FancyAlert>
-{/if}
 
 <!-- Section nav + primary action above the hero; this is the Explore tab -->
 <SubNav
