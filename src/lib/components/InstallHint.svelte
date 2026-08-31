@@ -14,7 +14,8 @@
 		const ua = navigator.userAgent;
 
 		// ipad in desktop mode reports a mac UA, so also treat touch-capable macs as ios
-		const isIos = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+		const isIos =
+			/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
 		if (!isIos) return false;
 
 		// in-app webviews and non-safari ios browsers can't add to home screen

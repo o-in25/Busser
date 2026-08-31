@@ -249,7 +249,9 @@
 					customizing = false;
 					const d = result.type === 'success' ? (result.data as any) : null;
 					if (d && (d.success || d.alreadyImported) && d.importedRecipeId) {
-						toast.success(d.alreadyImported ? 'Opening your copy' : 'Copy created', { id: toastId });
+						toast.success(d.alreadyImported ? 'Opening your copy' : 'Copy created', {
+							id: toastId,
+						});
 						goto(`/catalog/${d.importedRecipeId}/edit`);
 					} else {
 						toast.error(d?.error || 'Could not create copy', { id: toastId });
