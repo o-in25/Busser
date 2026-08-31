@@ -94,6 +94,12 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	// a recipe surfaced via the union but owned by the global catalog can only be customized (forked), not edited in place
 	const isOwned = result.data.recipe.workspaceId === workspaceId;
 
+	// for an owned fork, has its source been updated since we forked?
+	const sourceUpdate =
+		isOwned && result.data.recipe.sourceRecipeId
+			? await catalogRepo.getSourceUpdate(workspaceId, Number(recipeId))
+			: null;
+
 	return {
 		recipe: result.data.recipe,
 		recipeSteps: result.data.recipeSteps,
@@ -104,6 +110,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		canModify,
 		isGlobalCatalog,
 		isOwned,
+		sourceUpdate,
 	};
 };
 
@@ -226,5 +233,39 @@ export const actions: Actions = {
 			importedRecipeId: result.data?.recipe.recipeId,
 			targetWorkspaceId,
 		};
+	},
+
+	syncFork: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		const workspaceId = locals.activeWorkspaceId;
+		if (!userId || !workspaceId) return { success: false, error: 'Not authenticated' };
+
+		const recipeId = Number((await request.formData()).get('recipeId'));
+		if (!recipeId) return { success: false, error: 'Missing recipe.' };
+
+		if (!(await canModifyWorkspace(userId, workspaceId))) {
+			return { success: false, error: 'Only editors and owners can update recipes.' };
+		}
+
+		const result = await catalogRepo.resyncFork(workspaceId, recipeId);
+		if (result.status === 'error') return { success: false, error: result.error };
+		return { success: true, synced: true };
+	},
+
+	dismissUpdate: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		const workspaceId = locals.activeWorkspaceId;
+		if (!userId || !workspaceId) return { success: false, error: 'Not authenticated' };
+
+		const recipeId = Number((await request.formData()).get('recipeId'));
+		if (!recipeId) return { success: false, error: 'Missing recipe.' };
+
+		if (!(await canModifyWorkspace(userId, workspaceId))) {
+			return { success: false, error: 'Only editors and owners can update recipes.' };
+		}
+
+		const result = await catalogRepo.dismissSourceUpdate(workspaceId, recipeId);
+		if (result.status === 'error') return { success: false, error: result.error };
+		return { success: true, dismissed: true };
 	},
 };

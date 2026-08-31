@@ -8,6 +8,7 @@
 		Loader2,
 		Pencil,
 		Plus,
+		RefreshCw,
 		Star,
 		Trash2,
 	} from 'lucide-svelte';
@@ -52,6 +53,52 @@
 	const canPublish = $derived(canModify && data.isGlobalCatalog);
 	let publishing = $state(false);
 	let customizing = $state(false);
+
+	// fork divergence — the source recipe has a newer version
+	const sourceUpdate = $derived(data.sourceUpdate);
+	let syncDialogOpen = $state(false);
+	let syncing = $state(false);
+	let updateDismissed = $state(false);
+
+	async function doSync() {
+		if (syncing) return;
+		syncing = true;
+		try {
+			const body = new FormData();
+			body.set('recipeId', String(data.recipe.recipeId));
+			const res = await fetch('?/syncFork', { method: 'POST', body });
+			const result = deserialize(await res.text());
+			const d = result.type === 'success' ? (result.data as any) : null;
+			if (d?.success) {
+				toast.success('Recipe updated to the latest version');
+				syncDialogOpen = false;
+				await invalidateAll();
+			} else {
+				toast.error(d?.error || 'Could not update recipe');
+			}
+		} catch {
+			toast.error('Could not update recipe');
+		} finally {
+			syncing = false;
+		}
+	}
+
+	async function doDismiss() {
+		updateDismissed = true; // optimistic
+		try {
+			const body = new FormData();
+			body.set('recipeId', String(data.recipe.recipeId));
+			const res = await fetch('?/dismissUpdate', { method: 'POST', body });
+			const result = deserialize(await res.text());
+			if (!(result.type === 'success' && (result.data as any)?.success)) {
+				updateDismissed = false;
+				toast.error('Could not dismiss update');
+			}
+		} catch {
+			updateDismissed = false;
+			toast.error('Could not dismiss update');
+		}
+	}
 
 	async function togglePublish() {
 		if (publishing) return;
@@ -290,6 +337,24 @@
 {/snippet}
 
 <div class="container mx-auto max-w-6xl px-4">
+	<!-- fork is behind its source — offer to pull the latest -->
+	{#if canModify && sourceUpdate?.updateAvailable && !updateDismissed}
+		<div
+			class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-neon-cyan/30 bg-neon-cyan/10 px-4 py-3 backdrop-blur-md"
+		>
+			<div class="flex items-center gap-2 text-sm">
+				<RefreshCw class="h-4 w-4 text-neon-cyan shrink-0" />
+				A newer version of this recipe is available from the catalog.
+			</div>
+			<div class="flex gap-2 shrink-0">
+				<FancyButton size="sm" variant="default" onclick={() => (syncDialogOpen = true)}>
+					Update
+				</FancyButton>
+				<FancyButton size="sm" onclick={doDismiss}>Dismiss</FancyButton>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Desktop toolbar above hero -->
 	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
 		<div class="flex items-center gap-3">
@@ -453,6 +518,23 @@
 		{/snippet}
 	</Recipe>
 </div>
+
+<!-- update-to-latest confirmation (replaces the fork's content) -->
+<Dialog.Root bind:open={syncDialogOpen}>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Update to latest version?</Dialog.Title>
+			<Dialog.Description>
+				This replaces your copy of <span class="font-semibold">{data.recipe.recipeName}</span> with the
+				latest version from the catalog, including any customizations you've made to it.
+			</Dialog.Description>
+		</Dialog.Header>
+		<Dialog.Footer>
+			<Button variant="outline" onclick={() => (syncDialogOpen = false)}>Cancel</Button>
+			<Button onclick={doSync} disabled={syncing}>{syncing ? 'Updating…' : 'Update'}</Button>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
 
 <!-- delete confirmation -->
 {#if canModify}

@@ -31,7 +31,6 @@ export const getProductCategories = inventoryRepo.getCategoryBreakdown.bind(inve
 export const getRecipeUsageByProduct = inventoryRepo.getRecipeUsage.bind(inventoryRepo);
 export const productSelect = inventoryRepo.getProductOptions.bind(inventoryRepo);
 export const categorySelect = inventoryRepo.getCategoryOptions.bind(inventoryRepo);
-export const seedStarterPantry = inventoryRepo.seedStarterPantry.bind(inventoryRepo);
 export const getCategory = inventoryRepo.findCategoryById.bind(inventoryRepo);
 export const addCategory = inventoryRepo.createCategory.bind(inventoryRepo);
 export const updateCategory = inventoryRepo.updateCategory.bind(inventoryRepo);

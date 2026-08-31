@@ -1,7 +1,6 @@
 // workspace management repository
 import type { QueryResult, Workspace, WorkspaceUser } from '$lib/types';
 
-import { seedStarterPantry } from '../core';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
@@ -184,9 +183,6 @@ export class WorkspaceRepository extends BaseRepository {
 
 				return dbResult as Workspace;
 			});
-
-			// give the new bar a starter pantry so it can make a few recipes out of the box
-			await seedStarterPantry(workspace.workspaceId);
 
 			return {
 				status: 'success',

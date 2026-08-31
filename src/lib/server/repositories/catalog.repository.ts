@@ -852,6 +852,11 @@ export class CatalogRepository extends BaseRepository {
 
 					dbResult = await trx('recipe').insert(query).onConflict('RecipeId').merge();
 
+					// bump content version so forks of this recipe can detect the change
+					await trx('recipe')
+						.where({ RecipeId: keys.recipeId, WorkspaceId: workspaceId })
+						.increment('ContentVersion', 1);
+
 					// delete old steps
 					dbResult = await trx('recipestep').where('RecipeId', keys.recipeId).del();
 				}
@@ -970,6 +975,12 @@ export class CatalogRepository extends BaseRepository {
 					RecipeVersatilityRating: sourceRecipe.recipeVersatilityRating,
 				});
 
+				// snapshot the source's version so we can later tell when it has moved on
+				const sourceVersionRow = await trx('recipe')
+					.where('RecipeId', sourceRecipeId)
+					.select('ContentVersion')
+					.first();
+
 				const [newRecipeId] = await trx('recipe').insert({
 					WorkspaceId: targetWorkspaceId,
 					RecipeCategoryId: sourceRecipe.recipeCategoryId,
@@ -979,6 +990,7 @@ export class CatalogRepository extends BaseRepository {
 					Published: true,
 					SourceRecipeId: sourceRecipeId,
 					SourceWorkspaceId: sourceWorkspaceId,
+					SourceVersion: sourceVersionRow?.contentVersion ?? 0,
 				});
 
 				await trx('recipetechnique').insert({
@@ -1018,6 +1030,151 @@ export class CatalogRepository extends BaseRepository {
 			console.error(error.message);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: error.message || 'Cannot import recipe.' };
+		}
+	}
+
+	// divergence: has this fork's source moved on since it was taken?
+	async getSourceUpdate(
+		workspaceId: string,
+		recipeId: number
+	): Promise<{ updateAvailable: boolean; sourceRetired: boolean } | null> {
+		try {
+			const fork = await this.db
+				.table('recipe')
+				.where({ RecipeId: recipeId, WorkspaceId: workspaceId })
+				.whereNotNull('SourceRecipeId')
+				.select('SourceRecipeId', 'SourceVersion')
+				.first();
+			if (!fork) return null; // not a fork
+
+			const source = await this.db
+				.table('recipe')
+				.where('RecipeId', fork.sourceRecipeId)
+				.select('ContentVersion', 'Retired')
+				.first();
+			if (!source) return { updateAvailable: false, sourceRetired: true };
+
+			return {
+				updateAvailable:
+					!source.retired && Number(source.contentVersion) > Number(fork.sourceVersion ?? 0),
+				sourceRetired: !!source.retired,
+			};
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return null;
+		}
+	}
+
+	// "keep mine" — mark the fork current without pulling changes
+	async dismissSourceUpdate(workspaceId: string, recipeId: number): Promise<QueryResult> {
+		try {
+			const fork = await this.db
+				.table('recipe')
+				.where({ RecipeId: recipeId, WorkspaceId: workspaceId })
+				.whereNotNull('SourceRecipeId')
+				.select('SourceRecipeId')
+				.first();
+			if (!fork) return { status: 'error', error: 'Not a forked recipe.' };
+
+			const source = await this.db
+				.table('recipe')
+				.where('RecipeId', fork.sourceRecipeId)
+				.select('ContentVersion')
+				.first();
+			await this.db
+				.table('recipe')
+				.where({ RecipeId: recipeId, WorkspaceId: workspaceId })
+				.update({ SourceVersion: source?.contentVersion ?? 0 });
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not dismiss update.' };
+		}
+	}
+
+	// pull the latest source content into the fork — replaces the fork's current content
+	async resyncFork(workspaceId: string, recipeId: number): Promise<QueryResult> {
+		try {
+			await this.db.query.transaction(async (trx) => {
+				const fork = await trx('recipe')
+					.where({ RecipeId: recipeId, WorkspaceId: workspaceId })
+					.whereNotNull('SourceRecipeId')
+					.first();
+				if (!fork) throw new Error('Not a forked recipe.');
+
+				const [source] = await trx('basicrecipe').where({ RecipeId: fork.sourceRecipeId });
+				if (!source) throw new Error('Source recipe no longer exists.');
+
+				const sourceSteps = (await trx('recipestep')
+					.where({ RecipeId: fork.sourceRecipeId })
+					.orderBy('RecipeStepId', 'asc')) as Table.RecipeStep[];
+				const sourceVersionRow = await trx('recipe')
+					.where('RecipeId', fork.sourceRecipeId)
+					.select('ContentVersion')
+					.first();
+
+				// fork owns its own gcs objects — copy source images fresh, drop the fork's old ones
+				const copiedDescImageUrl = source.recipeDescriptionImageUrl
+					? await copyGcsFile(source.recipeDescriptionImageUrl, 'recipes', workspaceId)
+					: null;
+				const copiedRecipeImageUrl = source.recipeImageUrl
+					? await copyGcsFile(source.recipeImageUrl, 'recipes', workspaceId)
+					: null;
+				if (fork.recipeImageUrl) await deleteSignedUrl(fork.recipeImageUrl);
+				const oldDesc = await trx('recipedescription')
+					.where('RecipeDescriptionId', fork.recipeDescriptionId)
+					.select('RecipeDescriptionImageUrl')
+					.first();
+				if (oldDesc?.recipeDescriptionImageUrl) await deleteSignedUrl(oldDesc.recipeDescriptionImageUrl);
+
+				await trx('recipedescription')
+					.where('RecipeDescriptionId', fork.recipeDescriptionId)
+					.update({
+						RecipeDescription: source.recipeDescription,
+						RecipeDescriptionImageUrl: copiedDescImageUrl,
+						RecipeSweetnessRating: source.recipeSweetnessRating,
+						RecipeDrynessRating: source.recipeDrynessRating,
+						RecipeStrengthRating: source.recipeStrengthRating,
+						RecipeVersatilityRating: source.recipeVersatilityRating,
+					});
+
+				await trx('recipe')
+					.where({ RecipeId: recipeId, WorkspaceId: workspaceId })
+					.update({
+						RecipeCategoryId: source.recipeCategoryId,
+						RecipeName: source.recipeName,
+						RecipeImageUrl: copiedRecipeImageUrl,
+						SourceVersion: sourceVersionRow?.contentVersion ?? 0,
+					});
+
+				await trx('recipetechnique')
+					.insert({
+						RecipeTechniqueDescriptionId: source.recipeTechniqueDescriptionId,
+						RecipeId: recipeId,
+					})
+					.onConflict('RecipeId')
+					.merge();
+
+				await trx('recipestep').where('RecipeId', recipeId).del();
+				for (const step of sourceSteps) {
+					await trx('recipestep').insert({
+						RecipeId: recipeId,
+						ProductId: step.productId,
+						CategoryId: step.categoryId,
+						MatchMode: step.matchMode,
+						ProductIdQuantityInMilliliters: step.productIdQuantityInMilliliters,
+						ProductIdQuantityUnit: step.productIdQuantityUnit,
+						RecipeStepDescription: step.recipeStepDescription,
+					});
+				}
+			});
+			return { status: 'success' };
+		} catch (error: any) {
+			console.error(error.message);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: error.message || 'Could not update recipe.' };
 		}
 	}
 

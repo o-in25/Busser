@@ -19,20 +19,6 @@ import { deleteSignedUrl } from '../storage';
 import { getGlobalWorkspace } from '../workspace';
 import { BaseRepository, emptyPagination, titleCase } from './base.repository';
 
-// common global products stocked into a new bar so it can make a few recipes right away (matched by name)
-const STARTER_PANTRY = [
-	'Lime Juice',
-	'Lemon Juice',
-	'Simple Syrup',
-	'Beefeater London Dry Gin',
-	"Tito's Handmade Vodka",
-	'Evan Williams Bottled-In-Bond Bourbon',
-	'Angostura Aromatic Bitters',
-	'Cointreau',
-	'Soda Water',
-	'Grenadine',
-];
-
 export class InventoryRepository extends BaseRepository {
 	constructor(db: DbProvider) {
 		super(db);
@@ -146,7 +132,6 @@ export class InventoryRepository extends BaseRepository {
 
 				childRowId = childRow;
 
-				// dual-write overlay when stocked
 				if (product.productInStockQuantity > 0) {
 					await trx('workspacestock').insert({
 						WorkspaceId: workspaceId,
@@ -224,7 +209,6 @@ export class InventoryRepository extends BaseRepository {
 					.onConflict('ProductId')
 					.merge();
 
-				// dual-write overlay
 				await trx('workspacestock')
 					.insert({
 						WorkspaceId: workspaceId,
@@ -374,10 +358,15 @@ export class InventoryRepository extends BaseRepository {
 					.where('workspaceId', workspaceId)
 					.update({ ProductInStockQuantity: quantity });
 
-				// dual-write overlay for owned products only
 				if (ownedIds.length > 0) {
 					await trx('workspacestock')
-						.insert(ownedIds.map((ProductId) => ({ WorkspaceId: workspaceId, ProductId, Quantity: quantity })))
+						.insert(
+							ownedIds.map((ProductId) => ({
+								WorkspaceId: workspaceId,
+								ProductId,
+								Quantity: quantity,
+							}))
+						)
 						.onConflict(['WorkspaceId', 'ProductId'])
 						.merge();
 				}
@@ -410,7 +399,6 @@ export class InventoryRepository extends BaseRepository {
 					.where('workspaceId', workspaceId)
 					.update({ ProductInStockQuantity: newQuantity });
 
-				// dual-write overlay
 				await trx('workspacestock')
 					.insert({ WorkspaceId: workspaceId, ProductId: productId, Quantity: newQuantity })
 					.onConflict(['WorkspaceId', 'ProductId'])
@@ -589,29 +577,6 @@ export class InventoryRepository extends BaseRepository {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return [];
-		}
-	}
-
-	// stock a curated starter set of global products into a brand-new bar (best-effort onboarding)
-	async seedStarterPantry(workspaceId: string): Promise<void> {
-		try {
-			const globalId = getGlobalWorkspace();
-			const rows = (await this.db
-				.table('product')
-				.where('WorkspaceId', globalId)
-				.whereIn('ProductName', STARTER_PANTRY)
-				.select('ProductId')) as Array<{ productId: number }>;
-			if (rows.length === 0) return;
-
-			await this.db
-				.table('workspacestock')
-				.insert(rows.map((r) => ({ WorkspaceId: workspaceId, ProductId: r.productId, Quantity: 1 })))
-				.onConflict(['WorkspaceId', 'ProductId'])
-				.ignore();
-		} catch (error: any) {
-			// onboarding nicety — never block workspace creation on it
-			console.error('Failed to seed starter pantry:', error.message);
-			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 		}
 	}
 
