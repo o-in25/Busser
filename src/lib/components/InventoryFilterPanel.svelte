@@ -1,31 +1,37 @@
 <script lang="ts">
-	import { ArrowUpDown, List, Package, Settings2, Tags } from 'lucide-svelte';
+	import { ArrowUpDown, List, Package, Settings2, Store, Tags } from 'lucide-svelte';
 
 	import * as Select from '$lib/components/ui/select';
-	import type { CategoryGroupCount } from '$lib/types';
+	import type { CategoryGroupCount, Supplier } from '$lib/types';
 
 	let {
 		categories,
+		suppliers = [],
 		selectedCategory,
+		selectedSupplier,
 		stockFilter,
 		sortOption,
 		perPage,
 		showStock = true,
 		basePath = '/inventory',
 		onCategoryChange,
+		onSupplierChange,
 		onStockFilterChange,
 		onSortChange,
 		onPerPageChange,
 		onReset,
 	}: {
 		categories: CategoryGroupCount[];
+		suppliers?: Supplier[];
 		selectedCategory: string;
+		selectedSupplier: string;
 		stockFilter: string;
 		sortOption: string;
 		perPage: string;
 		showStock?: boolean;
 		basePath?: string;
 		onCategoryChange: (value: string) => void;
+		onSupplierChange: (value: string) => void;
 		onStockFilterChange: (value: string) => void;
 		onSortChange: (value: string) => void;
 		onPerPageChange: (value: string) => void;
@@ -57,6 +63,12 @@
 		return cat ? `${cat.categoryGroupName} (${cat.count})` : 'All Categories';
 	});
 
+	const supplierLabel = $derived.by(() => {
+		if (!selectedSupplier || selectedSupplier === 'all') return 'All Suppliers';
+		const sup = suppliers.find((s) => String(s.supplierId) === selectedSupplier);
+		return sup?.supplierName || 'All Suppliers';
+	});
+
 	const stockFilterLabel = $derived.by(() => {
 		const option = stockFilterOptions.find((o) => o.value === stockFilter);
 		return option?.label || 'All Stock Levels';
@@ -74,6 +86,7 @@
 
 	const hasNonDefaultFilters = $derived(
 		(selectedCategory && selectedCategory !== 'all') ||
+			(selectedSupplier && selectedSupplier !== 'all') ||
 			(stockFilter && stockFilter !== 'all') ||
 			sortOption !== 'name-asc' ||
 			perPage !== '20'
@@ -115,6 +128,33 @@
 			</Select.Content>
 		</Select.Root>
 	</div>
+
+	<!-- supplier -->
+	{#if suppliers.length > 0}
+		<div class="flex flex-col gap-1.5">
+			<span class="text-sm font-medium text-muted-foreground">Supplier</span>
+			<Select.Root
+				type="single"
+				value={selectedSupplier}
+				onValueChange={(v) => onSupplierChange(v ?? '')}
+			>
+				<Select.Trigger class="w-full">
+					<Store class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="All Suppliers">{supplierLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Item value="all" label="All Suppliers" />
+					<Select.Separator />
+					{#each suppliers as supplier}
+						<Select.Item
+							value={String(supplier.supplierId)}
+							label={supplier.supplierName || 'Unknown'}
+						/>
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
+	{/if}
 
 	<!-- stock level -->
 	{#if showStock}

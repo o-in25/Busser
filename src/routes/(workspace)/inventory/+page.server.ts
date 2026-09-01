@@ -11,6 +11,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 
 	const productName = url.searchParams.get('productName') || '';
 	const categoryGroupId = url.searchParams.get('categoryGroupId') || '';
+	const supplierFilter = url.searchParams.get('supplierId') || '';
 	const stockFilter = url.searchParams.get('stockFilter') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 
@@ -26,12 +27,15 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	if (categoryGroupId) {
 		filter.categoryGroupId = Number(categoryGroupId);
 	}
+	if (supplierFilter) {
+		filter.supplierId = Number(supplierFilter);
+	}
 	if (stockFilter) {
 		filter.stockFilter = stockFilter;
 	}
 
 	// Fetch all data in parallel
-	const [inventoryResult, stats, categories] = await Promise.all([
+	const [inventoryResult, stats, categories, suppliers] = await Promise.all([
 		inventoryRepo.findAll(
 			workspaceId,
 			page,
@@ -41,6 +45,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		),
 		inventoryRepo.getStats(workspaceId),
 		inventoryRepo.getCategoryBreakdown(workspaceId),
+		inventoryRepo.getSuppliers(workspaceId),
 	]);
 
 	const { data, pagination } = inventoryResult;
@@ -65,11 +70,13 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		pagination,
 		stats,
 		categories,
+		suppliers,
 		recipeUsage,
 		recentlyAdded,
 		filters: {
 			search: productName,
 			categoryGroupId,
+			supplierId: supplierFilter,
 			stockFilter,
 			sort,
 			page,

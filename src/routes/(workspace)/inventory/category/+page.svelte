@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Layers, Package, Pencil, Plus, Search, Tags, Trash2, X } from 'lucide-svelte';
+	import { Layers, Package, Plus, Search, Tags, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -22,7 +22,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
 	import type { Category } from '$lib/types';
-	import { cn } from '$lib/utils';
 
 	import { notificationStore, workspaceSwitching } from '../../../../stores';
 	import type { PageData } from './$types';
@@ -308,29 +307,7 @@
 		</Card.Content>
 	</Card.Root>
 {:else if viewMode === 'table'}
-	<Card.Root>
-		<Card.Header>
-			<div class="flex items-center justify-between">
-				<div>
-					<Card.Title class="flex items-center gap-2">
-						<Tags class="h-5 w-5" />
-						Categories
-					</Card.Title>
-					<Card.Description>
-						{#if activeGroup}
-							Showing {filteredCategories.length} categor{filteredCategories.length === 1
-								? 'y'
-								: 'ies'} in "{activeGroup}"
-						{:else}
-							{filteredCategories.length} categor{filteredCategories.length === 1 ? 'y' : 'ies'} total
-						{/if}
-					</Card.Description>
-				</div>
-				<Badge variant="secondary" class="text-sm">
-					{filteredCategories.length}
-				</Badge>
-			</div>
-		</Card.Header>
+	<Card.Root bare class="glass-panel isolate">
 		<Card.Content class="p-0">
 			<div class="overflow-x-auto">
 				<Table.Root>
@@ -339,10 +316,7 @@
 							<Table.Head class="pl-6">Name</Table.Head>
 							<Table.Head class="hidden sm:table-cell">Group</Table.Head>
 							<Table.Head>Description</Table.Head>
-							<Table.Head class="text-center">Products</Table.Head>
-							{#if canModify}
-								<Table.Head class="text-right pr-6">Actions</Table.Head>
-							{/if}
+							<Table.Head class="text-center pr-6">Products</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
@@ -359,45 +333,13 @@
 								<Table.Cell class="text-muted-foreground max-w-md truncate">
 									{category.categoryDescription || '—'}
 								</Table.Cell>
-								<Table.Cell class="text-center">
+								<Table.Cell class="text-center pr-6">
 									<span
 										class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium"
 									>
 										{category.productCount}
 									</span>
 								</Table.Cell>
-								{#if canModify}
-									<Table.Cell class="text-right pr-6">
-										<!-- svelte-ignore a11y_click_events_have_key_events -->
-										<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-										<div
-											class="flex items-center justify-end gap-2"
-											role="group"
-											onclick={(e) => e.stopPropagation()}
-										>
-											<a
-												href="/inventory/category/{category.categoryId}/edit"
-												class={cn(
-													buttonVariants({ variant: 'outline', size: 'icon' }),
-													'h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white'
-												)}
-												title="Edit category"
-											>
-												<Pencil class="w-4 h-4" />
-											</a>
-											<Button
-												variant="outline"
-												size="icon"
-												class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
-												onclick={() => openDeleteDialog(category.categoryId, category.categoryName)}
-												title="Delete category"
-												disabled={category.productCount > 0}
-											>
-												<Trash2 class="w-4 h-4" />
-											</Button>
-										</div>
-									</Table.Cell>
-								{/if}
 							</Table.Row>
 						{/each}
 					</Table.Body>
@@ -424,43 +366,13 @@
 									{category.categoryDescription}
 								</p>
 							{/if}
-							<div class="flex items-center justify-between gap-2 mt-1">
+							<div class="mt-1">
 								<span
 									class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium"
 								>
 									{category.productCount}
 									{category.productCount === 1 ? 'product' : 'products'}
 								</span>
-								{#if canModify}
-									<!-- svelte-ignore a11y_click_events_have_key_events -->
-									<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-									<div
-										class="flex items-center gap-1"
-										role="group"
-										onclick={(e) => e.stopPropagation()}
-									>
-										<a
-											href="/inventory/category/{category.categoryId}/edit"
-											class={cn(
-												buttonVariants({ variant: 'outline', size: 'icon' }),
-												'h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white'
-											)}
-											title="Edit category"
-										>
-											<Pencil class="w-4 h-4" />
-										</a>
-										<Button
-											variant="outline"
-											size="icon"
-											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
-											onclick={() => openDeleteDialog(category.categoryId, category.categoryName)}
-											title="Delete category"
-											disabled={category.productCount > 0}
-										>
-											<Trash2 class="w-4 h-4" />
-										</Button>
-									</div>
-								{/if}
 							</div>
 						</div>
 					</Card.Content>
@@ -484,6 +396,11 @@
 	category={selectedCategory}
 	{canModify}
 	onProductDeleted={handleProductDeleted}
+	onDelete={() => {
+		if (!selectedCategory) return;
+		drawerOpen = false;
+		openDeleteDialog(selectedCategory.categoryId, selectedCategory.categoryName);
+	}}
 />
 
 <!-- Delete Confirmation Dialog -->

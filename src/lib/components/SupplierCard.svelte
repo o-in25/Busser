@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ExternalLink, MapPin, Phone, Trash2 } from 'lucide-svelte';
+	import { ExternalLink, MapPin, Pencil, Phone, Trash2 } from 'lucide-svelte';
 
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -10,11 +10,13 @@
 		productCount = 0,
 		canModify = false,
 		onRemove,
+		onEdit,
 	}: {
 		supplier: Supplier;
 		productCount?: number;
 		canModify?: boolean;
 		onRemove?: (supplierId: number) => void;
+		onEdit?: (supplier: Supplier) => void;
 	} = $props();
 </script>
 
@@ -31,15 +33,29 @@
 				{/if}
 			</div>
 
-			{#if canModify && onRemove && supplier.supplierId !== 1}
-				<Button
-					variant="ghost"
-					size="sm"
-					class="shrink-0 text-muted-foreground hover:text-destructive"
-					onclick={() => onRemove(supplier.supplierId)}
-				>
-					<Trash2 class="h-4 w-4" />
-				</Button>
+			{#if canModify && supplier.supplierIsOwned && !supplier.supplierIsDefault}
+				<div class="flex shrink-0 items-center">
+					{#if onEdit}
+						<Button
+							variant="ghost"
+							size="sm"
+							class="text-muted-foreground hover:text-foreground"
+							onclick={() => onEdit(supplier)}
+						>
+							<Pencil class="h-4 w-4" />
+						</Button>
+					{/if}
+					{#if onRemove}
+						<Button
+							variant="ghost"
+							size="sm"
+							class="text-muted-foreground hover:text-destructive"
+							onclick={() => onRemove(supplier.supplierId)}
+						>
+							<Trash2 class="h-4 w-4" />
+						</Button>
+					{/if}
+				</div>
 			{/if}
 		</div>
 

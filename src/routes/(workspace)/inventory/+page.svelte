@@ -42,6 +42,7 @@
 	let viewMode = $state<'grid' | 'list' | 'table'>('table');
 	let searchInput = $state(data.filters?.search || '');
 	let selectedCategory = $state(data.filters?.categoryGroupId || 'all');
+	let selectedSupplier = $state(data.filters?.supplierId || 'all');
 	let stockFilter = $state(data.filters?.stockFilter || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
 	let perPage = $state(String(data.filters?.perPage || 20));
@@ -57,6 +58,7 @@
 	const activeFilterCount = $derived.by(() => {
 		let count = 0;
 		if (selectedCategory && selectedCategory !== 'all') count++;
+		if (selectedSupplier && selectedSupplier !== 'all') count++;
 		if (stockFilter && stockFilter !== 'all') count++;
 		if (sortOption !== 'name-asc') count++;
 		if (perPage !== '20') count++;
@@ -196,6 +198,7 @@
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const category =
 			overrides.categoryGroupId !== undefined ? overrides.categoryGroupId : selectedCategory;
+		const supplier = overrides.supplierId !== undefined ? overrides.supplierId : selectedSupplier;
 		const stock = overrides.stockFilter !== undefined ? overrides.stockFilter : stockFilter;
 		const sort = overrides.sort !== undefined ? overrides.sort : sortOption;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
@@ -204,6 +207,7 @@
 		params.set('page', String(pageNum));
 		if (search) params.set('productName', String(search));
 		if (category && category !== 'all') params.set('categoryGroupId', String(category));
+		if (supplier && supplier !== 'all') params.set('supplierId', String(supplier));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
 		if (pp && String(pp) !== '20') params.set('perPage', String(pp));
@@ -226,6 +230,12 @@
 	function handleCategoryChange(categoryGroupId: string) {
 		selectedCategory = categoryGroupId;
 		goto(buildUrl({ categoryGroupId, page: 1 }), { keepFocus: true });
+	}
+
+	// Handle supplier filter
+	function handleSupplierChange(value: string) {
+		selectedSupplier = value;
+		goto(buildUrl({ supplierId: value, page: 1 }), { keepFocus: true });
 	}
 
 	// Handle stock filter change
@@ -257,6 +267,11 @@
 		goto(buildUrl({ categoryGroupId: 'all' }), { keepFocus: true });
 	}
 
+	function clearSupplier() {
+		selectedSupplier = 'all';
+		goto(buildUrl({ supplierId: 'all' }), { keepFocus: true });
+	}
+
 	function clearStockFilter() {
 		stockFilter = 'all';
 		goto(buildUrl({ stockFilter: 'all' }), { keepFocus: true });
@@ -265,20 +280,23 @@
 	function clearAllFilters() {
 		searchInput = '';
 		selectedCategory = 'all';
+		selectedSupplier = 'all';
 		stockFilter = 'all';
 		sortOption = 'name-asc';
 		goto(`${basePath}?page=1`);
 	}
 
-	// reset filters behind the panel (category, stock, sort, perPage)
+	// reset filters behind the panel (category, supplier, stock, sort, perPage)
 	function resetPanelFilters() {
 		selectedCategory = 'all';
+		selectedSupplier = 'all';
 		stockFilter = 'all';
 		sortOption = 'name-asc';
 		perPage = '20';
 		goto(
 			buildUrl({
 				categoryGroupId: 'all',
+				supplierId: 'all',
 				stockFilter: 'all',
 				sort: 'name-asc',
 				perPage: '20',
@@ -298,6 +316,7 @@
 	const hasActiveFilters = $derived(
 		!!searchInput ||
 			(selectedCategory && selectedCategory !== 'all') ||
+			(selectedSupplier && selectedSupplier !== 'all') ||
 			(stockFilter && stockFilter !== 'all')
 	);
 
@@ -305,6 +324,7 @@
 	$effect(() => {
 		searchInput = data.filters?.search || '';
 		selectedCategory = data.filters?.categoryGroupId || 'all';
+		selectedSupplier = data.filters?.supplierId || 'all';
 		stockFilter = data.filters?.stockFilter || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
 		perPage = String(data.filters?.perPage || 20);
@@ -367,13 +387,16 @@
 		>
 			<InventoryFilterPanel
 				categories={data.categories}
+				suppliers={data.suppliers}
 				{selectedCategory}
+				{selectedSupplier}
 				{stockFilter}
 				{sortOption}
 				{perPage}
 				{showStock}
 				{basePath}
 				onCategoryChange={handleCategoryChange}
+				onSupplierChange={handleSupplierChange}
 				onStockFilterChange={handleStockFilterChange}
 				onSortChange={handleSortChange}
 				onPerPageChange={handlePerPageChange}
@@ -390,11 +413,14 @@
 <ActiveFiltersDisplay
 	search={searchInput}
 	categoryGroupId={selectedCategory}
+	supplierId={selectedSupplier}
 	{stockFilter}
 	categories={data.categories}
+	suppliers={data.suppliers}
 	{showStock}
 	onClearSearch={clearSearch}
 	onClearCategory={clearCategory}
+	onClearSupplier={clearSupplier}
 	onClearStockFilter={clearStockFilter}
 	onClearAll={clearAllFilters}
 />

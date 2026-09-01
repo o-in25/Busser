@@ -75,7 +75,9 @@
 	</div>
 
 	<!-- active step body -->
-	<div class="min-h-[18rem] overflow-x-hidden">
+	<!-- overflow-x-clip (not hidden) contains the horizontal slide without forcing overflow-y to
+	     auto, so field dropdowns can escape downward over the footer instead of being clipped -->
+	<div class="min-h-[18rem] overflow-x-clip">
 		{#key currentStep}
 			<div
 				in:fly={{ x: direction * 160, duration: 220, delay: 180 }}

@@ -36,12 +36,19 @@
 	import ImagePrompt from './ImagePrompt.svelte';
 	import Prompt from './Prompt.svelte';
 	import FormShell from './form/FormShell.svelte';
+	import SearchableSelect from './form/SearchableSelect.svelte';
 
 	let {
 		action,
 		product = null,
+		isShared = false,
 		modalOpen = $bindable(false),
-	}: { action: ComponentAction; product?: Product | null; modalOpen?: boolean } = $props();
+	}: {
+		action: ComponentAction;
+		product?: Product | null;
+		isShared?: boolean;
+		modalOpen?: boolean;
+	} = $props();
 
 	let slug = $page.params.id;
 	let productName = $state('');
@@ -248,7 +255,9 @@
 
 		const result = await response.json();
 		if ('data' in result) {
-			$notificationStore.success = { message: 'Inventory item deleted.' };
+			$notificationStore.success = {
+				message: isShared ? 'Removed from your inventory.' : 'Inventory item deleted.',
+			};
 			goto('/inventory');
 		} else {
 			$notificationStore.error = { message: result.message || result.error };
@@ -280,7 +289,7 @@
 		3: true, // description optional
 	});
 	const canProceed = $derived(stepValid[currentStep as keyof typeof stepValid] ?? true);
-	const isFormValid = $derived(stepValid[0] && stepValid[1]);
+	const isFormValid = $derived(stepValid[0] && stepValid[1] && !isShared);
 
 	// Track categoryId changes to mark as touched
 	$effect(() => {
@@ -347,6 +356,14 @@
 		}}
 		enctype="multipart/form-data"
 	>
+		{#if isShared}
+			<div
+				class="mb-4 rounded-lg border border-border/50 bg-muted/40 backdrop-blur-sm px-4 py-3 text-sm text-muted-foreground"
+			>
+				Shared Busser product — details are read-only. Manage its stock from your inventory, or
+				remove it from your bar.
+			</div>
+		{/if}
 		<FormShell
 			steps={formSteps}
 			bind:currentStep
@@ -359,6 +376,8 @@
 			submitLabel="Save Item"
 		>
 			{#snippet children({ step })}
+				<!-- shared global products are read-only here — disable every field at once -->
+				<fieldset disabled={isShared} class="contents">
 				{#if step === 0}
 					<!-- Basic Info Step -->
 					<div class="space-y-4">
@@ -399,19 +418,14 @@
 							{/if}
 						</div>
 						<div>
-							<Autocomplete
+							<SearchableSelect
 								label="Supplier"
 								fetchUrl="/api/select/suppliers"
 								name="supplierId"
-								grant=""
 								key={product?.supplierName || 'Any'}
 								required={true}
 								bind:value={supplierId}
 							/>
-							<p class="text-xs text-muted-foreground mt-1.5">
-								Where it comes from. Choose "Homemade" for things you make in-house — syrups,
-								juices, cordials.
-							</p>
 						</div>
 					</div>
 				{:else if step === 1}
@@ -591,6 +605,7 @@
 						/>
 					</div>
 				{/if}
+				</fieldset>
 			{/snippet}
 		</FormShell>
 	</form>
@@ -598,14 +613,19 @@
 	<Dialog.Root bind:open={modalOpen}>
 		<Dialog.Content>
 			<Dialog.Header>
-				<Dialog.Title>Confirm Delete</Dialog.Title>
+				<Dialog.Title>{isShared ? 'Remove from inventory' : 'Confirm Delete'}</Dialog.Title>
 				<Dialog.Description>
-					Delete <span class="font-semibold">{product?.productName}</span> from inventory?
-					<p
-						class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
-					>
-						Once deleted, it can't be recovered.
-					</p>
+					{#if isShared}
+						Remove <span class="font-semibold">{product?.productName}</span> from your inventory? The
+						shared Busser product isn't affected — you can add it back anytime.
+					{:else}
+						Delete <span class="font-semibold">{product?.productName}</span> from inventory?
+						<p
+							class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
+						>
+							Once deleted, it can't be recovered.
+						</p>
+					{/if}
 				</Dialog.Description>
 			</Dialog.Header>
 			<Dialog.Footer>
@@ -617,7 +637,7 @@
 						modalOpen = false;
 					}}
 				>
-					Delete
+					{isShared ? 'Remove' : 'Delete'}
 				</Button>
 			</Dialog.Footer>
 		</Dialog.Content>
@@ -643,6 +663,6 @@
 		class="mt-3 mx-auto w-fit flex items-center gap-2 text-xs text-destructive/60 hover:text-destructive bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-destructive/20 hover:border-destructive/40 shadow-sm transition-colors cursor-pointer"
 	>
 		<Trash2 class="h-3 w-3" />
-		<span>Delete</span>
+		<span>{isShared ? 'Remove from my inventory' : 'Delete'}</span>
 	</button>
 {/if}

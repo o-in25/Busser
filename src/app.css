@@ -763,39 +763,6 @@
 		focus:border-primary-500/50 transition-all duration-200;
 }
 
-@utility glass-table {
-	@apply backdrop-blur-lg bg-white/50 dark:bg-zinc-800/40
-		border border-zinc-200/40 dark:border-zinc-700/30
-		rounded-xl overflow-hidden;
-}
-
-@utility glass-table-header {
-	@apply bg-zinc-100/60 dark:bg-zinc-800/60
-		border-b border-zinc-200/40 dark:border-zinc-700/40;
-}
-
-@utility glass-table-row {
-	@apply border-b border-zinc-200/30 dark:border-zinc-700/25 transition-colors;
-
-	@media (hover: hover) {
-		&:hover {
-			@apply bg-white/40 dark:bg-zinc-700/30;
-		}
-	}
-
-	@media (hover: none) {
-		&:active {
-			background: theme(--color-zinc-200/0.3);
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		&:active {
-			background: initial;
-		}
-	}
-}
-
 @utility reveal-on-scroll {
 	opacity: 0;
 	transform: translateY(24px);

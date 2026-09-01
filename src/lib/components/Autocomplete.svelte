@@ -22,6 +22,7 @@
 
 	let items: any[] = [];
 	let show = false;
+	let typing = false;
 	let selectValue = key || '';
 	let prevValue: string | null = null;
 	let prevKey: string | undefined = key;
@@ -52,22 +53,27 @@
 		prevValue = value;
 	});
 
-	$: search = items.filter(
-		({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1
-	);
+	// show everything on focus; only narrow once the user actually types
+	$: search = typing
+		? items.filter(({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1)
+		: items;
+	// resolve the value off the full list, independent of what's currently visible
 	$: value =
-		search.find(({ name }) => {
-			return name.toLowerCase().trim() === selectValue.toLowerCase().trim();
-		})?.value ?? null;
+		items.find(({ name }) => name.toLowerCase().trim() === selectValue.toLowerCase().trim())
+			?.value ?? null;
 	$: disabled = items.length === 0;
 
-	const showAutocomplete = () => (show = true);
+	const showAutocomplete = () => {
+		typing = false;
+		show = true;
+	};
 	const hideAutocomplete = () =>
 		setTimeout(() => {
 			if (!search.length) {
 				selectValue = '';
 			}
 			show = false;
+			typing = false;
 		}, 100);
 
 	const handleClick = (item: SelectOption) => {
@@ -98,6 +104,7 @@
 			{placeholder}
 			onfocus={showAutocomplete}
 			onblur={hideAutocomplete}
+			oninput={() => (typing = true)}
 			bind:value={selectValue}
 			{required}
 			{disabled}

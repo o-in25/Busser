@@ -37,12 +37,12 @@
 						onclick={() => (modalOpen = true)}
 					>
 						<Trash2 class="h-4 w-4 mr-2" />
-						Delete Product
+						{data.isShared ? 'Remove from my inventory' : 'Delete Product'}
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		</div>
 	</div>
 
-	<InventoryForm action="edit" product={data.product} bind:modalOpen />
+	<InventoryForm action="edit" product={data.product} isShared={data.isShared} bind:modalOpen />
 </div>

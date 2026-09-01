@@ -18,6 +18,13 @@ export type Category = {
 	categoryGroupId: number | null;
 };
 
+// suppliertype lookup table (homemade, liquor_store, other)
+export type SupplierType = {
+	supplierTypeId: number;
+	supplierTypeName: string;
+	supplierTypeDescription: string | null;
+};
+
 // supplier table
 export type Supplier = {
 	supplierId: number;
@@ -27,7 +34,10 @@ export type Supplier = {
 	supplierPhone: string | null;
 	supplierAddress: string | null;
 	supplierPlaceId: string | null;
-	supplierType: string | null;
+	supplierTypeId: number | null;
+	supplierTypeName: string | null; // joined from suppliertype for display
+	supplierIsDefault?: boolean; // the catch-all "Any" / reassignment target
+	supplierIsOwned?: boolean; // owned by this workspace (vs a view-only global)
 };
 
 // shopping list item (out-of-stock product enriched with supplier + recipe data)
