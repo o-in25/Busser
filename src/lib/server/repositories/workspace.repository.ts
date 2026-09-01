@@ -1,6 +1,6 @@
 import type { QueryResult, Workspace, WorkspaceUser } from '$lib/types';
 
-import { seedDefaultStock } from '../core';
+import { seedBaselineInventory } from '../core';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
@@ -181,8 +181,7 @@ export class WorkspaceRepository extends BaseRepository {
 				return dbResult as Workspace;
 			});
 
-			// seed the new bar's default stock so it can make a few recipes out of the box
-			await seedDefaultStock(workspace.workspaceId);
+			await seedBaselineInventory(workspace.workspaceId);
 
 			return {
 				status: 'success',

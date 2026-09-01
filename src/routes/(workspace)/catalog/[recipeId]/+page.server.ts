@@ -8,14 +8,12 @@ import { canModifyWorkspace, getUserWorkspaces, getGlobalWorkspace } from '$lib/
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, parent, locals }) => {
-	// per-request, not module-load — a top-level call throws at build
 	const globalWorkspace = getGlobalWorkspace();
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
 	const { recipeId } = params;
 	const userId = locals.user?.userId;
 
-	// owners/editors can view + manage drafts; viewers get a 404 on unpublished
 	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
 
 	if (!recipeId || isNaN(Number(recipeId))) {
@@ -36,13 +34,11 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
-	// per-step images + inventory-backed substitutes for the workspace
 	const stepExtras = await catalogRepo.getStepExtras(workspaceId, result.data.recipeSteps);
 
 	const isFavorite = userId ? await userRepo.isFavorite(userId, Number(recipeId)) : false;
 	const isFeatured = await catalogRepo.isFeatured(workspaceId, Number(recipeId));
 
-	// import context: only when viewing global catalog as a non-admin authenticated user
 	let importData: {
 		editableWorkspaces: { workspaceId: string; workspaceName: string }[];
 		importedTo: string[];
@@ -56,14 +52,13 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		const wsResult = await getUserWorkspaces(userId);
 		const allWorkspaces = wsResult.status === 'success' ? (wsResult.data ?? []) : [];
 
-		// editable workspaces excluding global catalog
 		const editableWorkspaces = allWorkspaces
 			.filter((w) => w.workspaceId !== globalWorkspace)
 			.filter((w) => w.workspaceRole === 'owner' || w.workspaceRole === 'editor')
 			.map((w) => ({ workspaceId: w.workspaceId, workspaceName: w.workspaceName }));
 
+		// check which workspaces already have this recipe imported
 		if (editableWorkspaces.length > 0) {
-			// check which workspaces already have this recipe imported
 			const importedTo: string[] = [];
 			const nameCollisions: string[] = [];
 
@@ -82,7 +77,6 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 				if (nameMatch) nameCollisions.push(ws.workspaceId);
 			}
 
-			// eligibility: all steps must use category matching
 			const eligible = result.data.recipeSteps.every(
 				(s) => s.matchMode === 'ANY_IN_CATEGORY' || s.matchMode === 'ANY_IN_PARENT_CATEGORY'
 			);
@@ -91,10 +85,13 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		}
 	}
 
-	// a recipe surfaced via the union but owned by the global catalog can only be customized (forked), not edited in place
 	const isOwned = result.data.recipe.workspaceId === workspaceId;
 
-	// for an owned fork, has its source been updated since we forked?
+	const ownedSameName =
+		!!userId &&
+		!isOwned &&
+		!!(await catalogRepo.findByName(workspaceId, result.data.recipe.recipeName));
+
 	const sourceUpdate =
 		isOwned && result.data.recipe.sourceRecipeId
 			? await catalogRepo.getSourceUpdate(workspaceId, Number(recipeId))
@@ -110,6 +107,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		canModify,
 		isGlobalCatalog,
 		isOwned,
+		ownedSameName,
 		sourceUpdate,
 	};
 };

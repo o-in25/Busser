@@ -7,11 +7,11 @@ import type { AdvancedFilter } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, parent, locals }) => {
-	const { workspace } = await parent();
+	const { workspace, isGlobalWorkspace } = await parent();
 	const { workspaceId } = workspace;
 	const userId = locals.user?.userId;
 
-	// owners/editors see drafts (badged) for review; viewers don't
+	// owners/editors see drafts
 	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
 
 	const page = parseInt(url.searchParams.get('page') || '1');
@@ -22,8 +22,9 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const showFilter = url.searchParams.get('show') || ''; // 'favorites' | 'featured' | ''
 	const mood = url.searchParams.get('mood') || '';
 
-	// advanced search params
-	const readyToMake = url.searchParams.get('readyToMake') || '';
+	const makeableLensAvailable = !!userId && !isGlobalWorkspace;
+	const readyToMakeActive = makeableLensAvailable && url.searchParams.get('readyToMake') === '1';
+
 	const ingredientInclude = url.searchParams.get('ingredientInclude') || '';
 	const ingredientAny = url.searchParams.get('ingredientAny') || '';
 	const ingredientExclude = url.searchParams.get('ingredientExclude') || '';
@@ -35,10 +36,9 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const ratingMin = url.searchParams.get('ratingMin') || '';
 	const ratingMax = url.searchParams.get('ratingMax') || '';
 
-	// parse comma-separated ingredient ID lists
-	const parseIds = (s: string) =>
-		s
-			? s
+	const parseIds = (ids: string) =>
+		ids
+			? ids
 					.split(',')
 					.map(Number)
 					.filter((n) => !isNaN(n) && n > 0)
@@ -47,7 +47,6 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const anyIds = parseIds(ingredientAny);
 	const excludeIds = parseIds(ingredientExclude);
 
-	// Build filter
 	const filter: Record<string, any> = {};
 	if (search) {
 		filter.recipeName = search;
@@ -56,9 +55,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		filter.recipeCategoryId = parseInt(spiritId);
 	}
 
-	// build advanced filter
 	const advancedFilter: AdvancedFilter = {};
-	if (readyToMake === '1') advancedFilter.readyToMake = true;
+	if (readyToMakeActive) advancedFilter.readyToMake = true;
 	if (includeIds.length) advancedFilter.ingredientInclude = includeIds;
 	if (anyIds.length) advancedFilter.ingredientAny = anyIds;
 	if (excludeIds.length) advancedFilter.ingredientExclude = excludeIds;
@@ -73,13 +71,11 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 
 	const hasAdvancedFilter = Object.keys(advancedFilter).length > 0;
 
-	// look up product names for all referenced ingredient IDs
 	const allIngredientIds = [...new Set([...includeIds, ...anyIds, ...excludeIds])];
 	const ingredientNameLookups = allIngredientIds.map((id) =>
 		inventoryRepo.findById(workspaceId, id).then((p) => [id, p?.productName || String(id)] as const)
 	);
 
-	// Get recipes, spirits, favorites, featured, preparation methods, and ingredient names in parallel
 	const [
 		catalogResult,
 		spirits,
@@ -109,7 +105,6 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		...ingredientNameLookups,
 	]);
 
-	// ready-to-make and almost-there counts for the hero stat badges
 	const availableCount =
 		availableResult.status === 'success' ? (availableResult.data?.length ?? 0) : 0;
 	const almostThereCount = almostThereRecipes.length;
@@ -120,13 +115,10 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const preparationMethods =
 		prepMethodsResult.status === 'success' ? (prepMethodsResult.data ?? []) : [];
 
-	// Build sets for quick lookup
 	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
 	const featuredRecipeIds = new Set(featuredRecipes.map((f) => f.recipeId));
 
-	// Apply show filter (favorites/featured)
 	if (showFilter === 'favorites') {
-		// Use the actual favorite recipes, not filtered paginated results
 		data = favoriteRecipes;
 		pagination = {
 			...pagination,
@@ -135,7 +127,6 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			currentPage: 1,
 		};
 	} else if (showFilter === 'featured') {
-		// Use the actual featured recipes, not filtered paginated results
 		data = featuredRecipes;
 		pagination = {
 			...pagination,
@@ -145,7 +136,6 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		};
 	}
 
-	// Apply rating post-filter (score formula is too complex for SQL)
 	if (advancedFilter.ratingMin !== undefined || advancedFilter.ratingMax !== undefined) {
 		data = data.filter((recipe) => {
 			const score = calculateOverallScore(
@@ -165,7 +155,6 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		};
 	}
 
-	// Apply client-side sorting
 	switch (sort) {
 		case 'name-asc':
 			data.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
@@ -187,7 +176,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 					b.recipeDrynessRating,
 					b.recipeStrengthRating
 				);
-				return scoreB - scoreA; // Descending (highest first)
+				return scoreB - scoreA;
 			});
 			break;
 		case 'newest':
@@ -206,6 +195,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		canModify,
 		availableCount,
 		almostThereCount,
+		makeableLensAvailable,
 		favoriteRecipeIds: [...favoriteRecipeIds],
 		featuredRecipeIds: [...featuredRecipeIds],
 		filters: {
@@ -216,7 +206,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			mood,
 			page,
 			perPage,
-			readyToMake,
+			readyToMake: readyToMakeActive ? '1' : '',
 			ingredientInclude,
 			ingredientAny,
 			ingredientExclude,

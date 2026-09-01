@@ -398,6 +398,21 @@
 								<Helper color="red">{errors.categoryId}</Helper>
 							{/if}
 						</div>
+						<div>
+							<Autocomplete
+								label="Supplier"
+								fetchUrl="/api/select/suppliers"
+								name="supplierId"
+								grant=""
+								key={product?.supplierName || 'Any'}
+								required={true}
+								bind:value={supplierId}
+							/>
+							<p class="text-xs text-muted-foreground mt-1.5">
+								Where it comes from. Choose "Homemade" for things you make in-house — syrups,
+								juices, cordials.
+							</p>
+						</div>
 					</div>
 				{:else if step === 1}
 					<!-- Purchase Details Step -->
@@ -488,17 +503,6 @@
 							{#if abvPercent()}
 								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
 							{/if}
-						</div>
-						<div>
-							<Autocomplete
-								label="Supplier"
-								fetchUrl="/api/select/suppliers"
-								name="supplierId"
-								grant=""
-								key={product?.supplierName || 'Any'}
-								required={true}
-								bind:value={supplierId}
-							/>
 						</div>
 						<div class="flex items-center justify-end gap-3 pt-2">
 							<Label for="inStock" class="text-sm">In Stock</Label>

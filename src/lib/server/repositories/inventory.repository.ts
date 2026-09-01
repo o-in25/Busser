@@ -418,39 +418,28 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	async getStockByDefault(productId: number): Promise<boolean> {
-		const row = (await this.db
-			.table('product')
-			.where('ProductId', productId)
-			.select('StockByDefault')
-			.first()) as { stockByDefault: number } | undefined;
-		return !!row?.stockByDefault;
-	}
-
-	async setStockByDefault(productId: number, value: boolean): Promise<void> {
-		await this.db.table('product').where('ProductId', productId).update({ StockByDefault: value });
-	}
-
-	async seedDefaultStock(workspaceId: string): Promise<void> {
+	// give a new bar its baseline pantry
+	async seedInventory(workspaceId: string): Promise<void> {
 		try {
 			const globalId = getGlobalWorkspace();
 			const rows = (await this.db
-				.table('product')
-				.where('WorkspaceId', globalId)
-				.where('StockByDefault', true)
-				.select('ProductId')) as Array<{ productId: number }>;
+				.table('product as p')
+				.join('supplier as s', 'p.SupplierId', 's.SupplierId')
+				.where('p.WorkspaceId', globalId)
+				.where('s.SupplierName', 'Homemade')
+				.select('p.ProductId')) as Array<{ productId: number }>;
 			if (rows.length === 0) return;
 
 			await this.db
 				.table('workspacestock')
 				.insert(
-					rows.map((r) => ({ WorkspaceId: workspaceId, ProductId: r.productId, Quantity: 1 }))
+					rows.map((r) => ({ WorkspaceId: workspaceId, ProductId: r.productId, Quantity: 0 }))
 				)
 				.onConflict(['WorkspaceId', 'ProductId'])
 				.ignore();
 		} catch (error: any) {
 			// don't block workspace creation on error
-			console.error('Failed to seed default stock:', error.message);
+			console.error('Failed to seed baseline inventory:', error.message);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 		}
 	}

@@ -1,21 +1,15 @@
 <script lang="ts">
 	import { EllipsisVertical, Trash2 } from 'lucide-svelte';
 
-	import { enhance } from '$app/forms';
 	import BackButton from '$lib/components/BackButton.svelte';
 	import InventoryForm from '$lib/components/InventoryForm.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Switch } from '$lib/components/ui/switch';
 
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	let modalOpen = $state(false);
-
-	// global-catalog curation: whether this product seeds into every new workspace
-	let stockByDefault = $state(data.stockByDefault);
-	let flagForm = $state<HTMLFormElement>();
 </script>
 
 <svelte:head>
@@ -49,39 +43,6 @@
 			</DropdownMenu.Root>
 		</div>
 	</div>
-
-	{#if data.isGlobal}
-		<div
-			class="mb-4 flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 shadow-sm"
-		>
-			<div>
-				<p class="text-sm font-medium">Stock in new workspaces</p>
-				<p class="text-xs text-muted-foreground">
-					New bars start with this product already in stock.
-				</p>
-			</div>
-			<form
-				method="POST"
-				action="?/toggleDefaultStock"
-				bind:this={flagForm}
-				use:enhance={({ formData }) => {
-					formData.set('stockByDefault', String(stockByDefault));
-					return async ({ result }) => {
-						// optimistic — revert if the server rejected it
-						if (result.type === 'failure') stockByDefault = !stockByDefault;
-					};
-				}}
-			>
-				<Switch
-					checked={stockByDefault}
-					onCheckedChange={(checked) => {
-						stockByDefault = checked;
-						flagForm?.requestSubmit();
-					}}
-				/>
-			</form>
-		</div>
-	{/if}
 
 	<InventoryForm action="edit" product={data.product} bind:modalOpen />
 </div>

@@ -12,7 +12,7 @@ import type {
 	UserFavorite,
 } from '$lib/types';
 
-import { seedDefaultStock } from '../core';
+import { seedBaselineInventory } from '../core';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
@@ -759,8 +759,7 @@ export class UserRepository extends BaseRepository {
 			return user;
 		});
 
-		// default stock after commit — the cross-db overlay write needs the workspace row to exist
-		await seedDefaultStock(user.personalWorkspaceId);
+		await seedBaselineInventory(user.personalWorkspaceId);
 		return user;
 	}
 
@@ -789,7 +788,6 @@ export class UserRepository extends BaseRepository {
 			.first();
 	}
 
-	// atomic throttle: consumes a verification-send slot, false once the 24h cap is hit
 	async tryConsumeVerificationSend(userId: string): Promise<boolean> {
 		const MAX = 3;
 		const windowExpired =

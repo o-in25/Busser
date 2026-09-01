@@ -28,22 +28,8 @@ export class CatalogRepository extends BaseRepository {
 	}
 
 	private baseQuery(query: any, alias: string, viewerId: string): any {
-		const globalId = getGlobalWorkspace();
-		const workspaces = viewerId === globalId ? [globalId] : [viewerId, globalId];
 		return query
-			.whereIn(`${alias}.WorkspaceId`, workspaces)
-			.whereNotIn(
-				`${alias}.RecipeId`,
-				this.db
-					.table('recipe')
-					.select('SourceRecipeId')
-					.where('WorkspaceId', viewerId)
-					.whereNotNull('SourceRecipeId')
-			)
-			.whereNotIn(
-				`${alias}.RecipeId`,
-				this.db.table('workspacehidden').select('RecipeId').where('WorkspaceId', viewerId)
-			)
+			.where(`${alias}.WorkspaceId`, viewerId)
 			.whereNotIn(
 				`${alias}.RecipeId`,
 				this.db.table('recipe').select('RecipeId').where('Retired', true)
