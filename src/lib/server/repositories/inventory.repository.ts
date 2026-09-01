@@ -1309,7 +1309,8 @@ export class InventoryRepository extends BaseRepository {
 			const fields: Record<string, unknown> = {};
 			if (patch.supplierName !== undefined) fields.SupplierName = patch.supplierName;
 			if (patch.supplierDetails !== undefined) fields.SupplierDetails = patch.supplierDetails;
-			if (patch.supplierWebsiteUrl !== undefined) fields.SupplierWebsiteUrl = patch.supplierWebsiteUrl;
+			if (patch.supplierWebsiteUrl !== undefined)
+				fields.SupplierWebsiteUrl = patch.supplierWebsiteUrl;
 			if (patch.supplierPhone !== undefined) fields.SupplierPhone = patch.supplierPhone;
 			if (patch.supplierAddress !== undefined) fields.SupplierAddress = patch.supplierAddress;
 			if (patch.supplierTypeId !== undefined) fields.SupplierTypeId = patch.supplierTypeId;

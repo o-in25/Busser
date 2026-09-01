@@ -378,233 +378,237 @@
 			{#snippet children({ step })}
 				<!-- shared global products are read-only here — disable every field at once -->
 				<fieldset disabled={isShared} class="contents">
-				{#if step === 0}
-					<!-- Basic Info Step -->
-					<div class="space-y-4">
-						{#if action === 'add'}
-							<BottleScan onscan={handleBottleScan} categories={scanCategories} />
+					{#if step === 0}
+						<!-- Basic Info Step -->
+						<div class="space-y-4">
+							{#if action === 'add'}
+								<BottleScan onscan={handleBottleScan} categories={scanCategories} />
+							{/if}
+							<div>
+								<Label for="productName" class="mb-2">
+									Name <span class="text-destructive">*</span>
+								</Label>
+								<Input
+									type="text"
+									id="productName"
+									name="productName"
+									required
+									bind:value={productName}
+									onblur={() => (touched.productName = true)}
+									class={touched.productName && errors.productName ? 'border-destructive' : ''}
+								/>
+								{#if touched.productName && errors.productName}
+									<Helper color="red">{errors.productName}</Helper>
+								{/if}
+							</div>
+							<div>
+								<Autocomplete
+									label="Category"
+									fetchUrl="/api/select/categories"
+									actionUrl="/inventory/category/add"
+									name="categoryId"
+									grant="add_category"
+									key={product?.categoryName}
+									required={true}
+									bind:value={categoryId}
+									onselect={handleCategorySelect}
+								/>
+								{#if touched.categoryId && errors.categoryId}
+									<Helper color="red">{errors.categoryId}</Helper>
+								{/if}
+							</div>
+							<div>
+								<SearchableSelect
+									label="Supplier"
+									fetchUrl="/api/select/suppliers"
+									name="supplierId"
+									key={product?.supplierName || 'Any'}
+									required={true}
+									bind:value={supplierId}
+								/>
+							</div>
+						</div>
+					{:else if step === 1}
+						<!-- Purchase Details Step -->
+						<div class="space-y-4">
+							<div>
+								<Label for="productPricePerUnit" class="mb-2">
+									Price <span class="text-destructive">*</span>
+								</Label>
+								<div class="relative">
+									<span
+										class="absolute left-3 top-1/2 -translate-y-1/2 z-10 font-bold text-muted-foreground pointer-events-none"
+										>$</span
+									>
+									<Input
+										type="number"
+										id="productPricePerUnit"
+										step="any"
+										required
+										class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit
+											? 'border-destructive'
+											: ''}"
+										value={productPricePerUnit}
+										oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
+										onblur={() => (touched.productPricePerUnit = true)}
+									/>
+								</div>
+								{#if touched.productPricePerUnit && errors.productPricePerUnit}
+									<Helper color="red">{errors.productPricePerUnit}</Helper>
+								{/if}
+							</div>
+							<div>
+								<Label for="productUnitSizeInMilliliters" class="mb-2">
+									Size <span class="text-destructive">*</span>
+								</Label>
+								<div class="relative">
+									<Input
+										type="number"
+										id="productUnitSizeInMilliliters"
+										required
+										class="pr-10 {touched.productUnitSizeInMilliliters &&
+										errors.productUnitSizeInMilliliters
+											? 'border-destructive'
+											: ''}"
+										value={productUnitSizeInMilliliters}
+										oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
+										onblur={() => (touched.productUnitSizeInMilliliters = true)}
+									/>
+									<span
+										class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
+										>mL</span
+									>
+								</div>
+								{#if touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters}
+									<Helper color="red">{errors.productUnitSizeInMilliliters}</Helper>
+								{/if}
+								<QuickSelect
+									options={sizeOptions}
+									bind:value={productUnitSizeInMilliliters}
+									class="mt-2"
+								/>
+							</div>
+							<div>
+								<Label for="productProof" class="mb-2">
+									Proof <span class="text-destructive">*</span>
+								</Label>
+								<Input
+									type="number"
+									id="productProof"
+									max="200"
+									required
+									class={touched.productProof && errors.productProof ? 'border-destructive' : ''}
+									value={productProof}
+									oninput={(e) => (productProof = e.currentTarget.value)}
+									onblur={() => (touched.productProof = true)}
+								/>
+								{#if touched.productProof && errors.productProof}
+									<Helper color="red">{errors.productProof}</Helper>
+								{/if}
+								<QuickSelect options={proofOptions} bind:value={productProof} class="mt-2" />
+							</div>
+							<div class="flex flex-wrap gap-2 pt-2">
+								{#if pricePerOunce()}
+									<CalculatedBadge
+										label="Price/oz"
+										value={'$' + pricePerOunce()}
+										icon={Calculator}
+									/>
+								{/if}
+								{#if pricePerMl()}
+									<CalculatedBadge label="Price/mL" value={'$' + pricePerMl()} icon={Calculator} />
+								{/if}
+								{#if abvPercent()}
+									<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
+								{/if}
+							</div>
+							<div class="flex items-center justify-end gap-3 pt-2">
+								<Label for="inStock" class="text-sm">In Stock</Label>
+								<Switch
+									id="inStock"
+									checked={productInStockQuantity > 0}
+									onCheckedChange={(checked) => {
+										productInStockQuantity = checked ? 1 : 0;
+									}}
+								/>
+							</div>
+						</div>
+					{:else if step === 2}
+						<!-- Flavor Profile Step -->
+						{#if isSpirit}
+							<div class="space-y-6">
+								<div class="flex justify-end">
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onclick={generateFlavorRatings}
+										disabled={ratingsGenerating}
+									>
+										{#if ratingsGenerating}
+											<Loader2 class="w-4 h-4 mr-2 animate-spin" />
+											Generating...
+										{:else}
+											<Sparkles class="w-4 h-4 mr-2" />
+											Auto-Generate
+										{/if}
+									</Button>
+								</div>
+								<FlavorSlider
+									bind:value={productSweetnessRating}
+									label="Sweetness"
+									name="productSweetnessRating"
+									icon={Candy}
+									color="pink"
+								/>
+								<FlavorSlider
+									bind:value={productDrynessRating}
+									label="Dryness"
+									name="productDrynessRating"
+									icon={Wind}
+									color="amber"
+								/>
+								<FlavorSlider
+									bind:value={productVersatilityRating}
+									label="Versatility"
+									name="productVersatilityRating"
+									icon={Sparkles}
+									color="purple"
+								/>
+								<FlavorSlider
+									bind:value={productStrengthRating}
+									label="Strength"
+									name="productStrengthRating"
+									icon={Flame}
+									color="orange"
+								/>
+							</div>
+						{:else}
+							<p class="text-sm text-muted-foreground text-center py-8">
+								Flavor profile is only available for spirits.
+							</p>
 						{/if}
-						<div>
-							<Label for="productName" class="mb-2">
-								Name <span class="text-destructive">*</span>
-							</Label>
-							<Input
-								type="text"
-								id="productName"
-								name="productName"
-								required
-								bind:value={productName}
-								onblur={() => (touched.productName = true)}
-								class={touched.productName && errors.productName ? 'border-destructive' : ''}
-							/>
-							{#if touched.productName && errors.productName}
-								<Helper color="red">{errors.productName}</Helper>
-							{/if}
-						</div>
-						<div>
-							<Autocomplete
-								label="Category"
-								fetchUrl="/api/select/categories"
-								actionUrl="/inventory/category/add"
-								name="categoryId"
-								grant="add_category"
-								key={product?.categoryName}
-								required={true}
-								bind:value={categoryId}
-								onselect={handleCategorySelect}
-							/>
-							{#if touched.categoryId && errors.categoryId}
-								<Helper color="red">{errors.categoryId}</Helper>
-							{/if}
-						</div>
-						<div>
-							<SearchableSelect
-								label="Supplier"
-								fetchUrl="/api/select/suppliers"
-								name="supplierId"
-								key={product?.supplierName || 'Any'}
-								required={true}
-								bind:value={supplierId}
-							/>
-						</div>
-					</div>
-				{:else if step === 1}
-					<!-- Purchase Details Step -->
-					<div class="space-y-4">
-						<div>
-							<Label for="productPricePerUnit" class="mb-2">
-								Price <span class="text-destructive">*</span>
-							</Label>
-							<div class="relative">
-								<span
-									class="absolute left-3 top-1/2 -translate-y-1/2 z-10 font-bold text-muted-foreground pointer-events-none"
-									>$</span
-								>
-								<Input
-									type="number"
-									id="productPricePerUnit"
-									step="any"
-									required
-									class="pl-7 {touched.productPricePerUnit && errors.productPricePerUnit
-										? 'border-destructive'
-										: ''}"
-									value={productPricePerUnit}
-									oninput={(e) => (productPricePerUnit = e.currentTarget.value)}
-									onblur={() => (touched.productPricePerUnit = true)}
-								/>
-							</div>
-							{#if touched.productPricePerUnit && errors.productPricePerUnit}
-								<Helper color="red">{errors.productPricePerUnit}</Helper>
-							{/if}
-						</div>
-						<div>
-							<Label for="productUnitSizeInMilliliters" class="mb-2">
-								Size <span class="text-destructive">*</span>
-							</Label>
-							<div class="relative">
-								<Input
-									type="number"
-									id="productUnitSizeInMilliliters"
-									required
-									class="pr-10 {touched.productUnitSizeInMilliliters &&
-									errors.productUnitSizeInMilliliters
-										? 'border-destructive'
-										: ''}"
-									value={productUnitSizeInMilliliters}
-									oninput={(e) => (productUnitSizeInMilliliters = e.currentTarget.value)}
-									onblur={() => (touched.productUnitSizeInMilliliters = true)}
-								/>
-								<span
-									class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground"
-									>mL</span
-								>
-							</div>
-							{#if touched.productUnitSizeInMilliliters && errors.productUnitSizeInMilliliters}
-								<Helper color="red">{errors.productUnitSizeInMilliliters}</Helper>
-							{/if}
-							<QuickSelect
-								options={sizeOptions}
-								bind:value={productUnitSizeInMilliliters}
-								class="mt-2"
-							/>
-						</div>
-						<div>
-							<Label for="productProof" class="mb-2">
-								Proof <span class="text-destructive">*</span>
-							</Label>
-							<Input
-								type="number"
-								id="productProof"
-								max="200"
-								required
-								class={touched.productProof && errors.productProof ? 'border-destructive' : ''}
-								value={productProof}
-								oninput={(e) => (productProof = e.currentTarget.value)}
-								onblur={() => (touched.productProof = true)}
-							/>
-							{#if touched.productProof && errors.productProof}
-								<Helper color="red">{errors.productProof}</Helper>
-							{/if}
-							<QuickSelect options={proofOptions} bind:value={productProof} class="mt-2" />
-						</div>
-						<div class="flex flex-wrap gap-2 pt-2">
-							{#if pricePerOunce()}
-								<CalculatedBadge label="Price/oz" value={'$' + pricePerOunce()} icon={Calculator} />
-							{/if}
-							{#if pricePerMl()}
-								<CalculatedBadge label="Price/mL" value={'$' + pricePerMl()} icon={Calculator} />
-							{/if}
-							{#if abvPercent()}
-								<CalculatedBadge label="ABV" value={abvPercent() ?? ''} unit="%" icon={Percent} />
-							{/if}
-						</div>
-						<div class="flex items-center justify-end gap-3 pt-2">
-							<Label for="inStock" class="text-sm">In Stock</Label>
-							<Switch
-								id="inStock"
-								checked={productInStockQuantity > 0}
-								onCheckedChange={(checked) => {
-									productInStockQuantity = checked ? 1 : 0;
-								}}
-							/>
-						</div>
-					</div>
-				{:else if step === 2}
-					<!-- Flavor Profile Step -->
-					{#if isSpirit}
+					{:else if step === 3}
+						<!-- Description Step -->
 						<div class="space-y-6">
-							<div class="flex justify-end">
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									onclick={generateFlavorRatings}
-									disabled={ratingsGenerating}
-								>
-									{#if ratingsGenerating}
-										<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-										Generating...
-									{:else}
-										<Sparkles class="w-4 h-4 mr-2" />
-										Auto-Generate
-									{/if}
-								</Button>
-							</div>
-							<FlavorSlider
-								bind:value={productSweetnessRating}
-								label="Sweetness"
-								name="productSweetnessRating"
-								icon={Candy}
-								color="pink"
+							<Prompt
+								bind:value={productDescription}
+								trigger={productName}
+								id="productDescription"
+								name="productDescription"
+								url="/api/generator/inventory"
 							/>
-							<FlavorSlider
-								bind:value={productDrynessRating}
-								label="Dryness"
-								name="productDrynessRating"
-								icon={Wind}
-								color="amber"
-							/>
-							<FlavorSlider
-								bind:value={productVersatilityRating}
-								label="Versatility"
-								name="productVersatilityRating"
-								icon={Sparkles}
-								color="purple"
-							/>
-							<FlavorSlider
-								bind:value={productStrengthRating}
-								label="Strength"
-								name="productStrengthRating"
-								icon={Flame}
-								color="orange"
+							<ImagePrompt
+								name="productImageUrl"
+								bind:signedUrl={productImageUrl}
+								bind:pendingFile={pendingImageFile}
+								bind:imageCleared
+								trigger={productName}
+								type="product"
+								description={productDescription}
 							/>
 						</div>
-					{:else}
-						<p class="text-sm text-muted-foreground text-center py-8">
-							Flavor profile is only available for spirits.
-						</p>
 					{/if}
-				{:else if step === 3}
-					<!-- Description Step -->
-					<div class="space-y-6">
-						<Prompt
-							bind:value={productDescription}
-							trigger={productName}
-							id="productDescription"
-							name="productDescription"
-							url="/api/generator/inventory"
-						/>
-						<ImagePrompt
-							name="productImageUrl"
-							bind:signedUrl={productImageUrl}
-							bind:pendingFile={pendingImageFile}
-							bind:imageCleared
-							trigger={productName}
-							type="product"
-							description={productDescription}
-						/>
-					</div>
-				{/if}
 				</fieldset>
 			{/snippet}
 		</FormShell>

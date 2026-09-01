@@ -143,8 +143,8 @@
 					<Label class="mb-2">Type</Label>
 					<QuickSelect options={typeOptions} bind:value={type} />
 					<p class="text-xs text-muted-foreground mt-2">
-						Choose <span class="font-medium">Homemade</span> for things you make in-house — syrups,
-						juices, cordials.
+						Choose <span class="font-medium">Homemade</span> for things you make in-house — syrups, juices,
+						cordials.
 					</p>
 				</div>
 
@@ -164,7 +164,13 @@
 					</div>
 					<div>
 						<Label for="website" class="mb-2">Website</Label>
-						<Input id="website" name="website" type="url" bind:value={website} placeholder="https://" />
+						<Input
+							id="website"
+							name="website"
+							type="url"
+							bind:value={website}
+							placeholder="https://"
+						/>
 					</div>
 				{/if}
 			</Card.Content>

@@ -21,7 +21,8 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	}
 
 	// only workspace-owned suppliers are editable; global ones are view-only
-	const supplier = id && !isNaN(Number(id)) ? await inventoryRepo.getSupplierById(workspaceId, Number(id)) : null;
+	const supplier =
+		id && !isNaN(Number(id)) ? await inventoryRepo.getSupplierById(workspaceId, Number(id)) : null;
 	if (!supplier) {
 		redirect(StatusCodes.SEE_OTHER, '/inventory/suppliers');
 	}

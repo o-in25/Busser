@@ -63,7 +63,11 @@
 	<!-- sort -->
 	<div class="flex flex-col gap-1.5">
 		<span class="text-sm font-medium text-muted-foreground">Sort By</span>
-		<Select.Root type="single" value={sortOption} onValueChange={(v) => onSortChange(v ?? 'name-asc')}>
+		<Select.Root
+			type="single"
+			value={sortOption}
+			onValueChange={(v) => onSortChange(v ?? 'name-asc')}
+		>
 			<Select.Trigger class="w-full">
 				<ArrowUpDown class="h-4 w-4 mr-2" />
 				<Select.Value placeholder="Name (A-Z)">{sortLabel}</Select.Value>

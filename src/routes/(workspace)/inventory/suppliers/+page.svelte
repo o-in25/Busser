@@ -145,7 +145,12 @@
 		<Search
 			class="absolute left-3 top-1/2 -translate-y-1/2 z-10 h-4 w-4 text-muted-foreground pointer-events-none"
 		/>
-		<Input type="text" placeholder="Search suppliers..." bind:value={searchInput} class="pl-10 pr-10" />
+		<Input
+			type="text"
+			placeholder="Search suppliers..."
+			bind:value={searchInput}
+			class="pl-10 pr-10"
+		/>
 		{#if searchInput}
 			<button
 				type="button"
