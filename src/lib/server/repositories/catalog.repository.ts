@@ -288,7 +288,7 @@ export class CatalogRepository extends BaseRepository {
 					'workspaceId'
 				)) as View.BasicRecipe[];
 
-			// name -> recipe map for matching AI suggestions; prefer this workspace over global
+			// name -> recipe map for matching AI suggestions and prefer this workspace over global
 			const byName = new Map<string, View.BasicRecipe>();
 			for (const r of recipes) {
 				if (r.recipeId === recipeId) continue;
@@ -307,7 +307,7 @@ export class CatalogRepository extends BaseRepository {
 				return { name: v.name, description: v.description, recipeId: m?.recipeId ?? null };
 			});
 
-			// real recipes sharing the base spirit — always linkable, deduped by name
+			// real recipes sharing the base spirit
 			const related: RecipeInsightLinks['related'] = [];
 			const seen = new Set<string>();
 			for (const r of recipes) {
@@ -480,9 +480,7 @@ export class CatalogRepository extends BaseRepository {
 			return steps.map((step) => {
 				const matchMode = step.matchMode ?? 'EXACT_PRODUCT';
 
-				// prefer the step's own product image, but many products have none — fall back to any
-				// sibling in the same category so e.g. a generic "Lime Juice" step still shows the
-				// category's bottle rather than an empty tile. empty strings count as "no image".
+				// prefer the step's own product image
 				const own = imageByProduct.get(step.productId);
 				const productImageUrl =
 					(own && own.trim()) ||
@@ -925,10 +923,10 @@ export class CatalogRepository extends BaseRepository {
 					WorkspaceId: sourceWorkspaceId,
 				});
 				if (!sourceRecipe) throw new Error('Source recipe not found.');
-				// can't import a draft — it's not live yet
+				// can't import a draft if it's not live yet
 				if (!sourceRecipe.published) throw new Error('Source recipe is not published.');
 
-				// steps already point at global canonical products/categories — fork copies them verbatim
+				// steps already point at global canonical products/categories
 				const sourceSteps = (await trx('recipestep')
 					.where({ RecipeId: sourceRecipeId })
 					.orderBy('RecipeStepId', 'asc')) as Table.RecipeStep[];
@@ -950,7 +948,7 @@ export class CatalogRepository extends BaseRepository {
 					RecipeVersatilityRating: sourceRecipe.recipeVersatilityRating,
 				});
 
-				// snapshot the source's version so we can later tell when it has moved on
+				// keep the source's version so we can later tell when it has moved on
 				const sourceVersionRow = await trx('recipe')
 					.where('RecipeId', sourceRecipeId)
 					.select('ContentVersion')
@@ -1008,7 +1006,7 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
-	// divergence: has this fork's source moved on since it was taken?
+	// checks if this fork source moved on since it was taken?\
 	async getSourceUpdate(
 		workspaceId: string,
 		recipeId: number
@@ -1041,7 +1039,7 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
-	// "keep mine" — mark the fork current without pulling changes
+	// mark the fork current without pulling changes
 	async dismissSourceUpdate(workspaceId: string, recipeId: number): Promise<QueryResult> {
 		try {
 			const fork = await this.db
@@ -1069,7 +1067,7 @@ export class CatalogRepository extends BaseRepository {
 		}
 	}
 
-	// pull the latest source content into the fork — replaces the fork's current content
+	// replaces the fork's current content
 	async resyncFork(workspaceId: string, recipeId: number): Promise<QueryResult> {
 		try {
 			await this.db.query.transaction(async (trx) => {
@@ -1090,7 +1088,7 @@ export class CatalogRepository extends BaseRepository {
 					.select('ContentVersion')
 					.first();
 
-				// fork owns its own gcs objects — copy source images fresh, drop the fork's old ones
+				// fork owns its own gcs objects
 				const copiedDescImageUrl = source.recipeDescriptionImageUrl
 					? await copyGcsFile(source.recipeDescriptionImageUrl, 'recipes', workspaceId)
 					: null;

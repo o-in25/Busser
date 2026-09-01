@@ -16,7 +16,6 @@ import type {
 import { emptyPagination } from '$lib/types';
 import { titleCase } from '$lib/utils';
 
-import { normalizeProductName } from '../catalog-hygiene';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { deleteSignedUrl } from '../storage';
@@ -109,22 +108,6 @@ export class InventoryRepository extends BaseRepository {
 		imageUrl: string = ''
 	): Promise<QueryResult<Product>> {
 		try {
-			// keep the global catalog one-row-per-ingredient; bars can still free-type house items.
-			if (workspaceId === getGlobalWorkspace()) {
-				const target = normalizeProductName(product.productName);
-				const existing = (await this.db
-					.table('product')
-					.where('WorkspaceId', workspaceId)
-					.where('Retired', false)
-					.select('ProductName')) as { productName: string }[];
-				if (existing.some((r) => normalizeProductName(r.productName) === target)) {
-					return {
-						status: 'error',
-						error: `A global product named "${product.productName}" already exists.`,
-					};
-				}
-			}
-
 			let parentRowId: number | undefined;
 			let childRowId: number | undefined;
 
@@ -180,6 +163,17 @@ export class InventoryRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error(error);
 			Logger.error(error.sqlMessage, error.sql);
+
+			// db keeps the global catalog one-row-per-ingredient (ux_product_global_norm)
+			if (
+				error.code === 'ER_DUP_ENTRY' &&
+				String(error.sqlMessage).includes('ux_product_global_norm')
+			) {
+				return {
+					status: 'error',
+					error: `A global product named "${product.productName}" already exists.`,
+				};
+			}
 			return { status: 'error', error: 'Could not add new item to inventory.' };
 		}
 	}
