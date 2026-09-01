@@ -442,6 +442,40 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
+	// stock an existing global product onto the overlay (setStockQuantity can't — it no-ops a
+	// global product the bar doesn't stock yet)
+	async stockFromGlobal(
+		workspaceId: string,
+		productId: number,
+		quantity: number
+	): Promise<QueryResult<number>> {
+		try {
+			const globalId = getGlobalWorkspace();
+			const workspaces = workspaceId === globalId ? [globalId] : [workspaceId, globalId];
+			const product = await this.db
+				.table('product')
+				.where('ProductId', productId)
+				.whereIn('WorkspaceId', workspaces)
+				.where('Retired', false)
+				.first();
+			if (!product) {
+				return { status: 'error', error: 'That product is not in the catalog.' };
+			}
+
+			await this.db
+				.table('workspacestock')
+				.insert({ WorkspaceId: workspaceId, ProductId: productId, Quantity: quantity })
+				.onConflict(['WorkspaceId', 'ProductId'])
+				.merge();
+
+			return { status: 'success', data: productId };
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not add product to inventory.' };
+		}
+	}
+
 	async toggleInStockQuantity(
 		workspaceId: string,
 		productId: number

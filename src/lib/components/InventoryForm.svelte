@@ -176,6 +176,16 @@
 		{ title: 'Description & Image', icon: Image, optional: true },
 	];
 
+	// picking a catalog suggestion in the name field prompts to add it straight to stock
+	let selectedGlobal = $state<SelectOption | null>(null);
+	let confirmOpen = $state(false);
+	let confirmForm = $state<HTMLFormElement>();
+
+	function handleGlobalSelect(item: SelectOption) {
+		selectedGlobal = item;
+		confirmOpen = true;
+	}
+
 	// Draft data for autosave
 	let draftData = $derived({
 		productName,
@@ -385,20 +395,32 @@
 								<BottleScan onscan={handleBottleScan} categories={scanCategories} />
 							{/if}
 							<div>
-								<Label for="productName" class="mb-2">
-									Name <span class="text-destructive">*</span>
-								</Label>
-								<Input
-									type="text"
-									id="productName"
-									name="productName"
-									required
-									bind:value={productName}
-									onblur={() => (touched.productName = true)}
-									class={touched.productName && errors.productName ? 'border-destructive' : ''}
-								/>
-								{#if touched.productName && errors.productName}
-									<Helper color="red">{errors.productName}</Helper>
+								{#if action === 'add'}
+									<!-- pick a catalog product (prompts to add it straight to stock) or type your own -->
+									<SearchableSelect
+										label="Name"
+										fetchUrl="/api/select/products"
+										placeholder="Search the catalog, or type a new name…"
+										required={true}
+										bind:display={productName}
+										onselect={handleGlobalSelect}
+									/>
+								{:else}
+									<Label for="productName" class="mb-2">
+										Name <span class="text-destructive">*</span>
+									</Label>
+									<Input
+										type="text"
+										id="productName"
+										name="productName"
+										required
+										bind:value={productName}
+										onblur={() => (touched.productName = true)}
+										class={touched.productName && errors.productName ? 'border-destructive' : ''}
+									/>
+									{#if touched.productName && errors.productName}
+										<Helper color="red">{errors.productName}</Helper>
+									{/if}
 								{/if}
 							</div>
 							<div>
@@ -613,6 +635,48 @@
 			{/snippet}
 		</FormShell>
 	</form>
+
+	<!-- stocks a picked catalog product against its global id, no new product row -->
+	<form
+		method="POST"
+		action="?/add"
+		bind:this={confirmForm}
+		use:enhance={() => {
+			return async ({ result }) => {
+				confirmOpen = false;
+				if (result.type === 'redirect') {
+					draftManager?.clearDraft();
+					$notificationStore.success = { message: 'Added to your inventory.' };
+					goto(result.location);
+				} else if (result.type === 'failure') {
+					$notificationStore.error = {
+						message: result?.data?.error?.toString() || 'Could not add product.',
+					};
+				}
+			};
+		}}
+	>
+		<input type="hidden" name="globalProductId" value={selectedGlobal?.value ?? ''} />
+		<input type="hidden" name="productInStockQuantity" value="1" />
+	</form>
+
+	<Dialog.Root bind:open={confirmOpen}>
+		<Dialog.Content>
+			<Dialog.Header>
+				<Dialog.Title>Add to your inventory?</Dialog.Title>
+				<Dialog.Description>
+					Add <span class="font-semibold">{selectedGlobal?.name}</span
+					>{#if selectedGlobal?.categoryName}<span class="text-muted-foreground">
+							· {selectedGlobal.categoryName}</span
+						>{/if} to your bar? Its details come from the Busser catalog — you can adjust stock anytime.
+				</Dialog.Description>
+			</Dialog.Header>
+			<Dialog.Footer>
+				<Button variant="outline" onclick={() => (confirmOpen = false)}>Cancel</Button>
+				<Button onclick={() => confirmForm?.requestSubmit()}>Add to inventory</Button>
+			</Dialog.Footer>
+		</Dialog.Content>
+	</Dialog.Root>
 
 	<Dialog.Root bind:open={modalOpen}>
 		<Dialog.Content>

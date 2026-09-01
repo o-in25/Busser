@@ -23,6 +23,7 @@
 		grant = '',
 		createKind = undefined,
 		onselect,
+		display = $bindable(key ?? ''),
 	}: {
 		label: string;
 		value?: string | null;
@@ -34,6 +35,8 @@
 		grant?: string;
 		createKind?: NestedCreateKind;
 		onselect?: (item: SelectOption) => void;
+		// typed text; bindable so a parent can use it as free-text (e.g. a house-item name)
+		display?: string;
 	} = $props();
 
 	const permissions = getContext<string[]>('permissions') ?? [];
@@ -41,7 +44,6 @@
 
 	let items = $state<SelectOption[]>([]);
 	let show = $state(false);
-	let display = $state(key ?? '');
 	let activeIndex = $state(-1);
 	let inputEl = $state<HTMLInputElement>();
 
