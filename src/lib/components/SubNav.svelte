@@ -29,7 +29,7 @@
 <!-- mobile stacks (tabs row, then switcher + action row); desktop is a single row -->
 <nav class={cn('mb-6 flex flex-col md:flex-row md:items-center gap-2', className)}>
 	<div
-		class="relative flex w-full md:w-auto h-10 min-w-0 items-center justify-start gap-1 rounded-xl backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
+		class="relative flex w-full md:w-auto h-10 min-w-0 items-center justify-start gap-1 overflow-x-auto scrollbar-none rounded-xl backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
 	>
 		{#each tabs as tab}
 			<a

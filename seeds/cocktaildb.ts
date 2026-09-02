@@ -1,3 +1,8 @@
+/*
+adds recipes from https://www.thecocktaildb.com and adds them to the catalog
+run with pnpm import:cocktaildb [--limit=N] [--dry]
+*/
+
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
@@ -7,39 +12,34 @@ import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod.mjs';
 import { z } from 'zod';
 import config from '../knexfile';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
 
-// read-only ingest: walks thecocktaildb, transforms IBA classics into busser's
-// recipe json shape, and APPENDS new ones to global-catalog-recipes.json.
-// never touches the db — seed:core inserts them later (as drafts).
-// run: pnpm import:cocktaildb [--limit=N] [--dry]
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RECIPES_PATH = path.join(__dirname, './core/data/global-catalog-recipes.json');
+const IBA_PATH = path.join(__dirname, './core/data/iba.json');
 const API = 'https://www.thecocktaildb.com/api/json/v1/1';
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const args = process.argv.slice(2);
 const DRY = args.includes('--dry');
-const ALL = args.includes('--all'); // ignore the IBA gate — see everything the mappers accept
+const ALL = args.includes('--all');
+const IBA_MODE = args.includes('--iba');
 const limitArg = args.find((a) => a.startsWith('--limit='));
 const LIMIT = limitArg ? parseInt(limitArg.split('=')[1]) : Infinity;
 
-// valid busser spirits (recipecategory) and techniques (see 01_reference_data.ts)
-type Spirit = 'Whiskey' | 'Gin' | 'Vodka' | 'Tequila' | 'Rum' | 'Brandy';
+type Spirit = 'Whiskey' | 'Gin' | 'Vodka' | 'Tequila & Mezcal' | 'Rum' | 'Brandy';
 const TECHNIQUES = ['Stirred', 'Shaken', 'Dry Shaken', 'Blended', 'Whip Shaken'] as const;
 
-// base spirit inferred from which spirit-category ingredient appears (by priority).
-// (the free cocktaildb key throttles filter.php to 1 result, so we discover via
-// search.php?f=<letter> instead and infer the spirit from the mapped ingredients.)
 const CATEGORY_TO_SPIRIT: Record<string, Spirit> = {
 	'London Dry Gin': 'Gin',
 	'Old Tom Gin': 'Gin',
 	'Plain Vodka': 'Vodka',
 	'Flavored Vodka': 'Vodka',
-	'Blanco Tequila': 'Tequila',
-	'Reposado Tequila': 'Tequila',
-	Mezcal: 'Tequila',
+	'Blanco Tequila': 'Tequila & Mezcal',
+	'Reposado Tequila': 'Tequila & Mezcal',
+	Mezcal: 'Tequila & Mezcal',
 	'White Rum': 'Rum',
 	'Dark Rum': 'Rum',
 	Cachaça: 'Rum',
@@ -50,9 +50,8 @@ const CATEGORY_TO_SPIRIT: Record<string, Spirit> = {
 	'Apple Brandy': 'Brandy',
 	Pisco: 'Brandy',
 };
-const SPIRIT_PRIORITY: Spirit[] = ['Whiskey', 'Gin', 'Tequila', 'Rum', 'Brandy', 'Vodka'];
+const SPIRIT_PRIORITY: Spirit[] = ['Whiskey', 'Gin', 'Tequila & Mezcal', 'Rum', 'Brandy', 'Vodka'];
 
-// cocktaildb ingredient name (lowercased) -> busser category (aligned to existing json vocab)
 const CATEGORY_ALIAS: Record<string, string> = {
 	gin: 'London Dry Gin',
 	'london dry gin': 'London Dry Gin',
@@ -81,6 +80,8 @@ const CATEGORY_ALIAS: Record<string, string> = {
 	'sweet vermouth': 'Sweet Vermouth',
 	'dry vermouth': 'Dry Vermouth',
 	'lillet blanc': 'Lillet Blanc',
+	port: 'Fortified wine',
+	'creme de cassis': 'Blackcurrant Liqueur',
 	campari: 'Amaro',
 	aperol: 'Aperol',
 	amaretto: 'Amaretto',
@@ -124,22 +125,25 @@ const CATEGORY_ALIAS: Record<string, string> = {
 	'cream of coconut': 'Coconut Cream',
 	cream: 'Cream',
 	'heavy cream': 'Cream',
+	'light cream': 'Cream',
 	'angostura bitters': 'Bitters',
 	bitters: 'Bitters',
+	'peach bitters': 'Bitters',
 	'orange bitters': 'Orange Bitters',
 	'soda water': 'Soda Water',
 	'club soda': 'Soda Water',
 	'carbonated water': 'Soda Water',
 	'coca-cola': 'Cola',
 	cola: 'Cola',
+	'ginger beer': 'Ginger Beer',
 	champagne: 'Champagne',
 	prosecco: 'Champagne',
 	'egg white': 'Eggs',
+	'egg yolk': 'Eggs',
 	egg: 'Eggs',
 	mint: 'Mint',
 };
 
-// garnishes / non-ingredients — drop the step, keep the recipe
 const IGNORE = new Set([
 	'ice',
 	'ice cubes',
@@ -162,10 +166,6 @@ const IGNORE = new Set([
 	'mint sprig',
 	'mint garnish',
 ]);
-// note: 'lemon'/'lime' appear both as juice aliases and as garnishes; the measure
-// disambiguates in practice (garnish rows have no/whole measures), but we keep them
-// in CATEGORY_ALIAS so a measured "Lemon" maps to juice. bare garnish rows without a
-// parseable measure are dropped by parseMeasure returning null.
 
 const normalize = (s: string): string =>
 	s
@@ -174,9 +174,9 @@ const normalize = (s: string): string =>
 		.toLowerCase()
 		.replace(/[^a-z0-9]/g, '');
 
-// parse cocktaildb's free-form measure -> { qty, unit } in busser storage terms
-// (unit is 'ml' | 'dash' | 'barspoon' | 'tsp'); returns null to drop the step
-function parseMeasure(raw: string | null): { qty: number; unit: string; oz: number | null } | null {
+function parseMeasure(
+	raw: string | null
+): { qty: number; unit: string; oz: number | null; top?: boolean } | null {
 	if (!raw) return null;
 	let s = raw.trim().toLowerCase();
 	if (!s) return null;
@@ -205,12 +205,10 @@ function parseMeasure(raw: string | null): { qty: number; unit: string; oz: numb
 		return { qty: Math.round(tbsp * 15), unit: 'ml', oz: (tbsp * 15) / 30 };
 	}
 
-	// top / fill / splash -> treat as a top-off ~60ml
 	if (/^(top|fill|splash)/.test(s) || /to taste/.test(s)) {
-		return { qty: 60, unit: 'ml', oz: 2 };
+		return { qty: 60, unit: 'ml', oz: 2, top: true };
 	}
 
-	// explicit ml / cl
 	m = s.match(/^([\d.]+)\s*ml/);
 	if (m) {
 		const ml = parseFloat(m[1]);
@@ -225,22 +223,20 @@ function parseMeasure(raw: string | null): { qty: number; unit: string; oz: numb
 	// shots
 	m = s.match(/^([\d./\s]+)\s*shot/);
 	if (m) {
-		const oz = parseFraction(m[1]); // 1 shot ≈ 1oz/30ml
+		const oz = parseFraction(m[1]);
 		return { qty: Math.round(oz * 30), unit: 'ml', oz };
 	}
 
-	// oz (with optional fractions like "1 1/2 oz", "1/2 oz")
+	// oz
 	m = s.match(/^([\d./\s]+)\s*(oz|ounce)/);
 	if (m) {
 		const oz = parseFraction(m[1]);
 		return { qty: Math.round(oz * 30), unit: 'ml', oz };
 	}
 
-	// bare "1/2" or "1" with no unit and a spirit-ish context is ambiguous — drop it
 	return null;
 }
 
-// "1 1/2" -> 1.5, "1/2" -> 0.5, "2" -> 2
 function parseFraction(input: string): number {
 	const parts = input.trim().split(/\s+/);
 	let total = 0;
@@ -256,13 +252,18 @@ function parseFraction(input: string): number {
 	return total || 1;
 }
 
-// human-readable step desc matching existing convention ("Add 1.5oz gin")
-function stepDesc(oz: number | null, unit: string, qty: number, ingredient: string): string {
+function stepDesc(
+	oz: number | null,
+	unit: string,
+	qty: number,
+	ingredient: string,
+	top = false
+): string {
 	if (unit === 'dash') return `Add ${qty} ${qty === 1 ? 'dash' : 'dashes'} ${ingredient}`;
 	if (unit === 'barspoon')
 		return `Add ${qty} ${qty === 1 ? 'barspoon' : 'barspoons'} ${ingredient}`;
 	if (unit === 'tsp') return `Add ${qty} tsp ${ingredient}`;
-	if (oz && oz >= 2) return `Top with ${ingredient}`;
+	if (top) return `Top with ${ingredient}`;
 	if (oz) return `Add ${round1(oz)}oz ${ingredient}`;
 	return `Add ${ingredient}`;
 }
@@ -330,7 +331,27 @@ async function fetchJson(url: string): Promise<any> {
 	return res.json();
 }
 
-// format one recipe to match the existing json style (tabs, inline steps)
+async function fetchIbaDrinks(): Promise<{ drinks: any[]; missing: string[] }> {
+	const groups = JSON.parse(fs.readFileSync(IBA_PATH, 'utf8')) as Record<string, string[]>;
+	const names = Object.values(groups).flat();
+	const drinks: any[] = [];
+	const missing: string[] = [];
+	for (const name of names) {
+		const q = normalize(name);
+		const data = await fetchJson(`${API}/search.php?s=${encodeURIComponent(name)}`);
+		const hits: any[] = data.drinks || [];
+		const hit = hits.find((d) => normalize(d.strDrink) === q);
+		if (hit) drinks.push(hit);
+		else missing.push(name);
+		// free key caps at 60 req / 10s
+		await sleep(230);
+	}
+	console.log(
+		`IBA list: ${names.length} names → ${drinks.length} found on cocktaildb, ${missing.length} not found`
+	);
+	return { drinks, missing };
+}
+
 function formatRecipe(r: Recipe): string {
 	const rt = r.ratings;
 	const ratings = `{ "sweetness": ${round1(rt.sweetness).toFixed(1)}, "dryness": ${round1(rt.dryness).toFixed(1)}, "strength": ${round1(rt.strength).toFixed(1)}, "versatility": ${round1(rt.versatility).toFixed(1)} }`;
@@ -374,20 +395,31 @@ async function main() {
 		await db.destroy();
 	}
 
-	// 1) walk a-z via search.php?f=<letter> — returns full details (incl strIBA)
-	const seenIds = new Set<string>();
-	const drinks: any[] = [];
-	for (const letter of 'abcdefghijklmnopqrstuvwxyz') {
-		const data = await fetchJson(`${API}/search.php?f=${letter}`);
-		for (const d of data.drinks || []) {
-			if (seenIds.has(d.idDrink)) continue;
-			seenIds.add(d.idDrink);
-			drinks.push(d);
+	// 1) discover: the official IBA name list (--iba, preferred) or the a-z browse
+	let drinks: any[];
+	if (IBA_MODE) {
+		const res = await fetchIbaDrinks();
+		drinks = res.drinks;
+		if (res.missing.length) {
+			console.log(
+				`not on free cocktaildb (need prod key / manual authoring):\n  ${res.missing.join(', ')}\n`
+			);
 		}
+	} else {
+		const seenIds = new Set<string>();
+		drinks = [];
+		for (const letter of 'abcdefghijklmnopqrstuvwxyz') {
+			const data = await fetchJson(`${API}/search.php?f=${letter}`);
+			for (const d of data.drinks || []) {
+				if (seenIds.has(d.idDrink)) continue;
+				seenIds.add(d.idDrink);
+				drinks.push(d);
+			}
+		}
+		console.log(`discovered ${drinks.length} unique drinks`);
 	}
-	console.log(`discovered ${drinks.length} unique drinks`);
 
-	// 2) filter to IBA + <=6 ingredients + not already present
+	// 2) filter to IBA
 	const added: Recipe[] = [];
 	const skippedUnmapped: { name: string; ing: string }[] = [];
 	const skippedNoSpirit: string[] = [];
@@ -402,7 +434,7 @@ async function main() {
 			skippedExisting++;
 			continue;
 		}
-		if (!ALL && !detail.strIBA) {
+		if (!ALL && !IBA_MODE && !detail.strIBA) {
 			skippedNonIba++;
 			continue;
 		}
@@ -414,7 +446,7 @@ async function main() {
 			if (!ing || !ing.trim()) continue;
 			rawPairs.push({ ing: ing.trim(), measure: detail[`strMeasure${i}`] || null });
 		}
-		if (rawPairs.length > 6) continue;
+		if (rawPairs.length > (IBA_MODE ? 8 : 6)) continue;
 
 		// map ingredients -> categories, dropping garnishes
 		const steps: Step[] = [];
@@ -430,12 +462,12 @@ async function main() {
 			}
 
 			const parsed = parseMeasure(measure);
-			if (!parsed) continue; // unmeasured garnish-like row -> drop step
+			if (!parsed) continue;
 			steps.push({
 				category,
 				qty: parsed.qty,
 				unit: parsed.unit,
-				desc: stepDesc(parsed.oz, parsed.unit, parsed.qty, ing.toLowerCase()),
+				desc: stepDesc(parsed.oz, parsed.unit, parsed.qty, ing.toLowerCase(), parsed.top),
 			});
 		}
 
@@ -443,15 +475,15 @@ async function main() {
 			skippedUnmapped.push({ name, ing: unmapped });
 			continue;
 		}
-		if (steps.length < 2) continue; // not enough to be a real recipe
+		// not enough to be a real recipe
+		if (steps.length < 2) continue;
 
-		// infer base spirit from the mapped ingredient categories (by priority)
 		const spiritsPresent = new Set(
 			steps.map((s) => CATEGORY_TO_SPIRIT[s.category]).filter(Boolean) as Spirit[]
 		);
 		const spirit = SPIRIT_PRIORITY.find((s) => spiritsPresent.has(s));
 		if (!spirit) {
-			skippedNoSpirit.push(name); // liqueur-only / no base spirit we recognize
+			skippedNoSpirit.push(name);
 			continue;
 		}
 
@@ -512,7 +544,8 @@ async function main() {
 	if (DRY || added.length === 0) return;
 
 	const closeIdx = rawFile.lastIndexOf(']');
-	const before = rawFile.slice(0, closeIdx).replace(/\s*$/, ''); // ends with last '}'
+	// ends with last '}'
+	const before = rawFile.slice(0, closeIdx).replace(/\s*$/, '');
 	const block = added.map(formatRecipe).join(',\n');
 	fs.writeFileSync(RECIPES_PATH, `${before},\n${block}\n]\n`);
 	console.log(`\nappended ${added.length} recipes to ${path.basename(RECIPES_PATH)}`);

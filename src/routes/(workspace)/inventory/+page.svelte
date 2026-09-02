@@ -45,7 +45,7 @@
 	let selectedSupplier = $state(data.filters?.supplierId || 'all');
 	let stockFilter = $state(data.filters?.stockFilter || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
-	let perPage = $state(String(data.filters?.perPage || 20));
+	let perPage = $state(String(data.filters?.perPage || 10));
 
 	// Drawer state
 	let drawerOpen = $state(false);
@@ -61,7 +61,7 @@
 		if (selectedSupplier && selectedSupplier !== 'all') count++;
 		if (stockFilter && stockFilter !== 'all') count++;
 		if (sortOption !== 'name-asc') count++;
-		if (perPage !== '20') count++;
+		if (perPage !== '10') count++;
 		return count;
 	});
 
@@ -142,6 +142,30 @@
 		drawerOpen = true;
 	}
 
+	// single-item delete from the drawer
+	let itemDeleteOpen = $state(false);
+	let itemDeleteLoading = $state(false);
+
+	async function handleItemDelete() {
+		if (!selectedProduct?.productId) return;
+		itemDeleteLoading = true;
+		try {
+			const res = await fetch(`/api/inventory/${selectedProduct.productId}`, { method: 'DELETE' });
+			const result = await res.json();
+			if (result?.status === 'error' || result?.error) {
+				$notificationStore.error = { message: result.error || 'Failed to delete item.' };
+				return;
+			}
+			itemDeleteOpen = false;
+			$notificationStore.success = { message: 'Removed from your inventory.' };
+			await invalidateAll();
+		} catch {
+			$notificationStore.error = { message: 'Failed to delete item.' };
+		} finally {
+			itemDeleteLoading = false;
+		}
+	}
+
 	// Handle stock change from drawer
 	async function handleStockChange(productId: number, inStock: boolean) {
 		haptics.medium();
@@ -210,7 +234,7 @@
 		if (supplier && supplier !== 'all') params.set('supplierId', String(supplier));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
-		if (pp && String(pp) !== '20') params.set('perPage', String(pp));
+		if (pp && String(pp) !== '10') params.set('perPage', String(pp));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -292,14 +316,14 @@
 		selectedSupplier = 'all';
 		stockFilter = 'all';
 		sortOption = 'name-asc';
-		perPage = '20';
+		perPage = '10';
 		goto(
 			buildUrl({
 				categoryGroupId: 'all',
 				supplierId: 'all',
 				stockFilter: 'all',
 				sort: 'name-asc',
-				perPage: '20',
+				perPage: '10',
 				page: 1,
 			})
 		);
@@ -327,7 +351,7 @@
 		selectedSupplier = data.filters?.supplierId || 'all';
 		stockFilter = data.filters?.stockFilter || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
-		perPage = String(data.filters?.perPage || 20);
+		perPage = String(data.filters?.perPage || 10);
 	});
 </script>
 
@@ -608,4 +632,28 @@
 	recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
 	{showStock}
 	onStockChange={handleStockChange}
+	onDelete={() => {
+		drawerOpen = false;
+		itemDeleteOpen = true;
+	}}
 />
+
+<!-- Single-item Delete Confirmation Dialog -->
+<Dialog.Root bind:open={itemDeleteOpen}>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Remove from inventory?</Dialog.Title>
+			<Dialog.Description>
+				Remove <span class="font-semibold">{selectedProduct?.productName}</span> from your inventory?
+			</Dialog.Description>
+		</Dialog.Header>
+		<Dialog.Footer>
+			<Button variant="outline" onclick={() => (itemDeleteOpen = false)} disabled={itemDeleteLoading}>
+				Cancel
+			</Button>
+			<Button variant="destructive" onclick={handleItemDelete} disabled={itemDeleteLoading}>
+				{itemDeleteLoading ? 'Removing…' : 'Remove'}
+			</Button>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>

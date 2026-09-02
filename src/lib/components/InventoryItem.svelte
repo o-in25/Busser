@@ -11,6 +11,7 @@
 		Info,
 		Pencil,
 		Sparkles,
+		Trash2,
 		Wind,
 		XCircle,
 	} from 'lucide-svelte';
@@ -31,11 +32,13 @@
 		recipeCount = 0,
 		showStock = true,
 		onStockChange = null,
+		onDelete = null,
 	}: {
 		product: Product;
 		recipeCount?: number;
 		showStock?: boolean;
 		onStockChange?: ((productId: number, inStock: boolean) => void) | null;
+		onDelete?: (() => void) | null;
 	} = $props();
 
 	// get workspace role for permission checks
@@ -336,13 +339,28 @@
 				<div></div>
 			{/if}
 			{#if canModify}
-				<a
-					class={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
-					href="/inventory/{product.productId}/edit"
-				>
-					<Pencil class="w-3.5 h-3.5 mr-1.5" />
-					Edit
-				</a>
+				<div class="flex items-center gap-2">
+					{#if onDelete}
+						<button
+							type="button"
+							class={cn(
+								buttonVariants({ variant: 'outline', size: 'sm' }),
+								'text-red-400 border-destructive/50 bg-destructive/10 hover:bg-destructive hover:text-destructive-foreground'
+							)}
+							onclick={() => onDelete?.()}
+						>
+							<Trash2 class="w-3.5 h-3.5 mr-1.5" />
+							Delete
+						</button>
+					{/if}
+					<a
+						class={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
+						href="/inventory/{product.productId}/edit"
+					>
+						<Pencil class="w-3.5 h-3.5 mr-1.5" />
+						Edit
+					</a>
+				</div>
 			{/if}
 		</div>
 	</div>

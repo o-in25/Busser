@@ -10,13 +10,11 @@
 		Palette,
 		Percent,
 		Sparkles,
-		Trash2,
 		Wind,
 	} from 'lucide-svelte';
 
 	import { applyAction, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { CalculatedBadge } from '$lib/components/ui/calculated-badge';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -42,21 +40,18 @@
 		action,
 		product = null,
 		isShared = false,
-		modalOpen = $bindable(false),
 	}: {
 		action: ComponentAction;
 		product?: Product | null;
 		isShared?: boolean;
-		modalOpen?: boolean;
 	} = $props();
 
-	let slug = $page.params.id;
 	let productName = $state('');
 	let productPricePerUnit = $state('');
 	let productUnitSizeInMilliliters = $state('');
 	let productProof = $state('');
 	let categoryId = $state<string | null>(null);
-	let supplierId = $state<string | null>('1');
+	let supplierId = $state<string | null>(null);
 	let productImageUrl = $state<string | undefined>();
 	let productInStockQuantity = $state(0);
 	let productSweetnessRating = $state(0.0);
@@ -208,7 +203,7 @@
 		productUnitSizeInMilliliters = (data.productUnitSizeInMilliliters as string) ?? '';
 		productProof = (data.productProof as string) ?? '';
 		categoryId = (data.categoryId as string | null) ?? null;
-		supplierId = (data.supplierId as string | null) ?? '1';
+		supplierId = (data.supplierId as string | null) ?? null;
 		productInStockQuantity = (data.productInStockQuantity as number) ?? 0;
 		productSweetnessRating = (data.productSweetnessRating as number) ?? 0;
 		productDrynessRating = (data.productDrynessRating as number) ?? 0;
@@ -257,22 +252,6 @@
 			ratingsGenerating = false;
 		}
 	}
-
-	const deleteItem = async () => {
-		const response = await fetch(`/api/inventory/${slug}`, {
-			method: 'DELETE',
-		});
-
-		const result = await response.json();
-		if ('data' in result) {
-			$notificationStore.success = {
-				message: isShared ? 'Removed from your inventory.' : 'Inventory item deleted.',
-			};
-			goto('/inventory');
-		} else {
-			$notificationStore.error = { message: result.message || result.error };
-		}
-	};
 
 	// Validation state
 	let touched = $state({
@@ -430,6 +409,7 @@
 									actionUrl="/inventory/category/add"
 									name="categoryId"
 									grant="add_category"
+									placeholder="Search categories"
 									key={product?.categoryName}
 									required={true}
 									bind:value={categoryId}
@@ -444,8 +424,8 @@
 									label="Supplier"
 									fetchUrl="/api/select/suppliers"
 									name="supplierId"
-									key={product?.supplierName || 'Any'}
-									required={true}
+									placeholder="Any supplier"
+									key={product?.supplierName ?? undefined}
 									bind:value={supplierId}
 								/>
 							</div>
@@ -677,39 +657,6 @@
 			</Dialog.Footer>
 		</Dialog.Content>
 	</Dialog.Root>
-
-	<Dialog.Root bind:open={modalOpen}>
-		<Dialog.Content>
-			<Dialog.Header>
-				<Dialog.Title>{isShared ? 'Remove from inventory' : 'Confirm Delete'}</Dialog.Title>
-				<Dialog.Description>
-					{#if isShared}
-						Remove <span class="font-semibold">{product?.productName}</span> from your inventory? The
-						shared Busser product isn't affected — you can add it back anytime.
-					{:else}
-						Delete <span class="font-semibold">{product?.productName}</span> from inventory?
-						<p
-							class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
-						>
-							Once deleted, it can't be recovered.
-						</p>
-					{/if}
-				</Dialog.Description>
-			</Dialog.Header>
-			<Dialog.Footer>
-				<Button variant="outline" onclick={() => (modalOpen = false)}>Cancel</Button>
-				<Button
-					variant="destructive"
-					onclick={async () => {
-						await deleteItem();
-						modalOpen = false;
-					}}
-				>
-					{isShared ? 'Remove' : 'Delete'}
-				</Button>
-			</Dialog.Footer>
-		</Dialog.Content>
-	</Dialog.Root>
 </div>
 
 <!-- Draft Manager (only for add mode) -->
@@ -721,16 +668,4 @@
 		data={draftData}
 		onrestore={handleDraftRestore}
 	/>
-{/if}
-
-<!-- Delete pill (edit mode) -->
-{#if action === 'edit'}
-	<button
-		type="button"
-		onclick={() => (modalOpen = true)}
-		class="mt-3 mx-auto w-fit flex items-center gap-2 text-xs text-destructive/60 hover:text-destructive bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-destructive/20 hover:border-destructive/40 shadow-sm transition-colors cursor-pointer"
-	>
-		<Trash2 class="h-3 w-3" />
-		<span>{isShared ? 'Remove from my inventory' : 'Delete'}</span>
-	</button>
 {/if}

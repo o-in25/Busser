@@ -52,7 +52,8 @@
 	];
 
 	const perPageOptions = [
-		{ value: '20', label: '20 per page' },
+		{ value: '10', label: '10 per page' },
+		{ value: '25', label: '25 per page' },
 		{ value: '50', label: '50 per page' },
 		{ value: '100', label: '100 per page' },
 	];
@@ -81,7 +82,7 @@
 
 	const perPageLabel = $derived.by(() => {
 		const option = perPageOptions.find((o) => o.value === perPage);
-		return option?.label || '20 per page';
+		return option?.label || '10 per page';
 	});
 
 	const hasNonDefaultFilters = $derived(
@@ -89,11 +90,11 @@
 			(selectedSupplier && selectedSupplier !== 'all') ||
 			(stockFilter && stockFilter !== 'all') ||
 			sortOption !== 'name-asc' ||
-			perPage !== '20'
+			perPage !== '10'
 	);
 </script>
 
-<div class="flex flex-col gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 sm:grid-flow-row-dense gap-4">
 	<!-- category -->
 	<div class="flex flex-col gap-1.5">
 		<span class="text-sm font-medium text-muted-foreground">Category</span>
@@ -201,10 +202,10 @@
 	<!-- per page -->
 	<div class="flex flex-col gap-1.5">
 		<span class="text-sm font-medium text-muted-foreground">Per Page</span>
-		<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '20')}>
+		<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '10')}>
 			<Select.Trigger class="w-full">
 				<List class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="20 per page">{perPageLabel}</Select.Value>
+				<Select.Value placeholder="10 per page">{perPageLabel}</Select.Value>
 			</Select.Trigger>
 			<Select.Content>
 				{#each perPageOptions as option}
@@ -218,7 +219,7 @@
 	{#if hasNonDefaultFilters}
 		<button
 			onclick={onReset}
-			class="text-sm text-muted-foreground hover:text-foreground underline self-start"
+			class="text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 		>
 			Reset filters
 		</button>

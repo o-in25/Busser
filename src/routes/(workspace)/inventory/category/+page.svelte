@@ -60,7 +60,12 @@
 
 	onMount(() => {
 		const saved = localStorage.getItem('category-view-mode');
-		if (saved === 'list' || saved === 'table') viewMode = saved;
+		if (saved === 'list' || saved === 'table') {
+			viewMode = saved;
+		} else if (window.matchMedia('(max-width: 767px)').matches) {
+			// default to list on mobile so the table doesn't force horizontal scroll
+			viewMode = 'list';
+		}
 	});
 
 	function setViewMode(mode: 'table' | 'list') {
@@ -97,7 +102,7 @@
 
 	// active filter count for badge
 	const activeFilterCount = $derived(
-		(data.pagination.perPage !== 50 ? 1 : 0) + (activeGroup !== null ? 1 : 0)
+		(data.pagination.perPage !== 10 ? 1 : 0) + (activeGroup !== null ? 1 : 0)
 	);
 
 	async function handleRefresh() {
@@ -110,11 +115,11 @@
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 		const perPage =
-			overrides.perPage !== undefined ? overrides.perPage : (data.filters?.perPage ?? 50);
+			overrides.perPage !== undefined ? overrides.perPage : (data.filters?.perPage ?? 10);
 
 		params.set('page', String(pageNum));
 		if (search) params.set('search', String(search));
-		if (perPage && Number(perPage) !== 50) params.set('perPage', String(perPage));
+		if (perPage && Number(perPage) !== 10) params.set('perPage', String(perPage));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -230,7 +235,7 @@
 			onPerPageChange={(v) => goto(buildUrl({ perPage: v, page: 1 }))}
 			onReset={() => {
 				activeGroup = null;
-				goto(buildUrl({ perPage: 50, page: 1 }));
+				goto(buildUrl({ perPage: 10, page: 1 }));
 			}}
 		/>
 	</FilterButton>

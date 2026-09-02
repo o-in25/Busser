@@ -26,13 +26,19 @@
 	let selectValue = key || '';
 	let prevValue: string | null = null;
 	let prevKey: string | undefined = key;
+	let loaded = false;
 
 	onMount(async () => {
 		let response = await fetch(fetchUrl, {
 			method: 'GET',
 		});
-		const selectOptions = await response.json();
-		items = selectOptions;
+		items = await response.json();
+		// restore the display from a preserved value so a step remount doesn't blank the field
+		if (value && !selectValue) {
+			const match = items.find((item) => String(item.value) === String(value));
+			if (match) selectValue = match.name;
+		}
+		loaded = true;
 	});
 
 	// Handle external value changes (e.g., draft restore) imperatively to avoid reactive cycles
@@ -57,10 +63,12 @@
 	$: search = typing
 		? items.filter(({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1)
 		: items;
-	// resolve the value off the full list, independent of what's currently visible
-	$: value =
-		items.find(({ name }) => name.toLowerCase().trim() === selectValue.toLowerCase().trim())
-			?.value ?? null;
+	// resolve the value off the full list, independent of what's currently visible. hold off until
+	// options load, or the empty display nulls a preserved value on a step remount
+	$: if (loaded)
+		value =
+			items.find(({ name }) => name.toLowerCase().trim() === selectValue.toLowerCase().trim())
+				?.value ?? null;
 	$: disabled = items.length === 0;
 
 	const showAutocomplete = () => {

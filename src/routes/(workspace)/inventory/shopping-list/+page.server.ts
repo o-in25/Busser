@@ -14,9 +14,9 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	const supplierFilter = url.searchParams.get('supplierId') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 
-	const allowedPerPage = [20, 50, 100];
-	let perPage = Number(url.searchParams.get('perPage')) || 20;
-	if (!allowedPerPage.includes(perPage)) perPage = 20;
+	const allowedPerPage = [10, 25, 50, 100];
+	let perPage = Number(url.searchParams.get('perPage')) || 10;
+	if (!allowedPerPage.includes(perPage)) perPage = 10;
 
 	let filter: Record<string, any> = {};
 	if (productName) filter.productName = productName;

@@ -5,9 +5,12 @@
 		base: 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
 		variants: {
 			variant: {
-				default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
+				// everyday badge is translucent glass (pink), mirroring the button default treatment
+				default:
+					'border-primary/30 bg-primary/85 text-primary-foreground backdrop-blur-md shadow-md shadow-primary/25 hover:bg-primary dark:bg-primary/30 dark:text-white dark:border-primary/40 dark:shadow-glow-pink dark:hover:bg-primary/45',
+				// purple glass counterpart to the pink default
 				secondary:
-					'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+					'border-secondary/30 bg-secondary/85 text-secondary-foreground backdrop-blur-md shadow-md shadow-secondary/25 hover:bg-secondary dark:bg-secondary/30 dark:text-white dark:border-secondary/40 dark:shadow-glow-purple dark:hover:bg-secondary/45',
 				destructive:
 					'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
 				outline: 'text-foreground',

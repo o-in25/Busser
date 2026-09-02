@@ -56,7 +56,7 @@
 	// svelte-ignore state_referenced_locally
 	let selectedShowFilter = $state(data.filters.showFilter || 'all');
 	// svelte-ignore state_referenced_locally
-	let perPage = $state(String(data.filters.perPage ?? 24));
+	let perPage = $state(String(data.filters.perPage ?? 10));
 	// svelte-ignore state_referenced_locally
 	let selectedMood = $state(data.filters.mood || '');
 
@@ -70,7 +70,7 @@
 		if (selectedSpirit && selectedSpirit !== 'all') count++;
 		if (selectedShowFilter && selectedShowFilter !== 'all') count++;
 		if (selectedSort !== 'name-asc') count++;
-		if (perPage !== '24') count++;
+		if (perPage !== '10') count++;
 		if (selectedMood) count++;
 		return count;
 	});
@@ -99,14 +99,14 @@
 		selectedSpirit = 'all';
 		selectedShowFilter = 'all';
 		selectedSort = 'name-asc';
-		perPage = '24';
+		perPage = '10';
 		selectedMood = '';
 		goto(
 			buildUrl({
 				spirit: 'all',
 				show: 'all',
 				sort: 'name-asc',
-				perPage: '24',
+				perPage: '10',
 				mood: '',
 				page: 1,
 			}),
@@ -146,7 +146,7 @@
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
 		if (spirit && spirit !== 'all') params.set('spirit', String(spirit));
 		if (show && show !== 'all') params.set('show', String(show));
-		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
+		if (pp && String(pp) !== '10') params.set('perPage', String(pp));
 		if (mood) params.set('mood', String(mood));
 
 		if (makeableLensAvailable) {
@@ -240,7 +240,7 @@
 		selectedSort = data.filters.sort || 'name-asc';
 		selectedSpirit = data.filters.spiritId || 'all';
 		selectedShowFilter = data.filters.showFilter || 'all';
-		perPage = String(data.filters.perPage ?? 24);
+		perPage = String(data.filters.perPage ?? 10);
 		favorites = new Set(data.favoriteRecipeIds);
 		featured = new Set(data.featuredRecipeIds);
 	});

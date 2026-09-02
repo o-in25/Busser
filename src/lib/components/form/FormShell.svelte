@@ -60,7 +60,12 @@
 	}
 </script>
 
-<div class="mx-auto w-full max-w-3xl">
+<!-- mobile: fill the viewport minus the chrome (top header 4rem + safe-area, container/wrapper
+     padding above/below, fixed bottom nav's 6rem reserve) so a short form pushes the footer to the
+     bottom of the view without reserving room or adding scroll. desktop is untouched (block). -->
+<div
+	class="mx-auto flex min-h-[calc(100dvh-12rem-env(safe-area-inset-top,0px))] w-full max-w-3xl flex-col md:block md:min-h-0"
+>
 	<FormStepper {steps} {currentStep} {canProceed} onstep={goToStep} />
 
 	<!-- step heading -->
@@ -77,7 +82,8 @@
 	<!-- active step body -->
 	<!-- overflow-x-clip (not hidden) contains the horizontal slide without forcing overflow-y to
 	     auto, so field dropdowns can escape downward over the footer instead of being clipped -->
-	<div class="min-h-[18rem] overflow-x-clip">
+	<!-- flex-1 on mobile absorbs the slack so the footer lands at the bottom, not right under the body -->
+	<div class="min-h-[18rem] flex-1 overflow-x-clip md:flex-none">
 		{#key currentStep}
 			<div
 				in:fly={{ x: direction * 160, duration: 220, delay: 180 }}

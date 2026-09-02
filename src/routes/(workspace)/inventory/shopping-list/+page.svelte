@@ -40,7 +40,7 @@
 	let selectedCategory = $state(data.filters?.categoryGroupId || 'all');
 	let selectedSupplier = $state(data.filters?.supplierId || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
-	let perPage = $state(String(data.filters?.perPage || 20));
+	let perPage = $state(String(data.filters?.perPage || 10));
 
 	// filter panel state
 	let filterOpen = $state(false);
@@ -50,7 +50,7 @@
 		if (selectedCategory && selectedCategory !== 'all') count++;
 		if (selectedSupplier && selectedSupplier !== 'all') count++;
 		if (sortOption !== 'name-asc') count++;
-		if (perPage !== '20') count++;
+		if (perPage !== '10') count++;
 		return count;
 	});
 
@@ -91,7 +91,7 @@
 		if (category && category !== 'all') params.set('categoryGroupId', String(category));
 		if (supplier && supplier !== 'all') params.set('supplierId', String(supplier));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
-		if (pp && String(pp) !== '20') params.set('perPage', String(pp));
+		if (pp && String(pp) !== '10') params.set('perPage', String(pp));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -135,7 +135,7 @@
 		selectedCategory = 'all';
 		selectedSupplier = 'all';
 		sortOption = 'name-asc';
-		perPage = '20';
+		perPage = '10';
 		goto(`${basePath}?page=1`);
 	}
 
@@ -143,13 +143,13 @@
 		selectedCategory = 'all';
 		selectedSupplier = 'all';
 		sortOption = 'name-asc';
-		perPage = '20';
+		perPage = '10';
 		goto(
 			buildUrl({
 				categoryGroupId: 'all',
 				supplierId: 'all',
 				sort: 'name-asc',
-				perPage: '20',
+				perPage: '10',
 				page: 1,
 			})
 		);
@@ -248,7 +248,7 @@
 		selectedCategory = data.filters?.categoryGroupId || 'all';
 		selectedSupplier = data.filters?.supplierId || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
-		perPage = String(data.filters?.perPage || 20);
+		perPage = String(data.filters?.perPage || 10);
 	});
 
 	// filter panel label helpers
@@ -260,7 +260,8 @@
 	];
 
 	const perPageOptions = [
-		{ value: '20', label: '20 per page' },
+		{ value: '10', label: '10 per page' },
+		{ value: '25', label: '25 per page' },
 		{ value: '50', label: '50 per page' },
 		{ value: '100', label: '100 per page' },
 	];
@@ -281,14 +282,14 @@
 		sortOptions.find((o) => o.value === sortOption)?.label || 'Name (A-Z)'
 	);
 	const perPageLabel = $derived(
-		perPageOptions.find((o) => o.value === perPage)?.label || '20 per page'
+		perPageOptions.find((o) => o.value === perPage)?.label || '10 per page'
 	);
 
 	const hasNonDefaultFilters = $derived(
 		(selectedCategory && selectedCategory !== 'all') ||
 			(selectedSupplier && selectedSupplier !== 'all') ||
 			sortOption !== 'name-asc' ||
-			perPage !== '20'
+			perPage !== '10'
 	);
 </script>
 
@@ -346,7 +347,7 @@
 					onRefresh={handleRefresh}
 				>
 					<!-- category filter -->
-					<div class="flex flex-col gap-4">
+					<div class="grid grid-cols-1 sm:grid-cols-2 sm:grid-flow-row-dense gap-4">
 						<div class="flex flex-col gap-1.5">
 							<span class="text-sm font-medium text-muted-foreground">Category</span>
 							<Select.Root
@@ -417,10 +418,10 @@
 							<Select.Root
 								type="single"
 								value={perPage}
-								onValueChange={(v) => handlePerPageChange(v ?? '20')}
+								onValueChange={(v) => handlePerPageChange(v ?? '10')}
 							>
 								<Select.Trigger class="w-full">
-									<Select.Value placeholder="20 per page">{perPageLabel}</Select.Value>
+									<Select.Value placeholder="10 per page">{perPageLabel}</Select.Value>
 								</Select.Trigger>
 								<Select.Content>
 									{#each perPageOptions as option}
@@ -434,7 +435,7 @@
 						{#if hasNonDefaultFilters}
 							<button
 								onclick={resetPanelFilters}
-								class="text-sm text-muted-foreground hover:text-foreground underline self-start"
+								class="text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 							>
 								Reset filters
 							</button>

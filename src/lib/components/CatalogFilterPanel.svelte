@@ -19,7 +19,7 @@
 		selectedShowFilter,
 		selectedMood = '',
 		sortOption,
-		perPage = '24',
+		perPage = '10',
 		advancedFilterCount = 0,
 		hideSpirit = false,
 		onSpiritChange,
@@ -85,10 +85,10 @@
 	}
 
 	const perPageOptions = [
-		{ value: '12', label: '12 per page' },
-		{ value: '24', label: '24 per page' },
-		{ value: '48', label: '48 per page' },
-		{ value: '96', label: '96 per page' },
+		{ value: '10', label: '10 per page' },
+		{ value: '25', label: '25 per page' },
+		{ value: '50', label: '50 per page' },
+		{ value: '100', label: '100 per page' },
 	];
 
 	const sortLabel = $derived.by(() => {
@@ -98,7 +98,7 @@
 
 	const perPageLabel = $derived.by(() => {
 		const option = perPageOptions.find((o) => o.value === perPage);
-		return option?.label || '24 per page';
+		return option?.label || '10 per page';
 	});
 
 	const hasNonDefaultFilters = $derived(
@@ -106,11 +106,11 @@
 			(selectedShowFilter && selectedShowFilter !== 'all') ||
 			!!selectedMood ||
 			sortOption !== 'name-asc' ||
-			perPage !== '24'
+			perPage !== '10'
 	);
 </script>
 
-<div class="flex flex-col gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 sm:grid-flow-row-dense gap-4">
 	<!-- spirit -->
 	{#if !hideSpirit}
 		<div class="flex flex-col gap-1.5">
@@ -142,7 +142,7 @@
 
 	<!-- mood -->
 	{#if onMoodChange}
-		<div class="flex flex-col gap-1.5">
+		<div class="flex flex-col gap-1.5 sm:col-span-2">
 			<span class="text-sm font-medium text-muted-foreground">Mood</span>
 			<div class="flex flex-wrap gap-1.5">
 				{#each moods as mood}
@@ -203,10 +203,10 @@
 	{#if onPerPageChange}
 		<div class="flex flex-col gap-1.5">
 			<span class="text-sm font-medium text-muted-foreground">Page Size</span>
-			<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '24')}>
+			<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '10')}>
 				<Select.Trigger class="w-full">
 					<Rows3 class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="24 per page">{perPageLabel}</Select.Value>
+					<Select.Value placeholder="10 per page">{perPageLabel}</Select.Value>
 				</Select.Trigger>
 				<Select.Content>
 					{#each perPageOptions as option}
@@ -219,7 +219,7 @@
 
 	<!-- advanced filters link -->
 	{#if onAdvancedClick}
-		<div class="border-t border-border/50 pt-3">
+		<div class="border-t border-border/50 pt-3 sm:col-span-2">
 			<button
 				onclick={onAdvancedClick}
 				class="flex items-center justify-between w-full rounded-lg border border-input/50 px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors"
@@ -242,7 +242,7 @@
 	{#if hasNonDefaultFilters}
 		<button
 			onclick={onReset}
-			class="text-sm text-muted-foreground hover:text-foreground underline self-start"
+			class="text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 		>
 			Reset filters
 		</button>

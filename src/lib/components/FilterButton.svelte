@@ -53,10 +53,6 @@
 		list: 'List',
 	};
 
-	// lit treatment matching an active view-tab, keyed to the panel being open
-	const litTrigger =
-		'data-[state=open]:bg-primary/25 data-[state=open]:text-primary data-[state=open]:ring-1 data-[state=open]:ring-inset data-[state=open]:ring-primary/40 data-[state=open]:shadow-[inset_0_0_12px_rgba(248,78,128,0.35)]';
-
 	let isMobile = $state(false);
 
 	onMount(() => {
@@ -100,8 +96,7 @@
 		<Sheet.Trigger
 			class={cn(
 				buttonVariants({ variant: 'outline' }),
-				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4',
-				litTrigger
+				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4'
 			)}
 		>
 			{@render trigger()}
@@ -165,8 +160,7 @@
 		<Popover.Trigger
 			class={cn(
 				buttonVariants({ variant: 'outline' }),
-				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4',
-				litTrigger
+				'relative shrink-0 h-10 w-10 px-0 sm:w-auto sm:px-4'
 			)}
 		>
 			{@render trigger()}
@@ -179,7 +173,7 @@
 			side="bottom"
 			avoidCollisions={false}
 			collisionPadding={8}
-			class="w-80 max-h-[var(--bits-popover-content-available-height)] overflow-y-auto overscroll-contain"
+			class="w-[36rem] max-w-[calc(100vw-1rem)] max-h-[var(--bits-popover-content-available-height)] overflow-y-auto overscroll-contain"
 		>
 			{@render children()}
 			{@render refreshButton()}

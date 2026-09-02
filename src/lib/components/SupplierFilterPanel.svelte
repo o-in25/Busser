@@ -39,7 +39,7 @@
 	);
 </script>
 
-<div class="flex flex-col gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 sm:grid-flow-row-dense gap-4">
 	<!-- type -->
 	{#if types.length > 0}
 		<div class="flex flex-col gap-1.5">
@@ -84,7 +84,7 @@
 	{#if hasNonDefaultFilters}
 		<button
 			onclick={onReset}
-			class="text-sm text-muted-foreground hover:text-foreground underline self-start"
+			class="text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 		>
 			Reset filters
 		</button>

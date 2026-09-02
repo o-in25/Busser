@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	// Parse URL params
 	const page = Number(url.searchParams.get('page') || '1');
 	const search = url.searchParams.get('search') || '';
-	const perPage = Math.min(Math.max(Number(url.searchParams.get('perPage')) || 50, 10), 100);
+	const perPage = Math.min(Math.max(Number(url.searchParams.get('perPage')) || 10, 10), 100);
 
 	const [{ data: categories, pagination }, stats] = await Promise.all([
 		inventoryRepo.findAllCategories(workspaceId, page, perPage, search || null),
