@@ -63,7 +63,11 @@
 		appearance: none;
 		width: 18px;
 		height: 18px;
-		background: linear-gradient(135deg, hsl(var(--primary) / 0.85) 0%, hsl(340 87% 45% / 0.85) 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--primary) / 0.85) 0%,
+			hsl(340 87% 45% / 0.85) 100%
+		);
 		border-radius: 50%;
 		cursor: pointer;
 		border: 2px solid rgba(255, 255, 255, 0.5);
@@ -86,7 +90,11 @@
 	.slider-input::-moz-range-thumb {
 		width: 18px;
 		height: 18px;
-		background: linear-gradient(135deg, hsl(var(--primary) / 0.85) 0%, hsl(340 87% 45% / 0.85) 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--primary) / 0.85) 0%,
+			hsl(340 87% 45% / 0.85) 100%
+		);
 		border-radius: 50%;
 		cursor: pointer;
 		border: 2px solid rgba(255, 255, 255, 0.5);

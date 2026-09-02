@@ -648,7 +648,11 @@
 			</Dialog.Description>
 		</Dialog.Header>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => (itemDeleteOpen = false)} disabled={itemDeleteLoading}>
+			<Button
+				variant="outline"
+				onclick={() => (itemDeleteOpen = false)}
+				disabled={itemDeleteLoading}
+			>
 				Cancel
 			</Button>
 			<Button variant="destructive" onclick={handleItemDelete} disabled={itemDeleteLoading}>
