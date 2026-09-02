@@ -20,7 +20,7 @@
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import { FormShell } from '$lib/components/form';
-	import NestedCreateSheet from '$lib/components/form/NestedCreateSheet.svelte';
+	import NestedFormSheet from '$lib/components/form/NestedFormSheet.svelte';
 	import { FlavorSlider } from '$lib/components/ui/flavor-slider';
 	import { Helper } from '$lib/components/ui/helper';
 	import { Input } from '$lib/components/ui/input';
@@ -29,7 +29,7 @@
 	import { SpiritCard } from '$lib/components/ui/spirit-card';
 	import { Switch } from '$lib/components/ui/switch';
 	import { calculateOverallScore, convertFromMl, convertToMl } from '$lib/math';
-	import { NESTED_CREATE_KEY, NestedCreateStack } from './form/nestedCreate.svelte';
+	import { NESTED_FORM_KEY, NestedFormStack } from './form/NestedForm.svelte';
 	import type { PreparationMethod, Spirit, View } from '$lib/types';
 
 	import { notificationStore } from '../../stores';
@@ -53,11 +53,12 @@
 	} = $props();
 
 	// Make recipe deeply reactive for two-way binding on properties
+	// svelte-ignore state_referenced_locally
 	let recipe = $state(initialRecipe);
 
-	// provide the nested-create stack so any SearchableSelect "+" can open a stacked sheet
-	const nestedStack = new NestedCreateStack();
-	setContext(NESTED_CREATE_KEY, nestedStack);
+	// provide the nested-form stack so any SearchableSelect "+" can open a stacked sheet
+	const nestedStack = new NestedFormStack();
+	setContext(NESTED_FORM_KEY, nestedStack);
 
 	// Determine if this is add mode (for draft functionality)
 	const isAddMode = !recipe.recipeId;
@@ -290,6 +291,7 @@
 	let imageCleared = $state(false);
 
 	// AI insights toggle
+	// svelte-ignore state_referenced_locally
 	let insightsEnabled = $state(initialRecipe.insightsEnabled ?? true);
 
 	// Form state
@@ -647,7 +649,7 @@
 {/if}
 
 <!-- Nested product/category creation sheets -->
-<NestedCreateSheet />
+<NestedFormSheet />
 
 <style>
 	/* placeholder shown where dragged item will be inserted */

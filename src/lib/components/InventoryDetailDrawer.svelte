@@ -10,12 +10,14 @@
 		recipeCount = 0,
 		showStock = true,
 		onStockChange = null,
+		onDelete = null,
 	}: {
 		open?: boolean;
 		product: Product | null;
 		recipeCount?: number;
 		showStock?: boolean;
 		onStockChange?: ((productId: number, inStock: boolean) => void) | null;
+		onDelete?: (() => void) | null;
 	} = $props();
 </script>
 
@@ -33,7 +35,7 @@
 		<!-- scroll on the inner wrapper, not Content — keeps the pinned close button unclipped -->
 		<div class="flex-1 min-h-0 overflow-y-auto p-4 pt-14">
 			{#if product}
-				<InventoryItem {product} {recipeCount} {showStock} {onStockChange} />
+				<InventoryItem {product} {recipeCount} {showStock} {onStockChange} {onDelete} />
 			{:else}
 				<div class="flex items-center justify-center h-32 text-muted-foreground">
 					No product selected

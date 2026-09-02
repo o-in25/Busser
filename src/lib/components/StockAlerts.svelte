@@ -70,7 +70,7 @@
 								</a>
 							{/each}
 							<a
-								href="/inventory/suppliers"
+								href="/inventory/shopping-list"
 								class="flex items-center justify-center gap-2 p-2 rounded-md bg-background/80 hover:bg-background transition-colors text-sm font-medium text-primary"
 							>
 								<ShoppingCart class="h-4 w-4" />

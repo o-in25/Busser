@@ -8,6 +8,7 @@
 		Loader2,
 		Pencil,
 		Plus,
+		RefreshCw,
 		Star,
 		Trash2,
 	} from 'lucide-svelte';
@@ -28,26 +29,112 @@
 	import type { PageData } from './$types';
 	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
 
-	let { data }: { data: PageData } = $props();
+	let { data: pageData }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 	const authenticated = $derived(!!$page.data.user);
 
-	// local state for optimistic updates
-	let isFavorite = $state(data.isFavorite);
-	let isFeatured = $state(data.isFeatured);
-	let isPublished = $state(!!data.recipe.published);
+	// svelte-ignore state_referenced_locally
+	let isFavorite = $state(pageData.isFavorite);
+	// svelte-ignore state_referenced_locally
+	let isFeatured = $state(pageData.isFeatured);
+	// svelte-ignore state_referenced_locally
+	let isPublished = $state(!!pageData.recipe.published);
 
 	$effect(() => {
-		isFavorite = data.isFavorite;
-		isFeatured = data.isFeatured;
-		isPublished = !!data.recipe.published;
+		isFavorite = pageData.isFavorite;
+		isFeatured = pageData.isFeatured;
+		isPublished = !!pageData.recipe.published;
 	});
 
-	// publish toggle only applies to the global catalog
-	const canPublish = $derived(canModify && data.isGlobalCatalog);
+	const isOwned = $derived(pageData.isOwned);
+
+	const canPublish = $derived(canModify && pageData.isGlobalCatalog);
 	let publishing = $state(false);
+	let customizing = $state(false);
+
+	let sameNameConfirmOpen = $state(false);
+
+	async function submitAdd() {
+		customizing = true;
+		const toastId = toast.loading('Adding to your bar…');
+		const body = new FormData();
+		body.set('recipeId', String(pageData.recipe.recipeId));
+		body.set('sourceWorkspaceId', String(pageData.recipe.workspaceId));
+		body.set('targetWorkspaceId', workspace.workspaceId);
+		try {
+			const res = await fetch('?/importToWorkspace', { method: 'POST', body });
+			const result = deserialize(await res.text());
+			const data = result.type === 'success' ? (result.data as any) : null;
+			if (data && (data.success || data.alreadyImported) && data.importedRecipeId) {
+				toast.success(data.alreadyImported ? 'Opening your copy' : 'Added to your bar', {
+					id: toastId,
+				});
+				// goto(`/catalog/${data.importedRecipeId}`);
+			} else {
+				toast.error(data?.error || 'Could not add recipe', { id: toastId });
+			}
+		} catch {
+			toast.error('Could not add recipe', { id: toastId });
+		} finally {
+			customizing = false;
+		}
+	}
+
+	function attemptAdd() {
+		if (pageData.ownedSameName) {
+			sameNameConfirmOpen = true;
+			return;
+		}
+		submitAdd();
+	}
+
+	// fork divergence — the source recipe has a newer version
+	const sourceUpdate = $derived(pageData.sourceUpdate);
+	let syncDialogOpen = $state(false);
+	let syncing = $state(false);
+	let updateDismissed = $state(false);
+
+	async function doSync() {
+		if (syncing) return;
+		syncing = true;
+		try {
+			const body = new FormData();
+			body.set('recipeId', String(pageData.recipe.recipeId));
+			const res = await fetch('?/syncFork', { method: 'POST', body });
+			const result = deserialize(await res.text());
+			const data = result.type === 'success' ? (result.data as any) : null;
+			if (data?.success) {
+				toast.success('Recipe updated to the latest version');
+				syncDialogOpen = false;
+				await invalidateAll();
+			} else {
+				toast.error(data?.error || 'Could not update recipe');
+			}
+		} catch {
+			toast.error('Could not update recipe');
+		} finally {
+			syncing = false;
+		}
+	}
+
+	async function doDismiss() {
+		updateDismissed = true; // optimistic
+		try {
+			const body = new FormData();
+			body.set('recipeId', String(pageData.recipe.recipeId));
+			const res = await fetch('?/dismissUpdate', { method: 'POST', body });
+			const result = deserialize(await res.text());
+			if (!(result.type === 'success' && (result.data as any)?.success)) {
+				updateDismissed = false;
+				toast.error('Could not dismiss update');
+			}
+		} catch {
+			updateDismissed = false;
+			toast.error('Could not dismiss update');
+		}
+	}
 
 	async function togglePublish() {
 		if (publishing) return;
@@ -56,8 +143,8 @@
 		isPublished = !isPublished; // optimistic
 		try {
 			const body = new FormData();
-			body.set('recipeId', String(data.recipe.recipeId));
-			body.set('workspaceId', data.recipe.workspaceId);
+			body.set('recipeId', String(pageData.recipe.recipeId));
+			body.set('workspaceId', pageData.recipe.workspaceId);
 			const res = await fetch('?/togglePublished', { method: 'POST', body });
 			const result = deserialize(await res.text());
 			if (result.type === 'success' && (result.data as any)?.success) {
@@ -75,8 +162,7 @@
 		}
 	}
 
-	// import helpers — only offer workspaces the recipe isn't already in
-	const importData = $derived(data.importData);
+	const importData = $derived(pageData.importData);
 	const importableWorkspaces = $derived(
 		importData
 			? importData.editableWorkspaces.filter(
@@ -88,37 +174,36 @@
 		authenticated && importData && importData.eligible && importableWorkspaces.length > 0
 	);
 
-	// workspace ids with an import in flight — keeps their row disabled/spinning
 	let importing = $state(new Set<string>());
 
-	// json-ld structured data for search engines
+	// seo stuff
 	const jsonLd = $derived({
 		'@context': 'https://schema.org',
 		'@type': 'Recipe',
-		name: data.recipe.recipeName,
-		description: data.recipe.recipeDescription || `${data.recipe.recipeName} cocktail recipe.`,
-		...(data.recipe.recipeImageUrl && { image: data.recipe.recipeImageUrl }),
+		name: pageData.recipe.recipeName,
+		description:
+			pageData.recipe.recipeDescription || `${pageData.recipe.recipeName} cocktail recipe.`,
+		...(pageData.recipe.recipeImageUrl && { image: pageData.recipe.recipeImageUrl }),
 		author: { '@type': 'Organization', name: 'Busser', url: 'https://busserapp.com' },
-		recipeCategory: data.recipe.recipeCategoryDescription,
+		recipeCategory: pageData.recipe.recipeCategoryDescription,
 		recipeCuisine: 'Cocktail',
-		// cocktails are quick — flat estimate covers measuring (prep) + shake/stir/build (cook)
 		prepTime: 'PT3M',
 		cookTime: 'PT2M',
 		totalTime: 'PT5M',
 		keywords: [
-			data.recipe.recipeName,
-			data.recipe.recipeCategoryDescription,
-			data.recipe.recipeTechniqueDescriptionText,
+			pageData.recipe.recipeName,
+			pageData.recipe.recipeCategoryDescription,
+			pageData.recipe.recipeTechniqueDescriptionText,
 			'cocktail',
-			...data.recipeSteps.map((s) => s.productName),
+			...pageData.recipeSteps.map((s) => s.productName),
 		]
 			.filter(Boolean)
 			.join(', '),
-		recipeIngredient: data.recipeSteps.map(
+		recipeIngredient: pageData.recipeSteps.map(
 			(s) => `${s.productIdQuantityInMilliliters} ${s.productIdQuantityUnit} ${s.productName}`
 		),
-		...(data.recipe.recipeTechniqueDescriptionText && {
-			recipeInstructions: data.recipe.recipeTechniqueDescriptionText,
+		...(pageData.recipe.recipeTechniqueDescriptionText && {
+			recipeInstructions: pageData.recipe.recipeTechniqueDescriptionText,
 		}),
 	});
 
@@ -126,7 +211,7 @@
 	let deleteModalOpen = $state(false);
 
 	async function deleteRecipe() {
-		const response = await fetch(`/api/catalog/${data.recipe.recipeId}`, { method: 'DELETE' });
+		const response = await fetch(`/api/catalog/${pageData.recipe.recipeId}`, { method: 'DELETE' });
 		const result = await response.json();
 		if ('data' in result) {
 			$notificationStore.success = { message: 'Catalog item deleted.' };
@@ -138,38 +223,40 @@
 </script>
 
 <svelte:head>
-	<title>{data.recipe.recipeName} - Catalog</title>
+	<title>{pageData.recipe.recipeName} - Catalog</title>
 	<meta
 		name="description"
-		content={data.recipe.recipeDescription ||
-			`View the ${data.recipe.recipeName} cocktail recipe on Busser.`}
+		content={pageData.recipe.recipeDescription ||
+			`View the ${pageData.recipe.recipeName} cocktail recipe on Busser.`}
 	/>
-	<meta property="og:title" content="{data.recipe.recipeName} - Busser" />
+	<meta property="og:title" content="{pageData.recipe.recipeName} - Busser" />
 	<meta
 		property="og:description"
-		content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`}
+		content={pageData.recipe.recipeDescription ||
+			`View the ${pageData.recipe.recipeName} cocktail recipe.`}
 	/>
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="https://busserapp.com/catalog/{data.recipe.recipeId}" />
-	{#if data.recipe.recipeImageUrl}
-		<meta property="og:image" content={data.recipe.recipeImageUrl} />
+	<meta property="og:url" content="https://busserapp.com/catalog/{pageData.recipe.recipeId}" />
+	{#if pageData.recipe.recipeImageUrl}
+		<meta property="og:image" content={pageData.recipe.recipeImageUrl} />
 	{/if}
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="{data.recipe.recipeName} - Busser" />
+	<meta name="twitter:title" content="{pageData.recipe.recipeName} - Busser" />
 	<meta
 		name="twitter:description"
-		content={data.recipe.recipeDescription || `View the ${data.recipe.recipeName} cocktail recipe.`}
+		content={pageData.recipe.recipeDescription ||
+			`View the ${pageData.recipe.recipeName} cocktail recipe.`}
 	/>
-	{#if data.recipe.recipeImageUrl}
-		<meta name="twitter:image" content={data.recipe.recipeImageUrl} />
+	{#if pageData.recipe.recipeImageUrl}
+		<meta name="twitter:image" content={pageData.recipe.recipeImageUrl} />
 	{/if}
 	{@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</scr` + `ipt>`}
 </svelte:head>
 
-<!-- shared More menu, rendered by both the desktop toolbar and the mobile hero -->
+<!-- more menu -->
 {#snippet moreMenuItems()}
-	{#if canModify}
-		<DropdownMenu.Item onclick={() => goto(`/catalog/${data.recipe.recipeId}/edit`)}>
+	{#if canModify && isOwned}
+		<DropdownMenu.Item onclick={() => goto(`/catalog/${pageData.recipe.recipeId}/edit`)}>
 			<Pencil class="h-4 w-4 mr-2" />
 			Edit Recipe
 		</DropdownMenu.Item>
@@ -184,6 +271,23 @@
 				{/if}
 			</DropdownMenu.Item>
 		{/if}
+	{/if}
+
+	<!-- a global recipe can't be edited in place — "add" forks it into this bar and lands on the copy -->
+	{#if canModify && !isOwned}
+		<DropdownMenu.Item
+			disabled={customizing}
+			closeOnSelect={false}
+			class="cursor-pointer"
+			onclick={attemptAdd}
+		>
+			{#if customizing}
+				<Loader2 class="h-4 w-4 mr-2 animate-spin text-muted-foreground" />
+			{:else}
+				<Plus class="h-4 w-4 mr-2" />
+			{/if}
+			Add to workspace
+		</DropdownMenu.Item>
 	{/if}
 
 	{#if showImport && importData}
@@ -202,14 +306,14 @@
 					return async ({ result }) => {
 						importing = new Set([...importing].filter((id) => id !== ws.workspaceId));
 						if (result.type === 'success' && result.data) {
-							const d = result.data as any;
-							if (d.alreadyImported) {
+							const data = result.data as any;
+							if (data.alreadyImported) {
 								toast.info(`Already imported to ${ws.workspaceName}`, { id: toastId });
-							} else if (d.success) {
+							} else if (data.success) {
 								toast.success(`Imported to ${ws.workspaceName}`, { id: toastId });
 								invalidateAll();
 							} else {
-								toast.error(d.error || 'Failed to import recipe', { id: toastId });
+								toast.error(data.error || 'Failed to import recipe', { id: toastId });
 							}
 						} else {
 							toast.error('Failed to import recipe', { id: toastId });
@@ -217,7 +321,7 @@
 					};
 				}}
 			>
-				<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+				<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 				<input type="hidden" name="sourceWorkspaceId" value={workspace.workspaceId} />
 				<input type="hidden" name="targetWorkspaceId" value={ws.workspaceId} />
 				<DropdownMenu.Item disabled={isImporting} closeOnSelect={false} class="cursor-pointer">
@@ -237,7 +341,7 @@
 		{/each}
 	{/if}
 
-	{#if canModify}
+	{#if canModify && isOwned}
 		<DropdownMenu.Separator />
 		<DropdownMenu.Item
 			class="text-destructive dark:text-red-400 data-[highlighted]:text-destructive dark:data-[highlighted]:text-red-400 data-[highlighted]:bg-destructive/10"
@@ -250,6 +354,24 @@
 {/snippet}
 
 <div class="container mx-auto max-w-6xl px-4">
+	<!-- fork is behind its source — offer to pull the latest -->
+	{#if canModify && sourceUpdate?.updateAvailable && !updateDismissed}
+		<div
+			class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-neon-cyan/30 bg-neon-cyan/10 px-4 py-3 backdrop-blur-md"
+		>
+			<div class="flex items-center gap-2 text-sm">
+				<RefreshCw class="h-4 w-4 text-neon-cyan shrink-0" />
+				A newer version of this recipe is available from the catalog.
+			</div>
+			<div class="flex gap-2 shrink-0">
+				<FancyButton size="sm" variant="default" onclick={() => (syncDialogOpen = true)}>
+					Update
+				</FancyButton>
+				<FancyButton size="sm" onclick={doDismiss}>Dismiss</FancyButton>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Desktop toolbar above hero -->
 	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
 		<div class="flex items-center gap-3">
@@ -281,7 +403,7 @@
 						};
 					}}
 				>
-					<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+					<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
 					<FancyButton type="submit" variant={isFavorite ? 'danger' : 'default'} size="sm">
 						<Heart class={cn('h-4 w-4 mr-1', isFavorite && 'fill-current')} />
@@ -290,7 +412,7 @@
 				</form>
 			{/if}
 
-			{#if authenticated && canModify}
+			{#if authenticated && canModify && isOwned}
 				<form
 					method="POST"
 					action="?/toggleFeatured"
@@ -304,7 +426,7 @@
 						};
 					}}
 				>
-					<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+					<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
 					<FancyButton type="submit" variant={isFeatured ? 'warning' : 'default'} size="sm">
 						<Star class={cn('h-4 w-4 mr-1', isFeatured && 'fill-current')} />
@@ -327,7 +449,11 @@
 		</div>
 	</div>
 
-	<Recipe recipe={data.recipe} recipeSteps={data.recipeSteps} stepExtras={data.stepExtras}>
+	<Recipe
+		recipe={pageData.recipe}
+		recipeSteps={pageData.recipeSteps}
+		stepExtras={pageData.stepExtras}
+	>
 		{#snippet actions()}
 			<div class="flex w-full flex-col gap-2">
 				<!-- top row: back + more, matching the hero layout used across the app -->
@@ -366,7 +492,7 @@
 								};
 							}}
 						>
-							<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+							<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 							<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
 							<FancyButton
 								type="submit"
@@ -379,7 +505,7 @@
 							</FancyButton>
 						</form>
 
-						{#if canModify}
+						{#if canModify && isOwned}
 							<form
 								class="flex-1"
 								method="POST"
@@ -394,7 +520,7 @@
 									};
 								}}
 							>
-								<input type="hidden" name="recipeId" value={data.recipe.recipeId} />
+								<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 								<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
 								<FancyButton
 									type="submit"
@@ -414,6 +540,23 @@
 	</Recipe>
 </div>
 
+<!-- update-to-latest confirmation (replaces the fork's content) -->
+<Dialog.Root bind:open={syncDialogOpen}>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Update to latest version?</Dialog.Title>
+			<Dialog.Description>
+				This replaces your copy of <span class="font-semibold">{pageData.recipe.recipeName}</span> with
+				the latest version from the catalog, including any customizations you've made to it.
+			</Dialog.Description>
+		</Dialog.Header>
+		<Dialog.Footer>
+			<Button variant="outline" onclick={() => (syncDialogOpen = false)}>Cancel</Button>
+			<Button onclick={doSync} disabled={syncing}>{syncing ? 'Updating…' : 'Update'}</Button>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
+
 <!-- delete confirmation -->
 {#if canModify}
 	<Dialog.Root bind:open={deleteModalOpen}>
@@ -421,7 +564,7 @@
 			<Dialog.Header>
 				<Dialog.Title>Confirm Delete</Dialog.Title>
 				<Dialog.Description>
-					Delete <span class="font-semibold">{data.recipe.recipeName}</span> from catalog?
+					Delete <span class="font-semibold">{pageData.recipe.recipeName}</span> from catalog?
 					<p
 						class="text-destructive font-semibold mt-3 text-sm bg-destructive/10 dark:bg-destructive/15 rounded-lg px-3 py-2 border border-destructive/20"
 					>
@@ -442,3 +585,29 @@
 		</Dialog.Content>
 	</Dialog.Root>
 {/if}
+
+<!-- soft same-name nudge before adding busser's version alongside one you already have -->
+<Dialog.Root bind:open={sameNameConfirmOpen}>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Add Busser's version too?</Dialog.Title>
+			<Dialog.Description>
+				You already have a recipe called <span class="font-semibold"
+					>{pageData.recipe.recipeName}</span
+				>
+				in this bar. Adding Busser's version gives you a separate copy you can tweak — your existing recipe
+				is untouched.
+			</Dialog.Description>
+		</Dialog.Header>
+		<Dialog.Footer>
+			<Button variant="outline" onclick={() => (sameNameConfirmOpen = false)}>Cancel</Button>
+			<Button
+				disabled={customizing}
+				onclick={() => {
+					sameNameConfirmOpen = false;
+					submitAdd();
+				}}>Add anyway</Button
+			>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>

@@ -1,31 +1,37 @@
 <script lang="ts">
-	import { ArrowUpDown, List, Package, Settings2, Tags } from 'lucide-svelte';
+	import { ArrowUpDown, List, Package, Settings2, Store, Tags } from 'lucide-svelte';
 
 	import * as Select from '$lib/components/ui/select';
-	import type { CategoryGroupCount } from '$lib/types';
+	import type { CategoryGroupCount, Supplier } from '$lib/types';
 
 	let {
 		categories,
+		suppliers = [],
 		selectedCategory,
+		selectedSupplier,
 		stockFilter,
 		sortOption,
 		perPage,
 		showStock = true,
 		basePath = '/inventory',
 		onCategoryChange,
+		onSupplierChange,
 		onStockFilterChange,
 		onSortChange,
 		onPerPageChange,
 		onReset,
 	}: {
 		categories: CategoryGroupCount[];
+		suppliers?: Supplier[];
 		selectedCategory: string;
+		selectedSupplier: string;
 		stockFilter: string;
 		sortOption: string;
 		perPage: string;
 		showStock?: boolean;
 		basePath?: string;
 		onCategoryChange: (value: string) => void;
+		onSupplierChange: (value: string) => void;
 		onStockFilterChange: (value: string) => void;
 		onSortChange: (value: string) => void;
 		onPerPageChange: (value: string) => void;
@@ -46,7 +52,8 @@
 	];
 
 	const perPageOptions = [
-		{ value: '20', label: '20 per page' },
+		{ value: '10', label: '10 per page' },
+		{ value: '25', label: '25 per page' },
 		{ value: '50', label: '50 per page' },
 		{ value: '100', label: '100 per page' },
 	];
@@ -55,6 +62,12 @@
 		if (!selectedCategory || selectedCategory === 'all') return 'All Categories';
 		const cat = categories.find((c) => String(c.categoryGroupId) === selectedCategory);
 		return cat ? `${cat.categoryGroupName} (${cat.count})` : 'All Categories';
+	});
+
+	const supplierLabel = $derived.by(() => {
+		if (!selectedSupplier || selectedSupplier === 'all') return 'All Suppliers';
+		const sup = suppliers.find((s) => String(s.supplierId) === selectedSupplier);
+		return sup?.supplierName || 'All Suppliers';
 	});
 
 	const stockFilterLabel = $derived.by(() => {
@@ -69,18 +82,19 @@
 
 	const perPageLabel = $derived.by(() => {
 		const option = perPageOptions.find((o) => o.value === perPage);
-		return option?.label || '20 per page';
+		return option?.label || '10 per page';
 	});
 
 	const hasNonDefaultFilters = $derived(
 		(selectedCategory && selectedCategory !== 'all') ||
+			(selectedSupplier && selectedSupplier !== 'all') ||
 			(stockFilter && stockFilter !== 'all') ||
 			sortOption !== 'name-asc' ||
-			perPage !== '20'
+			perPage !== '10'
 	);
 </script>
 
-<div class="flex flex-col gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 sm:grid-flow-row-dense gap-4">
 	<!-- category -->
 	<div class="flex flex-col gap-1.5">
 		<span class="text-sm font-medium text-muted-foreground">Category</span>
@@ -115,6 +129,33 @@
 			</Select.Content>
 		</Select.Root>
 	</div>
+
+	<!-- supplier -->
+	{#if suppliers.length > 0}
+		<div class="flex flex-col gap-1.5">
+			<span class="text-sm font-medium text-muted-foreground">Supplier</span>
+			<Select.Root
+				type="single"
+				value={selectedSupplier}
+				onValueChange={(v) => onSupplierChange(v ?? '')}
+			>
+				<Select.Trigger class="w-full">
+					<Store class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="All Suppliers">{supplierLabel}</Select.Value>
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Item value="all" label="All Suppliers" />
+					<Select.Separator />
+					{#each suppliers as supplier}
+						<Select.Item
+							value={String(supplier.supplierId)}
+							label={supplier.supplierName || 'Unknown'}
+						/>
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
+	{/if}
 
 	<!-- stock level -->
 	{#if showStock}
@@ -161,10 +202,10 @@
 	<!-- per page -->
 	<div class="flex flex-col gap-1.5">
 		<span class="text-sm font-medium text-muted-foreground">Per Page</span>
-		<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '20')}>
+		<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '10')}>
 			<Select.Trigger class="w-full">
 				<List class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="20 per page">{perPageLabel}</Select.Value>
+				<Select.Value placeholder="10 per page">{perPageLabel}</Select.Value>
 			</Select.Trigger>
 			<Select.Content>
 				{#each perPageOptions as option}
@@ -178,7 +219,7 @@
 	{#if hasNonDefaultFilters}
 		<button
 			onclick={onReset}
-			class="text-sm text-muted-foreground hover:text-foreground underline self-start"
+			class="text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 		>
 			Reset filters
 		</button>

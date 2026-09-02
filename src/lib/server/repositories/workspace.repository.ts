@@ -1,9 +1,10 @@
-// workspace management repository
 import type { QueryResult, Workspace, WorkspaceUser } from '$lib/types';
 
+import { seedBaselineInventory } from '../core';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
+const WORKSPACE_CAP = 10;
 
 export type WorkspaceRole = 'owner' | 'editor' | 'viewer';
 
@@ -135,6 +136,15 @@ export class WorkspaceRepository extends BaseRepository {
 		workspaceType: 'personal' | 'shared'
 	): Promise<QueryResult<WorkspaceWithRole>> {
 		try {
+			const owned = (await this.db
+				.table('workspaceUser')
+				.where({ userId, workspaceRole: 'owner' })
+				.count('* as count')
+				.first()) as { count: number } | undefined;
+			if ((Number(owned?.count) || 0) >= WORKSPACE_CAP) {
+				return { status: 'error', error: `You can own at most ${WORKSPACE_CAP} workspaces.` };
+			}
+
 			const workspace = await this.db.query.transaction(async (trx) => {
 				// generate workspace ID (slug from name + random suffix)
 				const slug = workspaceName
@@ -170,6 +180,8 @@ export class WorkspaceRepository extends BaseRepository {
 
 				return dbResult as Workspace;
 			});
+
+			await seedBaselineInventory(workspace.workspaceId);
 
 			return {
 				status: 'success',

@@ -652,8 +652,8 @@
 		"description": "This cocktail features equal parts of Cognac and Amaretto, creating a rich and nutty flavor profile. Served over ice in an old fashioned glass, it offers a smooth and indulgent experience.",
 		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 6.0, "versatility": 5.0 },
 		"steps": [
-			{ "category": "Cognac", "qty": 45, "unit": "ml", "desc": "Add 1.5oz cognac" },
-			{ "category": "Amaretto", "qty": 23, "unit": "ml", "desc": "Add 0.8oz amaretto" }
+			{ "category": "Cognac", "qty": 35, "unit": "ml", "desc": "Add 1.2oz cognac" },
+			{ "category": "Amaretto", "qty": 35, "unit": "ml", "desc": "Add 1.2oz amaretto" }
 		]
 	},
 	{
@@ -680,21 +680,7 @@
 		]
 	},
 	{
-		"name": "Long Island Iced Tea",
-		"spirit": "Gin",
-		"technique": "Stirred",
-		"description": "A potent blend of equal parts vodka, tequila, light rum, and gin, topped with a splash of Coca-Cola for color. This refreshing and sweet concoction is served over ice and garnished with a lemon or lime twist.",
-		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 9.0, "versatility": 8.0 },
-		"steps": [
-			{ "category": "Plain Vodka", "qty": 15, "unit": "ml", "desc": "Add 0.5oz vodka" },
-			{ "category": "Blanco Tequila", "qty": 15, "unit": "ml", "desc": "Add 0.5oz tequila" },
-			{ "category": "White Rum", "qty": 15, "unit": "ml", "desc": "Add 0.5oz light rum" },
-			{ "category": "London Dry Gin", "qty": 15, "unit": "ml", "desc": "Add 0.5oz gin" },
-			{ "category": "Cola", "qty": 1, "unit": "dash", "desc": "Add 1 dash coca-cola" }
-		]
-	},
-	{
-		"name": "Sea breeze",
+		"name": "Sea Breeze",
 		"spirit": "Vodka",
 		"technique": "Stirred",
 		"description": "A refreshing blend of vodka, cranberry juice, and grapefruit juice. Served over ice in a highball glass, it offers a perfect balance of sweet and tart flavors, garnished with a lime wedge.",
@@ -715,6 +701,43 @@
 			{ "category": "London Dry Gin", "qty": 40, "unit": "ml", "desc": "Add 1.3oz gin" },
 			{ "category": "Orange Liqueur", "qty": 30, "unit": "ml", "desc": "Add 1oz triple sec" },
 			{ "category": "Lemon Juice", "qty": 20, "unit": "ml", "desc": "Add 0.7oz lemon juice" }
+		]
+	},
+	{
+		"name": "Alexander",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A delightful blend of gin, crème de cacao, and light cream, the Alexander cocktail is a creamy, chocolatey indulgence. Served chilled in a cocktail glass, it's topped with a sprinkle of nutmeg for an aromatic finish.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 30, "unit": "ml", "desc": "Add 1oz gin" },
+			{ "category": "Crème de Cacao", "qty": 30, "unit": "ml", "desc": "Add 1oz creme de cacao" },
+			{ "category": "Cream", "qty": 30, "unit": "ml", "desc": "Add 1oz light cream" }
+		]
+	},
+	{
+		"name": "John Collins",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "The John Collins is a refreshing cocktail made with bourbon, fresh lemon juice, and sugar, topped with club soda for a light and fizzy finish. Garnished with a maraschino cherry and an orange slice, it balances sweetness and tartness for a classic sip.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz bourbon" },
+			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp sugar" },
+			{ "category": "Soda Water", "qty": 90, "unit": "ml", "desc": "Add 3oz club soda" }
+		]
+	},
+	{
+		"name": "Tipperary",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "The Tipperary is a classic cocktail combining Irish whiskey, sweet vermouth, and green Chartreuse. This stirred drink offers a harmonious blend of herbal and citrus notes, enhanced by a twist of orange peel for aroma.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Rye Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz irish whiskey" },
+			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
+			{ "category": "Green Chartreuse", "qty": 15, "unit": "ml", "desc": "Add 0.5oz green chartreuse" }
 		]
 	}
 ]

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CircleCheck, FlaskConical, CircleX } from 'lucide-svelte';
+	import { CircleCheck, FlaskConical, CircleX, Store } from 'lucide-svelte';
 
 	import { goto } from '$app/navigation';
 	import FancyBadge from '$lib/components/FancyBadge.svelte';
@@ -102,6 +102,13 @@
 					{product.productDescription || product.categoryDescription || 'No description available'}
 				</p>
 
+				{#if product.supplierName}
+					<p class="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+						<Store class="h-3.5 w-3.5 shrink-0" />
+						<span class="truncate">{product.supplierName}</span>
+					</p>
+				{/if}
+
 				<!-- Recipe usage indicator -->
 				{#if recipeCount > 0}
 					<button
@@ -175,6 +182,12 @@
 						{#if product.productProof > 0}
 							<span class="text-xs text-muted-foreground">
 								{product.productProof} Proof
+							</span>
+						{/if}
+						{#if product.supplierName}
+							<span class="flex items-center gap-1 text-xs text-muted-foreground">
+								<Store class="h-3.5 w-3.5" />
+								{product.supplierName}
 							</span>
 						{/if}
 					</div>

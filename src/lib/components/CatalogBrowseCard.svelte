@@ -129,12 +129,14 @@
 					<!-- Gradient fade into glass body -->
 					<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
 
-					<!-- Category pill (top left) -->
-					<span
-						class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/15 text-foreground shadow-sm"
-					>
-						{recipe.recipeCategoryDescription}
-					</span>
+					<!-- Category pills -->
+					<div class="absolute top-3 left-3 flex flex-col items-start gap-1">
+						<span
+							class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/15 text-foreground shadow-sm"
+						>
+							{recipe.recipeCategoryDescription}
+						</span>
+					</div>
 
 					<!-- Draft badge (owners/editors only) -->
 					{#if canModify && recipe.published === false}

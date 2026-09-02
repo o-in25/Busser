@@ -619,6 +619,15 @@
 		opacity: 0.8;
 	}
 
+	/* avatar is self-evidently focusable, skip the global ring.
+	   :global needed since the class lands on the Trigger child element */
+	:global(.desktop-avatar-button:focus),
+	:global(.desktop-avatar-button:focus-visible) {
+		outline: none;
+		outline-offset: 0;
+		box-shadow: none;
+	}
+
 	/* drawer logo glow (matches home page hero) */
 	.drawer-logo-glow {
 		animation: drawer-glow 3s ease-in-out infinite;

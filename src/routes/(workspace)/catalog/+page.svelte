@@ -3,7 +3,6 @@
 		Compass,
 		FlaskConical,
 		GlassWater,
-		Globe,
 		Mail,
 		Plus,
 		Search,
@@ -46,35 +45,38 @@
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
 	const authenticated = $derived(!!$page.data.user);
-	// View mode
 	let viewMode = $state<'grid' | 'list'>('grid');
 
-	// Filter state
+	// svelte-ignore state_referenced_locally
 	let searchInput = $state(data.filters.search || '');
+	// svelte-ignore state_referenced_locally
 	let selectedSort = $state(data.filters.sort || 'name-asc');
+	// svelte-ignore state_referenced_locally
 	let selectedSpirit = $state(data.filters.spiritId || 'all');
+	// svelte-ignore state_referenced_locally
 	let selectedShowFilter = $state(data.filters.showFilter || 'all');
-	let perPage = $state(String(data.filters.perPage ?? 24));
+	// svelte-ignore state_referenced_locally
+	let perPage = $state(String(data.filters.perPage ?? 10));
+	// svelte-ignore state_referenced_locally
 	let selectedMood = $state(data.filters.mood || '');
 
-	// Filter panel state
+	const makeableLensAvailable = $derived(data.makeableLensAvailable);
+	const readyLensOn = $derived(data.filters.readyToMake === '1');
+
 	let filterOpen = $state(false);
 
-	// count of non-default filters behind the filter panel
 	const activeFilterCount = $derived.by(() => {
 		let count = 0;
 		if (selectedSpirit && selectedSpirit !== 'all') count++;
 		if (selectedShowFilter && selectedShowFilter !== 'all') count++;
 		if (selectedSort !== 'name-asc') count++;
-		if (perPage !== '24') count++;
+		if (perPage !== '10') count++;
 		if (selectedMood) count++;
 		return count;
 	});
 
-	// Advanced search
 	let advancedSearchOpen = $state(false);
 	const advancedParamKeys = [
-		'readyToMake',
 		'ingredientInclude',
 		'ingredientAny',
 		'ingredientExclude',
@@ -88,26 +90,32 @@
 	] as const;
 	const advancedFilterCount = $derived(advancedParamKeys.filter((k) => !!data.filters[k]).length);
 
-	// Track favorites/featured for optimistic updates
+	// svelte-ignore state_referenced_locally
 	let favorites = $state(new Set(data.favoriteRecipeIds));
+	// svelte-ignore state_referenced_locally
 	let featured = $state(new Set(data.featuredRecipeIds));
 
-	// reset filters behind the panel (spirit, show, sort, perPage)
 	function resetPanelFilters() {
 		selectedSpirit = 'all';
 		selectedShowFilter = 'all';
 		selectedSort = 'name-asc';
-		perPage = '24';
+		perPage = '10';
 		selectedMood = '';
 		goto(
-			buildUrl({ spirit: 'all', show: 'all', sort: 'name-asc', perPage: '24', mood: '', page: 1 }),
+			buildUrl({
+				spirit: 'all',
+				show: 'all',
+				sort: 'name-asc',
+				perPage: '10',
+				mood: '',
+				page: 1,
+			}),
 			{
 				keepFocus: true,
 			}
 		);
 	}
 
-	// Restore view mode from localStorage
 	onMount(() => {
 		const savedViewMode = localStorage.getItem('catalog-browse-view-mode');
 		if (savedViewMode === 'list' || savedViewMode === 'grid') {
@@ -138,8 +146,14 @@
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
 		if (spirit && spirit !== 'all') params.set('spirit', String(spirit));
 		if (show && show !== 'all') params.set('show', String(show));
-		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
+		if (pp && String(pp) !== '10') params.set('perPage', String(pp));
 		if (mood) params.set('mood', String(mood));
+
+		if (makeableLensAvailable) {
+			const ready =
+				overrides.readyToMake !== undefined ? overrides.readyToMake : readyLensOn ? '1' : null;
+			if (ready === '1') params.set('readyToMake', '1');
+		}
 
 		// preserve advanced filter params
 		for (const key of advancedParamKeys) {
@@ -176,6 +190,10 @@
 		goto(buildUrl({ show: value, page: 1 }), { keepFocus: true });
 	}
 
+	function setLens(on: boolean) {
+		goto(buildUrl({ readyToMake: on ? '1' : null, page: 1 }), { keepFocus: true });
+	}
+
 	function handlePerPageChange(value: string) {
 		perPage = value;
 		goto(buildUrl({ perPage: value, page: 1 }), { keepFocus: true });
@@ -188,11 +206,9 @@
 
 	function handleAdvancedSearch(params: Record<string, string>) {
 		const overrides: Record<string, string | number | null> = { page: 1 };
-		// clear all advanced params first
 		for (const key of advancedParamKeys) {
 			overrides[key] = null;
 		}
-		// apply new ones
 		for (const [key, val] of Object.entries(params)) {
 			overrides[key] = val;
 		}
@@ -219,13 +235,12 @@
 		goto(buildUrl({ page: pageNum }));
 	}
 
-	// Update local state when page data changes
 	$effect(() => {
 		searchInput = data.filters.search || '';
 		selectedSort = data.filters.sort || 'name-asc';
 		selectedSpirit = data.filters.spiritId || 'all';
 		selectedShowFilter = data.filters.showFilter || 'all';
-		perPage = String(data.filters.perPage ?? 24);
+		perPage = String(data.filters.perPage ?? 10);
 		favorites = new Set(data.favoriteRecipeIds);
 		featured = new Set(data.featuredRecipeIds);
 	});
@@ -284,19 +299,6 @@
 		</FancyAlert>
 	{/if}
 
-	{#if authenticated && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
-		<FancyAlert class="mb-6">
-			{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-			{#snippet children()}
-				<p class="sm:hidden">Viewing global catalog</p>
-				<p class="hidden sm:block">
-					You're viewing <strong>Busser's global catalog</strong>. To manage your own inventory,
-					switch to your workspace.
-				</p>
-			{/snippet}
-		</FancyAlert>
-	{/if}
-
 	{#if authenticated}
 		<!-- Section nav + primary action above the hero; explore lives here as a tab -->
 		<SubNav
@@ -316,7 +318,10 @@
 		</SubNav>
 
 		<!-- Hero Section -->
-		<PageHero title="Catalog">
+		<PageHero
+			title="Catalog"
+			subtitle="Browse cocktails and find what you can make with what's on hand."
+		>
 			<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 				<StatBadge class="whitespace-nowrap">
 					<Wine class="h-4 w-4 text-primary shrink-0" />
@@ -433,21 +438,40 @@
 		</div>
 	</div>
 
+	<!-- Makeability lens: the primary "what can I make" axis, with an obvious one-tap widen -->
+	{#if makeableLensAvailable && selectedShowFilter === 'all'}
+		<div class="flex items-center gap-1 mb-4 p-1 rounded-full bg-muted/50 w-fit">
+			<button
+				type="button"
+				onclick={() => setLens(true)}
+				class={cn(
+					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+					readyLensOn
+						? 'bg-primary text-primary-foreground shadow-sm'
+						: 'text-muted-foreground hover:text-foreground'
+				)}
+			>
+				Ready to make
+			</button>
+			<button
+				type="button"
+				onclick={() => setLens(false)}
+				class={cn(
+					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+					!readyLensOn
+						? 'bg-primary text-primary-foreground shadow-sm'
+						: 'text-muted-foreground hover:text-foreground'
+				)}
+			>
+				All recipes
+			</button>
+		</div>
+	{/if}
+
 	<!-- Active Advanced Filter Tags -->
 	{#if advancedFilterCount > 0}
 		<div class="flex flex-wrap items-center gap-2 mb-4">
 			<span class="text-sm text-muted-foreground">Filters:</span>
-			{#if data.filters.readyToMake}
-				<Badge variant="secondary" class="gap-1">
-					Ready to Make
-					<button
-						onclick={() => clearAdvancedFilter('readyToMake')}
-						class="ml-1 hover:text-destructive"
-					>
-						<X class="h-3 w-3" />
-					</button>
-				</Badge>
-			{/if}
 			{#if data.filters.ingredientInclude}
 				{@const names = data.filters.ingredientNames || {}}
 				{@const ids = data.filters.ingredientInclude.split(',').map(Number)}
@@ -539,6 +563,25 @@
 	<!-- Results -->
 	{#if $workspaceSwitching}
 		<CatalogResultsSkeleton {viewMode} count={data.recipes.length || 8} />
+	{:else if data.recipes.length === 0 && makeableLensAvailable && readyLensOn && !searchInput && advancedFilterCount === 0 && selectedShowFilter === 'all'}
+		<!-- makeable=0 first-run: teach the model instead of looking broken; widening is one tap -->
+		<Card.Root class="border-dashed">
+			<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
+				<div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+					<Sparkles class="h-10 w-10 text-primary/60" />
+				</div>
+				<h3 class="text-xl font-semibold mb-2">Nothing to make just yet</h3>
+				<p class="text-muted-foreground mb-6 max-w-md">
+					Add a few bottles to your shelf and we'll show what you can pour. Or browse the full
+					catalog for ideas.
+				</p>
+				<div class="flex flex-wrap gap-2 justify-center">
+					<a href="/inventory" class={buttonVariants()}>Add to your shelf</a>
+					<Button variant="outline" onclick={() => setLens(false)}>Show all recipes</Button>
+					<a href="/catalog/explore" class={buttonVariants({ variant: 'ghost' })}>Explore</a>
+				</div>
+			</Card.Content>
+		</Card.Root>
 	{:else if data.recipes.length === 0}
 		<Card.Root class="border-dashed">
 			<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
@@ -602,6 +645,5 @@
 	bind:open={advancedSearchOpen}
 	preparationMethods={data.preparationMethods}
 	filters={data.filters}
-	{authenticated}
 	onsearch={handleAdvancedSearch}
 />

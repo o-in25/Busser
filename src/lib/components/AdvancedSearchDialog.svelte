@@ -7,26 +7,22 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import Slider from '$lib/components/ui/slider/slider.svelte';
-	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import type { PreparationMethod, SelectOption } from '$lib/types';
 	let {
 		open = $bindable(false),
 		preparationMethods = [],
 		filters = {},
-		authenticated = true,
 		onsearch,
 	}: {
 		open?: boolean;
 		preparationMethods?: PreparationMethod[];
 		filters?: Record<string, any>;
-		authenticated?: boolean;
 		onsearch?: (params: Record<string, string>) => void;
 	} = $props();
 
 	type IngredientTag = { value: number; name: string };
 
 	// local state for each filter
-	let readyToMake = $state(false);
 	let includeIngredients = $state<IngredientTag[]>([]);
 	let anyIngredients = $state<IngredientTag[]>([]);
 	let excludeIngredients = $state<IngredientTag[]>([]);
@@ -55,7 +51,6 @@
 	$effect(() => {
 		if (open) {
 			const names = filters.ingredientNames || {};
-			readyToMake = filters.readyToMake === '1';
 			includeIngredients = rebuildTags(filters.ingredientInclude, names);
 			anyIngredients = rebuildTags(filters.ingredientAny, names);
 			excludeIngredients = rebuildTags(filters.ingredientExclude, names);
@@ -106,7 +101,6 @@
 	});
 
 	function clearAll() {
-		readyToMake = false;
 		includeIngredients = [];
 		anyIngredients = [];
 		excludeIngredients = [];
@@ -124,7 +118,6 @@
 
 	function handleApply() {
 		const params: Record<string, string> = {};
-		if (readyToMake) params.readyToMake = '1';
 		if (includeIngredients.length)
 			params.ingredientInclude = includeIngredients.map((t) => t.value).join(',');
 		if (anyIngredients.length) params.ingredientAny = anyIngredients.map((t) => t.value).join(',');
@@ -150,19 +143,6 @@
 		</Dialog.Header>
 
 		<div class="space-y-6 py-4">
-			<!-- ready to make (requires inventory, hidden when signed out) -->
-			{#if authenticated}
-				<div class="flex items-center justify-between rounded-lg border p-4">
-					<div class="space-y-0.5">
-						<Label>Ready to Make</Label>
-						<p class="text-sm text-muted-foreground">
-							Only show recipes you have all ingredients for
-						</p>
-					</div>
-					<Switch bind:checked={readyToMake} />
-				</div>
-			{/if}
-
 			<!-- ingredient filters -->
 			<div class="space-y-3">
 				<Label>Ingredient Filters</Label>

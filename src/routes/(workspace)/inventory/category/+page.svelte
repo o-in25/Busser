@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { Globe, Layers, Package, Pencil, Plus, Search, Tags, Trash2, X } from 'lucide-svelte';
+	import { Layers, Package, Plus, Search, Tags, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
 	import CategoryDetailDrawer from '$lib/components/CategoryDetailDrawer.svelte';
 	import CategoryFilterPanel from '$lib/components/CategoryFilterPanel.svelte';
@@ -24,7 +22,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
 	import type { Category } from '$lib/types';
-	import { cn } from '$lib/utils';
 
 	import { notificationStore, workspaceSwitching } from '../../../../stores';
 	import type { PageData } from './$types';
@@ -63,7 +60,12 @@
 
 	onMount(() => {
 		const saved = localStorage.getItem('category-view-mode');
-		if (saved === 'list' || saved === 'table') viewMode = saved;
+		if (saved === 'list' || saved === 'table') {
+			viewMode = saved;
+		} else if (window.matchMedia('(max-width: 767px)').matches) {
+			// default to list on mobile so the table doesn't force horizontal scroll
+			viewMode = 'list';
+		}
 	});
 
 	function setViewMode(mode: 'table' | 'list') {
@@ -100,7 +102,7 @@
 
 	// active filter count for badge
 	const activeFilterCount = $derived(
-		(data.pagination.perPage !== 50 ? 1 : 0) + (activeGroup !== null ? 1 : 0)
+		(data.pagination.perPage !== 10 ? 1 : 0) + (activeGroup !== null ? 1 : 0)
 	);
 
 	async function handleRefresh() {
@@ -113,11 +115,11 @@
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 		const perPage =
-			overrides.perPage !== undefined ? overrides.perPage : (data.filters?.perPage ?? 50);
+			overrides.perPage !== undefined ? overrides.perPage : (data.filters?.perPage ?? 10);
 
 		params.set('page', String(pageNum));
 		if (search) params.set('search', String(search));
-		if (perPage && Number(perPage) !== 50) params.set('perPage', String(perPage));
+		if (perPage && Number(perPage) !== 10) params.set('perPage', String(perPage));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -168,7 +170,10 @@
 </InventoryNav>
 
 <!-- Hero Section -->
-<PageHero title="Categories">
+<PageHero
+	title="Categories"
+	subtitle="Group your ingredients so recipes and inventory stay organized."
+>
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		<StatBadge class="whitespace-nowrap">
 			<Tags class="h-4 w-4 text-primary shrink-0" />
@@ -189,19 +194,6 @@
 		</StatBadge>
 	</div>
 </PageHero>
-
-{#if $page.data.user && $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
-	<FancyAlert class="mb-6 mt-4">
-		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-		{#snippet children()}
-			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">
-				You're viewing <strong>Busser's global catalog</strong>. Use the workspace switcher to
-				switch to your own and manage your inventory.
-			</p>
-		{/snippet}
-	</FancyAlert>
-{/if}
 
 <!-- Search Bar & Filters -->
 <div class="flex items-center gap-2 mb-6">
@@ -243,7 +235,7 @@
 			onPerPageChange={(v) => goto(buildUrl({ perPage: v, page: 1 }))}
 			onReset={() => {
 				activeGroup = null;
-				goto(buildUrl({ perPage: 50, page: 1 }));
+				goto(buildUrl({ perPage: 10, page: 1 }));
 			}}
 		/>
 	</FilterButton>
@@ -320,29 +312,7 @@
 		</Card.Content>
 	</Card.Root>
 {:else if viewMode === 'table'}
-	<Card.Root>
-		<Card.Header>
-			<div class="flex items-center justify-between">
-				<div>
-					<Card.Title class="flex items-center gap-2">
-						<Tags class="h-5 w-5" />
-						Categories
-					</Card.Title>
-					<Card.Description>
-						{#if activeGroup}
-							Showing {filteredCategories.length} categor{filteredCategories.length === 1
-								? 'y'
-								: 'ies'} in "{activeGroup}"
-						{:else}
-							{filteredCategories.length} categor{filteredCategories.length === 1 ? 'y' : 'ies'} total
-						{/if}
-					</Card.Description>
-				</div>
-				<Badge variant="secondary" class="text-sm">
-					{filteredCategories.length}
-				</Badge>
-			</div>
-		</Card.Header>
+	<Card.Root bare class="glass-panel isolate">
 		<Card.Content class="p-0">
 			<div class="overflow-x-auto">
 				<Table.Root>
@@ -351,10 +321,7 @@
 							<Table.Head class="pl-6">Name</Table.Head>
 							<Table.Head class="hidden sm:table-cell">Group</Table.Head>
 							<Table.Head>Description</Table.Head>
-							<Table.Head class="text-center">Products</Table.Head>
-							{#if canModify}
-								<Table.Head class="text-right pr-6">Actions</Table.Head>
-							{/if}
+							<Table.Head class="text-center pr-6">Products</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
@@ -371,45 +338,13 @@
 								<Table.Cell class="text-muted-foreground max-w-md truncate">
 									{category.categoryDescription || '—'}
 								</Table.Cell>
-								<Table.Cell class="text-center">
+								<Table.Cell class="text-center pr-6">
 									<span
 										class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium"
 									>
 										{category.productCount}
 									</span>
 								</Table.Cell>
-								{#if canModify}
-									<Table.Cell class="text-right pr-6">
-										<!-- svelte-ignore a11y_click_events_have_key_events -->
-										<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-										<div
-											class="flex items-center justify-end gap-2"
-											role="group"
-											onclick={(e) => e.stopPropagation()}
-										>
-											<a
-												href="/inventory/category/{category.categoryId}/edit"
-												class={cn(
-													buttonVariants({ variant: 'outline', size: 'icon' }),
-													'h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white'
-												)}
-												title="Edit category"
-											>
-												<Pencil class="w-4 h-4" />
-											</a>
-											<Button
-												variant="outline"
-												size="icon"
-												class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
-												onclick={() => openDeleteDialog(category.categoryId, category.categoryName)}
-												title="Delete category"
-												disabled={category.productCount > 0}
-											>
-												<Trash2 class="w-4 h-4" />
-											</Button>
-										</div>
-									</Table.Cell>
-								{/if}
 							</Table.Row>
 						{/each}
 					</Table.Body>
@@ -436,43 +371,13 @@
 									{category.categoryDescription}
 								</p>
 							{/if}
-							<div class="flex items-center justify-between gap-2 mt-1">
+							<div class="mt-1">
 								<span
 									class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium"
 								>
 									{category.productCount}
 									{category.productCount === 1 ? 'product' : 'products'}
 								</span>
-								{#if canModify}
-									<!-- svelte-ignore a11y_click_events_have_key_events -->
-									<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-									<div
-										class="flex items-center gap-1"
-										role="group"
-										onclick={(e) => e.stopPropagation()}
-									>
-										<a
-											href="/inventory/category/{category.categoryId}/edit"
-											class={cn(
-												buttonVariants({ variant: 'outline', size: 'icon' }),
-												'h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white'
-											)}
-											title="Edit category"
-										>
-											<Pencil class="w-4 h-4" />
-										</a>
-										<Button
-											variant="outline"
-											size="icon"
-											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
-											onclick={() => openDeleteDialog(category.categoryId, category.categoryName)}
-											title="Delete category"
-											disabled={category.productCount > 0}
-										>
-											<Trash2 class="w-4 h-4" />
-										</Button>
-									</div>
-								{/if}
 							</div>
 						</div>
 					</Card.Content>
@@ -496,6 +401,11 @@
 	category={selectedCategory}
 	{canModify}
 	onProductDeleted={handleProductDeleted}
+	onDelete={() => {
+		if (!selectedCategory) return;
+		drawerOpen = false;
+		openDeleteDialog(selectedCategory.categoryId, selectedCategory.categoryName);
+	}}
 />
 
 <!-- Delete Confirmation Dialog -->

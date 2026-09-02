@@ -30,6 +30,10 @@
 	let savedDraft: DraftData | null = $state(null);
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
+	// snapshot of the untouched form so we only persist/prompt once it's actually dirty —
+	// otherwise a pristine form (all defaults) writes a draft on mount and nags on every reload
+	const pristine = JSON.stringify(data);
+
 	const STORAGE_KEY = $derived(`draft_${draftKey}`);
 
 	interface StoredDraft {
@@ -94,18 +98,18 @@
 		showRestorePrompt = false;
 	}
 
-	// Check for existing draft on mount
+	// Check for existing draft on mount — only prompt if it holds real edits, not just defaults
 	onMount(() => {
 		const existing = getDraft();
-		if (existing && Object.keys(existing.data).length > 0) {
+		if (existing && JSON.stringify(existing.data) !== pristine) {
 			savedDraft = existing.data;
 			showRestorePrompt = true;
 		}
 	});
 
-	// Watch for data changes and autosave
+	// autosave on every change once the form diverges from its pristine state
 	$effect(() => {
-		if (data && Object.keys(data).length > 0) {
+		if (JSON.stringify(data) !== pristine) {
 			debouncedSave();
 		}
 	});

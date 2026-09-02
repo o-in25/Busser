@@ -514,7 +514,9 @@
 						onValueChange={(v) => (newWorkspaceType = v as 'personal' | 'shared')}
 					>
 						<Select.Trigger>
-							<Select.Value placeholder="Select type" />
+							<Select.Value placeholder="Select type">
+								{newWorkspaceType.charAt(0).toUpperCase() + newWorkspaceType.slice(1)}
+							</Select.Value>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="shared" label="Shared">
@@ -585,7 +587,9 @@
 						disabled={selectedWorkspace ? isGlobalWorkspace(selectedWorkspace) : false}
 					>
 						<Select.Trigger>
-							<Select.Value placeholder="Select type" />
+							<Select.Value placeholder="Select type">
+								{editWorkspaceType.charAt(0).toUpperCase() + editWorkspaceType.slice(1)}
+							</Select.Value>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="shared" label="Shared">

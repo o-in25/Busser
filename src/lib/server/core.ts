@@ -1,26 +1,20 @@
-// core.ts - backwards compatibility layer
+// TODO: backwards compatibility layer
 // new code should import from repositories directly
+// these should be moved to their own repo
 
 import { DbProvider } from './db';
 import { CatalogRepository } from './repositories/catalog.repository';
 import { InventoryRepository } from './repositories/inventory.repository';
-
 import { env } from '$env/dynamic/private';
-
+export { titleCase } from '$lib/utils';
 const { CORE_TABLE } = env;
-
-// re-export utilities from base
-export { titleCase } from './repositories/base.repository';
 
 // singleton instances
 const db = new DbProvider(CORE_TABLE || '');
 const inventoryRepo = new InventoryRepository(db);
 const catalogRepo = new CatalogRepository(db);
 
-// export repositories for direct access
-export { catalogRepo, inventoryRepo };
-
-// inventory functions (delegate to repository)
+// inventory
 export const getInventory = inventoryRepo.findAll.bind(inventoryRepo);
 export const findInventoryItem = inventoryRepo.findById.bind(inventoryRepo);
 export const addToInventory = inventoryRepo.create.bind(inventoryRepo);
@@ -31,13 +25,14 @@ export const getProductCategories = inventoryRepo.getCategoryBreakdown.bind(inve
 export const getRecipeUsageByProduct = inventoryRepo.getRecipeUsage.bind(inventoryRepo);
 export const productSelect = inventoryRepo.getProductOptions.bind(inventoryRepo);
 export const categorySelect = inventoryRepo.getCategoryOptions.bind(inventoryRepo);
+export const seedBaselineInventory = inventoryRepo.seedInventory.bind(inventoryRepo);
 export const getCategory = inventoryRepo.findCategoryById.bind(inventoryRepo);
 export const addCategory = inventoryRepo.createCategory.bind(inventoryRepo);
 export const updateCategory = inventoryRepo.updateCategory.bind(inventoryRepo);
 export const getSubcategories = inventoryRepo.findSubcategories.bind(inventoryRepo);
 export const getProductsByCategory = inventoryRepo.findProductsByCategory.bind(inventoryRepo);
 
-// catalog functions (delegate to repository)
+// catalog
 export const getCatalog = catalogRepo.findAll.bind(catalogRepo);
 export const getBasicRecipe = catalogRepo.findById.bind(catalogRepo);
 export const seedGallery = catalogRepo.getAvailableRecipes.bind(catalogRepo);
@@ -52,3 +47,5 @@ export const deleteCatalogItem = catalogRepo.delete.bind(catalogRepo);
 export const getHighestImpactIngredients =
 	catalogRepo.getHighestImpactIngredients.bind(catalogRepo);
 export const getRecipeCount = catalogRepo.getRecipeCount.bind(catalogRepo);
+
+export { catalogRepo, inventoryRepo };
