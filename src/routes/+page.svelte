@@ -34,6 +34,7 @@
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
 	import FancyButton from '$lib/components/FancyButton.svelte';
+	import DashboardSkeleton from '$lib/components/DashboardSkeleton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -46,6 +47,7 @@
 	import { indexFromSeed } from '$lib/math';
 	import greetings from '$lib/data/greetings.json';
 	import { cn } from '$lib/utils';
+	import { workspaceSwitching } from '../stores';
 
 	import type { ActionData, PageData } from './$types';
 
@@ -673,7 +675,9 @@
 {:else}
 	<!-- ==================== AUTHENTICATED DASHBOARD ==================== -->
 
-	{#if dashboardData}
+	{#if $workspaceSwitching}
+		<DashboardSkeleton />
+	{:else if dashboardData}
 		<!-- Welcome Header -->
 		<section class="mb-8 mt-4">
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -735,6 +739,8 @@
 		<!-- Quick Actions -->
 		<section class="mb-8">
 			<div class="grid grid-cols-2 {actionGridCols} gap-3">
+				<WorkspaceSwitcherBadge variant="card" />
+
 				<!-- browse is redundant with the nav, so it yields its mobile slot to the switcher -->
 				<a href="/catalog" class={canSwitch ? 'hidden md:block' : 'block'}>
 					<Card.Root
@@ -754,8 +760,6 @@
 						</div>
 					</Card.Root>
 				</a>
-
-				<WorkspaceSwitcherBadge variant="card" />
 
 				{#if isOwner}
 					<a href="/inventory?page=1&stockFilter=out-of-stock" class="block">
@@ -1099,11 +1103,11 @@
 
 				{#if filter.length > 8}
 					<div class="text-center mt-4">
-						<a href={browseUrl} class={buttonVariants({ variant: 'outline' })}>
+						<FancyButton href={browseUrl} variant="default" size="md">
 							View All {filter.length}
 							{isOwner ? 'Available' : ''} Recipes
 							<ArrowRight class="ml-2 h-4 w-4" />
-						</a>
+						</FancyButton>
 					</div>
 				{/if}
 			{/if}
