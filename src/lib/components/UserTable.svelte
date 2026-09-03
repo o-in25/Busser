@@ -19,7 +19,7 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Table from '$lib/components/ui/table';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import { Pagination } from '$lib/components/ui/pagination';
 	import type { User as UserType } from '$lib/types/auth';
 	import type { PaginationData } from '$lib/types/shared';
 	import { cn } from '$lib/utils';
@@ -284,7 +284,7 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8 bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500 hover:text-white"
+										class="bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500 hover:text-white"
 										onclick={async () => {
 											const { success, error } = await resendVerification(user.userId);
 											if (error) toast.error(error);
@@ -300,7 +300,7 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+										class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 										onclick={() => {
 											isOpened = true;
 											target = user.userId;

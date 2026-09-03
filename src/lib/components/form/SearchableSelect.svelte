@@ -181,7 +181,7 @@
 							type="button"
 							class={cn(
 								'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors',
-								i === activeIndex ? 'bg-primary/15 text-primary' : 'hover:bg-accent/60'
+								i === activeIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/60'
 							)}
 							onmousedown={() => pick(item)}
 							onmouseenter={() => (activeIndex = i)}
@@ -202,7 +202,7 @@
 				type="button"
 				aria-label="Create new {createKind}"
 				onclick={handleCreate}
-				class="glass-surface flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary transition-colors hover:bg-white/40 dark:hover:bg-zinc-700/50"
+				class="glass-surface flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary transition-colors hover:bg-white/40 dark:hover:bg-white/[0.10]"
 			>
 				<Plus class="h-4 w-4" />
 			</button>

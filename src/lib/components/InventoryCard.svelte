@@ -2,11 +2,9 @@
 	import { CircleCheck, FlaskConical, CircleX, Store } from 'lucide-svelte';
 
 	import { goto } from '$app/navigation';
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
-	import { cn } from '$lib/utils';
 	import type { Product } from '$lib/types';
 
 	let {
@@ -35,14 +33,12 @@
 		if (product.productInStockQuantity === 0) {
 			return {
 				label: 'Out of Stock',
-				variant: 'destructive' as const,
 				icon: CircleX,
 				color: 'text-red-500',
 			};
 		}
 		return {
 			label: 'In Stock',
-			variant: 'default' as const,
 			icon: CircleCheck,
 			color: 'text-neon-green-500',
 		};
@@ -72,21 +68,15 @@
 				></div>
 
 				<!-- Category badge -->
-				<Badge variant="secondary" class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm">
+				<Badge class="absolute top-3 left-3 px-2.5 py-0.5 text-xs font-semibold">
 					{product.categoryName}
 				</Badge>
 
 				<!-- Stock status badge -->
 				{#if showStock}
 					<div class="absolute top-3 right-3">
-						<Badge
-							variant={stockStatus.variant}
-							class={cn(
-								'bg-background/80 backdrop-blur-sm',
-								stockStatus.variant === 'default' && 'dark:shadow-glow-green'
-							)}
-						>
-							<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
+						<Badge class="gap-1 px-2.5 py-0.5 text-xs font-semibold">
+							<StockIcon class="h-3 w-3 {stockStatus.color}" />
 							{stockStatus.label}
 						</Badge>
 					</div>
@@ -156,9 +146,9 @@
 						<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
 							{product.productName}
 						</h3>
-						<FancyBadge variant="secondary" class="!px-2 !py-0.5 !gap-1 shrink-0">
+						<Badge size="lg" variant="secondary" class="!px-2 !py-0.5 !gap-1 shrink-0">
 							<span class="text-xs">{product.categoryName}</span>
-						</FancyBadge>
+						</Badge>
 					</div>
 					<p class="text-sm text-muted-foreground line-clamp-1">
 						{product.productDescription || product.categoryDescription || 'No description'}

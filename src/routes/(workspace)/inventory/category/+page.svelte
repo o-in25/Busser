@@ -5,7 +5,6 @@
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
-	import FancyButton from '$lib/components/FancyButton.svelte';
 	import CategoryDetailDrawer from '$lib/components/CategoryDetailDrawer.svelte';
 	import CategoryFilterPanel from '$lib/components/CategoryFilterPanel.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
@@ -13,7 +12,7 @@
 	import InventoryResultsSkeleton from '$lib/components/InventoryResultsSkeleton.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import StatBadge from '$lib/components/StatBadge.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import { Pagination } from '$lib/components/ui/pagination';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -161,10 +160,10 @@
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
-			<FancyButton variant="primary" size="sm" href="/inventory/category/add" class="shrink-0">
+			<Button size="sm" href="/inventory/category/add" class="shrink-0">
 				<Plus class="h-4 w-4 mr-1" />
 				Add Category
-			</FancyButton>
+			</Button>
 		{/if}
 	{/snippet}
 </InventoryNav>

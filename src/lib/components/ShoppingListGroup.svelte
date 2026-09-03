@@ -58,7 +58,6 @@
 						<Button
 							variant="ghost"
 							size="sm"
-							class="text-xs h-7"
 							onclick={() => onCheckAll(items.map((i) => i.productId))}
 						>
 							<CheckCheck class="h-3.5 w-3.5 mr-1" />

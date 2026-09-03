@@ -25,9 +25,8 @@
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { idToSlug, spirits as spiritContent } from '$lib/spirits';
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
-	import FancyInput from '$lib/components/FancyInput.svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import CocktailOfTheDay from '$lib/components/CocktailOfTheDay.svelte';
 	import ExploreSkeleton from '$lib/components/ExploreSkeleton.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
@@ -131,10 +130,10 @@
 	]}
 >
 	{#snippet action()}
-		<FancyButton onclick={surpriseMe} size="sm" class="shrink-0">
+		<Button variant="secondary" onclick={surpriseMe} size="sm" class="shrink-0">
 			<Shuffle class="h-4 w-4 mr-1" />
 			Surprise Me
-		</FancyButton>
+		</Button>
 	{/snippet}
 </SubNav>
 
@@ -143,7 +142,8 @@
 	<!-- Smart Action Pills -->
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		{#if popularSpirit}
-			<FancyBadge
+			<Badge
+				size="lg"
 				href="/catalog/explore/{idToSlug[popularSpirit.recipeCategoryId] ??
 					popularSpirit.recipeCategoryId}"
 				class="whitespace-nowrap"
@@ -151,21 +151,21 @@
 				<TrendingUp class="h-4 w-4 text-primary shrink-0" />
 				<span class="text-sm font-bold truncate">{popularSpirit.recipeCategoryDescription}</span>
 				<span class="text-xs text-muted-foreground">Most Popular</span>
-			</FancyBadge>
+			</Badge>
 		{:else}
-			<FancyBadge class="whitespace-nowrap">
+			<Badge size="lg" class="whitespace-nowrap">
 				<TrendingUp class="h-4 w-4 text-muted-foreground shrink-0" />
 				<span class="text-sm font-bold">&mdash;</span>
 				<span class="text-xs text-muted-foreground">Most Popular</span>
-			</FancyBadge>
+			</Badge>
 		{/if}
 
 		{#if topIngredient && !isGlobalCatalog}
-			<FancyBadge href="/inventory" class="whitespace-nowrap">
+			<Badge size="lg" href="/inventory" class="whitespace-nowrap">
 				<ShoppingCart class="h-4 w-4 text-primary shrink-0" />
 				<span class="text-sm font-bold">+{topIngredient.unlockableRecipes}</span>
 				<span class="text-xs text-muted-foreground">Buy {topIngredient.ingredientName}</span>
-			</FancyBadge>
+			</Badge>
 		{/if}
 	</div>
 </PageHero>
@@ -176,14 +176,14 @@
 		<Search
 			class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none"
 		/>
-		<FancyInput
+		<Input
 			type="text"
 			placeholder="Search cocktails..."
 			bind:value={searchQuery}
-			class="pl-10"
+			class="pl-10 rounded-full"
 		/>
 	</div>
-	<FancyButton type="submit" size="sm">Search</FancyButton>
+	<Button type="submit" size="sm">Search</Button>
 </form>
 
 {#if $workspaceSwitching}
@@ -240,7 +240,7 @@
 								<h3 class="text-xl font-bold text-foreground">
 									{spirit.recipeCategoryDescription}
 								</h3>
-								<Badge variant="secondary" class="bg-background/80 backdrop-blur-sm">
+								<Badge class="px-2.5 py-0.5 text-xs font-semibold">
 									{count}
 									{count === 1 ? 'recipe' : 'recipes'}
 								</Badge>
@@ -278,14 +278,14 @@
 			<Card.Header>
 				<div class="flex items-center gap-2">
 					<div
-						class="inline-flex items-center rounded-full bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
+						class="inline-flex items-center rounded-full bg-white/10 dark:bg-white/[0.06] shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 text-muted-foreground"
 					>
 						<button
 							class={cn(
 								'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
 								activeTab === 'featured'
-									? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-									: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
+									? 'glass-primary'
+									: 'hover:bg-white/10 dark:hover:bg-white/[0.05] hover:text-foreground'
 							)}
 							onclick={() => (activeTab = 'featured')}
 						>
@@ -297,8 +297,8 @@
 								class={cn(
 									'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
 									activeTab === 'favorites'
-										? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-										: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
+										? 'glass-primary'
+										: 'hover:bg-white/10 dark:hover:bg-white/[0.05] hover:text-foreground'
 								)}
 								onclick={() => (activeTab = 'favorites')}
 							>
@@ -310,8 +310,8 @@
 							class={cn(
 								'px-3 py-1 rounded-full text-xs font-medium transition-all duration-200',
 								activeTab === 'recent'
-									? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-									: 'hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
+									? 'glass-primary'
+									: 'hover:bg-white/10 dark:hover:bg-white/[0.05] hover:text-foreground'
 							)}
 							onclick={() => (activeTab = 'recent')}
 						>
@@ -406,10 +406,10 @@
 				<p class="text-muted-foreground text-sm mb-4 max-w-xs">
 					Create a new cocktail recipe from your inventory ingredients.
 				</p>
-				<FancyButton href="/catalog/add" variant="primary" size="md">
+				<Button href="/catalog/add">
 					<Plus class="h-4 w-4 mr-2" />
 					Add Recipe
-				</FancyButton>
+				</Button>
 			</Card.Content>
 		</Card.Root>
 	{:else}

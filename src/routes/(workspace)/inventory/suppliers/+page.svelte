@@ -4,7 +4,6 @@
 
 	import { browser } from '$app/environment';
 	import { goto, invalidateAll } from '$app/navigation';
-	import FancyButton from '$lib/components/FancyButton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
@@ -121,10 +120,10 @@
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
-			<FancyButton variant="primary" size="sm" href="/inventory/suppliers/add" class="shrink-0">
+			<Button size="sm" href="/inventory/suppliers/add" class="shrink-0">
 				<Plus class="h-4 w-4 mr-1" />
 				Add Supplier
-			</FancyButton>
+			</Button>
 		{/if}
 	{/snippet}
 </InventoryNav>

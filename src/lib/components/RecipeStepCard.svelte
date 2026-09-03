@@ -317,7 +317,7 @@
 										class={cn(
 											'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
 											step.productIdQuantityInMilliliters === val
-												? 'border-primary/40 bg-primary/20 text-primary'
+												? 'border-primary/40 bg-primary text-primary-foreground'
 												: 'glass-surface text-muted-foreground hover:text-foreground'
 										)}
 									>

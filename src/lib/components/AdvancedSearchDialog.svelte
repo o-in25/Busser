@@ -209,7 +209,7 @@
 					{#if excludeIngredients.length > 0}
 						<div class="flex flex-wrap gap-1.5 pt-1">
 							{#each excludeIngredients as tag}
-								<Badge variant="destructive" class="gap-1">
+								<Badge variant="danger" class="gap-1">
 									{tag.name}
 									<button
 										onclick={() =>

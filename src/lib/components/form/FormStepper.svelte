@@ -39,7 +39,7 @@
 			class={cn(
 				'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all duration-200',
 				done && 'bg-primary text-primary-foreground dark:shadow-glow-cyan',
-				active && 'bg-primary/15 text-primary ring-2 ring-primary/40 dark:shadow-glow-cyan',
+				active && 'bg-primary text-primary-foreground ring-2 ring-primary/40 dark:shadow-glow-cyan',
 				!done && !active && 'bg-secondary/20 text-muted-foreground hover:bg-secondary/30'
 			)}
 		>

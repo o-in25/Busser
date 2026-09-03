@@ -95,9 +95,7 @@
 	</div>
 
 	<!-- sticky glass footer -->
-	<div
-		class="sticky bottom-4 z-10 mb-4 mt-8 flex items-center gap-3 rounded-2xl border border-white/15 bg-background/70 px-2 py-3 backdrop-blur-lg dark:border-zinc-700/30 sm:px-3"
-	>
+	<div class="glass-panel sticky bottom-4 z-10 mb-4 mt-8 flex items-center gap-3 px-2 py-3 sm:px-3">
 		{#if currentStep === 0}
 			<Button type="button" variant="outline" class="rounded-full" onclick={() => goto(cancelHref)}>
 				<X class="mr-1 h-4 w-4" /> Cancel
@@ -113,22 +111,11 @@
 		</div>
 
 		{#if isLast}
-			<Button
-				type="submit"
-				variant="glass-primary"
-				size="glass-md"
-				disabled={submitting || !isValid}
-			>
+			<Button type="submit" disabled={submitting || !isValid}>
 				{submitting ? 'Saving…' : submitLabel}
 			</Button>
 		{:else}
-			<Button
-				type="button"
-				variant="glass-primary"
-				size="glass-md"
-				onclick={next}
-				disabled={!canProceed}
-			>
+			<Button type="button" onclick={next} disabled={!canProceed}>
 				Next <ChevronRight class="ml-1 h-4 w-4" />
 			</Button>
 		{/if}

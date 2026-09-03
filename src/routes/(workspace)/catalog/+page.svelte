@@ -17,9 +17,7 @@
 
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
+	import Callout from '$lib/components/Callout.svelte';
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
@@ -27,7 +25,7 @@
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import StatBadge from '$lib/components/StatBadge.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import { Pagination } from '$lib/components/ui/pagination';
 	import SubNav from '$lib/components/SubNav.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -285,7 +283,7 @@
 
 <div>
 	{#if !authenticated}
-		<FancyAlert class="mb-6">
+		<Callout class="mb-6">
 			{#snippet icon()}<Mail class="h-5 w-5 text-primary" />{/snippet}
 			{#snippet children()}
 				<p class="sm:hidden">Sign up to save favorites</p>
@@ -294,9 +292,9 @@
 				</p>
 			{/snippet}
 			{#snippet action()}
-				<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
+				<Button variant="cta-primary" size="cta-sm" href="/signup">Sign Up</Button>
 			{/snippet}
-		</FancyAlert>
+		</Callout>
 	{/if}
 
 	{#if authenticated}
@@ -309,10 +307,10 @@
 		>
 			{#snippet action()}
 				{#if canModify}
-					<FancyButton href="/catalog/add" variant="primary" size="sm" class="shrink-0">
+					<Button href="/catalog/add" size="sm" class="shrink-0">
 						<Plus class="h-4 w-4 mr-1" />
 						Add Recipe
-					</FancyButton>
+					</Button>
 				{/if}
 			{/snippet}
 		</SubNav>
@@ -352,22 +350,22 @@
 						(s) => String(s.recipeCategoryId) === selectedSpirit
 					)}
 					{#if spiritObj}
-						<FancyBadge class="whitespace-nowrap">
+						<Badge size="lg" class="whitespace-nowrap">
 							<span class="text-sm font-bold">{spiritObj.recipeCategoryDescription}</span>
 							<span class="text-xs text-muted-foreground">Spirit</span>
-						</FancyBadge>
+						</Badge>
 					{/if}
 				{/if}
 
 				{#if advancedFilterCount > 0}
-					<FancyBadge as="button" onclick={clearAllAdvancedFilters} class="whitespace-nowrap">
+					<Badge size="lg" as="button" onclick={clearAllAdvancedFilters} class="whitespace-nowrap">
 						<SlidersHorizontal class="h-4 w-4 text-primary shrink-0" />
 						<span class="text-sm font-bold">{advancedFilterCount}</span>
 						<span class="text-xs text-muted-foreground"
 							>Advanced Filter{advancedFilterCount !== 1 ? 's' : ''}</span
 						>
 						<X class="h-3 w-3 text-muted-foreground" />
-					</FancyBadge>
+					</Badge>
 				{/if}
 			</div>
 		</PageHero>
@@ -501,7 +499,7 @@
 			{#if data.filters.ingredientExclude}
 				{@const names = data.filters.ingredientNames || {}}
 				{@const ids = data.filters.ingredientExclude.split(',').map(Number)}
-				<Badge variant="destructive" class="gap-1">
+				<Badge variant="danger" class="gap-1">
 					Excludes: {ids.map((id) => names[id] || id).join(', ')}
 					<button
 						onclick={() => clearAdvancedFilter('ingredientExclude')}

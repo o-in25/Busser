@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { View } from '$lib/types';
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
-	import FancyCard from './FancyCard.svelte';
+	import RecipeCard from './RecipeCard.svelte';
 	import Autoplay from 'embla-carousel-autoplay';
 	import type { CarouselAPI } from '$lib/components/ui/carousel/context.js';
 	import { cn } from '$lib/utils';
@@ -93,7 +93,7 @@
 	<!-- static grid fallback for < 3 recipes -->
 	<div class={cn('grid grid-cols-2 md:grid-cols-4 gap-3', className)}>
 		{#each recipes as recipe}
-			<FancyCard {recipe} isActive={true} progress={1} />
+			<RecipeCard {recipe} isActive={true} progress={1} />
 		{/each}
 	</div>
 {:else}
@@ -107,17 +107,17 @@
 			<Carousel.Content class="-ml-6 py-2">
 				{#each recipes as recipe, i}
 					<Carousel.Item class="pl-6 basis-[75%] sm:basis-[45%] lg:basis-[31%]">
-						<FancyCard {recipe} isActive={selectedIndex === i} progress={slideProgress[i] ?? 0} />
+						<RecipeCard {recipe} isActive={selectedIndex === i} progress={slideProgress[i] ?? 0} />
 					</Carousel.Item>
 				{/each}
 			</Carousel.Content>
 
 			<!-- nav arrows (desktop only) -->
 			<Carousel.Previous
-				class="hidden sm:inline-flex left-4 bg-white/15 dark:bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/25 dark:hover:bg-white/15 text-white opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
+				class="hidden sm:inline-flex left-4 bg-white/15 dark:bg-white/10 backdrop-blur-md backdrop-saturate-150 border-white/20 hover:bg-white/25 dark:hover:bg-white/15 text-white opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
 			/>
 			<Carousel.Next
-				class="hidden sm:inline-flex right-4 bg-white/15 dark:bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/25 dark:hover:bg-white/15 text-white opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
+				class="hidden sm:inline-flex right-4 bg-white/15 dark:bg-white/10 backdrop-blur-md backdrop-saturate-150 border-white/20 hover:bg-white/25 dark:hover:bg-white/15 text-white opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
 			/>
 		</Carousel.Root>
 

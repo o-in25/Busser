@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 
 	import BackButton from '$lib/components/BackButton.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import ImagePrompt from '$lib/components/ImagePrompt.svelte';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -96,10 +96,10 @@
 		/>
 
 		<div class="flex justify-end gap-2">
-			<FancyButton href={backHref} size="sm">Cancel</FancyButton>
-			<FancyButton type="submit" variant="primary" size="sm" {disabled}>
+			<Button variant="secondary" href={backHref} size="sm">Cancel</Button>
+			<Button type="submit" size="sm" {disabled}>
 				{disabled ? 'Saving...' : 'Save'}
-			</FancyButton>
+			</Button>
 		</div>
 	</form>
 </div>

@@ -7,7 +7,6 @@
 	import { haptics } from '$lib/utils/haptics';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
 	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
@@ -16,7 +15,7 @@
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryResultsSkeleton from '$lib/components/InventoryResultsSkeleton.svelte';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import { Pagination } from '$lib/components/ui/pagination';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -363,10 +362,10 @@
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
-			<FancyButton variant="primary" size="sm" href="{basePath}/add" class="shrink-0">
+			<Button size="sm" href="{basePath}/add" class="shrink-0">
 				<Plus class="h-4 w-4 mr-1" />
 				Add Product
-			</FancyButton>
+			</Button>
 		{/if}
 	{/snippet}
 </InventoryNav>

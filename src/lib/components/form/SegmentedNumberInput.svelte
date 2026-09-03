@@ -99,7 +99,7 @@
 			tabindex="-1"
 			aria-label="decrease"
 			onclick={() => bump(-1)}
-			class="flex items-center px-3 text-muted-foreground transition-colors hover:bg-white/30 hover:text-foreground dark:hover:bg-zinc-700/40"
+			class="flex items-center px-3 text-muted-foreground transition-colors hover:bg-white/30 hover:text-foreground dark:hover:bg-white/[0.08]"
 		>
 			<Minus class="h-4 w-4" />
 		</button>
@@ -116,7 +116,7 @@
 			<!-- built-in unit picker; portaled content escapes the field/card clip + z-index -->
 			<Popover.Root bind:open={unitOpen}>
 				<Popover.Trigger
-					class="flex shrink-0 items-center gap-1 border-l border-white/20 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground dark:border-zinc-700/40"
+					class="flex shrink-0 items-center gap-1 border-l border-white/20 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground dark:border-white/[0.12]"
 				>
 					{unit}
 					<ChevronDown class="h-3.5 w-3.5 opacity-60" />
@@ -131,7 +131,7 @@
 							}}
 							class={cn(
 								'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors',
-								u.label === unit ? 'bg-primary/15 text-primary' : 'hover:bg-accent/60'
+								u.label === unit ? 'bg-primary text-primary-foreground' : 'hover:bg-accent/60'
 							)}
 						>
 							{u.label}
@@ -141,7 +141,7 @@
 			</Popover.Root>
 		{:else if unit}
 			<span
-				class="flex items-center border-l border-white/20 px-3 text-sm font-medium text-muted-foreground dark:border-zinc-700/40"
+				class="flex items-center border-l border-white/20 px-3 text-sm font-medium text-muted-foreground dark:border-white/[0.12]"
 			>
 				{unit}
 			</span>
@@ -151,7 +151,7 @@
 			tabindex="-1"
 			aria-label="increase"
 			onclick={() => bump(1)}
-			class="flex items-center px-3 text-muted-foreground transition-colors hover:bg-white/30 hover:text-foreground dark:hover:bg-zinc-700/40"
+			class="flex items-center px-3 text-muted-foreground transition-colors hover:bg-white/30 hover:text-foreground dark:hover:bg-white/[0.08]"
 		>
 			<Plus class="h-4 w-4" />
 		</button>
@@ -166,7 +166,7 @@
 					class={cn(
 						'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
 						value === p.value
-							? 'border-primary/40 bg-primary/20 text-primary'
+							? 'border-primary/40 bg-primary text-primary-foreground'
 							: 'glass-surface text-muted-foreground hover:text-foreground'
 					)}
 				>

@@ -17,7 +17,7 @@
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
 
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
@@ -239,58 +239,56 @@
 		<!-- Status + recipe count row -->
 		<div class="flex items-center gap-2 flex-wrap">
 			{#if showStock}
-				<FancyBadge variant={product.productInStockQuantity > 0 ? 'default' : 'danger'}>
+				<Badge size="lg" variant={product.productInStockQuantity > 0 ? 'default' : 'danger'}>
 					<StockIcon class="h-3.5 w-3.5 {stockStatus.color}" />
 					<span class="text-xs">{stockStatus.label}</span>
-				</FancyBadge>
+				</Badge>
 			{/if}
 			{#if recipeCount > 0}
-				<FancyBadge href="/catalog?ingredientInclude={product.productId}">
+				<Badge size="lg" href="/catalog?ingredientInclude={product.productId}">
 					<FlaskConical class="h-3.5 w-3.5 text-primary" />
 					<span class="text-xs text-muted-foreground"
 						>Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span
 					>
-				</FancyBadge>
+				</Badge>
 			{/if}
 		</div>
 
 		<!-- Quick stats — compact inline pills -->
 		<div class="flex flex-wrap gap-2">
 			{#if product.productPricePerUnit}
-				<FancyBadge>
+				<Badge size="lg">
 					<DollarSign class="h-3.5 w-3.5 text-neon-green-500" />
 					<span class="text-xs font-semibold">${product.productPricePerUnit.toFixed(2)}</span>
-				</FancyBadge>
+				</Badge>
 			{/if}
 			{#if product.productUnitSizeInMilliliters}
-				<FancyBadge>
+				<Badge size="lg">
 					<Beaker class="h-3.5 w-3.5 text-blue-500" />
 					<span class="text-xs font-semibold">{product.productUnitSizeInMilliliters}mL</span>
-				</FancyBadge>
+				</Badge>
 			{/if}
 			{#if product.productProof}
-				<FancyBadge>
+				<Badge size="lg">
 					<Flame class="h-3.5 w-3.5 text-neon-amber-500" />
 					<span class="text-xs font-semibold">
 						{product.productProof}° {#if abvPercent}<span class="font-normal text-muted-foreground"
 								>({abvPercent}%)</span
 							>{/if}
 					</span>
-				</FancyBadge>
+				</Badge>
 			{/if}
 			{#if pricePerOunce}
-				<FancyBadge>
+				<Badge size="lg">
 					<Calculator class="h-3.5 w-3.5 text-secondary-500" />
 					<span class="text-xs font-semibold">${pricePerOunce}/oz</span>
-				</FancyBadge>
+				</Badge>
 			{/if}
 		</div>
 
 		<!-- Flavor Profile -->
 		{#if hasFlavorProfile}
-			<div
-				class="rounded-xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-sm border border-white/20 dark:border-white/10 p-3 space-y-2.5"
-			>
+			<div class="glass-surface p-3 space-y-2.5">
 				<h3 class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
 					Flavor Profile
 				</h3>

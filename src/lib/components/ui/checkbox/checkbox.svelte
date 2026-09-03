@@ -35,7 +35,7 @@
 		'disabled:cursor-not-allowed disabled:opacity-50',
 		checked
 			? 'border-primary bg-primary text-primary-foreground shadow-sm'
-			: 'border-muted-foreground/40 bg-white/30 dark:bg-zinc-800/40 backdrop-blur-sm hover:border-primary/70',
+			: 'border-muted-foreground/40 bg-white/30 dark:bg-white/[0.08] backdrop-blur-sm hover:border-primary/70',
 		className
 	)}
 	onclick={toggle}
