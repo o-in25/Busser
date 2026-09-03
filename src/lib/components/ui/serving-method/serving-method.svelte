@@ -86,7 +86,7 @@
 					<div
 						class={cn(
 							'flex items-center justify-center w-12 h-12 rounded-full shrink-0 overflow-hidden',
-							isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+							isSelected ? 'glass-primary' : 'bg-muted text-muted-foreground'
 						)}
 					>
 						{#if method.recipeTechniqueDescriptionImageUrl}

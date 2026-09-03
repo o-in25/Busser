@@ -445,7 +445,7 @@
 				class={cn(
 					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
 					readyLensOn
-						? 'bg-primary text-primary-foreground shadow-sm'
+						? 'glass-primary'
 						: 'text-muted-foreground hover:text-foreground'
 				)}
 			>
@@ -457,7 +457,7 @@
 				class={cn(
 					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
 					!readyLensOn
-						? 'bg-primary text-primary-foreground shadow-sm'
+						? 'glass-primary'
 						: 'text-muted-foreground hover:text-foreground'
 				)}
 			>

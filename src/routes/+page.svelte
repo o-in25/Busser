@@ -876,7 +876,7 @@
 								class="inline-flex items-center rounded-full h-7 text-xs border border-dashed shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 									transition-all duration-300 ease-out
 									{activeMood === mood.id
-									? 'bg-primary text-primary-foreground border-primary'
+									? 'glass-primary'
 									: 'bg-background/60 backdrop-blur-sm border-border/50'}
 									{moodExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
 								onclick={() => {
@@ -956,7 +956,7 @@
 					class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 						transition-all duration-300 ease-out
 						{sortBy === 'all'
-						? 'bg-primary text-primary-foreground border-primary'
+						? 'glass-primary'
 						: 'bg-background/60 backdrop-blur-sm border-border/50'}
 						{spiritExpanded
 						? 'max-w-48 px-3 ml-1.5 opacity-100'
@@ -979,7 +979,7 @@
 							class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 								transition-all duration-300 ease-out
 								{sortBy === spirit.recipeCategoryId
-								? 'bg-primary text-primary-foreground border-primary'
+								? 'glass-primary'
 								: 'bg-background/60 backdrop-blur-sm border-border/50'}
 								{spiritExpanded
 								? 'max-w-48 px-3 ml-1.5 opacity-100'

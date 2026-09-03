@@ -76,7 +76,7 @@
 			>
 				<div
 					class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center {mode === 'auto'
-						? 'bg-primary text-primary-foreground'
+						? 'glass-primary'
 						: 'bg-muted text-muted-foreground'}"
 				>
 					<Sparkles class="w-5 h-5" />
@@ -115,7 +115,7 @@
 			>
 				<div
 					class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center {mode === 'custom'
-						? 'bg-primary text-primary-foreground'
+						? 'glass-primary'
 						: 'bg-muted text-muted-foreground'}"
 				>
 					<PenLine class="w-5 h-5" />

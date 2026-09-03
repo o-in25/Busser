@@ -131,7 +131,7 @@
 							}}
 							class={cn(
 								'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors',
-								u.label === unit ? 'bg-primary text-primary-foreground' : 'hover:bg-accent/60'
+								u.label === unit ? 'glass-primary' : 'hover:bg-accent/60'
 							)}
 						>
 							{u.label}
@@ -166,7 +166,7 @@
 					class={cn(
 						'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
 						value === p.value
-							? 'border-primary/40 bg-primary text-primary-foreground'
+							? 'glass-primary'
 							: 'glass-surface text-muted-foreground hover:text-foreground'
 					)}
 				>
