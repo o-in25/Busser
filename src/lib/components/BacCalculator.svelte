@@ -458,7 +458,6 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8"
 										onclick={() => removeDrink(drink.recipeId, true)}
 									>
 										<Minus class="h-4 w-4" />
@@ -467,7 +466,6 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8"
 										onclick={() => incrementDrink(drink.recipeId, true)}
 									>
 										<Plus class="h-4 w-4" />
@@ -492,7 +490,6 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8"
 										onclick={() => removeDrink(drink.recipeId, false)}
 									>
 										<Minus class="h-4 w-4" />
@@ -501,7 +498,6 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8"
 										onclick={() => incrementDrink(drink.recipeId, false)}
 									>
 										<Plus class="h-4 w-4" />

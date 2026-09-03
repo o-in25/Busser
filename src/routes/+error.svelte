@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import FancyButton from '$lib/components/FancyButton.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { ArrowLeft, House } from 'lucide-svelte';
 
 	function handleBack() {
@@ -67,14 +67,14 @@
 				</p>
 			{/if}
 			<div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-				<FancyButton size="md" onclick={handleBack}>
+				<Button variant="secondary" onclick={handleBack}>
 					<ArrowLeft class="h-4 w-4 mr-2" />
 					Go Back
-				</FancyButton>
-				<FancyButton size="md" variant="primary" href="/">
+				</Button>
+				<Button href="/">
 					<House class="h-4 w-4 mr-2" />
 					Go Home
-				</FancyButton>
+				</Button>
 			</div>
 		</div>
 	</div>

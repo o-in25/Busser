@@ -98,9 +98,7 @@
 		</Button>
 		<Button
 			type="button"
-			variant="glass-primary"
-			size="glass-md"
-			class="flex-1"
+			class="flex-1 rounded-full"
 			disabled={!valid || submitting}
 			onclick={save}
 		>

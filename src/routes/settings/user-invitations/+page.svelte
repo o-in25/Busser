@@ -252,7 +252,7 @@
 											variant="outline"
 											size="icon"
 											type="submit"
-											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+											class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 											title="Delete invitation"
 										>
 											<Trash2 class="w-4 h-4" />

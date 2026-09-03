@@ -76,10 +76,10 @@
 				<button
 					type="button"
 					class={cn(
-						'relative flex items-start gap-4 p-4 rounded-xl border-2 backdrop-blur-md transition-all duration-200 text-left',
+						'relative flex items-start gap-4 p-4 rounded-xl border-2 backdrop-blur-md backdrop-saturate-150 transition-all duration-200 text-left',
 						isSelected
 							? 'border-primary bg-primary/10'
-							: 'border-white/20 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 hover:border-primary/50'
+							: 'border-white/20 dark:border-white/[0.12] bg-white/40 dark:bg-white/[0.08] hover:border-primary/50'
 					)}
 					onclick={() => handleSelect(method)}
 				>
@@ -129,7 +129,7 @@
 	{:else}
 		<!-- Toggle variant (default) -->
 		<div
-			class="grid grid-cols-2 sm:flex rounded-full backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 gap-0.5"
+			class="glass-track grid grid-cols-2 sm:flex rounded-full p-0.5 gap-0.5"
 		>
 			{#each methods as method}
 				{@const isSelected = method.recipeTechniqueDescriptionId === value}
@@ -140,8 +140,8 @@
 					class={cn(
 						'sm:flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-full text-sm font-medium transition-all duration-200',
 						isSelected
-							? 'bg-primary/25 dark:bg-primary/20 text-primary dark:text-[rgba(248,78,128,1)] backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)]'
-							: 'text-muted-foreground hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground'
+							? 'glass-primary'
+							: 'text-muted-foreground hover:bg-white/10 dark:hover:bg-white/[0.05] hover:text-foreground'
 					)}
 					onclick={() => handleSelect(method)}
 				>

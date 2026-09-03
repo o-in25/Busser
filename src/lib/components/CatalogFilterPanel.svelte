@@ -148,7 +148,7 @@
 				{#each moods as mood}
 					<Button
 						variant={activeMoods.has(mood.id) ? 'default' : 'outline'}
-						class="rounded-full border-dashed h-7 text-xs px-3"
+						class="rounded-full border-dashed"
 						size="sm"
 						onclick={() => toggleMood(mood.id)}
 					>

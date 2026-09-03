@@ -3,7 +3,7 @@
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import { Pagination } from '$lib/components/ui/pagination';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';

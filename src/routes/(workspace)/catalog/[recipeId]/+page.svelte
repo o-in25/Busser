@@ -17,7 +17,6 @@
 	import { deserialize, enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
-	import FancyButton from '$lib/components/FancyButton.svelte';
 	import Recipe from '$lib/components/Recipe.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -364,10 +363,10 @@
 				A newer version of this recipe is available from the catalog.
 			</div>
 			<div class="flex gap-2 shrink-0">
-				<FancyButton size="sm" variant="default" onclick={() => (syncDialogOpen = true)}>
+				<Button variant="secondary" size="sm" onclick={() => (syncDialogOpen = true)}>
 					Update
-				</FancyButton>
-				<FancyButton size="sm" onclick={doDismiss}>Dismiss</FancyButton>
+				</Button>
+				<Button variant="secondary" size="sm" onclick={doDismiss}>Dismiss</Button>
 			</div>
 		</div>
 	{/if}
@@ -375,10 +374,10 @@
 	<!-- Desktop toolbar above hero -->
 	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
 		<div class="flex items-center gap-3">
-			<FancyButton href="/catalog" size="sm">
+			<Button variant="secondary" href="/catalog" size="sm">
 				<ChevronLeft class="h-4 w-4 mr-1" />
 				Back to Catalog
-			</FancyButton>
+			</Button>
 			{#if canPublish && !isPublished}
 				<span
 					class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
@@ -405,10 +404,10 @@
 				>
 					<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-					<FancyButton type="submit" variant={isFavorite ? 'danger' : 'default'} size="sm">
+					<Button type="submit" variant={isFavorite ? 'destructive' : 'default'} size="sm">
 						<Heart class={cn('h-4 w-4 mr-1', isFavorite && 'fill-current')} />
 						{isFavorite ? 'Favorited' : 'Favorite'}
-					</FancyButton>
+					</Button>
 				</form>
 			{/if}
 
@@ -428,10 +427,10 @@
 				>
 					<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-					<FancyButton type="submit" variant={isFeatured ? 'warning' : 'default'} size="sm">
+					<Button type="submit" variant={isFeatured ? 'warning' : 'default'} size="sm">
 						<Star class={cn('h-4 w-4 mr-1', isFeatured && 'fill-current')} />
 						{isFeatured ? 'Featured' : 'Feature'}
-					</FancyButton>
+					</Button>
 				</form>
 			{/if}
 
@@ -458,10 +457,10 @@
 			<div class="flex w-full flex-col gap-2">
 				<!-- top row: back + more, matching the hero layout used across the app -->
 				<div class="flex gap-2">
-					<FancyButton href="/catalog" size="sm" class="flex-1 justify-center">
+					<Button variant="secondary" href="/catalog" size="sm" class="flex-1 justify-center">
 						<ChevronLeft class="h-4 w-4 mr-1" />
 						Back
-					</FancyButton>
+					</Button>
 
 					{#if canModify || (showImport && importData)}
 						<DropdownMenu.Root>
@@ -494,15 +493,15 @@
 						>
 							<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 							<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-							<FancyButton
+							<Button
 								type="submit"
-								variant={isFavorite ? 'danger' : 'default'}
+								variant={isFavorite ? 'destructive' : 'default'}
 								size="sm"
 								class="w-full justify-center"
 							>
 								<Heart class={cn('h-4 w-4 mr-1', isFavorite && 'fill-current')} />
 								{isFavorite ? 'Favorited' : 'Favorite'}
-							</FancyButton>
+							</Button>
 						</form>
 
 						{#if canModify && isOwned}
@@ -522,7 +521,7 @@
 							>
 								<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 								<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-								<FancyButton
+								<Button
 									type="submit"
 									variant={isFeatured ? 'warning' : 'default'}
 									size="sm"
@@ -530,7 +529,7 @@
 								>
 									<Star class={cn('h-4 w-4 mr-1', isFeatured && 'fill-current')} />
 									{isFeatured ? 'Featured' : 'Feature'}
-								</FancyButton>
+								</Button>
 							</form>
 						{/if}
 					</div>

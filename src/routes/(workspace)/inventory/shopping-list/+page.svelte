@@ -9,7 +9,7 @@
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryResultsSkeleton from '$lib/components/InventoryResultsSkeleton.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import { Pagination } from '$lib/components/ui/pagination';
 	import ShoppingListHeader from '$lib/components/ShoppingListHeader.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
@@ -661,7 +661,6 @@
 												<Button
 													variant="ghost"
 													size="sm"
-													class="h-7 text-xs"
 													onclick={() => handleToggle(item.productId)}
 												>
 													<PackageCheck class="h-3.5 w-3.5 mr-1" />
@@ -708,8 +707,7 @@
 									class="h-full w-full"
 								/>
 								<Badge
-									variant="secondary"
-									class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm"
+																		class="absolute top-3 left-3 px-2.5 py-0.5 text-xs font-semibold"
 								>
 									{item.categoryName}
 								</Badge>
@@ -759,7 +757,6 @@
 										<Button
 											variant="outline"
 											size="sm"
-											class="h-7 text-xs"
 											onclick={() => handleToggle(item.productId)}
 										>
 											<PackageCheck class="h-3.5 w-3.5 mr-1" />
@@ -820,7 +817,6 @@
 										<Button
 											variant="outline"
 											size="sm"
-											class="h-7 text-xs"
 											onclick={() => handleToggle(item.productId)}
 										>
 											<PackageCheck class="h-3.5 w-3.5 mr-1" />

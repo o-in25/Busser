@@ -38,7 +38,7 @@
 	<SheetOverlay />
 	<SheetPrimitive.Content
 		class={cn(
-			'fixed z-50 gap-4 bg-white/75 dark:bg-zinc-900/65 backdrop-blur-2xl backdrop-saturate-150 p-6 shadow-2xl border-white/20 dark:border-zinc-700/30',
+			'fixed z-50 gap-4 bg-white/75 dark:bg-zinc-900/65 backdrop-blur-2xl backdrop-saturate-150 p-6 shadow-2xl border-white/20 dark:border-white/[0.10]',
 			sideClasses[side],
 			className
 		)}

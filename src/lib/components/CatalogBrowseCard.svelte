@@ -101,8 +101,8 @@
 
 {#if viewMode === 'grid'}
 	<!-- Grid View Card — liquid glass -->
-	<a href="/catalog/{recipe.recipeId}" class="block group h-full">
-		<div class="relative rounded-2xl overflow-hidden h-full browse-grid-card">
+	<a href="/catalog/{recipe.recipeId}" class="cv-card block group h-full">
+		<div class="relative rounded-3xl overflow-hidden h-full browse-grid-card">
 			<!-- Blurred background glow from recipe image -->
 			{#if recipe.recipeImageUrl}
 				<img
@@ -114,11 +114,9 @@
 			{/if}
 
 			<!-- Glass surface -->
-			<div
-				class="relative h-full flex flex-col bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_16px_40px_-20px_rgba(31,20,60,0.28)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_22px_48px_-20px_rgba(31,20,60,0.34)] transition-all duration-300"
-			>
+			<div class="glass-card glass-card-hover relative h-full flex flex-col">
 				<!-- Image area -->
-				<div class="relative h-44 overflow-hidden rounded-t-2xl">
+				<div class="relative h-44 overflow-hidden rounded-t-3xl">
 					<SkeletonImage
 						src={recipe.recipeImageUrl}
 						alt={recipe.recipeName}
@@ -132,7 +130,7 @@
 					<!-- Category pills -->
 					<div class="absolute top-3 left-3 flex flex-col items-start gap-1">
 						<span
-							class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/15 text-foreground shadow-sm"
+							class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md backdrop-saturate-150 border border-white/30 dark:border-white/15 text-foreground shadow-sm"
 						>
 							{recipe.recipeCategoryDescription}
 						</span>
@@ -178,7 +176,7 @@
 								<input type="hidden" name="workspaceId" value={workspaceId} />
 								<button
 									type="submit"
-									class="p-1.5 rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 transition-colors"
+									class="p-1.5 rounded-full bg-black/30 backdrop-blur-md backdrop-saturate-150 hover:bg-black/50 transition-colors"
 									title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
 								>
 									<Heart
@@ -199,7 +197,7 @@
 									<input type="hidden" name="workspaceId" value={workspaceId} />
 									<button
 										type="submit"
-										class="p-1.5 rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 transition-colors"
+										class="p-1.5 rounded-full bg-black/30 backdrop-blur-md backdrop-saturate-150 hover:bg-black/50 transition-colors"
 										title={isFeatured ? 'Remove from featured' : 'Add to featured'}
 									>
 										<Star
@@ -241,8 +239,8 @@
 	</a>
 {:else}
 	<!-- List View Card — liquid glass -->
-	<a href="/catalog/{recipe.recipeId}" class="block group">
-		<div class="relative rounded-2xl overflow-hidden browse-list-card">
+	<a href="/catalog/{recipe.recipeId}" class="cv-row block group">
+		<div class="relative rounded-3xl overflow-hidden browse-list-card">
 			<!-- Blurred background image -->
 			{#if recipe.recipeImageUrl}
 				<img
@@ -253,13 +251,13 @@
 				/>
 				<!-- dark scrim so the colored tint stays but text keeps contrast (dark mode only) -->
 				<div
-					class="absolute inset-0 rounded-2xl dark:bg-gradient-to-b dark:from-black/30 dark:to-black/45 pointer-events-none"
+					class="absolute inset-0 rounded-3xl dark:bg-gradient-to-b dark:from-black/30 dark:to-black/45 pointer-events-none"
 				></div>
 			{/if}
 
 			<!-- Glass surface -->
 			<div
-				class="relative flex items-center gap-3 p-3 bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_10px_28px_-16px_rgba(31,20,60,0.25)] hover:bg-white/60 dark:hover:bg-white/[0.09] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_14px_32px_-16px_rgba(31,20,60,0.3)] transition-all duration-200"
+				class="glass-card glass-card-hover relative flex items-center gap-3 p-3"
 			>
 				<!-- Thumbnail with verdict overlay -->
 				<div

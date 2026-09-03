@@ -28,12 +28,11 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import FancyCarousel from '$lib/components/FancyCarousel.svelte';
+	import RecipeCarousel from '$lib/components/RecipeCarousel.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
 	import DashboardSkeleton from '$lib/components/DashboardSkeleton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -244,21 +243,21 @@
 
 			<!-- CTAs -->
 			<div class="flex flex-col sm:flex-row justify-center gap-4 hero-enter" style="--delay: 600ms">
-				<FancyButton variant="primary" href="/signup">
+				<Button variant="cta-primary" size="cta" href="/signup">
 					<Mail class="w-5 h-5 mr-2" />
 					Sign Up
-				</FancyButton>
-				<FancyButton href="/login">
+				</Button>
+				<Button variant="cta" size="cta" href="/login">
 					<LogIn class="w-5 h-5 mr-2" />
 					Log In
-				</FancyButton>
+				</Button>
 			</div>
 		</div>
 
 		<!-- Featured Recipes Carousel -->
 		{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
 			<div class="mt-4 w-full hero-enter" style="--delay: 800ms">
-				<FancyCarousel recipes={landingData.featuredRecipes} />
+				<RecipeCarousel recipes={landingData.featuredRecipes} />
 				<!-- secondary browse affordance — kept lightweight so it doesn't compete with sign up -->
 				<div class="mt-3 text-center">
 					<a
@@ -557,10 +556,10 @@
 							</button>
 						</p>
 					{/if}
-					<FancyButton variant="primary" href="/signup">
+					<Button variant="cta-primary" size="cta" href="/signup">
 						Sign Up
 						<ArrowRight class="ml-2 h-5 w-5" />
-					</FancyButton>
+					</Button>
 				</div>
 			</div>
 		</div>
@@ -911,7 +910,7 @@
 							{#if moodCounts[mood.id] > 0}
 								<Button
 									variant={activeMood === mood.id ? 'default' : 'outline'}
-									class="rounded-full border-dashed shrink-0 h-7 text-xs px-3"
+									class="rounded-full border-dashed shrink-0"
 									size="sm"
 									onclick={() => (activeMood = activeMood === mood.id ? null : mood.id)}
 								>
@@ -924,7 +923,7 @@
 							<Button
 								variant="ghost"
 								size="sm"
-								class="rounded-full text-muted-foreground shrink-0 h-7 text-xs px-2"
+								class="rounded-full text-muted-foreground shrink-0"
 								onclick={() => (activeMood = null)}
 							>
 								<X class="h-3 w-3" />
@@ -1014,7 +1013,7 @@
 				<div class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mb-1">
 					<Button
 						variant={sortBy === 'all' ? 'default' : 'outline'}
-						class="rounded-full shrink-0 h-7 text-xs px-3"
+						class="rounded-full shrink-0"
 						size="sm"
 						onclick={() => setFilterType('all')}
 					>
@@ -1028,7 +1027,7 @@
 						{#if count > 0}
 							<Button
 								variant={sortBy === spirit.recipeCategoryId ? 'default' : 'outline'}
-								class="rounded-full shrink-0 h-7 text-xs px-3"
+								class="rounded-full shrink-0"
 								size="sm"
 								onclick={() => setFilterType(spirit.recipeCategoryId)}
 							>
@@ -1056,10 +1055,10 @@
 								: 'There are no recipes in this catalog yet.'}
 						</p>
 						{#if canModify && isOwner}
-							<FancyButton href="/inventory/add" size="sm" variant="primary">
+							<Button href="/inventory/add" size="sm">
 								<Plus class="h-4 w-4 mr-2" />
 								Add Ingredients
-							</FancyButton>
+							</Button>
 						{/if}
 					</Card.Content>
 				</Card.Root>
@@ -1082,8 +1081,7 @@
 										class="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
 									></div>
 									<Badge
-										variant="secondary"
-										class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm"
+																				class="absolute top-2 left-2 px-2.5 py-0.5 text-xs font-semibold"
 									>
 										{item.data.recipeCategoryDescription}
 									</Badge>
@@ -1103,11 +1101,11 @@
 
 				{#if filter.length > 8}
 					<div class="text-center mt-4">
-						<FancyButton href={browseUrl} variant="default" size="md">
+						<Button variant="secondary" href={browseUrl}>
 							View All {filter.length}
 							{isOwner ? 'Available' : ''} Recipes
 							<ArrowRight class="ml-2 h-4 w-4" />
-						</FancyButton>
+						</Button>
 					</div>
 				{/if}
 			{/if}

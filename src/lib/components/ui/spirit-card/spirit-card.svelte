@@ -35,10 +35,10 @@
 	/>
 	<div
 		class={cn(
-			'relative flex h-24 flex-col justify-end overflow-hidden rounded-xl border-2 transition-all duration-200 backdrop-blur-md',
+			'relative flex h-24 flex-col justify-end overflow-hidden rounded-xl border-2 transition-all duration-200 backdrop-blur-md backdrop-saturate-150',
 			selected
 				? 'border-primary ring-4 ring-primary/20 shadow-lg shadow-primary/10'
-				: 'border-white/20 dark:border-zinc-700/40 hover:border-primary/50'
+				: 'border-white/20 dark:border-white/[0.12] hover:border-primary/50'
 		)}
 	>
 		<!-- backdrop: category image faded into the card, glass fallback when none -->
@@ -51,7 +51,7 @@
 					class="h-full w-full object-cover"
 				/>
 			{:else}
-				<div class="h-full w-full bg-white/40 dark:bg-zinc-800/40"></div>
+				<div class="h-full w-full bg-white/40 dark:bg-white/[0.08]"></div>
 			{/if}
 			<div
 				class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"

@@ -14,7 +14,6 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
 
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { cdnSrc } from '$lib/utils/image';
 	import { Badge } from '$lib/components/ui/badge';
@@ -192,7 +191,7 @@
 
 				<!-- Expand indicator -->
 				<div
-					class="absolute top-4 right-4 p-2 rounded-full bg-white/30 dark:bg-black/30 backdrop-blur-md border border-white/40 dark:border-white/20 text-white shadow-lg hover:!bg-black/80 hover:!border-black/80 hover:!backdrop-blur-none active:!bg-black transition-all duration-200"
+					class="absolute top-4 right-4 p-2 rounded-full bg-white/30 dark:bg-black/30 backdrop-blur-md backdrop-saturate-150 border border-white/40 dark:border-white/20 text-white shadow-lg hover:!bg-black/80 hover:!border-black/80 hover:!backdrop-blur-none active:!bg-black transition-all duration-200"
 				>
 					<Expand class="w-5 h-5 drop-shadow" />
 				</div>
@@ -211,34 +210,34 @@
 			<!-- Desktop: title + badges -->
 			<div class="hidden md:flex items-end justify-between gap-4">
 				<div>
-					<FancyBadge variant="secondary" class="mb-3 !text-sm pointer-events-auto">
+					<Badge size="lg" variant="secondary" class="mb-3 !text-sm pointer-events-auto">
 						{recipe.recipeCategoryDescription}
-					</FancyBadge>
+					</Badge>
 					<h1 class="text-3xl md:text-4xl font-bold text-foreground mb-2">
 						{recipe.recipeName}
 					</h1>
 				</div>
 				<div class="flex flex-wrap items-center gap-2 pointer-events-auto justify-end">
-					<FancyBadge class="!py-1 !px-3 !text-xs !gap-1.5">
+					<Badge size="lg" class="!py-1 !px-3 !text-xs !gap-1.5">
 						<Percent class="h-3.5 w-3.5" />
 						{abv}
-					</FancyBadge>
-					<FancyBadge class="!py-1 !px-3 !text-xs !gap-1.5">
+					</Badge>
+					<Badge size="lg" class="!py-1 !px-3 !text-xs !gap-1.5">
 						<ServingIcon class="h-3.5 w-3.5" />
 						{recipe.recipeTechniqueDescriptionText}
-					</FancyBadge>
-					<FancyBadge class="!py-1 !px-3 !text-xs !gap-1.5">
+					</Badge>
+					<Badge size="lg" class="!py-1 !px-3 !text-xs !gap-1.5">
 						<FlaskConical class="h-3.5 w-3.5" />
 						{ingredientCount} ingredients
-					</FancyBadge>
+					</Badge>
 				</div>
 			</div>
 
 			<!-- Mobile: title + actions, no badges -->
 			<div class="md:hidden">
-				<FancyBadge variant="secondary" class="mb-3 !text-sm pointer-events-auto">
+				<Badge size="lg" variant="secondary" class="mb-3 !text-sm pointer-events-auto">
 					{recipe.recipeCategoryDescription}
-				</FancyBadge>
+				</Badge>
 				<h1 class="text-3xl font-bold text-foreground mb-2">
 					{recipe.recipeName}
 				</h1>
@@ -262,7 +261,7 @@
 			<!-- Backdrop -->
 			<button
 				type="button"
-				class="absolute inset-0 bg-background/95 backdrop-blur-md cursor-zoom-out"
+				class="absolute inset-0 bg-background/95 backdrop-blur-md backdrop-saturate-150 cursor-zoom-out"
 				onclick={closeLightbox}
 				aria-label="Close lightbox"
 				transition:fade={{ duration: 200 }}

@@ -237,7 +237,7 @@
 											variant="outline"
 											size="icon"
 											disabled
-											class="h-8 w-8 opacity-40"
+											class="opacity-40"
 											title="You cannot remove yourself"
 										>
 											<Shield class="h-4 w-4" />
@@ -247,7 +247,7 @@
 										<Button
 											variant="outline"
 											size="icon"
-											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+											class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 											onclick={() => openRemoveDialog(member.userId, member.username)}
 											title="Remove member"
 										>
@@ -325,7 +325,7 @@
 											type="submit"
 											variant="outline"
 											size="icon"
-											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+											class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 											title="Cancel invitation"
 										>
 											<Trash2 class="h-4 w-4" />

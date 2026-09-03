@@ -58,7 +58,7 @@
 		{#if recipe.recipeCategoryDescription}
 			<Badge
 				variant="secondary"
-				class="absolute top-3 left-3 bg-white/15 dark:bg-white/10 backdrop-blur-md text-white text-xs border-white/20"
+				class="absolute top-3 left-3 bg-white/15 dark:bg-white/10 backdrop-blur-md backdrop-saturate-150 text-white text-xs border-white/20"
 			>
 				{recipe.recipeCategoryDescription}
 			</Badge>

@@ -17,7 +17,7 @@
 
 <div
 	class={cn(
-		'glass-alert relative overflow-hidden rounded-xl border border-white/25 dark:border-zinc-700/40 bg-white/50 dark:bg-zinc-800/40 backdrop-blur-xl backdrop-saturate-150 shadow-lg p-4 flex items-center gap-4',
+		'glass-panel relative overflow-hidden p-4 flex items-center gap-4',
 		className
 	)}
 >
@@ -41,10 +41,6 @@
 </div>
 
 <style>
-	.glass-alert {
-		position: relative;
-	}
-
 	.glass-alert-shimmer {
 		position: absolute;
 		inset: 0;

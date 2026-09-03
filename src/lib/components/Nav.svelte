@@ -105,7 +105,7 @@
 </script>
 
 <!-- Mobile Top Logo (visible on small screens) -->
-<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
+<div class="mobile-logo-header glass-nav flex md:hidden" class:header-hidden={!headerVisible}>
 	<Sheet.Root bind:open={mobileMenuOpen}>
 		<Sheet.Trigger
 			class="relative z-10 w-8 h-8 flex items-center justify-center cursor-pointer"
@@ -300,7 +300,7 @@
 <nav class="mobile-nav-container flex md:hidden" class:nav-hidden={keyboardOpen}>
 	<!-- thin progress line above the pill — feedback near the thumb when tapping the bottom nav -->
 	<NavigationProgress variant="bottom" />
-	<div class="mobile-nav-pill">
+	<div class="mobile-nav-pill glass-nav-pill">
 		{#each items as item}
 			<a
 				href={item.href}
@@ -315,7 +315,7 @@
 </nav>
 
 <!-- Desktop Top Navigation (visible on medium+ screens) -->
-<nav class="desktop-nav hidden md:block">
+<nav class="desktop-nav glass-nav hidden md:block">
 	<div class="mx-auto flex max-w-7xl items-center px-4">
 		<!-- Logo (left) — flex-1 keeps the center pill balanced against the wider right side -->
 		<div class="flex flex-1 justify-start">
@@ -325,7 +325,7 @@
 		</div>
 
 		<!-- Center nav pill -->
-		<div class="desktop-nav-pill">
+		<div class="desktop-nav-pill glass-nav-pill">
 			{#each items as item}
 				<a href={item.href} class="desktop-nav-item {isActive(item.href) ? 'active' : ''}">
 					<item.icon class="h-4 w-4" />
@@ -385,10 +385,7 @@
 		   safe-area inset is 0 (i.e. non-pwa safari) */
 		min-height: calc(4rem + env(safe-area-inset-top, 0px));
 		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
-		backdrop-filter: blur(20px) saturate(1.5);
-		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+		/* glass comes from the glass-nav tier (frosted default); this owns only layout */
 		transition: transform 0.3s ease;
 	}
 
@@ -405,10 +402,6 @@
 		transform: translateY(-100%);
 	}
 
-	:global(.dark) .mobile-logo-header {
-		background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(24, 24, 27, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	}
 
 	/* mobile bottom nav container */
 	.mobile-nav-container {
@@ -429,6 +422,7 @@
 	}
 
 	/* mobile main nav pill */
+	/* glass comes from the glass-nav-pill utility; this owns only layout */
 	.mobile-nav-pill {
 		display: flex;
 		align-items: center;
@@ -437,31 +431,6 @@
 		padding: 0.375rem;
 		border-radius: 9999px;
 		width: 100%;
-		background: linear-gradient(
-			135deg,
-			rgba(255, 255, 255, 0.7) 0%,
-			rgba(253, 242, 248, 0.6) 50%,
-			rgba(245, 243, 255, 0.6) 100%
-		);
-		backdrop-filter: blur(20px) saturate(1.5);
-		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.08),
-			inset 0 1px 0 rgba(255, 255, 255, 0.4);
-	}
-
-	:global(.dark) .mobile-nav-pill {
-		background: linear-gradient(
-			135deg,
-			rgba(39, 39, 42, 0.7) 0%,
-			rgba(50, 30, 40, 0.6) 50%,
-			rgba(40, 30, 50, 0.6) 100%
-		);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.1);
 	}
 
 	/* mobile nav item */
@@ -517,53 +486,22 @@
 	}
 
 	/* desktop top nav */
+	/* glass comes from the glass-nav tier (frosted default); this owns only layout */
 	.desktop-nav {
 		position: sticky;
 		top: 0;
 		z-index: 50;
 		width: 100%;
 		padding: 0.75rem 0;
-		backdrop-filter: blur(20px) saturate(1.5);
-		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 	}
 
-	:global(.dark) .desktop-nav {
-		background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(24, 24, 27, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	}
-
-	/* desktop nav pill */
+	/* glass comes from the glass-nav-pill utility; this owns only layout */
 	.desktop-nav-pill {
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.375rem;
 		border-radius: 9999px;
-		background: linear-gradient(
-			135deg,
-			rgba(255, 255, 255, 0.6) 0%,
-			rgba(253, 242, 248, 0.5) 50%,
-			rgba(245, 243, 255, 0.5) 100%
-		);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		box-shadow:
-			0 4px 16px rgba(0, 0, 0, 0.06),
-			inset 0 1px 0 rgba(255, 255, 255, 0.4);
-	}
-
-	:global(.dark) .desktop-nav-pill {
-		background: linear-gradient(
-			135deg,
-			rgba(39, 39, 42, 0.6) 0%,
-			rgba(50, 30, 40, 0.5) 50%,
-			rgba(40, 30, 50, 0.5) 100%
-		);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow:
-			0 4px 16px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.1);
 	}
 
 	/* desktop nav item */

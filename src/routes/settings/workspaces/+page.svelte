@@ -322,7 +322,7 @@
 												variant="outline"
 												size="icon"
 												disabled
-												class="h-8 w-8 opacity-40"
+												class="opacity-40"
 												title={isGlobalWorkspace(workspace)
 													? 'Cannot modify the global workspace'
 													: 'Cannot modify the workspace you are currently in'}
@@ -334,7 +334,7 @@
 												variant="outline"
 												size="icon"
 												disabled
-												class="h-8 w-8 opacity-40"
+												class="opacity-40"
 												title={isGlobalWorkspace(workspace)
 													? 'Cannot delete the global workspace'
 													: 'Cannot delete the workspace you are currently in'}
@@ -347,7 +347,7 @@
 											<Button
 												variant="outline"
 												size="icon"
-												class="h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white"
+												class="bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white"
 												onclick={() => openEditDialog(workspace)}
 												title="Edit workspace"
 											>
@@ -357,7 +357,7 @@
 											<Button
 												variant="outline"
 												size="icon"
-												class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+												class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 												onclick={() => openDeleteDialog(workspace)}
 												title="Delete workspace"
 											>
