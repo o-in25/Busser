@@ -21,7 +21,8 @@
 	let { children, class: className, ...rest }: AnchorProps | ButtonProps | DivProps = $props();
 </script>
 
-<Badge size="lg"
+<Badge
+	size="lg"
 	class={cn('relative', $workspaceSwitching && 'pointer-events-none', className)}
 	{...rest as any}
 >

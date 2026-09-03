@@ -706,9 +706,7 @@
 									variant="product"
 									class="h-full w-full"
 								/>
-								<Badge
-																		class="absolute top-3 left-3 px-2.5 py-0.5 text-xs font-semibold"
-								>
+								<Badge class="absolute top-3 left-3 px-2.5 py-0.5 text-xs font-semibold">
 									{item.categoryName}
 								</Badge>
 								{#if impact > 0}

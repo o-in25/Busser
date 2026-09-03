@@ -95,9 +95,7 @@
 	</div>
 
 	<!-- sticky glass footer -->
-	<div
-		class="glass-panel sticky bottom-4 z-10 mb-4 mt-8 flex items-center gap-3 px-2 py-3 sm:px-3"
-	>
+	<div class="glass-panel sticky bottom-4 z-10 mb-4 mt-8 flex items-center gap-3 px-2 py-3 sm:px-3">
 		{#if currentStep === 0}
 			<Button type="button" variant="outline" class="rounded-full" onclick={() => goto(cancelHref)}>
 				<X class="mr-1 h-4 w-4" /> Cancel

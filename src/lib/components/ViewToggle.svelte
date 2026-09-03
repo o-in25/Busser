@@ -22,9 +22,7 @@
 	};
 </script>
 
-<div
-	class="glass-control hidden sm:flex items-center rounded-lg overflow-hidden"
->
+<div class="glass-control hidden sm:flex items-center rounded-lg overflow-hidden">
 	{#each modes as mode}
 		{@const Icon = icons[mode]}
 		<button

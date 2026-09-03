@@ -15,7 +15,8 @@
 					'border border-white/40 dark:border-white/[0.12] bg-white/50 dark:bg-white/[0.08] backdrop-blur-md backdrop-saturate-150 text-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:bg-white/70 dark:hover:bg-white/[0.14] hover:border-primary/40 hover:text-primary',
 				secondary:
 					'border border-white/30 dark:border-white/[0.1] bg-secondary/20 dark:bg-secondary/20 backdrop-blur-md backdrop-saturate-150 text-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] hover:bg-secondary/30 dark:hover:bg-secondary/30 hover:border-primary/40',
-				ghost: 'text-foreground hover:bg-white/40 dark:hover:bg-white/[0.10] hover:backdrop-blur-md hover:backdrop-saturate-150',
+				ghost:
+					'text-foreground hover:bg-white/40 dark:hover:bg-white/[0.10] hover:backdrop-blur-md hover:backdrop-saturate-150',
 				link: 'text-primary underline-offset-4 hover:underline',
 				// amber everyday variant for active/featured toggles
 				warning:

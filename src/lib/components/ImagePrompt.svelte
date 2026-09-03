@@ -262,9 +262,7 @@
 	</div>
 
 	<!-- action buttons -->
-	<div
-		class="glass-surface flex flex-col sm:flex-row gap-3 p-4"
-	>
+	<div class="glass-surface flex flex-col sm:flex-row gap-3 p-4">
 		<!-- generate button -->
 		<Button
 			type="button"

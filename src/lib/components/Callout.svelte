@@ -15,12 +15,7 @@
 	} = $props();
 </script>
 
-<div
-	class={cn(
-		'glass-panel relative overflow-hidden p-4 flex items-center gap-4',
-		className
-	)}
->
+<div class={cn('glass-panel relative overflow-hidden p-4 flex items-center gap-4', className)}>
 	<div class="glass-alert-shimmer"></div>
 
 	{#if icon}

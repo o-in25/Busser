@@ -402,7 +402,6 @@
 		transform: translateY(-100%);
 	}
 
-
 	/* mobile bottom nav container */
 	.mobile-nav-container {
 		position: fixed;

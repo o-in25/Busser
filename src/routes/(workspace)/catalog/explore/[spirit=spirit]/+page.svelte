@@ -193,7 +193,8 @@
 
 			<!-- Mobile buttons inside hero -->
 			<div class="flex gap-2 md:hidden">
-				<Button variant="secondary"
+				<Button
+					variant="secondary"
 					href="/catalog/explore"
 					size="sm"
 					class="flex-1 justify-center whitespace-nowrap"

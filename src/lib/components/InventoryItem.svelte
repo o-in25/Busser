@@ -288,9 +288,7 @@
 
 		<!-- Flavor Profile -->
 		{#if hasFlavorProfile}
-			<div
-				class="glass-surface p-3 space-y-2.5"
-			>
+			<div class="glass-surface p-3 space-y-2.5">
 				<h3 class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
 					Flavor Profile
 				</h3>

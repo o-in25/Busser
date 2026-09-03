@@ -49,9 +49,7 @@
 		style="bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem)"
 		transition:fly={{ y: 24, duration: 300 }}
 	>
-		<div
-			class="glass-panel relative flex w-full max-w-md items-center gap-3 overflow-hidden p-4"
-		>
+		<div class="glass-panel relative flex w-full max-w-md items-center gap-3 overflow-hidden p-4">
 			<div class="shrink-0 rounded-lg bg-primary/10 p-2 text-primary">
 				<!-- ios share glyph -->
 				<svg

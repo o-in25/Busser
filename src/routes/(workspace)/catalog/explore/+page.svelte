@@ -142,7 +142,8 @@
 	<!-- Smart Action Pills -->
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		{#if popularSpirit}
-			<Badge size="lg"
+			<Badge
+				size="lg"
 				href="/catalog/explore/{idToSlug[popularSpirit.recipeCategoryId] ??
 					popularSpirit.recipeCategoryId}"
 				class="whitespace-nowrap"

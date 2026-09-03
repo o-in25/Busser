@@ -128,9 +128,7 @@
 		</div>
 	{:else}
 		<!-- Toggle variant (default) -->
-		<div
-			class="glass-track grid grid-cols-2 sm:flex rounded-full p-0.5 gap-0.5"
-		>
+		<div class="glass-track grid grid-cols-2 sm:flex rounded-full p-0.5 gap-0.5">
 			{#each methods as method}
 				{@const isSelected = method.recipeTechniqueDescriptionId === value}
 				{@const MethodIcon = iconMap[method.recipeTechniqueDescriptionText] || Martini}

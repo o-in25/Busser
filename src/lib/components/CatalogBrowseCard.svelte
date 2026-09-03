@@ -256,9 +256,7 @@
 			{/if}
 
 			<!-- Glass surface -->
-			<div
-				class="glass-card glass-card-hover relative flex items-center gap-3 p-3"
-			>
+			<div class="glass-card glass-card-hover relative flex items-center gap-3 p-3">
 				<!-- Thumbnail with verdict overlay -->
 				<div
 					class="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-md ring-1 ring-black/5 dark:ring-white/10"

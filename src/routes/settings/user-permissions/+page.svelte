@@ -173,11 +173,7 @@
 										maxlength={10}
 										class="h-8 text-xs"
 									/>
-									<Button
-										type="submit"
-										size="sm"
-										disabled={!newRoleName.trim() || isCreatingRole}
-									>
+									<Button type="submit" size="sm" disabled={!newRoleName.trim() || isCreatingRole}>
 										<Plus class="h-3.5 w-3.5" />
 									</Button>
 								</div>

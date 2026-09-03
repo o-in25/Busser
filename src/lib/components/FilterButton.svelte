@@ -110,9 +110,7 @@
 					{#if viewModes && activeView && onViewChange}
 						<div class="flex flex-col gap-1.5">
 							<span class="text-sm font-medium text-muted-foreground">View</span>
-							<div
-								class="glass-control flex items-center rounded-lg overflow-hidden w-fit"
-							>
+							<div class="glass-control flex items-center rounded-lg overflow-hidden w-fit">
 								{#each viewModes as mode}
 									{@const Icon = viewIcons[mode]}
 									<button
