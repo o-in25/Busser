@@ -264,7 +264,7 @@
 						href="https://instagram.com/busserapp"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-muted-foreground hover:text-foreground transition-colors"
+						class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 						aria-label="Instagram"
 					>
 						<Instagram class="h-5 w-5" />
@@ -273,7 +273,7 @@
 						href="https://www.facebook.com/profile.php?id=61588019103189"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-muted-foreground hover:text-foreground transition-colors"
+						class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 						aria-label="Facebook"
 					>
 						<Facebook class="h-5 w-5" />
@@ -282,7 +282,7 @@
 						href="https://x.com/busserapp"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-muted-foreground hover:text-foreground transition-colors"
+						class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 						aria-label="Twitter"
 					>
 						<Twitter class="h-5 w-5" />
@@ -455,8 +455,9 @@
 	.mobile-nav-item.active {
 		background: rgba(232, 25, 95, 0.25);
 		color: rgba(232, 25, 95, 1);
-		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
-		border: 1px solid rgba(232, 25, 95, 0.3);
+		box-shadow:
+			inset 0 0 0 1px rgba(232, 25, 95, 0.3),
+			0 0 12px rgba(248, 78, 128, 0.25);
 	}
 
 	:global(.dark) .mobile-nav-item {
@@ -469,9 +470,9 @@
 
 	:global(.dark) .mobile-nav-item.active {
 		background: rgba(248, 78, 128, 0.2);
-		border: 1px solid rgba(248, 78, 128, 0.3);
 		color: rgba(248, 78, 128, 1);
 		box-shadow:
+			inset 0 0 0 1px rgba(248, 78, 128, 0.3),
 			0 0 12px rgba(248, 78, 128, 0.25),
 			0 0 24px rgba(248, 78, 128, 0.15),
 			inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -525,8 +526,11 @@
 	.desktop-nav-item.active {
 		background: rgba(232, 25, 95, 0.25);
 		color: rgba(232, 25, 95, 1);
-		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
-		border: 1px solid rgba(232, 25, 95, 0.3);
+		/* ring via inset shadow, not border — a border widens the active item and shifts the
+		   content-sized nav pill when the active tab changes */
+		box-shadow:
+			inset 0 0 0 1px rgba(232, 25, 95, 0.3),
+			0 0 12px rgba(248, 78, 128, 0.25);
 	}
 
 	:global(.dark) .desktop-nav-item {
@@ -540,9 +544,10 @@
 
 	:global(.dark) .desktop-nav-item.active {
 		background: rgba(248, 78, 128, 0.2);
-		border: 1px solid rgba(248, 78, 128, 0.3);
 		color: rgba(248, 78, 128, 1);
-		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
+		box-shadow:
+			inset 0 0 0 1px rgba(248, 78, 128, 0.3),
+			0 0 12px rgba(248, 78, 128, 0.25);
 	}
 
 	/* desktop avatar button */

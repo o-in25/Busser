@@ -130,7 +130,7 @@
 	]}
 >
 	{#snippet action()}
-		<Button variant="secondary" onclick={surpriseMe} size="sm" class="shrink-0">
+		<Button onclick={surpriseMe} size="sm" class="shrink-0">
 			<Shuffle class="h-4 w-4 mr-1" />
 			Surprise Me
 		</Button>
@@ -183,7 +183,7 @@
 			class="pl-10 rounded-full"
 		/>
 	</div>
-	<Button type="submit" size="sm">Search</Button>
+	<Button variant="primary" type="submit" size="sm">Search</Button>
 </form>
 
 {#if $workspaceSwitching}
@@ -406,7 +406,7 @@
 				<p class="text-muted-foreground text-sm mb-4 max-w-xs">
 					Create a new cocktail recipe from your inventory ingredients.
 				</p>
-				<Button href="/catalog/add">
+				<Button variant="primary" href="/catalog/add">
 					<Plus class="h-4 w-4 mr-2" />
 					Add Recipe
 				</Button>

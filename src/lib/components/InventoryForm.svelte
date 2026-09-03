@@ -361,7 +361,11 @@
 			submitting={disabled}
 			lastSaved={draftLastSaved}
 			cancelHref="/inventory"
-			eyebrow={action === 'add' ? 'New Item' : 'Edit Item'}
+			title={action === 'add' ? 'Add New Product' : 'Edit Product'}
+			subtitle={action === 'add'
+				? 'Add a new item to your inventory'
+				: `Update ${product?.productName ?? 'product'}`}
+			backHref="/inventory"
 			submitLabel="Save Item"
 		>
 			{#snippet children({ step })}
@@ -653,7 +657,9 @@
 			</Dialog.Header>
 			<Dialog.Footer>
 				<Button variant="outline" onclick={() => (confirmOpen = false)}>Cancel</Button>
-				<Button onclick={() => confirmForm?.requestSubmit()}>Add to inventory</Button>
+				<Button variant="primary" onclick={() => confirmForm?.requestSubmit()}
+					>Add to inventory</Button
+				>
 			</Dialog.Footer>
 		</Dialog.Content>
 	</Dialog.Root>

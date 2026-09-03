@@ -161,6 +161,7 @@
 		<Dialog.Footer>
 			<Button type="button" variant="outline" onclick={() => (open = false)}>Cancel</Button>
 			<Button
+				variant="primary"
 				type="button"
 				onclick={handleGenerate}
 				disabled={mode === 'custom' && !customPrompt.trim()}

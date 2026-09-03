@@ -58,7 +58,7 @@
 							</Table.Cell>
 							<Table.Cell class="hidden lg:table-cell text-muted-foreground">
 								{#if supplier.supplierPhone}
-									<a href="tel:{supplier.supplierPhone}" class="hover:text-foreground">
+									<a href="tel:{supplier.supplierPhone}" class="focus-ring hover:text-foreground">
 										{supplier.supplierPhone}
 									</a>
 								{:else}
@@ -71,7 +71,7 @@
 										href={supplier.supplierWebsiteUrl}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+										class="focus-ring inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
 									>
 										<ExternalLink class="h-3.5 w-3.5" />
 										Visit

@@ -137,7 +137,7 @@
 				<Table.Row class="hover:bg-transparent">
 					<Table.Head class="pl-6">
 						<button
-							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							class="focus-ring flex items-center gap-1.5 hover:text-foreground transition-colors"
 							onclick={() => toggleSort('username')}
 						>
 							User
@@ -151,7 +151,7 @@
 					</Table.Head>
 					<Table.Head class="hidden sm:table-cell">
 						<button
-							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							class="focus-ring flex items-center gap-1.5 hover:text-foreground transition-colors"
 							onclick={() => toggleSort('email')}
 						>
 							Email
@@ -165,7 +165,7 @@
 					</Table.Head>
 					<Table.Head class="hidden lg:table-cell">
 						<button
-							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							class="focus-ring flex items-center gap-1.5 hover:text-foreground transition-colors"
 							onclick={() => toggleSort('createdDate')}
 						>
 							Joined
@@ -179,7 +179,7 @@
 					</Table.Head>
 					<Table.Head class="hidden md:table-cell">
 						<button
-							class="flex items-center gap-1.5 hover:text-foreground transition-colors"
+							class="focus-ring flex items-center gap-1.5 hover:text-foreground transition-colors"
 							onclick={() => toggleSort('lastActivityDate')}
 						>
 							Last Activity

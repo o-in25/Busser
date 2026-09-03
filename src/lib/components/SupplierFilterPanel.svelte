@@ -84,7 +84,7 @@
 	{#if hasNonDefaultFilters}
 		<button
 			onclick={onReset}
-			class="text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
+			class="focus-ring text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 		>
 			Reset filters
 		</button>

@@ -30,7 +30,7 @@ export class InventoryRepository extends BaseRepository {
 	async findAll(
 		workspaceId: string,
 		currentPage: number,
-		perPage: number = 25,
+		perPage: number = 24,
 		filter: (Partial<Product> & { stockFilter?: string }) | null = null,
 		sort: string = 'name-asc'
 	): Promise<PaginationResult<Product[]>> {
@@ -852,7 +852,7 @@ export class InventoryRepository extends BaseRepository {
 	async findAllCategories(
 		workspaceId: string,
 		currentPage: number = 1,
-		perPage: number = 10,
+		perPage: number = 24,
 		search: string | null = null
 	): Promise<
 		PaginationResult<(Category & { productCount: number; categoryGroupName: string | null })[]>

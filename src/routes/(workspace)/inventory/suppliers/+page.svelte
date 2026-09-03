@@ -120,7 +120,7 @@
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
-			<Button size="sm" href="/inventory/suppliers/add" class="shrink-0">
+			<Button variant="primary" size="sm" href="/inventory/suppliers/add" class="shrink-0">
 				<Plus class="h-4 w-4 mr-1" />
 				Add Supplier
 			</Button>
@@ -201,7 +201,7 @@
 				Add your first supplier — find a store nearby or enter the details yourself.
 			</p>
 			{#if canModify}
-				<Button onclick={() => goto('/inventory/suppliers/add')}>
+				<Button variant="primary" onclick={() => goto('/inventory/suppliers/add')}>
 					<Plus class="h-4 w-4 mr-2" />
 					Add Supplier
 				</Button>

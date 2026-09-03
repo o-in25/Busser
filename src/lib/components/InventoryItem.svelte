@@ -188,7 +188,7 @@
 						<div class="flex items-center gap-2 mt-1.5 flex-wrap">
 							<Popover.Root>
 								<Popover.Trigger
-									class="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+									class="focus-ring flex items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
 								>
 									{product.categoryName}
 									<Info class="w-3 h-3 ml-1" />
@@ -205,7 +205,7 @@
 										<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
 										<a
 											href="/inventory/category/{product.categoryId}/edit"
-											class="inline-flex items-center text-sm font-medium text-primary hover:underline"
+											class="focus-ring inline-flex items-center text-sm font-medium text-primary hover:underline"
 										>
 											Edit Category <ArrowRight class="ml-1 h-3 w-3" />
 										</a>

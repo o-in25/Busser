@@ -128,13 +128,11 @@
 	</div>
 	{#if show}
 		<div class="relative">
-			<div
-				class="absolute w-full max-h-44 overflow-y-auto z-50 mt-1 rounded-md border bg-popover text-popover-foreground shadow-md"
-			>
+			<div class="glass-dropdown absolute w-full max-h-44 overflow-y-auto z-50 mt-1 p-1">
 				{#each search as item}
 					<button
 						type="button"
-						class="w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
+						class="w-full rounded-lg px-3 py-2 text-left text-sm text-foreground hover:bg-primary-500 hover:text-white cursor-pointer transition-colors"
 						onmousedown={() => handleClick(item)}
 					>
 						{item.name}

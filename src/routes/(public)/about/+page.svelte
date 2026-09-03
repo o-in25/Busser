@@ -289,7 +289,10 @@
 <div class="text-center mt-8 pt-6 border-t border-border">
 	<p class="text-sm text-muted-foreground">
 		Have questions or feedback? Contact us at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline font-medium">
+		<a
+			href="mailto:support@busserapp.com"
+			class="focus-ring text-primary hover:underline font-medium"
+		>
 			support@busserapp.com
 		</a>
 	</p>

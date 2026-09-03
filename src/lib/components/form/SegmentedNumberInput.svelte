@@ -92,7 +92,7 @@
 <div class={cn('relative space-y-2', className)}>
 	<!-- h-10 to match Select triggers and text inputs for a consistent field scale -->
 	<div
-		class="glass-surface flex h-10 items-stretch overflow-hidden rounded-xl transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/30 dark:focus-within:shadow-glow-cyan"
+		class="glass-surface flex h-10 items-stretch overflow-hidden rounded-xl transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/30"
 	>
 		<button
 			type="button"

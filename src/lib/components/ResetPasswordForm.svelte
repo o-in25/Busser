@@ -21,5 +21,5 @@
 		<Label for="passwordConfirm" class="mb-2">Confirm New Password</Label>
 		<Input type="password" name="passwordConfirm" placeholder="•••••" required />
 	</div>
-	<Button type="submit">Reset Password</Button>
+	<Button variant="primary" type="submit">Reset Password</Button>
 </form>

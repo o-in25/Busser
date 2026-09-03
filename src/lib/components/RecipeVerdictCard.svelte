@@ -119,7 +119,10 @@
 						A 0–10 score reflecting how well-crafted and balanced a cocktail is, based on sweetness,
 						dryness, strength, and versatility.
 					</p>
-					<a href="/catalog/explore#verdict" class="text-xs text-primary hover:underline">
+					<a
+						href="/catalog/explore#verdict"
+						class="focus-ring text-xs text-primary hover:underline"
+					>
 						Learn more
 					</a>
 				</Popover.Content>

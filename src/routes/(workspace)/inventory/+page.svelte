@@ -44,7 +44,7 @@
 	let selectedSupplier = $state(data.filters?.supplierId || 'all');
 	let stockFilter = $state(data.filters?.stockFilter || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
-	let perPage = $state(String(data.filters?.perPage || 10));
+	let perPage = $state(String(data.filters?.perPage || 24));
 
 	// Drawer state
 	let drawerOpen = $state(false);
@@ -60,7 +60,7 @@
 		if (selectedSupplier && selectedSupplier !== 'all') count++;
 		if (stockFilter && stockFilter !== 'all') count++;
 		if (sortOption !== 'name-asc') count++;
-		if (perPage !== '10') count++;
+		if (perPage !== '24') count++;
 		return count;
 	});
 
@@ -233,7 +233,7 @@
 		if (supplier && supplier !== 'all') params.set('supplierId', String(supplier));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
-		if (pp && String(pp) !== '10') params.set('perPage', String(pp));
+		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -315,14 +315,14 @@
 		selectedSupplier = 'all';
 		stockFilter = 'all';
 		sortOption = 'name-asc';
-		perPage = '10';
+		perPage = '24';
 		goto(
 			buildUrl({
 				categoryGroupId: 'all',
 				supplierId: 'all',
 				stockFilter: 'all',
 				sort: 'name-asc',
-				perPage: '10',
+				perPage: '24',
 				page: 1,
 			})
 		);
@@ -350,7 +350,7 @@
 		selectedSupplier = data.filters?.supplierId || 'all';
 		stockFilter = data.filters?.stockFilter || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
-		perPage = String(data.filters?.perPage || 10);
+		perPage = String(data.filters?.perPage || 24);
 	});
 </script>
 
@@ -362,7 +362,7 @@
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
-			<Button size="sm" href="{basePath}/add" class="shrink-0">
+			<Button variant="primary" size="sm" href="{basePath}/add" class="shrink-0">
 				<Plus class="h-4 w-4 mr-1" />
 				Add Product
 			</Button>
@@ -391,7 +391,7 @@
 					<button
 						type="button"
 						onclick={clearSearch}
-						class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+						class="focus-ring absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 					>
 						<X class="h-4 w-4" />
 					</button>

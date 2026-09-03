@@ -87,7 +87,7 @@
 				I agree to the
 				<button
 					type="button"
-					class="text-primary underline-offset-4 hover:underline"
+					class="focus-ring text-primary underline-offset-4 hover:underline"
 					onclick={() => (tosDialogOpen = true)}
 				>
 					Terms of Service
@@ -108,6 +108,7 @@
 						Close
 					</Button>
 					<Button
+						variant="primary"
 						type="button"
 						onclick={() => {
 							tosAccepted = true;
@@ -120,7 +121,13 @@
 			</Dialog.Content>
 		</Dialog.Root>
 
-		<Button type="submit" size="lg" class="w-full" disabled={!tosAccepted || !username.trim()}>
+		<Button
+			variant="primary"
+			type="submit"
+			size="lg"
+			class="w-full"
+			disabled={!tosAccepted || !username.trim()}
+		>
 			Get Started
 		</Button>
 	</form>

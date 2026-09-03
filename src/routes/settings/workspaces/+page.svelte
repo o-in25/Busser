@@ -182,7 +182,7 @@
 				Create and manage workspaces for organizing content
 			</p>
 		</div>
-		<Button onclick={() => (createDialogOpen = true)} class="w-fit">
+		<Button variant="primary" onclick={() => (createDialogOpen = true)} class="w-fit">
 			<Plus class="h-4 w-4 mr-2" />
 			Create Workspace
 		</Button>
@@ -445,6 +445,7 @@
 
 					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2">
 						<Button
+							variant="primary"
 							type="submit"
 							class="w-full sm:w-auto"
 							disabled={!preferredChanged || isPreferredSubmitting || data.workspaces.length === 1}
@@ -540,7 +541,7 @@
 				<Button type="button" variant="outline" onclick={() => (createDialogOpen = false)}>
 					Cancel
 				</Button>
-				<Button type="submit">Create</Button>
+				<Button variant="primary" type="submit">Create</Button>
 			</Dialog.Footer>
 		</form>
 	</Dialog.Content>
@@ -618,7 +619,7 @@
 				<Button type="button" variant="outline" onclick={() => (editDialogOpen = false)}>
 					Cancel
 				</Button>
-				<Button type="submit">Save</Button>
+				<Button variant="primary" type="submit">Save</Button>
 			</Dialog.Footer>
 		</form>
 	</Dialog.Content>

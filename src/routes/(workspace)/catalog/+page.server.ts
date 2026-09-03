@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
 
 	const page = parseInt(url.searchParams.get('page') || '1');
-	const perPage = parseInt(url.searchParams.get('perPage') || '10');
+	const perPage = parseInt(url.searchParams.get('perPage') || '24');
 	const search = url.searchParams.get('search') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 	const spiritId = url.searchParams.get('spirit') || '';

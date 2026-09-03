@@ -262,7 +262,7 @@
 				<div class="mt-3 text-center">
 					<a
 						href="/catalog"
-						class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+						class="focus-ring inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
 					>
 						Browse the catalog
 						<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
@@ -656,7 +656,12 @@
 							>
 								Cancel
 							</Button>
-							<Button type="submit" class="w-full sm:w-auto" disabled={isSubmitting}>
+							<Button
+								variant="primary"
+								type="submit"
+								class="w-full sm:w-auto"
+								disabled={isSubmitting}
+							>
 								{#if isSubmitting}
 									<Loader2 class="h-4 w-4 mr-2 animate-spin" />
 									Submitting...
@@ -687,7 +692,7 @@
 					{#if moodSuggestion}
 						<a
 							href="/catalog?mood={moodSuggestion.mood.id}"
-							class="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+							class="focus-ring text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
 						>
 							{moodSuggestion.text}
 							<ArrowRight class="h-4 w-4" />
@@ -843,7 +848,7 @@
 				</div>
 				<a
 					href={browseUrl}
-					class="text-sm text-primary hover:underline hidden md:flex items-center"
+					class="focus-ring text-sm text-primary hover:underline hidden md:flex items-center"
 				>
 					View all
 					<ChevronRight class="h-4 w-4" />
@@ -875,9 +880,7 @@
 							<button
 								class="inline-flex items-center rounded-full h-7 text-xs border border-dashed shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 									transition-all duration-300 ease-out
-									{activeMood === mood.id
-									? 'glass-primary'
-									: 'bg-background/60 backdrop-blur-sm border-border/50'}
+									{activeMood === mood.id ? 'glass-primary' : 'bg-background/60 backdrop-blur-sm border-border/50'}
 									{moodExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
 								onclick={() => {
 									activeMood = activeMood === mood.id ? null : mood.id;
@@ -955,9 +958,7 @@
 				<button
 					class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 						transition-all duration-300 ease-out
-						{sortBy === 'all'
-						? 'glass-primary'
-						: 'bg-background/60 backdrop-blur-sm border-border/50'}
+						{sortBy === 'all' ? 'glass-primary' : 'bg-background/60 backdrop-blur-sm border-border/50'}
 						{spiritExpanded
 						? 'max-w-48 px-3 ml-1.5 opacity-100'
 						: 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
@@ -1055,7 +1056,7 @@
 								: 'There are no recipes in this catalog yet.'}
 						</p>
 						{#if canModify && isOwner}
-							<Button href="/inventory/add" size="sm">
+							<Button variant="primary" href="/inventory/add" size="sm">
 								<Plus class="h-4 w-4 mr-2" />
 								Add Ingredients
 							</Button>

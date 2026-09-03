@@ -131,7 +131,7 @@
 				<Trash2 class="h-4 w-4" />
 				Discard
 			</Button>
-			<Button onclick={restoreDraft} class="flex items-center gap-2">
+			<Button variant="primary" onclick={restoreDraft} class="flex items-center gap-2">
 				<RotateCcw class="h-4 w-4" />
 				Restore
 			</Button>
