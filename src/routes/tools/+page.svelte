@@ -73,7 +73,7 @@
 											href="https://punchdrink.com/articles/super-juice-lime-daiquiri-recipe/"
 											target="_blank"
 											rel="noopener noreferrer"
-											class="text-xs text-primary hover:underline"
+											class="focus-ring text-xs text-primary hover:underline"
 										>
 											Read the article
 										</a>
@@ -81,7 +81,7 @@
 											href="https://www.youtube.com/watch?v=eiNMAm42C8U"
 											target="_blank"
 											rel="noopener noreferrer"
-											class="text-xs text-primary hover:underline"
+											class="focus-ring text-xs text-primary hover:underline"
 										>
 											Watch the video
 										</a>

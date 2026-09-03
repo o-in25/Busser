@@ -97,7 +97,7 @@
 
 		<div class="flex justify-end gap-2">
 			<Button variant="secondary" href={backHref} size="sm">Cancel</Button>
-			<Button type="submit" size="sm" {disabled}>
+			<Button variant="primary" type="submit" size="sm" {disabled}>
 				{disabled ? 'Saving...' : 'Save'}
 			</Button>
 		</div>

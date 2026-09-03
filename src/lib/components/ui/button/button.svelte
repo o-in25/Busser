@@ -7,20 +7,20 @@
 		base: 'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
 		variants: {
 			variant: {
-				// everyday variants are translucent glass (sizing/radius still come from base/size)
-				default: 'glass-primary',
+				// default is neutral glass; primary is the pink CTA (opt-in). colored variants below.
+				default: 'glass-button',
+				primary: 'glass-primary',
 				destructive:
 					'border border-destructive/30 bg-red-600 text-white backdrop-blur-md backdrop-saturate-150 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),0_0_12px_rgba(239,68,68,0.4)] hover:bg-red-700 hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.45),0_0_18px_rgba(239,68,68,0.55)] dark:bg-destructive/25 dark:text-white dark:hover:bg-destructive/40 dark:shadow-[0_0_12px_rgba(239,68,68,0.25)]',
-				outline:
-					'border border-white/40 dark:border-white/[0.12] bg-white/50 dark:bg-white/[0.08] backdrop-blur-md backdrop-saturate-150 text-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:bg-white/70 dark:hover:bg-white/[0.14] hover:border-primary/40 hover:text-primary',
+				outline: 'glass-button',
 				secondary:
 					'border border-white/30 dark:border-white/[0.1] bg-secondary/20 dark:bg-secondary/20 backdrop-blur-md backdrop-saturate-150 text-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] hover:bg-secondary/30 dark:hover:bg-secondary/30 hover:border-primary/40',
 				ghost:
 					'text-foreground hover:bg-white/40 dark:hover:bg-white/[0.10] hover:backdrop-blur-md hover:backdrop-saturate-150',
 				link: 'text-primary underline-offset-4 hover:underline',
-				// amber everyday variant for active/featured toggles
-				warning:
-					'border border-amber-500/30 bg-amber-500 text-zinc-900 backdrop-blur-md backdrop-saturate-150 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),0_0_12px_rgba(245,158,11,0.4)] hover:bg-amber-400 hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.45),0_0_18px_rgba(245,158,11,0.55)] dark:bg-amber-500/25 dark:text-white dark:hover:bg-amber-500/40 dark:shadow-[0_0_12px_rgba(245,158,11,0.25)]',
+				// yellow tertiary tier — pink primary, purple secondary, neon-yellow tertiary
+				tertiary:
+					'border border-neon-yellow-500/30 bg-neon-yellow-500 text-zinc-900 backdrop-blur-md backdrop-saturate-150 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),0_0_12px_rgba(245,197,66,0.4)] hover:bg-neon-yellow-400 hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.45),0_0_18px_rgba(245,197,66,0.55)] dark:bg-neon-yellow-500/25 dark:text-white dark:hover:bg-neon-yellow-500/40 dark:shadow-[0_0_12px_rgba(245,197,66,0.25)]',
 				// marketing cta pill — login/signup/landing only; sizing comes from .glass-cta in app.css
 				cta: 'glass-cta',
 				'cta-primary': 'glass-cta glass-cta-primary',

@@ -39,7 +39,7 @@ export class CatalogRepository extends BaseRepository {
 	async findAll(
 		workspaceId: string,
 		currentPage: number,
-		perPage: number = 25,
+		perPage: number = 24,
 		filter: (Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep>) | null = null,
 		advancedFilter: AdvancedFilter | null = null,
 		includeUnpublished: boolean = false

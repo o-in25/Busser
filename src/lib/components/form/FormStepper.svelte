@@ -6,7 +6,7 @@
 	// lucide icons are legacy component classes, hence `typeof Check` rather than svelte's `Component`
 	type Icon = typeof Check;
 
-	// thin checkmark progress rail — completed steps filled + glow, current ringed, future muted
+	// thin checkmark progress rail — completed steps filled, current ringed, future muted
 	let {
 		steps,
 		currentStep = 0,
@@ -38,8 +38,8 @@
 			aria-current={active ? 'step' : undefined}
 			class={cn(
 				'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all duration-200',
-				done && 'bg-primary text-primary-foreground dark:shadow-glow-cyan',
-				active && 'bg-primary text-primary-foreground ring-2 ring-primary/40 dark:shadow-glow-cyan',
+				done && 'bg-primary text-primary-foreground',
+				active && 'bg-primary text-primary-foreground ring-2 ring-primary/40',
 				!done && !active && 'bg-secondary/20 text-muted-foreground hover:bg-secondary/30'
 			)}
 		>

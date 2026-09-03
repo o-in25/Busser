@@ -63,7 +63,7 @@
 			{#if supplier.supplierPhone}
 				<a
 					href="tel:{supplier.supplierPhone}"
-					class="flex items-center gap-1 hover:text-foreground transition-colors"
+					class="focus-ring flex items-center gap-1 hover:text-foreground transition-colors"
 				>
 					<Phone class="h-3.5 w-3.5" />
 					{supplier.supplierPhone}
@@ -74,7 +74,7 @@
 					href={supplier.supplierWebsiteUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="flex items-center gap-1 hover:text-foreground transition-colors"
+					class="focus-ring flex items-center gap-1 hover:text-foreground transition-colors"
 				>
 					<ExternalLink class="h-3.5 w-3.5" />
 					Website

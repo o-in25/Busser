@@ -146,7 +146,7 @@
 	}
 
 	const inputClasses =
-		'glass-surface flex h-10 w-full px-3 py-2 text-base md:text-sm ring-offset-background placeholder:text-muted-foreground/80 focus-visible:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:shadow-glow-cyan';
+		'glass-surface flex h-10 w-full px-3 py-2 text-base md:text-sm ring-offset-background placeholder:text-muted-foreground/80 focus-visible:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50';
 </script>
 
 <div class="w-full">
@@ -181,7 +181,7 @@
 							type="button"
 							class={cn(
 								'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors',
-								i === activeIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/60'
+								i === activeIndex ? 'glass-primary' : 'hover:bg-white/40 dark:hover:bg-white/[0.08]'
 							)}
 							onmousedown={() => pick(item)}
 							onmouseenter={() => (activeIndex = i)}

@@ -64,7 +64,7 @@
 		{#if hasSearch}
 			<Badge variant="secondary" class="gap-1">
 				Search: "{search}"
-				<button onclick={onClearSearch} class="ml-1 hover:text-destructive">
+				<button onclick={onClearSearch} class="focus-ring ml-1 hover:text-destructive">
 					<X class="h-3 w-3" />
 				</button>
 			</Badge>
@@ -73,7 +73,7 @@
 		{#if hasCategory}
 			<Badge variant="secondary" class="gap-1">
 				Category: {categoryName}
-				<button onclick={onClearCategory} class="ml-1 hover:text-destructive">
+				<button onclick={onClearCategory} class="focus-ring ml-1 hover:text-destructive">
 					<X class="h-3 w-3" />
 				</button>
 			</Badge>
@@ -82,7 +82,7 @@
 		{#if hasSupplier}
 			<Badge variant="secondary" class="gap-1">
 				Supplier: {supplierName}
-				<button onclick={onClearSupplier} class="ml-1 hover:text-destructive">
+				<button onclick={onClearSupplier} class="focus-ring ml-1 hover:text-destructive">
 					<X class="h-3 w-3" />
 				</button>
 			</Badge>
@@ -91,7 +91,7 @@
 		{#if hasStockFilter}
 			<Badge variant="secondary" class="gap-1">
 				Stock: {stockFilterLabels[stockFilter] || stockFilter}
-				<button onclick={onClearStockFilter} class="ml-1 hover:text-destructive">
+				<button onclick={onClearStockFilter} class="focus-ring ml-1 hover:text-destructive">
 					<X class="h-3 w-3" />
 				</button>
 			</Badge>
@@ -99,7 +99,7 @@
 
 		<button
 			onclick={onClearAll}
-			class="text-sm text-muted-foreground hover:text-foreground underline"
+			class="focus-ring text-sm text-muted-foreground hover:text-foreground underline"
 		>
 			Clear all
 		</button>

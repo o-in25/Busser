@@ -250,7 +250,12 @@
 
 		<!-- submit -->
 		<div class="flex justify-end">
-			<Button type="submit" disabled={!allRulesMet || !passwordsMatch} class="w-full sm:w-auto">
+			<Button
+				variant="primary"
+				type="submit"
+				disabled={!allRulesMet || !passwordsMatch}
+				class="w-full sm:w-auto"
+			>
 				Create
 			</Button>
 		</div>

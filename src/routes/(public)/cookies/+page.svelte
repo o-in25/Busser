@@ -14,7 +14,9 @@
 	<p class="text-muted-foreground mb-4">
 		This Cookie Policy explains how Busser ("Company," "we," "us," and "our") uses cookies and
 		similar technologies to recognize you when you visit our website at
-		<a href="https://busserapp.com" class="text-primary hover:underline">https://busserapp.com</a>
+		<a href="https://busserapp.com" class="focus-ring text-primary hover:underline"
+			>https://busserapp.com</a
+		>
 		("Website"). It explains what these technologies are and why we use them, as well as your rights to
 		control our use of them.
 	</p>
@@ -94,7 +96,7 @@
 				href="https://support.google.com/chrome/answer/95647#zippy=%2Callow-or-block-cookies"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">Chrome</a
+				class="focus-ring text-primary hover:underline">Chrome</a
 			>
 		</li>
 		<li class="mb-2">
@@ -102,7 +104,7 @@
 				href="https://support.microsoft.com/en-us/windows/delete-and-manage-cookies-168dab11-0753-043d-7c16-ede5947fc64d"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">Internet Explorer</a
+				class="focus-ring text-primary hover:underline">Internet Explorer</a
 			>
 		</li>
 		<li class="mb-2">
@@ -110,7 +112,7 @@
 				href="https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop?redirectslug=enable-and-disable-cookies-website-preferences&redirectlocale=en-US"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">Firefox</a
+				class="focus-ring text-primary hover:underline">Firefox</a
 			>
 		</li>
 		<li class="mb-2">
@@ -118,7 +120,7 @@
 				href="https://support.apple.com/en-ie/guide/safari/sfri11471/mac"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">Safari</a
+				class="focus-ring text-primary hover:underline">Safari</a
 			>
 		</li>
 		<li class="mb-2">
@@ -126,7 +128,7 @@
 				href="https://support.microsoft.com/en-us/windows/microsoft-edge-browsing-data-and-privacy-bb8174ba-9d73-dcf2-9b4a-c582b4e640dd"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">Edge</a
+				class="focus-ring text-primary hover:underline">Edge</a
 			>
 		</li>
 		<li class="mb-2">
@@ -134,7 +136,7 @@
 				href="https://help.opera.com/en/latest/web-preferences/"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">Opera</a
+				class="focus-ring text-primary hover:underline">Opera</a
 			>
 		</li>
 	</ul>
@@ -150,7 +152,7 @@
 				href="http://www.aboutads.info/choices/"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">Digital Advertising Alliance</a
+				class="focus-ring text-primary hover:underline">Digital Advertising Alliance</a
 			>
 		</li>
 		<li class="mb-2">
@@ -158,7 +160,7 @@
 				href="https://youradchoices.ca/"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">Digital Advertising Alliance of Canada</a
+				class="focus-ring text-primary hover:underline">Digital Advertising Alliance of Canada</a
 			>
 		</li>
 		<li class="mb-2">
@@ -166,7 +168,8 @@
 				href="http://www.youronlinechoices.com/"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-primary hover:underline">European Interactive Digital Advertising Alliance</a
+				class="focus-ring text-primary hover:underline"
+				>European Interactive Digital Advertising Alliance</a
 			>
 		</li>
 	</ul>
@@ -207,13 +210,13 @@
 			href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager07.html"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="text-primary hover:underline">Website Storage Settings Panel</a
+			class="focus-ring text-primary hover:underline">Website Storage Settings Panel</a
 		>. You can also control Flash Cookies by going to the
 		<a
 			href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager03.html"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="text-primary hover:underline">Global Storage Settings Panel</a
+			class="focus-ring text-primary hover:underline">Global Storage Settings Panel</a
 		>
 		and following the instructions (which may include instructions that explain, for example, how to delete
 		existing Flash Cookies (referred to "information" on the Macromedia site), how to prevent Flash LSOs
@@ -266,7 +269,7 @@
 
 	<p class="text-muted-foreground mb-4">
 		If you have any questions about our use of cookies or other technologies, please email us at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>
 		or by post to:

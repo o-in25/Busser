@@ -434,7 +434,11 @@
 			submitting={disabled}
 			lastSaved={draftLastSaved}
 			cancelHref="/catalog"
-			eyebrow="New Recipe"
+			title={isAddMode ? 'Add New Recipe' : 'Edit Recipe'}
+			subtitle={isAddMode
+				? 'Create a new cocktail recipe for your catalog'
+				: `Update ${recipe.recipeName ?? 'recipe'}`}
+			backHref={isAddMode ? '/catalog' : `/catalog/${recipe.recipeId}`}
 			submitLabel="Save Recipe"
 		>
 			{#snippet children({ step })}

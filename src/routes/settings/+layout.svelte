@@ -25,9 +25,7 @@
 		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-muted-foreground rounded-xl hover:bg-white/10 dark:hover:bg-white/[0.05] hover:text-foreground transition-all duration-200';
 </script>
 
-<nav
-	class="flex md:inline-flex rounded-xl backdrop-blur-xl bg-white/10 dark:bg-white/[0.06] shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 mb-4"
->
+<nav class="glass-track flex md:inline-flex rounded-xl p-0.5 mb-4">
 	<ul class="flex w-full flex-wrap md:flex-nowrap space-x-1 rtl:space-x-reverse">
 		<li class="group flex-1" role="presentation">
 			<a

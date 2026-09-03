@@ -6,6 +6,7 @@
 		Expand,
 		FlaskConical,
 		GlassWater,
+		Info,
 		Martini,
 		Percent,
 		X,
@@ -23,6 +24,7 @@
 	import type { View } from '$lib/types';
 	import type { RecipeInsightLinks, RecipeInsightsOutput } from '$lib/types/generators';
 
+	import RecipeDetailSheet from './RecipeDetailSheet.svelte';
 	import RecipeIngredientStep from './RecipeIngredientStep.svelte';
 	import RecipeInsights from './RecipeInsights.svelte';
 	import RecipeVerdictCard from './RecipeVerdictCard.svelte';
@@ -36,11 +38,13 @@
 		recipeSteps: initialRecipeSteps,
 		stepExtras,
 		actions,
+		imageActions,
 	}: {
 		recipe: View.BasicRecipe;
 		recipeSteps: View.BasicRecipeStep[];
 		stepExtras?: StepExtras[];
 		actions?: Snippet;
+		imageActions?: Snippet;
 	} = $props();
 
 	// resolve per-step image/substitute data by step id (absent in preview contexts)
@@ -59,8 +63,18 @@
 	// steps with checked state
 	let steps = $derived(initialRecipeSteps.map((step) => ({ ...step, checked: false })));
 
-	// Lightbox state
+	// Lightbox state (desktop) + details sheet state (mobile)
 	let lightboxOpen = $state(false);
+	let detailSheetOpen = $state(false);
+	let isMobile = $state(false);
+
+	onMount(() => {
+		const mq = window.matchMedia('(max-width: 767px)');
+		isMobile = mq.matches;
+		const handler = (e: MediaQueryListEvent) => (isMobile = e.matches);
+		mq.addEventListener('change', handler);
+		return () => mq.removeEventListener('change', handler);
+	});
 
 	// used initialize before render and reset when steps change
 	let completed: boolean[] = $state([]);
@@ -144,6 +158,13 @@
 		regenerating = false;
 	}
 
+	// mobile taps open the details sheet; desktop keeps the lightbox
+	function handleImageClick() {
+		if (!recipe.recipeImageUrl) return;
+		if (isMobile) detailSheetOpen = true;
+		else openLightbox();
+	}
+
 	function openLightbox() {
 		if (!recipe.recipeImageUrl) return;
 		lightboxOpen = true;
@@ -166,6 +187,13 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <section class="antialiased">
+	<!-- Mobile toolbar above the image: back + more -->
+	{#if imageActions}
+		<div class="md:hidden flex items-center justify-between mb-3">
+			{@render imageActions()}
+		</div>
+	{/if}
+
 	<!-- Hero Section -->
 	<div class="relative rounded-xl overflow-hidden mb-6">
 		<!-- Background Image (clickable area) -->
@@ -173,8 +201,8 @@
 			<button
 				type="button"
 				class="absolute inset-0 w-full cursor-zoom-in group"
-				onclick={openLightbox}
-				aria-label="View full image"
+				onclick={handleImageClick}
+				aria-label="View recipe details"
 			>
 				<SkeletonImage
 					src={recipe.recipeImageUrl}
@@ -189,11 +217,18 @@
 					class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"
 				></div>
 
-				<!-- Expand indicator -->
+				<!-- Expand indicator (desktop lightbox) -->
 				<div
-					class="absolute top-4 right-4 p-2 rounded-full bg-white/30 dark:bg-black/30 backdrop-blur-md backdrop-saturate-150 border border-white/40 dark:border-white/20 text-white shadow-lg hover:!bg-black/80 hover:!border-black/80 hover:!backdrop-blur-none active:!bg-black transition-all duration-200"
+					class="hidden md:block absolute top-4 right-4 p-2 rounded-full bg-white/30 dark:bg-black/30 backdrop-blur-md backdrop-saturate-150 border border-white/40 dark:border-white/20 text-neutral-800 dark:text-white hover:!text-white shadow-lg hover:!bg-black/80 hover:!border-black/80 hover:!backdrop-blur-none active:!bg-black transition-all duration-200"
 				>
 					<Expand class="w-5 h-5 drop-shadow" />
+				</div>
+
+				<!-- Tap-for-details hint (mobile) -->
+				<div
+					class="md:hidden absolute top-4 left-1/2 -translate-x-1/2 p-2 rounded-full glass-overlay-control shadow-lg pointer-events-none"
+				>
+					<Info class="w-5 h-5 drop-shadow" />
 				</div>
 			</button>
 		{:else}
@@ -233,22 +268,21 @@
 				</div>
 			</div>
 
-			<!-- Mobile: title + actions, no badges -->
+			<!-- Mobile: title only (category + actions live below/around the image) -->
 			<div class="md:hidden">
-				<Badge size="lg" variant="secondary" class="mb-3 !text-sm pointer-events-auto">
-					{recipe.recipeCategoryDescription}
-				</Badge>
 				<h1 class="text-3xl font-bold text-foreground mb-2">
 					{recipe.recipeName}
 				</h1>
-				{#if actions}
-					<div class="flex items-center gap-2 mt-3 pointer-events-auto">
-						{@render actions()}
-					</div>
-				{/if}
 			</div>
 		</div>
 	</div>
+
+	<!-- Mobile: favorite + feature below the image -->
+	{#if actions}
+		<div class="md:hidden mb-6">
+			{@render actions()}
+		</div>
+	{/if}
 
 	<!-- Lightbox Overlay -->
 	{#if lightboxOpen && recipe.recipeImageUrl}
@@ -354,8 +388,8 @@
 			</Card.Content>
 		</Card.Root>
 
-		<!-- Verdict Card (sticky on desktop, offset to clear the nav) -->
-		<div class="lg:col-span-1 lg:sticky lg:top-20 lg:self-start">
+		<!-- Verdict Card (sticky on desktop, offset to clear the nav; mobile shows it in the details sheet) -->
+		<div class="hidden md:block lg:col-span-1 lg:sticky lg:top-20 lg:self-start">
 			<RecipeVerdictCard {recipe} recipeSteps={initialRecipeSteps} />
 		</div>
 	</div>
@@ -463,3 +497,13 @@
 		/>
 	{/if}
 </section>
+
+<!-- Mobile details sheet (image, badges, verdict) -->
+<RecipeDetailSheet
+	bind:open={detailSheetOpen}
+	{recipe}
+	recipeSteps={initialRecipeSteps}
+	{abv}
+	{ingredientCount}
+	{ServingIcon}
+/>

@@ -19,11 +19,11 @@
 		onReset?: () => void;
 	} = $props();
 
-	const perPageOptions = [10, 25, 50, 100];
+	const perPageOptions = [12, 24, 48, 96];
 
 	const groupLabel = $derived(activeGroup ?? 'All Groups');
 
-	const hasNonDefaultFilters = $derived(perPage !== 10 || activeGroup !== null);
+	const hasNonDefaultFilters = $derived(perPage !== 24 || activeGroup !== null);
 </script>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 sm:grid-flow-row-dense gap-4">
@@ -63,7 +63,7 @@
 		>
 			<Select.Trigger class="w-full">
 				<Package class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="10 per page">{perPage} per page</Select.Value>
+				<Select.Value placeholder="24 per page">{perPage} per page</Select.Value>
 			</Select.Trigger>
 			<Select.Content>
 				{#each perPageOptions as opt}
@@ -77,7 +77,7 @@
 	{#if hasNonDefaultFilters && onReset}
 		<button
 			onclick={onReset}
-			class="text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
+			class="focus-ring text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 		>
 			Reset filters
 		</button>

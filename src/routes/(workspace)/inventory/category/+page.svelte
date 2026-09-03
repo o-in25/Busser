@@ -101,7 +101,7 @@
 
 	// active filter count for badge
 	const activeFilterCount = $derived(
-		(data.pagination.perPage !== 10 ? 1 : 0) + (activeGroup !== null ? 1 : 0)
+		(data.pagination.perPage !== 24 ? 1 : 0) + (activeGroup !== null ? 1 : 0)
 	);
 
 	async function handleRefresh() {
@@ -114,11 +114,11 @@
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
 		const perPage =
-			overrides.perPage !== undefined ? overrides.perPage : (data.filters?.perPage ?? 10);
+			overrides.perPage !== undefined ? overrides.perPage : (data.filters?.perPage ?? 24);
 
 		params.set('page', String(pageNum));
 		if (search) params.set('search', String(search));
-		if (perPage && Number(perPage) !== 10) params.set('perPage', String(perPage));
+		if (perPage && Number(perPage) !== 24) params.set('perPage', String(perPage));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -160,7 +160,7 @@
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
-			<Button size="sm" href="/inventory/category/add" class="shrink-0">
+			<Button variant="primary" size="sm" href="/inventory/category/add" class="shrink-0">
 				<Plus class="h-4 w-4 mr-1" />
 				Add Category
 			</Button>
@@ -211,7 +211,7 @@
 				<button
 					type="button"
 					onclick={clearSearch}
-					class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+					class="focus-ring absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 				>
 					<X class="h-4 w-4" />
 				</button>
@@ -234,7 +234,7 @@
 			onPerPageChange={(v) => goto(buildUrl({ perPage: v, page: 1 }))}
 			onReset={() => {
 				activeGroup = null;
-				goto(buildUrl({ perPage: 10, page: 1 }));
+				goto(buildUrl({ perPage: 24, page: 1 }));
 			}}
 		/>
 	</FilterButton>

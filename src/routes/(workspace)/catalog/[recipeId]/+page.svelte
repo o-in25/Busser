@@ -374,7 +374,7 @@
 	<!-- Desktop toolbar above hero -->
 	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
 		<div class="flex items-center gap-3">
-			<Button variant="secondary" href="/catalog" size="sm">
+			<Button variant="outline" href="/catalog" size="sm">
 				<ChevronLeft class="h-4 w-4 mr-1" />
 				Back to Catalog
 			</Button>
@@ -427,7 +427,7 @@
 				>
 					<input type="hidden" name="recipeId" value={pageData.recipe.recipeId} />
 					<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
-					<Button type="submit" variant={isFeatured ? 'warning' : 'default'} size="sm">
+					<Button type="submit" variant={isFeatured ? 'tertiary' : 'default'} size="sm">
 						<Star class={cn('h-4 w-4 mr-1', isFeatured && 'fill-current')} />
 						{isFeatured ? 'Featured' : 'Feature'}
 					</Button>
@@ -453,28 +453,28 @@
 		recipeSteps={pageData.recipeSteps}
 		stepExtras={pageData.stepExtras}
 	>
+		{#snippet imageActions()}
+			<Button variant="outline" href="/catalog" size="sm">
+				<ChevronLeft class="h-4 w-4 mr-1" />
+				Back
+			</Button>
+
+			{#if canModify || (showImport && importData)}
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger class="glass-cta glass-cta-sm">
+						<EllipsisVertical class="h-4 w-4 mr-1" />
+						More
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end">
+						{@render moreMenuItems()}
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+			{/if}
+		{/snippet}
+
 		{#snippet actions()}
 			<div class="flex w-full flex-col gap-2">
-				<!-- top row: back + more, matching the hero layout used across the app -->
-				<div class="flex gap-2">
-					<Button variant="secondary" href="/catalog" size="sm" class="flex-1 justify-center">
-						<ChevronLeft class="h-4 w-4 mr-1" />
-						Back
-					</Button>
-
-					{#if canModify || (showImport && importData)}
-						<DropdownMenu.Root>
-							<DropdownMenu.Trigger class="glass-cta glass-cta-sm shrink-0">
-								<EllipsisVertical class="h-4 w-4" />
-							</DropdownMenu.Trigger>
-							<DropdownMenu.Content align="end">
-								{@render moreMenuItems()}
-							</DropdownMenu.Content>
-						</DropdownMenu.Root>
-					{/if}
-				</div>
-
-				<!-- second row: favorite + feature -->
+				<!-- favorite + feature -->
 				{#if authenticated}
 					<div class="flex gap-2">
 						<form
@@ -523,7 +523,7 @@
 								<input type="hidden" name="workspaceId" value={workspace.workspaceId} />
 								<Button
 									type="submit"
-									variant={isFeatured ? 'warning' : 'default'}
+									variant={isFeatured ? 'tertiary' : 'default'}
 									size="sm"
 									class="w-full justify-center"
 								>
@@ -601,6 +601,7 @@
 		<Dialog.Footer>
 			<Button variant="outline" onclick={() => (sameNameConfirmOpen = false)}>Cancel</Button>
 			<Button
+				variant="primary"
 				disabled={customizing}
 				onclick={() => {
 					sameNameConfirmOpen = false;

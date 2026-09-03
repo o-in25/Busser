@@ -37,10 +37,7 @@
 
 <div
 	role="radiogroup"
-	class={cn(
-		'inline-flex w-full gap-1 rounded-lg border border-white/20 bg-white/40 p-1 backdrop-blur-md backdrop-saturate-150 dark:border-white/[0.10] dark:bg-white/[0.08]',
-		className
-	)}
+	class={cn('glass-control inline-flex w-full gap-1 rounded-lg p-1', className)}
 	{...restProps}
 >
 	{@render children?.()}

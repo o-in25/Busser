@@ -54,7 +54,7 @@
 	// svelte-ignore state_referenced_locally
 	let selectedShowFilter = $state(data.filters.showFilter || 'all');
 	// svelte-ignore state_referenced_locally
-	let perPage = $state(String(data.filters.perPage ?? 10));
+	let perPage = $state(String(data.filters.perPage ?? 24));
 	// svelte-ignore state_referenced_locally
 	let selectedMood = $state(data.filters.mood || '');
 
@@ -68,7 +68,7 @@
 		if (selectedSpirit && selectedSpirit !== 'all') count++;
 		if (selectedShowFilter && selectedShowFilter !== 'all') count++;
 		if (selectedSort !== 'name-asc') count++;
-		if (perPage !== '10') count++;
+		if (perPage !== '24') count++;
 		if (selectedMood) count++;
 		return count;
 	});
@@ -97,14 +97,14 @@
 		selectedSpirit = 'all';
 		selectedShowFilter = 'all';
 		selectedSort = 'name-asc';
-		perPage = '10';
+		perPage = '24';
 		selectedMood = '';
 		goto(
 			buildUrl({
 				spirit: 'all',
 				show: 'all',
 				sort: 'name-asc',
-				perPage: '10',
+				perPage: '24',
 				mood: '',
 				page: 1,
 			}),
@@ -144,7 +144,7 @@
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
 		if (spirit && spirit !== 'all') params.set('spirit', String(spirit));
 		if (show && show !== 'all') params.set('show', String(show));
-		if (pp && String(pp) !== '10') params.set('perPage', String(pp));
+		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
 		if (mood) params.set('mood', String(mood));
 
 		if (makeableLensAvailable) {
@@ -238,7 +238,7 @@
 		selectedSort = data.filters.sort || 'name-asc';
 		selectedSpirit = data.filters.spiritId || 'all';
 		selectedShowFilter = data.filters.showFilter || 'all';
-		perPage = String(data.filters.perPage ?? 10);
+		perPage = String(data.filters.perPage ?? 24);
 		favorites = new Set(data.favoriteRecipeIds);
 		featured = new Set(data.featuredRecipeIds);
 	});
@@ -307,7 +307,7 @@
 		>
 			{#snippet action()}
 				{#if canModify}
-					<Button href="/catalog/add" size="sm" class="shrink-0">
+					<Button variant="primary" href="/catalog/add" size="sm" class="shrink-0">
 						<Plus class="h-4 w-4 mr-1" />
 						Add Recipe
 					</Button>
@@ -393,7 +393,7 @@
 						<button
 							type="button"
 							onclick={clearSearch}
-							class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+							class="focus-ring absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 						>
 							<X class="h-4 w-4" />
 						</button>
@@ -444,9 +444,7 @@
 				onclick={() => setLens(true)}
 				class={cn(
 					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
-					readyLensOn
-						? 'bg-primary text-primary-foreground shadow-sm'
-						: 'text-muted-foreground hover:text-foreground'
+					readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
 				)}
 			>
 				Ready to make
@@ -456,9 +454,7 @@
 				onclick={() => setLens(false)}
 				class={cn(
 					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
-					!readyLensOn
-						? 'bg-primary text-primary-foreground shadow-sm'
-						: 'text-muted-foreground hover:text-foreground'
+					!readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
 				)}
 			>
 				All recipes

@@ -71,7 +71,7 @@
 					<ArrowLeft class="h-4 w-4 mr-2" />
 					Go Back
 				</Button>
-				<Button href="/">
+				<Button variant="primary" href="/">
 					<House class="h-4 w-4 mr-2" />
 					Go Home
 				</Button>

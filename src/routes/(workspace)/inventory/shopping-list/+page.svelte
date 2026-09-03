@@ -40,7 +40,7 @@
 	let selectedCategory = $state(data.filters?.categoryGroupId || 'all');
 	let selectedSupplier = $state(data.filters?.supplierId || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
-	let perPage = $state(String(data.filters?.perPage || 10));
+	let perPage = $state(String(data.filters?.perPage || 24));
 
 	// filter panel state
 	let filterOpen = $state(false);
@@ -50,7 +50,7 @@
 		if (selectedCategory && selectedCategory !== 'all') count++;
 		if (selectedSupplier && selectedSupplier !== 'all') count++;
 		if (sortOption !== 'name-asc') count++;
-		if (perPage !== '10') count++;
+		if (perPage !== '24') count++;
 		return count;
 	});
 
@@ -91,7 +91,7 @@
 		if (category && category !== 'all') params.set('categoryGroupId', String(category));
 		if (supplier && supplier !== 'all') params.set('supplierId', String(supplier));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
-		if (pp && String(pp) !== '10') params.set('perPage', String(pp));
+		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -135,7 +135,7 @@
 		selectedCategory = 'all';
 		selectedSupplier = 'all';
 		sortOption = 'name-asc';
-		perPage = '10';
+		perPage = '24';
 		goto(`${basePath}?page=1`);
 	}
 
@@ -143,13 +143,13 @@
 		selectedCategory = 'all';
 		selectedSupplier = 'all';
 		sortOption = 'name-asc';
-		perPage = '10';
+		perPage = '24';
 		goto(
 			buildUrl({
 				categoryGroupId: 'all',
 				supplierId: 'all',
 				sort: 'name-asc',
-				perPage: '10',
+				perPage: '24',
 				page: 1,
 			})
 		);
@@ -248,7 +248,7 @@
 		selectedCategory = data.filters?.categoryGroupId || 'all';
 		selectedSupplier = data.filters?.supplierId || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
-		perPage = String(data.filters?.perPage || 10);
+		perPage = String(data.filters?.perPage || 24);
 	});
 
 	// filter panel label helpers
@@ -260,10 +260,10 @@
 	];
 
 	const perPageOptions = [
-		{ value: '10', label: '10 per page' },
-		{ value: '25', label: '25 per page' },
-		{ value: '50', label: '50 per page' },
-		{ value: '100', label: '100 per page' },
+		{ value: '12', label: '12 per page' },
+		{ value: '24', label: '24 per page' },
+		{ value: '48', label: '48 per page' },
+		{ value: '96', label: '96 per page' },
 	];
 
 	const categoryLabel = $derived.by(() => {
@@ -282,14 +282,14 @@
 		sortOptions.find((o) => o.value === sortOption)?.label || 'Name (A-Z)'
 	);
 	const perPageLabel = $derived(
-		perPageOptions.find((o) => o.value === perPage)?.label || '10 per page'
+		perPageOptions.find((o) => o.value === perPage)?.label || '24 per page'
 	);
 
 	const hasNonDefaultFilters = $derived(
 		(selectedCategory && selectedCategory !== 'all') ||
 			(selectedSupplier && selectedSupplier !== 'all') ||
 			sortOption !== 'name-asc' ||
-			perPage !== '10'
+			perPage !== '24'
 	);
 </script>
 
@@ -329,7 +329,7 @@
 							<button
 								type="button"
 								onclick={clearSearch}
-								class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+								class="focus-ring absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 							>
 								<X class="h-4 w-4" />
 							</button>
@@ -418,10 +418,10 @@
 							<Select.Root
 								type="single"
 								value={perPage}
-								onValueChange={(v) => handlePerPageChange(v ?? '10')}
+								onValueChange={(v) => handlePerPageChange(v ?? '24')}
 							>
 								<Select.Trigger class="w-full">
-									<Select.Value placeholder="10 per page">{perPageLabel}</Select.Value>
+									<Select.Value placeholder="24 per page">{perPageLabel}</Select.Value>
 								</Select.Trigger>
 								<Select.Content>
 									{#each perPageOptions as option}
@@ -435,7 +435,7 @@
 						{#if hasNonDefaultFilters}
 							<button
 								onclick={resetPanelFilters}
-								class="text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
+								class="focus-ring text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 							>
 								Reset filters
 							</button>
@@ -455,7 +455,7 @@
 				{#if searchInput}
 					<Badge variant="secondary" class="gap-1">
 						Search: "{searchInput}"
-						<button onclick={clearSearch} class="ml-1 hover:text-destructive"
+						<button onclick={clearSearch} class="focus-ring ml-1 hover:text-destructive"
 							><X class="h-3 w-3" /></button
 						>
 					</Badge>
@@ -478,7 +478,7 @@
 				{/if}
 				<button
 					onclick={clearAllFilters}
-					class="text-sm text-muted-foreground hover:text-foreground underline"
+					class="focus-ring text-sm text-muted-foreground hover:text-foreground underline"
 				>
 					Clear all
 				</button>

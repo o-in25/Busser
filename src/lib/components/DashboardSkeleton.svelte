@@ -29,16 +29,18 @@
 
 	<!-- quick actions -->
 	<section class="mb-8">
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-			{#each Array(4) as _}
+		<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+			{#each Array(5) as _}
 				<div
-					class="rounded-xl border border-white/40 dark:border-white/[0.08] bg-white/50 dark:bg-white/[0.06] p-4"
+					class="flex items-center min-h-[76px] p-4 rounded-xl border border-white/40 dark:border-white/[0.08] bg-white/50 dark:bg-white/[0.06]"
 				>
 					<div class="flex items-center gap-3">
-						<div class="shimmer h-9 w-9 rounded-lg"></div>
+						<div class="p-2 rounded-lg bg-white/40 dark:bg-white/[0.08]">
+							<div class="shimmer h-5 w-5 rounded-md"></div>
+						</div>
 						<div>
-							<div class="shimmer h-4 w-24 mb-1 rounded-md"></div>
-							<div class="shimmer h-3 w-16 rounded-md"></div>
+							<div class="shimmer h-4 w-24 mb-1.5 rounded-md"></div>
+							<div class="shimmer hidden md:block h-3 w-16 rounded-md"></div>
 						</div>
 					</div>
 				</div>

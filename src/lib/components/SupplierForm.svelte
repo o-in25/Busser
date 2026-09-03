@@ -180,7 +180,7 @@
 			<Button type="button" variant="outline" onclick={() => goto('/inventory/suppliers')}>
 				Cancel
 			</Button>
-			<Button type="submit" disabled={isSubmitting || !isValid}>
+			<Button variant="primary" type="submit" disabled={isSubmitting || !isValid}>
 				{isSubmitting ? 'Saving...' : action === 'add' ? 'Create' : 'Save'}
 			</Button>
 		</div>

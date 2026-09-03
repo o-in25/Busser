@@ -102,7 +102,7 @@
 				<!-- Recipe usage indicator -->
 				{#if recipeCount > 0}
 					<button
-						class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+						class="focus-ring flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
 						onclick={(e) => {
 							e.preventDefault();
 							e.stopPropagation();
@@ -158,7 +158,7 @@
 					<div class="flex items-center gap-3 mt-2">
 						{#if recipeCount > 0}
 							<button
-								class="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+								class="focus-ring flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
 								onclick={(e) => {
 									e.preventDefault();
 									e.stopPropagation();

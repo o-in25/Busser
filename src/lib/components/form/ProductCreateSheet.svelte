@@ -133,6 +133,7 @@
 			Cancel
 		</Button>
 		<Button
+			variant="primary"
 			type="button"
 			class="flex-1 rounded-full"
 			disabled={!valid || submitting}

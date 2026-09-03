@@ -4,6 +4,7 @@
 	import { fly } from 'svelte/transition';
 
 	import { goto } from '$app/navigation';
+	import BackButton from '$lib/components/BackButton.svelte';
 	import { Button } from '$lib/components/ui/button';
 
 	import AutosaveIndicator from './AutosaveIndicator.svelte';
@@ -22,6 +23,9 @@
 		lastSaved = null,
 		cancelHref = '/',
 		eyebrow,
+		title,
+		subtitle,
+		backHref,
 		submitLabel = 'Save',
 		children,
 	}: {
@@ -33,6 +37,9 @@
 		lastSaved?: Date | null;
 		cancelHref?: string;
 		eyebrow?: string;
+		title?: string;
+		subtitle?: string;
+		backHref?: string;
 		submitLabel?: string;
 		children: Snippet<[{ step: number }]>;
 	} = $props();
@@ -66,6 +73,21 @@
 <div
 	class="mx-auto flex min-h-[calc(100dvh-12rem-env(safe-area-inset-top,0px))] w-full max-w-3xl flex-col md:block md:min-h-0"
 >
+	<!-- glass header — form identity + back, bookends the sticky footer at all breakpoints -->
+	{#if title}
+		<div class="glass-panel mb-6 flex items-center gap-4 px-3 py-3">
+			{#if backHref}
+				<BackButton fallback={backHref} />
+			{/if}
+			<div>
+				<h1 class="text-lg font-bold sm:text-2xl">{title}</h1>
+				{#if subtitle}
+					<p class="text-sm text-muted-foreground">{subtitle}</p>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
 	<FormStepper {steps} {currentStep} {canProceed} onstep={goToStep} />
 
 	<!-- step heading -->
@@ -81,9 +103,11 @@
 
 	<!-- active step body -->
 	<!-- overflow-x-clip (not hidden) contains the horizontal slide without forcing overflow-y to
-	     auto, so field dropdowns can escape downward over the footer instead of being clipped -->
+	     auto, so field dropdowns can escape downward over the footer instead of being clipped.
+	     -mx-2/px-2 pushes the clip edge 8px outside the content so field focus rings (which paint
+	     ~2px past the input) aren't sliced flat; content stays aligned with the header/footer. -->
 	<!-- flex-1 on mobile absorbs the slack so the footer lands at the bottom, not right under the body -->
-	<div class="min-h-[18rem] flex-1 overflow-x-clip md:flex-none">
+	<div class="-mx-2 min-h-[18rem] flex-1 overflow-x-clip px-2 md:flex-none">
 		{#key currentStep}
 			<div
 				in:fly={{ x: direction * 160, duration: 220, delay: 180 }}
@@ -111,11 +135,11 @@
 		</div>
 
 		{#if isLast}
-			<Button type="submit" disabled={submitting || !isValid}>
+			<Button variant="primary" type="submit" disabled={submitting || !isValid}>
 				{submitting ? 'Saving…' : submitLabel}
 			</Button>
 		{:else}
-			<Button type="button" onclick={next} disabled={!canProceed}>
+			<Button variant="primary" type="button" onclick={next} disabled={!canProceed}>
 				Next <ChevronRight class="ml-1 h-4 w-4" />
 			</Button>
 		{/if}

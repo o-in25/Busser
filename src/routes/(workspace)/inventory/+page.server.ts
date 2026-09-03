@@ -15,9 +15,9 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	const stockFilter = url.searchParams.get('stockFilter') || '';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 
-	const allowedPerPage = [10, 25, 50, 100];
-	let perPage = Number(url.searchParams.get('perPage')) || 10;
-	if (!allowedPerPage.includes(perPage)) perPage = 10;
+	const allowedPerPage = [12, 24, 48, 96];
+	let perPage = Number(url.searchParams.get('perPage')) || 24;
+	if (!allowedPerPage.includes(perPage)) perPage = 24;
 
 	// Build filter object
 	let filter: Record<string, any> = {};

@@ -76,9 +76,7 @@
 					class="flex gap-1.5 mt-1.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
 				>
 					{#each flavorBadges as badge}
-						<span
-							class="text-[10px] px-1.5 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-white/90 border border-white/10"
-						>
+						<span class="glass-overlay-control text-[10px] px-1.5 py-0.5 rounded-full">
 							{badge}
 						</span>
 					{/each}

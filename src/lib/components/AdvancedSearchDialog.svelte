@@ -322,7 +322,7 @@
 		<Dialog.Footer>
 			<Button type="button" variant="ghost" onclick={clearAll}>Clear All</Button>
 			<Button type="button" variant="outline" onclick={() => (open = false)}>Cancel</Button>
-			<Button type="button" onclick={handleApply}>Apply Filters</Button>
+			<Button variant="primary" type="button" onclick={handleApply}>Apply Filters</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
