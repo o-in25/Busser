@@ -102,7 +102,9 @@
 {#if viewMode === 'grid'}
 	<!-- Grid View Card — liquid glass -->
 	<a href="/catalog/{recipe.recipeId}" class="cv-card block group h-full">
-		<div class="relative rounded-3xl overflow-hidden h-full card-zoom transition-transform duration-300">
+		<div
+			class="relative rounded-3xl overflow-hidden h-full card-zoom transition-transform duration-300"
+		>
 			<!-- Blurred background glow from recipe image -->
 			{#if recipe.recipeImageUrl}
 				<img

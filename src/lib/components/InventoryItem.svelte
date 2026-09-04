@@ -38,13 +38,9 @@
 		onDelete?: (() => void) | null;
 	} = $props();
 
-	// get workspace role for permission checks
 	const workspace = getContext<WorkspaceWithRole>('workspace');
 	const canModify = roleCanModify(workspace?.workspaceRole);
 
-	// recipes this product appears in — fetched lazily when the sheet opens on a product.
-	// capped server-side; the full list lives at /catalog?ingredientInclude=<id>.
-	const RECIPE_CAP = 12;
 	let recipes = $state<View.BasicRecipe[]>([]);
 	let recipeTotal = $state(0);
 	let recipesLoading = $state(false);
@@ -70,7 +66,6 @@
 			.finally(() => (recipesLoading = false));
 	});
 
-	// Calculated fields
 	const pricePerOunce = $derived.by(() => {
 		const price = product.productPricePerUnit;
 		const size = product.productUnitSizeInMilliliters;
@@ -84,7 +79,6 @@
 		return (proof / 2).toFixed(1);
 	});
 
-	// Stock status
 	const stockStatus = $derived.by(() => {
 		if (product.productInStockQuantity === 0) {
 			return {
@@ -106,7 +100,6 @@
 
 	const StockIcon = $derived(stockStatus.icon);
 
-	// Flavor profile data
 	const flavorProfile = $derived([
 		{
 			label: 'Sweetness',
@@ -134,12 +127,10 @@
 		},
 	]);
 
-	// only show flavor profile for spirits (CategoryGroupId 1) with data
 	const hasFlavorProfile = $derived(
 		product.categoryGroupId === 1 && flavorProfile.some((f) => f.value > 0)
 	);
 
-	// gate the stat card so non-spirits with no numbers don't render an empty shell
 	const hasQuickStats = $derived(
 		!!product.productPricePerUnit ||
 			!!product.productUnitSizeInMilliliters ||
@@ -147,7 +138,6 @@
 			!!pricePerOunce
 	);
 
-	// Overall rating calculation
 	const generateRatings = () => {
 		const ratings = [
 			{ label: 'Dryness', rating: product.productDrynessRating || 0.0 },
@@ -187,7 +177,6 @@
 
 	const overallRating = generateRatings();
 
-	// Handle stock toggle
 	function handleStockToggle(checked: boolean) {
 		if (onStockChange && product.productId) {
 			onStockChange(product.productId, checked);
@@ -197,7 +186,7 @@
 
 {#if product}
 	<div class="space-y-4">
-		<!-- Hero: image with just the name overlaid (photo stays unobstructed; category lives below) -->
+		<!-- Hero -->
 		<div class="relative rounded-xl overflow-hidden">
 			<div class="aspect-[3/2] w-full">
 				<SkeletonImage
@@ -271,7 +260,9 @@
 							<div class="min-w-0">
 								<div class="text-[11px] text-muted-foreground uppercase tracking-wide">Proof</div>
 								<div class="text-sm font-semibold">
-									{product.productProof}°{#if abvPercent}<span class="font-normal text-muted-foreground">
+									{product.productProof}°{#if abvPercent}<span
+											class="font-normal text-muted-foreground"
+										>
 											({abvPercent}%)</span
 										>{/if}
 								</div>
@@ -418,7 +409,12 @@
 							Delete
 						</Button>
 					{/if}
-					<Button variant="default" size="sm" class="flex-1" href="/inventory/{product.productId}/edit">
+					<Button
+						variant="default"
+						size="sm"
+						class="flex-1"
+						href="/inventory/{product.productId}/edit"
+					>
 						<Pencil class="w-3.5 h-3.5 mr-1.5" />
 						Edit
 					</Button>

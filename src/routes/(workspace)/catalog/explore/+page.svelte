@@ -56,9 +56,7 @@
 
 	// read workspace from page store so it stays current after switches
 	const workspace = $derived($page.data.workspace as WorkspaceWithRole);
-	const canModify = $derived(
-		roleCanModify(workspace?.workspaceRole)
-	);
+	const canModify = $derived(roleCanModify(workspace?.workspaceRole));
 	const authenticated = $derived(!!$page.data.user);
 
 	// recipe list tab state
