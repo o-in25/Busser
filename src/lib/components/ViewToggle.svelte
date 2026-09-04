@@ -9,10 +9,12 @@
 		modes,
 		active,
 		onchange,
+		class: className,
 	}: {
 		modes: ViewMode[];
 		active: ViewMode;
 		onchange: (mode: any) => void;
+		class?: string;
 	} = $props();
 
 	const icons: Record<ViewMode, typeof TableIcon> = {
@@ -20,22 +22,32 @@
 		grid: LayoutGrid,
 		list: List,
 	};
+
+	// uniform-width cells let the puck slide by index instead of measuring geometry
+	const activeIndex = $derived(modes.indexOf(active));
 </script>
 
-<div
-	class="hidden sm:flex items-center border border-white/30 dark:border-zinc-700/40 bg-white/40 dark:bg-zinc-800/40 backdrop-blur-md rounded-lg overflow-hidden"
->
+<div class={cn('glass-track hidden sm:flex relative items-center rounded-lg p-1', className)}>
+	<!-- sliding pink puck (glasscn segmented-control feel, on-brand tint) -->
+	{#if activeIndex >= 0}
+		<span
+			class="glass-primary pointer-events-none absolute top-1 left-1 h-10 w-10 rounded-md"
+			style="transform: translateX({activeIndex *
+				100}%); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);"
+			aria-hidden="true"
+		></span>
+	{/if}
+
 	{#each modes as mode}
 		{@const Icon = icons[mode]}
 		<button
 			class={cn(
-				'h-10 w-10 flex items-center justify-center transition-all',
-				active === mode
-					? 'bg-primary/25 dark:bg-primary/20 text-primary backdrop-blur-sm ring-1 ring-inset ring-primary/40 shadow-[inset_0_0_12px_rgba(248,78,128,0.35)]'
-					: 'text-muted-foreground hover:bg-white/40 dark:hover:bg-zinc-700/40 hover:text-primary'
+				'relative z-10 h-10 w-10 flex items-center justify-center rounded-md transition-colors',
+				active === mode ? 'text-primary-foreground' : 'text-muted-foreground hover:text-primary'
 			)}
 			onclick={() => onchange(mode)}
 			aria-label="{mode} view"
+			aria-pressed={active === mode}
 		>
 			<Icon class="h-4 w-4" />
 		</button>

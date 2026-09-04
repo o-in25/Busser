@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Sparkles } from 'lucide-svelte';
 	import { page } from '$app/stores';
 
 	import AiAssistant from '$lib/components/AiAssistant.svelte';
@@ -38,24 +37,6 @@
 		<!-- chat container — full width to match the hero -->
 		<div class="glass-panel flex-1 min-h-0 overflow-hidden w-full">
 			<AiAssistant userAvatarUrl={$page.data.user?.avatarImageUrl} />
-		</div>
-	{:else}
-		<!-- switch workspace prompt -->
-		<div
-			class="glass-panel overflow-hidden flex items-center justify-center p-6 w-full max-w-3xl mx-auto"
-		>
-			<div class="text-center max-w-sm space-y-6">
-				<div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-					<Sparkles class="h-8 w-8 text-primary" />
-				</div>
-				<div>
-					<h2 class="text-lg font-semibold mb-1">Switch to your workspace</h2>
-					<p class="text-sm text-muted-foreground">
-						Assistant needs write access to your catalog and inventory. Use the workspace switcher
-						above to switch to a workspace you own and get started.
-					</p>
-				</div>
-			</div>
 		</div>
 	{/if}
 </div>

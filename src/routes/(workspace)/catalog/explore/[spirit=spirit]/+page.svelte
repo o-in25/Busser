@@ -28,16 +28,16 @@
 	import { reveal } from '$lib/actions/reveal';
 	import { cdnSrc, cdnSrcset } from '$lib/utils/image';
 	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	import type { PageData } from './$types';
-	import FancyButton from '$lib/components/FancyButton.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { workspaceSwitching } from '../../../../../stores';
 
 	let { data }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace?.workspaceRole);
 	const authenticated = $derived(!!$page.data.user);
 
 	// spirit category description/image is global — only admins may edit it
@@ -137,10 +137,10 @@
 
 	<!-- Desktop toolbar above hero -->
 	<div class="hidden md:flex items-center justify-between mb-4 mt-4">
-		<FancyButton href="/catalog/explore" size="sm">
+		<Button variant="secondary" href="/catalog/explore" size="sm">
 			<ChevronLeft class="h-4 w-4 mr-1" />
 			Back to Explore
-		</FancyButton>
+		</Button>
 		<div class="flex items-center gap-2">
 			{#if canModify || canEditCategory}
 				<DropdownMenu.Root>
@@ -193,14 +193,15 @@
 
 			<!-- Mobile buttons inside hero -->
 			<div class="flex gap-2 md:hidden">
-				<FancyButton
+				<Button
+					variant="secondary"
 					href="/catalog/explore"
 					size="sm"
 					class="flex-1 justify-center whitespace-nowrap"
 				>
 					<ChevronLeft class="h-4 w-4 mr-1" />
 					Back
-				</FancyButton>
+				</Button>
 
 				{#if canModify || canEditCategory}
 					<DropdownMenu.Root>
@@ -284,10 +285,10 @@
 			<div class="flex items-center gap-2 shrink-0">
 				<WorkspaceSwitcherBadge variant="pill" />
 				{#if data.totalCount > 0}
-					<FancyButton href={catalogLink} variant="primary" size="sm" class="whitespace-nowrap">
+					<Button href={catalogLink} size="sm" class="whitespace-nowrap">
 						View all
 						<ArrowRight class="h-4 w-4 ml-1" />
-					</FancyButton>
+					</Button>
 				{/if}
 			</div>
 		</div>
@@ -329,11 +330,11 @@
 
 			{#if data.totalCount > data.recipes.length}
 				<div class="mt-6 flex justify-center">
-					<FancyButton href={catalogLink} size="sm">
+					<Button variant="secondary" href={catalogLink} size="sm">
 						View all {data.totalCount}
 						{data.spiritContent.displayName} cocktails
 						<ArrowRight class="h-4 w-4 ml-1" />
-					</FancyButton>
+					</Button>
 				</div>
 			{/if}
 		{/if}

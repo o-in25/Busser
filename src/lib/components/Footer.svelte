@@ -27,7 +27,7 @@
 						<li>
 							<a
 								href="/privacy"
-								class="hover:text-foreground transition-colors {isActive('/privacy')
+								class="focus-ring hover:text-foreground transition-colors {isActive('/privacy')
 									? 'text-primary font-medium'
 									: ''}"
 							>
@@ -37,7 +37,7 @@
 						<li>
 							<a
 								href="/terms"
-								class="hover:text-foreground transition-colors {isActive('/terms')
+								class="focus-ring hover:text-foreground transition-colors {isActive('/terms')
 									? 'text-primary font-medium'
 									: ''}"
 							>
@@ -47,7 +47,7 @@
 						<li>
 							<a
 								href="/cookies"
-								class="hover:text-foreground transition-colors {isActive('/cookies')
+								class="focus-ring hover:text-foreground transition-colors {isActive('/cookies')
 									? 'text-primary font-medium'
 									: ''}"
 							>
@@ -64,7 +64,7 @@
 						<li>
 							<a
 								href="/about"
-								class="hover:text-foreground transition-colors {isActive('/about')
+								class="focus-ring hover:text-foreground transition-colors {isActive('/about')
 									? 'text-primary font-medium'
 									: ''}"
 							>
@@ -81,7 +81,7 @@
 						<li>
 							<a
 								href="https://github.com/o-in25/Busser"
-								class="hover:text-foreground transition-colors">GitHub</a
+								class="focus-ring hover:text-foreground transition-colors">GitHub</a
 							>
 						</li>
 					</ul>
@@ -98,26 +98,26 @@
 			<div class="flex gap-4">
 				<a
 					href="https://instagram.com/busserapp"
-					class="text-muted-foreground hover:text-foreground transition-colors"
+					class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 					aria-label="Instagram"
 				>
 					<Instagram class="w-5 h-5" />
 				</a>
 				<a
 					href="https://www.facebook.com/profile.php?id=61588019103189"
-					class="text-muted-foreground hover:text-foreground transition-colors"
+					class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 					aria-label="Facebook"
 				>
 					<Facebook class="w-5 h-5" />
 				</a>
 				<a
 					href="https://x.com/busserapp"
-					class="text-muted-foreground hover:text-foreground transition-colors"
+					class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 					aria-label="Twitter"
 				>
 					<Twitter class="w-5 h-5" />
 				</a>
-				<!-- <a href="https://github.com/o-in25/Busser" class="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
+				<!-- <a href="https://github.com/o-in25/Busser" class="focus-ring text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
           <Github class="w-5 h-5" />
         </a> -->
 			</div>

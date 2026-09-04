@@ -105,7 +105,7 @@
 </script>
 
 <!-- Mobile Top Logo (visible on small screens) -->
-<div class="mobile-logo-header flex md:hidden" class:header-hidden={!headerVisible}>
+<div class="mobile-logo-header glass-nav flex md:hidden" class:header-hidden={!headerVisible}>
 	<Sheet.Root bind:open={mobileMenuOpen}>
 		<Sheet.Trigger
 			class="relative z-10 w-8 h-8 flex items-center justify-center cursor-pointer"
@@ -132,7 +132,7 @@
 					</div>
 				{:else}
 					<div class="flex items-center gap-3">
-						<img src={logoNav} class="h-9" alt="Busser" />
+						<img src={logoNav} class="h-10" alt="Busser" />
 						<div class="flex flex-col">
 							<Sheet.Title class="text-sm font-medium">Busser</Sheet.Title>
 							<Sheet.Description class="text-xs text-muted-foreground">
@@ -264,7 +264,7 @@
 						href="https://instagram.com/busserapp"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-muted-foreground hover:text-foreground transition-colors"
+						class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 						aria-label="Instagram"
 					>
 						<Instagram class="h-5 w-5" />
@@ -273,7 +273,7 @@
 						href="https://www.facebook.com/profile.php?id=61588019103189"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-muted-foreground hover:text-foreground transition-colors"
+						class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 						aria-label="Facebook"
 					>
 						<Facebook class="h-5 w-5" />
@@ -282,7 +282,7 @@
 						href="https://x.com/busserapp"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-muted-foreground hover:text-foreground transition-colors"
+						class="focus-ring text-muted-foreground hover:text-foreground transition-colors"
 						aria-label="Twitter"
 					>
 						<Twitter class="h-5 w-5" />
@@ -292,7 +292,7 @@
 		</Sheet.Content>
 	</Sheet.Root>
 	<a href="/" class="mobile-header-logo">
-		<img src={logoNav} class="h-10" alt="Busser" />
+		<img src={logoNav} class="h-12" alt="Busser" />
 	</a>
 </div>
 
@@ -300,7 +300,7 @@
 <nav class="mobile-nav-container flex md:hidden" class:nav-hidden={keyboardOpen}>
 	<!-- thin progress line above the pill — feedback near the thumb when tapping the bottom nav -->
 	<NavigationProgress variant="bottom" />
-	<div class="mobile-nav-pill">
+	<div class="mobile-nav-pill glass-nav-pill">
 		{#each items as item}
 			<a
 				href={item.href}
@@ -315,17 +315,17 @@
 </nav>
 
 <!-- Desktop Top Navigation (visible on medium+ screens) -->
-<nav class="desktop-nav hidden md:block">
+<nav class="desktop-nav glass-nav hidden md:block">
 	<div class="mx-auto flex max-w-7xl items-center px-4">
 		<!-- Logo (left) — flex-1 keeps the center pill balanced against the wider right side -->
 		<div class="flex flex-1 justify-start">
 			<a href="/" class="flex-shrink-0">
-				<img src={logoNav} class="h-10" alt="Busser" />
+				<img src={logoNav} class="h-12" alt="Busser" />
 			</a>
 		</div>
 
 		<!-- Center nav pill -->
-		<div class="desktop-nav-pill">
+		<div class="desktop-nav-pill glass-nav-pill">
 			{#each items as item}
 				<a href={item.href} class="desktop-nav-item {isActive(item.href) ? 'active' : ''}">
 					<item.icon class="h-4 w-4" />
@@ -380,15 +380,10 @@
 		top: 0;
 		z-index: 50;
 		align-items: center;
-		/* min-height must fit the 2.5rem logo — without it the header collapses to the
-		   hamburger height and the taller logo clips against the header edge when the
-		   safe-area inset is 0 (i.e. non-pwa safari) */
-		min-height: calc(4rem + env(safe-area-inset-top, 0px));
+		/* min-height must fit the 3rem logo, else it clips when the safe-area inset is 0 */
+		min-height: calc(4.5rem + env(safe-area-inset-top, 0px));
 		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
-		backdrop-filter: blur(20px) saturate(1.5);
-		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+		/* glass comes from the glass-nav tier (frosted default); this owns only layout */
 		transition: transform 0.3s ease;
 	}
 
@@ -403,11 +398,6 @@
 
 	.mobile-logo-header.header-hidden {
 		transform: translateY(-100%);
-	}
-
-	:global(.dark) .mobile-logo-header {
-		background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(24, 24, 27, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	/* mobile bottom nav container */
@@ -429,6 +419,7 @@
 	}
 
 	/* mobile main nav pill */
+	/* glass comes from the glass-nav-pill utility; this owns only layout */
 	.mobile-nav-pill {
 		display: flex;
 		align-items: center;
@@ -437,31 +428,6 @@
 		padding: 0.375rem;
 		border-radius: 9999px;
 		width: 100%;
-		background: linear-gradient(
-			135deg,
-			rgba(255, 255, 255, 0.7) 0%,
-			rgba(253, 242, 248, 0.6) 50%,
-			rgba(245, 243, 255, 0.6) 100%
-		);
-		backdrop-filter: blur(20px) saturate(1.5);
-		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.08),
-			inset 0 1px 0 rgba(255, 255, 255, 0.4);
-	}
-
-	:global(.dark) .mobile-nav-pill {
-		background: linear-gradient(
-			135deg,
-			rgba(39, 39, 42, 0.7) 0%,
-			rgba(50, 30, 40, 0.6) 50%,
-			rgba(40, 30, 50, 0.6) 100%
-		);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.1);
 	}
 
 	/* mobile nav item */
@@ -487,8 +453,9 @@
 	.mobile-nav-item.active {
 		background: rgba(232, 25, 95, 0.25);
 		color: rgba(232, 25, 95, 1);
-		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
-		border: 1px solid rgba(232, 25, 95, 0.3);
+		box-shadow:
+			inset 0 0 0 1px rgba(232, 25, 95, 0.3),
+			0 0 12px rgba(248, 78, 128, 0.25);
 	}
 
 	:global(.dark) .mobile-nav-item {
@@ -501,9 +468,9 @@
 
 	:global(.dark) .mobile-nav-item.active {
 		background: rgba(248, 78, 128, 0.2);
-		border: 1px solid rgba(248, 78, 128, 0.3);
 		color: rgba(248, 78, 128, 1);
 		box-shadow:
+			inset 0 0 0 1px rgba(248, 78, 128, 0.3),
 			0 0 12px rgba(248, 78, 128, 0.25),
 			0 0 24px rgba(248, 78, 128, 0.15),
 			inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -517,53 +484,22 @@
 	}
 
 	/* desktop top nav */
+	/* glass comes from the glass-nav tier (frosted default); this owns only layout */
 	.desktop-nav {
 		position: sticky;
 		top: 0;
 		z-index: 50;
 		width: 100%;
 		padding: 0.75rem 0;
-		backdrop-filter: blur(20px) saturate(1.5);
-		-webkit-backdrop-filter: blur(20px) saturate(1.5);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 	}
 
-	:global(.dark) .desktop-nav {
-		background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(24, 24, 27, 0.6) 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	}
-
-	/* desktop nav pill */
+	/* glass comes from the glass-nav-pill utility; this owns only layout */
 	.desktop-nav-pill {
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.375rem;
 		border-radius: 9999px;
-		background: linear-gradient(
-			135deg,
-			rgba(255, 255, 255, 0.6) 0%,
-			rgba(253, 242, 248, 0.5) 50%,
-			rgba(245, 243, 255, 0.5) 100%
-		);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		box-shadow:
-			0 4px 16px rgba(0, 0, 0, 0.06),
-			inset 0 1px 0 rgba(255, 255, 255, 0.4);
-	}
-
-	:global(.dark) .desktop-nav-pill {
-		background: linear-gradient(
-			135deg,
-			rgba(39, 39, 42, 0.6) 0%,
-			rgba(50, 30, 40, 0.5) 50%,
-			rgba(40, 30, 50, 0.5) 100%
-		);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow:
-			0 4px 16px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.1);
 	}
 
 	/* desktop nav item */
@@ -588,8 +524,11 @@
 	.desktop-nav-item.active {
 		background: rgba(232, 25, 95, 0.25);
 		color: rgba(232, 25, 95, 1);
-		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
-		border: 1px solid rgba(232, 25, 95, 0.3);
+		/* ring via inset shadow, not border — a border widens the active item and shifts the
+		   content-sized nav pill when the active tab changes */
+		box-shadow:
+			inset 0 0 0 1px rgba(232, 25, 95, 0.3),
+			0 0 12px rgba(248, 78, 128, 0.25);
 	}
 
 	:global(.dark) .desktop-nav-item {
@@ -603,9 +542,10 @@
 
 	:global(.dark) .desktop-nav-item.active {
 		background: rgba(248, 78, 128, 0.2);
-		border: 1px solid rgba(248, 78, 128, 0.3);
 		color: rgba(248, 78, 128, 1);
-		box-shadow: 0 0 12px rgba(248, 78, 128, 0.25);
+		box-shadow:
+			inset 0 0 0 1px rgba(248, 78, 128, 0.3),
+			0 0 12px rgba(248, 78, 128, 0.25);
 	}
 
 	/* desktop avatar button */
@@ -619,25 +559,12 @@
 		opacity: 0.8;
 	}
 
-	/* drawer logo glow (matches home page hero) */
-	.drawer-logo-glow {
-		animation: drawer-glow 3s ease-in-out infinite;
-	}
-
-	@keyframes drawer-glow {
-		0%,
-		100% {
-			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
-		}
-		50% {
-			filter: drop-shadow(0 0 20px rgba(248, 78, 128, 0.5));
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.drawer-logo-glow {
-			animation: none;
-			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
-		}
+	/* avatar is self-evidently focusable, skip the global ring.
+	   :global needed since the class lands on the Trigger child element */
+	:global(.desktop-avatar-button:focus),
+	:global(.desktop-avatar-button:focus-visible) {
+		outline: none;
+		outline-offset: 0;
+		box-shadow: none;
 	}
 </style>

@@ -1,5 +1,7 @@
 // user management types
 
+import type { WorkspaceRole } from './workspace';
+
 export type User = {
 	userId: string;
 	username: string;
@@ -43,7 +45,7 @@ export type Invitation = {
 	expiresAt: Date | null;
 	lastSentAt: Date | null;
 	workspaceId: string | null;
-	workspaceRole: 'owner' | 'editor' | 'viewer' | null;
+	workspaceRole: WorkspaceRole | null;
 };
 
 export type InvitationRequest = {
@@ -55,21 +57,6 @@ export type InvitationRequest = {
 	resolvedAt: Date | null;
 	resolvedBy: string | null;
 };
-
-export interface Workspace {
-	workspaceId: string;
-	workspaceName: string;
-	workspaceType: 'personal' | 'shared';
-	createdDate: Date;
-	createdBy: string;
-}
-
-export interface WorkspaceUser {
-	workspaceId: string;
-	userId: string;
-	workspaceRole: 'owner' | 'editor' | 'viewer';
-	joinedDate: Date;
-}
 
 export interface UserFavorite {
 	favoriteId: string;

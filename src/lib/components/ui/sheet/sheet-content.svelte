@@ -11,9 +11,10 @@
 	let {
 		class: className,
 		side = 'right',
+		showClose = true,
 		children,
 		...restProps
-	}: SheetPrimitive.ContentProps & { side?: Side } = $props();
+	}: SheetPrimitive.ContentProps & { side?: Side; showClose?: boolean } = $props();
 
 	const sideClasses: Record<Side, string> = {
 		top: 'inset-x-0 top-0 border-b data-[state=closed]:animate-slide-out-to-top data-[state=open]:animate-slide-in-from-top',
@@ -37,23 +38,21 @@
 <SheetPrimitive.Portal>
 	<SheetOverlay />
 	<SheetPrimitive.Content
-		class={cn(
-			'fixed z-50 gap-4 bg-white/75 dark:bg-zinc-900/65 backdrop-blur-2xl backdrop-saturate-150 p-6 shadow-2xl border-white/20 dark:border-zinc-700/30',
-			sideClasses[side],
-			className
-		)}
+		class={cn('glass-sheet fixed z-50 gap-4 p-6', sideClasses[side], className)}
 		style={contentStyle}
 		{...restProps}
 	>
 		{#if children}
 			{@render children()}
 		{/if}
-		<SheetPrimitive.Close
-			class="absolute right-4 z-10 p-2.5 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-			style={closeStyle}
-		>
-			<X class="h-5 w-5" />
-			<span class="sr-only">Close</span>
-		</SheetPrimitive.Close>
+		{#if showClose}
+			<SheetPrimitive.Close
+				class="absolute right-4 z-10 p-2.5 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+				style={closeStyle}
+			>
+				<X class="h-5 w-5" />
+				<span class="sr-only">Close</span>
+			</SheetPrimitive.Close>
+		{/if}
 	</SheetPrimitive.Content>
 </SheetPrimitive.Portal>

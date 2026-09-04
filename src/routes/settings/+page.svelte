@@ -147,7 +147,7 @@
 										onchange={handleFileSelect}
 									/>
 								{/if}
-								<Button type="submit" size="sm" disabled={isSaving}>
+								<Button variant="primary" type="submit" size="sm" disabled={isSaving}>
 									{isSaving ? 'Saving...' : 'Save'}
 								</Button>
 							</form>

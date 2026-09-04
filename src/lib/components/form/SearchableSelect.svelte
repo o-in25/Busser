@@ -3,15 +3,11 @@
 	import { getContext, onMount, tick } from 'svelte';
 
 	import { Label } from '$lib/components/ui/label';
-	import {
-		NESTED_CREATE_KEY,
-		type NestedCreateKind,
-		type NestedCreateStack,
-	} from './nestedCreate.svelte';
+	import { NESTED_FORM_KEY, type NestedFormKind, type NestedFormStack } from './NestedForm.svelte';
 	import type { SelectOption } from '$lib/types';
 	import { cn } from '$lib/utils';
 
-	// svelte 5 replacement for Autocomplete: keyboard nav + nested-create "+" instead of page nav
+	// TODO: replace Autocomplete component with this
 	let {
 		label,
 		value = $bindable(null),
@@ -23,6 +19,7 @@
 		grant = '',
 		createKind = undefined,
 		onselect,
+		display = $bindable(key ?? ''),
 	}: {
 		label: string;
 		value?: string | null;
@@ -32,18 +29,21 @@
 		key?: string;
 		required?: boolean;
 		grant?: string;
-		createKind?: NestedCreateKind;
+		createKind?: NestedFormKind;
 		onselect?: (item: SelectOption) => void;
+		// typed text; bindable so a parent can use it as free-text (e.g. a house-item name)
+		display?: string;
 	} = $props();
 
 	const permissions = getContext<string[]>('permissions') ?? [];
-	const stack = getContext<NestedCreateStack | undefined>(NESTED_CREATE_KEY);
+	const stack = getContext<NestedFormStack | undefined>(NESTED_FORM_KEY);
 
 	let items = $state<SelectOption[]>([]);
 	let show = $state(false);
-	let display = $state(key ?? '');
 	let activeIndex = $state(-1);
 	let inputEl = $state<HTMLInputElement>();
+	let typing = $state(false);
+	let loaded = $state(false);
 
 	onMount(async () => {
 		try {
@@ -52,6 +52,8 @@
 			syncDisplayFromValue();
 		} catch {
 			// leave items empty on failure
+		} finally {
+			loaded = true;
 		}
 	});
 
@@ -71,12 +73,17 @@
 		}
 	}
 
+	// show the full list on focus; only narrow once the user actually types
 	const filtered = $derived(
-		items.filter((i) => i.name.toLowerCase().includes(display.toLowerCase().trim()))
+		typing
+			? items.filter((i) => i.name.toLowerCase().includes(display.toLowerCase().trim()))
+			: items
 	);
 
-	// resolve value from an exact display match (null while partially typed)
+	// resolve value from an exact display match (null while partially typed). wait for the initial
+	// load so a preset value survives a step remount before its items have arrived
 	$effect(() => {
+		if (!loaded) return;
 		const exact = items.find((i) => i.name.toLowerCase().trim() === display.toLowerCase().trim());
 		value = exact ? String(exact.value) : null;
 	});
@@ -85,6 +92,7 @@
 
 	function open() {
 		show = true;
+		typing = false;
 		activeIndex = -1;
 	}
 	function close() {
@@ -102,6 +110,7 @@
 		display = item.name;
 		value = String(item.value);
 		show = false;
+		typing = false;
 		onselect?.(item);
 	}
 
@@ -137,7 +146,7 @@
 	}
 
 	const inputClasses =
-		'glass-surface flex h-10 w-full px-3 py-2 text-base md:text-sm ring-offset-background placeholder:text-muted-foreground/80 focus-visible:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:shadow-glow-cyan';
+		'glass-surface flex h-10 w-full px-3 py-2 text-base md:text-sm ring-offset-background placeholder:text-muted-foreground/80 focus-visible:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50';
 </script>
 
 <div class="w-full">
@@ -157,6 +166,7 @@
 				oninput={(e) => {
 					display = e.currentTarget.value;
 					show = true;
+					typing = true;
 					activeIndex = -1;
 				}}
 				onfocus={open}
@@ -171,7 +181,7 @@
 							type="button"
 							class={cn(
 								'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors',
-								i === activeIndex ? 'bg-primary/15 text-primary' : 'hover:bg-accent/60'
+								i === activeIndex ? 'glass-primary' : 'hover:bg-white/40 dark:hover:bg-white/[0.08]'
 							)}
 							onmousedown={() => pick(item)}
 							onmouseenter={() => (activeIndex = i)}
@@ -192,7 +202,7 @@
 				type="button"
 				aria-label="Create new {createKind}"
 				onclick={handleCreate}
-				class="glass-surface flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary transition-colors hover:bg-white/40 dark:hover:bg-zinc-700/50"
+				class="glass-surface flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary transition-colors hover:bg-white/40 dark:hover:bg-white/[0.10]"
 			>
 				<Plus class="h-4 w-4" />
 			</button>

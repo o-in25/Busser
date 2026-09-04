@@ -28,7 +28,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleIsOwner, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	import type { ActionData, PageData } from './$types';
 
@@ -93,7 +93,7 @@
 
 	// Check if user is owner of workspace
 	function isOwner(workspace: WorkspaceWithRole): boolean {
-		return workspace.workspaceRole === 'owner';
+		return roleIsOwner(workspace.workspaceRole);
 	}
 
 	// Open edit dialog
@@ -182,7 +182,7 @@
 				Create and manage workspaces for organizing content
 			</p>
 		</div>
-		<Button onclick={() => (createDialogOpen = true)} class="w-fit">
+		<Button variant="primary" onclick={() => (createDialogOpen = true)} class="w-fit">
 			<Plus class="h-4 w-4 mr-2" />
 			Create Workspace
 		</Button>
@@ -290,7 +290,7 @@
 								</Table.Cell>
 								<Table.Cell>
 									<Badge
-										variant={workspace.workspaceRole === 'owner'
+										variant={roleIsOwner(workspace.workspaceRole)
 											? 'default'
 											: workspace.workspaceRole === 'editor'
 												? 'secondary'
@@ -322,7 +322,7 @@
 												variant="outline"
 												size="icon"
 												disabled
-												class="h-8 w-8 opacity-40"
+												class="opacity-40"
 												title={isGlobalWorkspace(workspace)
 													? 'Cannot modify the global workspace'
 													: 'Cannot modify the workspace you are currently in'}
@@ -334,7 +334,7 @@
 												variant="outline"
 												size="icon"
 												disabled
-												class="h-8 w-8 opacity-40"
+												class="opacity-40"
 												title={isGlobalWorkspace(workspace)
 													? 'Cannot delete the global workspace'
 													: 'Cannot delete the workspace you are currently in'}
@@ -347,7 +347,7 @@
 											<Button
 												variant="outline"
 												size="icon"
-												class="h-8 w-8 bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white"
+												class="bg-secondary-500/20 border-secondary-500/50 text-secondary-400 hover:bg-secondary-500 hover:text-white"
 												onclick={() => openEditDialog(workspace)}
 												title="Edit workspace"
 											>
@@ -357,7 +357,7 @@
 											<Button
 												variant="outline"
 												size="icon"
-												class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+												class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 												onclick={() => openDeleteDialog(workspace)}
 												title="Delete workspace"
 											>
@@ -429,7 +429,7 @@
 									</div>
 									<div class="flex items-center gap-2 mt-2">
 										<Badge class="{info.bg} {info.color} border-0">
-											{#if selectedWs.workspaceRole === 'owner'}
+											{#if roleIsOwner(selectedWs.workspaceRole)}
 												<Crown class="h-3 w-3 mr-1" />
 											{/if}
 											{info.label}
@@ -445,6 +445,7 @@
 
 					<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2">
 						<Button
+							variant="primary"
 							type="submit"
 							class="w-full sm:w-auto"
 							disabled={!preferredChanged || isPreferredSubmitting || data.workspaces.length === 1}
@@ -514,7 +515,9 @@
 						onValueChange={(v) => (newWorkspaceType = v as 'personal' | 'shared')}
 					>
 						<Select.Trigger>
-							<Select.Value placeholder="Select type" />
+							<Select.Value placeholder="Select type">
+								{newWorkspaceType.charAt(0).toUpperCase() + newWorkspaceType.slice(1)}
+							</Select.Value>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="shared" label="Shared">
@@ -538,7 +541,7 @@
 				<Button type="button" variant="outline" onclick={() => (createDialogOpen = false)}>
 					Cancel
 				</Button>
-				<Button type="submit">Create</Button>
+				<Button variant="primary" type="submit">Create</Button>
 			</Dialog.Footer>
 		</form>
 	</Dialog.Content>
@@ -585,7 +588,9 @@
 						disabled={selectedWorkspace ? isGlobalWorkspace(selectedWorkspace) : false}
 					>
 						<Select.Trigger>
-							<Select.Value placeholder="Select type" />
+							<Select.Value placeholder="Select type">
+								{editWorkspaceType.charAt(0).toUpperCase() + editWorkspaceType.slice(1)}
+							</Select.Value>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="shared" label="Shared">
@@ -614,7 +619,7 @@
 				<Button type="button" variant="outline" onclick={() => (editDialogOpen = false)}>
 					Cancel
 				</Button>
-				<Button type="submit">Save</Button>
+				<Button variant="primary" type="submit">Save</Button>
 			</Dialog.Footer>
 		</form>
 	</Dialog.Content>

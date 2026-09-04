@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { CircleCheck, FlaskConical, CircleX } from 'lucide-svelte';
+	import { CircleCheck, FlaskConical, CircleX, Store } from 'lucide-svelte';
 
 	import { goto } from '$app/navigation';
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
-	import { cn } from '$lib/utils';
 	import type { Product } from '$lib/types';
 
 	let {
@@ -35,14 +33,12 @@
 		if (product.productInStockQuantity === 0) {
 			return {
 				label: 'Out of Stock',
-				variant: 'destructive' as const,
 				icon: CircleX,
 				color: 'text-red-500',
 			};
 		}
 		return {
 			label: 'In Stock',
-			variant: 'default' as const,
 			icon: CircleCheck,
 			color: 'text-neon-green-500',
 		};
@@ -55,7 +51,7 @@
 	<!-- Grid View Card -->
 	<a href="/inventory/{product.productId}/edit" class="block group" onclick={handleClick}>
 		<Card.Root
-			class="overflow-hidden hover:shadow-lg transition-all duration-300 h-full dark:hover:shadow-glow-purple"
+			class="card-zoom overflow-hidden hover:shadow-lg transition-all duration-300 h-full dark:hover:shadow-glow-purple"
 		>
 			<!-- Image -->
 			<div class="relative h-44 overflow-hidden">
@@ -64,7 +60,7 @@
 					alt={product.productName}
 					variant="product"
 					class="h-full w-full"
-					imgClass="transition-transform duration-300 group-hover:scale-110"
+					imgClass="transition-transform duration-300 card-zoom-img"
 				/>
 				<!-- Gradient overlay on hover -->
 				<div
@@ -72,21 +68,15 @@
 				></div>
 
 				<!-- Category badge -->
-				<Badge variant="secondary" class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm">
+				<Badge class="absolute top-3 left-3 px-2.5 py-0.5 text-xs font-semibold">
 					{product.categoryName}
 				</Badge>
 
 				<!-- Stock status badge -->
 				{#if showStock}
 					<div class="absolute top-3 right-3">
-						<Badge
-							variant={stockStatus.variant}
-							class={cn(
-								'bg-background/80 backdrop-blur-sm',
-								stockStatus.variant === 'default' && 'dark:shadow-glow-green'
-							)}
-						>
-							<StockIcon class="h-3 w-3 mr-1 {stockStatus.color}" />
+						<Badge class="gap-1 px-2.5 py-0.5 text-xs font-semibold">
+							<StockIcon class="h-3 w-3 {stockStatus.color}" />
 							{stockStatus.label}
 						</Badge>
 					</div>
@@ -102,10 +92,17 @@
 					{product.productDescription || product.categoryDescription || 'No description available'}
 				</p>
 
+				{#if product.supplierName}
+					<p class="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+						<Store class="h-3.5 w-3.5 shrink-0" />
+						<span class="truncate">{product.supplierName}</span>
+					</p>
+				{/if}
+
 				<!-- Recipe usage indicator -->
 				{#if recipeCount > 0}
 					<button
-						class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+						class="focus-ring flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
 						onclick={(e) => {
 							e.preventDefault();
 							e.stopPropagation();
@@ -149,9 +146,9 @@
 						<h3 class="font-bold text-base group-hover:text-primary transition-colors truncate">
 							{product.productName}
 						</h3>
-						<FancyBadge variant="secondary" class="!px-2 !py-0.5 !gap-1 shrink-0">
+						<Badge size="lg" variant="secondary" class="!px-2 !py-0.5 !gap-1 shrink-0">
 							<span class="text-xs">{product.categoryName}</span>
-						</FancyBadge>
+						</Badge>
 					</div>
 					<p class="text-sm text-muted-foreground line-clamp-1">
 						{product.productDescription || product.categoryDescription || 'No description'}
@@ -161,7 +158,7 @@
 					<div class="flex items-center gap-3 mt-2">
 						{#if recipeCount > 0}
 							<button
-								class="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+								class="focus-ring flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
 								onclick={(e) => {
 									e.preventDefault();
 									e.stopPropagation();
@@ -175,6 +172,12 @@
 						{#if product.productProof > 0}
 							<span class="text-xs text-muted-foreground">
 								{product.productProof} Proof
+							</span>
+						{/if}
+						{#if product.supplierName}
+							<span class="flex items-center gap-1 text-xs text-muted-foreground">
+								<Store class="h-3.5 w-3.5" />
+								{product.supplierName}
 							</span>
 						{/if}
 					</div>

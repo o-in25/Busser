@@ -8,7 +8,9 @@
 
 	<p class="text-muted-foreground mb-4">
 		We operate the website
-		<a href="https://busserapp.com" class="text-primary hover:underline">https://busserapp.com</a>
+		<a href="https://busserapp.com" class="focus-ring text-primary hover:underline"
+			>https://busserapp.com</a
+		>
 		(the "Site"), as well as any other related products and services that refer or link to these legal
 		terms (the "Legal Terms") (collectively, the "Services").
 	</p>
@@ -22,7 +24,7 @@
 
 	<p class="text-muted-foreground mb-4">
 		You can contact us by email at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>.
 	</p>
@@ -61,84 +63,91 @@
 
 	<ol class="list-decimal pl-6 mb-4 text-muted-foreground">
 		<li class="mb-1">
-			<a href="#services" class="text-primary hover:underline">Our Services</a>
+			<a href="#services" class="focus-ring text-primary hover:underline">Our Services</a>
 		</li>
 		<li class="mb-1">
-			<a href="#ip" class="text-primary hover:underline">Intellectual Property Rights</a>
+			<a href="#ip" class="focus-ring text-primary hover:underline">Intellectual Property Rights</a>
 		</li>
 		<li class="mb-1">
-			<a href="#userreps" class="text-primary hover:underline">User Representations</a>
+			<a href="#userreps" class="focus-ring text-primary hover:underline">User Representations</a>
 		</li>
 		<li class="mb-1">
-			<a href="#userreg" class="text-primary hover:underline">User Registration</a>
+			<a href="#userreg" class="focus-ring text-primary hover:underline">User Registration</a>
 		</li>
 		<li class="mb-1">
-			<a href="#purchases" class="text-primary hover:underline">Purchases and Payment</a>
+			<a href="#purchases" class="focus-ring text-primary hover:underline">Purchases and Payment</a>
 		</li>
 		<li class="mb-1">
-			<a href="#prohibited" class="text-primary hover:underline">Prohibited Activities</a>
-		</li>
-		<li class="mb-1">
-			<a href="#ugc" class="text-primary hover:underline">User Generated Contributions</a>
-		</li>
-		<li class="mb-1">
-			<a href="#license" class="text-primary hover:underline">Contribution License</a>
-		</li>
-		<li class="mb-1">
-			<a href="#reviews" class="text-primary hover:underline">Guidelines for Reviews</a>
-		</li>
-		<li class="mb-1">
-			<a href="#thirdparty" class="text-primary hover:underline">Third-Party Websites and Content</a
+			<a href="#prohibited" class="focus-ring text-primary hover:underline">Prohibited Activities</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#sitemanage" class="text-primary hover:underline">Services Management</a>
+			<a href="#ugc" class="focus-ring text-primary hover:underline">User Generated Contributions</a
+			>
 		</li>
 		<li class="mb-1">
-			<a href="#ppyes" class="text-primary hover:underline">Privacy Policy</a>
+			<a href="#license" class="focus-ring text-primary hover:underline">Contribution License</a>
 		</li>
 		<li class="mb-1">
-			<a href="#terms" class="text-primary hover:underline">Term and Termination</a>
+			<a href="#reviews" class="focus-ring text-primary hover:underline">Guidelines for Reviews</a>
 		</li>
 		<li class="mb-1">
-			<a href="#modifications" class="text-primary hover:underline"
+			<a href="#thirdparty" class="focus-ring text-primary hover:underline"
+				>Third-Party Websites and Content</a
+			>
+		</li>
+		<li class="mb-1">
+			<a href="#sitemanage" class="focus-ring text-primary hover:underline">Services Management</a>
+		</li>
+		<li class="mb-1">
+			<a href="#ppyes" class="focus-ring text-primary hover:underline">Privacy Policy</a>
+		</li>
+		<li class="mb-1">
+			<a href="#terms" class="focus-ring text-primary hover:underline">Term and Termination</a>
+		</li>
+		<li class="mb-1">
+			<a href="#modifications" class="focus-ring text-primary hover:underline"
 				>Modifications and Interruptions</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#law" class="text-primary hover:underline">Governing Law</a>
+			<a href="#law" class="focus-ring text-primary hover:underline">Governing Law</a>
 		</li>
 		<li class="mb-1">
-			<a href="#disputes" class="text-primary hover:underline">Dispute Resolution</a>
+			<a href="#disputes" class="focus-ring text-primary hover:underline">Dispute Resolution</a>
 		</li>
 		<li class="mb-1">
-			<a href="#corrections" class="text-primary hover:underline">Corrections</a>
+			<a href="#corrections" class="focus-ring text-primary hover:underline">Corrections</a>
 		</li>
 		<li class="mb-1">
-			<a href="#disclaimer" class="text-primary hover:underline">Disclaimer</a>
+			<a href="#disclaimer" class="focus-ring text-primary hover:underline">Disclaimer</a>
 		</li>
 		<li class="mb-1">
-			<a href="#liability" class="text-primary hover:underline">Limitations of Liability</a>
+			<a href="#liability" class="focus-ring text-primary hover:underline"
+				>Limitations of Liability</a
+			>
 		</li>
 		<li class="mb-1">
-			<a href="#indemnification" class="text-primary hover:underline">Indemnification</a>
+			<a href="#indemnification" class="focus-ring text-primary hover:underline">Indemnification</a>
 		</li>
 		<li class="mb-1">
-			<a href="#userdata" class="text-primary hover:underline">User Data</a>
+			<a href="#userdata" class="focus-ring text-primary hover:underline">User Data</a>
 		</li>
 		<li class="mb-1">
-			<a href="#electronic" class="text-primary hover:underline"
+			<a href="#electronic" class="focus-ring text-primary hover:underline"
 				>Electronic Communications, Transactions, and Signatures</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#california" class="text-primary hover:underline">California Users and Residents</a>
+			<a href="#california" class="focus-ring text-primary hover:underline"
+				>California Users and Residents</a
+			>
 		</li>
 		<li class="mb-1">
-			<a href="#misc" class="text-primary hover:underline">Miscellaneous</a>
+			<a href="#misc" class="focus-ring text-primary hover:underline">Miscellaneous</a>
 		</li>
 		<li class="mb-1">
-			<a href="#contact" class="text-primary hover:underline">Contact Us</a>
+			<a href="#contact" class="focus-ring text-primary hover:underline">Contact Us</a>
 		</li>
 	</ol>
 
@@ -189,7 +198,7 @@
 	<p class="text-muted-foreground mb-4">
 		Subject to your compliance with these Legal Terms, including the "<a
 			href="#prohibited"
-			class="text-primary hover:underline">Prohibited Activities</a
+			class="focus-ring text-primary hover:underline">Prohibited Activities</a
 		>" section below, we grant you a non-exclusive, non-transferable, revocable license to:
 	</p>
 
@@ -213,7 +222,7 @@
 	<p class="text-muted-foreground mb-4">
 		If you wish to make any use of the Services, Content, or Marks other than as set out in this
 		section or elsewhere in our Legal Terms, please address your request to:
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>. If we ever grant you the permission to post, reproduce, or publicly display any part of our
 		Services or Content, you must identify us as the owners or licensors of the Services, Content,
@@ -233,8 +242,9 @@
 	<h3 class="text-lg font-medium mt-4 mb-2">Your submissions and contributions</h3>
 
 	<p class="text-muted-foreground mb-4">
-		Please review this section and the "<a href="#prohibited" class="text-primary hover:underline"
-			>Prohibited Activities</a
+		Please review this section and the "<a
+			href="#prohibited"
+			class="focus-ring text-primary hover:underline">Prohibited Activities</a
 		>" section carefully prior to using our Services to understand the (a) rights you give us and
 		(b) obligations you have when you post or upload any content through the Services.
 	</p>
@@ -291,7 +301,7 @@
 		<li class="mb-2">
 			confirm that you have read and agree with our "<a
 				href="#prohibited"
-				class="text-primary hover:underline">Prohibited Activities</a
+				class="focus-ring text-primary hover:underline">Prohibited Activities</a
 			>" and will not post, send, publish, upload, or transmit through the Services any Submission
 			nor post any Contribution that is illegal, harassing, hateful, harmful, defamatory, obscene,
 			bullying, abusive, discriminatory, threatening to any person or group, sexually explicit,
@@ -684,10 +694,11 @@
 
 	<p class="text-muted-foreground mb-4">
 		We care about data privacy and security. Please review our Privacy Policy:
-		<a href="/privacy" class="text-primary hover:underline">https://busserapp.com/privacy</a>. By
-		using the Services, you agree to be bound by our Privacy Policy, which is incorporated into
-		these Legal Terms. Please be advised the Services are hosted in the United States. If you access
-		the Services from any other region of the world with laws or other requirements governing
+		<a href="/privacy" class="focus-ring text-primary hover:underline"
+			>https://busserapp.com/privacy</a
+		>. By using the Services, you agree to be bound by our Privacy Policy, which is incorporated
+		into these Legal Terms. Please be advised the Services are hosted in the United States. If you
+		access the Services from any other region of the world with laws or other requirements governing
 		personal data collection, use, or disclosure that differ from applicable laws in the United
 		States, then through your continued use of the Services, you are transferring your data to the
 		United States, and you expressly consent to have your data transferred to and processed in the
@@ -776,7 +787,8 @@
 			href="http://www.adr.org"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="text-primary hover:underline">American Arbitration Association (AAA) website</a
+			class="focus-ring text-primary hover:underline"
+			>American Arbitration Association (AAA) website</a
 		>. Your arbitration fees and your share of arbitrator compensation shall be governed by the AAA
 		Consumer Rules and, where appropriate, limited by the AAA Consumer Rules.
 	</p>
@@ -978,7 +990,7 @@
 	<p class="text-muted-foreground mb-4">Busser</p>
 	<p class="text-muted-foreground mb-4">United States</p>
 	<p class="text-muted-foreground mb-4">
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>
 	</p>

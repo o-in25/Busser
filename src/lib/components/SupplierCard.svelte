@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ExternalLink, MapPin, Phone, Trash2 } from 'lucide-svelte';
+	import { ExternalLink, MapPin, Pencil, Phone, Trash2 } from 'lucide-svelte';
 
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -10,11 +10,13 @@
 		productCount = 0,
 		canModify = false,
 		onRemove,
+		onEdit,
 	}: {
 		supplier: Supplier;
 		productCount?: number;
 		canModify?: boolean;
 		onRemove?: (supplierId: number) => void;
+		onEdit?: (supplier: Supplier) => void;
 	} = $props();
 </script>
 
@@ -31,15 +33,29 @@
 				{/if}
 			</div>
 
-			{#if canModify && onRemove && supplier.supplierId !== 1}
-				<Button
-					variant="ghost"
-					size="sm"
-					class="shrink-0 text-muted-foreground hover:text-destructive"
-					onclick={() => onRemove(supplier.supplierId)}
-				>
-					<Trash2 class="h-4 w-4" />
-				</Button>
+			{#if canModify && supplier.supplierIsOwned && !supplier.supplierIsDefault}
+				<div class="flex shrink-0 items-center">
+					{#if onEdit}
+						<Button
+							variant="ghost"
+							size="sm"
+							class="text-muted-foreground hover:text-foreground"
+							onclick={() => onEdit(supplier)}
+						>
+							<Pencil class="h-4 w-4" />
+						</Button>
+					{/if}
+					{#if onRemove}
+						<Button
+							variant="ghost"
+							size="sm"
+							class="text-muted-foreground hover:text-destructive"
+							onclick={() => onRemove(supplier.supplierId)}
+						>
+							<Trash2 class="h-4 w-4" />
+						</Button>
+					{/if}
+				</div>
 			{/if}
 		</div>
 
@@ -47,7 +63,7 @@
 			{#if supplier.supplierPhone}
 				<a
 					href="tel:{supplier.supplierPhone}"
-					class="flex items-center gap-1 hover:text-foreground transition-colors"
+					class="focus-ring flex items-center gap-1 hover:text-foreground transition-colors"
 				>
 					<Phone class="h-3.5 w-3.5" />
 					{supplier.supplierPhone}
@@ -58,7 +74,7 @@
 					href={supplier.supplierWebsiteUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="flex items-center gap-1 hover:text-foreground transition-colors"
+					class="focus-ring flex items-center gap-1 hover:text-foreground transition-colors"
 				>
 					<ExternalLink class="h-3.5 w-3.5" />
 					Website

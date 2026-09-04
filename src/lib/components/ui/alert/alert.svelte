@@ -15,7 +15,7 @@
 
 	const variantClasses: Record<Variant, string> = {
 		default:
-			'bg-white/50 dark:bg-zinc-900/50 border-white/30 dark:border-zinc-700/40 text-foreground',
+			'bg-white/50 dark:bg-zinc-900/50 border-white/30 dark:border-white/[0.12] text-foreground',
 		destructive:
 			'bg-destructive/10 dark:bg-destructive/20 border-destructive/30 dark:border-destructive/40 text-destructive dark:text-red-400 [&>svg]:text-destructive dark:[&>svg]:text-red-400 dark:shadow-glow-pink',
 		success:

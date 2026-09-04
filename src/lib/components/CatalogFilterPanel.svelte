@@ -22,6 +22,7 @@
 		perPage = '24',
 		advancedFilterCount = 0,
 		hideSpirit = false,
+		canModify = false,
 		onSpiritChange,
 		onShowFilterChange,
 		onMoodChange,
@@ -38,6 +39,7 @@
 		perPage?: string;
 		advancedFilterCount?: number;
 		hideSpirit?: boolean;
+		canModify?: boolean;
 		onSpiritChange: (value: string) => void;
 		onShowFilterChange: (value: string) => void;
 		onMoodChange?: (value: string) => void;
@@ -55,11 +57,13 @@
 		{ value: 'oldest', label: 'Oldest First' },
 	];
 
-	const showFilterOptions = [
+	// drafts are an owner/editor-only view; unpublished recipes are hidden everywhere else
+	const showFilterOptions = $derived([
 		{ value: 'all', label: 'All Recipes' },
 		{ value: 'favorites', label: 'My Favorites' },
 		{ value: 'featured', label: 'Featured' },
-	];
+		...(canModify ? [{ value: 'drafts', label: 'Drafts' }] : []),
+	]);
 
 	const spiritLabel = $derived.by(() => {
 		if (!selectedSpirit || selectedSpirit === 'all') return 'All Spirits';
@@ -98,7 +102,7 @@
 
 	const perPageLabel = $derived.by(() => {
 		const option = perPageOptions.find((o) => o.value === perPage);
-		return option?.label || '24 per page';
+		return option?.label || '10 per page';
 	});
 
 	const hasNonDefaultFilters = $derived(
@@ -110,7 +114,7 @@
 	);
 </script>
 
-<div class="flex flex-col gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 sm:grid-flow-row-dense gap-4">
 	<!-- spirit -->
 	{#if !hideSpirit}
 		<div class="flex flex-col gap-1.5">
@@ -142,13 +146,13 @@
 
 	<!-- mood -->
 	{#if onMoodChange}
-		<div class="flex flex-col gap-1.5">
+		<div class="flex flex-col gap-1.5 sm:col-span-2">
 			<span class="text-sm font-medium text-muted-foreground">Mood</span>
 			<div class="flex flex-wrap gap-1.5">
 				{#each moods as mood}
 					<Button
 						variant={activeMoods.has(mood.id) ? 'default' : 'outline'}
-						class="rounded-full border-dashed h-7 text-xs px-3"
+						class="rounded-full border-dashed"
 						size="sm"
 						onclick={() => toggleMood(mood.id)}
 					>
@@ -219,7 +223,7 @@
 
 	<!-- advanced filters link -->
 	{#if onAdvancedClick}
-		<div class="border-t border-border/50 pt-3">
+		<div class="border-t border-border/50 pt-3 sm:col-span-2">
 			<button
 				onclick={onAdvancedClick}
 				class="flex items-center justify-between w-full rounded-lg border border-input/50 px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors"
@@ -242,7 +246,7 @@
 	{#if hasNonDefaultFilters}
 		<button
 			onclick={onReset}
-			class="text-sm text-muted-foreground hover:text-foreground underline self-start"
+			class="focus-ring text-sm text-muted-foreground hover:text-foreground underline justify-self-start sm:col-span-2"
 		>
 			Reset filters
 		</button>

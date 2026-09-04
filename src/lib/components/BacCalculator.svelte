@@ -294,7 +294,7 @@
 					<button
 						type="button"
 						onclick={toggleWeightUnit}
-						class="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-1"
+						class="focus-ring absolute right-2 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-1"
 					>
 						{weightUnit}
 					</button>
@@ -354,7 +354,7 @@
 				<button
 					type="button"
 					onclick={toggleTimeUnit}
-					class="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-1"
+					class="focus-ring absolute right-2 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-1"
 				>
 					{timeUnit}
 				</button>
@@ -458,7 +458,6 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8"
 										onclick={() => removeDrink(drink.recipeId, true)}
 									>
 										<Minus class="h-4 w-4" />
@@ -467,7 +466,6 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8"
 										onclick={() => incrementDrink(drink.recipeId, true)}
 									>
 										<Plus class="h-4 w-4" />
@@ -492,7 +490,6 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8"
 										onclick={() => removeDrink(drink.recipeId, false)}
 									>
 										<Minus class="h-4 w-4" />
@@ -501,7 +498,6 @@
 									<Button
 										variant="outline"
 										size="icon"
-										class="h-8 w-8"
 										onclick={() => incrementDrink(drink.recipeId, false)}
 									>
 										<Plus class="h-4 w-4" />
@@ -521,7 +517,12 @@
 	</div>
 
 	<!-- Calculate Button -->
-	<Button onclick={calculate} class="w-full sm:w-auto" disabled={selectedDrinks.length === 0}>
+	<Button
+		variant="primary"
+		onclick={calculate}
+		class="w-full sm:w-auto"
+		disabled={selectedDrinks.length === 0}
+	>
 		Calculate BAC
 	</Button>
 

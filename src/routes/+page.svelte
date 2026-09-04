@@ -8,14 +8,13 @@
 		FlaskConical,
 		GlassWater,
 		Loader2,
-		LogIn,
-		Mail,
 		Package,
 		Plus,
 		Send,
 		ShoppingCart,
 		Shuffle,
 		Sparkles,
+		UserPlus,
 		Users,
 		BarChart3,
 		DollarSign,
@@ -28,12 +27,12 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import FancyCarousel from '$lib/components/FancyCarousel.svelte';
+	import RecipeCarousel from '$lib/components/RecipeCarousel.svelte';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
 	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
 	import TasteProfileChart from '$lib/components/TasteProfileChart.svelte';
 	import CostBreakdown from '$lib/components/CostBreakdown.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
+	import DashboardSkeleton from '$lib/components/DashboardSkeleton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -43,9 +42,11 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { reveal } from '$lib/actions/reveal';
 	import { moods } from '$lib/spirits';
+	import { roleCanModify, roleIsOwner } from '$lib/types/workspace';
 	import { indexFromSeed } from '$lib/math';
 	import greetings from '$lib/data/greetings.json';
 	import { cn } from '$lib/utils';
+	import { workspaceSwitching } from '../stores';
 
 	import type { ActionData, PageData } from './$types';
 
@@ -103,9 +104,9 @@
 
 	// workspace role determines resource access (viewer can only read)
 	const workspaceRole = $derived(dashboardData?.workspaceRole);
-	const canModify = $derived(workspaceRole === 'owner' || workspaceRole === 'editor');
+	const canModify = $derived(roleCanModify(workspaceRole));
 	// global catalog has no per-user inventory, so it's never treated as an owned bar
-	const isOwner = $derived(workspaceRole === 'owner' && !data.isGlobalCatalog);
+	const isOwner = $derived(roleIsOwner(workspaceRole) && !data.isGlobalCatalog);
 
 	// a workspace switcher tile only appears when there's somewhere to switch to.
 	// when it shows, it takes the (nav-redundant) browse tile's slot on mobile.
@@ -210,7 +211,7 @@
 	<!-- Hero Section -->
 	<!-- mobile reserves extra height for the fixed bottom nav so the carousel stays above the fold -->
 	<section
-		class="relative overflow-hidden h-[calc(100dvh-10rem)] md:h-[calc(100dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl"
+		class="relative overflow-hidden min-h-[calc(80dvh-10rem)] md:min-h-[calc(80dvh-6.5rem)] flex flex-col justify-center items-center rounded-2xl py-10 md:py-12"
 	>
 		<!-- Animated background gradient -->
 		<div class="absolute inset-0 hero-gradient-bg -z-10 rounded-2xl"></div>
@@ -223,232 +224,78 @@
 			<div class="hero-orb hero-orb-orange"></div>
 		</div>
 
-		<div class="max-w-4xl mx-auto text-center px-4">
-			<!-- Headline -->
-			<h1
-				class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight hero-enter text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
-				style="--delay: 200ms"
-			>
-				From Shelf To Shaker
-			</h1>
+		<!-- hero content sits edge-to-edge over the gradient/orbs -->
+		<div class="relative z-10 w-[calc(100%-1.5rem)] max-w-5xl mx-auto px-4 sm:px-8">
+			<div class="max-w-4xl mx-auto text-center">
+				<!-- Headline -->
+				<h1
+					class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight hero-enter text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
+					style="--delay: 200ms"
+				>
+					From Shelf To Shaker
+				</h1>
 
-			<!-- Subheadline -->
-			<p
-				class="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto hero-enter"
-				style="--delay: 400ms"
-			>
-				Track your bottles. Discover what you can mix.
-			</p>
-
-			<!-- CTAs -->
-			<div class="flex flex-col sm:flex-row justify-center gap-4 hero-enter" style="--delay: 600ms">
-				<FancyButton variant="primary" href="/signup">
-					<Mail class="w-5 h-5 mr-2" />
-					Sign Up
-				</FancyButton>
-				<FancyButton href="/login">
-					<LogIn class="w-5 h-5 mr-2" />
-					Log In
-				</FancyButton>
-			</div>
-		</div>
-
-		<!-- Featured Recipes Carousel -->
-		{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
-			<div class="mt-4 w-full hero-enter" style="--delay: 800ms">
-				<FancyCarousel recipes={landingData.featuredRecipes} />
-				<!-- secondary browse affordance — kept lightweight so it doesn't compete with sign up -->
-				<div class="mt-3 text-center">
-					<a
-						href="/catalog"
-						class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-					>
-						Browse the catalog
-						<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
-					</a>
-				</div>
-			</div>
-		{/if}
-	</section>
-
-	<!-- Features Section -->
-	<section class="py-16 px-4">
-		<div class="max-w-6xl mx-auto">
-			<div class="text-center mb-12 reveal-on-scroll" use:reveal>
-				<h2 class="text-3xl md:text-4xl font-bold mb-4">Features</h2>
-				<p class="text-muted-foreground text-lg max-w-2xl mx-auto">
-					Busser finds recipes that match your on-hand ingredients, no guesswork needed.
+				<!-- Subheadline -->
+				<p
+					class="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto hero-enter"
+					style="--delay: 400ms"
+				>
+					Track the bottles you own and Busser shows you every cocktail you can make right now — no
+					guesswork.
 				</p>
-			</div>
 
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-				<!-- Inventory Management -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 0 }}>
-					<Card.Root
-						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-					>
-						<div
-							class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.6)]"
-						></div>
-						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
-							>
-								<Package class="h-6 w-6 text-primary" />
-							</div>
-							<Card.Title class="text-lg">Inventory Management</Card.Title>
-						</Card.Header>
-						<Card.Content>
-							<p class="text-sm text-muted-foreground">
-								Track your spirits, liqueurs, mixers, and ingredients in one place. Organize by
-								category and never lose track of what you have.
-							</p>
-						</Card.Content>
-					</Card.Root>
-				</div>
-
-				<!-- Smart Matching -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
-					<Card.Root
-						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-					>
-						<div
-							class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(28,186,138,0.6)]"
-						></div>
-						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
-							>
-								<SwatchBook class="h-6 w-6 text-primary" />
-							</div>
-							<Card.Title class="text-lg">Smart Matching</Card.Title>
-						</Card.Header>
-						<Card.Content>
-							<p class="text-sm text-muted-foreground">
-								Discover which cocktails you can make right now based on your current inventory. No
-								more guessing or missing ingredients.
-							</p>
-						</Card.Content>
-					</Card.Root>
-				</div>
-
-				<!-- Spirit Guide -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
-					<Card.Root
-						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-					>
-						<div
-							class="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(232,163,15,0.6)]"
-						></div>
-						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
-							>
-								<BookOpen class="h-6 w-6 text-primary" />
-							</div>
-							<Card.Title class="text-lg">Spirit Guide</Card.Title>
-						</Card.Header>
-						<Card.Content>
-							<p class="text-sm text-muted-foreground">
-								Browse a curated and detailed spirit catalog, with cocktail history, how different
-								spirits are made, and bartending tips.
-							</p>
-						</Card.Content>
-					</Card.Root>
-				</div>
-
-				<!-- AI-Powered -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
-					<Card.Root
-						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors"
-					>
-						<div
-							class="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(165,125,213,0.6)]"
-						></div>
-						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
-							>
-								<Sparkles class="h-6 w-6 text-primary" />
-							</div>
-							<Card.Title class="text-lg">AI-Powered Tools</Card.Title>
-						</Card.Header>
-						<Card.Content>
-							<p class="text-sm text-muted-foreground">
-								Leverage intelligent features to generate recipe suggestions and get personalized
-								recommendations based on your preferences.
-							</p>
-						</Card.Content>
-					</Card.Root>
+				<!-- CTA + reassurance -->
+				<div class="flex flex-col items-center gap-2 hero-enter" style="--delay: 600ms">
+					<Button variant="cta-primary" size="cta" href="/signup">
+						<UserPlus class="w-5 h-5 mr-2" />
+						Sign Up
+					</Button>
+					<p class="text-sm text-muted-foreground/70">
+						Free ·
+						<a
+							href="https://github.com/o-in25/Busser"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="focus-ring underline-offset-2 hover:text-foreground hover:underline transition-colors"
+						>
+							open source
+						</a>
+					</p>
 				</div>
 			</div>
 
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<!-- Store Finder -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 400 }}>
-					<Card.Root
-						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
-					>
-						<div
-							class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(34,211,238,0.6)]"
-						></div>
-						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
-							>
-								<MapPin class="h-6 w-6 text-primary" />
-							</div>
-							<Card.Title class="text-lg">Store Finder</Card.Title>
-						</Card.Header>
-						<Card.Content>
-							<p class="text-sm text-muted-foreground">
-								Find nearby liquor stores to restock your bar or compare product prices. Powered by
-								Google Places, so you always know where to get what you need.
-							</p>
-						</Card.Content>
-					</Card.Root>
+			<!-- Featured Recipes Carousel -->
+			{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
+				<div class="mt-8 w-full hero-enter" style="--delay: 800ms">
+					<!-- cap the spotlight: a dot pager stops reading past ~6 -->
+					<RecipeCarousel recipes={landingData.featuredRecipes.slice(0, 6)} />
+					<!-- secondary browse affordance — kept lightweight so it doesn't compete with sign up -->
+					<div class="mt-3 text-center">
+						<a
+							href="/catalog"
+							class="focus-ring inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+						>
+							Browse the catalog
+							<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
+						</a>
+					</div>
 				</div>
-
-				<!-- Workspace Collaboration -->
-				<div class="reveal-on-scroll" use:reveal={{ delay: 500 }}>
-					<Card.Root
-						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
-					>
-						<div
-							class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.4)]"
-						></div>
-						<Card.Header class="pb-2">
-							<div
-								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
-							>
-								<Users class="h-6 w-6 text-primary" />
-							</div>
-							<Card.Title class="text-lg">Workspace Collaboration</Card.Title>
-						</Card.Header>
-						<Card.Content>
-							<p class="text-sm text-muted-foreground">
-								Create shared workspaces to manage your bar with friends, family, or colleagues.
-								Perfect for home bars, small events, or collaborative cocktail exploration.
-							</p>
-						</Card.Content>
-					</Card.Root>
-				</div>
-			</div>
+			{/if}
 		</div>
 	</section>
 
 	<!-- How It Works Section -->
-	<section class="py-16 px-4">
+	<section class="py-8 px-4">
 		<div class="max-w-4xl mx-auto">
 			<div class="text-center mb-12 reveal-on-scroll" use:reveal>
-				<h2 class="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+				<h2 class="text-3xl md:text-4xl font-bold mb-4">How it works</h2>
 				<p class="text-muted-foreground text-lg">Three steps to your next cocktail</p>
 			</div>
 
 			<div class="relative">
 				<!-- connecting line (desktop only) -->
 				<div
-					class="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-primary-500 via-neon-amber-500 to-neon-green-500 opacity-30"
+					class="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-primary-500 via-neon-amber-500 to-primary-600 opacity-30"
 				></div>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
@@ -471,7 +318,7 @@
 								1
 							</span>
 						</div>
-						<h3 class="text-lg font-semibold mb-2">Add Your Bottles</h3>
+						<h3 class="text-lg font-semibold mb-2">Add your bottles</h3>
 						<p class="text-sm text-muted-foreground">
 							Log the spirits, liqueurs, and mixers you already own.
 						</p>
@@ -496,7 +343,7 @@
 								2
 							</span>
 						</div>
-						<h3 class="text-lg font-semibold mb-2">Get Matched Recipes</h3>
+						<h3 class="text-lg font-semibold mb-2">Get matched recipes</h3>
 						<p class="text-sm text-muted-foreground">
 							Busser finds every cocktail you can make right now.
 						</p>
@@ -510,22 +357,183 @@
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
 								<div
-									class="w-24 h-24 rounded-full bg-neon-green-500/10 flex items-center justify-center"
+									class="w-24 h-24 rounded-full bg-primary-600/10 flex items-center justify-center"
 								>
-									<GlassWater class="h-10 w-10 text-neon-green-500" />
+									<GlassWater class="h-10 w-10 text-primary-600" />
 								</div>
 							</div>
 							<span
-								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-neon-green-500 text-white text-xs font-bold flex items-center justify-center"
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center"
 							>
 								3
 							</span>
 						</div>
-						<h3 class="text-lg font-semibold mb-2">Start Mixing</h3>
+						<h3 class="text-lg font-semibold mb-2">Start mixing</h3>
 						<p class="text-sm text-muted-foreground">
 							Follow step-by-step instructions and enjoy your drink.
 						</p>
 					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Features Section -->
+	<section class="py-8 px-4">
+		<div class="max-w-6xl mx-auto">
+			<div class="text-center mb-12 reveal-on-scroll" use:reveal>
+				<h2 class="text-3xl md:text-4xl font-bold mb-4">Everything your bar needs</h2>
+			</div>
+
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<!-- Inventory Management -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 0 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
+					>
+						<div
+							class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.6)]"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
+								<Package class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">Inventory management</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground">
+								Track your spirits, liqueurs, mixers, and ingredients in one place. Organize by
+								category and never lose track of what you have.
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</div>
+
+				<!-- Smart Matching -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 50 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
+					>
+						<div
+							class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(28,186,138,0.6)]"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
+								<SwatchBook class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">Smart matching</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground">
+								Tell Busser what's on your shelf and it works out every cocktail you can make right
+								now — no more guessing at what you're missing.
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</div>
+
+				<!-- Spirit Guide -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 100 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
+					>
+						<div
+							class="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(232,163,15,0.6)]"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
+								<BookOpen class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">Spirit guide</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground">
+								Browse a curated and detailed spirit catalog, with cocktail history, how different
+								spirits are made, and bartending tips.
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</div>
+
+				<!-- AI-Powered -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 200 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
+					>
+						<div
+							class="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(165,125,213,0.6)]"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
+								<Sparkles class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">AI-powered tools</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground">
+								A built-in assistant answers your cocktail and bartending questions and can act on
+								your bar for you — plus AI-generated recipe details and imagery.
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</div>
+
+				<!-- Store Finder -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 300 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
+					>
+						<div
+							class="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(34,211,238,0.6)]"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
+								<MapPin class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">Store finder</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground">
+								Find nearby liquor stores to restock your bar or compare product prices. Powered by
+								Google Places, so you always know where to get what you need.
+							</p>
+						</Card.Content>
+					</Card.Root>
+				</div>
+
+				<!-- Workspace Collaboration -->
+				<div class="reveal-on-scroll" use:reveal={{ delay: 400 }}>
+					<Card.Root
+						class="group relative overflow-hidden border-primary/20 hover:border-primary/40 transition-colors h-full"
+					>
+						<div
+							class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl bg-[rgba(248,78,128,0.4)]"
+						></div>
+						<Card.Header class="pb-2">
+							<div
+								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors"
+							>
+								<Users class="h-6 w-6 text-primary" />
+							</div>
+							<Card.Title class="text-lg">Workspace collaboration</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<p class="text-sm text-muted-foreground">
+								Create shared workspaces to manage your bar with friends, family, or colleagues.
+								Perfect for home bars, small events, or collaborative cocktail exploration.
+							</p>
+						</Card.Content>
+					</Card.Root>
 				</div>
 			</div>
 		</div>
@@ -539,9 +547,9 @@
 			>
 				<div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
 				<div class="relative">
-					<h2 class="text-3xl md:text-4xl font-bold mb-4">Get Started</h2>
+					<h2 class="text-3xl md:text-4xl font-bold mb-4">Get started</h2>
 					<p class="text-muted-foreground text-lg mb-4">
-						Create an account to start tracking your bar.
+						Set up your shelf once and Busser keeps showing you what you can pour.
 					</p>
 					{#if landingData?.inviteOnly}
 						<p class="text-muted-foreground/60 text-sm mb-8">
@@ -555,10 +563,21 @@
 							</button>
 						</p>
 					{/if}
-					<FancyButton variant="primary" href="/signup">
+					<Button variant="cta-primary" size="cta" href="/signup">
 						Sign Up
 						<ArrowRight class="ml-2 h-5 w-5" />
-					</FancyButton>
+					</Button>
+					<p class="text-sm text-muted-foreground/70 mt-3">
+						Free ·
+						<a
+							href="https://github.com/o-in25/Busser"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="focus-ring underline-offset-2 hover:text-foreground hover:underline transition-colors"
+						>
+							open source
+						</a>
+					</p>
 				</div>
 			</div>
 		</div>
@@ -655,7 +674,12 @@
 							>
 								Cancel
 							</Button>
-							<Button type="submit" class="w-full sm:w-auto" disabled={isSubmitting}>
+							<Button
+								variant="primary"
+								type="submit"
+								class="w-full sm:w-auto"
+								disabled={isSubmitting}
+							>
 								{#if isSubmitting}
 									<Loader2 class="h-4 w-4 mr-2 animate-spin" />
 									Submitting...
@@ -673,7 +697,9 @@
 {:else}
 	<!-- ==================== AUTHENTICATED DASHBOARD ==================== -->
 
-	{#if dashboardData}
+	{#if $workspaceSwitching}
+		<DashboardSkeleton />
+	{:else if dashboardData}
 		<!-- Welcome Header -->
 		<section class="mb-8 mt-4">
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -684,7 +710,7 @@
 					{#if moodSuggestion}
 						<a
 							href="/catalog?mood={moodSuggestion.mood.id}"
-							class="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+							class="focus-ring text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
 						>
 							{moodSuggestion.text}
 							<ArrowRight class="h-4 w-4" />
@@ -735,6 +761,8 @@
 		<!-- Quick Actions -->
 		<section class="mb-8">
 			<div class="grid grid-cols-2 {actionGridCols} gap-3">
+				<WorkspaceSwitcherBadge variant="card" />
+
 				<!-- browse is redundant with the nav, so it yields its mobile slot to the switcher -->
 				<a href="/catalog" class={canSwitch ? 'hidden md:block' : 'block'}>
 					<Card.Root
@@ -754,8 +782,6 @@
 						</div>
 					</Card.Root>
 				</a>
-
-				<WorkspaceSwitcherBadge variant="card" />
 
 				{#if isOwner}
 					<a href="/inventory?page=1&stockFilter=out-of-stock" class="block">
@@ -840,7 +866,7 @@
 				</div>
 				<a
 					href={browseUrl}
-					class="text-sm text-primary hover:underline hidden md:flex items-center"
+					class="focus-ring text-sm text-primary hover:underline hidden md:flex items-center"
 				>
 					View all
 					<ChevronRight class="h-4 w-4" />
@@ -872,9 +898,7 @@
 							<button
 								class="inline-flex items-center rounded-full h-7 text-xs border border-dashed shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 									transition-all duration-300 ease-out
-									{activeMood === mood.id
-									? 'bg-primary text-primary-foreground border-primary'
-									: 'bg-background/60 backdrop-blur-sm border-border/50'}
+									{activeMood === mood.id ? 'glass-primary' : 'bg-background/60 backdrop-blur-sm border-border/50'}
 									{moodExpanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
 								onclick={() => {
 									activeMood = activeMood === mood.id ? null : mood.id;
@@ -907,7 +931,7 @@
 							{#if moodCounts[mood.id] > 0}
 								<Button
 									variant={activeMood === mood.id ? 'default' : 'outline'}
-									class="rounded-full border-dashed shrink-0 h-7 text-xs px-3"
+									class="rounded-full border-dashed shrink-0"
 									size="sm"
 									onclick={() => (activeMood = activeMood === mood.id ? null : mood.id)}
 								>
@@ -920,7 +944,7 @@
 							<Button
 								variant="ghost"
 								size="sm"
-								class="rounded-full text-muted-foreground shrink-0 h-7 text-xs px-2"
+								class="rounded-full text-muted-foreground shrink-0"
 								onclick={() => (activeMood = null)}
 							>
 								<X class="h-3 w-3" />
@@ -952,9 +976,7 @@
 				<button
 					class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 						transition-all duration-300 ease-out
-						{sortBy === 'all'
-						? 'bg-primary text-primary-foreground border-primary'
-						: 'bg-background/60 backdrop-blur-sm border-border/50'}
+						{sortBy === 'all' ? 'glass-primary' : 'bg-background/60 backdrop-blur-sm border-border/50'}
 						{spiritExpanded
 						? 'max-w-48 px-3 ml-1.5 opacity-100'
 						: 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'}"
@@ -976,7 +998,7 @@
 							class="inline-flex items-center rounded-full h-7 text-xs border shrink-0 cursor-pointer shadow-sm whitespace-nowrap
 								transition-all duration-300 ease-out
 								{sortBy === spirit.recipeCategoryId
-								? 'bg-primary text-primary-foreground border-primary'
+								? 'glass-primary'
 								: 'bg-background/60 backdrop-blur-sm border-border/50'}
 								{spiritExpanded
 								? 'max-w-48 px-3 ml-1.5 opacity-100'
@@ -1010,7 +1032,7 @@
 				<div class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mb-1">
 					<Button
 						variant={sortBy === 'all' ? 'default' : 'outline'}
-						class="rounded-full shrink-0 h-7 text-xs px-3"
+						class="rounded-full shrink-0"
 						size="sm"
 						onclick={() => setFilterType('all')}
 					>
@@ -1024,7 +1046,7 @@
 						{#if count > 0}
 							<Button
 								variant={sortBy === spirit.recipeCategoryId ? 'default' : 'outline'}
-								class="rounded-full shrink-0 h-7 text-xs px-3"
+								class="rounded-full shrink-0"
 								size="sm"
 								onclick={() => setFilterType(spirit.recipeCategoryId)}
 							>
@@ -1052,10 +1074,10 @@
 								: 'There are no recipes in this catalog yet.'}
 						</p>
 						{#if canModify && isOwner}
-							<FancyButton href="/inventory/add" size="sm" variant="primary">
+							<Button variant="primary" href="/inventory/add" size="sm">
 								<Plus class="h-4 w-4 mr-2" />
 								Add Ingredients
-							</FancyButton>
+							</Button>
 						{/if}
 					</Card.Content>
 				</Card.Root>
@@ -1077,10 +1099,7 @@
 									<div
 										class="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
 									></div>
-									<Badge
-										variant="secondary"
-										class="absolute top-2 left-2 bg-background/80 backdrop-blur-sm"
-									>
+									<Badge class="absolute top-2 left-2 px-2.5 py-0.5 text-xs font-semibold">
 										{item.data.recipeCategoryDescription}
 									</Badge>
 								</div>
@@ -1099,11 +1118,11 @@
 
 				{#if filter.length > 8}
 					<div class="text-center mt-4">
-						<a href={browseUrl} class={buttonVariants({ variant: 'outline' })}>
+						<Button variant="secondary" href={browseUrl}>
 							View All {filter.length}
 							{isOwner ? 'Available' : ''} Recipes
 							<ArrowRight class="ml-2 h-4 w-4" />
-						</a>
+						</Button>
 					</div>
 				{/if}
 			{/if}

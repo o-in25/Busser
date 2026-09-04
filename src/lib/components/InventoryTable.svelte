@@ -3,9 +3,10 @@
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import { Pagination } from '$lib/components/ui/pagination';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
+	import * as Card from '$lib/components/ui/card';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Indicator } from '$lib/components/ui/indicator';
 	import * as Table from '$lib/components/ui/table';
@@ -75,81 +76,98 @@
 {/if}
 
 <!-- table -->
-<div class="glass-table overflow-x-auto">
-	<Table.Root>
-		<Table.Header class="glass-table-header hidden sm:table-header-group">
-			<Table.Row>
-				{#if selectable}
-					<Table.Head class="w-10">
-						<!-- svelte-ignore a11y_click_events_have_key_events -->
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<div class="flex items-center justify-center" onclick={(e) => e.stopPropagation()}>
-							<Checkbox checked={allSelected} onchange={toggleAll} />
-						</div>
-					</Table.Head>
-				{/if}
-				<Table.Head class="hidden sm:table-cell">Name</Table.Head>
-				<Table.Head class="hidden sm:table-cell">Category</Table.Head>
-				{#if showStock}<Table.Head class="hidden sm:table-cell">Status</Table.Head>{/if}
-				<Table.Head class="hidden sm:table-cell text-center">Used In</Table.Head>
-				<Table.Head class="hidden sm:table-cell">Group</Table.Head>
-			</Table.Row>
-		</Table.Header>
-		<Table.Body>
-			{#each search as product}
-				<Table.Row onclick={() => handleRowClick(product)} class="cursor-pointer glass-table-row">
-					{#if selectable}
-						<Table.Cell class="w-10">
-							<!-- svelte-ignore a11y_click_events_have_key_events -->
-							<!-- svelte-ignore a11y_no_static_element_interactions -->
-							<div class="flex items-center justify-center" onclick={(e) => e.stopPropagation()}>
-								<Checkbox
-									checked={!!product.productId && selectedIds.includes(product.productId)}
-									onchange={() => toggleSelection(product.productId)}
-								/>
-							</div>
-						</Table.Cell>
-					{/if}
-					<Table.Cell>{product.productName}</Table.Cell>
-					<Table.Cell class="hidden sm:table-cell">
-						{product.categoryName}
-					</Table.Cell>
-					{#if showStock}
-						<Table.Cell class="hidden sm:table-cell">
-							<span class="flex items-center">
-								{#if product.productInStockQuantity === 0}
-									<Indicator color="red" class="me-1.5" />Out of stock
+<Card.Root bare class="glass-panel isolate">
+	<Card.Content class="p-0">
+		<div class="overflow-x-auto">
+			<Table.Root
+				class="[&_th:first-child]:pl-6 [&_td:first-child]:pl-6 [&_th:last-child]:pr-6 [&_td:last-child]:pr-6"
+			>
+				<Table.Header class="hidden sm:table-header-group">
+					<Table.Row>
+						{#if selectable}
+							<Table.Head class="w-10">
+								<!-- svelte-ignore a11y_click_events_have_key_events -->
+								<!-- svelte-ignore a11y_no_static_element_interactions -->
+								<div class="flex items-center justify-center" onclick={(e) => e.stopPropagation()}>
+									<Checkbox checked={allSelected} onchange={toggleAll} />
+								</div>
+							</Table.Head>
+						{/if}
+						<Table.Head class="hidden sm:table-cell">Name</Table.Head>
+						<Table.Head class="hidden sm:table-cell">Category</Table.Head>
+						<Table.Head class="hidden sm:table-cell">Supplier</Table.Head>
+						{#if showStock}<Table.Head class="hidden sm:table-cell">Status</Table.Head>{/if}
+						<Table.Head class="hidden sm:table-cell text-center">Used In</Table.Head>
+						<Table.Head class="hidden sm:table-cell">Group</Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each search as product}
+						<Table.Row onclick={() => handleRowClick(product)} class="cursor-pointer">
+							{#if selectable}
+								<Table.Cell class="w-10">
+									<!-- svelte-ignore a11y_click_events_have_key_events -->
+									<!-- svelte-ignore a11y_no_static_element_interactions -->
+									<div
+										class="flex items-center justify-center"
+										onclick={(e) => e.stopPropagation()}
+									>
+										<Checkbox
+											checked={!!product.productId && selectedIds.includes(product.productId)}
+											onchange={() => toggleSelection(product.productId)}
+										/>
+									</div>
+								</Table.Cell>
+							{/if}
+							<Table.Cell>{product.productName}</Table.Cell>
+							<Table.Cell class="hidden sm:table-cell">
+								{product.categoryName}
+							</Table.Cell>
+							<Table.Cell class="hidden sm:table-cell">
+								{#if product.supplierName}
+									{product.supplierName}
 								{:else}
-									<Indicator color="green" class="me-1.5" />In stock
+									<span class="text-muted-foreground text-sm">-</span>
 								{/if}
-							</span>
-						</Table.Cell>
-					{/if}
-					<Table.Cell class="text-center hidden sm:table-cell">
-						{#if product.productId && recipeUsage[product.productId]}
-							<a
-								href="/catalog?ingredientInclude={product.productId}"
-								onclick={(e) => e.stopPropagation()}
-								class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium hover:bg-muted/70 transition-colors"
-							>
-								{recipeUsage[product.productId]}
-							</a>
-						{:else}
-							<span class="text-muted-foreground text-sm">-</span>
-						{/if}
-					</Table.Cell>
-					<Table.Cell class="hidden sm:table-cell">
-						{#if product.categoryGroupName}
-							<Badge variant="outline">{product.categoryGroupName}</Badge>
-						{:else}
-							<span class="text-muted-foreground text-sm">-</span>
-						{/if}
-					</Table.Cell>
-				</Table.Row>
-			{/each}
-		</Table.Body>
-	</Table.Root>
-</div>
+							</Table.Cell>
+							{#if showStock}
+								<Table.Cell class="hidden sm:table-cell">
+									<span class="flex items-center">
+										{#if product.productInStockQuantity === 0}
+											<Indicator color="red" class="me-1.5" />Out of stock
+										{:else}
+											<Indicator color="green" class="me-1.5" />In stock
+										{/if}
+									</span>
+								</Table.Cell>
+							{/if}
+							<Table.Cell class="text-center hidden sm:table-cell">
+								{#if product.productId && recipeUsage[product.productId]}
+									<a
+										href="/catalog?ingredientInclude={product.productId}"
+										onclick={(e) => e.stopPropagation()}
+										class="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium hover:bg-muted/70 transition-colors"
+									>
+										{recipeUsage[product.productId]}
+									</a>
+								{:else}
+									<span class="text-muted-foreground text-sm">-</span>
+								{/if}
+							</Table.Cell>
+							<Table.Cell class="hidden sm:table-cell">
+								{#if product.categoryGroupName}
+									<Badge variant="outline">{product.categoryGroupName}</Badge>
+								{:else}
+									<span class="text-muted-foreground text-sm">-</span>
+								{/if}
+							</Table.Cell>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</div>
+	</Card.Content>
+</Card.Root>
 
 {#if !search.length}
 	<div class="flex flex-col items-center py-4">

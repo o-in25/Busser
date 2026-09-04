@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Globe, Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
+	import { Package, PackageCheck, PackageX, Plus, Search, Trash2, X } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -7,8 +7,6 @@
 	import { haptics } from '$lib/utils/haptics';
 	import { page } from '$app/stores';
 	import ActiveFiltersDisplay from '$lib/components/ActiveFiltersDisplay.svelte';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
 	import InventoryCard from '$lib/components/InventoryCard.svelte';
 	import InventoryDashboard from '$lib/components/InventoryDashboard.svelte';
@@ -17,7 +15,7 @@
 	import InventoryNav from '$lib/components/InventoryNav.svelte';
 	import InventoryResultsSkeleton from '$lib/components/InventoryResultsSkeleton.svelte';
 	import InventoryTable from '$lib/components/InventoryTable.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import { Pagination } from '$lib/components/ui/pagination';
 	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -28,13 +26,15 @@
 
 	import type { PageData } from './$types';
 	import { notificationStore, workspaceSwitching } from '../../../stores';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, roleIsOwner, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	let { data }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
-	const showStock = $derived(workspace?.workspaceRole === 'owner' && !$page.data.isGlobalWorkspace);
+	const canModify = roleCanModify(workspace?.workspaceRole);
+	// global is read-only except its owner, so gate stock purely on owner — the global owner
+	// still needs to spot recipes/products they forgot to stock
+	const showStock = $derived(roleIsOwner(workspace?.workspaceRole));
 
 	// Base path for inventory routes
 	const basePath = '/inventory';
@@ -43,9 +43,10 @@
 	let viewMode = $state<'grid' | 'list' | 'table'>('table');
 	let searchInput = $state(data.filters?.search || '');
 	let selectedCategory = $state(data.filters?.categoryGroupId || 'all');
+	let selectedSupplier = $state(data.filters?.supplierId || 'all');
 	let stockFilter = $state(data.filters?.stockFilter || 'all');
 	let sortOption = $state(data.filters?.sort || 'name-asc');
-	let perPage = $state(String(data.filters?.perPage || 20));
+	let perPage = $state(String(data.filters?.perPage || 24));
 
 	// Drawer state
 	let drawerOpen = $state(false);
@@ -58,9 +59,10 @@
 	const activeFilterCount = $derived.by(() => {
 		let count = 0;
 		if (selectedCategory && selectedCategory !== 'all') count++;
+		if (selectedSupplier && selectedSupplier !== 'all') count++;
 		if (stockFilter && stockFilter !== 'all') count++;
 		if (sortOption !== 'name-asc') count++;
-		if (perPage !== '20') count++;
+		if (perPage !== '24') count++;
 		return count;
 	});
 
@@ -141,6 +143,30 @@
 		drawerOpen = true;
 	}
 
+	// single-item delete from the drawer
+	let itemDeleteOpen = $state(false);
+	let itemDeleteLoading = $state(false);
+
+	async function handleItemDelete() {
+		if (!selectedProduct?.productId) return;
+		itemDeleteLoading = true;
+		try {
+			const res = await fetch(`/api/inventory/${selectedProduct.productId}`, { method: 'DELETE' });
+			const result = await res.json();
+			if (result?.status === 'error' || result?.error) {
+				$notificationStore.error = { message: result.error || 'Failed to delete item.' };
+				return;
+			}
+			itemDeleteOpen = false;
+			$notificationStore.success = { message: 'Removed from your inventory.' };
+			await invalidateAll();
+		} catch {
+			$notificationStore.error = { message: 'Failed to delete item.' };
+		} finally {
+			itemDeleteLoading = false;
+		}
+	}
+
 	// Handle stock change from drawer
 	async function handleStockChange(productId: number, inStock: boolean) {
 		haptics.medium();
@@ -197,6 +223,7 @@
 		const search = overrides.search !== undefined ? overrides.search : searchInput;
 		const category =
 			overrides.categoryGroupId !== undefined ? overrides.categoryGroupId : selectedCategory;
+		const supplier = overrides.supplierId !== undefined ? overrides.supplierId : selectedSupplier;
 		const stock = overrides.stockFilter !== undefined ? overrides.stockFilter : stockFilter;
 		const sort = overrides.sort !== undefined ? overrides.sort : sortOption;
 		const pageNum = overrides.page !== undefined ? overrides.page : 1;
@@ -205,9 +232,10 @@
 		params.set('page', String(pageNum));
 		if (search) params.set('productName', String(search));
 		if (category && category !== 'all') params.set('categoryGroupId', String(category));
+		if (supplier && supplier !== 'all') params.set('supplierId', String(supplier));
 		if (stock && stock !== 'all') params.set('stockFilter', String(stock));
 		if (sort && sort !== 'name-asc') params.set('sort', String(sort));
-		if (pp && String(pp) !== '20') params.set('perPage', String(pp));
+		if (pp && String(pp) !== '24') params.set('perPage', String(pp));
 
 		return `${basePath}?${params.toString()}`;
 	}
@@ -227,6 +255,12 @@
 	function handleCategoryChange(categoryGroupId: string) {
 		selectedCategory = categoryGroupId;
 		goto(buildUrl({ categoryGroupId, page: 1 }), { keepFocus: true });
+	}
+
+	// Handle supplier filter
+	function handleSupplierChange(value: string) {
+		selectedSupplier = value;
+		goto(buildUrl({ supplierId: value, page: 1 }), { keepFocus: true });
 	}
 
 	// Handle stock filter change
@@ -258,6 +292,11 @@
 		goto(buildUrl({ categoryGroupId: 'all' }), { keepFocus: true });
 	}
 
+	function clearSupplier() {
+		selectedSupplier = 'all';
+		goto(buildUrl({ supplierId: 'all' }), { keepFocus: true });
+	}
+
 	function clearStockFilter() {
 		stockFilter = 'all';
 		goto(buildUrl({ stockFilter: 'all' }), { keepFocus: true });
@@ -266,23 +305,26 @@
 	function clearAllFilters() {
 		searchInput = '';
 		selectedCategory = 'all';
+		selectedSupplier = 'all';
 		stockFilter = 'all';
 		sortOption = 'name-asc';
 		goto(`${basePath}?page=1`);
 	}
 
-	// reset filters behind the panel (category, stock, sort, perPage)
+	// reset filters behind the panel (category, supplier, stock, sort, perPage)
 	function resetPanelFilters() {
 		selectedCategory = 'all';
+		selectedSupplier = 'all';
 		stockFilter = 'all';
 		sortOption = 'name-asc';
-		perPage = '20';
+		perPage = '24';
 		goto(
 			buildUrl({
 				categoryGroupId: 'all',
+				supplierId: 'all',
 				stockFilter: 'all',
 				sort: 'name-asc',
-				perPage: '20',
+				perPage: '24',
 				page: 1,
 			})
 		);
@@ -299,6 +341,7 @@
 	const hasActiveFilters = $derived(
 		!!searchInput ||
 			(selectedCategory && selectedCategory !== 'all') ||
+			(selectedSupplier && selectedSupplier !== 'all') ||
 			(stockFilter && stockFilter !== 'all')
 	);
 
@@ -306,9 +349,10 @@
 	$effect(() => {
 		searchInput = data.filters?.search || '';
 		selectedCategory = data.filters?.categoryGroupId || 'all';
+		selectedSupplier = data.filters?.supplierId || 'all';
 		stockFilter = data.filters?.stockFilter || 'all';
 		sortOption = data.filters?.sort || 'name-asc';
-		perPage = String(data.filters?.perPage || 20);
+		perPage = String(data.filters?.perPage || 24);
 	});
 </script>
 
@@ -320,28 +364,15 @@
 <InventoryNav>
 	{#snippet action()}
 		{#if canModify}
-			<FancyButton variant="primary" size="sm" href="{basePath}/add" class="shrink-0">
+			<Button variant="primary" size="sm" href="{basePath}/add" class="shrink-0">
 				<Plus class="h-4 w-4 mr-1" />
 				Add Product
-			</FancyButton>
+			</Button>
 		{/if}
 	{/snippet}
 </InventoryNav>
 
 <InventoryDashboard stats={data.stats} {showStock} />
-
-{#if $page.data.isGlobalWorkspace && workspace?.workspaceRole !== 'owner'}
-	<FancyAlert class="mb-6 mt-4">
-		{#snippet icon()}<Globe class="h-5 w-5 text-primary" />{/snippet}
-		{#snippet children()}
-			<p class="sm:hidden">Viewing global catalog</p>
-			<p class="hidden sm:block">
-				You're viewing <strong>Busser's global catalog</strong>. Use the workspace switcher to
-				switch to your own and manage your inventory.
-			</p>
-		{/snippet}
-	</FancyAlert>
-{/if}
 
 <!-- Toolbar -->
 <div class="flex flex-col gap-3 mb-6">
@@ -362,7 +393,7 @@
 					<button
 						type="button"
 						onclick={clearSearch}
-						class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+						class="focus-ring absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 					>
 						<X class="h-4 w-4" />
 					</button>
@@ -381,13 +412,16 @@
 		>
 			<InventoryFilterPanel
 				categories={data.categories}
+				suppliers={data.suppliers}
 				{selectedCategory}
+				{selectedSupplier}
 				{stockFilter}
 				{sortOption}
 				{perPage}
 				{showStock}
 				{basePath}
 				onCategoryChange={handleCategoryChange}
+				onSupplierChange={handleSupplierChange}
 				onStockFilterChange={handleStockFilterChange}
 				onSortChange={handleSortChange}
 				onPerPageChange={handlePerPageChange}
@@ -404,11 +438,14 @@
 <ActiveFiltersDisplay
 	search={searchInput}
 	categoryGroupId={selectedCategory}
+	supplierId={selectedSupplier}
 	{stockFilter}
 	categories={data.categories}
+	suppliers={data.suppliers}
 	{showStock}
 	onClearSearch={clearSearch}
 	onClearCategory={clearCategory}
+	onClearSupplier={clearSupplier}
 	onClearStockFilter={clearStockFilter}
 	onClearAll={clearAllFilters}
 />
@@ -596,4 +633,32 @@
 	recipeCount={selectedProduct?.productId ? data.recipeUsage[selectedProduct.productId] || 0 : 0}
 	{showStock}
 	onStockChange={handleStockChange}
+	onDelete={() => {
+		drawerOpen = false;
+		itemDeleteOpen = true;
+	}}
 />
+
+<!-- Single-item Delete Confirmation Dialog -->
+<Dialog.Root bind:open={itemDeleteOpen}>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Remove from inventory?</Dialog.Title>
+			<Dialog.Description>
+				Remove <span class="font-semibold">{selectedProduct?.productName}</span> from your inventory?
+			</Dialog.Description>
+		</Dialog.Header>
+		<Dialog.Footer>
+			<Button
+				variant="outline"
+				onclick={() => (itemDeleteOpen = false)}
+				disabled={itemDeleteLoading}
+			>
+				Cancel
+			</Button>
+			<Button variant="destructive" onclick={handleItemDelete} disabled={itemDeleteLoading}>
+				{itemDeleteLoading ? 'Removing…' : 'Remove'}
+			</Button>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>

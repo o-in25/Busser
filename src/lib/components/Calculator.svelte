@@ -145,7 +145,7 @@
 	</div>
 
 	<!-- Calculate Button -->
-	<Button onclick={calculate} class="w-full sm:w-auto">Calculate Recipe</Button>
+	<Button variant="primary" onclick={calculate} class="w-full sm:w-auto">Calculate Recipe</Button>
 
 	<!-- Results Section -->
 	{#if hasCalculated}

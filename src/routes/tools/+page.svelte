@@ -4,8 +4,8 @@
 	import { page } from '$app/stores';
 	import BacCalculator from '$lib/components/BacCalculator.svelte';
 	import Calculator from '$lib/components/Calculator.svelte';
-	import FancyAlert from '$lib/components/FancyAlert.svelte';
-	import FancyButton from '$lib/components/FancyButton.svelte';
+	import Callout from '$lib/components/Callout.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import * as Popover from '$lib/components/ui/popover';
@@ -20,7 +20,7 @@
 </svelte:head>
 
 {#if !authenticated}
-	<FancyAlert class="mb-6">
+	<Callout class="mb-6">
 		{#snippet icon()}<Mail class="h-5 w-5 text-primary" />{/snippet}
 		{#snippet children()}
 			<p class="sm:hidden">Sign up to build your own bar</p>
@@ -29,9 +29,9 @@
 			</p>
 		{/snippet}
 		{#snippet action()}
-			<FancyButton size="sm" variant="primary" href="/signup">Sign Up</FancyButton>
+			<Button variant="cta-primary" size="cta-sm" href="/signup">Sign Up</Button>
 		{/snippet}
-	</FancyAlert>
+	</Callout>
 {/if}
 
 {#if authenticated}
@@ -73,7 +73,7 @@
 											href="https://punchdrink.com/articles/super-juice-lime-daiquiri-recipe/"
 											target="_blank"
 											rel="noopener noreferrer"
-											class="text-xs text-primary hover:underline"
+											class="focus-ring text-xs text-primary hover:underline"
 										>
 											Read the article
 										</a>
@@ -81,7 +81,7 @@
 											href="https://www.youtube.com/watch?v=eiNMAm42C8U"
 											target="_blank"
 											rel="noopener noreferrer"
-											class="text-xs text-primary hover:underline"
+											class="focus-ring text-xs text-primary hover:underline"
 										>
 											Watch the video
 										</a>

@@ -22,3 +22,21 @@ export async function switchWorkspace(workspaceId: string): Promise<boolean> {
 		workspaceSwitching.set(false);
 	}
 }
+
+// creates a workspace then switches into it (skeletons come from the switch)
+export async function createAndSwitchWorkspace(
+	workspaceName: string,
+	workspaceType: 'personal' | 'shared'
+): Promise<boolean> {
+	const res = await fetch('/api/workspace/create', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ workspaceName, workspaceType }),
+	});
+	if (!res.ok) return false;
+
+	const { workspace } = await res.json();
+	if (!workspace?.workspaceId) return false;
+
+	return switchWorkspace(workspace.workspaceId);
+}

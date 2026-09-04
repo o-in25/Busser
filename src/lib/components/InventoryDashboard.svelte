@@ -18,7 +18,7 @@
 	}
 </script>
 
-<PageHero title="Inventory">
+<PageHero title="Inventory" subtitle="Track what's in your bar and see what's running low.">
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
 		<StatBadge as="button" onclick={() => applyFilter('all')} class="whitespace-nowrap">
 			<Package class="h-4 w-4 text-primary shrink-0" />

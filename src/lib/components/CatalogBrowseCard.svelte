@@ -101,8 +101,10 @@
 
 {#if viewMode === 'grid'}
 	<!-- Grid View Card — liquid glass -->
-	<a href="/catalog/{recipe.recipeId}" class="block group h-full">
-		<div class="relative rounded-2xl overflow-hidden h-full browse-grid-card">
+	<a href="/catalog/{recipe.recipeId}" class="cv-card block group h-full">
+		<div
+			class="relative rounded-3xl overflow-hidden h-full card-zoom transition-transform duration-300"
+		>
 			<!-- Blurred background glow from recipe image -->
 			{#if recipe.recipeImageUrl}
 				<img
@@ -114,27 +116,27 @@
 			{/if}
 
 			<!-- Glass surface -->
-			<div
-				class="relative h-full flex flex-col bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_16px_40px_-20px_rgba(31,20,60,0.28)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_22px_48px_-20px_rgba(31,20,60,0.34)] transition-all duration-300"
-			>
+			<div class="glass-card glass-card-hover relative h-full flex flex-col">
 				<!-- Image area -->
-				<div class="relative h-44 overflow-hidden rounded-t-2xl">
+				<div class="relative h-44 overflow-hidden rounded-t-3xl">
 					<SkeletonImage
 						src={recipe.recipeImageUrl}
 						alt={recipe.recipeName}
 						variant="recipe"
 						class="h-full w-full"
-						imgClass="transition-transform duration-300 group-hover:scale-110"
+						imgClass="transition-transform duration-300 card-zoom-img"
 					/>
 					<!-- Gradient fade into glass body -->
 					<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
 
-					<!-- Category pill (top left) -->
-					<span
-						class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md border border-white/30 dark:border-white/15 text-foreground shadow-sm"
-					>
-						{recipe.recipeCategoryDescription}
-					</span>
+					<!-- Category pills -->
+					<div class="absolute top-3 left-3 flex flex-col items-start gap-1">
+						<span
+							class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/60 dark:bg-black/40 backdrop-blur-md backdrop-saturate-150 border border-white/30 dark:border-white/15 text-foreground shadow-sm"
+						>
+							{recipe.recipeCategoryDescription}
+						</span>
+					</div>
 
 					<!-- Draft badge (owners/editors only) -->
 					{#if canModify && recipe.published === false}
@@ -142,23 +144,6 @@
 							class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-500/90 text-white shadow"
 						>
 							Draft
-						</span>
-					{/if}
-
-					<!-- Verdict pill (top right) -->
-					{#if hasRatings}
-						<span
-							class={cn(
-								'absolute top-3 right-3 flex flex-col items-center px-2 py-1 rounded-full text-white shadow-lg',
-								rating.bg
-							)}
-							title={rating.label}
-						>
-							<span
-								class="text-[8px] font-semibold uppercase tracking-wider opacity-80 leading-none"
-								>verdict</span
-							>
-							<span class="text-sm font-bold leading-tight">{score.toFixed(1)}</span>
 						</span>
 					{/if}
 
@@ -176,7 +161,7 @@
 								<input type="hidden" name="workspaceId" value={workspaceId} />
 								<button
 									type="submit"
-									class="p-1.5 rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 transition-colors"
+									class="p-1.5 rounded-full bg-black/30 backdrop-blur-md backdrop-saturate-150 hover:bg-black/50 transition-colors"
 									title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
 								>
 									<Heart
@@ -197,7 +182,7 @@
 									<input type="hidden" name="workspaceId" value={workspaceId} />
 									<button
 										type="submit"
-										class="p-1.5 rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 transition-colors"
+										class="p-1.5 rounded-full bg-black/30 backdrop-blur-md backdrop-saturate-150 hover:bg-black/50 transition-colors"
 										title={isFeatured ? 'Remove from featured' : 'Add to featured'}
 									>
 										<Star
@@ -225,12 +210,28 @@
 					<p class="text-sm text-muted-foreground/80 line-clamp-2 mt-1">
 						{recipe.recipeDescription || 'A delicious cocktail recipe'}
 					</p>
-					{#if recipe.recipeTechniqueDescriptionText}
-						<div class="flex items-center gap-1.5 mt-auto pt-2">
-							<span class="flex items-center gap-1 text-[11px] text-muted-foreground/60">
-								<TechniqueIcon class="h-3 w-3" />
-								{recipe.recipeTechniqueDescriptionText}
-							</span>
+					{#if recipe.recipeTechniqueDescriptionText || hasRatings}
+						<div class="flex items-center justify-between gap-1.5 mt-auto pt-2">
+							{#if recipe.recipeTechniqueDescriptionText}
+								<span class="flex items-center gap-1 text-[11px] text-muted-foreground/60">
+									<TechniqueIcon class="h-3 w-3" />
+									{recipe.recipeTechniqueDescriptionText}
+								</span>
+							{/if}
+							{#if hasRatings}
+								<span
+									class={cn(
+										'flex items-center gap-1 px-2 py-0.5 rounded-full text-white shadow',
+										rating.bg
+									)}
+									title={rating.label}
+								>
+									<span class="text-[8px] font-semibold uppercase tracking-wider opacity-80"
+										>{rating.label}</span
+									>
+									<span class="text-xs font-bold leading-tight">{score.toFixed(1)}</span>
+								</span>
+							{/if}
 						</div>
 					{/if}
 				</div>
@@ -239,8 +240,8 @@
 	</a>
 {:else}
 	<!-- List View Card — liquid glass -->
-	<a href="/catalog/{recipe.recipeId}" class="block group">
-		<div class="relative rounded-2xl overflow-hidden browse-list-card">
+	<a href="/catalog/{recipe.recipeId}" class="cv-row block group">
+		<div class="relative rounded-3xl overflow-hidden browse-list-card">
 			<!-- Blurred background image -->
 			{#if recipe.recipeImageUrl}
 				<img
@@ -251,14 +252,12 @@
 				/>
 				<!-- dark scrim so the colored tint stays but text keeps contrast (dark mode only) -->
 				<div
-					class="absolute inset-0 rounded-2xl dark:bg-gradient-to-b dark:from-black/30 dark:to-black/45 pointer-events-none"
+					class="absolute inset-0 rounded-3xl dark:bg-gradient-to-b dark:from-black/30 dark:to-black/45 pointer-events-none"
 				></div>
 			{/if}
 
 			<!-- Glass surface -->
-			<div
-				class="relative flex items-center gap-3 p-3 bg-white/50 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-[1.7] border border-white/40 dark:border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_10px_28px_-16px_rgba(31,20,60,0.25)] hover:bg-white/60 dark:hover:bg-white/[0.09] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6),0_14px_32px_-16px_rgba(31,20,60,0.3)] transition-all duration-200"
-			>
+			<div class="glass-card glass-card-hover relative flex items-center gap-3 p-3">
 				<!-- Thumbnail with verdict overlay -->
 				<div
 					class="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-md ring-1 ring-black/5 dark:ring-white/10"

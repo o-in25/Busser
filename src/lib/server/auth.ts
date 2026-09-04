@@ -1,4 +1,3 @@
-// auth service
 import { compare, hash } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
@@ -24,7 +23,6 @@ import { env } from '$env/dynamic/private';
 const { JWT_SIGNING_KEY, USER_TABLE } = env;
 const HASH_ROUNDS = 10;
 
-// singletons
 const db = new DbProvider(USER_TABLE || '');
 const userRepo = new UserRepository(db);
 const settingsRepo = new SettingsRepository(db);
@@ -204,6 +202,7 @@ export async function registerUser(
 			username: user.username,
 			token,
 		});
+		await Logger.info(`registration email dispatched to ${user.email}`);
 
 		return { status: 'success' };
 	} catch (error: any) {
@@ -281,6 +280,7 @@ export async function resendVerificationEmail(userId: string): Promise<QueryResu
 			username: dbResult.username,
 			token,
 		});
+		await Logger.info(`verification email resent to ${dbResult.email}`);
 
 		return { status: 'success' };
 	} catch (error: any) {
@@ -320,6 +320,7 @@ export async function resendVerificationEmailByEmail(email: string): Promise<Que
 			username: dbResult.username,
 			token,
 		});
+		await Logger.info(`verification email resent to ${dbResult.email}`);
 
 		return { status: 'success' };
 	} catch (error: any) {

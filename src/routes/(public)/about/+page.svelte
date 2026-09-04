@@ -16,7 +16,7 @@
 	} from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
-	import FancyButton from '$lib/components/FancyButton.svelte';
+	import { Button } from '$lib/components/ui/button';
 
 	import * as Card from '$lib/components/ui/card';
 
@@ -275,11 +275,11 @@
 				Create a free account to start tracking your inventory and discovering new cocktails today.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-3 justify-center">
-				<FancyButton variant="primary" href="/signup">
+				<Button variant="cta-primary" size="cta" href="/signup">
 					Get Started Free
 					<ArrowRight class="ml-2 h-4 w-4" />
-				</FancyButton>
-				<FancyButton href="/login">Log In</FancyButton>
+				</Button>
+				<Button variant="cta" size="cta" href="/login">Log In</Button>
 			</div>
 		</Card.Content>
 	</Card.Root>
@@ -289,7 +289,10 @@
 <div class="text-center mt-8 pt-6 border-t border-border">
 	<p class="text-sm text-muted-foreground">
 		Have questions or feedback? Contact us at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline font-medium">
+		<a
+			href="mailto:support@busserapp.com"
+			class="focus-ring text-primary hover:underline font-medium"
+		>
 			support@busserapp.com
 		</a>
 	</p>

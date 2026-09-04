@@ -47,6 +47,17 @@ export const actions: Actions = {
 
 		const formData = await request.formData();
 
+		// picking an existing global product just records stock against its id — no new product row
+		const globalProductId = parseInt(formData.get('globalProductId') as string) || 0;
+		if (globalProductId) {
+			const quantity = parseInt(formData.get('productInStockQuantity') as string) || 0;
+			const result = await inventoryRepo.stockFromGlobal(workspaceId, globalProductId, quantity);
+			if (result.status === 'error') {
+				return fail(StatusCodes.INTERNAL_SERVER_ERROR, { error: result.error });
+			}
+			redirect(StatusCodes.SEE_OTHER, '/inventory');
+		}
+
 		const productName = formData.get('productName') as string;
 		const categoryId = formData.get('categoryId') as string;
 		const productPricePerUnit = parseFloat(formData.get('productPricePerUnit') as string) || 0;

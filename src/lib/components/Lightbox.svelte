@@ -24,7 +24,7 @@
 >
 	<button
 		type="button"
-		class="absolute inset-0 bg-background/95 backdrop-blur-md cursor-zoom-out"
+		class="absolute inset-0 bg-background/95 backdrop-blur-md backdrop-saturate-150 cursor-zoom-out"
 		onclick={onclose}
 		aria-label="Close lightbox"
 		transition:fade={{ duration: 200 }}

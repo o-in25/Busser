@@ -9,14 +9,18 @@ import type {
 	SelectOption,
 	ShoppingListItem,
 	Supplier,
+	SupplierType,
 	Table,
 	CategoryGroup,
 } from '$lib/types';
+import { emptyPagination } from '$lib/types';
+import { titleCase } from '$lib/utils';
 
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { deleteSignedUrl } from '../storage';
-import { BaseRepository, emptyPagination, titleCase } from './base.repository';
+import { getGlobalWorkspace } from '../workspace';
+import { BaseRepository } from './base.repository';
 
 export class InventoryRepository extends BaseRepository {
 	constructor(db: DbProvider) {
@@ -26,7 +30,7 @@ export class InventoryRepository extends BaseRepository {
 	async findAll(
 		workspaceId: string,
 		currentPage: number,
-		perPage: number = 25,
+		perPage: number = 24,
 		filter: (Partial<Product> & { stockFilter?: string }) | null = null,
 		sort: string = 'name-asc'
 	): Promise<PaginationResult<Product[]>> {
@@ -39,6 +43,10 @@ export class InventoryRepository extends BaseRepository {
 
 			if (filter?.categoryGroupId) {
 				query = query.andWhere('categoryGroupId', '=', filter.categoryGroupId);
+			}
+
+			if (filter?.supplierId) {
+				query = query.andWhere('supplierId', '=', filter.supplierId);
 			}
 
 			if (filter?.stockFilter) {
@@ -130,6 +138,15 @@ export class InventoryRepository extends BaseRepository {
 					.merge();
 
 				childRowId = childRow;
+
+				if (product.productInStockQuantity > 0) {
+					await trx('workspacestock').insert({
+						WorkspaceId: workspaceId,
+						ProductId: parentRowId,
+						Quantity: product.productInStockQuantity,
+					});
+				}
+
 				await trx.commit();
 			});
 
@@ -146,8 +163,36 @@ export class InventoryRepository extends BaseRepository {
 		} catch (error: any) {
 			console.error(error);
 			Logger.error(error.sqlMessage, error.sql);
+
+			// db keeps the global catalog one-row-per-ingredient (ux_product_global_norm)
+			if (
+				error.code === 'ER_DUP_ENTRY' &&
+				String(error.sqlMessage).includes('ux_product_global_norm')
+			) {
+				return {
+					status: 'error',
+					error: `A global product named "${product.productName}" already exists.`,
+				};
+			}
 			return { status: 'error', error: 'Could not add new item to inventory.' };
 		}
+	}
+
+	// owned = editable/deletable; foreign = shared global product this bar only overlays stock on
+	private async splitByOwnership(workspaceId: string, productIds: number[]) {
+		const rows = (await this.db
+			.table('product')
+			.whereIn('ProductId', productIds)
+			.select('ProductId', 'WorkspaceId')) as Array<{ productId: number; workspaceId: string }>;
+		const owned: number[] = [];
+		const foreign: number[] = [];
+		for (const r of rows) (r.workspaceId === workspaceId ? owned : foreign).push(r.productId);
+		return { owned, foreign };
+	}
+
+	async isOwned(workspaceId: string, productId: number): Promise<boolean> {
+		const { owned } = await this.splitByOwnership(workspaceId, [productId]);
+		return owned.length > 0;
 	}
 
 	async update(
@@ -159,11 +204,20 @@ export class InventoryRepository extends BaseRepository {
 		try {
 			if (!product?.productId) throw Error('No inventory ID provided.');
 
-			// verify product belongs to workspace
 			const existing = await this.findById(workspaceId, product.productId);
 			if (!existing) throw Error('Product not found in this workspace.');
 
-			// Resolve the image URL: new upload, cleared, or keep existing
+			// shared catalog products are read-only here — only their stock can change (via workspacestock)
+			const { owned } = await this.splitByOwnership(workspaceId, [product.productId]);
+			if (owned.length === 0) {
+				return {
+					status: 'error',
+					error:
+						"This is a shared Busser catalog product — its details can't be edited here. " +
+						'You can update its stock, or add your own version as a house product.',
+				};
+			}
+
 			let resolvedImageUrl: string | null;
 			if (imageCleared) {
 				resolvedImageUrl = null;
@@ -173,7 +227,7 @@ export class InventoryRepository extends BaseRepository {
 				resolvedImageUrl = existing.productImageUrl || null;
 			}
 
-			// Delete old image from storage when replacing or clearing
+			// delete old image from storage when replacing or clearing
 			if (
 				(resolvedImageUrl !== existing.productImageUrl || imageCleared) &&
 				existing.productImageUrl
@@ -197,6 +251,15 @@ export class InventoryRepository extends BaseRepository {
 						ProductProof: product.productProof,
 					})
 					.onConflict('ProductId')
+					.merge();
+
+				await trx('workspacestock')
+					.insert({
+						WorkspaceId: workspaceId,
+						ProductId: product.productId,
+						Quantity: product.productInStockQuantity,
+					})
+					.onConflict(['WorkspaceId', 'ProductId'])
 					.merge();
 
 				await trx('productdetail')
@@ -239,33 +302,36 @@ export class InventoryRepository extends BaseRepository {
 				return { status: 'success', data: { deleted: 0 } };
 			}
 
-			const { imageUrls, deleted } = await this.db.query.transaction(async (trx) => {
-				// scope to ids that actually belong to this workspace
-				const ownedRows = (await trx('product')
-					.select('ProductId')
-					.whereIn('ProductId', productIds)
-					.where('workspaceId', workspaceId)) as Array<{ productId: number }>;
+			// owned rows get really deleted; foreign (shared global) ones just leave this bar's overlay
+			const { owned, foreign } = await this.splitByOwnership(workspaceId, productIds);
 
-				const ownedIds = ownedRows.map((r) => r.productId);
-				if (ownedIds.length === 0) {
-					return { imageUrls: [] as string[], deleted: 0 };
+			const { imageUrls, deleted } = await this.db.query.transaction(async (trx) => {
+				let removed = 0;
+				let urls: string[] = [];
+
+				if (owned.length > 0) {
+					const detailRows = (await trx('productdetail')
+						.select('ProductImageUrl')
+						.whereIn('ProductId', owned)) as Array<{ productImageUrl: string | null }>;
+					urls = detailRows.map((r) => r.productImageUrl).filter((url): url is string => !!url);
+
+					removed += await trx<Product>('product')
+						.whereIn('ProductId', owned)
+						.where('workspaceId', workspaceId)
+						.del();
 				}
 
-				const detailRows = (await trx('productdetail')
-					.select('ProductImageUrl')
-					.whereIn('ProductId', ownedIds)) as Array<{ productImageUrl: string | null }>;
+				if (foreign.length > 0) {
+					removed += await trx('workspacestock')
+						.where('WorkspaceId', workspaceId)
+						.whereIn('ProductId', foreign)
+						.del();
+				}
 
-				const urls = detailRows.map((r) => r.productImageUrl).filter((url): url is string => !!url);
-
-				const rows = await trx<Product>('product')
-					.whereIn('ProductId', ownedIds)
-					.where('workspaceId', workspaceId)
-					.del();
-
-				return { imageUrls: urls, deleted: rows };
+				return { imageUrls: urls, deleted: removed };
 			});
 
-			// clean up gcs outside the transaction so we don't hold a db connection during storage i/o
+			// clean up gcs outside the transaction so we don't hold a db connection during storage
 			await Promise.all(imageUrls.map((url) => deleteSignedUrl(url)));
 
 			return { status: 'success', data: { deleted } };
@@ -285,6 +351,16 @@ export class InventoryRepository extends BaseRepository {
 
 	async delete(workspaceId: string, productId: number): Promise<QueryResult<number>> {
 		try {
+			// shared global product — just drop this bar's stock overlay, leave the catalog row alone
+			const { owned } = await this.splitByOwnership(workspaceId, [productId]);
+			if (owned.length === 0) {
+				await this.db
+					.table('workspacestock')
+					.where({ WorkspaceId: workspaceId, ProductId: productId })
+					.del();
+				return { status: 'success', data: 1 };
+			}
+
 			const { productImageUrl, rowsDeleted } = await this.db.query.transaction(async (trx) => {
 				const childRow = await trx('productdetail')
 					.select('ProductImageUrl')
@@ -327,16 +403,76 @@ export class InventoryRepository extends BaseRepository {
 		quantity: number
 	): Promise<QueryResult<number>> {
 		try {
-			const updated = await this.db
-				.table('product')
-				.whereIn('ProductId', productIds)
-				.where('workspaceId', workspaceId)
-				.update({ ProductInStockQuantity: quantity });
+			const updated = await this.db.query.transaction(async (trx) => {
+				// resolve against the overlay view so global (shared) products count too, not just
+				// rows physically owned by this workspace — otherwise bulk no-ops on global products
+				const visibleRows = (await trx('inventory')
+					.select('ProductId')
+					.whereIn('ProductId', productIds)
+					.where('workspaceId', workspaceId)) as Array<{ productId: number }>;
+				const visibleIds = visibleRows.map((r) => r.productId);
+
+				if (visibleIds.length === 0) return 0;
+
+				// dual-write: keep owned product rows in sync (global rows are immutable, so this no-ops them)
+				await trx('product')
+					.whereIn('ProductId', visibleIds)
+					.where('workspaceId', workspaceId)
+					.update({ ProductInStockQuantity: quantity });
+
+				// authoritative overlay stock
+				await trx('workspacestock')
+					.insert(
+						visibleIds.map((ProductId) => ({
+							WorkspaceId: workspaceId,
+							ProductId,
+							Quantity: quantity,
+						}))
+					)
+					.onConflict(['WorkspaceId', 'ProductId'])
+					.merge();
+
+				return visibleIds.length;
+			});
 			return { status: 'success', data: updated };
 		} catch (error: any) {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Could not update stock status.' };
+		}
+	}
+
+	// stock an existing global product onto the overlay (setStockQuantity can't — it no-ops a
+	// global product the bar doesn't stock yet)
+	async stockFromGlobal(
+		workspaceId: string,
+		productId: number,
+		quantity: number
+	): Promise<QueryResult<number>> {
+		try {
+			const globalId = getGlobalWorkspace();
+			const workspaces = workspaceId === globalId ? [globalId] : [workspaceId, globalId];
+			const product = await this.db
+				.table('product')
+				.where('ProductId', productId)
+				.whereIn('WorkspaceId', workspaces)
+				.where('Retired', false)
+				.first();
+			if (!product) {
+				return { status: 'error', error: 'That product is not in the catalog.' };
+			}
+
+			await this.db
+				.table('workspacestock')
+				.insert({ WorkspaceId: workspaceId, ProductId: productId, Quantity: quantity })
+				.onConflict(['WorkspaceId', 'ProductId'])
+				.merge();
+
+			return { status: 'success', data: productId };
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not add product to inventory.' };
 		}
 	}
 
@@ -352,11 +488,17 @@ export class InventoryRepository extends BaseRepository {
 
 			const newQuantity = existing.productInStockQuantity ? 0 : 1;
 
-			await this.db
-				.table('product')
-				.where('ProductId', productId)
-				.where('workspaceId', workspaceId)
-				.update({ ProductInStockQuantity: newQuantity });
+			await this.db.query.transaction(async (trx) => {
+				await trx('product')
+					.where('ProductId', productId)
+					.where('workspaceId', workspaceId)
+					.update({ ProductInStockQuantity: newQuantity });
+
+				await trx('workspacestock')
+					.insert({ WorkspaceId: workspaceId, ProductId: productId, Quantity: newQuantity })
+					.onConflict(['WorkspaceId', 'ProductId'])
+					.merge();
+			});
 
 			const updated = await this.findById(workspaceId, productId);
 			if (!updated) {
@@ -368,6 +510,33 @@ export class InventoryRepository extends BaseRepository {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 			return { status: 'error', error: 'Could not toggle stock status.' };
+		}
+	}
+
+	// give a new bar its baseline pantry
+	async seedInventory(workspaceId: string): Promise<void> {
+		try {
+			const globalId = getGlobalWorkspace();
+			const rows = (await this.db
+				.table('product as p')
+				.join('supplier as s', 'p.SupplierId', 's.SupplierId')
+				.join('suppliertype as st', 's.SupplierTypeId', 'st.SupplierTypeId')
+				.where('p.WorkspaceId', globalId)
+				.where('st.SupplierTypeName', 'homemade')
+				.select('p.ProductId')) as Array<{ productId: number }>;
+			if (rows.length === 0) return;
+
+			await this.db
+				.table('workspacestock')
+				.insert(
+					rows.map((r) => ({ WorkspaceId: workspaceId, ProductId: r.productId, Quantity: 0 }))
+				)
+				.onConflict(['WorkspaceId', 'ProductId'])
+				.ignore();
+		} catch (error: any) {
+			// don't block workspace creation on error
+			console.error('Failed to seed baseline inventory:', error.message);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
 		}
 	}
 
@@ -461,40 +630,41 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	// select options for dropdowns
 	async getProductOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
-			let result = await this.db
+			const globalId = getGlobalWorkspace();
+			const workspaces = workspaceId === globalId ? [globalId] : [workspaceId, globalId];
+			const result = (await this.db
 				.table('product as p')
 				.join('category as c', 'p.CategoryId', 'c.CategoryId')
 				.leftJoin('category as pc', 'c.ParentCategoryId', 'pc.CategoryId')
-				.where('p.workspaceId', workspaceId)
+				.whereIn('p.WorkspaceId', workspaces)
+				.where('p.Retired', false)
 				.select(
 					'p.ProductId',
 					'p.ProductName',
+					'p.WorkspaceId',
 					'c.CategoryId',
 					'c.CategoryName',
 					'c.ParentCategoryId',
 					'pc.CategoryName as ParentCategoryName'
-				);
-			let products = result as any[];
-			return products.map(
-				({
-					productId,
-					productName,
-					categoryId,
-					categoryName,
-					parentCategoryId,
-					parentCategoryName,
-				}) => ({
-					name: productName,
-					value: productId || 0,
-					categoryId,
-					categoryName,
-					parentCategoryId: parentCategoryId ?? null,
-					parentCategoryName: parentCategoryName ?? null,
-				})
-			);
+				)) as any[];
+
+			const byName = new Map<string, any>();
+			for (const r of result) {
+				const key = (r.productName || '').trim().toLowerCase();
+				const existing = byName.get(key);
+				if (!existing || r.workspaceId === globalId) byName.set(key, r);
+			}
+
+			return [...byName.values()].map((r) => ({
+				name: r.productName,
+				value: r.productId || 0,
+				categoryId: r.categoryId,
+				categoryName: r.categoryName,
+				parentCategoryId: r.parentCategoryId ?? null,
+				parentCategoryName: r.parentCategoryName ?? null,
+			}));
 		} catch (error: any) {
 			console.error(error);
 			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
@@ -504,16 +674,25 @@ export class InventoryRepository extends BaseRepository {
 
 	async getCategoryOptions(workspaceId: string): Promise<SelectOption[]> {
 		try {
-			let result = await this.db
+			const globalId = getGlobalWorkspace();
+			const workspaces = workspaceId === globalId ? [globalId] : [workspaceId, globalId];
+			const result = (await this.db
 				.table('category as c')
-				.where('c.workspaceId', workspaceId)
-				.select('c.CategoryId', 'c.CategoryName', 'c.CategoryGroupId')
-				.orderBy('c.CategoryName');
-			let categories = result as Category[];
-			return categories.map(({ categoryId, categoryName, categoryGroupId }) => ({
-				name: categoryName,
-				value: categoryId,
-				categoryGroupId: categoryGroupId ?? null,
+				.whereIn('c.WorkspaceId', workspaces)
+				.select('c.CategoryId', 'c.CategoryName', 'c.CategoryGroupId', 'c.WorkspaceId')
+				.orderBy('c.CategoryName')) as any[];
+
+			const byName = new Map<string, any>();
+			for (const r of result) {
+				const key = (r.categoryName || '').toLowerCase();
+				const existing = byName.get(key);
+				if (!existing || r.workspaceId === globalId) byName.set(key, r);
+			}
+
+			return [...byName.values()].map((r) => ({
+				name: r.categoryName,
+				value: r.categoryId,
+				categoryGroupId: r.categoryGroupId ?? null,
 			}));
 		} catch (error: any) {
 			console.error(error);
@@ -576,7 +755,7 @@ export class InventoryRepository extends BaseRepository {
 		categoryGroupId: number | null = null
 	): Promise<QueryResult<number>> {
 		try {
-			// auto-inherit group from parent when not explicitly set
+			// auto inherits group from parent when not explicitly set
 			if (parentCategoryId && !categoryGroupId) {
 				const parent = await this.db
 					.table('category')
@@ -615,7 +794,7 @@ export class InventoryRepository extends BaseRepository {
 			const { categoryName, categoryDescription, parentCategoryId } = category;
 			let { categoryGroupId } = category;
 
-			// auto-inherit group from parent when not explicitly set
+			// auto inherits group from parent when not explicitly set
 			if (parentCategoryId && !categoryGroupId) {
 				const parent = await this.db
 					.table('category')
@@ -673,7 +852,7 @@ export class InventoryRepository extends BaseRepository {
 	async findAllCategories(
 		workspaceId: string,
 		currentPage: number = 1,
-		perPage: number = 10,
+		perPage: number = 24,
 		search: string | null = null
 	): Promise<
 		PaginationResult<(Category & { productCount: number; categoryGroupName: string | null })[]>
@@ -811,7 +990,7 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	// shopping list: out-of-stock items with supplier info and recipe count
+	// get out of stock items with supplier info and recipe count
 	async getShoppingList(
 		workspaceId: string,
 		currentPage: number = 1,
@@ -935,29 +1114,28 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
-	// per-product count of "almost-there" recipes that would be unlocked
+	// find products that are 1 away from stocking a recipe
 	async getShoppingListImpact(
 		workspaceId: string,
 		productIds: number[]
 	): Promise<Map<number, number>> {
 		try {
 			if (productIds.length === 0) return new Map();
-
-			// find recipes missing exactly 1 ingredient, then count per product
 			const result = await this.db
 				.table('basicrecipestep as rs')
+				.join('recipestepstock as ss', 'rs.RecipeStepId', 'ss.RecipeStepId')
 				.select('rs.ProductId')
 				.select(this.db.query.raw('COUNT(DISTINCT rs.RecipeId) as unlockable'))
-				.where('rs.WorkspaceId', workspaceId)
-				.where('rs.EffectiveInStock', 0)
+				.where('ss.WorkspaceId', workspaceId)
+				.where('ss.EffectiveInStock', 0)
 				.whereIn('rs.ProductId', productIds)
 				.whereIn('rs.RecipeId', function () {
-					this.select('sub.RecipeId')
-						.from('basicrecipestep as sub')
-						.where('sub.WorkspaceId', workspaceId)
-						.groupBy('sub.RecipeId')
-						.havingRaw('SUM(CASE WHEN sub.EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
-						.havingRaw('COUNT(sub.RecipeStepId) > 1');
+					this.select('RecipeId')
+						.from('recipestepstock')
+						.where('WorkspaceId', workspaceId)
+						.groupBy('RecipeId')
+						.havingRaw('SUM(CASE WHEN EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
+						.havingRaw('COUNT(RecipeStepId) > 1');
 				})
 				.groupBy('rs.ProductId');
 
@@ -979,28 +1157,39 @@ export class InventoryRepository extends BaseRepository {
 	// supplier CRUD
 	async getSuppliers(workspaceId: string, includeDefault = false): Promise<Supplier[]> {
 		try {
-			let query = this.db.table('supplier').where(function () {
-				this.whereNull('WorkspaceId').orWhere('WorkspaceId', workspaceId);
+			const globalId = getGlobalWorkspace();
+			// global suppliers (NULL or the global workspace) are shared to everyone
+			let query = this.db.table('supplier as s').where(function () {
+				this.whereNull('s.WorkspaceId').orWhereIn('s.WorkspaceId', [globalId, workspaceId]);
 			});
 
 			if (!includeDefault) {
-				query = query.whereNot('SupplierId', 1);
+				query = query.where('s.SupplierIsDefault', false);
 			}
 
 			const result = await query
+				.leftJoin('suppliertype as st', 's.SupplierTypeId', 'st.SupplierTypeId')
 				.select(
-					'SupplierId',
-					'SupplierName',
-					'SupplierDetails',
-					'SupplierWebsiteUrl',
-					'SupplierPhone',
-					'SupplierAddress',
-					'SupplierPlaceId',
-					'SupplierType'
+					's.SupplierId',
+					's.SupplierName',
+					's.SupplierDetails',
+					's.SupplierWebsiteUrl',
+					's.SupplierPhone',
+					's.SupplierAddress',
+					's.SupplierPlaceId',
+					's.SupplierTypeId',
+					's.SupplierIsDefault',
+					's.WorkspaceId',
+					'st.SupplierTypeName'
 				)
-				.orderBy('SupplierName');
+				.orderBy('s.SupplierName');
 
-			return result as Supplier[];
+			// flag ownership so the ui can gate edit/remove — globals are view-only
+			return (result as any[]).map(({ workspaceId: ownerId, supplierIsDefault, ...rest }) => ({
+				...rest,
+				supplierIsDefault: Boolean(supplierIsDefault),
+				supplierIsOwned: ownerId != null && ownerId === workspaceId,
+			})) as Supplier[];
 		} catch (error: any) {
 			console.error('Failed to get suppliers:', error);
 			Logger.error(
@@ -1009,6 +1198,86 @@ export class InventoryRepository extends BaseRepository {
 			);
 			return [];
 		}
+	}
+
+	// single workspace-owned supplier (global suppliers are view-only, so excluded)
+	async getSupplierById(workspaceId: string, supplierId: number): Promise<Supplier | null> {
+		try {
+			const row = await this.db
+				.table('supplier as s')
+				.where('s.SupplierId', supplierId)
+				.where('s.WorkspaceId', workspaceId)
+				.leftJoin('suppliertype as st', 's.SupplierTypeId', 'st.SupplierTypeId')
+				.select(
+					's.SupplierId',
+					's.SupplierName',
+					's.SupplierDetails',
+					's.SupplierWebsiteUrl',
+					's.SupplierPhone',
+					's.SupplierAddress',
+					's.SupplierPlaceId',
+					's.SupplierTypeId',
+					'st.SupplierTypeName'
+				)
+				.first();
+
+			return (row as Supplier) || null;
+		} catch (error: any) {
+			console.error('Failed to get supplier:', error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return null;
+		}
+	}
+
+	// count of all products assigned to each supplier in the workspace (no stock filter)
+	async getSupplierProductCounts(workspaceId: string): Promise<Record<number, number>> {
+		try {
+			const rows = await this.db
+				.table('product')
+				.where('workspaceId', workspaceId)
+				.whereNotNull('SupplierId')
+				.select('SupplierId')
+				.count('ProductId as productCount')
+				.groupBy('SupplierId');
+
+			const counts: Record<number, number> = {};
+			for (const row of rows as any[]) {
+				counts[Number(row.supplierId)] = Number(row.productCount);
+			}
+			return counts;
+		} catch (error: any) {
+			console.error('Failed to get supplier product counts:', error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return {};
+		}
+	}
+
+	async getSupplierTypes(): Promise<SelectOption[]> {
+		try {
+			const result = await this.db
+				.table('suppliertype')
+				.select('SupplierTypeId', 'SupplierTypeName')
+				.orderBy('SupplierTypeName');
+			return (result as SupplierType[]).map(({ supplierTypeId, supplierTypeName }) => ({
+				name: supplierTypeName,
+				value: supplierTypeId,
+			}));
+		} catch (error: any) {
+			console.error(error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return [];
+		}
+	}
+
+	async getSupplierTypeIdByName(name: string): Promise<number | null> {
+		const row = await this.db.table('suppliertype').where('SupplierTypeName', name).first();
+		return row ? (row as SupplierType).supplierTypeId : null;
+	}
+
+	// the catch-all supplier orphaned products fall back to when their supplier is deleted
+	async getDefaultSupplierId(): Promise<number> {
+		const row = await this.db.table('supplier').where('SupplierIsDefault', true).first();
+		return row ? (row as Supplier).supplierId : 1;
 	}
 
 	async createSupplier(
@@ -1038,7 +1307,7 @@ export class InventoryRepository extends BaseRepository {
 				SupplierPhone: supplier.supplierPhone || null,
 				SupplierAddress: supplier.supplierAddress || null,
 				SupplierPlaceId: supplier.supplierPlaceId || null,
-				SupplierType: supplier.supplierType || 'liquor_store',
+				SupplierTypeId: supplier.supplierTypeId || null,
 				WorkspaceId: workspaceId,
 			});
 
@@ -1052,19 +1321,67 @@ export class InventoryRepository extends BaseRepository {
 		}
 	}
 
+	async updateSupplier(
+		workspaceId: string,
+		supplierId: number,
+		patch: Partial<Supplier>
+	): Promise<QueryResult<Supplier>> {
+		try {
+			// the default "Any" supplier is immutable
+			const target = await this.db.table('supplier').where('SupplierId', supplierId).first();
+			if ((target as Supplier | undefined)?.supplierIsDefault) {
+				return { status: 'error', error: 'Cannot edit the default supplier.' };
+			}
+
+			// only touch columns that were provided
+			const fields: Record<string, unknown> = {};
+			if (patch.supplierName !== undefined) fields.SupplierName = patch.supplierName;
+			if (patch.supplierDetails !== undefined) fields.SupplierDetails = patch.supplierDetails;
+			if (patch.supplierWebsiteUrl !== undefined)
+				fields.SupplierWebsiteUrl = patch.supplierWebsiteUrl;
+			if (patch.supplierPhone !== undefined) fields.SupplierPhone = patch.supplierPhone;
+			if (patch.supplierAddress !== undefined) fields.SupplierAddress = patch.supplierAddress;
+			if (patch.supplierTypeId !== undefined) fields.SupplierTypeId = patch.supplierTypeId;
+
+			if (Object.keys(fields).length === 0) {
+				return { status: 'error', error: 'No fields to update.' };
+			}
+
+			// scope to the workspace so global (WorkspaceId NULL) suppliers stay read-only
+			const updated = await this.db
+				.table('supplier')
+				.where('SupplierId', supplierId)
+				.where('WorkspaceId', workspaceId)
+				.update(fields);
+
+			if (updated === 0) {
+				return { status: 'error', error: 'Supplier not found in this workspace.' };
+			}
+
+			const row = await this.db.table('supplier').where('SupplierId', supplierId).first();
+			return { status: 'success', data: row as Supplier };
+		} catch (error: any) {
+			console.error('Failed to update supplier:', error);
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return { status: 'error', error: 'Could not update supplier.' };
+		}
+	}
+
 	async deleteSupplier(workspaceId: string, supplierId: number): Promise<QueryResult<number>> {
 		try {
-			// prevent deleting the global "Any" supplier
-			if (supplierId === 1) {
+			// prevent deleting the default catch-all supplier
+			const target = await this.db.table('supplier').where('SupplierId', supplierId).first();
+			if ((target as Supplier | undefined)?.supplierIsDefault) {
 				return { status: 'error', error: 'Cannot delete the default supplier.' };
 			}
 
-			// reassign products to "Any" before deleting
+			// reassign products to the default before deleting (FK is NO ACTION)
+			const defaultSupplierId = await this.getDefaultSupplierId();
 			await this.db
 				.table('product')
 				.where('SupplierId', supplierId)
 				.where('WorkspaceId', workspaceId)
-				.update({ SupplierId: 1 });
+				.update({ SupplierId: defaultSupplierId });
 
 			const deleted = await this.db
 				.table('supplier')
@@ -1082,7 +1399,6 @@ export class InventoryRepository extends BaseRepository {
 
 	async deleteCategory(workspaceId: string, categoryId: number): Promise<QueryResult<number>> {
 		try {
-			// Check if category has products
 			const productCountResult = (await this.db
 				.table('product')
 				.where('CategoryId', categoryId)

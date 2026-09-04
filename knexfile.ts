@@ -8,16 +8,13 @@ const connection = {
 	password: process.env.DB_PASSWORD,
 };
 
-// schema is env-driven: the migrate:*:prod scripts set CORE_DATABASE/USER_DATABASE to the _p
-// schemas; everything else falls back to the dev _d schemas.
-const coreDatabase = process.env.CORE_DATABASE || 'app_d';
-const userDatabase = process.env.USER_DATABASE || 'user_d';
+const coreDb = process.env.CORE_DATABASE || 'app_d';
+const userDb = process.env.USER_DATABASE || 'user_d';
 
 const config: Record<string, Knex.Config> = {
-	// user database: auth, roles, permissions, workspaces, invitations
 	user: {
 		client: 'mysql2',
-		connection: { ...connection, database: userDatabase },
+		connection: { ...connection, database: userDb },
 		migrations: {
 			directory: './migrations/user',
 			extension: 'ts',
@@ -27,11 +24,9 @@ const config: Record<string, Knex.Config> = {
 			extension: 'ts',
 		},
 	},
-
-	// core database: inventory, catalog, recipes
 	core: {
 		client: 'mysql2',
-		connection: { ...connection, database: coreDatabase },
+		connection: { ...connection, database: coreDb },
 		migrations: {
 			directory: './migrations/core',
 			extension: 'ts',

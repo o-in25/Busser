@@ -80,6 +80,11 @@
 		window.addEventListener('focusin', handleFocusIn, { passive: true });
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
+		// ios only honors :active on nested elements while a touch listener exists — this no-op
+		// enables the css press feedback on cards (the glass surface is a child of the <a>)
+		const enableActive = () => {};
+		document.addEventListener('touchstart', enableActive, { passive: true });
+
 		// detect ios keyboard open/close via visualViewport
 		const initialHeight = window.visualViewport?.height ?? window.innerHeight;
 		let lastVpHeight = initialHeight;
@@ -109,6 +114,7 @@
 			mql.removeEventListener('change', handler);
 			window.removeEventListener('focusin', handleFocusIn);
 			window.removeEventListener('scroll', handleScroll);
+			document.removeEventListener('touchstart', enableActive);
 			window.visualViewport?.removeEventListener('resize', handleViewportResize);
 		};
 	});

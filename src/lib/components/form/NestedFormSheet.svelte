@@ -2,13 +2,12 @@
 	import { getContext } from 'svelte';
 
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { NESTED_CREATE_KEY, type NestedCreateStack } from './nestedCreate.svelte';
+	import { NESTED_FORM_KEY, type NestedFormStack } from './NestedForm.svelte';
 
 	import CategoryCreateSheet from './CategoryCreateSheet.svelte';
 	import ProductCreateSheet from './ProductCreateSheet.svelte';
 
-	// renders one independent Sheet.Root per stack entry so nested creates stack naturally
-	const stack = getContext<NestedCreateStack | undefined>(NESTED_CREATE_KEY);
+	const stack = getContext<NestedFormStack | undefined>(NESTED_FORM_KEY);
 </script>
 
 {#if stack}

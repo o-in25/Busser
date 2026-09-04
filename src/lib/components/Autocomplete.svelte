@@ -22,16 +22,23 @@
 
 	let items: any[] = [];
 	let show = false;
+	let typing = false;
 	let selectValue = key || '';
 	let prevValue: string | null = null;
 	let prevKey: string | undefined = key;
+	let loaded = false;
 
 	onMount(async () => {
 		let response = await fetch(fetchUrl, {
 			method: 'GET',
 		});
-		const selectOptions = await response.json();
-		items = selectOptions;
+		items = await response.json();
+		// restore the display from a preserved value so a step remount doesn't blank the field
+		if (value && !selectValue) {
+			const match = items.find((item) => String(item.value) === String(value));
+			if (match) selectValue = match.name;
+		}
+		loaded = true;
 	});
 
 	// Handle external value changes (e.g., draft restore) imperatively to avoid reactive cycles
@@ -52,22 +59,29 @@
 		prevValue = value;
 	});
 
-	$: search = items.filter(
-		({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1
-	);
-	$: value =
-		search.find(({ name }) => {
-			return name.toLowerCase().trim() === selectValue.toLowerCase().trim();
-		})?.value ?? null;
+	// show everything on focus; only narrow once the user actually types
+	$: search = typing
+		? items.filter(({ name }) => name.toLowerCase().indexOf(selectValue.toLowerCase()) !== -1)
+		: items;
+	// resolve the value off the full list, independent of what's currently visible. hold off until
+	// options load, or the empty display nulls a preserved value on a step remount
+	$: if (loaded)
+		value =
+			items.find(({ name }) => name.toLowerCase().trim() === selectValue.toLowerCase().trim())
+				?.value ?? null;
 	$: disabled = items.length === 0;
 
-	const showAutocomplete = () => (show = true);
+	const showAutocomplete = () => {
+		typing = false;
+		show = true;
+	};
 	const hideAutocomplete = () =>
 		setTimeout(() => {
 			if (!search.length) {
 				selectValue = '';
 			}
 			show = false;
+			typing = false;
 		}, 100);
 
 	const handleClick = (item: SelectOption) => {
@@ -98,6 +112,7 @@
 			{placeholder}
 			onfocus={showAutocomplete}
 			onblur={hideAutocomplete}
+			oninput={() => (typing = true)}
 			bind:value={selectValue}
 			{required}
 			{disabled}
@@ -113,13 +128,11 @@
 	</div>
 	{#if show}
 		<div class="relative">
-			<div
-				class="absolute w-full max-h-44 overflow-y-auto z-50 mt-1 rounded-md border bg-popover text-popover-foreground shadow-md"
-			>
+			<div class="glass-dropdown absolute w-full max-h-44 overflow-y-auto z-50 mt-1 p-1">
 				{#each search as item}
 					<button
 						type="button"
-						class="w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
+						class="w-full rounded-lg px-3 py-2 text-left text-sm text-foreground hover:bg-primary-500 hover:text-white cursor-pointer transition-colors"
 						onmousedown={() => handleClick(item)}
 					>
 						{item.name}

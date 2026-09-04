@@ -14,9 +14,9 @@
 </script>
 
 {#if viewMode === 'table'}
-	<div class="glass-table overflow-x-auto" aria-busy="true" aria-label="Loading inventory">
+	<div class="glass-panel isolate overflow-hidden" aria-busy="true" aria-label="Loading inventory">
 		<!-- header -->
-		<div class="hidden sm:flex items-center gap-4 px-4 py-3 border-b border-white/10">
+		<div class="hidden sm:flex items-center gap-4 px-6 py-3 border-b border-white/10">
 			{#if selectable}<div class="shimmer h-4 w-4 rounded"></div>{/if}
 			<div class="shimmer h-4 w-32 rounded-md"></div>
 			<div class="shimmer h-4 w-24 rounded-md"></div>
@@ -26,7 +26,7 @@
 		</div>
 		<!-- rows -->
 		{#each Array(count) as _}
-			<div class="flex items-center gap-4 px-4 py-3 border-b border-white/5 last:border-b-0">
+			<div class="flex items-center gap-4 px-6 py-3 border-b border-white/5 last:border-b-0">
 				{#if selectable}<div class="shimmer h-4 w-4 rounded shrink-0"></div>{/if}
 				<div class="shimmer h-4 w-40 rounded-md"></div>
 				<div class="shimmer h-4 w-24 rounded-md hidden sm:block"></div>

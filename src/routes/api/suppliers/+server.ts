@@ -40,6 +40,10 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 	}
 
 	const body = await request.json();
+	// accept an explicit type id (from the form) or resolve a type name (from the places flow)
+	const supplierTypeId =
+		body.supplierTypeId ??
+		(await inventoryRepo.getSupplierTypeIdByName(body.type || 'liquor_store'));
 	const result = await inventoryRepo.createSupplier(workspaceId, {
 		supplierName: body.name,
 		supplierDetails: body.details || null,
@@ -47,7 +51,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		supplierPhone: body.phone || null,
 		supplierAddress: body.address || null,
 		supplierPlaceId: body.placeId || null,
-		supplierType: body.type || 'liquor_store',
+		supplierTypeId,
 	});
 
 	if (result.status === 'error') {
@@ -59,6 +63,59 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 	}
 
 	return json(result.data, { status: 201 });
+};
+
+export const PUT: RequestHandler = async ({ locals, request }) => {
+	const workspaceId = locals.activeWorkspaceId;
+	if (!workspaceId || !locals.user) {
+		error(StatusCodes.UNAUTHORIZED, {
+			reason: 'Unauthorized',
+			code: StatusCodes.UNAUTHORIZED,
+			message: 'Workspace context required',
+		});
+	}
+
+	const canModify = await canModifyWorkspace(locals.user.userId, workspaceId);
+	if (!canModify) {
+		error(StatusCodes.FORBIDDEN, {
+			reason: getReasonPhrase(StatusCodes.FORBIDDEN),
+			code: StatusCodes.FORBIDDEN,
+			message: 'You need editor or owner access to edit suppliers.',
+		});
+	}
+
+	const body = await request.json();
+	const supplierId = Number(body.id);
+	if (!supplierId || isNaN(supplierId)) {
+		error(StatusCodes.BAD_REQUEST, {
+			reason: 'Bad Request',
+			code: StatusCodes.BAD_REQUEST,
+			message: 'Supplier ID is required.',
+		});
+	}
+
+	// accept an explicit type id, or resolve a type name to its id
+	const supplierTypeId =
+		body.supplierTypeId ??
+		(body.type !== undefined ? await inventoryRepo.getSupplierTypeIdByName(body.type) : undefined);
+	const result = await inventoryRepo.updateSupplier(workspaceId, supplierId, {
+		supplierName: body.name,
+		supplierDetails: body.details ?? null,
+		supplierWebsiteUrl: body.website ?? null,
+		supplierPhone: body.phone ?? null,
+		supplierAddress: body.address ?? null,
+		supplierTypeId,
+	});
+
+	if (result.status === 'error') {
+		error(StatusCodes.BAD_REQUEST, {
+			reason: 'Bad Request',
+			code: StatusCodes.BAD_REQUEST,
+			message: result.error,
+		});
+	}
+
+	return json(result.data);
 };
 
 export const DELETE: RequestHandler = async ({ locals, url }) => {
