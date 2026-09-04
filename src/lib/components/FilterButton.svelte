@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RefreshCw, SlidersHorizontal } from 'lucide-svelte';
+	import { RefreshCw, SlidersHorizontal, X } from 'lucide-svelte';
 	import { onMount, type Snippet } from 'svelte';
 
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -55,11 +55,11 @@
 
 {#snippet refreshButton()}
 	{#if onRefresh}
-		<div class="border-t border-border/50 pt-3 mt-4">
+		<div class="mt-3">
 			<button
 				onclick={handleRefresh}
 				disabled={isRefreshing}
-				class="flex items-center gap-2 w-full rounded-lg glass-controlpx-3 py-2.5 text-sm hover:bg-white/60 dark:hover:bg-white/[0.14] transition-colors disabled:opacity-50"
+				class="flex items-center gap-2 w-full rounded-lg border border-input/50 px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors disabled:opacity-50"
 			>
 				<RefreshCw class={cn('h-4 w-4 text-muted-foreground', isRefreshing && 'animate-spin')} />
 				{isRefreshing ? 'Refreshing...' : 'Refresh results'}
@@ -112,7 +112,7 @@
 							onclick={handleRefresh}
 							disabled={isRefreshing}
 							class={cn(
-								'h-10 w-10 flex items-center justify-center rounded-lg glass-controlhover:bg-white/60 dark:hover:bg-white/[0.14] transition-colors disabled:opacity-50 ml-auto shrink-0'
+								'h-10 w-10 flex items-center justify-center rounded-lg border border-input/50 hover:bg-accent/50 transition-colors disabled:opacity-50 ml-auto shrink-0'
 							)}
 							aria-label="Refresh results"
 						>
@@ -144,15 +144,33 @@
 		<!-- force downward so it never flips up under the nav; align end keeps it on-screen
 		     (avoidCollisions off also disables horizontal shift, so anchor to the right edge).
 		     cap height to the space below the trigger and scroll — handles short viewports. -->
+		<!-- scroll lives on an inner wrapper, not the glass element itself: a backdrop-filtered
+		     scroll container renders square corners in webkit (ignores the panel radius). -->
 		<Popover.Content
 			align="end"
 			side="bottom"
 			avoidCollisions={false}
 			collisionPadding={8}
-			class="w-[36rem] max-w-[calc(100vw-1rem)] max-h-[var(--bits-popover-content-available-height)] overflow-y-auto overscroll-contain"
+			class="w-[36rem] max-w-[calc(100vw-1rem)] overflow-hidden"
 		>
-			{@render children()}
-			{@render refreshButton()}
+			<!-- close keeps the current filters; it only dismisses the panel -->
+			<div class="flex items-center justify-between mb-3">
+				<span class="text-base font-semibold">{title}</span>
+				<button
+					type="button"
+					onclick={() => (open = false)}
+					aria-label="Close"
+					class="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+				>
+					<X class="h-4 w-4" />
+				</button>
+			</div>
+			<div
+				class="max-h-[calc(var(--bits-popover-content-available-height)-4.5rem)] overflow-y-auto overscroll-contain"
+			>
+				{@render children()}
+				{@render refreshButton()}
+			</div>
 		</Popover.Content>
 	</Popover.Root>
 {/if}

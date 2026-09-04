@@ -23,14 +23,12 @@
 		perPage = '24',
 		advancedFilterCount = 0,
 		hideSpirit = false,
-		makeableLensAvailable = false,
-		readyToMake = false,
+		canModify = false,
 		onSpiritChange,
 		onShowFilterChange,
 		onMoodChange,
 		onSortChange,
 		onPerPageChange,
-		onReadyToMakeChange,
 		onReset,
 		onAdvancedClick,
 	}: {
@@ -42,14 +40,12 @@
 		perPage?: string;
 		advancedFilterCount?: number;
 		hideSpirit?: boolean;
-		makeableLensAvailable?: boolean;
-		readyToMake?: boolean;
+		canModify?: boolean;
 		onSpiritChange: (value: string) => void;
 		onShowFilterChange: (value: string) => void;
 		onMoodChange?: (value: string) => void;
 		onSortChange: (value: string) => void;
 		onPerPageChange?: (value: string) => void;
-		onReadyToMakeChange?: (on: boolean) => void;
 		onReset: () => void;
 		onAdvancedClick?: () => void;
 	} = $props();
@@ -62,11 +58,13 @@
 		{ value: 'oldest', label: 'Oldest First' },
 	];
 
-	const showFilterOptions = [
+	// drafts are an owner/editor-only view; unpublished recipes are hidden everywhere else
+	const showFilterOptions = $derived([
 		{ value: 'all', label: 'All Recipes' },
 		{ value: 'favorites', label: 'My Favorites' },
 		{ value: 'featured', label: 'Featured' },
-	];
+		...(canModify ? [{ value: 'drafts', label: 'Drafts' }] : []),
+	]);
 
 	const spiritLabel = $derived.by(() => {
 		if (!selectedSpirit || selectedSpirit === 'all') return 'All Spirits';
@@ -118,35 +116,6 @@
 </script>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 sm:grid-flow-row-dense gap-4">
-	<!-- availability lens (owner/personal only); mirrors the pill above the results -->
-	{#if makeableLensAvailable}
-		<div class="flex flex-col gap-1.5 sm:col-span-2">
-			<span class="text-sm font-medium text-muted-foreground">Availability</span>
-			<div class="flex items-center gap-1 p-1 rounded-full bg-muted/50 w-fit">
-				<button
-					type="button"
-					onclick={() => onReadyToMakeChange?.(true)}
-					class={cn(
-						'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
-						readyToMake ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
-					)}
-				>
-					Ready to make
-				</button>
-				<button
-					type="button"
-					onclick={() => onReadyToMakeChange?.(false)}
-					class={cn(
-						'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
-						!readyToMake ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
-					)}
-				>
-					All recipes
-				</button>
-			</div>
-		</div>
-	{/if}
-
 	<!-- spirit -->
 	{#if !hideSpirit}
 		<div class="flex flex-col gap-1.5">

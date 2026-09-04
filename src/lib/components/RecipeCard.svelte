@@ -50,8 +50,9 @@
 			class="h-full w-full group-hover:scale-105 transition-transform duration-500"
 		/>
 
-		<!-- gradient overlay -->
-		<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+		<!-- dark scrim so bright photos don't glare on the near-black theme -->
+		<div class="absolute inset-0 bg-black/25"></div>
+		<div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5"></div>
 
 		<!-- specular highlight -->
 		<div class="fancy-card-specular"></div>

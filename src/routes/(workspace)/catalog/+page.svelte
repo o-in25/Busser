@@ -375,6 +375,32 @@
 		<h1 class="sr-only">Cocktail Catalog</h1>
 	{/if}
 
+	<!-- ready-to-make lens: shared by the inline (desktop/tablet) and mobile placements -->
+	{#snippet readyLens(extraClass = '')}
+		<div class={cn('flex items-center gap-1 p-1 rounded-full bg-muted/50 w-fit shrink-0', extraClass)}>
+			<button
+				type="button"
+				onclick={() => setLens(true)}
+				class={cn(
+					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+					readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
+				)}
+			>
+				Ready to make
+			</button>
+			<button
+				type="button"
+				onclick={() => setLens(false)}
+				class={cn(
+					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+					!readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
+				)}
+			>
+				All recipes
+			</button>
+		</div>
+	{/snippet}
+
 	<!-- Toolbar -->
 	<div class="flex flex-col gap-3 mb-6">
 		<div class="flex items-center gap-2">
@@ -419,9 +445,7 @@
 					sortOption={selectedSort}
 					{perPage}
 					{advancedFilterCount}
-					{makeableLensAvailable}
-					readyToMake={readyLensOn}
-					onReadyToMakeChange={setLens}
+					{canModify}
 					onSpiritChange={handleSpiritChange}
 					onShowFilterChange={handleShowFilterChange}
 					onMoodChange={handleMoodChange}
@@ -435,34 +459,20 @@
 				/>
 			</FilterButton>
 
+			<!-- ready-to-make lens, promoted next to the view toggle (desktop/tablet) -->
+			{#if makeableLensAvailable && selectedShowFilter === 'all'}
+				{@render readyLens('hidden sm:flex')}
+			{/if}
+
 			<!-- View toggle -->
 			<ViewToggle modes={['grid', 'list']} active={viewMode} onchange={setViewMode} />
 		</div>
 	</div>
 
-	<!-- Makeability lens: the primary "what can I make" axis, with an obvious one-tap widen -->
+	<!-- makeability lens (mobile): the primary "what can I make" axis; desktop/tablet shows it in the toolbar -->
 	{#if makeableLensAvailable && selectedShowFilter === 'all'}
-		<div class="flex items-center gap-1 mb-4 p-1 rounded-full bg-muted/50 w-fit">
-			<button
-				type="button"
-				onclick={() => setLens(true)}
-				class={cn(
-					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
-					readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
-				)}
-			>
-				Ready to make
-			</button>
-			<button
-				type="button"
-				onclick={() => setLens(false)}
-				class={cn(
-					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
-					!readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
-				)}
-			>
-				All recipes
-			</button>
+		<div class="sm:hidden mb-4">
+			{@render readyLens()}
 		</div>
 	{/if}
 

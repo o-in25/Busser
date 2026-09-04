@@ -48,6 +48,8 @@ export class CatalogRepository extends BaseRepository {
 			let query = this.baseQuery(this.db.table('basicrecipe as r').select(), 'r', workspaceId);
 
 			if (!includeUnpublished) query = query.where('r.published', true);
+			// explicit published filter (e.g. drafts view narrows to unpublished)
+			if (filter?.published !== undefined) query = query.where('r.published', filter.published);
 			if (filter?.productInStockQuantity) {
 				query = query.whereIn(
 					'r.RecipeId',

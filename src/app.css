@@ -14,6 +14,12 @@
 	::file-selector-button {
 		border-color: var(--color-gray-200, currentcolor);
 	}
+
+	/* v4 dropped the default pointer cursor on buttons, restore it */
+	button:not(:disabled),
+	[role='button']:not([aria-disabled='true']) {
+		cursor: pointer;
+	}
 }
 
 @theme {
@@ -519,8 +525,10 @@
 	backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 	-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 	background-color: rgb(var(--glass-fill));
-	border-bottom: 1px solid rgb(var(--glass-border-color));
-	box-shadow: inset 0 1px 0 0 rgb(255 255 255 / var(--glass-highlight));
+	/* soft shadow, not a hard border, so the frosted band eases into the page behind it */
+	box-shadow:
+		inset 0 1px 0 0 rgb(255 255 255 / var(--glass-highlight)),
+		0 8px 24px -12px rgb(0 0 0 / 0.25);
 }
 
 /* pink-tinted glass pill — shared by the nav pills; blur/saturate track the system */

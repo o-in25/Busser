@@ -132,7 +132,7 @@
 					</div>
 				{:else}
 					<div class="flex items-center gap-3">
-						<img src={logoNav} class="h-9" alt="Busser" />
+						<img src={logoNav} class="h-10" alt="Busser" />
 						<div class="flex flex-col">
 							<Sheet.Title class="text-sm font-medium">Busser</Sheet.Title>
 							<Sheet.Description class="text-xs text-muted-foreground">
@@ -292,7 +292,7 @@
 		</Sheet.Content>
 	</Sheet.Root>
 	<a href="/" class="mobile-header-logo">
-		<img src={logoNav} class="h-10" alt="Busser" />
+		<img src={logoNav} class="h-12" alt="Busser" />
 	</a>
 </div>
 
@@ -320,7 +320,7 @@
 		<!-- Logo (left) — flex-1 keeps the center pill balanced against the wider right side -->
 		<div class="flex flex-1 justify-start">
 			<a href="/" class="flex-shrink-0">
-				<img src={logoNav} class="h-10" alt="Busser" />
+				<img src={logoNav} class="h-12" alt="Busser" />
 			</a>
 		</div>
 
@@ -380,10 +380,8 @@
 		top: 0;
 		z-index: 50;
 		align-items: center;
-		/* min-height must fit the 2.5rem logo — without it the header collapses to the
-		   hamburger height and the taller logo clips against the header edge when the
-		   safe-area inset is 0 (i.e. non-pwa safari) */
-		min-height: calc(4rem + env(safe-area-inset-top, 0px));
+		/* min-height must fit the 3rem logo, else it clips when the safe-area inset is 0 */
+		min-height: calc(4.5rem + env(safe-area-inset-top, 0px));
 		padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
 		/* glass comes from the glass-nav tier (frosted default); this owns only layout */
 		transition: transform 0.3s ease;

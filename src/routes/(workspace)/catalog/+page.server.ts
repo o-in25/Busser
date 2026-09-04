@@ -27,6 +27,10 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const makeableLensAvailable = canModify;
 	const readyToMakeActive = makeableLensAvailable && url.searchParams.get('readyToMake') === '1';
 
+	// drafts live behind the Show filter (owner/editor only) so the default catalog reads as
+	// published-only — matching the home count. everyone else always sees published.
+	const draftsView = canModify && showFilter === 'drafts';
+
 	const ingredientInclude = url.searchParams.get('ingredientInclude') || '';
 	const ingredientAny = url.searchParams.get('ingredientAny') || '';
 	const ingredientExclude = url.searchParams.get('ingredientExclude') || '';
@@ -55,6 +59,10 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	}
 	if (spiritId) {
 		filter.recipeCategoryId = parseInt(spiritId);
+	}
+	// drafts view narrows to unpublished; everything else stays published-only via includeUnpublished
+	if (draftsView) {
+		filter.published = false;
 	}
 
 	const advancedFilter: AdvancedFilter = {};
@@ -95,7 +103,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			perPage,
 			Object.keys(filter).length > 0 ? filter : null,
 			hasAdvancedFilter ? advancedFilter : null,
-			canModify
+			draftsView
 		),
 		catalogRepo.getSpirits(),
 		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
