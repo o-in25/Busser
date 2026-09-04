@@ -7,3 +7,4 @@ export * from './inventory';
 export * from './shared';
 export * from './spirits';
 export * from './user';
+export * from './workspace';

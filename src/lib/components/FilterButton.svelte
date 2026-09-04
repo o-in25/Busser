@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { LayoutGrid, List, RefreshCw, SlidersHorizontal, TableIcon } from 'lucide-svelte';
+	import { RefreshCw, SlidersHorizontal } from 'lucide-svelte';
 	import { onMount, type Snippet } from 'svelte';
 
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Sheet from '$lib/components/ui/sheet';
+	import ViewToggle from '$lib/components/ViewToggle.svelte';
 	import { cn } from '$lib/utils';
 
 	type ViewMode = 'table' | 'grid' | 'list';
@@ -40,18 +41,6 @@
 			isRefreshing = false;
 		}
 	}
-
-	const viewIcons: Record<ViewMode, typeof TableIcon> = {
-		table: TableIcon,
-		grid: LayoutGrid,
-		list: List,
-	};
-
-	const viewLabels: Record<ViewMode, string> = {
-		table: 'Table',
-		grid: 'Grid',
-		list: 'List',
-	};
 
 	let isMobile = $state(false);
 
@@ -110,23 +99,12 @@
 					{#if viewModes && activeView && onViewChange}
 						<div class="flex flex-col gap-1.5">
 							<span class="text-sm font-medium text-muted-foreground">View</span>
-							<div class="glass-control flex items-center rounded-lg overflow-hidden w-fit">
-								{#each viewModes as mode}
-									{@const Icon = viewIcons[mode]}
-									<button
-										class={cn(
-											'h-10 px-3 flex items-center justify-center gap-1.5 text-sm transition-all',
-											activeView === mode
-												? 'glass-primary'
-												: 'text-muted-foreground hover:bg-white/40 dark:hover:bg-white/[0.08] hover:text-primary'
-										)}
-										onclick={() => onViewChange(mode)}
-									>
-										<Icon class="h-4 w-4" />
-										{viewLabels[mode]}
-									</button>
-								{/each}
-							</div>
+							<ViewToggle
+								modes={viewModes}
+								active={activeView}
+								onchange={onViewChange}
+								class="flex w-fit"
+							/>
 						</div>
 					{/if}
 					{#if onRefresh}

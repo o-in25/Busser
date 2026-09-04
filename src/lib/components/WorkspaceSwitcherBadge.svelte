@@ -18,7 +18,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import type { WorkspaceWithRole } from '$lib/types/workspace';
 	import { createAndSwitchWorkspace, switchWorkspace } from '$lib/utils/workspace';
 	import { workspaceSwitching } from '../../stores';
 

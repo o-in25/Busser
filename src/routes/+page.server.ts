@@ -7,6 +7,7 @@ import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { checkRateLimit, getClientIp } from '$lib/server/rate-limit';
 import { getGlobalWorkspace } from '$lib/server/workspace';
 import type { View } from '$lib/types';
+import { roleIsOwner, type WorkspaceRole } from '$lib/types/workspace';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -31,7 +32,7 @@ export const load = (async ({ locals }) => {
 	// the global catalog has no per-user inventory (everything reads as in stock), so the
 	// bar dashboard is meaningless there — treat it as a plain browse view, not an owned bar
 	const isGlobalCatalog = workspaceId === globalWorkspace;
-	const isOwner = workspaceRole === 'owner' && !isGlobalCatalog;
+	const isOwner = roleIsOwner(workspaceRole) && !isGlobalCatalog;
 
 	// owners see available (ready to make) recipes; non-owners see full catalog
 	let recipes: View.BasicRecipe[] = [];
@@ -66,7 +67,7 @@ export const load = (async ({ locals }) => {
 		availableCount: number;
 		almostThereRecipes: Array<View.BasicRecipe & { missingIngredient: string | null }>;
 		userName: string;
-		workspaceRole: string | null;
+		workspaceRole: WorkspaceRole | null;
 		highImpactIngredients: { ingredientName: string; unlockableRecipes: number }[];
 		barBreakdown: Awaited<ReturnType<typeof inventoryRepo.getCategoryBreakdown>>;
 		catalogCoverage: number;

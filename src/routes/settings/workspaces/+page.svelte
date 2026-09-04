@@ -28,7 +28,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleIsOwner, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	import type { ActionData, PageData } from './$types';
 
@@ -93,7 +93,7 @@
 
 	// Check if user is owner of workspace
 	function isOwner(workspace: WorkspaceWithRole): boolean {
-		return workspace.workspaceRole === 'owner';
+		return roleIsOwner(workspace.workspaceRole);
 	}
 
 	// Open edit dialog
@@ -290,7 +290,7 @@
 								</Table.Cell>
 								<Table.Cell>
 									<Badge
-										variant={workspace.workspaceRole === 'owner'
+										variant={roleIsOwner(workspace.workspaceRole)
 											? 'default'
 											: workspace.workspaceRole === 'editor'
 												? 'secondary'
@@ -429,7 +429,7 @@
 									</div>
 									<div class="flex items-center gap-2 mt-2">
 										<Badge class="{info.bg} {info.color} border-0">
-											{#if selectedWs.workspaceRole === 'owner'}
+											{#if roleIsOwner(selectedWs.workspaceRole)}
 												<Crown class="h-3 w-3 mr-1" />
 											{/if}
 											{info.label}

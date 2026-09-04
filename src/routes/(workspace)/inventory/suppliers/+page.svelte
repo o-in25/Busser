@@ -16,7 +16,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import type { Supplier } from '$lib/types';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	import type { PageData } from './$types';
 	import { notificationStore } from '../../../../stores';
@@ -24,7 +24,7 @@
 	let { data }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace?.workspaceRole);
 
 	// local state
 	let viewMode = $state<'table' | 'grid'>('table');

@@ -32,7 +32,7 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 	import { cn } from '$lib/utils';
 
 	import { workspaceSwitching } from '../../../stores';
@@ -41,7 +41,7 @@
 	let { data }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace?.workspaceRole);
 	const authenticated = $derived(!!$page.data.user);
 	let viewMode = $state<'grid' | 'list'>('grid');
 
@@ -70,6 +70,7 @@
 		if (selectedSort !== 'name-asc') count++;
 		if (perPage !== '24') count++;
 		if (selectedMood) count++;
+		if (makeableLensAvailable && readyLensOn) count++;
 		return count;
 	});
 
@@ -106,6 +107,7 @@
 				sort: 'name-asc',
 				perPage: '24',
 				mood: '',
+				readyToMake: null,
 				page: 1,
 			}),
 			{
@@ -327,10 +329,9 @@
 					<span class="text-xs text-muted-foreground">Recipes</span>
 				</StatBadge>
 
-				<!-- todo: make these badges filter the catalog (readyToMake=1, and an almostThere filter that
-				     doesn't exist yet). links dropped for now so they're stat-only, not dead clicks. -->
-				{#if !$page.data.isGlobalWorkspace}
-					<StatBadge class="whitespace-nowrap">
+				<!-- "Ready" jumps to the makeability lens; "Almost There" stays a stat (no almostThere filter yet) -->
+				{#if makeableLensAvailable}
+					<StatBadge as="button" onclick={() => setLens(true)} class="whitespace-nowrap">
 						<Sparkles class="h-4 w-4 text-primary shrink-0" />
 						<span class="text-sm font-bold">{data.availableCount}</span>
 						<span class="text-xs text-muted-foreground">Ready</span>
@@ -418,6 +419,9 @@
 					sortOption={selectedSort}
 					{perPage}
 					{advancedFilterCount}
+					{makeableLensAvailable}
+					readyToMake={readyLensOn}
+					onReadyToMakeChange={setLens}
 					onSpiritChange={handleSpiritChange}
 					onShowFilterChange={handleShowFilterChange}
 					onMoodChange={handleMoodChange}

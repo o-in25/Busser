@@ -569,26 +569,4 @@
 		outline-offset: 0;
 		box-shadow: none;
 	}
-
-	/* drawer logo glow (matches home page hero) */
-	.drawer-logo-glow {
-		animation: drawer-glow 3s ease-in-out infinite;
-	}
-
-	@keyframes drawer-glow {
-		0%,
-		100% {
-			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
-		}
-		50% {
-			filter: drop-shadow(0 0 20px rgba(248, 78, 128, 0.5));
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.drawer-logo-glow {
-			animation: none;
-			filter: drop-shadow(0 0 8px rgba(165, 125, 213, 0.3));
-		}
-	}
 </style>

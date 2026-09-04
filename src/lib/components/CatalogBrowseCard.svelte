@@ -102,7 +102,7 @@
 {#if viewMode === 'grid'}
 	<!-- Grid View Card — liquid glass -->
 	<a href="/catalog/{recipe.recipeId}" class="cv-card block group h-full">
-		<div class="relative rounded-3xl overflow-hidden h-full browse-grid-card">
+		<div class="relative rounded-3xl overflow-hidden h-full card-zoom transition-transform duration-300">
 			<!-- Blurred background glow from recipe image -->
 			{#if recipe.recipeImageUrl}
 				<img
@@ -122,7 +122,7 @@
 						alt={recipe.recipeName}
 						variant="recipe"
 						class="h-full w-full"
-						imgClass="transition-transform duration-300 group-hover:scale-110"
+						imgClass="transition-transform duration-300 card-zoom-img"
 					/>
 					<!-- Gradient fade into glass body -->
 					<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
@@ -142,23 +142,6 @@
 							class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-500/90 text-white shadow"
 						>
 							Draft
-						</span>
-					{/if}
-
-					<!-- Verdict pill (top right) -->
-					{#if hasRatings}
-						<span
-							class={cn(
-								'absolute top-3 right-3 flex flex-col items-center px-2 py-1 rounded-full text-white shadow-lg',
-								rating.bg
-							)}
-							title={rating.label}
-						>
-							<span
-								class="text-[8px] font-semibold uppercase tracking-wider opacity-80 leading-none"
-								>verdict</span
-							>
-							<span class="text-sm font-bold leading-tight">{score.toFixed(1)}</span>
 						</span>
 					{/if}
 
@@ -225,12 +208,28 @@
 					<p class="text-sm text-muted-foreground/80 line-clamp-2 mt-1">
 						{recipe.recipeDescription || 'A delicious cocktail recipe'}
 					</p>
-					{#if recipe.recipeTechniqueDescriptionText}
-						<div class="flex items-center gap-1.5 mt-auto pt-2">
-							<span class="flex items-center gap-1 text-[11px] text-muted-foreground/60">
-								<TechniqueIcon class="h-3 w-3" />
-								{recipe.recipeTechniqueDescriptionText}
-							</span>
+					{#if recipe.recipeTechniqueDescriptionText || hasRatings}
+						<div class="flex items-center justify-between gap-1.5 mt-auto pt-2">
+							{#if recipe.recipeTechniqueDescriptionText}
+								<span class="flex items-center gap-1 text-[11px] text-muted-foreground/60">
+									<TechniqueIcon class="h-3 w-3" />
+									{recipe.recipeTechniqueDescriptionText}
+								</span>
+							{/if}
+							{#if hasRatings}
+								<span
+									class={cn(
+										'flex items-center gap-1 px-2 py-0.5 rounded-full text-white shadow',
+										rating.bg
+									)}
+									title={rating.label}
+								>
+									<span class="text-[8px] font-semibold uppercase tracking-wider opacity-80"
+										>{rating.label}</span
+									>
+									<span class="text-xs font-bold leading-tight">{score.toFixed(1)}</span>
+								</span>
+							{/if}
 						</div>
 					{/if}
 				</div>

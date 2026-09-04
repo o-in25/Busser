@@ -26,13 +26,15 @@
 
 	import type { PageData } from './$types';
 	import { notificationStore, workspaceSwitching } from '../../../stores';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, roleIsOwner, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	let { data }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
-	const showStock = $derived(workspace?.workspaceRole === 'owner' && !$page.data.isGlobalWorkspace);
+	const canModify = roleCanModify(workspace?.workspaceRole);
+	// global is read-only except its owner, so gate stock purely on owner — the global owner
+	// still needs to spot recipes/products they forgot to stock
+	const showStock = $derived(roleIsOwner(workspace?.workspaceRole));
 
 	// Base path for inventory routes
 	const basePath = '/inventory';

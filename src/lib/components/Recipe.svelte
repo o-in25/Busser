@@ -22,6 +22,7 @@
 	import { calculateAbv, getDilutionInfo } from '$lib/math';
 	import { cn } from '$lib/utils';
 	import type { View } from '$lib/types';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 	import type { RecipeInsightLinks, RecipeInsightsOutput } from '$lib/types/generators';
 
 	import RecipeDetailSheet from './RecipeDetailSheet.svelte';
@@ -51,8 +52,8 @@
 	const extrasByStep = $derived(new Map((stepExtras ?? []).map((e) => [e.recipeStepId, e])));
 
 	// get workspace role for permission checks
-	const workspace = getContext<{ workspaceRole?: string }>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const workspace = getContext<WorkspaceWithRole>('workspace');
+	const canModify = roleCanModify(workspace?.workspaceRole);
 
 	let content: RecipeInsightsOutput | null = $state(null);
 	let links: RecipeInsightLinks | null = $state(null);

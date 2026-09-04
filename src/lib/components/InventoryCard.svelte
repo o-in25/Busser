@@ -51,7 +51,7 @@
 	<!-- Grid View Card -->
 	<a href="/inventory/{product.productId}/edit" class="block group" onclick={handleClick}>
 		<Card.Root
-			class="overflow-hidden hover:shadow-lg transition-all duration-300 h-full dark:hover:shadow-glow-purple"
+			class="card-zoom overflow-hidden hover:shadow-lg transition-all duration-300 h-full dark:hover:shadow-glow-purple"
 		>
 			<!-- Image -->
 			<div class="relative h-44 overflow-hidden">
@@ -60,7 +60,7 @@
 					alt={product.productName}
 					variant="product"
 					class="h-full w-full"
-					imgClass="transition-transform duration-300 group-hover:scale-110"
+					imgClass="transition-transform duration-300 card-zoom-img"
 				/>
 				<!-- Gradient overlay on hover -->
 				<div

@@ -475,6 +475,44 @@
 		0 30px 64px -24px rgba(0, 0, 0, 0.75);
 }
 
+/* touch has no hover — mirror the lift on press so a tap still reads as feedback.
+   fast transition in (:active) with the base 0.3s handling the gentle release, so a
+   quick tap still registers. */
+@media (hover: none) {
+	.glass-card-hover:active {
+		background-color: rgb(255 255 255 / 0.5);
+		box-shadow:
+			inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+			0 26px 56px -22px rgba(31, 20, 60, 0.34);
+		transition: all 0.1s ease;
+	}
+	:is(.dark) .glass-card-hover:active {
+		background-color: rgb(255 255 255 / 0.14);
+		box-shadow:
+			inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+			0 0 24px rgba(248, 78, 128, 0.14),
+			0 30px 64px -24px rgba(0, 0, 0, 0.75);
+	}
+}
+
+/* grid card zoom (catalog + inventory) — desktop (>= md) zooms the image on hover; mobile
+   scales the whole card instead (image stays put). keyed to the md breakpoint like the
+   rest of the app defines "mobile", so it previews on a resized window too.
+   the transition comes from each card's own `transition-*` utility so we don't clobber
+   sibling transitions (e.g. the inventory card's hover shadow). */
+@media (min-width: 768px) {
+	.card-zoom:hover .card-zoom-img {
+		transform: scale(1.1);
+	}
+}
+
+@media (max-width: 767px) {
+	.card-zoom:hover,
+	.card-zoom:active {
+		transform: scale(1.03);
+	}
+}
+
 @utility glass-nav {
 	/* role only — a full-width bar. fill/blur/border/highlight come from the active treatment
 	   (frosted by default), so a shade swaps with e.g. `glass-nav glass-subtle`. */
@@ -590,40 +628,99 @@
 	--glass-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.65);
 }
 
-/* canonical pink emphasis pill — the single source for primary buttons + active/selected states
-   (toggles, nav). light = glossy gradient + glow; dark = translucent + glow; white text. */
-/* canonical pink emphasis pill — buttons, toggles, nav active. soft rose fill + white text;
-   dark = translucent pink + white text + glow. */
-.glass-primary {
-	color: hsl(var(--primary-foreground));
-	background-color: var(--color-primary-500);
-	backdrop-filter: blur(12px) saturate(1.4);
-	-webkit-backdrop-filter: blur(12px) saturate(1.4);
+/* colored glass buttons (primary/secondary/destructive/tertiary) — the colored sibling of
+   .glass-button: a diagonal hue-tinted gradient over blur lets the backdrop glow through, with a
+   top highlight + soft outer glow (never an opaque fill). --hue is theme-independent (a colored
+   button owns its color); theme only shifts the glass weight — light needs a heavier tint so the
+   active-state highlight reads on pale backdrops, dark goes airier + glows more. */
+.glass-primary,
+.glass-secondary,
+.glass-destructive,
+.glass-tertiary {
+	color: #fff;
+	background-image: linear-gradient(
+		135deg,
+		rgb(var(--hue) / 0.92) 0%,
+		rgb(var(--hue) / 0.8) 50%,
+		rgb(var(--hue) / 0.74) 100%
+	);
+	backdrop-filter: blur(12px) saturate(1.5);
+	-webkit-backdrop-filter: blur(12px) saturate(1.5);
 	/* ring via inset shadow, not border — a border adds intrinsic width and shifts content-sized
 	   flex containers (e.g. the settings subnav) when a tab toggles active */
 	box-shadow:
-		inset 0 0 0 1px rgb(248 78 128 / 0.4),
-		inset 0 1px 0 0 rgb(255 255 255 / 0.35),
-		0 0 12px rgb(248 78 128 / 0.35);
+		inset 0 0 0 1px rgb(var(--hue) / 0.5),
+		inset 0 1px 0 0 rgb(255 255 255 / 0.4),
+		0 4px 14px rgb(var(--hue) / 0.25),
+		0 0 12px rgb(var(--hue) / 0.25);
 	transition:
 		box-shadow 0.2s ease,
-		background-color 0.2s ease,
+		background-image 0.2s ease,
 		color 0.2s ease;
 }
-.glass-primary:hover {
-	background-color: var(--color-primary-600);
+.glass-primary:hover,
+.glass-secondary:hover,
+.glass-destructive:hover,
+.glass-tertiary:hover {
+	background-image: linear-gradient(
+		135deg,
+		rgb(var(--hue) / 1) 0%,
+		rgb(var(--hue) / 0.9) 50%,
+		rgb(var(--hue) / 0.84) 100%
+	);
 	box-shadow:
-		inset 0 1px 0 0 rgb(255 255 255 / 0.4),
-		0 0 18px rgb(248 78 128 / 0.45);
+		inset 0 0 0 1px rgb(var(--hue) / 0.6),
+		inset 0 1px 0 0 rgb(255 255 255 / 0.45),
+		0 4px 16px rgb(var(--hue) / 0.3),
+		0 0 18px rgb(var(--hue) / 0.35);
 }
-:is(.dark) .glass-primary {
-	background-color: rgb(248 78 128 / 0.3);
+:is(.dark) .glass-primary,
+:is(.dark) .glass-secondary,
+:is(.dark) .glass-destructive,
+:is(.dark) .glass-tertiary {
+	background-image: linear-gradient(
+		135deg,
+		rgb(var(--hue) / 0.4) 0%,
+		rgb(var(--hue) / 0.28) 50%,
+		rgb(var(--hue) / 0.22) 100%
+	);
 	box-shadow:
-		inset 0 1px 0 0 rgb(255 255 255 / 0.12),
-		0 0 20px rgb(248 78 128 / 0.4);
+		inset 0 0 0 1px rgb(var(--hue) / 0.4),
+		inset 0 1px 0 0 rgb(255 255 255 / 0.14),
+		0 0 20px rgb(var(--hue) / 0.4);
 }
-:is(.dark) .glass-primary:hover {
-	background-color: rgb(248 78 128 / 0.45);
+:is(.dark) .glass-primary:hover,
+:is(.dark) .glass-secondary:hover,
+:is(.dark) .glass-destructive:hover,
+:is(.dark) .glass-tertiary:hover {
+	background-image: linear-gradient(
+		135deg,
+		rgb(var(--hue) / 0.55) 0%,
+		rgb(var(--hue) / 0.42) 50%,
+		rgb(var(--hue) / 0.36) 100%
+	);
+	box-shadow:
+		inset 0 0 0 1px rgb(var(--hue) / 0.45),
+		inset 0 1px 0 0 rgb(255 255 255 / 0.16),
+		0 0 26px rgb(var(--hue) / 0.5);
+}
+
+.glass-primary {
+	--hue: 248 78 128;
+}
+.glass-secondary {
+	--hue: 165 125 213;
+}
+.glass-destructive {
+	--hue: 220 38 38;
+}
+/* yellow reads best with dark text; keep it as the shared gradient, just the ink flips per theme */
+.glass-tertiary {
+	--hue: 245 197 66;
+	color: #18181b;
+}
+:is(.dark) .glass-tertiary {
+	color: #fff;
 }
 
 /* liquid glass CTA pill — the frosted surface comes from .glass-button (grouped below); this owns
@@ -985,6 +1082,12 @@
 /* translucent chrome that floats over photos — carousel arrows, chips on imagery. white text, low fill. */
 @utility glass-overlay-control {
 	@apply bg-white/15 dark:bg-white/10 backdrop-blur-md backdrop-saturate-150 border border-white/20 text-white;
+}
+
+/* pill overlaid on a photo — a dark scrim keeps the white text legible over any image,
+   pale or dark. white-on-white washed the old bg-white/15 version out in light mode. */
+@utility glass-image-badge {
+	@apply bg-black/45 backdrop-blur-md backdrop-saturate-150 border border-white/25 text-white shadow-sm;
 }
 
 /* modal drawer surface — more opaque than the card tiers for content legibility; caller owns edge + radius. */

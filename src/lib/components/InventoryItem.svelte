@@ -1,14 +1,12 @@
 <script lang="ts">
 	import {
-		ArrowRight,
 		Beaker,
 		Calculator,
 		Candy,
 		CheckCircle2,
+		ChevronRight,
 		DollarSign,
 		Flame,
-		FlaskConical,
-		Info,
 		Pencil,
 		Sparkles,
 		Trash2,
@@ -19,13 +17,12 @@
 
 	import { Badge } from '$lib/components/ui/badge';
 	import SkeletonImage from '$lib/components/SkeletonImage.svelte';
-	import { buttonVariants } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
-	import * as Popover from '$lib/components/ui/popover';
 	import { Switch } from '$lib/components/ui/switch';
 	import { weightedMean } from '$lib/math';
-	import type { Product } from '$lib/types';
-	import { cn } from '$lib/utils';
+	import type { Product, View } from '$lib/types';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	let {
 		product,
@@ -42,8 +39,36 @@
 	} = $props();
 
 	// get workspace role for permission checks
-	const workspace = getContext<{ workspaceRole?: string }>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const workspace = getContext<WorkspaceWithRole>('workspace');
+	const canModify = roleCanModify(workspace?.workspaceRole);
+
+	// recipes this product appears in — fetched lazily when the sheet opens on a product.
+	// capped server-side; the full list lives at /catalog?ingredientInclude=<id>.
+	const RECIPE_CAP = 12;
+	let recipes = $state<View.BasicRecipe[]>([]);
+	let recipeTotal = $state(0);
+	let recipesLoading = $state(false);
+
+	$effect(() => {
+		const id = product?.productId;
+		if (!id || recipeCount === 0) {
+			recipes = [];
+			recipeTotal = 0;
+			return;
+		}
+		recipesLoading = true;
+		fetch(`/api/inventory/${id}/recipes`)
+			.then((res) => (res.ok ? res.json() : { recipes: [], total: 0 }))
+			.then((data) => {
+				recipes = data.recipes ?? [];
+				recipeTotal = data.total ?? 0;
+			})
+			.catch(() => {
+				recipes = [];
+				recipeTotal = 0;
+			})
+			.finally(() => (recipesLoading = false));
+	});
 
 	// Calculated fields
 	const pricePerOunce = $derived.by(() => {
@@ -114,6 +139,14 @@
 		product.categoryGroupId === 1 && flavorProfile.some((f) => f.value > 0)
 	);
 
+	// gate the stat card so non-spirits with no numbers don't render an empty shell
+	const hasQuickStats = $derived(
+		!!product.productPricePerUnit ||
+			!!product.productUnitSizeInMilliliters ||
+			!!product.productProof ||
+			!!pricePerOunce
+	);
+
 	// Overall rating calculation
 	const generateRatings = () => {
 		const ratings = [
@@ -164,7 +197,7 @@
 
 {#if product}
 	<div class="space-y-4">
-		<!-- Hero: image with name, category, and rating overlaid -->
+		<!-- Hero: image with just the name overlaid (photo stays unobstructed; category lives below) -->
 		<div class="relative rounded-xl overflow-hidden">
 			<div class="aspect-[3/2] w-full">
 				<SkeletonImage
@@ -178,113 +211,110 @@
 				class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
 			></div>
 
-			<!-- Name + category over image -->
 			<div class="absolute inset-x-0 bottom-0 p-4">
-				<div class="flex items-start justify-between gap-3">
-					<div class="min-w-0">
-						<h2 class="text-xl font-bold text-foreground leading-tight">
-							{product.productName}
-						</h2>
-						<div class="flex items-center gap-2 mt-1.5 flex-wrap">
-							<Popover.Root>
-								<Popover.Trigger
-									class="focus-ring flex items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-								>
-									{product.categoryName}
-									<Info class="w-3 h-3 ml-1" />
-								</Popover.Trigger>
-								<Popover.Content
-									class="w-72"
-									side="bottom"
-									align="start"
-									avoidCollisions={true}
-									collisionPadding={16}
-								>
-									<div class="space-y-2">
-										<h4 class="font-medium">{product.categoryName}</h4>
-										<p class="text-sm text-muted-foreground">{product.categoryDescription}</p>
-										<a
-											href="/inventory/category/{product.categoryId}/edit"
-											class="focus-ring inline-flex items-center text-sm font-medium text-primary hover:underline"
-										>
-											Edit Category <ArrowRight class="ml-1 h-3 w-3" />
-										</a>
-									</div>
-								</Popover.Content>
-							</Popover.Root>
-							{#if product.categoryGroupName}
-								<span class="text-xs text-muted-foreground/50">&middot;</span>
-								<span class="text-sm text-muted-foreground">{product.categoryGroupName}</span>
-							{/if}
-						</div>
-					</div>
-
-					<!-- Rating pill -->
-					{#if hasFlavorProfile}
-						<span
-							class="shrink-0 flex flex-col items-center px-2.5 py-1.5 rounded-xl text-white shadow-lg {overallRating.style}"
-						>
-							<span
-								class="text-[9px] font-semibold uppercase tracking-wider opacity-80 leading-none"
-								>verdict</span
-							>
-							<span class="text-lg font-bold leading-tight">{overallRating.score}</span>
-							<span class="text-[10px] opacity-80 leading-none">{overallRating.label}</span>
-						</span>
-					{/if}
-				</div>
+				<h2 class="text-xl font-bold text-foreground leading-tight">
+					{product.productName}
+				</h2>
 			</div>
 		</div>
 
-		<!-- Status + recipe count row -->
-		<div class="flex items-center gap-2 flex-wrap">
-			{#if showStock}
+		<!-- Stock status -->
+		{#if showStock}
+			<div class="flex items-center gap-2 flex-wrap">
 				<Badge size="lg" variant={product.productInStockQuantity > 0 ? 'default' : 'danger'}>
 					<StockIcon class="h-3.5 w-3.5 {stockStatus.color}" />
 					<span class="text-xs">{stockStatus.label}</span>
 				</Badge>
-			{/if}
-			{#if recipeCount > 0}
-				<Badge size="lg" href="/catalog?ingredientInclude={product.productId}">
-					<FlaskConical class="h-3.5 w-3.5 text-primary" />
-					<span class="text-xs text-muted-foreground"
-						>Used in {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span
-					>
-				</Badge>
-			{/if}
-		</div>
+			</div>
+		{/if}
 
-		<!-- Quick stats — compact inline pills -->
-		<div class="flex flex-wrap gap-2">
-			{#if product.productPricePerUnit}
-				<Badge size="lg">
-					<DollarSign class="h-3.5 w-3.5 text-neon-green-500" />
-					<span class="text-xs font-semibold">${product.productPricePerUnit.toFixed(2)}</span>
-				</Badge>
-			{/if}
-			{#if product.productUnitSizeInMilliliters}
-				<Badge size="lg">
-					<Beaker class="h-3.5 w-3.5 text-blue-500" />
-					<span class="text-xs font-semibold">{product.productUnitSizeInMilliliters}mL</span>
-				</Badge>
-			{/if}
-			{#if product.productProof}
-				<Badge size="lg">
-					<Flame class="h-3.5 w-3.5 text-neon-amber-500" />
-					<span class="text-xs font-semibold">
-						{product.productProof}° {#if abvPercent}<span class="font-normal text-muted-foreground"
-								>({abvPercent}%)</span
-							>{/if}
-					</span>
-				</Badge>
-			{/if}
-			{#if pricePerOunce}
-				<Badge size="lg">
-					<Calculator class="h-3.5 w-3.5 text-secondary-500" />
-					<span class="text-xs font-semibold">${pricePerOunce}/oz</span>
-				</Badge>
-			{/if}
-		</div>
+		<!-- Stat card — verdict lead + labeled numeric grid -->
+		{#if hasFlavorProfile || hasQuickStats}
+			<div class="glass-surface p-3 space-y-3">
+				{#if hasFlavorProfile}
+					<div class="flex items-center gap-3 pb-3 border-b border-white/10">
+						<span
+							class="shrink-0 flex items-center justify-center h-11 w-11 rounded-xl text-white shadow-lg {overallRating.style}"
+						>
+							<span class="text-lg font-bold leading-none">{overallRating.score}</span>
+						</span>
+						<div class="min-w-0">
+							<div class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+								Verdict
+							</div>
+							<div class="text-sm font-semibold text-foreground">{overallRating.label}</div>
+						</div>
+					</div>
+				{/if}
+				<div class="grid grid-cols-2 gap-x-4 gap-y-3">
+					{#if product.productPricePerUnit}
+						<div class="flex items-center gap-2">
+							<DollarSign class="h-4 w-4 shrink-0 text-neon-green-500" />
+							<div class="min-w-0">
+								<div class="text-[11px] text-muted-foreground uppercase tracking-wide">Price</div>
+								<div class="text-sm font-semibold">${product.productPricePerUnit.toFixed(2)}</div>
+							</div>
+						</div>
+					{/if}
+					{#if product.productUnitSizeInMilliliters}
+						<div class="flex items-center gap-2">
+							<Beaker class="h-4 w-4 shrink-0 text-blue-500" />
+							<div class="min-w-0">
+								<div class="text-[11px] text-muted-foreground uppercase tracking-wide">Bottle</div>
+								<div class="text-sm font-semibold">{product.productUnitSizeInMilliliters} mL</div>
+							</div>
+						</div>
+					{/if}
+					{#if product.productProof}
+						<div class="flex items-center gap-2">
+							<Flame class="h-4 w-4 shrink-0 text-neon-amber-500" />
+							<div class="min-w-0">
+								<div class="text-[11px] text-muted-foreground uppercase tracking-wide">Proof</div>
+								<div class="text-sm font-semibold">
+									{product.productProof}°{#if abvPercent}<span class="font-normal text-muted-foreground">
+											({abvPercent}%)</span
+										>{/if}
+								</div>
+							</div>
+						</div>
+					{/if}
+					{#if pricePerOunce}
+						<div class="flex items-center gap-2">
+							<Calculator class="h-4 w-4 shrink-0 text-secondary-500" />
+							<div class="min-w-0">
+								<div class="text-[11px] text-muted-foreground uppercase tracking-wide">Per oz</div>
+								<div class="text-sm font-semibold">${pricePerOunce}</div>
+							</div>
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Category — inline (replaces the old tooltip), parent › child hierarchy -->
+		{#if product.categoryName}
+			<div class="glass-surface p-3 space-y-1.5">
+				<h3 class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+					Category
+				</h3>
+				<div class="flex items-center gap-1 flex-wrap text-sm">
+					{#if product.categoryGroupName}
+						<span class="text-muted-foreground">{product.categoryGroupName}</span>
+						<ChevronRight class="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
+					{/if}
+					<span class="font-semibold text-foreground">{product.categoryName}</span>
+				</div>
+				{#if product.categoryDescription}
+					<p class="text-sm text-foreground/90 leading-relaxed">{product.categoryDescription}</p>
+				{/if}
+				<a
+					href="/inventory/category/{product.categoryId}/edit"
+					class="inline-flex items-center rounded-sm text-sm font-medium text-primary hover:underline focus-visible:underline focus-visible:outline-none"
+				>
+					Edit Category <ChevronRight class="ml-0.5 h-3.5 w-3.5" />
+				</a>
+			</div>
+		{/if}
 
 		<!-- Flavor Profile -->
 		{#if hasFlavorProfile}
@@ -320,47 +350,81 @@
 			</p>
 		{/if}
 
+		<!-- Used in recipes — gated on the fetched total, capped; full list lives in the catalog -->
+		{#if recipesLoading || recipeTotal > 0}
+			<div class="glass-surface p-3 space-y-2">
+				{#if recipesLoading && recipes.length === 0}
+					<div class="h-3 w-28 rounded bg-muted animate-pulse"></div>
+					<div class="space-y-2">
+						{#each Array(Math.min(recipeCount || 3, 4)) as _}
+							<div class="flex items-center gap-3">
+								<div class="h-10 w-10 shrink-0 rounded-md bg-muted animate-pulse"></div>
+								<div class="h-3 flex-1 rounded bg-muted animate-pulse"></div>
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<h3 class="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+						Used in {recipeTotal} recipe{recipeTotal !== 1 ? 's' : ''}
+					</h3>
+					{#each recipes as recipe (recipe.recipeId)}
+						<a
+							href="/catalog/{recipe.recipeId}"
+							class="focus-ring flex items-center gap-3 rounded-lg p-1.5 -mx-1.5 transition-colors hover:bg-white/5"
+						>
+							<div class="h-10 w-10 shrink-0 overflow-hidden rounded-md">
+								<SkeletonImage
+									src={recipe.recipeImageUrl}
+									alt={recipe.recipeName}
+									variant="recipe"
+									class="h-full w-full"
+								/>
+							</div>
+							<span class="min-w-0 flex-1 truncate text-sm font-medium">{recipe.recipeName}</span>
+							<ChevronRight class="h-4 w-4 shrink-0 text-muted-foreground" />
+						</a>
+					{/each}
+					{#if recipeTotal > recipes.length}
+						<a
+							href="/catalog?ingredientInclude={product.productId}"
+							class="inline-flex items-center rounded-sm pt-1 text-sm font-medium text-primary hover:underline focus-visible:underline focus-visible:outline-none"
+						>
+							Show all {recipeTotal} recipes <ChevronRight class="ml-0.5 h-3.5 w-3.5" />
+						</a>
+					{/if}
+				{/if}
+			</div>
+		{/if}
+
 		<!-- Actions -->
-		<div class="flex items-center justify-between pt-3 border-t border-white/10">
-			{#if canModify && onStockChange && showStock}
-				<div class="flex items-center gap-2.5">
-					<Switch
-						id="stock-toggle-{product.productId}"
-						checked={product.productInStockQuantity > 0}
-						onCheckedChange={handleStockToggle}
-					/>
-					<Label for="stock-toggle-{product.productId}" class="text-sm cursor-pointer">
-						In Stock
-					</Label>
-				</div>
-			{:else}
-				<div></div>
-			{/if}
-			{#if canModify}
+		{#if canModify}
+			<div class="space-y-3 pt-3 border-t border-white/10">
+				{#if onStockChange && showStock}
+					<div class="flex items-center gap-2.5">
+						<Switch
+							id="stock-toggle-{product.productId}"
+							checked={product.productInStockQuantity > 0}
+							onCheckedChange={handleStockToggle}
+						/>
+						<Label for="stock-toggle-{product.productId}" class="text-sm cursor-pointer">
+							In Stock
+						</Label>
+					</div>
+				{/if}
 				<div class="flex items-center gap-2">
 					{#if onDelete}
-						<button
-							type="button"
-							class={cn(
-								buttonVariants({ variant: 'outline', size: 'sm' }),
-								'text-red-400 border-destructive/50 bg-destructive/10 hover:bg-destructive hover:text-destructive-foreground'
-							)}
-							onclick={() => onDelete?.()}
-						>
+						<Button variant="destructive" size="sm" class="flex-1" onclick={() => onDelete?.()}>
 							<Trash2 class="w-3.5 h-3.5 mr-1.5" />
 							Delete
-						</button>
+						</Button>
 					{/if}
-					<a
-						class={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
-						href="/inventory/{product.productId}/edit"
-					>
+					<Button variant="default" size="sm" class="flex-1" href="/inventory/{product.productId}/edit">
 						<Pencil class="w-3.5 h-3.5 mr-1.5" />
 						Edit
-					</a>
+					</Button>
 				</div>
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
 {:else}
 	<div class="flex items-center justify-center h-32 text-muted-foreground">No product data</div>

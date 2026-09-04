@@ -37,7 +37,7 @@
 	import { cdnSrc, cdnSrcset } from '$lib/utils/image';
 
 	import type { PageData } from './$types';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 	import { workspaceSwitching } from '../../../../stores';
 
 	let { data }: { data: PageData } = $props();
@@ -52,13 +52,13 @@
 	const favoriteRecipes = $derived(data.args.favoriteRecipes);
 	const popularSpirit = $derived(data.args.popularSpirit);
 	const topIngredient = $derived(data.args.topIngredient);
+	const makeableLensAvailable = $derived(data.args.makeableLensAvailable);
 
 	// read workspace from page store so it stays current after switches
 	const workspace = $derived($page.data.workspace as WorkspaceWithRole);
 	const canModify = $derived(
-		workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor'
+		roleCanModify(workspace?.workspaceRole)
 	);
-	const isGlobalCatalog = $derived($page.data.isGlobalWorkspace);
 	const authenticated = $derived(!!$page.data.user);
 
 	// recipe list tab state
@@ -160,7 +160,7 @@
 			</Badge>
 		{/if}
 
-		{#if topIngredient && !isGlobalCatalog}
+		{#if topIngredient && makeableLensAvailable}
 			<Badge size="lg" href="/inventory" class="whitespace-nowrap">
 				<ShoppingCart class="h-4 w-4 text-primary shrink-0" />
 				<span class="text-sm font-bold">+{topIngredient.unlockableRecipes}</span>

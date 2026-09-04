@@ -21,6 +21,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
 	import type { Category } from '$lib/types';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	import { notificationStore, workspaceSwitching } from '../../../../stores';
 	import type { PageData } from './$types';
@@ -42,8 +43,8 @@
 	}
 
 	// get workspace role for permission checks
-	const workspace = getContext<{ workspaceRole?: string }>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const workspace = getContext<WorkspaceWithRole>('workspace');
+	const canModify = roleCanModify(workspace?.workspaceRole);
 	const basePath = '/inventory/category';
 
 	// Search state

@@ -3,7 +3,7 @@
 
 	import { page } from '$app/stores';
 	import { Badge } from '$lib/components/ui/badge';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleIsOwner, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	let {
 		workspaces,
@@ -62,7 +62,7 @@
 				</div>
 				<div class="flex items-center gap-2">
 					<Badge variant="secondary" class="capitalize text-xs">
-						{#if workspace.workspaceRole === 'owner'}
+						{#if roleIsOwner(workspace.workspaceRole)}
 							<Crown class="h-3 w-3 mr-1" />
 						{/if}
 						{workspace.workspaceRole}

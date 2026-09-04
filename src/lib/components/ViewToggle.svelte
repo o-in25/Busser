@@ -9,10 +9,12 @@
 		modes,
 		active,
 		onchange,
+		class: className,
 	}: {
 		modes: ViewMode[];
 		active: ViewMode;
 		onchange: (mode: any) => void;
+		class?: string;
 	} = $props();
 
 	const icons: Record<ViewMode, typeof TableIcon> = {
@@ -25,7 +27,7 @@
 	const activeIndex = $derived(modes.indexOf(active));
 </script>
 
-<div class="glass-track hidden sm:flex relative items-center rounded-lg p-1">
+<div class={cn('glass-track hidden sm:flex relative items-center rounded-lg p-1', className)}>
 	<!-- sliding pink puck (glasscn segmented-control feel, on-brand tint) -->
 	{#if activeIndex >= 0}
 		<span

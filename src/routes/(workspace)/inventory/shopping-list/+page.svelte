@@ -22,7 +22,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import type { ShoppingListItem } from '$lib/types';
 	import { cn } from '$lib/utils';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	import type { PageData } from './$types';
 	import { notificationStore, workspaceSwitching } from '../../../../stores';
@@ -30,7 +30,7 @@
 	let { data }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace?.workspaceRole);
 
 	const basePath = '/inventory/shopping-list';
 

@@ -34,8 +34,10 @@
 <a
 	href="/catalog/{recipe.recipeId}"
 	class={cn(
-		'fancy-card group block rounded-2xl overflow-hidden relative',
-		isActive && 'fancy-card-active',
+		'fancy-card block rounded-2xl overflow-hidden relative',
+		// only the centered card is hover-interactive — off-center neighbors caught hover
+		// as the cursor passed near them, bouncing their zoom on/off
+		isActive && 'fancy-card-active group',
 		className
 	)}
 	style={reducedMotion ? undefined : `transform: scale(${scale});`}
@@ -56,10 +58,7 @@
 
 		<!-- spirit badge -->
 		{#if recipe.recipeCategoryDescription}
-			<Badge
-				variant="secondary"
-				class="absolute top-3 left-3 bg-white/15 dark:bg-white/10 backdrop-blur-md backdrop-saturate-150 text-white text-xs border-white/20"
-			>
+			<Badge variant="verdict" class="glass-image-badge absolute top-3 left-3 text-xs">
 				{recipe.recipeCategoryDescription}
 			</Badge>
 		{/if}
@@ -76,7 +75,7 @@
 					class="flex gap-1.5 mt-1.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
 				>
 					{#each flavorBadges as badge}
-						<span class="glass-overlay-control text-[10px] px-1.5 py-0.5 rounded-full">
+						<span class="glass-image-badge text-[10px] px-1.5 py-0.5 rounded-full">
 							{badge}
 						</span>
 					{/each}

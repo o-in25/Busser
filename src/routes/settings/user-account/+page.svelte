@@ -16,6 +16,7 @@
 		Users,
 	} from 'lucide-svelte';
 	import { getContext } from 'svelte';
+	import { roleIsOwner } from '$lib/types/workspace';
 
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
@@ -185,7 +186,7 @@
 							</p>
 						</div>
 						<Badge variant="secondary" class="ml-auto capitalize">
-							{#if data.currentWorkspace.workspaceRole === 'owner'}
+							{#if roleIsOwner(data.currentWorkspace.workspaceRole)}
 								<Crown class="h-3 w-3 mr-1" />
 							{/if}
 							{data.currentWorkspace.workspaceRole}

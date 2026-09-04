@@ -26,12 +26,12 @@
 	import { notificationStore } from '../../../../stores';
 
 	import type { PageData } from './$types';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	let { data: pageData }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace?.workspaceRole);
 	const authenticated = $derived(!!$page.data.user);
 
 	// svelte-ignore state_referenced_locally

@@ -1,18 +1,19 @@
 import { catalogRepo, inventoryRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
 import { getFavoriteRecipes } from '$lib/server/user-settings';
+import { roleCanModify } from '$lib/types/workspace';
 import { calculateOverallScore } from '$lib/math';
 import type { AdvancedFilter } from '$lib/types';
 
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, parent, locals }) => {
-	const { workspace, isGlobalWorkspace } = await parent();
+	const { workspace } = await parent();
 	const { workspaceId } = workspace;
 	const userId = locals.user?.userId;
 
 	// owners/editors see drafts
-	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace.workspaceRole);
 
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const perPage = parseInt(url.searchParams.get('perPage') || '24');
@@ -22,7 +23,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const showFilter = url.searchParams.get('show') || ''; // 'favorites' | 'featured' | ''
 	const mood = url.searchParams.get('mood') || '';
 
-	const makeableLensAvailable = !!userId && !isGlobalWorkspace;
+	// makeability lens is an operator tool — whoever can modify the workspace (owner/editor) gets it
+	const makeableLensAvailable = canModify;
 	const readyToMakeActive = makeableLensAvailable && url.searchParams.get('readyToMake') === '1';
 
 	const ingredientInclude = url.searchParams.get('ingredientInclude') || '';

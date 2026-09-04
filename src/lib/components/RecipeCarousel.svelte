@@ -97,7 +97,7 @@
 		{/each}
 	</div>
 {:else}
-	<div class={cn('w-full', className)}>
+	<div class={cn('w-full carousel-faded', className)}>
 		<Carousel.Root
 			opts={{ loop: true, align: 'center' }}
 			plugins={autoplayPlugin}
@@ -112,12 +112,12 @@
 				{/each}
 			</Carousel.Content>
 
-			<!-- nav arrows (desktop only) -->
+			<!-- nav arrows (desktop only) — hug the faded edge, emphasize on hover -->
 			<Carousel.Previous
-				class="glass-overlay-control hidden sm:inline-flex left-4 hover:bg-white/25 dark:hover:bg-white/15 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
+				class="glass-overlay-control hidden sm:inline-flex left-1 opacity-70 hover:opacity-100 hover:bg-white/25 dark:hover:bg-white/15 transition-opacity duration-300"
 			/>
 			<Carousel.Next
-				class="glass-overlay-control hidden sm:inline-flex right-4 hover:bg-white/25 dark:hover:bg-white/15 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
+				class="glass-overlay-control hidden sm:inline-flex right-1 opacity-70 hover:opacity-100 hover:bg-white/25 dark:hover:bg-white/15 transition-opacity duration-300"
 			/>
 		</Carousel.Root>
 
@@ -134,3 +134,18 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	/* fade the peeking neighbors so a clipped card dissolves instead of cutting a word mid-name.
+	   targets the static viewport, so the nav arrows (its siblings) stay crisp. */
+	.carousel-faded :global([data-slot='carousel-content']) {
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent 0,
+			#000 8%,
+			#000 92%,
+			transparent 100%
+		);
+		mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+	}
+</style>

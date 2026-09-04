@@ -43,6 +43,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { reveal } from '$lib/actions/reveal';
 	import { moods } from '$lib/spirits';
+	import { roleCanModify, roleIsOwner } from '$lib/types/workspace';
 	import { indexFromSeed } from '$lib/math';
 	import greetings from '$lib/data/greetings.json';
 	import { cn } from '$lib/utils';
@@ -104,9 +105,9 @@
 
 	// workspace role determines resource access (viewer can only read)
 	const workspaceRole = $derived(dashboardData?.workspaceRole);
-	const canModify = $derived(workspaceRole === 'owner' || workspaceRole === 'editor');
+	const canModify = $derived(roleCanModify(workspaceRole));
 	// global catalog has no per-user inventory, so it's never treated as an owned bar
-	const isOwner = $derived(workspaceRole === 'owner' && !data.isGlobalCatalog);
+	const isOwner = $derived(roleIsOwner(workspaceRole) && !data.isGlobalCatalog);
 
 	// a workspace switcher tile only appears when there's somewhere to switch to.
 	// when it shows, it takes the (nav-redundant) browse tile's slot on mobile.
@@ -224,52 +225,61 @@
 			<div class="hero-orb hero-orb-orange"></div>
 		</div>
 
-		<div class="max-w-4xl mx-auto text-center px-4">
-			<!-- Headline -->
-			<h1
-				class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight hero-enter text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
-				style="--delay: 200ms"
-			>
-				From Shelf To Shaker
-			</h1>
+		<!-- glass hero panel — floats the header + carousel above the gradient/orbs as one frosted surface -->
+		<div
+			class="relative z-10 w-[calc(100%-1.5rem)] max-w-5xl mx-auto glass-card glass-frosted rounded-3xl px-4 py-8 sm:px-8 sm:py-10 md:px-10"
+		>
+			<div class="max-w-4xl mx-auto text-center">
+				<!-- Headline -->
+				<h1
+					class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight hero-enter text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
+					style="--delay: 200ms"
+				>
+					From Shelf To Shaker
+				</h1>
 
-			<!-- Subheadline -->
-			<p
-				class="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto hero-enter"
-				style="--delay: 400ms"
-			>
-				Track your bottles. Discover what you can mix.
-			</p>
+				<!-- Subheadline -->
+				<p
+					class="text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto hero-enter"
+					style="--delay: 400ms"
+				>
+					Track your bottles. Discover what you can mix.
+				</p>
 
-			<!-- CTAs -->
-			<div class="flex flex-col sm:flex-row justify-center gap-4 hero-enter" style="--delay: 600ms">
-				<Button variant="cta-primary" size="cta" href="/signup">
-					<Mail class="w-5 h-5 mr-2" />
-					Sign Up
-				</Button>
-				<Button variant="cta" size="cta" href="/login">
-					<LogIn class="w-5 h-5 mr-2" />
-					Log In
-				</Button>
-			</div>
-		</div>
-
-		<!-- Featured Recipes Carousel -->
-		{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
-			<div class="mt-4 w-full hero-enter" style="--delay: 800ms">
-				<RecipeCarousel recipes={landingData.featuredRecipes} />
-				<!-- secondary browse affordance — kept lightweight so it doesn't compete with sign up -->
-				<div class="mt-3 text-center">
-					<a
-						href="/catalog"
-						class="focus-ring inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-					>
-						Browse the catalog
-						<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
-					</a>
+				<!-- CTAs -->
+				<div
+					class="flex flex-col sm:flex-row justify-center gap-4 hero-enter"
+					style="--delay: 600ms"
+				>
+					<Button variant="cta-primary" size="cta" href="/signup">
+						<Mail class="w-5 h-5 mr-2" />
+						Sign Up
+					</Button>
+					<Button variant="cta" size="cta" href="/login">
+						<LogIn class="w-5 h-5 mr-2" />
+						Log In
+					</Button>
 				</div>
 			</div>
-		{/if}
+
+			<!-- Featured Recipes Carousel -->
+			{#if landingData?.featuredRecipes && landingData.featuredRecipes.length > 0}
+				<div class="mt-8 w-full hero-enter" style="--delay: 800ms">
+					<!-- cap the spotlight: a dot pager stops reading past ~6 -->
+					<RecipeCarousel recipes={landingData.featuredRecipes.slice(0, 6)} />
+					<!-- secondary browse affordance — kept lightweight so it doesn't compete with sign up -->
+					<div class="mt-3 text-center">
+						<a
+							href="/catalog"
+							class="focus-ring inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+						>
+							Browse the catalog
+							<ArrowRight class="h-3.5 w-3.5 ml-1.5" />
+						</a>
+					</div>
+				</div>
+			{/if}
+		</div>
 	</section>
 
 	<!-- Features Section -->

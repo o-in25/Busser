@@ -3,6 +3,7 @@
 
 	import { page } from '$app/stores';
 	import GlobalCatalogAlert from '$lib/components/GlobalCatalogAlert.svelte';
+	import { roleIsOwner } from '$lib/types/workspace';
 
 	import type { LayoutData } from './$types';
 
@@ -13,7 +14,7 @@
 	}
 
 	$: showGlobalCatalogAlert =
-		!!$page.data.user && data.isGlobalWorkspace && data.workspace?.workspaceRole !== 'owner';
+		!!$page.data.user && data.isGlobalWorkspace && !roleIsOwner(data.workspace?.workspaceRole);
 </script>
 
 {#if showGlobalCatalogAlert}

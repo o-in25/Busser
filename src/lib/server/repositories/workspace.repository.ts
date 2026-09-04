@@ -1,16 +1,16 @@
-import type { QueryResult, Workspace, WorkspaceUser } from '$lib/types';
+import type {
+	QueryResult,
+	Workspace,
+	WorkspaceUser,
+	WorkspaceRole,
+	WorkspaceWithRole,
+} from '$lib/types';
 
 import { seedBaselineInventory } from '../core';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
 const WORKSPACE_CAP = 10;
-
-export type WorkspaceRole = 'owner' | 'editor' | 'viewer';
-
-export type WorkspaceWithRole = Workspace & {
-	workspaceRole: WorkspaceRole;
-};
 
 export class WorkspaceRepository extends BaseRepository {
 	constructor(db: DbProvider) {

@@ -4,6 +4,7 @@ import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { catalogRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
 import { canModifyWorkspace, getUserWorkspaces, getGlobalWorkspace } from '$lib/server/workspace';
+import { roleCanModify } from '$lib/types/workspace';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -14,7 +15,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	const { recipeId } = params;
 	const userId = locals.user?.userId;
 
-	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace.workspaceRole);
 
 	if (!recipeId || isNaN(Number(recipeId))) {
 		error(StatusCodes.BAD_REQUEST, {
@@ -34,10 +35,12 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
-	const stepExtras = await catalogRepo.getStepExtras(workspaceId, result.data.recipeSteps);
-
-	const isFavorite = userId ? await userRepo.isFavorite(userId, Number(recipeId)) : false;
-	const isFeatured = await catalogRepo.isFeatured(workspaceId, Number(recipeId));
+	// these don't depend on each other — fan them out
+	const [stepExtras, isFavorite, isFeatured] = await Promise.all([
+		catalogRepo.getStepExtras(workspaceId, result.data.recipeSteps),
+		userId ? userRepo.isFavorite(userId, Number(recipeId)) : Promise.resolve(false),
+		catalogRepo.isFeatured(workspaceId, Number(recipeId)),
+	]);
 
 	let importData: {
 		editableWorkspaces: { workspaceId: string; workspaceName: string }[];
@@ -54,28 +57,23 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 
 		const editableWorkspaces = allWorkspaces
 			.filter((w) => w.workspaceId !== globalWorkspace)
-			.filter((w) => w.workspaceRole === 'owner' || w.workspaceRole === 'editor')
+			.filter((w) => roleCanModify(w.workspaceRole))
 			.map((w) => ({ workspaceId: w.workspaceId, workspaceName: w.workspaceName }));
 
-		// check which workspaces already have this recipe imported
+		// check which workspaces already have this recipe imported — fan out per workspace
 		if (editableWorkspaces.length > 0) {
-			const importedTo: string[] = [];
-			const nameCollisions: string[] = [];
+			const checks = await Promise.all(
+				editableWorkspaces.map(async (ws) => {
+					const [imported, nameMatch] = await Promise.all([
+						catalogRepo.findImportedRecipe(ws.workspaceId, Number(recipeId), globalWorkspace),
+						catalogRepo.findByName(ws.workspaceId, result.data!.recipe.recipeName),
+					]);
+					return { workspaceId: ws.workspaceId, imported: !!imported, nameMatch: !!nameMatch };
+				})
+			);
 
-			for (const ws of editableWorkspaces) {
-				const imported = await catalogRepo.findImportedRecipe(
-					ws.workspaceId,
-					Number(recipeId),
-					globalWorkspace
-				);
-				if (imported) importedTo.push(ws.workspaceId);
-
-				const nameMatch = await catalogRepo.findByName(
-					ws.workspaceId,
-					result.data.recipe.recipeName
-				);
-				if (nameMatch) nameCollisions.push(ws.workspaceId);
-			}
+			const importedTo = checks.filter((c) => c.imported).map((c) => c.workspaceId);
+			const nameCollisions = checks.filter((c) => c.nameMatch).map((c) => c.workspaceId);
 
 			const eligible = result.data.recipeSteps.every(
 				(s) => s.matchMode === 'ANY_IN_CATEGORY' || s.matchMode === 'ANY_IN_PARENT_CATEGORY'
@@ -87,15 +85,14 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 
 	const isOwned = result.data.recipe.workspaceId === workspaceId;
 
-	const ownedSameName =
-		!!userId &&
-		!isOwned &&
-		!!(await catalogRepo.findByName(workspaceId, result.data.recipe.recipeName));
-
-	const sourceUpdate =
+	const [ownedSameName, sourceUpdate] = await Promise.all([
+		!!userId && !isOwned
+			? catalogRepo.findByName(workspaceId, result.data.recipe.recipeName).then((r) => !!r)
+			: Promise.resolve(false),
 		isOwned && result.data.recipe.sourceRecipeId
-			? await catalogRepo.getSourceUpdate(workspaceId, Number(recipeId))
-			: null;
+			? catalogRepo.getSourceUpdate(workspaceId, Number(recipeId))
+			: Promise.resolve(null),
+	]);
 
 	return {
 		recipe: result.data.recipe,

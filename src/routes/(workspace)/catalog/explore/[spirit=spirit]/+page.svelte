@@ -28,7 +28,7 @@
 	import { reveal } from '$lib/actions/reveal';
 	import { cdnSrc, cdnSrcset } from '$lib/utils/image';
 	import WorkspaceSwitcherBadge from '$lib/components/WorkspaceSwitcherBadge.svelte';
-	import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+	import { roleCanModify, type WorkspaceWithRole } from '$lib/types/workspace';
 
 	import type { PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
@@ -37,7 +37,7 @@
 	let { data }: { data: PageData } = $props();
 
 	const workspace = getContext<WorkspaceWithRole>('workspace');
-	const canModify = workspace?.workspaceRole === 'owner' || workspace?.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace?.workspaceRole);
 	const authenticated = $derived(!!$page.data.user);
 
 	// spirit category description/image is global — only admins may edit it
