@@ -377,12 +377,14 @@
 
 	<!-- ready-to-make lens: shared by the inline (desktop/tablet) and mobile placements -->
 	{#snippet readyLens(extraClass = '')}
-		<div class={cn('flex items-center gap-1 p-1 rounded-full bg-muted/50 w-fit shrink-0', extraClass)}>
+		<div
+			class={cn('flex items-center gap-1 p-1 rounded-full bg-muted/50 w-fit shrink-0', extraClass)}
+		>
 			<button
 				type="button"
 				onclick={() => setLens(true)}
 				class={cn(
-					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+					'px-4 h-10 flex items-center rounded-full text-sm font-medium transition-colors',
 					readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
 				)}
 			>
@@ -392,7 +394,7 @@
 				type="button"
 				onclick={() => setLens(false)}
 				class={cn(
-					'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+					'px-4 h-10 flex items-center rounded-full text-sm font-medium transition-colors',
 					!readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
 				)}
 			>

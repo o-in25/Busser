@@ -240,8 +240,8 @@
 					class="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto hero-enter"
 					style="--delay: 400ms"
 				>
-					Track the bottles you own and Busser shows you every cocktail you can make right
-					now — no guesswork.
+					Track the bottles you own and Busser shows you every cocktail you can make right now — no
+					guesswork.
 				</p>
 
 				<!-- CTA + reassurance -->
