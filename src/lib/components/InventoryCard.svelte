@@ -62,6 +62,8 @@
 					class="h-full w-full"
 					imgClass="transition-transform duration-300 card-zoom-img"
 				/>
+				<!-- dark scrim so bright photos don't glare on the near-black theme (dark mode only) -->
+				<div class="absolute inset-0 dark:bg-black/25 pointer-events-none"></div>
 				<!-- Gradient overlay on hover -->
 				<div
 					class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
