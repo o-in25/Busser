@@ -14,6 +14,7 @@ import type {
 } from '$lib/types';
 import { emptyPagination } from '$lib/types';
 import type { RecipeInsightLinks } from '$lib/types/generators';
+import { moods } from '$lib/spirits';
 
 import { DbProvider } from '../db';
 import { deleteCachedContent } from '../generators/cache';
@@ -42,13 +43,29 @@ export class CatalogRepository extends BaseRepository {
 		perPage: number = 24,
 		filter: (Partial<View.BasicRecipe> & Partial<View.BasicRecipeStep>) | null = null,
 		advancedFilter: AdvancedFilter | null = null,
-		includeUnpublished: boolean = false
+		includeUnpublished: boolean = false,
+		sort: string = 'name-asc'
 	): Promise<PaginationResult<View.BasicRecipe[]>> {
 		try {
 			let query = this.baseQuery(this.db.table('basicrecipe as r').select(), 'r', workspaceId);
+			const v = 'r.recipeVersatilityRating';
+			const s = 'r.recipeSweetnessRating';
+			const d = 'r.recipeDrynessRating';
+			const st = 'r.recipeStrengthRating';
+			const parabolic = (val: string, ideal: number, max: number) =>
+				`GREATEST(0, ${max} * (1 - POW(ABS(${val} - ${ideal}) / 5, 1.5)))`;
+			const scoreSql = `CASE WHEN (${v} <= 0 AND ${s} <= 0 AND ${d} <= 0 AND ${st} <= 0) THEN 0 ELSE LEAST(GREATEST(
+				(${v} * 0.5)
+				+ ${parabolic(s, 5, 1.5)}
+				+ ${parabolic(d, 5, 1.5)}
+				+ ${parabolic(st, 6, 1.5)}
+				+ CASE WHEN ((${s} >= 5 AND ${d} <= 4) OR (${d} >= 5 AND ${s} <= 4)) THEN 0.5 ELSE 0 END
+				+ CASE WHEN (${s} > 7 AND ${d} > 7) THEN -1 ELSE 0 END
+				+ CASE WHEN (${st} < 3) THEN -0.5 ELSE 0 END
+				+ CASE WHEN (${st} > 8 AND (${s} < 3 OR ${d} < 3)) THEN -0.5 ELSE 0 END
+			, 0), 10) END`;
 
 			if (!includeUnpublished) query = query.where('r.published', true);
-			// explicit published filter (e.g. drafts view narrows to unpublished)
 			if (filter?.published !== undefined) query = query.where('r.published', filter.published);
 			if (filter?.productInStockQuantity) {
 				query = query.whereIn(
@@ -156,26 +173,39 @@ export class CatalogRepository extends BaseRepository {
 				}
 
 				if (advancedFilter.mood) {
-					const moodIds = advancedFilter.mood.split(',').filter(Boolean);
-					const moodSql: Record<string, string> = {
-						'strong-dry': '(r.recipeStrengthRating >= 6 AND r.recipeDrynessRating >= 6)',
-						'sweet-easy': '(r.recipeSweetnessRating >= 6 AND r.recipeStrengthRating <= 5)',
-						balanced: `(
-							ABS(r.recipeSweetnessRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
-							AND ABS(r.recipeDrynessRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
-							AND ABS(r.recipeStrengthRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
-							AND ABS(r.recipeVersatilityRating - (r.recipeSweetnessRating + r.recipeDrynessRating + r.recipeStrengthRating + r.recipeVersatilityRating) / 4) <= 2.5
-						)`,
-						'bold-complex': '(r.recipeStrengthRating >= 6 AND r.recipeVersatilityRating >= 6)',
-					};
-					const clauses = moodIds.map((id) => moodSql[id]).filter(Boolean);
+					const ids = advancedFilter.mood.split(',').filter(Boolean);
+					const clauses = ids.map((id) => moods.find((m) => m.id === id)?.sql('r')).filter(Boolean);
 					if (clauses.length > 0) {
 						query = query.whereRaw(`(${clauses.join(' OR ')})`);
 					}
 				}
+
+				// rating filter on the derived overall score
+				if (advancedFilter.ratingMin !== undefined) {
+					query = query.whereRaw(`${scoreSql} >= ?`, [advancedFilter.ratingMin]);
+				}
+				if (advancedFilter.ratingMax !== undefined) {
+					query = query.whereRaw(`${scoreSql} <= ?`, [advancedFilter.ratingMax]);
+				}
 			}
 
-			query = query.orderBy('recipeName');
+			switch (sort) {
+				case 'name-desc':
+					query = query.orderBy('recipeName', 'desc');
+					break;
+				case 'top-rated':
+					query = query.orderByRaw(`${scoreSql} DESC`);
+					break;
+				case 'newest':
+					query = query.orderBy('recipeId', 'desc');
+					break;
+				case 'oldest':
+					query = query.orderBy('recipeId', 'asc');
+					break;
+				default:
+					query = query.orderBy('recipeName', 'asc');
+			}
+
 			const { data, pagination } = await query.paginate({
 				perPage,
 				currentPage,

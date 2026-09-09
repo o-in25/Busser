@@ -12,9 +12,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const { workspaceId } = workspace;
 	const userId = locals.user?.userId;
 
-	// owners/editors see drafts
 	const canModify = roleCanModify(workspace.workspaceRole);
-
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const perPage = parseInt(url.searchParams.get('perPage') || '24');
 	const search = url.searchParams.get('search') || '';
@@ -22,15 +20,9 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const spiritId = url.searchParams.get('spirit') || '';
 	const showFilter = url.searchParams.get('show') || ''; // 'favorites' | 'featured' | ''
 	const mood = url.searchParams.get('mood') || '';
-
-	// makeability lens is an operator tool — whoever can modify the workspace (owner/editor) gets it
 	const makeableLensAvailable = canModify;
 	const readyToMakeActive = makeableLensAvailable && url.searchParams.get('readyToMake') === '1';
-
-	// drafts live behind the Show filter (owner/editor only) so the default catalog reads as
-	// published-only — matching the home count. everyone else always sees published.
 	const draftsView = canModify && showFilter === 'drafts';
-
 	const ingredientInclude = url.searchParams.get('ingredientInclude') || '';
 	const ingredientAny = url.searchParams.get('ingredientAny') || '';
 	const ingredientExclude = url.searchParams.get('ingredientExclude') || '';
@@ -41,7 +33,6 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const method = url.searchParams.get('method') || '';
 	const ratingMin = url.searchParams.get('ratingMin') || '';
 	const ratingMax = url.searchParams.get('ratingMax') || '';
-
 	const parseIds = (ids: string) =>
 		ids
 			? ids
@@ -60,7 +51,6 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	if (spiritId) {
 		filter.recipeCategoryId = parseInt(spiritId);
 	}
-	// drafts view narrows to unpublished; everything else stays published-only via includeUnpublished
 	if (draftsView) {
 		filter.published = false;
 	}
@@ -103,7 +93,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			perPage,
 			Object.keys(filter).length > 0 ? filter : null,
 			hasAdvancedFilter ? advancedFilter : null,
-			draftsView
+			draftsView,
+			sort
 		),
 		catalogRepo.getSpirits(),
 		userId ? userRepo.getFavorites(userId, workspaceId) : Promise.resolve([]),
@@ -128,73 +119,52 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const favoriteRecipeIds = new Set(userFavorites.map((f) => f.recipeId));
 	const featuredRecipeIds = new Set(featuredRecipes.map((f) => f.recipeId));
 
+	const isReplacedView = showFilter === 'favorites' || showFilter === 'featured';
 	if (showFilter === 'favorites') {
 		data = favoriteRecipes;
-		pagination = {
-			...pagination,
-			total: favoriteRecipes.length,
-			lastPage: 1,
-			currentPage: 1,
-		};
+		pagination = { ...pagination, total: favoriteRecipes.length, lastPage: 1, currentPage: 1 };
 	} else if (showFilter === 'featured') {
 		data = featuredRecipes;
-		pagination = {
-			...pagination,
-			total: featuredRecipes.length,
-			lastPage: 1,
-			currentPage: 1,
-		};
+		pagination = { ...pagination, total: featuredRecipes.length, lastPage: 1, currentPage: 1 };
 	}
 
-	if (advancedFilter.ratingMin !== undefined || advancedFilter.ratingMax !== undefined) {
-		data = data.filter((recipe) => {
-			const score = calculateOverallScore(
-				recipe.recipeVersatilityRating,
-				recipe.recipeSweetnessRating,
-				recipe.recipeDrynessRating,
-				recipe.recipeStrengthRating
+	if (isReplacedView) {
+		const scoreOf = (r: (typeof data)[number]) =>
+			calculateOverallScore(
+				r.recipeVersatilityRating,
+				r.recipeSweetnessRating,
+				r.recipeDrynessRating,
+				r.recipeStrengthRating
 			);
-			if (advancedFilter.ratingMin !== undefined && score < advancedFilter.ratingMin) return false;
-			if (advancedFilter.ratingMax !== undefined && score > advancedFilter.ratingMax) return false;
-			return true;
-		});
-		pagination = {
-			...pagination,
-			total: data.length,
-			lastPage: Math.max(1, Math.ceil(data.length / perPage)),
-		};
-	}
 
-	switch (sort) {
-		case 'name-asc':
-			data.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
-			break;
-		case 'name-desc':
-			data.sort((a, b) => b.recipeName.localeCompare(a.recipeName));
-			break;
-		case 'top-rated':
-			data.sort((a, b) => {
-				const scoreA = calculateOverallScore(
-					a.recipeVersatilityRating,
-					a.recipeSweetnessRating,
-					a.recipeDrynessRating,
-					a.recipeStrengthRating
-				);
-				const scoreB = calculateOverallScore(
-					b.recipeVersatilityRating,
-					b.recipeSweetnessRating,
-					b.recipeDrynessRating,
-					b.recipeStrengthRating
-				);
-				return scoreB - scoreA;
+		if (advancedFilter.ratingMin !== undefined || advancedFilter.ratingMax !== undefined) {
+			data = data.filter((r) => {
+				const score = scoreOf(r);
+				if (advancedFilter.ratingMin !== undefined && score < advancedFilter.ratingMin)
+					return false;
+				if (advancedFilter.ratingMax !== undefined && score > advancedFilter.ratingMax)
+					return false;
+				return true;
 			});
-			break;
-		case 'newest':
-			data.sort((a, b) => b.recipeId - a.recipeId);
-			break;
-		case 'oldest':
-			data.sort((a, b) => a.recipeId - b.recipeId);
-			break;
+			pagination = { ...pagination, total: data.length };
+		}
+
+		switch (sort) {
+			case 'name-desc':
+				data.sort((a, b) => b.recipeName.localeCompare(a.recipeName));
+				break;
+			case 'top-rated':
+				data.sort((a, b) => scoreOf(b) - scoreOf(a));
+				break;
+			case 'newest':
+				data.sort((a, b) => b.recipeId - a.recipeId);
+				break;
+			case 'oldest':
+				data.sort((a, b) => a.recipeId - b.recipeId);
+				break;
+			default:
+				data.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
+		}
 	}
 
 	return {
