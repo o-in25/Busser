@@ -878,17 +878,6 @@
 		]
 	},
 	{
-		"name": "Boston Sour",
-		"spirit": "Whiskey",
-		"technique": "Shaken",
-		"description": "The Boston Sour combines blended whiskey with fresh lemon juice and powdered sugar, creating a refreshing and slightly sweet sour drink. Finished with a fluffy egg white froth, garnished with a slice of lemon and a cherry, it's a delightful variation of the classic whiskey sour.",
-		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
-		"steps": [
-			{ "category": "Bourbon Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz blended whiskey" },
-			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
-		]
-	},
-	{
 		"name": "Casa Blanca",
 		"spirit": "Rum",
 		"technique": "Shaken",
@@ -1008,17 +997,6 @@
 		]
 	},
 	{
-		"name": "Frozen Mint Daiquiri",
-		"spirit": "Rum",
-		"technique": "Blended",
-		"description": "A refreshing blend of light rum, fresh lime juice, mint leaves, and sugar, frozen with crushed ice for a slushy consistency. This cocktail is served in an old-fashioned glass, perfect for a hot day.",
-		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 5.0, "versatility": 7.0 },
-		"steps": [
-			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz light rum" },
-			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp sugar" }
-		]
-	},
-	{
 		"name": "Godchild",
 		"spirit": "Vodka",
 		"technique": "Shaken",
@@ -1054,28 +1032,6 @@
 		]
 	},
 	{
-		"name": "Gin Toddy",
-		"spirit": "Gin",
-		"technique": "Stirred",
-		"description": "A classic warm drink combining gin, powdered sugar, and water, garnished with a twist of lemon peel. Served in an old-fashioned glass, it offers a soothing and mildly sweet experience.",
-		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 6.0 },
-		"steps": [
-			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
-			{ "category": "Sugar", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp powdered sugar" }
-		]
-	},
-	{
-		"name": "Gin Smash",
-		"spirit": "Gin",
-		"technique": "Stirred",
-		"description": "A refreshing cocktail combining gin with muddled mint, sugar, and a hint of fruitiness from orange and cherry. This invigorating drink is topped with a splash of carbonated water for a fizzy finish.",
-		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
-		"steps": [
-			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
-			{ "category": "Soda Water", "qty": 30, "unit": "ml", "desc": "Add 1oz carbonated water" }
-		]
-	},
-	{
 		"name": "Gin Daisy",
 		"spirit": "Gin",
 		"technique": "Shaken",
@@ -1086,28 +1042,6 @@
 			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
 			{ "category": "Sugar", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp sugar" },
 			{ "category": "Grenadine", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp grenadine" }
-		]
-	},
-	{
-		"name": "Gin Lemon",
-		"spirit": "Gin",
-		"technique": "Stirred",
-		"description": "A refreshing cocktail made with gin and lemon juice, served over ice and garnished with a lemon slice. Optionally, add mint leaves for an extra burst of flavor.",
-		"ratings": { "sweetness": 3.0, "dryness": 5.0, "strength": 7.0, "versatility": 8.0 },
-		"steps": [
-			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
-			{ "category": "Lemon Juice", "qty": 80, "unit": "ml", "desc": "Add 2.7oz lemon juice" }
-		]
-	},
-	{
-		"name": "Gin Sling",
-		"spirit": "Gin",
-		"technique": "Stirred",
-		"description": "A refreshing blend of gin, lemon juice, and powdered sugar, served over ice and garnished with an orange peel twist. This classic cocktail balances sweet and tart flavors for a vibrant sip.",
-		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
-		"steps": [
-			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
-			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
 		]
 	},
 	{
@@ -1133,17 +1067,6 @@
 			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
 			{ "category": "Bitters", "qty": 1, "unit": "dash", "desc": "Add 1 dash bitters" },
 			{ "category": "Soda Water", "qty": 90, "unit": "ml", "desc": "Add 3oz club soda" }
-		]
-	},
-	{
-		"name": "Gin and Soda",
-		"spirit": "Gin",
-		"technique": "Stirred",
-		"description": "A refreshing and simple cocktail made with gin and soda water, finished with a wedge of lime. It is a light and effervescent drink, perfect for warm weather.",
-		"ratings": { "sweetness": 2.0, "dryness": 8.0, "strength": 4.0, "versatility": 9.0 },
-		"steps": [
-			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
-			{ "category": "Soda Water", "qty": 150, "unit": "ml", "desc": "Add 5oz soda water" }
 		]
 	},
 	{
@@ -1215,17 +1138,6 @@
 			{ "category": "Lime Juice", "qty": 40, "unit": "ml", "desc": "Add 1.3oz lime juice" },
 			{ "category": "London Dry Gin", "qty": 20, "unit": "ml", "desc": "Add 0.7oz gin" },
 			{ "category": "Aperol", "qty": 40, "unit": "ml", "desc": "Add 1.3oz aperol" }
-		]
-	},
-	{
-		"name": "Japanese Fizz",
-		"spirit": "Whiskey",
-		"technique": "Shaken",
-		"description": "A refreshing cocktail combining blended whiskey with lemon, powdered sugar, port, and egg white, topped with carbonated water. Served over ice, it balances sweetness and brightness with a creamy texture.",
-		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 6.0, "versatility": 7.0 },
-		"steps": [
-			{ "category": "Bourbon Whiskey", "qty": 45, "unit": "ml", "desc": "Add 1.5oz blended whiskey" },
-			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
 		]
 	},
 	{
@@ -1462,17 +1374,6 @@
 		]
 	},
 	{
-		"name": "Rum Toddy",
-		"spirit": "Rum",
-		"technique": "Stirred",
-		"description": "A warm and comforting cocktail that combines rum with powdered sugar and hot water. Garnished with a twist of lemon peel, this drink is perfect for cold evenings.",
-		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 6.0, "versatility": 5.0 },
-		"steps": [
-			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz rum" },
-			{ "category": "Sugar", "qty": 2, "unit": "tsp", "desc": "Add 2 tsp powdered sugar" }
-		]
-	},
-	{
 		"name": "Rum Cobbler",
 		"spirit": "Rum",
 		"technique": "Stirred",
@@ -1482,50 +1383,6 @@
 			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp sugar" },
 			{ "category": "Soda Water", "qty": 90, "unit": "ml", "desc": "Add 3oz club soda" },
 			{ "category": "Dark Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz dark rum" }
-		]
-	},
-	{
-		"name": "Ruby Tuesday",
-		"spirit": "Gin",
-		"technique": "Stirred",
-		"description": "A refreshing take on gin with tart cranberry juice and a hint of sweetness from grenadine. Served over ice in a highball glass, it’s a vibrant and easy-drinking cocktail perfect for any occasion.",
-		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 5.0, "versatility": 7.0 },
-		"steps": [
-			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
-			{ "category": "Cranberry Juice", "qty": 150, "unit": "ml", "desc": "Add 5oz cranberry juice" }
-		]
-	},
-	{
-		"name": "Royal Gin Fizz",
-		"spirit": "Gin",
-		"technique": "Shaken",
-		"description": "A refreshing cocktail made with gin, lemon juice, and powdered sugar, enhanced with the frothy texture of egg and topped with carbonated water. Served ice-cold in a highball glass, it offers a light yet vibrant flavor profile.",
-		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 8.0 },
-		"steps": [
-			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
-			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
-		]
-	},
-	{
-		"name": "Raspberry Julep",
-		"spirit": "Whiskey",
-		"technique": "Stirred",
-		"description": "A refreshing twist on the classic Julep, combining Bourbon with raspberry syrup for a fruity note. Muddled mint leaves add a fragrant finish, perfect for warm weather sipping.",
-		"ratings": { "sweetness": 7.0, "dryness": 2.0, "strength": 5.0, "versatility": 6.0 },
-		"steps": [
-			{ "category": "Bourbon Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz bourbon" },
-			{ "category": "Raspberry Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz raspberry syrup" }
-		]
-	},
-	{
-		"name": "Rum Screwdriver",
-		"spirit": "Rum",
-		"technique": "Stirred",
-		"description": "A simple yet refreshing mix of light rum and orange juice, served over ice in a highball glass. This tropical twist on the classic screwdriver is perfect for warm weather sipping.",
-		"ratings": { "sweetness": 6.0, "dryness": 2.0, "strength": 4.0, "versatility": 7.0 },
-		"steps": [
-			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz light rum" },
-			{ "category": "Orange Juice", "qty": 150, "unit": "ml", "desc": "Add 5oz orange juice" }
 		]
 	},
 	{
@@ -1565,28 +1422,6 @@
 		]
 	},
 	{
-		"name": "Scotch Sour",
-		"spirit": "Whiskey",
-		"technique": "Shaken",
-		"description": "A refreshing twist on the classic sour, combining scotch whiskey with fresh lime juice and sweet powdered sugar. This cocktail is garnished with a lemon slice and a cherry for an added touch of elegance.",
-		"ratings": { "sweetness": 3.0, "dryness": 5.0, "strength": 7.0, "versatility": 6.0 },
-		"steps": [
-			{ "category": "Scotch Whisky", "qty": 45, "unit": "ml", "desc": "Add 1.5oz scotch" },
-			{ "category": "Sugar", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp powdered sugar" }
-		]
-	},
-	{
-		"name": "Tequila Sour",
-		"spirit": "Tequila & Mezcal",
-		"technique": "Shaken",
-		"description": "A refreshing blend of tequila and mezcal, paired with tart lemon juice and sweetened with powdered sugar. This cocktail is served over ice in a whiskey sour glass, garnished with a lemon slice and a cherry.",
-		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 8.0 },
-		"steps": [
-			{ "category": "Blanco Tequila", "qty": 60, "unit": "ml", "desc": "Add 2oz tequila" },
-			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
-		]
-	},
-	{
 		"name": "The Jimmy Conway",
 		"spirit": "Whiskey",
 		"technique": "Stirred",
@@ -1620,17 +1455,6 @@
 			{ "category": "White Rum", "qty": 30, "unit": "ml", "desc": "Add 1oz light rum" },
 			{ "category": "Sweet Vermouth", "qty": 15, "unit": "ml", "desc": "Add 0.5oz sweet vermouth" },
 			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
-		]
-	},
-	{
-		"name": "Vodka Lemon",
-		"spirit": "Vodka",
-		"technique": "Stirred",
-		"description": "A refreshing blend of vodka and fresh lemon juice, served over ice in a highball glass. Garnished with a slice of lemon and optionally adorned with mint leaves for added freshness.",
-		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 8.0 },
-		"steps": [
-			{ "category": "Plain Vodka", "qty": 50, "unit": "ml", "desc": "Add 1.7oz vodka" },
-			{ "category": "Lemon Juice", "qty": 70, "unit": "ml", "desc": "Add 2.3oz lemon juice" }
 		]
 	},
 	{

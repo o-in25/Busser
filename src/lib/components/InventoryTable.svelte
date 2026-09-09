@@ -97,7 +97,9 @@
 						<Table.Head class="hidden sm:table-cell">Category</Table.Head>
 						<Table.Head class="hidden sm:table-cell">Supplier</Table.Head>
 						{#if showStock}<Table.Head class="hidden sm:table-cell">Status</Table.Head>{/if}
-						<Table.Head class="hidden sm:table-cell text-center whitespace-nowrap">Used In</Table.Head>
+						<Table.Head class="hidden sm:table-cell text-center whitespace-nowrap"
+							>Used In</Table.Head
+						>
 						<Table.Head class="hidden sm:table-cell">Group</Table.Head>
 					</Table.Row>
 				</Table.Header>
