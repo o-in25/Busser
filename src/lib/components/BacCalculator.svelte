@@ -66,7 +66,8 @@
 	// User inputs
 	let weight = $state('');
 	let weightUnit = $state<'kg' | 'lbs'>('lbs');
-	let gender = $state<'male' | 'female'>('male');
+	let gender = $state<'male' | 'female' | 'other'>('male');
+	let bodyWater = $state(''); // optional measured total body water (L), used for the "other" path
 	let timeSinceDrinking = $state('');
 	let timeUnit = $state<'hours' | 'minutes'>('hours');
 
@@ -208,7 +209,14 @@
 			}
 		}
 
-		bacResult = calculateBac(totalAlcoholGrams, weightInKg, gender, timeInHours);
+		const totalBodyWaterLiters = parseFloat(bodyWater) || 0;
+		bacResult = calculateBac(
+			totalAlcoholGrams,
+			weightInKg,
+			gender,
+			timeInHours,
+			totalBodyWaterLiters
+		);
 		impairment = getImpairmentLevel(bacResult);
 		timeUntilSober = estimateTimeUntilSober(bacResult);
 		hasCalculated = true;
@@ -302,7 +310,7 @@
 			</div>
 		</div>
 
-		<!-- Gender Selection -->
+		<!-- Sex / body-water Selection -->
 		<div class="space-y-2">
 			<Label class="flex items-center gap-2">
 				<User class="h-4 w-4 text-muted-foreground" />
@@ -310,7 +318,7 @@
 			</Label>
 			<div class="flex gap-2">
 				<Button
-					variant={gender === 'male' ? 'default' : 'outline'}
+					variant={gender === 'male' ? 'primary' : 'outline'}
 					size="sm"
 					class="flex-1"
 					onclick={() => {
@@ -321,7 +329,7 @@
 					Male
 				</Button>
 				<Button
-					variant={gender === 'female' ? 'default' : 'outline'}
+					variant={gender === 'female' ? 'primary' : 'outline'}
 					size="sm"
 					class="flex-1"
 					onclick={() => {
@@ -331,8 +339,34 @@
 				>
 					Female
 				</Button>
+				<Button
+					variant={gender === 'other' ? 'primary' : 'outline'}
+					size="sm"
+					class="flex-1"
+					onclick={() => {
+						gender = 'other';
+						if (hasCalculated) calculate();
+					}}
+				>
+					Other
+				</Button>
 			</div>
-			<p class="text-xs text-muted-foreground">Affects Widmark factor in calculation</p>
+			{#if gender === 'other'}
+				<Input
+					type="number"
+					bind:value={bodyWater}
+					placeholder="Total body water (L) — optional"
+					oninput={() => {
+						if (hasCalculated) calculate();
+					}}
+				/>
+				<p class="text-xs text-muted-foreground">
+					For a personalised estimate, enter your measured total body water. Left blank, we use a
+					neutral average — less accurate than a real measurement.
+				</p>
+			{:else}
+				<p class="text-xs text-muted-foreground">Affects Widmark factor in calculation</p>
+			{/if}
 		</div>
 
 		<!-- Time Input -->

@@ -1,5 +1,5 @@
 <div class="prose prose-zinc dark:prose-invert">
-	<p class="text-muted-foreground mb-4">Last updated: January 23, 2026</p>
+	<p class="text-muted-foreground mb-4">Last updated: September 9, 2026</p>
 
 	<!-- Agreement to Legal Terms -->
 	<h2 id="agreement" class="text-xl font-semibold mt-8 mb-3">Agreement to Our Legal Terms</h2>
@@ -50,8 +50,9 @@
 	</p>
 
 	<p class="text-muted-foreground mb-4">
-		The Services are intended for users who are at least 18 years old. Persons under the age of 18
-		are not permitted to use or register for the Services.
+		The Services are intended for users who are at least 21 years old, or the legal drinking age in
+		your jurisdiction, whichever is higher. Persons under that age are not permitted to use or
+		register for the Services.
 	</p>
 
 	<p class="text-muted-foreground mb-4">
@@ -344,11 +345,11 @@
 		By using the Services, you represent and warrant that: (1) all registration information you
 		submit will be true, accurate, current, and complete; (2) you will maintain the accuracy of such
 		information and promptly update such registration information as necessary; (3) you have the
-		legal capacity and you agree to comply with these Legal Terms; (4) you are not a minor in the
-		jurisdiction in which you reside; (5) you will not access the Services through automated or
-		non-human means, whether through a bot, script or otherwise; (6) you will not use the Services
-		for any illegal or unauthorized purpose; and (7) your use of the Services will not violate any
-		applicable law or regulation.
+		legal capacity and you agree to comply with these Legal Terms; (4) you are at least 21 years
+		old, or the legal drinking age in the jurisdiction in which you reside, whichever is higher; (5)
+		you you will not access the Services through automated or non-human means, whether through a
+		bot, script or otherwise; (6) you will not use the Services for any illegal or unauthorized
+		purpose; and (7) your use of the Services will not violate any applicable law or regulation.
 	</p>
 
 	<p class="text-muted-foreground mb-4">

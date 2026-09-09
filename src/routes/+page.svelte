@@ -295,7 +295,7 @@
 			<div class="relative">
 				<!-- connecting line (desktop only) -->
 				<div
-					class="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-primary-500 via-neon-amber-500 to-primary-600 opacity-30"
+					class="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-primary-500 via-secondary-500 to-neon-cyan-500 opacity-30"
 				></div>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
@@ -332,13 +332,13 @@
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
 								<div
-									class="w-24 h-24 rounded-full bg-neon-amber-500/10 flex items-center justify-center"
+									class="w-24 h-24 rounded-full bg-secondary-500/10 flex items-center justify-center"
 								>
-									<SwatchBook class="h-10 w-10 text-neon-amber-500" />
+									<SwatchBook class="h-10 w-10 text-secondary-500" />
 								</div>
 							</div>
 							<span
-								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-neon-amber-500 text-white text-xs font-bold flex items-center justify-center"
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-secondary-500 text-white text-xs font-bold flex items-center justify-center"
 							>
 								2
 							</span>
@@ -357,13 +357,13 @@
 						<div class="relative mb-4">
 							<div class="rounded-full bg-background">
 								<div
-									class="w-24 h-24 rounded-full bg-primary-600/10 flex items-center justify-center"
+									class="w-24 h-24 rounded-full bg-neon-cyan-500/10 flex items-center justify-center"
 								>
-									<GlassWater class="h-10 w-10 text-primary-600" />
+									<GlassWater class="h-10 w-10 text-neon-cyan-500" />
 								</div>
 							</div>
 							<span
-								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center"
+								class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-neon-cyan-500 text-white text-xs font-bold flex items-center justify-center"
 							>
 								3
 							</span>
