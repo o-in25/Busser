@@ -175,7 +175,11 @@
 				class={inputClasses}
 			/>
 			{#if show && filtered.length}
-				<div class="glass-dropdown absolute z-50 mt-1 max-h-52 w-full overflow-y-auto p-1">
+				<!-- solid surface, not glass: menus can't be see-through, and a glass backdrop-filter
+				     nested inside a sheet/dialog (also backdrop-filtered) doesn't apply, so it washes out -->
+				<div
+					class="absolute z-50 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border bg-popover p-1 text-popover-foreground shadow-xl"
+				>
 					{#each filtered as item, i (item.value)}
 						<button
 							type="button"
@@ -191,7 +195,9 @@
 					{/each}
 				</div>
 			{:else if show && display.trim() && !filtered.length}
-				<div class="glass-dropdown absolute z-50 mt-1 w-full p-3 text-sm text-muted-foreground">
+				<div
+					class="absolute z-50 mt-1 w-full rounded-xl border bg-popover p-3 text-sm text-muted-foreground shadow-xl"
+				>
 					No matches{#if showCreate}
 						— tap + to create “{display.trim()}”{/if}
 				</div>

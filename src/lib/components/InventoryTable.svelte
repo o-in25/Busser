@@ -97,7 +97,7 @@
 						<Table.Head class="hidden sm:table-cell">Category</Table.Head>
 						<Table.Head class="hidden sm:table-cell">Supplier</Table.Head>
 						{#if showStock}<Table.Head class="hidden sm:table-cell">Status</Table.Head>{/if}
-						<Table.Head class="hidden sm:table-cell text-center">Used In</Table.Head>
+						<Table.Head class="hidden sm:table-cell text-center whitespace-nowrap">Used In</Table.Head>
 						<Table.Head class="hidden sm:table-cell">Group</Table.Head>
 					</Table.Row>
 				</Table.Header>
@@ -132,11 +132,11 @@
 							</Table.Cell>
 							{#if showStock}
 								<Table.Cell class="hidden sm:table-cell">
-									<span class="flex items-center">
+									<span class="flex items-center whitespace-nowrap">
 										{#if product.productInStockQuantity === 0}
-											<Indicator color="red" class="me-1.5" />Out of stock
+											<Indicator color="red" class="me-1.5 shrink-0" />Out of stock
 										{:else}
-											<Indicator color="green" class="me-1.5" />In stock
+											<Indicator color="green" class="me-1.5 shrink-0" />In stock
 										{/if}
 									</span>
 								</Table.Cell>

@@ -739,5 +739,920 @@
 			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
 			{ "category": "Green Chartreuse", "qty": 15, "unit": "ml", "desc": "Add 0.5oz green chartreuse" }
 		]
+	},
+	{
+		"name": "Adam",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A refreshing blend of dark rum, tangy lemon juice, and sweet grenadine, the Adam cocktail delivers a bright and vibrant flavor profile. This shaken cocktail is served in a chilled glass, making it a perfect choice for warm evenings or as a lively aperitif.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Dark Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz dark rum" },
+			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
+			{ "category": "Grenadine", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp grenadine" }
+		]
+	},
+	{
+		"name": "Almeria",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A rich blend of dark rum and Kahlua, topped with a creamy egg white. This cocktail delivers a smooth and indulgent experience, beautifully balanced with flavors of coffee and molasses.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Dark Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz dark rum" },
+			{ "category": "Coffee Liquor", "qty": 30, "unit": "ml", "desc": "Add 1oz kahlua" }
+		]
+	},
+	{
+		"name": "Affinity",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "The Affinity cocktail combines Scotch whisky, sweet vermouth, and dry vermouth, enhanced with a dash of orange bitters. This sophisticated drink is stirred and served straight up, offering a balanced blend of flavors.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 45, "unit": "ml", "desc": "Add 1.5oz scotch" },
+			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
+			{ "category": "Dry Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz dry vermouth" },
+			{ "category": "Orange Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes orange bitters" }
+		]
+	},
+	{
+		"name": "Acapulco",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A refreshing blend of light rum, triple sec, and fresh lime juice, sweetened with sugar and served with a frothy egg white. Garnished with mint, this cocktail offers a tropical twist perfect for warm weather.",
+		"ratings": { "sweetness": 4.0, "dryness": 3.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz light rum" },
+			{ "category": "Orange Liqueur", "qty": 1.5, "unit": "tsp", "desc": "Add 1.5 tsp triple sec" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp sugar" }
+		]
+	},
+	{
+		"name": "Algonquin",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A refreshing blend of blended whiskey, dry vermouth, and pineapple juice. This cocktail balances the smoothness of whiskey with the sweetness and acidity of pineapple, creating a vibrant drink.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 45, "unit": "ml", "desc": "Add 1.5oz blended whiskey" },
+			{ "category": "Dry Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz dry vermouth" },
+			{ "category": "Pineapple Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz pineapple juice" }
+		]
+	},
+	{
+		"name": "Artillery",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A balanced blend of gin and sweet vermouth with a touch of bitters. The Artillery is a smooth and slightly sweet cocktail, perfect for those who enjoy a complex flavor profile with a hint of herbal notes.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Sweet Vermouth", "qty": 1.5, "unit": "tsp", "desc": "Add 1.5 tsp sweet vermouth" },
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes bitters" }
+		]
+	},
+	{
+		"name": "Boxcar",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail featuring gin, triple sec, and lemon juice, balanced with a touch of grenadine for sweetness and an egg white for a silky texture. Typically served in a sour glass, this drink offers a vibrant appearance and delightful flavor profile.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Orange Liqueur", "qty": 30, "unit": "ml", "desc": "Add 1oz triple sec" },
+			{ "category": "Lemon Juice", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp lemon juice" },
+			{ "category": "Grenadine", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp grenadine" }
+		]
+	},
+	{
+		"name": "Balmoral",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A sophisticated blend of Scotch, sweet vermouth, and dry vermouth, the Balmoral cocktail is finished with a dash of bitters. It offers a rich and complex flavor profile served elegantly in a chilled cocktail glass.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 45, "unit": "ml", "desc": "Add 1.5oz scotch" },
+			{ "category": "Sweet Vermouth", "qty": 15, "unit": "ml", "desc": "Add 0.5oz sweet vermouth" },
+			{ "category": "Dry Vermouth", "qty": 15, "unit": "ml", "desc": "Add 0.5oz dry vermouth" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes bitters" }
+		]
+	},
+	{
+		"name": "Bluebird",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing blend of gin, triple sec, and blue curacao, enhanced with bitters. This vibrant cocktail is garnished with a twist of lemon peel and a maraschino cherry for a citrusy finish.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Orange Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz triple sec" },
+			{ "category": "Curaçao", "qty": 15, "unit": "ml", "desc": "Add 0.5oz blue curacao" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes bitters" }
+		]
+	},
+	{
+		"name": "Brooklyn",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A classic cocktail featuring rye whiskey, dry vermouth, maraschino liqueur, and a few dashes of Angostura bitters. Stirred and served in a chilled cocktail glass, the Brooklyn cocktail offers a balanced blend of herbal and fruity notes with a subtle bitterness.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Rye Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz rye whiskey" },
+			{ "category": "Dry Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz dry vermouth" },
+			{ "category": "Maraschino Liqueur", "qty": 8, "unit": "ml", "desc": "Add 0.3oz maraschino liqueur" },
+			{ "category": "Bitters", "qty": 3, "unit": "dash", "desc": "Add 3 dashes angostura bitters" }
+		]
+	},
+	{
+		"name": "Boomerang",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A balanced mix of gin, dry vermouth, and maraschino liqueur, accented with bitters for depth. This classic cocktail is served straight up and garnished with a cherry for a touch of sweetness.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Dry Vermouth", "qty": 15, "unit": "ml", "desc": "Add 0.5oz dry vermouth" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes bitters" },
+			{ "category": "Maraschino Liqueur", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp maraschino liqueur" }
+		]
+	},
+	{
+		"name": "Boston Sour",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "The Boston Sour combines blended whiskey with fresh lemon juice and powdered sugar, creating a refreshing and slightly sweet sour drink. Finished with a fluffy egg white froth, garnished with a slice of lemon and a cherry, it's a delightful variation of the classic whiskey sour.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz blended whiskey" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Casa Blanca",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A bright and refreshing cocktail made with light rum, triple sec, lime juice, and maraschino liqueur. This delightful mix offers a balanced combination of citrus notes and a hint of cherry sweetness.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz light rum" },
+			{ "category": "Orange Liqueur", "qty": 1.5, "unit": "tsp", "desc": "Add 1.5 tsp triple sec" },
+			{ "category": "Lime Juice", "qty": 1.5, "unit": "tsp", "desc": "Add 1.5 tsp lime juice" },
+			{ "category": "Maraschino Liqueur", "qty": 1.5, "unit": "tsp", "desc": "Add 1.5 tsp maraschino liqueur" }
+		]
+	},
+	{
+		"name": "City Slicker",
+		"spirit": "Brandy",
+		"technique": "Shaken",
+		"description": "A refreshing blend of brandy, triple sec, and lemon juice. This cocktail offers a bright and zesty flavor profile, perfect as an uplifting aperitif.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Cognac", "qty": 60, "unit": "ml", "desc": "Add 2oz brandy" },
+			{ "category": "Orange Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz triple sec" }
+		]
+	},
+	{
+		"name": "Chicago Fizz",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail combining light rum and port with a zesty lemon flavor, balanced by the creaminess of egg white and the fizz of carbonated water. This highball drink is a delightful blend of sweet and tart, perfect for a laid-back evening.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 30, "unit": "ml", "desc": "Add 1oz light rum" },
+			{ "category": "Fortified wine", "qty": 30, "unit": "ml", "desc": "Add 1oz port" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Casino Royale",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail combining gin, fresh lemon juice, fragrant maraschino liqueur, and a dash of orange bitters, rounded off with a rich egg yolk. Served chilled in a sour glass for a smooth and slightly frothy finish.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Lemon Juice", "qty": 15, "unit": "ml", "desc": "Add 0.5oz lemon juice" },
+			{ "category": "Maraschino Liqueur", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp maraschino liqueur" },
+			{ "category": "Orange Bitters", "qty": 1, "unit": "dash", "desc": "Add 1 dash orange bitters" }
+		]
+	},
+	{
+		"name": "Derby",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing cocktail featuring gin, Peach Bitters, and fresh mint. This vibrant mix is stirred to maintain its crispness and is elegantly garnished with a sprig of mint.",
+		"ratings": { "sweetness": 3.0, "dryness": 4.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes peach bitters" }
+		]
+	},
+	{
+		"name": "Dry Rob Roy",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A refined and sophisticated cocktail made with Scotch and dry vermouth, garnished with a lemon twist for a hint of citrus brightness. The Dry Rob Roy is a perfect blend of herbal notes from the vermouth and the smokiness of the Scotch, served chilled in a classic cocktail glass.",
+		"ratings": { "sweetness": 2.0, "dryness": 8.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 75, "unit": "ml", "desc": "Add 2.5oz scotch" },
+			{ "category": "Dry Vermouth", "qty": 1.5, "unit": "tsp", "desc": "Add 1.5 tsp dry vermouth" }
+		]
+	},
+	{
+		"name": "English Highball",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing and effervescent cocktail featuring gin, brandy, and sweet vermouth topped with carbonated water. Served over ice with a twist of lemon peel, it offers a delightful balance of flavors.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Cognac", "qty": 23, "unit": "ml", "desc": "Add 0.8oz brandy" },
+			{ "category": "London Dry Gin", "qty": 23, "unit": "ml", "desc": "Add 0.8oz gin" },
+			{ "category": "Sweet Vermouth", "qty": 23, "unit": "ml", "desc": "Add 0.8oz sweet vermouth" }
+		]
+	},
+	{
+		"name": "Flying Dutchman",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A simple yet elegant gin cocktail featuring equal parts gin and triple sec. Served over ice with a smooth and slightly herbal character, this drink is perfect for those who enjoy a balanced spirit-forward experience.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Orange Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz triple sec" }
+		]
+	},
+	{
+		"name": "Frozen Daiquiri",
+		"spirit": "Rum",
+		"technique": "Blended",
+		"description": "A Frozen Daiquiri is a refreshing blend of light rum, lime juice, triple sec, and sugar, frozen with ice to create a slushy texture. It is garnished with a cherry and served in a champagne flute, perfect for a warm day.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz light rum" },
+			{ "category": "Lime Juice", "qty": 45, "unit": "ml", "desc": "Add 1.5oz lime juice" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp sugar" }
+		]
+	},
+	{
+		"name": "Flying Scotchman",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A classic blend of Scotch and sweet vermouth, accented with bitters and sugar syrup. This cocktail offers a smooth, rich flavor with a hint of sweetness, perfect for sipping before dinner.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 30, "unit": "ml", "desc": "Add 1oz scotch" },
+			{ "category": "Sweet Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz sweet vermouth" },
+			{ "category": "Bitters", "qty": 1, "unit": "dash", "desc": "Add 1 dash bitters" },
+			{ "category": "Simple Syrup", "qty": 0.25, "unit": "tsp", "desc": "Add 0.25 tsp sugar syrup" }
+		]
+	},
+	{
+		"name": "Frozen Mint Daiquiri",
+		"spirit": "Rum",
+		"technique": "Blended",
+		"description": "A refreshing blend of light rum, fresh lime juice, mint leaves, and sugar, frozen with crushed ice for a slushy consistency. This cocktail is served in an old-fashioned glass, perfect for a hot day.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz light rum" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp sugar" }
+		]
+	},
+	{
+		"name": "Godchild",
+		"spirit": "Vodka",
+		"technique": "Shaken",
+		"description": "A creamy blend of vodka and amaretto, the Godchild is a rich cocktail enhanced with heavy cream. It offers a smooth, nutty sweetness, served beautifully in a champagne flute.",
+		"ratings": { "sweetness": 7.0, "dryness": 2.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 30, "unit": "ml", "desc": "Add 1oz vodka" },
+			{ "category": "Amaretto", "qty": 30, "unit": "ml", "desc": "Add 1oz amaretto" },
+			{ "category": "Cream", "qty": 30, "unit": "ml", "desc": "Add 1oz heavy cream" }
+		]
+	},
+	{
+		"name": "Gin Sour",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail combining gin, fresh lemon juice, and sugar for a balance of tartness and sweetness. Garnished with an orange slice and a maraschino cherry, it's a delightful sipper perfect for any occasion.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
+			{ "category": "Sugar", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp sugar" }
+		]
+	},
+	{
+		"name": "Godmother",
+		"spirit": "Vodka",
+		"technique": "Stirred",
+		"description": "A simple blend of vodka and amaretto served over ice. This cocktail offers a sweet, nutty flavor profile while maintaining a smooth character.",
+		"ratings": { "sweetness": 6.0, "dryness": 2.0, "strength": 4.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 45, "unit": "ml", "desc": "Add 1.5oz vodka" },
+			{ "category": "Amaretto", "qty": 23, "unit": "ml", "desc": "Add 0.8oz amaretto" }
+		]
+	},
+	{
+		"name": "Gin Toddy",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A classic warm drink combining gin, powdered sugar, and water, garnished with a twist of lemon peel. Served in an old-fashioned glass, it offers a soothing and mildly sweet experience.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Sugar", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Gin Smash",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing cocktail combining gin with muddled mint, sugar, and a hint of fruitiness from orange and cherry. This invigorating drink is topped with a splash of carbonated water for a fizzy finish.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Soda Water", "qty": 30, "unit": "ml", "desc": "Add 1oz carbonated water" }
+		]
+	},
+	{
+		"name": "Gin Daisy",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing blend of gin, lemon juice, sugar, and grenadine. This cocktail is served over ice in an old-fashioned glass, garnished with a maraschino cherry and an orange slice.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
+			{ "category": "Sugar", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp sugar" },
+			{ "category": "Grenadine", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp grenadine" }
+		]
+	},
+	{
+		"name": "Gin Lemon",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing cocktail made with gin and lemon juice, served over ice and garnished with a lemon slice. Optionally, add mint leaves for an extra burst of flavor.",
+		"ratings": { "sweetness": 3.0, "dryness": 5.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Lemon Juice", "qty": 80, "unit": "ml", "desc": "Add 2.7oz lemon juice" }
+		]
+	},
+	{
+		"name": "Gin Sling",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing blend of gin, lemon juice, and powdered sugar, served over ice and garnished with an orange peel twist. This classic cocktail balances sweet and tart flavors for a vibrant sip.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Greyhound",
+		"spirit": "Vodka",
+		"technique": "Stirred",
+		"description": "A refreshing blend of vodka and grapefruit juice, the Greyhound is a simple yet invigorating cocktail. Served over ice in a Collins glass, it perfectly balances the crispness of vodka with the tartness of fresh grapefruit.",
+		"ratings": { "sweetness": 3.0, "dryness": 6.0, "strength": 5.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 45, "unit": "ml", "desc": "Add 1.5oz vodka" },
+			{ "category": "Grapefruit Juice", "qty": 90, "unit": "ml", "desc": "Add 3oz grapefruit juice" }
+		]
+	},
+	{
+		"name": "Gin Swizzle",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing combination of gin, lime juice, and sugar complemented by bitters, topped with club soda for a fizzy finish. This invigorating swizzle-style cocktail is served over ice and perfect for warm weather.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Lime Juice", "qty": 45, "unit": "ml", "desc": "Add 1.5oz lime juice" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp sugar" },
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Bitters", "qty": 1, "unit": "dash", "desc": "Add 1 dash bitters" },
+			{ "category": "Soda Water", "qty": 90, "unit": "ml", "desc": "Add 3oz club soda" }
+		]
+	},
+	{
+		"name": "Gin and Soda",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing and simple cocktail made with gin and soda water, finished with a wedge of lime. It is a light and effervescent drink, perfect for warm weather.",
+		"ratings": { "sweetness": 2.0, "dryness": 8.0, "strength": 4.0, "versatility": 9.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Soda Water", "qty": 150, "unit": "ml", "desc": "Add 5oz soda water" }
+		]
+	},
+	{
+		"name": "Honey Bee",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail made with white rum, honey, and lemon juice. Served over crushed ice, this drink balances sweetness and acidity perfectly, making it an ideal choice for warm-weather sipping.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz white rum" },
+			{ "category": "Honey Syrup", "qty": 20, "unit": "ml", "desc": "Add 0.7oz honey" },
+			{ "category": "Lemon Juice", "qty": 20, "unit": "ml", "desc": "Add 0.7oz lemon juice" }
+		]
+	},
+	{
+		"name": "Havana Cocktail",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A refreshing tropical cocktail made with light rum, pineapple juice, and lemon juice. This vibrant drink is shaken with ice and served in a chilled cocktail glass for a zesty balance of flavors.",
+		"ratings": { "sweetness": 6.0, "dryness": 2.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 30, "unit": "ml", "desc": "Add 1oz light rum" },
+			{ "category": "Pineapple Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz pineapple juice" },
+			{ "category": "Lemon Juice", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp lemon juice" }
+		]
+	},
+	{
+		"name": "Hawaiian Cocktail",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing blend of gin, triple sec, and pineapple juice. This tropical cocktail is shaken with ice and served in a classic cocktail glass.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Orange Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz triple sec" }
+		]
+	},
+	{
+		"name": "Highland Fling Cocktail",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A delightful blend of Scotch and sweet vermouth, the Highland Fling Cocktail is balanced with a touch of orange bitters. Served with a garnish of an olive, this drink showcases a rich, earthy flavor profile.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 45, "unit": "ml", "desc": "Add 1.5oz scotch" },
+			{ "category": "Sweet Vermouth", "qty": 23, "unit": "ml", "desc": "Add 0.8oz sweet vermouth" },
+			{ "category": "Orange Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes orange bitters" }
+		]
+	},
+	{
+		"name": "Imperial Fizz",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "The Imperial Fizz combines light rum and blended whiskey with fresh lemon juice and powdered sugar, creating a refreshing and slightly effervescent cocktail. Topped with carbonated water, it offers a bright and balanced flavor profile, served over ice in a highball glass.",
+		"ratings": { "sweetness": 4.0, "dryness": 3.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 15, "unit": "ml", "desc": "Add 0.5oz light rum" },
+			{ "category": "Bourbon Whiskey", "qty": 45, "unit": "ml", "desc": "Add 1.5oz blended whiskey" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Imperial Cocktail",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing combination of gin, lime juice, and Aperol, the Imperial Cocktail is a vibrant drink that balances botanical notes with citrus zest and a touch of bitterness. Served chilled in a cocktail glass, it offers a delightful aperitivo experience.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Lime Juice", "qty": 40, "unit": "ml", "desc": "Add 1.3oz lime juice" },
+			{ "category": "London Dry Gin", "qty": 20, "unit": "ml", "desc": "Add 0.7oz gin" },
+			{ "category": "Aperol", "qty": 40, "unit": "ml", "desc": "Add 1.3oz aperol" }
+		]
+	},
+	{
+		"name": "Japanese Fizz",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail combining blended whiskey with lemon, powdered sugar, port, and egg white, topped with carbonated water. Served over ice, it balances sweetness and brightness with a creamy texture.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 45, "unit": "ml", "desc": "Add 1.5oz blended whiskey" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Jewel Of The Nile",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A balanced blend of gin and two varieties of Chartreuse, offering a vibrant herbal complexity. This cocktail is served up in a classic fashion, showcasing its rich flavors and aromatic profile.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Green Chartreuse", "qty": 15, "unit": "ml", "desc": "Add 0.5oz green chartreuse" },
+			{ "category": "Yellow Chartreuse", "qty": 15, "unit": "ml", "desc": "Add 0.5oz yellow chartreuse" }
+		]
+	},
+	{
+		"name": "Loch Lomond",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A blend of Scotch whisky, Drambuie, and dry vermouth, this balanced cocktail offers a unique combination of sweetness and herbal complexity, finished with a twist of lemon peel. Ideal as a smooth pre-dinner drink or a digestif, it exhibits a rich flavor profile.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 60, "unit": "ml", "desc": "Add 2oz scotch" },
+			{ "category": "Drambuie", "qty": 15, "unit": "ml", "desc": "Add 0.5oz drambuie" },
+			{ "category": "Dry Vermouth", "qty": 15, "unit": "ml", "desc": "Add 0.5oz dry vermouth" }
+		]
+	},
+	{
+		"name": "London Town",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A harmonious blend of gin and Maraschino liqueur, accented with a touch of orange bitters. This cocktail offers a refreshing and slightly sweet profile, perfect as a pre-dinner drink.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Maraschino Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz maraschino liqueur" },
+			{ "category": "Orange Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes orange bitters" }
+		]
+	},
+	{
+		"name": "Lady Love Fizz",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A delightful gin cocktail combining light cream, lemon juice, and powdered sugar, finished with a frothy egg white. Topped with carbonated water, it offers a refreshing and creamy sipping experience.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Cream", "qty": 2, "unit": "tsp", "desc": "Add 2 tsp light cream" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Lone Tree Cocktail",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A classic blend of gin and sweet vermouth, the Lone Tree Cocktail offers a smooth and aromatic experience. Ideal as an aperitif, its balanced profile hints at herbal and botanical nuances from the vermouth.",
+		"ratings": { "sweetness": 4.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Sweet Vermouth", "qty": 23, "unit": "ml", "desc": "Add 0.8oz sweet vermouth" },
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" }
+		]
+	},
+	{
+		"name": "Long Island Iced Tea",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A potent blend of equal parts vodka, tequila, light rum, and gin, topped with a splash of Coca-Cola for color. This classic cocktail is known for its complex flavor and refreshing finish, garnished with a lemon or lime twist.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 9.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 15, "unit": "ml", "desc": "Add 0.5oz vodka" },
+			{ "category": "Blanco Tequila", "qty": 15, "unit": "ml", "desc": "Add 0.5oz tequila" },
+			{ "category": "White Rum", "qty": 15, "unit": "ml", "desc": "Add 0.5oz light rum" },
+			{ "category": "London Dry Gin", "qty": 15, "unit": "ml", "desc": "Add 0.5oz gin" },
+			{ "category": "Cola", "qty": 1, "unit": "dash", "desc": "Add 1 dash coca-cola" }
+		]
+	},
+	{
+		"name": "Monkey Wrench",
+		"spirit": "Rum",
+		"technique": "Stirred",
+		"description": "A refreshing blend of light rum and grapefruit juice, enhanced with a dash of bitters. This cocktail balances sweet and tart flavors, served over ice in an old-fashioned glass.",
+		"ratings": { "sweetness": 4.0, "dryness": 5.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz light rum" },
+			{ "category": "Grapefruit Juice", "qty": 90, "unit": "ml", "desc": "Add 3oz grapefruit juice" },
+			{ "category": "Bitters", "qty": 1, "unit": "dash", "desc": "Add 1 dash bitters" }
+		]
+	},
+	{
+		"name": "Orgasm",
+		"spirit": "Vodka",
+		"technique": "Shaken",
+		"description": "A creamy blend of vodka, crème de cacao, amaretto, triple sec, and light cream. This cocktail offers a rich, sweet flavor profile, perfect for dessert lovers.",
+		"ratings": { "sweetness": 8.0, "dryness": 2.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Crème de Cacao", "qty": 15, "unit": "ml", "desc": "Add 0.5oz creme de cacao" },
+			{ "category": "Amaretto", "qty": 15, "unit": "ml", "desc": "Add 0.5oz amaretto" },
+			{ "category": "Orange Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz triple sec" },
+			{ "category": "Plain Vodka", "qty": 15, "unit": "ml", "desc": "Add 0.5oz vodka" },
+			{ "category": "Cream", "qty": 30, "unit": "ml", "desc": "Add 1oz light cream" }
+		]
+	},
+	{
+		"name": "Old Pal",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "The Old Pal is a classic cocktail made with rye whiskey, Campari, and dry vermouth. This well-balanced drink offers a bittersweet profile that's perfect as an aperitif or evening sipper.",
+		"ratings": { "sweetness": 3.0, "dryness": 7.0, "strength": 8.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Rye Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz rye whiskey" },
+			{ "category": "Amaro", "qty": 30, "unit": "ml", "desc": "Add 1oz campari" },
+			{ "category": "Dry Vermouth", "qty": 30, "unit": "ml", "desc": "Add 1oz dry vermouth" }
+		]
+	},
+	{
+		"name": "Old Cuban",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail combining white rum, mint, and vibrant citrus flavors, balanced with sugar syrup and a hint of Angostura bitters. Finished with a sparkling Prosecco top for a festive touch.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz white rum" },
+			{ "category": "Simple Syrup", "qty": 30, "unit": "ml", "desc": "Add 1oz sugar syrup" },
+			{ "category": "Lime Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lime juice" },
+			{ "category": "Bitters", "qty": 2, "unit": "dash", "desc": "Add 2 dashes angostura bitters" },
+			{ "category": "Champagne", "qty": 60, "unit": "ml", "desc": "Add 2oz prosecco" }
+		]
+	},
+	{
+		"name": "Orange Whip",
+		"spirit": "Rum",
+		"technique": "Stirred",
+		"description": "A refreshing blend of rum, vodka, and orange juice, combined with cream for a smooth texture. Served over ice, the Orange Whip delivers a fruity yet creamy experience, perfect for warm days.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Orange Juice", "qty": 120, "unit": "ml", "desc": "Add 4oz orange juice" },
+			{ "category": "White Rum", "qty": 30, "unit": "ml", "desc": "Add 1oz rum" },
+			{ "category": "Plain Vodka", "qty": 30, "unit": "ml", "desc": "Add 1oz vodka" }
+		]
+	},
+	{
+		"name": "Orange Crush",
+		"spirit": "Vodka",
+		"technique": "Shaken",
+		"description": "A refreshing blend of vodka, triple sec, and fresh orange juice. Served as a shot, this cocktail delivers a vibrant citrus flavor with a sweet finish.",
+		"ratings": { "sweetness": 7.0, "dryness": 2.0, "strength": 6.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 30, "unit": "ml", "desc": "Add 1oz vodka" },
+			{ "category": "Orange Liqueur", "qty": 30, "unit": "ml", "desc": "Add 1oz triple sec" },
+			{ "category": "Orange Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz orange juice" }
+		]
+	},
+	{
+		"name": "Pegu Club",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A dry cocktail composed of gin, orange curaçao, and lime juice, enhanced with both Angostura and orange bitters. The Pegu Club is served up in a chilled cocktail glass, showcasing its vibrant citrus flavors.",
+		"ratings": { "sweetness": 5.0, "dryness": 7.0, "strength": 8.0, "versatility": 9.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Curaçao", "qty": 23, "unit": "ml", "desc": "Add 0.8oz orange curacao" },
+			{ "category": "Lime Juice", "qty": 23, "unit": "ml", "desc": "Add 0.8oz lime juice" },
+			{ "category": "Bitters", "qty": 1, "unit": "dash", "desc": "Add 1 dash angostura bitters" },
+			{ "category": "Orange Bitters", "qty": 1, "unit": "dash", "desc": "Add 1 dash orange bitters" }
+		]
+	},
+	{
+		"name": "Pink Lady",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "The Pink Lady combines gin, grenadine, light cream, and egg white for a creamy, frothy cocktail with a hint of sweetness. It's served in a cocktail glass, showcasing a delicate pink hue.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Grenadine", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp grenadine" },
+			{ "category": "Cream", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp light cream" }
+		]
+	},
+	{
+		"name": "Poppy Cocktail",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A simple and elegant blend of gin and crème de cacao. This cocktail offers a subtle sweetness while maintaining a refreshing character, served chilled in a classic cocktail glass.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Crème de Cacao", "qty": 23, "unit": "ml", "desc": "Add 0.8oz creme de cacao" }
+		]
+	},
+	{
+		"name": "Port Wine Cocktail",
+		"spirit": "Brandy",
+		"technique": "Stirred",
+		"description": "A delightful blend of port and brandy, the Port Wine Cocktail showcases rich, fruity flavors with a smooth finish. Stirred to perfection, this classic cocktail is served elegantly in a chilled cocktail glass.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Fortified wine", "qty": 75, "unit": "ml", "desc": "Add 2.5oz port" },
+			{ "category": "Cognac", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp brandy" }
+		]
+	},
+	{
+		"name": "Quentin",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A decadent mix of dark rum, Kahlua, and light cream. Served chilled and garnished with nutmeg, it delivers a rich, dessert-like experience.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Dark Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz dark rum" },
+			{ "category": "Coffee Liquor", "qty": 15, "unit": "ml", "desc": "Add 0.5oz kahlua" },
+			{ "category": "Cream", "qty": 30, "unit": "ml", "desc": "Add 1oz light cream" }
+		]
+	},
+	{
+		"name": "Quaker's Cocktail",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "An intriguing blend of light rum and brandy with fresh lemon juice and raspberry syrup. This cocktail balances fruity sweetness with a zesty tartness, served chilled in a classic cocktail glass.",
+		"ratings": { "sweetness": 6.0, "dryness": 3.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 23, "unit": "ml", "desc": "Add 0.8oz light rum" },
+			{ "category": "Cognac", "qty": 23, "unit": "ml", "desc": "Add 0.8oz brandy" },
+			{ "category": "Raspberry Syrup", "qty": 2, "unit": "tsp", "desc": "Add 2 tsp raspberry syrup" }
+		]
+	},
+	{
+		"name": "Rum Sour",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A refreshing blend of light rum and tart lemon juice, balanced with sugar for sweetness. This sour cocktail is garnished with an orange slice and a maraschino cherry for a classic touch.",
+		"ratings": { "sweetness": 5.0, "dryness": 4.0, "strength": 6.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz light rum" },
+			{ "category": "Lemon Juice", "qty": 30, "unit": "ml", "desc": "Add 1oz lemon juice" },
+			{ "category": "Sugar", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp sugar" }
+		]
+	},
+	{
+		"name": "Rum Toddy",
+		"spirit": "Rum",
+		"technique": "Stirred",
+		"description": "A warm and comforting cocktail that combines rum with powdered sugar and hot water. Garnished with a twist of lemon peel, this drink is perfect for cold evenings.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz rum" },
+			{ "category": "Sugar", "qty": 2, "unit": "tsp", "desc": "Add 2 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Rum Cobbler",
+		"spirit": "Rum",
+		"technique": "Stirred",
+		"description": "A refreshing cocktail combining dark rum, sugar, and club soda, enhanced with fresh lemon and garnished with citrus slices and a maraschino cherry. Served over crushed ice, it offers a balance of sweetness and citrusy brightness, making it a delightful summer drink.",
+		"ratings": { "sweetness": 5.0, "dryness": 2.0, "strength": 6.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp sugar" },
+			{ "category": "Soda Water", "qty": 90, "unit": "ml", "desc": "Add 3oz club soda" },
+			{ "category": "Dark Rum", "qty": 60, "unit": "ml", "desc": "Add 2oz dark rum" }
+		]
+	},
+	{
+		"name": "Ruby Tuesday",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing take on gin with tart cranberry juice and a hint of sweetness from grenadine. Served over ice in a highball glass, it’s a vibrant and easy-drinking cocktail perfect for any occasion.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Cranberry Juice", "qty": 150, "unit": "ml", "desc": "Add 5oz cranberry juice" }
+		]
+	},
+	{
+		"name": "Royal Gin Fizz",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail made with gin, lemon juice, and powdered sugar, enhanced with the frothy texture of egg and topped with carbonated water. Served ice-cold in a highball glass, it offers a light yet vibrant flavor profile.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 60, "unit": "ml", "desc": "Add 2oz gin" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Raspberry Julep",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A refreshing twist on the classic Julep, combining Bourbon with raspberry syrup for a fruity note. Muddled mint leaves add a fragrant finish, perfect for warm weather sipping.",
+		"ratings": { "sweetness": 7.0, "dryness": 2.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Bourbon Whiskey", "qty": 60, "unit": "ml", "desc": "Add 2oz bourbon" },
+			{ "category": "Raspberry Syrup", "qty": 15, "unit": "ml", "desc": "Add 0.5oz raspberry syrup" }
+		]
+	},
+	{
+		"name": "Rum Screwdriver",
+		"spirit": "Rum",
+		"technique": "Stirred",
+		"description": "A simple yet refreshing mix of light rum and orange juice, served over ice in a highball glass. This tropical twist on the classic screwdriver is perfect for warm weather sipping.",
+		"ratings": { "sweetness": 6.0, "dryness": 2.0, "strength": 4.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 45, "unit": "ml", "desc": "Add 1.5oz light rum" },
+			{ "category": "Orange Juice", "qty": 150, "unit": "ml", "desc": "Add 5oz orange juice" }
+		]
+	},
+	{
+		"name": "Russian Spring Punch",
+		"spirit": "Vodka",
+		"technique": "Shaken",
+		"description": "A refreshing cocktail combining vodka, crème de cassis, sugar syrup, and lemon juice, topped with sparkling wine for a delightful fizz. Perfect for a summer gathering or as a light aperitif.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 6.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 25, "unit": "ml", "desc": "Add 0.8oz vodka" },
+			{ "category": "Blackcurrant Liqueur", "qty": 15, "unit": "ml", "desc": "Add 0.5oz creme de cassis" },
+			{ "category": "Simple Syrup", "qty": 10, "unit": "ml", "desc": "Add 0.3oz sugar syrup" },
+			{ "category": "Lemon Juice", "qty": 25, "unit": "ml", "desc": "Add 0.8oz lemon juice" }
+		]
+	},
+	{
+		"name": "Scooter",
+		"spirit": "Brandy",
+		"technique": "Shaken",
+		"description": "A creamy blend of brandy and amaretto, the Scooter is a rich cocktail enhanced with light cream for a smooth texture. Served in a cocktail glass, this drink offers a delightful balance of nutty and fruity flavors.",
+		"ratings": { "sweetness": 7.0, "dryness": 2.0, "strength": 6.0, "versatility": 5.0 },
+		"steps": [
+			{ "category": "Cognac", "qty": 30, "unit": "ml", "desc": "Add 1oz brandy" },
+			{ "category": "Amaretto", "qty": 30, "unit": "ml", "desc": "Add 1oz amaretto" },
+			{ "category": "Cream", "qty": 30, "unit": "ml", "desc": "Add 1oz light cream" }
+		]
+	},
+	{
+		"name": "Salty Dog",
+		"spirit": "Gin",
+		"technique": "Stirred",
+		"description": "A refreshing mix of grapefruit juice and gin, the Salty Dog is served over ice in a highball glass with a hint of salt to enhance its bright citrus flavor. This cocktail provides a perfect balance of tartness and delicious botanicals.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "Grapefruit Juice", "qty": 150, "unit": "ml", "desc": "Add 5oz grapefruit juice" },
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" }
+		]
+	},
+	{
+		"name": "Scotch Sour",
+		"spirit": "Whiskey",
+		"technique": "Shaken",
+		"description": "A refreshing twist on the classic sour, combining scotch whiskey with fresh lime juice and sweet powdered sugar. This cocktail is garnished with a lemon slice and a cherry for an added touch of elegance.",
+		"ratings": { "sweetness": 3.0, "dryness": 5.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Scotch Whisky", "qty": 45, "unit": "ml", "desc": "Add 1.5oz scotch" },
+			{ "category": "Sugar", "qty": 0.5, "unit": "tsp", "desc": "Add 0.5 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Tequila Sour",
+		"spirit": "Tequila & Mezcal",
+		"technique": "Shaken",
+		"description": "A refreshing blend of tequila and mezcal, paired with tart lemon juice and sweetened with powdered sugar. This cocktail is served over ice in a whiskey sour glass, garnished with a lemon slice and a cherry.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Blanco Tequila", "qty": 60, "unit": "ml", "desc": "Add 2oz tequila" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "The Jimmy Conway",
+		"spirit": "Whiskey",
+		"technique": "Stirred",
+		"description": "A refreshing blend of Irish whiskey, Amaretto, and cranberry juice, the Jimmy Conway balances the rich nuttiness of Amaretto with the tartness of cranberry. Served over ice with a lemon garnish, it offers a fruity twist on classic whiskey cocktails.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 5.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "Rye Whiskey", "qty": 50, "unit": "ml", "desc": "Add 1.7oz irish whiskey" },
+			{ "category": "Amaretto", "qty": 50, "unit": "ml", "desc": "Add 1.7oz amaretto" },
+			{ "category": "Cranberry Juice", "qty": 120, "unit": "ml", "desc": "Add 4oz cranberry juice" }
+		]
+	},
+	{
+		"name": "Victor",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A classic cocktail featuring gin, sweet vermouth, and brandy. This well-balanced drink combines the herbal notes of gin with the richness of brandy and the sweetness of vermouth.",
+		"ratings": { "sweetness": 5.0, "dryness": 3.0, "strength": 7.0, "versatility": 6.0 },
+		"steps": [
+			{ "category": "London Dry Gin", "qty": 45, "unit": "ml", "desc": "Add 1.5oz gin" },
+			{ "category": "Sweet Vermouth", "qty": 15, "unit": "ml", "desc": "Add 0.5oz sweet vermouth" },
+			{ "category": "Cognac", "qty": 15, "unit": "ml", "desc": "Add 0.5oz brandy" }
+		]
+	},
+	{
+		"name": "Vesuvio",
+		"spirit": "Rum",
+		"technique": "Shaken",
+		"description": "A blend of light rum and sweet vermouth, combined with fresh lemon juice and powdered sugar, creating a refreshing and slightly frothy cocktail. The addition of egg white adds a silky texture, served over ice for an invigorating experience.",
+		"ratings": { "sweetness": 6.0, "dryness": 4.0, "strength": 5.0, "versatility": 7.0 },
+		"steps": [
+			{ "category": "White Rum", "qty": 30, "unit": "ml", "desc": "Add 1oz light rum" },
+			{ "category": "Sweet Vermouth", "qty": 15, "unit": "ml", "desc": "Add 0.5oz sweet vermouth" },
+			{ "category": "Sugar", "qty": 1, "unit": "tsp", "desc": "Add 1 tsp powdered sugar" }
+		]
+	},
+	{
+		"name": "Vodka Lemon",
+		"spirit": "Vodka",
+		"technique": "Stirred",
+		"description": "A refreshing blend of vodka and fresh lemon juice, served over ice in a highball glass. Garnished with a slice of lemon and optionally adorned with mint leaves for added freshness.",
+		"ratings": { "sweetness": 4.0, "dryness": 6.0, "strength": 7.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 50, "unit": "ml", "desc": "Add 1.7oz vodka" },
+			{ "category": "Lemon Juice", "qty": 70, "unit": "ml", "desc": "Add 2.3oz lemon juice" }
+		]
+	},
+	{
+		"name": "Vodka Martini",
+		"spirit": "Vodka",
+		"technique": "Shaken",
+		"description": "A classic cocktail consisting of vodka and dry vermouth, served with an olive. It's a crisp and clean drink, ideal for any occasion.",
+		"ratings": { "sweetness": 2.0, "dryness": 7.0, "strength": 8.0, "versatility": 9.0 },
+		"steps": [
+			{ "category": "Plain Vodka", "qty": 45, "unit": "ml", "desc": "Add 1.5oz vodka" },
+			{ "category": "Dry Vermouth", "qty": 23, "unit": "ml", "desc": "Add 0.8oz dry vermouth" }
+		]
+	},
+	{
+		"name": "Waikiki Beachcomber",
+		"spirit": "Gin",
+		"technique": "Shaken",
+		"description": "A refreshing blend of gin, triple sec, and pineapple juice shaken with ice and served in a cocktail glass. This tropical concoction is perfect for warm-weather sipping.",
+		"ratings": { "sweetness": 7.0, "dryness": 3.0, "strength": 6.0, "versatility": 8.0 },
+		"steps": [
+			{ "category": "Orange Liqueur", "qty": 23, "unit": "ml", "desc": "Add 0.8oz triple sec" },
+			{ "category": "London Dry Gin", "qty": 23, "unit": "ml", "desc": "Add 0.8oz gin" }
+		]
 	}
 ]

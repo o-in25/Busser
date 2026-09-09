@@ -19,6 +19,7 @@
 	import { page } from '$app/stores';
 	import Callout from '$lib/components/Callout.svelte';
 	import AdvancedSearchDialog from '$lib/components/AdvancedSearchDialog.svelte';
+	import AdvancedSearchFields from '$lib/components/AdvancedSearchFields.svelte';
 	import CatalogBrowseCard from '$lib/components/CatalogBrowseCard.svelte';
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
 	import CatalogResultsSkeleton from '$lib/components/CatalogResultsSkeleton.svelte';
@@ -75,6 +76,8 @@
 	});
 
 	let advancedSearchOpen = $state(false);
+	// apply/clear handles the expanded advanced section registers so the sheet footer can drive it
+	let advancedApi = $state<{ apply: () => void; clear: () => void } | null>(null);
 	const advancedParamKeys = [
 		'ingredientInclude',
 		'ingredientAny',
@@ -114,6 +117,27 @@
 				keepFocus: true,
 			}
 		);
+	}
+
+	// mobile sheet "Clear": reset basic filters and wipe advanced params in one go
+	function clearSheetFilters() {
+		advancedApi?.clear();
+		selectedSpirit = 'all';
+		selectedShowFilter = 'all';
+		selectedSort = 'name-asc';
+		perPage = '24';
+		selectedMood = '';
+		const overrides: Record<string, string | number | null> = {
+			spirit: 'all',
+			show: 'all',
+			sort: 'name-asc',
+			perPage: '24',
+			mood: '',
+			readyToMake: null,
+			page: 1,
+		};
+		for (const key of advancedParamKeys) overrides[key] = null;
+		goto(buildUrl(overrides), { keepFocus: true });
 	}
 
 	onMount(() => {
@@ -438,7 +462,20 @@
 				activeView={viewMode}
 				onViewChange={setViewMode}
 				onRefresh={invalidateAll}
+				advancedCount={advancedFilterCount}
+				onDone={() => advancedApi?.apply()}
+				onClear={clearSheetFilters}
 			>
+				{#snippet advanced(expanded)}
+					<AdvancedSearchFields
+						active={expanded}
+						preparationMethods={data.preparationMethods}
+						filters={data.filters}
+						showActions={false}
+						onRegister={(api) => (advancedApi = api)}
+						onsearch={handleAdvancedSearch}
+					/>
+				{/snippet}
 				<CatalogFilterPanel
 					spirits={data.spirits}
 					{selectedSpirit}
