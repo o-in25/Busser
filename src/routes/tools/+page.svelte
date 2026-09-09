@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Citrus, Mail, Wine } from 'lucide-svelte';
+	import { Citrus, Mail, Play, Wine } from 'lucide-svelte';
 
 	import { page } from '$app/stores';
 	import BacCalculator from '$lib/components/BacCalculator.svelte';
