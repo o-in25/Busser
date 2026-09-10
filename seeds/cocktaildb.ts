@@ -18,7 +18,9 @@ const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
 
 const RECIPES_PATH = path.join(__dirname, './core/data/global-catalog-recipes.json');
 const IBA_PATH = path.join(__dirname, './core/data/iba.json');
-const API = 'https://www.thecocktaildb.com/api/json/v1/1';
+// pro keys use the v2 endpoint; dev key '1' stays on v1
+const KEY = process.env.COCKTAILDB_API_KEY || '1';
+const API = `https://www.thecocktaildb.com/api/json/${KEY === '1' ? 'v1' : 'v2'}/${KEY}`;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
