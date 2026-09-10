@@ -163,9 +163,13 @@
 									name={opt.productName}
 									class="h-8 w-8 flex-shrink-0 rounded-md border border-border/60 text-xs"
 								/>
-								<span class="min-w-0 flex-1 truncate text-sm text-foreground">{opt.productName}</span>
+								<span class="min-w-0 flex-1 truncate text-sm text-foreground"
+									>{opt.productName}</span
+								>
 								{#if opt.productId === defaultOption.productId}
-									<span class="flex-shrink-0 text-[11px] font-medium text-muted-foreground">Default</span>
+									<span class="flex-shrink-0 text-[11px] font-medium text-muted-foreground"
+										>Default</span
+									>
 								{/if}
 								{#if opt.inStock}
 									<span

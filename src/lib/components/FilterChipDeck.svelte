@@ -53,7 +53,9 @@
 				active === option.id
 					? 'glass-primary'
 					: 'bg-background/60 backdrop-blur-sm border-border/50',
-				expanded ? 'max-w-48 px-3 ml-1.5 opacity-100' : 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'
+				expanded
+					? 'max-w-48 px-3 ml-1.5 opacity-100'
+					: 'max-w-0 px-0 ml-0 opacity-0 overflow-hidden'
 			)}
 			onclick={() => {
 				onSelect(option.id);
