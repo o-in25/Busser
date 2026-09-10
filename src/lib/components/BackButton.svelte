@@ -51,7 +51,7 @@
 		{/if}
 	</a>
 {:else}
-	<button onclick={handleBack} class={buttonClass}>
+	<button type="button" onclick={handleBack} class={buttonClass}>
 		<ArrowLeft class={label && size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'} />
 		{#if label}
 			<span>{label}</span>

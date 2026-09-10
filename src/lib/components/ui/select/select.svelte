@@ -2,15 +2,16 @@
 	import { Select as SelectPrimitive } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 
+	// value is a string in single mode, a string[] in multiple mode
 	let {
-		value = $bindable<string | undefined>(undefined),
+		value = $bindable(),
 		onValueChange,
 		type = 'single',
 		children,
 		...restProps
 	}: {
-		value?: string;
-		onValueChange?: (value: string) => void;
+		value?: string | string[];
+		onValueChange?: (value: any) => void;
 		type?: 'single' | 'multiple';
 		children?: Snippet;
 		[key: string]: unknown;
@@ -20,7 +21,7 @@
 {#if type === 'single'}
 	<SelectPrimitive.Root
 		type="single"
-		bind:value
+		bind:value={() => value as string | undefined, (v) => (value = v)}
 		onValueChange={onValueChange as any}
 		{...restProps}
 	>
@@ -29,7 +30,12 @@
 		{/if}
 	</SelectPrimitive.Root>
 {:else}
-	<SelectPrimitive.Root type="multiple" {...restProps}>
+	<SelectPrimitive.Root
+		type="multiple"
+		bind:value={() => value as string[] | undefined, (v) => (value = v)}
+		onValueChange={onValueChange as any}
+		{...restProps}
+	>
 		{#if children}
 			{@render children()}
 		{/if}

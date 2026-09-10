@@ -54,7 +54,9 @@
 					Workspaces let you organize your bar separately, each with its own inventory, recipes, and
 					catalog.
 				</p>
-				<a href="/settings/workspaces" class="text-xs text-primary hover:underline"> Learn more </a>
+				<a href="/settings/workspaces" class="focus-ring text-xs text-primary hover:underline">
+					Learn more
+				</a>
 			</Popover.Content>
 		</Popover.Root>
 	</div>
@@ -118,7 +120,12 @@
 	>
 		<input type="hidden" name="workspaceId" value={selectedWorkspaceId || ''} />
 		<input type="hidden" name="setAsDefault" value={setAsDefault ? 'true' : 'false'} />
-		<Button type="submit" class="w-full" disabled={!selectedWorkspaceId || isSubmitting}>
+		<Button
+			variant="primary"
+			type="submit"
+			class="w-full"
+			disabled={!selectedWorkspaceId || isSubmitting}
+		>
 			{#if isSubmitting}
 				Entering workspace...
 			{:else}
@@ -134,7 +141,7 @@
 	<button
 		type="button"
 		onclick={signOut}
-		class="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+		class="focus-ring text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
 	>
 		<LogOut class="h-3 w-3" />
 		Sign out

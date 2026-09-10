@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { Package, Store, Tags } from 'lucide-svelte';
+	import { Package, ShoppingCart, Store, Tags } from 'lucide-svelte';
 	import type { Snippet } from 'svelte';
 
-	import { page } from '$app/stores';
 	import SubNav from '$lib/components/SubNav.svelte';
 
 	let { action }: { action?: Snippet } = $props();
 
-	const isOwner = $derived($page.data.workspace?.workspaceRole === 'owner');
-
-	const tabs = $derived([
+	const tabs = [
 		{
 			href: '/inventory',
 			label: 'Products',
@@ -19,7 +16,8 @@
 				p === '/inventory' ||
 				(p.startsWith('/inventory/') &&
 					!p.startsWith('/inventory/category') &&
-					!p.startsWith('/inventory/suppliers')),
+					!p.startsWith('/inventory/suppliers') &&
+					!p.startsWith('/inventory/shopping-list')),
 		},
 		{
 			href: '/inventory/category',
@@ -27,17 +25,19 @@
 			icon: Tags,
 			match: (p: string) => p.startsWith('/inventory/category'),
 		},
-		...(isOwner
-			? [
-					{
-						href: '/inventory/suppliers',
-						label: 'Suppliers',
-						icon: Store,
-						match: (p: string) => p.startsWith('/inventory/suppliers'),
-					},
-				]
-			: []),
-	]);
+		{
+			href: '/inventory/suppliers',
+			label: 'Suppliers',
+			icon: Store,
+			match: (p: string) => p.startsWith('/inventory/suppliers'),
+		},
+		{
+			href: '/inventory/shopping-list',
+			label: 'Shopping List',
+			icon: ShoppingCart,
+			match: (p: string) => p.startsWith('/inventory/shopping-list'),
+		},
+	];
 </script>
 
 <SubNav {tabs} {action} />

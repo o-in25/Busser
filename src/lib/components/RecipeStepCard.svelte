@@ -284,7 +284,7 @@
 									class={cn(
 										'px-3 py-2 text-sm rounded-lg border transition-colors',
 										selectedPreset === preset.ml
-											? 'bg-primary text-primary-foreground border-primary'
+											? 'glass-primary'
 											: 'bg-background hover:bg-muted border-input'
 									)}
 									onclick={() => (step.productIdQuantityInMilliliters = preset.ml)}
@@ -317,7 +317,7 @@
 										class={cn(
 											'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
 											step.productIdQuantityInMilliliters === val
-												? 'border-primary/40 bg-primary/20 text-primary'
+												? 'glass-primary'
 												: 'glass-surface text-muted-foreground hover:text-foreground'
 										)}
 									>

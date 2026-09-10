@@ -22,6 +22,10 @@ const publicRoutes = [
 	'/api/oauth/**',
 	'/catalog/**',
 	'/tools/**',
+	'/about',
+	'/privacy',
+	'/terms',
+	'/cookies',
 ];
 
 // user can see these before they complete their profile

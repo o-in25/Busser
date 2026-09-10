@@ -1,9 +1,9 @@
-// oauth data access
 import moment from 'moment';
 
 import type { Invitation, OAuthProfile, QueryResult, User } from '$lib/types';
 import type { LinkedOAuthAccount } from '$lib/types/oauth';
 
+import { seedBaselineInventory } from '../core';
 import { DbProvider } from '../db';
 import { Logger } from '../logger';
 import { BaseRepository } from './base.repository';
@@ -136,6 +136,8 @@ export class OAuthRepository extends BaseRepository {
 				return user;
 			});
 
+			// baseline inventory after commit — the cross-db overlay write needs the workspace row to exist
+			await seedBaselineInventory(user.personalWorkspaceId);
 			return this.userRepo.findById(user.userId);
 		} catch (error: any) {
 			await Logger.error(

@@ -197,7 +197,7 @@
 			<div class="text-left">
 				<a
 					href="/forgot-password"
-					class="text-sm text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
+					class="focus-ring text-sm text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
 				>
 					Forgot your password?
 				</a>
@@ -269,7 +269,7 @@
 			I agree to the
 			<button
 				type="button"
-				class="text-primary hover:underline underline-offset-4"
+				class="focus-ring text-primary hover:underline underline-offset-4"
 				onclick={() => (tosDialogOpen = true)}
 			>
 				Terms of Service
@@ -290,6 +290,7 @@
 					Close
 				</Button>
 				<Button
+					variant="primary"
 					type="button"
 					onclick={() => {
 						tosAccepted = true;
@@ -305,24 +306,30 @@
 
 <!-- submit -->
 {#if action === 'register' || action === 'login'}
-	<Button type="submit" size="lg" class="w-full" disabled={submitDisabled}>
+	<Button variant="primary" type="submit" size="lg" class="w-full" disabled={submitDisabled}>
 		{action === 'register' ? 'Sign up' : 'Log in'}
 	</Button>
 {:else}
 	<div class="md:flex justify-end">
-		<Button class="w-full md:w-32" type="submit" size="lg" disabled={submitDisabled}>Save</Button>
+		<Button
+			variant="primary"
+			class="w-full md:w-32"
+			type="submit"
+			size="lg"
+			disabled={submitDisabled}>Save</Button
+		>
 	</div>
 {/if}
 
 <!-- help -->
 {#if action === 'register'}
 	<div class="text-sm font-medium text-muted-foreground">
-		Already signed up? <a href="/login" class="text-primary hover:underline"> Log in </a>
+		Already signed up? <a href="/login" class="focus-ring text-primary hover:underline"> Log in </a>
 	</div>
 {/if}
 
 {#if action === 'login'}
 	<div class="text-sm font-medium text-muted-foreground">
-		Not a member? <a href="/signup" class="text-primary hover:underline"> Sign up </a>
+		Not a member? <a href="/signup" class="focus-ring text-primary hover:underline"> Sign up </a>
 	</div>
 {/if}

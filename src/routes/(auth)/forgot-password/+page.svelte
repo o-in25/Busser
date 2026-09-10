@@ -75,7 +75,7 @@
 			</div>
 
 			<div class="flex flex-col gap-3">
-				<Button type="submit" disabled={isSubmitting}>
+				<Button variant="primary" type="submit" disabled={isSubmitting}>
 					{#if isSubmitting}
 						<Loader2 class="w-4 h-4 mr-2 animate-spin" />
 						Sending...

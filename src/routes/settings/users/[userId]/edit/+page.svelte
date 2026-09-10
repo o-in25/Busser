@@ -210,7 +210,7 @@
 
 		<!-- save button -->
 		<div class="flex justify-end">
-			<Button type="submit" class="w-full sm:w-auto">Save</Button>
+			<Button variant="primary" type="submit" class="w-full sm:w-auto">Save</Button>
 		</div>
 	</form>
 
@@ -315,7 +315,11 @@
 					>
 						Cancel
 					</Button>
-					<Button type="submit" disabled={isSubmittingPassword || !allRulesMet || !passwordsMatch}>
+					<Button
+						variant="primary"
+						type="submit"
+						disabled={isSubmittingPassword || !allRulesMet || !passwordsMatch}
+					>
 						{#if isSubmittingPassword}
 							Saving...
 						{:else if data.hasPassword}

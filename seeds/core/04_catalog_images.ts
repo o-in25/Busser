@@ -10,7 +10,9 @@ import config from '../../knexfile';
 import recipes from './data/global-catalog-recipes.json';
 
 const WORKSPACE = process.env.GLOBAL_WORKSPACE || 'ws-global-catalog';
-const API = 'https://www.thecocktaildb.com/api/json/v1/1/search.php';
+// pro keys use the v2 endpoint; dev key '1' stays on v1
+const KEY = process.env.COCKTAILDB_API_KEY || '1';
+const API = `https://www.thecocktaildb.com/api/json/${KEY === '1' ? 'v1' : 'v2'}/${KEY}/search.php`;
 
 // some recipe names differ between us and cocktaildb
 const NAME_MAP: Record<string, string> = {

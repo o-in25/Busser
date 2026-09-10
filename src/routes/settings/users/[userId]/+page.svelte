@@ -12,6 +12,7 @@
 		XCircle,
 	} from 'lucide-svelte';
 	import moment from 'moment';
+	import { roleIsOwner } from '$lib/types/workspace';
 
 	import BackButton from '$lib/components/BackButton.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -220,7 +221,7 @@
 											</Badge>
 										</Table.Cell>
 										<Table.Cell>
-											<Badge variant={ws.workspaceRole === 'owner' ? 'default' : 'secondary'}>
+											<Badge variant={roleIsOwner(ws.workspaceRole) ? 'default' : 'secondary'}>
 												{ws.workspaceRole}
 											</Badge>
 										</Table.Cell>

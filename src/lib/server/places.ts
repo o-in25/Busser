@@ -1,5 +1,3 @@
-// google places api (new) — nearby store search via REST
-
 import type { PlaceResult } from '$lib/types';
 
 import { getAccessToken } from './google';

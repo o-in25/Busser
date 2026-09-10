@@ -23,28 +23,27 @@
 
     <!-- Inter is self-hosted via @fontsource-variable/inter (imported in +layout.svelte) -->
     <style>
-      /* light mode -- soft mesh the translucent cards let bleed through as gentle color.
-         fixed layer so cards read against shifting color as you scroll */
-      body {
+      /* fixed gradient mesh as a composited pseudo-element, not background-attachment:fixed —
+         the latter repainted the whole page every scroll frame (jank + tearing under the glass
+         backdrop-filters). same fixed-to-viewport look, one cheap layer. */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
         background:
           radial-gradient(ellipse 75% 60% at 10% 4%, rgba(253, 111, 148, 0.34) 0%, transparent 60%),
           radial-gradient(ellipse 70% 60% at 92% 8%, rgba(165, 125, 213, 0.3) 0%, transparent 60%),
           radial-gradient(ellipse 85% 70% at 78% 96%, rgba(150, 190, 230, 0.2) 0%, transparent 64%),
           linear-gradient(160deg, #ece6f4 0%, #f4ecf0 52%, #e7eef6 100%);
-        background-attachment: fixed;
       }
       /* dark mode -- calm pink->purple wash, kept subtle so it doesn't compete with content */
-      .dark body {
+      .dark body::before {
         background:
           radial-gradient(ellipse 85% 60% at 12% 2%, rgba(226, 30, 96, 0.2) 0%, transparent 62%),
           radial-gradient(ellipse 80% 60% at 90% 6%, rgba(122, 78, 190, 0.18) 0%, transparent 62%),
-          radial-gradient(
-            ellipse 100% 70% at 50% 104%,
-            rgba(96, 66, 156, 0.12) 0%,
-            transparent 66%
-          ),
+          radial-gradient(ellipse 100% 70% at 50% 104%, rgba(96, 66, 156, 0.12) 0%, transparent 66%),
           linear-gradient(160deg, #08070e 0%, #0a0911 60%, #08080e 100%);
-        background-attachment: fixed;
       }
       /* baseline — safe for all contexts */
       html,

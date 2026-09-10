@@ -20,14 +20,12 @@
 		activeUrl$.includes('account') || (!isAdmin && activeUrl$.includes('/users/'));
 
 	let activeClass =
-		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-primary dark:text-[rgba(248,78,128,1)] bg-primary/25 dark:bg-primary/20 backdrop-blur-sm ring-1 ring-primary/30 shadow-[0_0_12px_rgba(248,78,128,0.25)] rounded-xl';
+		'glass-primary block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 rounded-xl';
 	let defaultClass =
-		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-muted-foreground rounded-xl hover:bg-white/10 dark:hover:bg-zinc-700/25 hover:text-foreground transition-all duration-200';
+		'block w-full text-sm font-medium text-center disabled:cursor-not-allowed px-3 py-2 text-muted-foreground rounded-xl hover:bg-white/10 dark:hover:bg-white/[0.05] hover:text-foreground transition-all duration-200';
 </script>
 
-<nav
-	class="flex md:inline-flex rounded-xl backdrop-blur-xl bg-white/10 dark:bg-zinc-800/30 shadow-lg shadow-black/5 dark:shadow-black/15 p-0.5 mb-4"
->
+<nav class="glass-track flex md:inline-flex rounded-xl p-0.5 mb-4">
 	<ul class="flex w-full flex-wrap md:flex-nowrap space-x-1 rtl:space-x-reverse">
 		<li class="group flex-1" role="presentation">
 			<a

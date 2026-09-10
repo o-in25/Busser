@@ -2,10 +2,10 @@
 	import {
 		ArrowUpDown,
 		ChevronRight,
-		Filter,
 		GlassWater,
-		Rows3,
+		RotateCcw,
 		SlidersHorizontal,
+		Sparkles,
 	} from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
@@ -22,6 +22,7 @@
 		perPage = '24',
 		advancedFilterCount = 0,
 		hideSpirit = false,
+		canModify = false,
 		onSpiritChange,
 		onShowFilterChange,
 		onMoodChange,
@@ -38,6 +39,7 @@
 		perPage?: string;
 		advancedFilterCount?: number;
 		hideSpirit?: boolean;
+		canModify?: boolean;
 		onSpiritChange: (value: string) => void;
 		onShowFilterChange: (value: string) => void;
 		onMoodChange?: (value: string) => void;
@@ -55,10 +57,19 @@
 		{ value: 'oldest', label: 'Oldest First' },
 	];
 
-	const showFilterOptions = [
+	// drafts are an owner/editor-only view; unpublished recipes are hidden everywhere else
+	const showFilterOptions = $derived([
 		{ value: 'all', label: 'All Recipes' },
-		{ value: 'favorites', label: 'My Favorites' },
+		{ value: 'favorites', label: 'Favorites' },
 		{ value: 'featured', label: 'Featured' },
+		...(canModify ? [{ value: 'drafts', label: 'Drafts' }] : []),
+	]);
+
+	const perPageOptions = [
+		{ value: '12', label: '12 / page' },
+		{ value: '24', label: '24 / page' },
+		{ value: '48', label: '48 / page' },
+		{ value: '96', label: '96 / page' },
 	];
 
 	const spiritLabel = $derived.by(() => {
@@ -67,29 +78,13 @@
 		return spirit?.recipeCategoryDescription || 'All Spirits';
 	});
 
-	const showFilterLabel = $derived.by(() => {
-		const option = showFilterOptions.find((o) => o.value === selectedShowFilter);
-		return option?.label || 'All Recipes';
+	// mood is multi-select; the parent contract stays a comma-joined string
+	const moodIds = $derived(selectedMood ? selectedMood.split(',') : []);
+	const moodLabel = $derived.by(() => {
+		if (moodIds.length === 0) return 'All Moods';
+		if (moodIds.length === 1) return moods.find((m) => m.id === moodIds[0])?.label ?? 'All Moods';
+		return `${moodIds.length} moods`;
 	});
-
-	const activeMoods = $derived(new Set(selectedMood ? selectedMood.split(',') : []));
-
-	function toggleMood(id: string) {
-		const current = new Set(activeMoods);
-		if (current.has(id)) {
-			current.delete(id);
-		} else {
-			current.add(id);
-		}
-		onMoodChange?.([...current].join(','));
-	}
-
-	const perPageOptions = [
-		{ value: '12', label: '12 per page' },
-		{ value: '24', label: '24 per page' },
-		{ value: '48', label: '48 per page' },
-		{ value: '96', label: '96 per page' },
-	];
 
 	const sortLabel = $derived.by(() => {
 		const option = sortOptions.find((o) => o.value === sortOption);
@@ -98,7 +93,7 @@
 
 	const perPageLabel = $derived.by(() => {
 		const option = perPageOptions.find((o) => o.value === perPage);
-		return option?.label || '24 per page';
+		return option?.label || '24 / page';
 	});
 
 	const hasNonDefaultFilters = $derived(
@@ -111,115 +106,120 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<!-- spirit -->
-	{#if !hideSpirit}
-		<div class="flex flex-col gap-1.5">
-			<span class="text-sm font-medium text-muted-foreground">Spirit</span>
-			<Select.Root
-				type="single"
-				value={selectedSpirit}
-				onValueChange={(v) => onSpiritChange(v ?? 'all')}
-			>
-				<Select.Trigger class="w-full">
-					<GlassWater class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="All Spirits">{spiritLabel}</Select.Value>
-				</Select.Trigger>
-				<Select.Content>
-					<Select.Item value="all" label="All Spirits" />
-					{#if spirits.length > 0}
-						<Select.Separator />
-					{/if}
-					{#each spirits as spirit}
-						<Select.Item
-							value={String(spirit.recipeCategoryId)}
-							label={spirit.recipeCategoryDescription ?? undefined}
-						/>
-					{/each}
-				</Select.Content>
-			</Select.Root>
-		</div>
-	{/if}
-
-	<!-- mood -->
-	{#if onMoodChange}
-		<div class="flex flex-col gap-1.5">
-			<span class="text-sm font-medium text-muted-foreground">Mood</span>
-			<div class="flex flex-wrap gap-1.5">
-				{#each moods as mood}
-					<Button
-						variant={activeMoods.has(mood.id) ? 'default' : 'outline'}
-						class="rounded-full border-dashed h-7 text-xs px-3"
-						size="sm"
-						onclick={() => toggleMood(mood.id)}
-					>
-						{mood.label}
-					</Button>
-				{/each}
+	<!-- tier 1: primary dropdowns -->
+	<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+		{#if !hideSpirit}
+			<div class="flex flex-col gap-1.5">
+				<span class="text-sm font-medium text-muted-foreground">Spirit</span>
+				<Select.Root
+					type="single"
+					value={selectedSpirit}
+					onValueChange={(v) => onSpiritChange(v ?? 'all')}
+				>
+					<Select.Trigger class="w-full">
+						<GlassWater class="h-4 w-4 mr-2" />
+						<Select.Value placeholder="All Spirits">{spiritLabel}</Select.Value>
+					</Select.Trigger>
+					<Select.Content>
+						<Select.Item value="all" label="All Spirits" />
+						{#if spirits.length > 0}
+							<Select.Separator />
+						{/if}
+						{#each spirits as spirit}
+							<Select.Item
+								value={String(spirit.recipeCategoryId)}
+								label={spirit.recipeCategoryDescription ?? undefined}
+							/>
+						{/each}
+					</Select.Content>
+				</Select.Root>
 			</div>
-		</div>
-	{/if}
+		{/if}
 
-	<!-- show filter -->
+		{#if onMoodChange}
+			<div class="flex flex-col gap-1.5">
+				<span class="text-sm font-medium text-muted-foreground">Mood</span>
+				<Select.Root
+					type="multiple"
+					value={moodIds}
+					onValueChange={(v) => onMoodChange?.((v ?? []).join(','))}
+				>
+					<Select.Trigger class="w-full">
+						<Sparkles class="h-4 w-4 mr-2" />
+						<Select.Value placeholder="All Moods">{moodLabel}</Select.Value>
+					</Select.Trigger>
+					<Select.Content>
+						{#each moods as mood}
+							<Select.Item value={mood.id} label={mood.label} />
+						{/each}
+					</Select.Content>
+				</Select.Root>
+			</div>
+		{/if}
+	</div>
+
+	<!-- tier 2: show — quick toggles -->
 	<div class="flex flex-col gap-1.5">
 		<span class="text-sm font-medium text-muted-foreground">Show</span>
-		<Select.Root
-			type="single"
-			value={selectedShowFilter}
-			onValueChange={(v) => onShowFilterChange(v ?? 'all')}
-		>
-			<Select.Trigger class="w-full">
-				<Filter class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="All Recipes">{showFilterLabel}</Select.Value>
-			</Select.Trigger>
-			<Select.Content>
-				{#each showFilterOptions as option}
-					<Select.Item value={option.value} label={option.label} />
-				{/each}
-			</Select.Content>
-		</Select.Root>
+		<div class="flex flex-wrap gap-1.5">
+			{#each showFilterOptions as option}
+				<Button
+					variant={selectedShowFilter === option.value ? 'primary' : 'outline'}
+					class="rounded-full"
+					size="sm"
+					onclick={() => onShowFilterChange(option.value)}
+				>
+					{option.label}
+				</Button>
+			{/each}
+		</div>
 	</div>
 
-	<!-- sort -->
-	<div class="flex flex-col gap-1.5">
-		<span class="text-sm font-medium text-muted-foreground">Sort By</span>
-		<Select.Root
-			type="single"
-			value={sortOption}
-			onValueChange={(v) => onSortChange(v ?? 'name-asc')}
-		>
-			<Select.Trigger class="w-full">
-				<ArrowUpDown class="h-4 w-4 mr-2" />
-				<Select.Value placeholder="Name (A-Z)">{sortLabel}</Select.Value>
-			</Select.Trigger>
-			<Select.Content>
-				{#each sortOptions as option}
-					<Select.Item value={option.value} label={option.label} />
-				{/each}
-			</Select.Content>
-		</Select.Root>
-	</div>
-
-	<!-- page size -->
-	{#if onPerPageChange}
-		<div class="flex flex-col gap-1.5">
-			<span class="text-sm font-medium text-muted-foreground">Page Size</span>
-			<Select.Root type="single" value={perPage} onValueChange={(v) => onPerPageChange(v ?? '24')}>
+	<!-- tier 3: sort + page size (page size demoted, compact) -->
+	<div class="flex flex-wrap items-end gap-4">
+		<div class="flex flex-col gap-1.5 flex-1 min-w-[12rem]">
+			<span class="text-sm font-medium text-muted-foreground">Sort By</span>
+			<Select.Root
+				type="single"
+				value={sortOption}
+				onValueChange={(v) => onSortChange(v ?? 'name-asc')}
+			>
 				<Select.Trigger class="w-full">
-					<Rows3 class="h-4 w-4 mr-2" />
-					<Select.Value placeholder="24 per page">{perPageLabel}</Select.Value>
+					<ArrowUpDown class="h-4 w-4 mr-2" />
+					<Select.Value placeholder="Name (A-Z)">{sortLabel}</Select.Value>
 				</Select.Trigger>
 				<Select.Content>
-					{#each perPageOptions as option}
+					{#each sortOptions as option}
 						<Select.Item value={option.value} label={option.label} />
 					{/each}
 				</Select.Content>
 			</Select.Root>
 		</div>
-	{/if}
 
-	<!-- advanced filters link -->
+		{#if onPerPageChange}
+			<div class="flex flex-col gap-1.5">
+				<span class="text-sm font-medium text-muted-foreground">Per page</span>
+				<Select.Root
+					type="single"
+					value={perPage}
+					onValueChange={(v) => onPerPageChange(v ?? '24')}
+				>
+					<Select.Trigger class="w-auto min-w-[7.5rem]">
+						<Select.Value placeholder="24 / page">{perPageLabel}</Select.Value>
+					</Select.Trigger>
+					<Select.Content>
+						{#each perPageOptions as option}
+							<Select.Item value={option.value} label={option.label} />
+						{/each}
+					</Select.Content>
+				</Select.Root>
+			</div>
+		{/if}
+	</div>
+
+	<!-- tier 4: advanced filters link (desktop popover only; mobile sheet expands these inline) -->
 	{#if onAdvancedClick}
-		<div class="border-t border-border/50 pt-3">
+		<div class="hidden md:block border-t border-border/50 pt-3">
 			<button
 				onclick={onAdvancedClick}
 				class="flex items-center justify-between w-full rounded-lg border border-input/50 px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors"
@@ -238,13 +238,14 @@
 		</div>
 	{/if}
 
-	<!-- reset -->
+	<!-- clear: promoted to a real button, only when filters are active (desktop popover only;
+	     the mobile sheet has its own Clear in the footer) -->
 	{#if hasNonDefaultFilters}
-		<button
-			onclick={onReset}
-			class="text-sm text-muted-foreground hover:text-foreground underline self-start"
-		>
-			Reset filters
-		</button>
+		<div class="hidden md:flex justify-end border-t border-border/50 pt-3">
+			<Button variant="outline" size="sm" onclick={onReset}>
+				<RotateCcw class="h-4 w-4 mr-2" />
+				Clear filters
+			</Button>
+		</div>
 	{/if}
 </div>

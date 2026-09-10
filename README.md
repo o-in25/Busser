@@ -75,6 +75,7 @@ pnpm run prepare    # Install Husky pre-commit hooks
 | `GOOGLE_OAUTH_CLIENT_ID`     | Google OAuth client ID                    |
 | `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth secret                       |
 | `GLOBAL_WORKSPACE`           | Global catalog workspace ID               |
+| `COCKTAILDB_API_KEY`         | TheCocktailDB key (seed-time only; dev default `1`, pro key → v2 API) |
 | `APP_VERSION`                | App version (auto-set by deploy workflow) |
 
 ### Migrations

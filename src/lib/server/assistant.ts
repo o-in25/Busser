@@ -1,4 +1,3 @@
-// assistant tool executor - maps tool calls to repository methods with workspace context
 import { catalogRepo, inventoryRepo } from './core';
 
 export class ToolExecutor {
@@ -21,7 +20,7 @@ export class ToolExecutor {
 			case 'get_preparation_methods':
 				return this.getPreparationMethods();
 			case 'propose_recipe':
-				// proposal is returned as-is - the client handles confirmation
+				// proposal is returned as is and the client handles confirmation
 				return JSON.stringify({ type: 'proposal', data: args });
 			default:
 				return JSON.stringify({ error: `Unknown tool: ${toolName}` });

@@ -24,16 +24,16 @@ export const removeWorkspaceMember = workspaceRepo.removeWorkspaceMember.bind(wo
 export const updateWorkspaceMemberRole =
 	workspaceRepo.updateWorkspaceMemberRole.bind(workspaceRepo);
 
-export type { WorkspaceRole } from './repositories/workspace.repository';
+import { roleCanModify, roleIsOwner } from '$lib/types/workspace';
 
 export async function canModifyWorkspace(userId: string, workspaceId: string): Promise<boolean> {
 	const role = await hasWorkspaceAccess(userId, workspaceId);
-	return role === 'owner' || role === 'editor';
+	return roleCanModify(role);
 }
 
 export async function isWorkspaceOwner(userId: string, workspaceId: string): Promise<boolean> {
 	const role = await hasWorkspaceAccess(userId, workspaceId);
-	return role === 'owner';
+	return roleIsOwner(role);
 }
 
 export function getGlobalWorkspace(): string {

@@ -2,7 +2,7 @@ import { userRepo } from '$lib/server/auth';
 import { getUserWorkspaces, getWorkspace } from '$lib/server/workspace';
 import { generateAndUploadAvatar } from '$lib/server/user';
 import { getGlobalWorkspace } from '$lib/server/workspace';
-import type { WorkspaceWithRole } from '$lib/server/repositories/workspace.repository';
+import type { WorkspaceWithRole } from '$lib/types/workspace';
 
 import type { LayoutServerLoad } from './$types';
 

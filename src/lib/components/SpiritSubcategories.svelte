@@ -102,10 +102,10 @@
 				</Carousel.Content>
 
 				<Carousel.Previous
-					class="hidden sm:inline-flex bg-white/15 dark:bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/25 dark:hover:bg-white/15 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
+					class="hidden sm:inline-flex bg-white/15 dark:bg-white/10 backdrop-blur-md backdrop-saturate-150 border-white/20 hover:bg-white/25 dark:hover:bg-white/15 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
 				/>
 				<Carousel.Next
-					class="hidden sm:inline-flex bg-white/15 dark:bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/25 dark:hover:bg-white/15 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
+					class="hidden sm:inline-flex bg-white/15 dark:bg-white/10 backdrop-blur-md backdrop-saturate-150 border-white/20 hover:bg-white/25 dark:hover:bg-white/15 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
 				/>
 			</Carousel.Root>
 		</div>

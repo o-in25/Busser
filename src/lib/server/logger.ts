@@ -1,9 +1,6 @@
 import moment from 'moment';
-
 import { type Log } from '$lib/types';
-
 import { DbProvider } from './db';
-
 import { env } from '$env/dynamic/private';
 
 const { USER_TABLE } = env;

@@ -4,7 +4,6 @@
 
 	import { browser } from '$app/environment';
 
-	// "Saved X min ago" glass pill, wired to FormDraftManager's lastSaved timestamp
 	let { lastSaved = null }: { lastSaved?: Date | null } = $props();
 
 	let now = $state(browser ? Date.now() : 0);
@@ -26,9 +25,11 @@
 
 {#if lastSaved}
 	<span
-		class="glass-surface inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-muted-foreground"
+		class="glass-surface inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs text-muted-foreground"
 	>
 		<Check class="h-3 w-3 text-primary" />
-		{label}
+		<!-- mobile has no room for the timestamp -->
+		<span class="md:hidden">Saved</span>
+		<span class="hidden md:inline">{label}</span>
 	</span>
 {/if}

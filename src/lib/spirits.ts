@@ -20,24 +20,43 @@ type TasteRatings = {
 	recipeVersatilityRating: number;
 };
 
+type Condition = { field: keyof TasteRatings; op: '>=' | '<='; value: number };
+
 export type Mood = {
 	id: string;
 	label: string;
 	test: (d: TasteRatings) => boolean;
+	sql: (alias?: string) => string;
 };
+
+function conjunction(conditions: Condition[]): Pick<Mood, 'test' | 'sql'> {
+	return {
+		test: (d) =>
+			conditions.every((c) => (c.op === '>=' ? d[c.field] >= c.value : d[c.field] <= c.value)),
+		sql: (alias = 'r') =>
+			'(' + conditions.map((c) => `${alias}.${c.field} ${c.op} ${c.value}`).join(' AND ') + ')',
+	};
+}
 
 export const moods: Mood[] = [
 	{
 		id: 'strong-dry',
 		label: 'Strong & Dry',
-		test: (d) => d.recipeStrengthRating >= 6 && d.recipeDrynessRating >= 6,
+		...conjunction([
+			{ field: 'recipeStrengthRating', op: '>=', value: 6 },
+			{ field: 'recipeDrynessRating', op: '>=', value: 6 },
+		]),
 	},
 	{
 		id: 'sweet-easy',
 		label: 'Sweet & Easy',
-		test: (d) => d.recipeSweetnessRating >= 6 && d.recipeStrengthRating <= 5,
+		...conjunction([
+			{ field: 'recipeSweetnessRating', op: '>=', value: 6 },
+			{ field: 'recipeStrengthRating', op: '<=', value: 5 },
+		]),
 	},
 	{
+		// mean distance rule
 		id: 'balanced',
 		label: 'Balanced',
 		test: (d) => {
@@ -50,10 +69,21 @@ export const moods: Mood[] = [
 			const mean = vals.reduce((a, b) => a + b, 0) / 4;
 			return vals.every((v) => Math.abs(v - mean) <= 2.5);
 		},
+		sql: (alias = 'r') => {
+			const s = `${alias}.recipeSweetnessRating`;
+			const d = `${alias}.recipeDrynessRating`;
+			const st = `${alias}.recipeStrengthRating`;
+			const v = `${alias}.recipeVersatilityRating`;
+			const mean = `((${s} + ${d} + ${st} + ${v}) / 4)`;
+			return `(ABS(${s} - ${mean}) <= 2.5 AND ABS(${d} - ${mean}) <= 2.5 AND ABS(${st} - ${mean}) <= 2.5 AND ABS(${v} - ${mean}) <= 2.5)`;
+		},
 	},
 	{
 		id: 'bold-complex',
 		label: 'Bold & Complex',
-		test: (d) => d.recipeStrengthRating >= 6 && d.recipeVersatilityRating >= 6,
+		...conjunction([
+			{ field: 'recipeStrengthRating', op: '>=', value: 6 },
+			{ field: 'recipeVersatilityRating', op: '>=', value: 6 },
+		]),
 	},
 ];

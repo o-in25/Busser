@@ -88,7 +88,7 @@
 	{#if canModify}
 		<a
 			href="/inventory/category/{category.categoryId}/edit"
-			class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+			class="focus-ring inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
 		>
 			<Pencil class="h-3.5 w-3.5" />
 			Edit category

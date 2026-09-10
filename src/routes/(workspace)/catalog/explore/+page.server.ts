@@ -1,6 +1,7 @@
 import { catalogRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
 import { getFavoriteRecipes } from '$lib/server/user-settings';
+import { roleCanModify } from '$lib/types/workspace';
 import { indexFromSeed } from '$lib/math';
 
 import type { Actions, PageServerLoad } from './$types';
@@ -10,6 +11,9 @@ export const load = (async ({ parent, locals }) => {
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
 	const userId = locals.user?.userId;
+
+	// stock-derived stats are an operator tool — whoever can modify the workspace (owner/editor) gets them
+	const makeableLensAvailable = roleCanModify(workspace.workspaceRole);
 
 	// Get all spirits (global reference data)
 	const spirits = await catalogRepo.getSpirits();
@@ -91,6 +95,7 @@ export const load = (async ({ parent, locals }) => {
 			availableCount,
 			almostThereCount,
 			topIngredient,
+			makeableLensAvailable,
 			favoriteRecipeIds: [...favoriteRecipeIds],
 			featuredRecipeIds: [...featuredRecipeIds],
 		},

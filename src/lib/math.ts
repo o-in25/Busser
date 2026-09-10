@@ -340,6 +340,38 @@ export const getUnitOptions = () =>
 		label: config.label,
 	}));
 
+// super juice ratios per Kevin Kos' calculator — grams of ingredient per gram of peel
+export type SuperJuiceCitrus = 'lime' | 'lemon' | 'orange' | 'grapefruit';
+
+const SUPER_JUICE_RECIPES: Record<
+	SuperJuiceCitrus,
+	{ name: string; citricAcid: number; malicAcid: number; msg: number; water: number }
+> = {
+	lime: { name: 'Lime', citricAcid: 0.66, malicAcid: 0.33, msg: 0, water: 16.66 },
+	lemon: { name: 'Lemon', citricAcid: 1, malicAcid: 0, msg: 0, water: 16.66 },
+	orange: { name: 'Orange', citricAcid: 0.9, malicAcid: 0.1, msg: 0, water: 16.66 },
+	grapefruit: { name: 'Grapefruit', citricAcid: 0.8, malicAcid: 0.2, msg: 0.033, water: 16.66 },
+};
+
+// 250ml metric cup — water is displayed in cups, everything else in grams
+const CUP_ML = 250;
+
+export const getSuperJuiceCitrusOptions = () =>
+	Object.entries(SUPER_JUICE_RECIPES).map(([value, { name }]) => ({ value, name }));
+
+// scales a recipe to a peel weight; solids in grams, water in cups
+export const calculateSuperJuice = (citrus: SuperJuiceCitrus, peelWeightGrams: number) => {
+	const recipe = SUPER_JUICE_RECIPES[citrus];
+	return {
+		citricAcid: peelWeightGrams * recipe.citricAcid,
+		malicAcid: peelWeightGrams * recipe.malicAcid,
+		msg: peelWeightGrams * recipe.msg,
+		waterCups: (peelWeightGrams * recipe.water) / CUP_ML,
+		hasMalic: recipe.malicAcid > 0,
+		hasMsg: recipe.msg > 0,
+	};
+};
+
 export function generateSecureCode(length = 6) {
 	const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 	const bytes = crypto.randomBytes(length);
@@ -349,8 +381,27 @@ export function generateSecureCode(length = 6) {
 // BAC Calculator Constants
 export const WIDMARK_R_MALE = 0.68;
 export const WIDMARK_R_FEMALE = 0.55;
+export const WIDMARK_R_OTHER = 0.6; // neutral fallback when total body water is unknown
+export const BLOOD_WATER_FRACTION = 0.8; // converts total body water (L) into a widmark r
 export const METABOLISM_RATE = 0.015; // per hour
 export const ALCOHOL_DENSITY = 0.789; // g/ml
+
+export type BacSex = 'male' | 'female' | 'other';
+
+// widmark r is just a proxy for body-water fraction, so a measured total body water
+// gives a person-specific factor (recommended over assigned sex for trans/non-binary users)
+const resolveWidmarkFactor = (
+	sex: BacSex,
+	bodyWeightKg: number,
+	totalBodyWaterLiters?: number
+): number => {
+	if (totalBodyWaterLiters && totalBodyWaterLiters > 0 && bodyWeightKg > 0) {
+		return totalBodyWaterLiters / (bodyWeightKg * BLOOD_WATER_FRACTION);
+	}
+	if (sex === 'male') return WIDMARK_R_MALE;
+	if (sex === 'female') return WIDMARK_R_FEMALE;
+	return WIDMARK_R_OTHER;
+};
 
 // Calculate pure alcohol in grams from recipe steps
 export const calculateAlcoholGrams = (
@@ -378,10 +429,11 @@ export const calculateAlcoholGrams = (
 export const calculateBac = (
 	alcoholGrams: number,
 	bodyWeightKg: number,
-	gender: 'male' | 'female',
-	hoursSinceDrinking: number
+	sex: BacSex,
+	hoursSinceDrinking: number,
+	totalBodyWaterLiters?: number
 ): number => {
-	const widmarkFactor = gender === 'male' ? WIDMARK_R_MALE : WIDMARK_R_FEMALE;
+	const widmarkFactor = resolveWidmarkFactor(sex, bodyWeightKg, totalBodyWaterLiters);
 	const bodyWeightGrams = bodyWeightKg * 1000;
 
 	// Calculate BAC before metabolism

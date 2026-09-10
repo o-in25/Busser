@@ -174,9 +174,9 @@
 										class="h-8 text-xs"
 									/>
 									<Button
+										variant="primary"
 										type="submit"
 										size="sm"
-										class="h-8 px-2"
 										disabled={!newRoleName.trim() || isCreatingRole}
 									>
 										<Plus class="h-3.5 w-3.5" />
@@ -320,7 +320,7 @@
 						<div class="flex justify-end pt-4 border-t">
 							<input type="hidden" name="formData" bind:this={formDataInput} />
 							<input type="hidden" name="roleId" bind:this={roleIdInput} />
-							<Button type="submit" class="min-w-[120px]">Save</Button>
+							<Button variant="primary" type="submit" class="min-w-[120px]">Save</Button>
 						</div>
 					</form>
 				</Card.Content>

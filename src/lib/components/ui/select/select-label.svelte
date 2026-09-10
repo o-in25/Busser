@@ -12,7 +12,7 @@
 </script>
 
 <SelectPrimitive.GroupHeading
-	class={cn('py-1.5 pl-8 pr-2 text-sm font-semibold', className)}
+	class={cn('px-3 py-1.5 text-sm font-semibold text-muted-foreground', className)}
 	{...restProps}
 >
 	{#if children}

@@ -12,7 +12,7 @@ export async function seed(knex: Knex): Promise<void> {
 			{ RecipeCategoryId: 4, RecipeCategoryDescription: 'Whiskey' },
 			{ RecipeCategoryId: 5, RecipeCategoryDescription: 'Gin' },
 			{ RecipeCategoryId: 6, RecipeCategoryDescription: 'Vodka' },
-			{ RecipeCategoryId: 7, RecipeCategoryDescription: 'Tequila' },
+			{ RecipeCategoryId: 7, RecipeCategoryDescription: 'Tequila & Mezcal' },
 			{ RecipeCategoryId: 8, RecipeCategoryDescription: 'Rum' },
 			{ RecipeCategoryId: 9, RecipeCategoryDescription: 'Brandy' },
 		])

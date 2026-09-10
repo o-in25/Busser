@@ -19,8 +19,9 @@
 
 	<ul class="list-disc pl-6 mb-4 text-muted-foreground">
 		<li class="mb-2">
-			Visit our website at <a href="https://busserapp.com" class="text-primary hover:underline"
-				>https://busserapp.com</a
+			Visit our website at <a
+				href="https://busserapp.com"
+				class="focus-ring text-primary hover:underline">https://busserapp.com</a
 			> or any website of ours that links to this Privacy Notice
 		</li>
 		<li class="mb-2">
@@ -38,7 +39,7 @@
 		your privacy rights and choices. We are responsible for making decisions about how your personal
 		information is processed. If you do not agree with our policies and practices, please do not use
 		our Services. If you still have any questions or concerns, please contact us at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>.
 	</p>
@@ -51,7 +52,7 @@
 			>This summary provides key points from our Privacy Notice, but you can find out more details
 			about any of these topics by clicking the link following each key point or by using our <a
 				href="#toc"
-				class="text-primary hover:underline">table of contents</a
+				class="focus-ring text-primary hover:underline">table of contents</a
 			> below to find the section you are looking for.</em
 		>
 	</p>
@@ -60,7 +61,7 @@
 		<strong>What personal information do we process?</strong> When you visit, use, or navigate our
 		Services, we may process personal information depending on how you interact with us and the
 		Services, the choices you make, and the products and features you use. Learn more about
-		<a href="#infocollect" class="text-primary hover:underline"
+		<a href="#infocollect" class="focus-ring text-primary hover:underline"
 			>personal information you disclose to us</a
 		>.
 	</p>
@@ -82,13 +83,15 @@
 		and to comply with law. We may also process your information for other purposes with your
 		consent. We process your information only when we have a valid legal reason to do so. Learn more
 		about
-		<a href="#infouse" class="text-primary hover:underline">how we process your information</a>.
+		<a href="#infouse" class="focus-ring text-primary hover:underline"
+			>how we process your information</a
+		>.
 	</p>
 
 	<p class="text-muted-foreground mb-4">
 		<strong>In what situations and with which parties do we share personal information?</strong>
 		We may share information in specific situations and with specific third parties. Learn more about
-		<a href="#whoshare" class="text-primary hover:underline"
+		<a href="#whoshare" class="focus-ring text-primary hover:underline"
 			>when and with whom we share your personal information</a
 		>.
 	</p>
@@ -100,14 +103,17 @@
 		be 100% secure, so we cannot promise or guarantee that hackers, cybercriminals, or other
 		unauthorized third parties will not be able to defeat our security and improperly collect,
 		access, steal, or modify your information. Learn more about
-		<a href="#infosafe" class="text-primary hover:underline">how we keep your information safe</a>.
+		<a href="#infosafe" class="focus-ring text-primary hover:underline"
+			>how we keep your information safe</a
+		>.
 	</p>
 
 	<p class="text-muted-foreground mb-4">
 		<strong>What are your rights?</strong> Depending on where you are located geographically, the
 		applicable privacy law may mean you have certain rights regarding your personal information.
 		Learn more about
-		<a href="#privacyrights" class="text-primary hover:underline">your privacy rights</a>.
+		<a href="#privacyrights" class="focus-ring text-primary hover:underline">your privacy rights</a
+		>.
 	</p>
 
 	<p class="text-muted-foreground mb-4">
@@ -117,14 +123,16 @@
 			href="https://app.termly.io/dsar/1c0aafb9-c005-4071-a29b-e5b7cd041a48"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="text-primary hover:underline">data subject access request</a
+			class="focus-ring text-primary hover:underline">data subject access request</a
 		>, or by contacting us. We will consider and act upon any request in accordance with applicable
 		data protection laws.
 	</p>
 
 	<p class="text-muted-foreground mb-4">
 		Want to learn more about what we do with any information we collect?
-		<a href="#toc" class="text-primary hover:underline">Review the Privacy Notice in full</a>.
+		<a href="#toc" class="focus-ring text-primary hover:underline"
+			>Review the Privacy Notice in full</a
+		>.
 	</p>
 
 	<!-- Table of Contents -->
@@ -132,67 +140,72 @@
 
 	<ol class="list-decimal pl-6 mb-4 text-muted-foreground">
 		<li class="mb-1">
-			<a href="#infocollect" class="text-primary hover:underline">What Information Do We Collect?</a
+			<a href="#infocollect" class="focus-ring text-primary hover:underline"
+				>What Information Do We Collect?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#infouse" class="text-primary hover:underline">How Do We Process Your Information?</a
+			<a href="#infouse" class="focus-ring text-primary hover:underline"
+				>How Do We Process Your Information?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#whoshare" class="text-primary hover:underline"
+			<a href="#whoshare" class="focus-ring text-primary hover:underline"
 				>When and With Whom Do We Share Your Personal Information?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#cookies" class="text-primary hover:underline"
+			<a href="#cookies" class="focus-ring text-primary hover:underline"
 				>Do We Use Cookies and Other Tracking Technologies?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#ai" class="text-primary hover:underline"
+			<a href="#ai" class="focus-ring text-primary hover:underline"
 				>Do We Offer Artificial Intelligence-Based Products?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#inforetain" class="text-primary hover:underline"
+			<a href="#inforetain" class="focus-ring text-primary hover:underline"
 				>How Long Do We Keep Your Information?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#infosafe" class="text-primary hover:underline"
+			<a href="#infosafe" class="focus-ring text-primary hover:underline"
 				>How Do We Keep Your Information Safe?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#infominors" class="text-primary hover:underline"
+			<a href="#infominors" class="focus-ring text-primary hover:underline"
 				>Do We Collect Information From Minors?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#privacyrights" class="text-primary hover:underline">What Are Your Privacy Rights?</a
+			<a href="#privacyrights" class="focus-ring text-primary hover:underline"
+				>What Are Your Privacy Rights?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#DNT" class="text-primary hover:underline">Controls for Do-Not-Track Features</a>
+			<a href="#DNT" class="focus-ring text-primary hover:underline"
+				>Controls for Do-Not-Track Features</a
+			>
 		</li>
 		<li class="mb-1">
-			<a href="#uslaws" class="text-primary hover:underline"
+			<a href="#uslaws" class="focus-ring text-primary hover:underline"
 				>Do United States Residents Have Specific Privacy Rights?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#policyupdates" class="text-primary hover:underline"
+			<a href="#policyupdates" class="focus-ring text-primary hover:underline"
 				>Do We Make Updates to This Notice?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#contact" class="text-primary hover:underline"
+			<a href="#contact" class="focus-ring text-primary hover:underline"
 				>How Can You Contact Us About This Notice?</a
 			>
 		</li>
 		<li class="mb-1">
-			<a href="#request" class="text-primary hover:underline"
+			<a href="#request" class="focus-ring text-primary hover:underline"
 				>How Can You Review, Update, or Delete the Data We Collect From You?</a
 			>
 		</li>
@@ -244,13 +257,13 @@
 			href="https://developers.google.com/terms/api-services-user-data-policy"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="text-primary hover:underline">Google API Services User Data Policy</a
+			class="focus-ring text-primary hover:underline">Google API Services User Data Policy</a
 		>, including the
 		<a
 			href="https://developers.google.com/terms/api-services-user-data-policy#limited-use"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="text-primary hover:underline">Limited Use requirements</a
+			class="focus-ring text-primary hover:underline">Limited Use requirements</a
 		>.
 	</p>
 
@@ -343,7 +356,7 @@
 		To the extent these online tracking technologies are deemed to be a "sale"/"sharing" (which
 		includes targeted advertising, as defined under the applicable laws) under applicable US state
 		laws, you can opt out of these online tracking technologies by submitting a request as described
-		below under section "<a href="#uslaws" class="text-primary hover:underline"
+		below under section "<a href="#uslaws" class="focus-ring text-primary hover:underline"
 			>Do United States Residents Have Specific Privacy Rights?</a
 		>"
 	</p>
@@ -351,7 +364,9 @@
 	<p class="text-muted-foreground mb-4">
 		Specific information about how we use such technologies and how you can refuse certain cookies
 		is set out in our Cookie Notice:
-		<a href="/cookies" class="text-primary hover:underline">https://busserapp.com/cookies</a>.
+		<a href="/cookies" class="focus-ring text-primary hover:underline"
+			>https://busserapp.com/cookies</a
+		>.
 	</p>
 
 	<!-- Section 5 -->
@@ -381,7 +396,7 @@
 		information will be shared with and processed by these AI Service Providers to enable your use
 		of our AI Products for purposes outlined in "<a
 			href="#whoshare"
-			class="text-primary hover:underline"
+			class="focus-ring text-primary hover:underline"
 			>When and With Whom Do We Share Your Personal Information?</a
 		>" You must not use the AI Products in any way that violates the terms or policies of any AI
 		Service Provider.
@@ -490,7 +505,7 @@
 		law, you have the right to withdraw your consent at any time. You can withdraw your consent at
 		any time by contacting us by using the contact details provided in the section "<a
 			href="#contact"
-			class="text-primary hover:underline">How Can You Contact Us About This Notice?</a
+			class="focus-ring text-primary hover:underline">How Can You Contact Us About This Notice?</a
 		>" below.
 	</p>
 
@@ -523,12 +538,14 @@
 		by default. If you prefer, you can usually choose to set your browser to remove cookies and to
 		reject cookies. If you choose to remove cookies or reject cookies, this could affect certain
 		features or services of our Services. For further information, please see our Cookie Notice:
-		<a href="/cookies" class="text-primary hover:underline">https://busserapp.com/cookies</a>.
+		<a href="/cookies" class="focus-ring text-primary hover:underline"
+			>https://busserapp.com/cookies</a
+		>.
 	</p>
 
 	<p class="text-muted-foreground mb-4">
 		If you have questions or comments about your privacy rights, you may email us at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>.
 	</p>
@@ -575,7 +592,7 @@
 	<p class="text-muted-foreground mb-4">
 		The table below shows the categories of personal information we have collected in the past
 		twelve (12) months. For a comprehensive inventory of all personal information we process, please
-		refer to the section "<a href="#infocollect" class="text-primary hover:underline"
+		refer to the section "<a href="#infocollect" class="focus-ring text-primary hover:underline"
 			>What Information Do We Collect?</a
 		>"
 	</p>
@@ -717,7 +734,7 @@
 	<p class="text-muted-foreground mb-4">
 		Learn more about the sources of personal information we collect in "<a
 			href="#infocollect"
-			class="text-primary hover:underline">What Information Do We Collect?</a
+			class="focus-ring text-primary hover:underline">What Information Do We Collect?</a
 		>"
 	</p>
 
@@ -726,7 +743,7 @@
 	<p class="text-muted-foreground mb-4">
 		Learn more about how we use your personal information in the section, "<a
 			href="#infouse"
-			class="text-primary hover:underline">How Do We Process Your Information?</a
+			class="focus-ring text-primary hover:underline">How Do We Process Your Information?</a
 		>"
 	</p>
 
@@ -737,7 +754,7 @@
 	<p class="text-muted-foreground mb-4">
 		We may disclose your personal information with our service providers pursuant to a written
 		contract between us and each service provider. Learn more about how we disclose personal
-		information in the section, "<a href="#whoshare" class="text-primary hover:underline"
+		information in the section, "<a href="#whoshare" class="focus-ring text-primary hover:underline"
 			>When and With Whom Do We Share Your Personal Information?</a
 		>"
 	</p>
@@ -823,9 +840,9 @@
 			href="https://app.termly.io/dsar/1c0aafb9-c005-4071-a29b-e5b7cd041a48"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="text-primary hover:underline">data subject access request</a
+			class="focus-ring text-primary hover:underline">data subject access request</a
 		>, by emailing us at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>, or by referring to the contact details at the bottom of this document.
 	</p>
@@ -859,7 +876,7 @@
 	<p class="text-muted-foreground mb-4">
 		Under certain US state data protection laws, if we decline to take action regarding your
 		request, you may appeal our decision by emailing us at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>. We will inform you in writing of any action taken or not taken in response to the appeal,
 		including a written explanation of the reasons for the decisions. If your appeal is denied, you
@@ -877,7 +894,7 @@
 		California resident and would like to make such a request, please submit your request in writing
 		to us by using the contact details provided in the section "<a
 			href="#contact"
-			class="text-primary hover:underline">How Can You Contact Us About This Notice?</a
+			class="focus-ring text-primary hover:underline">How Can You Contact Us About This Notice?</a
 		>"
 	</p>
 
@@ -908,7 +925,7 @@
 
 	<p class="text-muted-foreground mb-4">
 		If you have questions or comments about this notice, you may email us at
-		<a href="mailto:support@busserapp.com" class="text-primary hover:underline"
+		<a href="mailto:support@busserapp.com" class="focus-ring text-primary hover:underline"
 			>support@busserapp.com</a
 		>
 		or contact us by post at:
@@ -931,7 +948,7 @@
 			href="https://app.termly.io/dsar/1c0aafb9-c005-4071-a29b-e5b7cd041a48"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="text-primary hover:underline">data subject access request</a
+			class="focus-ring text-primary hover:underline">data subject access request</a
 		>.
 	</p>
 </div>

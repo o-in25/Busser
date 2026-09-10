@@ -6,7 +6,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 
-	import FancyImage from './FancyImage.svelte';
+	import BorderedImage from './BorderedImage.svelte';
 
 	export let name = 'image';
 	export let signedUrl: string | undefined;
@@ -52,7 +52,7 @@
 			<div class="flex group">
 				<label
 					for={name}
-					class="flex items-center justify-center px-4 border border-r-0 border-input/50 rounded-l-lg bg-white/50 dark:bg-zinc-800/40 backdrop-blur-sm hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer transition-all duration-200 group-focus-within:border-primary/50 group-focus-within:bg-primary/5"
+					class="flex items-center justify-center px-4 border border-r-0 border-input/50 rounded-l-lg bg-white/50 dark:bg-white/[0.08] backdrop-blur-sm hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer transition-all duration-200 group-focus-within:border-primary/50 group-focus-within:bg-primary/5"
 				>
 					<Upload
 						class="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors"
@@ -79,7 +79,7 @@
 	</div>
 	<div class="glass-surface p-4 overflow-hidden">
 		{#if hasImage}
-			<FancyImage
+			<BorderedImage
 				alt="Product Thumbnail"
 				{src}
 				divStyle="rounded-lg"

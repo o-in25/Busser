@@ -1,0 +1,5 @@
+{
+	"registration": "Welcome to Busser, {{username}}!\n\nVerify your email address to finish setting up your account:\n{{url}}/verify-email/{{token}}\n\nThis link expires in 24 hours. If you didn't create an account, you can safely ignore this email.\n\n— The Busser Team",
+	"passwordReset": "Hi {{username}},\n\nWe received a request to reset your Busser password. Open the link below to choose a new one:\n{{url}}/reset-password/{{token}}\n\nThis link expires in 1 hour. If you didn't request a reset, you can safely ignore this email.\n\n— The Busser Team",
+	"workspaceInvitation": "{{inviterName}} invited you to join the \"{{workspaceName}}\" workspace on Busser as a {{role}}.\n\nAccept the invitation here:\n{{url}}/accept-invite?code={{invitationCode}}\n\nIf you weren't expecting this, you can safely ignore this email.\n\n— The Busser Team"
+}

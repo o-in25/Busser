@@ -214,7 +214,7 @@
 				<div class="mt-5 flex flex-col gap-2 w-full max-w-sm">
 					{#each [{ label: 'Classic Negroni', prompt: 'Add a recipe for a Negroni' }, { label: 'Margarita with a specific tequila', prompt: 'Add a Margarita using Codigo 1530 Blanco' }, { label: 'Custom recipe from ingredients', prompt: 'Add this recipe: 2oz bourbon, 1oz sweet vermouth, 2 dashes Angostura bitters' }] as suggestion, idx}
 						<button
-							class="group glass-surface flex items-center gap-3 text-left px-4 py-2.5 hover:bg-white/75 dark:hover:bg-zinc-700/50 hover:border-primary/30 transition-all cursor-pointer animate-chat-fade-up"
+							class="group glass-surface flex items-center gap-3 text-left px-4 py-2.5 hover:bg-white/75 dark:hover:bg-white/[0.10] hover:border-primary/30 transition-all cursor-pointer animate-chat-fade-up"
 							style="animation-delay: {220 + idx * 80}ms"
 							onclick={() => {
 								input = suggestion.prompt;
@@ -285,7 +285,7 @@
 
 	<!-- input bar -->
 	<div
-		class="p-3 border-t border-white/20 dark:border-zinc-700/30 backdrop-blur-sm bg-white/30 dark:bg-zinc-900/30"
+		class="p-3 border-t border-white/20 dark:border-white/[0.10] backdrop-blur-sm bg-white/30 dark:bg-zinc-900/30"
 	>
 		<form
 			class="flex gap-2 items-end"
@@ -302,9 +302,9 @@
 				placeholder="Describe a cocktail to add..."
 				rows={1}
 				disabled={isLoading}
-				class="glass-input flex-1 resize-none px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+				class="glass-field flex-1 resize-none px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
 			></textarea>
-			<Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+			<Button variant="primary" type="submit" size="icon" disabled={isLoading || !input.trim()}>
 				<SendHorizonal class="h-4 w-4" />
 			</Button>
 		</form>

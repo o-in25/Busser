@@ -22,7 +22,6 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	const availableOnly = url.searchParams.get('available') === 'true';
 	const sort = url.searchParams.get('sort') || 'name-asc';
 
-	// Build filter object
 	const filter: Record<string, any> = {};
 
 	if (searchTerm) {
@@ -33,14 +32,11 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		filter.productInStockQuantity = 1;
 	}
 
-	// Get catalog with pagination
 	let { data, pagination } = await catalogRepo.findAll(workspaceId, page, perPage, filter);
 
-	// Filter by spirit category (client-side for now since getCatalog doesn't support it)
 	if (spiritId) {
 		const spiritIdNum = parseInt(spiritId);
 		data = data.filter((recipe) => recipe.recipeCategoryId === spiritIdNum);
-		// Adjust pagination for filtered results
 		pagination = {
 			...pagination,
 			total: data.length,
@@ -48,7 +44,6 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		};
 	}
 
-	// Apply sorting
 	switch (sort) {
 		case 'name-asc':
 			data.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
@@ -57,7 +52,6 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			data.sort((a, b) => b.recipeName.localeCompare(a.recipeName));
 			break;
 		case 'newest':
-			// Assuming higher recipeId = newer (common pattern)
 			data.sort((a, b) => b.recipeId - a.recipeId);
 			break;
 		case 'oldest':

@@ -116,7 +116,7 @@
 					class="flex-1"
 				>
 					<input type="hidden" name="code" value={data.invitation.invitationCode} />
-					<Button type="submit" class="w-full" disabled={isSubmitting}>
+					<Button variant="primary" type="submit" class="w-full" disabled={isSubmitting}>
 						<Check class="h-4 w-4 mr-2" />
 						{isSubmitting ? 'Accepting...' : 'Accept'}
 					</Button>

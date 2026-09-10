@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAnchorAttributes, HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
 
-	import FancyBadge from '$lib/components/FancyBadge.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 	import { cn } from '$lib/utils';
 
 	import { workspaceSwitching } from '../../stores';
@@ -21,7 +21,8 @@
 	let { children, class: className, ...rest }: AnchorProps | ButtonProps | DivProps = $props();
 </script>
 
-<FancyBadge
+<Badge
+	size="lg"
 	class={cn('relative', $workspaceSwitching && 'pointer-events-none', className)}
 	{...rest as any}
 >
@@ -31,7 +32,7 @@
 	{#if $workspaceSwitching}
 		<span class="shimmer absolute inset-0 rounded-full" aria-hidden="true"></span>
 	{/if}
-</FancyBadge>
+</Badge>
 
 <style>
 	/* same sweeping highlight as the results skeletons — keeps the switch gesture consistent */

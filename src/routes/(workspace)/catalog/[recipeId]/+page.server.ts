@@ -4,19 +4,18 @@ import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { catalogRepo } from '$lib/server/core';
 import { userRepo } from '$lib/server/auth';
 import { canModifyWorkspace, getUserWorkspaces, getGlobalWorkspace } from '$lib/server/workspace';
+import { roleCanModify } from '$lib/types/workspace';
 
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, parent, locals }) => {
-	// per-request, not module-load — a top-level call throws at build
 	const globalWorkspace = getGlobalWorkspace();
 	const { workspace } = await parent();
 	const { workspaceId } = workspace;
 	const { recipeId } = params;
 	const userId = locals.user?.userId;
 
-	// owners/editors can view + manage drafts; viewers get a 404 on unpublished
-	const canModify = workspace.workspaceRole === 'owner' || workspace.workspaceRole === 'editor';
+	const canModify = roleCanModify(workspace.workspaceRole);
 
 	if (!recipeId || isNaN(Number(recipeId))) {
 		error(StatusCodes.BAD_REQUEST, {
@@ -36,13 +35,13 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
-	// per-step images + inventory-backed substitutes for the workspace
-	const stepExtras = await catalogRepo.getStepExtras(workspaceId, result.data.recipeSteps);
+	// these don't depend on each other — fan them out
+	const [stepExtras, isFavorite, isFeatured] = await Promise.all([
+		catalogRepo.getStepExtras(workspaceId, result.data.recipeSteps),
+		userId ? userRepo.isFavorite(userId, Number(recipeId)) : Promise.resolve(false),
+		catalogRepo.isFeatured(workspaceId, Number(recipeId)),
+	]);
 
-	const isFavorite = userId ? await userRepo.isFavorite(userId, Number(recipeId)) : false;
-	const isFeatured = await catalogRepo.isFeatured(workspaceId, Number(recipeId));
-
-	// import context: only when viewing global catalog as a non-admin authenticated user
 	let importData: {
 		editableWorkspaces: { workspaceId: string; workspaceName: string }[];
 		importedTo: string[];
@@ -56,33 +55,26 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		const wsResult = await getUserWorkspaces(userId);
 		const allWorkspaces = wsResult.status === 'success' ? (wsResult.data ?? []) : [];
 
-		// editable workspaces excluding global catalog
 		const editableWorkspaces = allWorkspaces
 			.filter((w) => w.workspaceId !== globalWorkspace)
-			.filter((w) => w.workspaceRole === 'owner' || w.workspaceRole === 'editor')
+			.filter((w) => roleCanModify(w.workspaceRole))
 			.map((w) => ({ workspaceId: w.workspaceId, workspaceName: w.workspaceName }));
 
+		// check which workspaces already have this recipe imported — fan out per workspace
 		if (editableWorkspaces.length > 0) {
-			// check which workspaces already have this recipe imported
-			const importedTo: string[] = [];
-			const nameCollisions: string[] = [];
+			const checks = await Promise.all(
+				editableWorkspaces.map(async (ws) => {
+					const [imported, nameMatch] = await Promise.all([
+						catalogRepo.findImportedRecipe(ws.workspaceId, Number(recipeId), globalWorkspace),
+						catalogRepo.findByName(ws.workspaceId, result.data!.recipe.recipeName),
+					]);
+					return { workspaceId: ws.workspaceId, imported: !!imported, nameMatch: !!nameMatch };
+				})
+			);
 
-			for (const ws of editableWorkspaces) {
-				const imported = await catalogRepo.findImportedRecipe(
-					ws.workspaceId,
-					Number(recipeId),
-					globalWorkspace
-				);
-				if (imported) importedTo.push(ws.workspaceId);
+			const importedTo = checks.filter((c) => c.imported).map((c) => c.workspaceId);
+			const nameCollisions = checks.filter((c) => c.nameMatch).map((c) => c.workspaceId);
 
-				const nameMatch = await catalogRepo.findByName(
-					ws.workspaceId,
-					result.data.recipe.recipeName
-				);
-				if (nameMatch) nameCollisions.push(ws.workspaceId);
-			}
-
-			// eligibility: all steps must use category matching
 			const eligible = result.data.recipeSteps.every(
 				(s) => s.matchMode === 'ANY_IN_CATEGORY' || s.matchMode === 'ANY_IN_PARENT_CATEGORY'
 			);
@@ -90,6 +82,17 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 			importData = { editableWorkspaces, importedTo, nameCollisions, eligible };
 		}
 	}
+
+	const isOwned = result.data.recipe.workspaceId === workspaceId;
+
+	const [ownedSameName, sourceUpdate] = await Promise.all([
+		!!userId && !isOwned
+			? catalogRepo.findByName(workspaceId, result.data.recipe.recipeName).then((r) => !!r)
+			: Promise.resolve(false),
+		isOwned && result.data.recipe.sourceRecipeId
+			? catalogRepo.getSourceUpdate(workspaceId, Number(recipeId))
+			: Promise.resolve(null),
+	]);
 
 	return {
 		recipe: result.data.recipe,
@@ -100,6 +103,9 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		importData,
 		canModify,
 		isGlobalCatalog,
+		isOwned,
+		ownedSameName,
+		sourceUpdate,
 	};
 };
 
@@ -222,5 +228,39 @@ export const actions: Actions = {
 			importedRecipeId: result.data?.recipe.recipeId,
 			targetWorkspaceId,
 		};
+	},
+
+	syncFork: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		const workspaceId = locals.activeWorkspaceId;
+		if (!userId || !workspaceId) return { success: false, error: 'Not authenticated' };
+
+		const recipeId = Number((await request.formData()).get('recipeId'));
+		if (!recipeId) return { success: false, error: 'Missing recipe.' };
+
+		if (!(await canModifyWorkspace(userId, workspaceId))) {
+			return { success: false, error: 'Only editors and owners can update recipes.' };
+		}
+
+		const result = await catalogRepo.resyncFork(workspaceId, recipeId);
+		if (result.status === 'error') return { success: false, error: result.error };
+		return { success: true, synced: true };
+	},
+
+	dismissUpdate: async ({ request, locals }) => {
+		const userId = locals.user?.userId;
+		const workspaceId = locals.activeWorkspaceId;
+		if (!userId || !workspaceId) return { success: false, error: 'Not authenticated' };
+
+		const recipeId = Number((await request.formData()).get('recipeId'));
+		if (!recipeId) return { success: false, error: 'Missing recipe.' };
+
+		if (!(await canModifyWorkspace(userId, workspaceId))) {
+			return { success: false, error: 'Only editors and owners can update recipes.' };
+		}
+
+		const result = await catalogRepo.dismissSourceUpdate(workspaceId, recipeId);
+		if (result.status === 'error') return { success: false, error: result.error };
+		return { success: true, dismissed: true };
 	},
 };

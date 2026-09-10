@@ -18,17 +18,17 @@
 	{value}
 	{disabled}
 	class={cn(
-		'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[selected]:bg-accent data-[selected]:text-accent-foreground transition-colors',
+		'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-3 pr-9 text-sm outline-none transition-colors data-[highlighted]:bg-primary/10 data-[highlighted]:text-foreground data-[selected]:bg-primary/15 data-[selected]:font-medium data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
 		className
 	)}
 	{...restProps}
 >
 	{#snippet children({ selected })}
-		<span class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+		{label ?? value}
+		<span class="absolute right-2.5 flex h-3.5 w-3.5 items-center justify-center text-primary">
 			{#if selected}
 				<Check class="h-4 w-4" />
 			{/if}
 		</span>
-		{label ?? value}
 	{/snippet}
 </SelectPrimitive.Item>

@@ -107,7 +107,7 @@
 				Manage access to <span class="font-medium">{data.workspace.workspaceName}</span>
 			</p>
 		</div>
-		<Button onclick={() => (inviteDialogOpen = true)}>Invite Member</Button>
+		<Button variant="primary" onclick={() => (inviteDialogOpen = true)}>Invite Member</Button>
 	</div>
 
 	<!-- Members Card -->
@@ -187,7 +187,10 @@
 												}}
 											>
 												<Select.Trigger class="w-32">
-													<Select.Value placeholder="Select role" />
+													<Select.Value placeholder="Select role">
+														{member.workspaceRole.charAt(0).toUpperCase() +
+															member.workspaceRole.slice(1)}
+													</Select.Value>
 												</Select.Trigger>
 												<Select.Content>
 													<Select.Item value="owner" label="Owner">
@@ -234,7 +237,7 @@
 											variant="outline"
 											size="icon"
 											disabled
-											class="h-8 w-8 opacity-40"
+											class="opacity-40"
 											title="You cannot remove yourself"
 										>
 											<Shield class="h-4 w-4" />
@@ -244,7 +247,7 @@
 										<Button
 											variant="outline"
 											size="icon"
-											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+											class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 											onclick={() => openRemoveDialog(member.userId, member.username)}
 											title="Remove member"
 										>
@@ -322,7 +325,7 @@
 											type="submit"
 											variant="outline"
 											size="icon"
-											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+											class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 											title="Cancel invitation"
 										>
 											<Trash2 class="h-4 w-4" />
@@ -452,7 +455,9 @@
 						onValueChange={(v) => (inviteRole = (v as 'owner' | 'editor' | 'viewer') ?? 'viewer')}
 					>
 						<Select.Trigger>
-							<Select.Value placeholder="Select role" />
+							<Select.Value placeholder="Select role">
+								{inviteRole.charAt(0).toUpperCase() + inviteRole.slice(1)}
+							</Select.Value>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="viewer" label="Viewer">
@@ -482,7 +487,7 @@
 				<Button type="button" variant="outline" onclick={() => (inviteDialogOpen = false)}>
 					Cancel
 				</Button>
-				<Button type="submit" disabled={!inviteEmail}>Send</Button>
+				<Button variant="primary" type="submit" disabled={!inviteEmail}>Send</Button>
 			</Dialog.Footer>
 		</form>
 	</Dialog.Content>

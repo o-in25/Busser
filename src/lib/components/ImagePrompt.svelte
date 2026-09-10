@@ -234,7 +234,7 @@
 						<button
 							type="button"
 							onclick={openLightbox}
-							class="p-2 rounded-full bg-white/30 dark:bg-black/30 backdrop-blur-md border border-white/40 dark:border-white/20 text-white shadow-lg hover:!bg-black/80 hover:!border-black/80 hover:!backdrop-blur-none active:!bg-black transition-all duration-200"
+							class="p-2 rounded-full bg-white/30 dark:bg-black/30 backdrop-blur-md backdrop-saturate-150 border border-white/40 dark:border-white/20 text-white shadow-lg hover:!bg-black/80 hover:!border-black/80 hover:!backdrop-blur-none active:!bg-black transition-all duration-200"
 							title="Full screen preview"
 						>
 							<Expand class="w-4 h-4 drop-shadow" />
@@ -242,7 +242,7 @@
 						<button
 							type="button"
 							onclick={clearAll}
-							class="p-2 rounded-full bg-red-500/40 backdrop-blur-md border border-red-300/40 dark:border-red-400/30 text-white shadow-lg hover:bg-red-600 hover:backdrop-blur-none hover:border-red-600 active:bg-red-700 transition-all duration-200"
+							class="p-2 rounded-full bg-red-500/40 backdrop-blur-md backdrop-saturate-150 border border-red-300/40 dark:border-red-400/30 text-white shadow-lg hover:bg-red-600 hover:backdrop-blur-none hover:border-red-600 active:bg-red-700 transition-all duration-200"
 							title="Remove image"
 						>
 							<X class="w-4 h-4 drop-shadow" />
@@ -262,9 +262,7 @@
 	</div>
 
 	<!-- action buttons -->
-	<div
-		class="flex flex-col sm:flex-row gap-3 p-4 rounded-xl bg-white/50 dark:bg-zinc-800/40 backdrop-blur-sm border border-input/50"
-	>
+	<div class="glass-surface flex flex-col sm:flex-row gap-3 p-4">
 		<!-- generate button -->
 		<Button
 			type="button"

@@ -27,6 +27,18 @@ export type PaginationData = {
 	pages?: Page[];
 };
 
+// default pagination for error/empty cases
+export const emptyPagination: PaginationData = {
+	total: 0,
+	currentPage: 0,
+	perPage: 0,
+	from: 0,
+	to: 0,
+	lastPage: 0,
+	prevPage: 0,
+	nextPage: 0,
+};
+
 export type Page = {
 	name: string;
 	href: string;

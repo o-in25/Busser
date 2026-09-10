@@ -33,9 +33,10 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
-	const [product, categories] = await Promise.all([
+	const [product, categories, owned] = await Promise.all([
 		inventoryRepo.findById(workspaceId, Number(id)),
 		inventoryRepo.getCategoryOptions(workspaceId),
+		inventoryRepo.isOwned(workspaceId, Number(id)),
 	]);
 
 	if (!product) {
@@ -46,9 +47,11 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 		});
 	}
 
+	// shared global products can be stocked/removed but not edited here
 	return {
 		product,
 		categories,
+		isShared: !owned,
 	};
 };
 

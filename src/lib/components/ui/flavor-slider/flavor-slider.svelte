@@ -100,15 +100,23 @@
 		);
 	}
 
+	/* glass thumb: translucent tinted fill, subtle border, soft shadow + colored neon glow */
 	.flavor-slider::-webkit-slider-thumb {
 		appearance: none;
 		width: 18px;
 		height: 18px;
-		background: linear-gradient(135deg, hsl(var(--color-from)) 0%, hsl(var(--color-to)) 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--color-from) / 0.85) 0%,
+			hsl(var(--color-to) / 0.85) 100%
+		);
 		border-radius: 50%;
 		cursor: pointer;
-		border: 2px solid white;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+		border: 2px solid rgba(255, 255, 255, 0.5);
+		backdrop-filter: blur(4px);
+		box-shadow:
+			0 2px 6px rgba(0, 0, 0, 0.2),
+			0 0 12px hsl(var(--color-from) / 0.5);
 		transition:
 			transform 0.15s ease,
 			box-shadow 0.15s ease;
@@ -116,17 +124,26 @@
 
 	.flavor-slider::-webkit-slider-thumb:hover {
 		transform: scale(1.1);
-		box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+		box-shadow:
+			0 3px 10px rgba(0, 0, 0, 0.25),
+			0 0 18px hsl(var(--color-from) / 0.7);
 	}
 
 	.flavor-slider::-moz-range-thumb {
 		width: 18px;
 		height: 18px;
-		background: linear-gradient(135deg, hsl(var(--color-from)) 0%, hsl(var(--color-to)) 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--color-from) / 0.85) 0%,
+			hsl(var(--color-to) / 0.85) 100%
+		);
 		border-radius: 50%;
 		cursor: pointer;
-		border: 2px solid white;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+		border: 2px solid rgba(255, 255, 255, 0.5);
+		backdrop-filter: blur(4px);
+		box-shadow:
+			0 2px 6px rgba(0, 0, 0, 0.2),
+			0 0 12px hsl(var(--color-from) / 0.5);
 		transition:
 			transform 0.15s ease,
 			box-shadow 0.15s ease;
@@ -134,6 +151,8 @@
 
 	.flavor-slider::-moz-range-thumb:hover {
 		transform: scale(1.1);
-		box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+		box-shadow:
+			0 3px 10px rgba(0, 0, 0, 0.25),
+			0 0 18px hsl(var(--color-from) / 0.7);
 	}
 </style>

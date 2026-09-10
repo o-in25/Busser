@@ -11,7 +11,7 @@ import {
 	updateWorkspaceMemberRole,
 } from '$lib/server/workspace';
 import { MailClient } from '$lib/server/mail';
-import type { WorkspaceRole } from '$lib/server/repositories/workspace.repository';
+import { roleIsOwner, type WorkspaceRole } from '$lib/types/workspace';
 import { createInvitation, deleteInvitation, getWorkspaceInvitations } from '$lib/server/user';
 
 import type { Actions, PageServerLoad } from './$types';
@@ -97,7 +97,7 @@ export const actions: Actions = {
 		}
 
 		// prevent owner from demoting themselves
-		if (userId === locals.user.userId && role !== 'owner') {
+		if (userId === locals.user.userId && !roleIsOwner(role)) {
 			return fail(StatusCodes.BAD_REQUEST, {
 				error: 'You cannot demote yourself. Transfer ownership first.',
 			});

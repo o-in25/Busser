@@ -1,0 +1,75 @@
+import type { Knex } from 'knex';
+
+const GLOBAL = 'ws-global-catalog';
+
+const inStockForViewer = `
+	CASE
+		WHEN rs.MatchMode = 'EXACT_PRODUCT' THEN
+			CASE WHEN EXISTS(
+				SELECT 1 FROM workspacestock ws
+				WHERE ws.WorkspaceId = v.WorkspaceId AND ws.ProductId = p.ProductId AND ws.Quantity > 0
+			) THEN 1 ELSE 0 END
+		WHEN rs.MatchMode = 'ANY_IN_CATEGORY' THEN
+			CASE WHEN EXISTS(
+				SELECT 1 FROM product p2
+				JOIN workspacestock ws2 ON ws2.WorkspaceId = v.WorkspaceId AND ws2.ProductId = p2.ProductId AND ws2.Quantity > 0
+				WHERE p2.CategoryId = COALESCE(rs.CategoryId, p.CategoryId)
+			) THEN 1 ELSE 0 END
+		WHEN rs.MatchMode = 'ANY_IN_PARENT_CATEGORY' THEN
+			CASE WHEN EXISTS(
+				SELECT 1 FROM product p4
+				JOIN category c4 ON p4.CategoryId = c4.CategoryId
+				JOIN workspacestock ws4 ON ws4.WorkspaceId = v.WorkspaceId AND ws4.ProductId = p4.ProductId AND ws4.Quantity > 0
+				WHERE (c4.ParentCategoryId = c.ParentCategoryId OR c4.CategoryId = c.ParentCategoryId)
+				AND c.ParentCategoryId IS NOT NULL
+			) THEN 1 ELSE 0 END
+		ELSE 0
+	END`;
+
+export async function up(knex: Knex): Promise<void> {
+	await knex.raw(`
+		CREATE OR REPLACE VIEW recipestepstock AS
+		SELECT v.WorkspaceId, rs.RecipeStepId, rs.RecipeId, ${inStockForViewer} AS EffectiveInStock
+		FROM (SELECT DISTINCT WorkspaceId FROM workspacestock) v
+		JOIN recipestep rs ON 1 = 1
+		JOIN product p ON rs.ProductId = p.ProductId
+		JOIN category c ON p.CategoryId = c.CategoryId
+	`);
+
+	await knex.raw(`
+		CREATE OR REPLACE VIEW availablerecipes AS
+		SELECT v.WorkspaceId, rs.RecipeId
+		FROM (SELECT DISTINCT WorkspaceId FROM workspacestock) v
+		JOIN recipestep rs ON 1 = 1
+		JOIN product p ON rs.ProductId = p.ProductId
+		JOIN category c ON p.CategoryId = c.CategoryId
+		GROUP BY v.WorkspaceId, rs.RecipeId
+		HAVING SUM(${inStockForViewer}) = COUNT(*)
+	`);
+}
+
+export async function down(knex: Knex): Promise<void> {
+	await knex.raw(`
+		CREATE OR REPLACE VIEW recipestepstock AS
+		SELECT v.WorkspaceId, rs.RecipeStepId, rs.RecipeId, ${inStockForViewer} AS EffectiveInStock
+		FROM (SELECT DISTINCT WorkspaceId FROM workspacestock WHERE WorkspaceId <> '${GLOBAL}') v
+		JOIN recipestep rs ON 1 = 1
+		JOIN product p ON rs.ProductId = p.ProductId
+		JOIN category c ON p.CategoryId = c.CategoryId
+		UNION ALL
+		SELECT '${GLOBAL}', rs.RecipeStepId, rs.RecipeId, 1 FROM recipestep rs
+	`);
+
+	await knex.raw(`
+		CREATE OR REPLACE VIEW availablerecipes AS
+		SELECT v.WorkspaceId, rs.RecipeId
+		FROM (SELECT DISTINCT WorkspaceId FROM workspacestock WHERE WorkspaceId <> '${GLOBAL}') v
+		JOIN recipestep rs ON 1 = 1
+		JOIN product p ON rs.ProductId = p.ProductId
+		JOIN category c ON p.CategoryId = c.CategoryId
+		GROUP BY v.WorkspaceId, rs.RecipeId
+		HAVING SUM(${inStockForViewer}) = COUNT(*)
+		UNION ALL
+		SELECT '${GLOBAL}', rs.RecipeId FROM recipestep rs GROUP BY rs.RecipeId
+	`);
+}

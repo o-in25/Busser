@@ -13,7 +13,7 @@
 				href={source.url}
 				target="_blank"
 				rel="noopener noreferrer"
-				class="hover:text-foreground underline underline-offset-2 transition-colors inline-flex items-center gap-1"
+				class="focus-ring hover:text-foreground underline underline-offset-2 transition-colors inline-flex items-center gap-1"
 			>
 				{source.title}
 				<ExternalLink class="h-3 w-3" />

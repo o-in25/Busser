@@ -6,7 +6,7 @@
 	import type { CatalogDescriptionOutput } from '$lib/types/generators';
 
 	import CatalogItem from './CatalogItem.svelte';
-	import FancyImage from './FancyImage.svelte';
+	import BorderedImage from './BorderedImage.svelte';
 	import IconList from './IconList.svelte';
 
 	// props
@@ -56,7 +56,7 @@
 
 	<!-- col 2 -->
 	<div class="m-auto">
-		<FancyImage
+		<BorderedImage
 			src={spirit.recipeCategoryDescriptionImageUrl || ''}
 			alt={spirit.recipeCategoryDescriptionText || ''}
 		/>

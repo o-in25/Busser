@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	}
 
 	const [recipeResult, spirits, preparationMethodsResult, productOptions] = await Promise.all([
-		catalogRepo.findById(workspaceId, recipeId),
+		catalogRepo.findById(workspaceId, recipeId, true),
 		catalogRepo.getSpirits(),
 		catalogRepo.getPreparationMethods(),
 		inventoryRepo.getProductOptions(workspaceId),

@@ -72,6 +72,7 @@
 			<p class="text-sm text-muted-foreground mt-1">Manage user invitations and access requests</p>
 		</div>
 		<Button
+			variant="primary"
 			class="w-fit"
 			onclick={() => {
 				resetPrefill();
@@ -123,6 +124,7 @@
 							</div>
 							<div class="flex items-center gap-2 shrink-0">
 								<Button
+									variant="primary"
 									size="sm"
 									onclick={() =>
 										openCreateModalForRequest(request.email, request.invitationRequestId)}
@@ -198,7 +200,7 @@
 								<Table.Cell class="pl-6">
 									<button
 										type="button"
-										class="inline-flex items-center gap-2 font-mono cursor-pointer hover:text-primary transition-colors"
+										class="focus-ring inline-flex items-center gap-2 font-mono cursor-pointer hover:text-primary transition-colors"
 										onclick={() => copyToClipboard(invite.invitationCode)}
 										title="Click to copy"
 									>
@@ -252,7 +254,7 @@
 											variant="outline"
 											size="icon"
 											type="submit"
-											class="h-8 w-8 bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
+											class="bg-destructive/20 border-destructive/50 text-red-400 hover:bg-destructive hover:text-destructive-foreground"
 											title="Delete invitation"
 										>
 											<Trash2 class="w-4 h-4" />
@@ -274,6 +276,7 @@
 						Create an invitation to invite users to Busser.
 					</p>
 					<Button
+						variant="primary"
 						onclick={() => {
 							resetPrefill();
 							formModal = true;
@@ -431,7 +434,7 @@
 				</p>
 			</div>
 			<Dialog.Footer>
-				<Button type="submit" size="lg" class="w-full">
+				<Button variant="primary" type="submit" size="lg" class="w-full">
 					{#if prefillRequestId}
 						Create
 					{:else}

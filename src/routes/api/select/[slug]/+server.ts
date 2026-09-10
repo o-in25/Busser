@@ -39,6 +39,11 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			);
 		}
 
+		case '/api/select/suppliertypes': {
+			const response = await inventoryRepo.getSupplierTypes();
+			return json(response);
+		}
+
 		default:
 			return json({ message: 'Route not found!' });
 	}

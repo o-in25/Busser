@@ -39,7 +39,7 @@
 		</div>
 
 		<!-- progress bar -->
-		<div class="w-48 h-1.5 bg-zinc-200/50 dark:bg-zinc-700/50 rounded-full overflow-hidden">
+		<div class="w-48 h-1.5 bg-zinc-200/50 dark:bg-white/[0.10] rounded-full overflow-hidden">
 			<div
 				class="h-full bg-gradient-to-r from-primary via-secondary to-primary rounded-full transition-all duration-300 ease-out shimmer"
 				style="width: {progress}%"
