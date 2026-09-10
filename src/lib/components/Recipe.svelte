@@ -366,11 +366,13 @@
 							{@const extras = extrasByStep.get(step.recipeStepId ?? -1)}
 							<RecipeIngredientStep
 								categoryName={step.categoryName}
+								productId={step.productId}
 								productName={step.productName}
 								quantity={step.productIdQuantityInMilliliters}
 								unit={step.productIdQuantityUnit}
 								description={step.recipeStepDescription}
 								productImageUrl={extras?.productImageUrl ?? null}
+								inStock={step.productInStockQuantity > 0}
 								matchLabel={extras?.matchLabel ?? null}
 								substitutes={extras?.substitutes ?? []}
 								bind:checked={completed[index]}

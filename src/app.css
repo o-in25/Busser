@@ -579,9 +579,12 @@
 		var(--glass-shadow);
 }
 :is(.dark) .glass-dropdown {
-	--glass-fill: 255 255 255 / 0.055;
-	--glass-border-color: 255 255 255 / 0.08;
-	--glass-highlight: 0.09;
+	/* dark tint, not translucent white: menus float over bright media (recipe photos, badges),
+	   and a near-transparent white fill just lets that brightness bleed through and wash out the
+	   controls. a dark fill obscures whatever's behind so the panel reads solid regardless. */
+	--glass-fill: 20 18 38 / 0.72;
+	--glass-border-color: 255 255 255 / 0.1;
+	--glass-highlight: 0.08;
 	--glass-shadow: 0 24px 56px -18px rgba(0, 0, 0, 0.75);
 }
 

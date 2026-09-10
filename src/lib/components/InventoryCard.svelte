@@ -131,6 +131,8 @@
 						variant="product"
 						class="w-20 h-20 rounded-lg"
 					/>
+					<!-- dark scrim so bright photos don't glare on the near-black theme (dark mode only) -->
+					<div class="absolute inset-0 rounded-lg dark:bg-black/25 pointer-events-none"></div>
 					{#if showStock && product.productInStockQuantity === 0}
 						<span
 							class="absolute -top-1 -right-1 inline-flex items-center gap-1 rounded-full bg-red-500/90 text-white text-[10px] font-semibold px-1.5 py-0.5 backdrop-blur-sm shadow-sm ring-1 ring-red-400/50"

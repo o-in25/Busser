@@ -24,6 +24,7 @@
 	import CatalogFilterPanel from '$lib/components/CatalogFilterPanel.svelte';
 	import CatalogResultsSkeleton from '$lib/components/CatalogResultsSkeleton.svelte';
 	import FilterButton from '$lib/components/FilterButton.svelte';
+	import FilterChipDeck from '$lib/components/FilterChipDeck.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import StatBadge from '$lib/components/StatBadge.svelte';
 	import { Pagination } from '$lib/components/ui/pagination';
@@ -58,6 +59,19 @@
 	let perPage = $state(String(data.filters.perPage ?? 24));
 	// svelte-ignore state_referenced_locally
 	let selectedMood = $state(data.filters.mood || '');
+
+	// show filter now lives in a chip deck in the toolbar (drafts is owner/editor-only)
+	const showOptions = $derived([
+		{ id: 'all', label: 'All Recipes' },
+		{ id: 'favorites', label: 'Favorites' },
+		{ id: 'featured', label: 'Featured' },
+		...(canModify ? [{ id: 'drafts', label: 'Drafts' }] : []),
+	]);
+	const showActiveLabel = $derived(
+		selectedShowFilter !== 'all'
+			? (showOptions.find((o) => o.id === selectedShowFilter)?.label ?? '')
+			: ''
+	);
 
 	const makeableLensAvailable = $derived(data.makeableLensAvailable);
 	const readyLensOn = $derived(data.filters.readyToMake === '1');
@@ -479,14 +493,11 @@
 				<CatalogFilterPanel
 					spirits={data.spirits}
 					{selectedSpirit}
-					{selectedShowFilter}
 					{selectedMood}
 					sortOption={selectedSort}
 					{perPage}
 					{advancedFilterCount}
-					{canModify}
 					onSpiritChange={handleSpiritChange}
-					onShowFilterChange={handleShowFilterChange}
 					onMoodChange={handleMoodChange}
 					onSortChange={handleSortChange}
 					onPerPageChange={handlePerPageChange}
@@ -506,6 +517,15 @@
 			<!-- View toggle -->
 			<ViewToggle modes={['grid', 'list']} active={viewMode} onchange={setViewMode} />
 		</div>
+
+		<!-- show filter: stacked chip deck (moved out of the filter panel) -->
+		<FilterChipDeck
+			label="Show"
+			options={showOptions}
+			active={selectedShowFilter}
+			activeLabel={showActiveLabel}
+			onSelect={(id) => handleShowFilterChange(String(id))}
+		/>
 	</div>
 
 	<!-- makeability lens (mobile): the primary "what can I make" axis; desktop/tablet shows it in the toolbar -->

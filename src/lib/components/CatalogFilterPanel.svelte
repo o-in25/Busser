@@ -16,15 +16,12 @@
 	let {
 		spirits,
 		selectedSpirit,
-		selectedShowFilter,
 		selectedMood = '',
 		sortOption,
 		perPage = '24',
 		advancedFilterCount = 0,
 		hideSpirit = false,
-		canModify = false,
 		onSpiritChange,
-		onShowFilterChange,
 		onMoodChange,
 		onSortChange,
 		onPerPageChange,
@@ -33,15 +30,12 @@
 	}: {
 		spirits: { recipeCategoryId: number; recipeCategoryDescription: string | null }[];
 		selectedSpirit: string;
-		selectedShowFilter: string;
 		selectedMood?: string;
 		sortOption: string;
 		perPage?: string;
 		advancedFilterCount?: number;
 		hideSpirit?: boolean;
-		canModify?: boolean;
 		onSpiritChange: (value: string) => void;
-		onShowFilterChange: (value: string) => void;
 		onMoodChange?: (value: string) => void;
 		onSortChange: (value: string) => void;
 		onPerPageChange?: (value: string) => void;
@@ -56,14 +50,6 @@
 		{ value: 'newest', label: 'Newest First' },
 		{ value: 'oldest', label: 'Oldest First' },
 	];
-
-	// drafts are an owner/editor-only view; unpublished recipes are hidden everywhere else
-	const showFilterOptions = $derived([
-		{ value: 'all', label: 'All Recipes' },
-		{ value: 'favorites', label: 'Favorites' },
-		{ value: 'featured', label: 'Featured' },
-		...(canModify ? [{ value: 'drafts', label: 'Drafts' }] : []),
-	]);
 
 	const perPageOptions = [
 		{ value: '12', label: '12 / page' },
@@ -98,7 +84,6 @@
 
 	const hasNonDefaultFilters = $derived(
 		(selectedSpirit && selectedSpirit !== 'all') ||
-			(selectedShowFilter && selectedShowFilter !== 'all') ||
 			!!selectedMood ||
 			sortOption !== 'name-asc' ||
 			perPage !== '24'
@@ -158,24 +143,7 @@
 		{/if}
 	</div>
 
-	<!-- tier 2: show — quick toggles -->
-	<div class="flex flex-col gap-1.5">
-		<span class="text-sm font-medium text-muted-foreground">Show</span>
-		<div class="flex flex-wrap gap-1.5">
-			{#each showFilterOptions as option}
-				<Button
-					variant={selectedShowFilter === option.value ? 'primary' : 'outline'}
-					class="rounded-full"
-					size="sm"
-					onclick={() => onShowFilterChange(option.value)}
-				>
-					{option.label}
-				</Button>
-			{/each}
-		</div>
-	</div>
-
-	<!-- tier 3: sort + page size (page size demoted, compact) -->
+	<!-- tier 2: sort + page size (page size demoted, compact) -->
 	<div class="flex flex-wrap items-end gap-4">
 		<div class="flex flex-col gap-1.5 flex-1 min-w-[12rem]">
 			<span class="text-sm font-medium text-muted-foreground">Sort By</span>

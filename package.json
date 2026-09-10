@@ -29,6 +29,7 @@
 		"seed:core": "cross-env CORE_DATABASE=app_d USER_DATABASE=user_d tsx node_modules/knex/bin/cli.js seed:run --knexfile knexfile.ts --env core",
 		"unseed:core": "tsx seeds/unseed.ts",
 		"import:cocktaildb": "tsx seeds/cocktaildb.ts",
+		"cocktaildb:check": "tsx seeds/cocktaildb-check.ts",
 		"seed:user": "cross-env USER_DATABASE=user_d tsx node_modules/knex/bin/cli.js seed:run --knexfile knexfile.ts --env user",
 		"test": "vitest run",
 		"test:watch": "vitest",
