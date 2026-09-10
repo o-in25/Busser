@@ -51,11 +51,14 @@ jobs:
       # linux runners need webkit's system libs (mobile-safari is webkit too)
       - run: pnpm exec playwright install --with-deps chromium webkit
 
-      # build needs APP_VERSION for $env/static/private, same as the check step
+      # build needs APP_VERSION for $env/static/private, same as the check step.
+      # GLOBAL_WORKSPACE stops the root layout throwing; E2E_NO_DB skips db-backed pages (no db in ci yet)
       - run: pnpm test:e2e
         env:
           CI: 'true'
           APP_VERSION: ci
+          GLOBAL_WORKSPACE: e2e
+          E2E_NO_DB: 'true'
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
