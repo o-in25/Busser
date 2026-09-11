@@ -1,19 +1,5 @@
 <script lang="ts">
-	import {
-		ArrowRight,
-		Bell,
-		BookOpen,
-		CircleCheck,
-		CircleDot,
-		FlaskConical,
-		FolderPlus,
-		GlassWater,
-		ListPlus,
-		Package,
-		Search,
-		Sparkles,
-		UserPlus,
-	} from 'lucide-svelte';
+	import { ArrowRight, Bot, Github, Sparkles, Target, Users } from 'lucide-svelte';
 
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -25,242 +11,193 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// grounded differentiators, each maps to a shipped feature not a generic blurb
+	const DIFFERENTIATORS = [
+		{
+			icon: Sparkles,
+			color: 'text-primary',
+			title: 'Availability, not a wall of recipes',
+			body: 'Every recipe is checked against what you actually have in stock, so the catalog shows what you can pour right now instead of what you might buy for someday.',
+		},
+		{
+			icon: Target,
+			color: 'text-neon-amber-500',
+			title: '"Almost there"',
+			body: "Recipes you're a single ingredient away from surface on their own, so one bottle can unlock a handful of new drinks.",
+		},
+		{
+			icon: Users,
+			color: 'text-neon-cyan-500',
+			title: 'Shared bars',
+			body: 'A workspace can be shared with viewer, editor, or owner roles. Manage one bar together instead of each keeping a separate list.',
+		},
+		{
+			icon: Bot,
+			color: 'text-secondary-500',
+			title: 'An assistant that acts on your bar',
+			body: 'A built-in assistant answers cocktail questions and can make changes for you, alongside tools like the super juice and BAC calculators.',
+		},
+	];
+
+	const FAQ = [
+		{
+			q: 'Is Busser free?',
+			a: 'Yes. Busser is free to use and open source.',
+		},
+		{
+			q: 'Do I have to enter every bottle I own?',
+			a: 'No. Add whatever you want tracked. Pull items from the catalog or add a house item by hand, and the more you stock the more recipes light up.',
+		},
+		{
+			q: 'Can I share my bar with someone?',
+			a: 'Yes. Invite others into a workspace as a viewer, editor, or owner depending on how much control you want to give them.',
+		},
+		{
+			q: 'Where do the recipe images come from?',
+			a: 'Ingredient and recipe imagery is powered by TheCocktailDB.',
+		},
+	];
 </script>
 
 <svelte:head>
 	<title>About - Busser</title>
 	<meta
 		name="description"
-		content="Learn about Busser — a home bar management app for tracking your inventory, discovering cocktail recipes, and collaborating with friends."
+		content="What Busser is and why it exists. A free, open-source home bar app that shows you the cocktails you can actually make with the bottles you own."
 	/>
 </svelte:head>
 
-<!-- Hero Section -->
-<div class="mb-10">
+<!-- Hero -->
+<div class="mb-12">
 	<h1 class="text-3xl md:text-4xl font-bold mb-4">About Busser</h1>
 	<p class="text-lg text-muted-foreground max-w-2xl">
-		Busser is a home bar management app that helps you track your inventory, organize cocktail
-		recipes, and discover what drinks you can make with what you have on hand.
+		Busser is a free, open-source home bar app built around one idea:
+		<span
+			class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-secondary-500 via-primary-500 to-neon-amber-500"
+		>
+			show me what I can make with what I have on hand
+		</span>.
 	</p>
-	<div class="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm text-muted-foreground">
-		<span class="flex items-center gap-1.5">
-			<Package class="h-4 w-4" />
-			Inventory tracking
-		</span>
-		<span class="flex items-center gap-1.5">
-			<GlassWater class="h-4 w-4" />
-			Recipe catalog
-		</span>
-		<span class="flex items-center gap-1.5">
-			<Sparkles class="h-4 w-4" />
-			Smart matching
-		</span>
+</div>
+
+<!-- Founder story -->
+<div class="mb-12 max-w-2xl">
+	<h2 class="text-2xl font-bold mb-4">Why I built Busser</h2>
+	<div class="space-y-4 text-muted-foreground">
+		<p>
+			When I first got into home bartending, I kept running into the same problem of trying to keep
+			a growing shelf of ingredients with no real way to know what I could actually make with them.
+			Some spirits and liqueurs can last almost indefinitely when stored properly, while juices or
+			mixers can spoil in just a few days. It began getting tougher and tougher to justify the cost
+			of these expensive ingredients when my inventory management system at the time consisted of a
+			series of Post-it notes written with a Sharpie.
+		</p>
+		<p>
+			Around that time, I was itching to start a new project, and this real problem of my own was
+			perfect excuse. So I started building Busser: a tool that tracks what I have in stock and
+			shows me what I can pour with it.
+		</p>
+		<p>
+			What I thought would be an easy job of matching ingredients to drinks kept turning up
+			questions I didn't expect. How do you handle a drink like a Moscow Mule, which works with just
+			about any vodka, next to a Dark 'N' Stormy, a trademarked drink that specifically needs
+			Gosling's Black Seal rum? When you're on a budget and can only stock a few bottles, how do you
+			know which ones give you the best bang for your buck? And as Busser grew from my own pet
+			project into something other people could use, how do you keep one person's bar from turning
+			into everybody else's?
+		</p>
+		<p>
+			Working through problems like these has helped Busser grow from a personal pet project into a
+			flexible platform for home bartenders and enthusiasts alike to get more out of their bar, with
+			custom workspaces, smart inventory management, and a magazine of cocktail and spirit related
+			history and science I've curated over years of reading books, gathering history, and making
+			cocktails at home.
+		</p>
+		<p>
+			Whether you're a casual imbiber, a weekend-warrior enthusiast, or a professional mixologist, I
+			hope Busser gives you a better way to manage your bar. Come say hello on our social pages, or
+			dig into the code and contribute to the
+			<a
+				href="https://github.com/o-in25/Busser"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="focus-ring text-primary hover:underline font-medium">open source project</a
+			>. Cheers!
+		</p>
+		<p class="italic">— Eoin</p>
 	</div>
 </div>
 
-<!-- How It Works Tutorial -->
-<div class="mb-8">
-	<div class="text-center mb-6">
-		<Badge variant="outline" class="mb-3">
-			<BookOpen class="h-3 w-3 mr-1" />
-			Getting Started
-		</Badge>
-		<h2 class="text-2xl font-bold">How Busser Works</h2>
-		<p class="text-muted-foreground mt-2 max-w-lg mx-auto">
-			Get up and running in minutes with this quick walkthrough of Busser's core features.
-		</p>
+<!-- What makes it different -->
+<div class="mb-12">
+	<h2 class="text-2xl font-bold mb-6">What makes it different</h2>
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		{#each DIFFERENTIATORS as { icon: Icon, color, title, body }}
+			<Card.Root class="h-full">
+				<Card.Content class="py-5">
+					<div class="flex items-start gap-3">
+						<div class="w-10 h-10 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+							<Icon class="h-5 w-5 {color}" />
+						</div>
+						<div>
+							<h3 class="font-semibold mb-1">{title}</h3>
+							<p class="text-sm text-muted-foreground">{body}</p>
+						</div>
+					</div>
+				</Card.Content>
+			</Card.Root>
+		{/each}
 	</div>
+</div>
 
-	<div class="space-y-6">
-		<!-- Step 1: Workspaces -->
-		<Card.Root class="relative overflow-hidden">
-			<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
-			<Card.Content class="py-5 pl-6">
-				<div class="flex items-start gap-4">
-					<div
-						class="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold"
-					>
-						1
-					</div>
-					<div class="flex-1">
-						<h3 class="text-lg font-semibold flex items-center gap-2 mb-2">
-							<FolderPlus class="h-5 w-5 text-primary" />
-							Create a Workspace
-						</h3>
-						<p class="text-sm text-muted-foreground mb-3">
-							A workspace is your personal or shared bar environment. Think of it as a container for
-							all your bottles, ingredients, and cocktail recipes. You might have one workspace for
-							your home bar, another for a friend's place you help manage, or one for a special
-							event.
-						</p>
-						<div class="bg-muted/50 rounded-lg p-3 text-sm">
-							<p class="font-medium mb-2 flex items-center gap-2">
-								<UserPlus class="h-4 w-4" />
-								Collaboration
-							</p>
-							<p class="text-muted-foreground">
-								Invite others to your workspace with different permission levels. Viewers can browse
-								your inventory and recipes, while editors can add and modify items. Perfect for
-								couples managing a home bar together or friends planning a cocktail party.
-							</p>
-						</div>
-					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
+<!-- Status & trust -->
+<div class="mb-12 max-w-2xl">
+	<h2 class="text-2xl font-bold mb-4">Where things stand</h2>
+	<div class="flex flex-wrap gap-2 mb-4">
+		<Badge variant="secondary">Free</Badge>
+		<Badge variant="secondary">Open source</Badge>
+		<Badge variant="secondary">Invitation-only · early access</Badge>
+	</div>
+	<p class="text-muted-foreground">
+		Busser is in active, early development and currently invitation-only. It's open source, so you
+		can read the code, file issues, or contribute on
+		<a
+			href="https://github.com/o-in25/Busser"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="focus-ring text-primary hover:underline font-medium inline-flex items-center gap-1"
+		>
+			<Github class="h-4 w-4" />
+			GitHub
+		</a>. Want in? You can
+		<a href="/" class="focus-ring text-primary hover:underline font-medium">request an invite</a>
+		from the home page.
+	</p>
+</div>
 
-		<!-- Step 2: Inventory -->
-		<Card.Root class="relative overflow-hidden">
-			<div class="absolute left-0 top-0 bottom-0 w-1 bg-neon-amber-500"></div>
-			<Card.Content class="py-5 pl-6">
-				<div class="flex items-start gap-4">
-					<div
-						class="w-10 h-10 rounded-full bg-neon-amber-500 text-white flex items-center justify-center shrink-0 font-bold"
-					>
-						2
-					</div>
-					<div class="flex-1">
-						<h3 class="text-lg font-semibold flex items-center gap-2 mb-2">
-							<Package class="h-5 w-5 text-neon-amber-500" />
-							Stock Your Inventory
-						</h3>
-						<p class="text-sm text-muted-foreground mb-3">
-							Add the bottles and ingredients you have on hand. Busser organizes everything into
-							categories like spirits (vodka, gin, whiskey), liqueurs, mixers, bitters, and fresh
-							ingredients. Each item tracks important details like proof, quantity, and price.
-						</p>
-						<div class="grid sm:grid-cols-2 gap-3">
-							<div class="bg-muted/50 rounded-lg p-3 text-sm">
-								<p class="font-medium mb-1 flex items-center gap-2">
-									<CircleDot class="h-4 w-4" />
-									Categories
-								</p>
-								<p class="text-muted-foreground">
-									Create custom categories to organize your inventory your way - by spirit type,
-									shelf location, or however makes sense for your bar.
-								</p>
-							</div>
-							<div class="bg-muted/50 rounded-lg p-3 text-sm">
-								<p class="font-medium mb-1 flex items-center gap-2">
-									<Bell class="h-4 w-4" />
-									Stock Tracking
-								</p>
-								<p class="text-muted-foreground">
-									Mark items as in-stock or out-of-stock. Busser uses this to show you which
-									cocktails you can make right now.
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Step 3: Catalog -->
-		<Card.Root class="relative overflow-hidden">
-			<div class="absolute left-0 top-0 bottom-0 w-1 bg-neon-green-500"></div>
-			<Card.Content class="py-5 pl-6">
-				<div class="flex items-start gap-4">
-					<div
-						class="w-10 h-10 rounded-full bg-neon-green-500 text-white flex items-center justify-center shrink-0 font-bold"
-					>
-						3
-					</div>
-					<div class="flex-1">
-						<h3 class="text-lg font-semibold flex items-center gap-2 mb-2">
-							<ListPlus class="h-5 w-5 text-neon-green-500" />
-							Build Your Cocktail Catalog
-						</h3>
-						<p class="text-sm text-muted-foreground mb-3">
-							Add cocktail recipes to your catalog with detailed ingredients and preparation
-							methods. Each recipe links to items in your inventory, so Busser knows exactly what
-							you need to make each drink.
-						</p>
-						<div class="bg-muted/50 rounded-lg p-3 text-sm mb-3">
-							<p class="font-medium mb-2 flex items-center gap-2">
-								<FlaskConical class="h-4 w-4" />
-								Recipe Details
-							</p>
-							<ul class="text-muted-foreground space-y-1">
-								<li class="flex items-start gap-2">
-									<CircleCheck class="h-4 w-4 mt-0.5 text-neon-green-500 shrink-0" />
-									<span
-										><strong>Ingredients</strong> - Specify exact quantities in oz, ml, dashes, or other
-										units</span
-									>
-								</li>
-								<li class="flex items-start gap-2">
-									<CircleCheck class="h-4 w-4 mt-0.5 text-neon-green-500 shrink-0" />
-									<span
-										><strong>Technique</strong> - Stirred, shaken, built, or blended - affects dilution
-										calculations</span
-									>
-								</li>
-								<li class="flex items-start gap-2">
-									<CircleCheck class="h-4 w-4 mt-0.5 text-neon-green-500 shrink-0" />
-									<span
-										><strong>Flexible Matching</strong> - Allow substitutions like "any bourbon" instead
-										of a specific brand</span
-									>
-								</li>
-							</ul>
-						</div>
-						<div class="bg-muted/50 rounded-lg p-3 text-sm">
-							<p class="font-medium mb-1 flex items-center gap-2">
-								<Sparkles class="h-4 w-4" />
-								Smart Features
-							</p>
-							<p class="text-muted-foreground">
-								Busser automatically calculates the ABV of your cocktails, shows which drinks you
-								can make with your current inventory, and even suggests what's "almost available" if
-								you're just one ingredient short.
-							</p>
-						</div>
-					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Step 4: Discover -->
-		<Card.Root class="relative overflow-hidden">
-			<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary-500"></div>
-			<Card.Content class="py-5 pl-6">
-				<div class="flex items-start gap-4">
-					<div
-						class="w-10 h-10 rounded-full bg-secondary-500 text-white flex items-center justify-center shrink-0 font-bold"
-					>
-						4
-					</div>
-					<div class="flex-1">
-						<h3 class="text-lg font-semibold flex items-center gap-2 mb-2">
-							<GlassWater class="h-5 w-5 text-secondary-500" />
-							Discover & Enjoy
-						</h3>
-						<p class="text-sm text-muted-foreground mb-3">
-							With your inventory stocked and recipes cataloged, Busser becomes your bartending
-							companion. Browse your catalog filtered by what you can make tonight, explore by
-							spirit category, or use the tools section for helpful calculators.
-						</p>
-						<div class="flex flex-wrap gap-2">
-							<Badge variant="secondary" class="text-xs">
-								<CircleCheck class="h-3 w-3 mr-1 text-neon-green-500" />
-								Available Now
-							</Badge>
-							<Badge variant="secondary" class="text-xs">
-								<Search class="h-3 w-3 mr-1" />
-								Browse by Spirit
-							</Badge>
-							<Badge variant="secondary" class="text-xs">
-								<FlaskConical class="h-3 w-3 mr-1" />
-								Super Juice Calculator
-							</Badge>
-							<Badge variant="secondary" class="text-xs">
-								<GlassWater class="h-3 w-3 mr-1" />
-								BAC Estimator
-							</Badge>
-						</div>
-					</div>
-				</div>
+<!-- FAQ -->
+<div class="mb-12">
+	<h2 class="text-2xl font-bold mb-6">Common questions</h2>
+	<div class="space-y-3 max-w-2xl">
+		{#each FAQ as { q, a }}
+			<Card.Root>
+				<Card.Content class="py-4">
+					<h3 class="font-semibold mb-1">{q}</h3>
+					<p class="text-sm text-muted-foreground">{a}</p>
+				</Card.Content>
+			</Card.Root>
+		{/each}
+		<Card.Root>
+			<Card.Content class="py-4">
+				<h3 class="font-semibold mb-1">Is my data private?</h3>
+				<p class="text-sm text-muted-foreground">
+					See our
+					<a href="/privacy" class="focus-ring text-primary hover:underline">privacy policy</a>
+					and
+					<a href="/terms" class="focus-ring text-primary hover:underline">terms</a> for how your data
+					is handled.
+				</p>
 			</Card.Content>
 		</Card.Root>
 	</div>

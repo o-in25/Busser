@@ -44,15 +44,32 @@ Service account credentials are required to authenticate with the
 ### Running the App
 
 ```bash
-pnpm install        # Install dependencies
-pnpm run cloudsql:proxy        # Start auth proxy
-pnpm run dev        # Start dev server at http://localhost:5173
-pnpm run check      # TypeScript validation
-pnpm run build      # Production build
-pnpm run preview    # Preview production build
-pnpm test           # Run all tests once
-pnpm test:watch     # Run tests in watch mode
-pnpm run prepare    # Install Husky pre-commit hooks
+pnpm install            # Install dependencies
+pnpm run cloudsql:proxy # Start auth proxy
+pnpm run dev            # Start dev server at http://localhost:5173
+pnpm run build          # Production build
+pnpm run preview        # Preview production build
+pnpm run prepare        # Install Husky pre-commit hooks
+```
+
+### Type Checking, Linting & Formatting
+
+```bash
+pnpm run check        # TypeScript validation via svelte-check
+pnpm run check:watch  # Type checking in watch mode
+pnpm run lint         # Lint with ESLint
+pnpm run lint:fix     # Lint and auto-fix
+pnpm run format       # Format all files with Prettier
+pnpm run format:check # Check formatting without writing
+```
+
+### Testing
+
+```bash
+pnpm test           # Run all unit tests once (Vitest)
+pnpm test:watch     # Unit tests in watch mode
+pnpm test:e2e       # Run end-to-end tests (Playwright)
+pnpm test:e2e:ui    # Run e2e tests with the Playwright UI
 ```
 
 ### Environment Variables
@@ -101,6 +118,32 @@ The schema is chosen by the `CORE_DATABASE`/`USER_DATABASE` env vars, which each
 `cross-env` (dev→`_d`, prod→`_p`), so a stale shell env can't redirect a migration. Migration files
 live in `migrations/core/` and `migrations/user/`, named with a `YYYYMMDD000000_description.ts`
 timestamp convention.
+
+### Seeds
+
+Seed scripts populate the dev schemas (`app_d`/`user_d`). The CocktailDB scripts import recipe data
+from [TheCocktailDB](https://www.thecocktaildb.com/) (uses `COCKTAILDB_API_KEY`).
+
+```bash
+pnpm seed:core          # Seed app_d (catalog, recipes, categories)
+pnpm seed:user          # Seed user_d (auth, roles, workspaces)
+pnpm unseed:core         # Tear down / reverse the core seed
+pnpm import:cocktaildb   # Import recipes from TheCocktailDB
+pnpm cocktaildb:check    # Dry-run check of the CocktailDB import
+```
+
+## Docker
+
+Build and run the production image locally, mirroring how Fly deploys. Backed by `.build.sh`.
+
+```bash
+pnpm docker:build   # Build the amd64 image as Fly would + assert no secrets in layers
+pnpm docker:smoke   # Build + boot + assert /login 200 + tear down (one-shot pass/fail)
+pnpm docker:run     # Run detached, boot-only (no db) — browse http://localhost:3000
+pnpm docker:run:db  # Run detached, full stack (cloud-sql-proxy → prod db; mutations are real)
+pnpm docker:logs    # Follow container logs
+pnpm docker:stop    # Stop + remove the container
+```
 
 ## Deployment
 
