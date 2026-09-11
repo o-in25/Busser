@@ -60,11 +60,6 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		recipeUsage[productId] = count;
 	});
 
-	// Get recently added items (highest productId = most recent)
-	const recentlyAdded = [...data]
-		.sort((a, b) => (b.productId || 0) - (a.productId || 0))
-		.slice(0, 6);
-
 	return {
 		data,
 		pagination,
@@ -72,7 +67,6 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		categories,
 		suppliers,
 		recipeUsage,
-		recentlyAdded,
 		filters: {
 			search: productName,
 			categoryGroupId,

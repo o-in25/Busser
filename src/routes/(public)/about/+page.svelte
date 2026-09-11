@@ -20,6 +20,8 @@
 
 	import * as Card from '$lib/components/ui/card';
 
+	import cocktaildbLogo from '$lib/assets/thecocktaildb-logo.png';
+
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -294,6 +296,26 @@
 			class="focus-ring text-primary hover:underline font-medium"
 		>
 			support@busserapp.com
+		</a>
+	</p>
+	<p
+		class="text-sm text-muted-foreground mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
+	>
+		<span>Ingredient & recipe imagery powered by</span>
+		<a
+			href="https://www.thecocktaildb.com"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="focus-ring inline-flex rounded"
+			aria-label="TheCocktailDB"
+		>
+			<img
+				src={cocktaildbLogo}
+				alt="TheCocktailDB"
+				width="130"
+				height="34"
+				class="h-[26px] w-auto opacity-90 transition-opacity hover:opacity-100"
+			/>
 		</a>
 	</p>
 </div>

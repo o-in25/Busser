@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Pencil, Trash2 } from 'lucide-svelte';
+	import { onMount } from 'svelte';
 
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Sheet from '$lib/components/ui/sheet';
@@ -21,6 +22,16 @@
 		onProductDeleted?: () => void;
 		onDelete?: () => void;
 	} = $props();
+
+	// mobile slides up from the bottom (sheet); desktop keeps the right-side drawer
+	let isMobile = $state(false);
+	onMount(() => {
+		const mq = window.matchMedia('(max-width: 767px)');
+		isMobile = mq.matches;
+		const handler = (e: MediaQueryListEvent) => (isMobile = e.matches);
+		mq.addEventListener('change', handler);
+		return () => mq.removeEventListener('change', handler);
+	});
 
 	let loading = $state(false);
 	let errorMsg = $state('');
@@ -53,7 +64,10 @@
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content side="right" class="w-full sm:max-w-lg overflow-y-auto">
+	<Sheet.Content
+		side={isMobile ? 'bottom' : 'right'}
+		class="overflow-y-auto {isMobile ? 'max-h-[85vh] rounded-t-2xl' : 'w-full sm:max-w-lg'}"
+	>
 		<Sheet.Header class="pb-4 border-b">
 			<Sheet.Title class="text-lg font-semibold">Category Details</Sheet.Title>
 		</Sheet.Header>

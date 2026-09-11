@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Search, Store, X } from 'lucide-svelte';
+	import { CheckCircle2, Plus, Search, Store, X, XCircle } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -32,8 +32,13 @@
 	let sortOption = $state('name-asc');
 	let selectedType = $state('all');
 	let filterOpen = $state(false);
+	// usage axis: 'all' | 'in-use' (supplies >=1 product) | 'empty'
+	let usageFilter = $state<'all' | 'in-use' | 'empty'>('all');
 
 	const count = (id: number) => data.productCounts[id] || 0;
+
+	const inUseCount = $derived(data.suppliers.filter((s) => count(s.supplierId) > 0).length);
+	const emptyCount = $derived(data.suppliers.length - inUseCount);
 
 	// 'liquor_store' -> 'Liquor store'
 	const prettify = (typeName: string) =>
@@ -47,6 +52,8 @@
 	const filteredSuppliers = $derived.by(() => {
 		const q = searchInput.trim().toLowerCase();
 		const list = data.suppliers.filter((s) => {
+			if (usageFilter === 'in-use' && count(s.supplierId) === 0) return false;
+			if (usageFilter === 'empty' && count(s.supplierId) > 0) return false;
 			if (selectedType !== 'all' && s.supplierTypeName !== selectedType) return false;
 			if (!q) return true;
 			return (
@@ -67,6 +74,7 @@
 		let c = 0;
 		if (selectedType !== 'all') c++;
 		if (sortOption !== 'name-asc') c++;
+		if (usageFilter !== 'all') c++;
 		return c;
 	});
 
@@ -96,6 +104,7 @@
 
 	function clearAll() {
 		searchInput = '';
+		usageFilter = 'all';
 		resetFilters();
 	}
 
@@ -130,10 +139,40 @@
 
 <PageHero title="Suppliers" subtitle="Where your bottles and ingredients come from.">
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
-		<StatBadge class="whitespace-nowrap">
+		<StatBadge
+			as="button"
+			variant={usageFilter === 'all' ? 'primary' : 'default'}
+			aria-pressed={usageFilter === 'all'}
+			onclick={() => (usageFilter = 'all')}
+			class="whitespace-nowrap"
+		>
 			<Store class="h-4 w-4 text-primary shrink-0" />
 			<span class="text-sm font-bold">{data.suppliers.length}</span>
-			<span class="text-xs text-muted-foreground">Suppliers</span>
+			<span class="text-xs text-muted-foreground">All</span>
+		</StatBadge>
+
+		<StatBadge
+			as="button"
+			variant={usageFilter === 'in-use' ? 'primary' : 'default'}
+			aria-pressed={usageFilter === 'in-use'}
+			onclick={() => (usageFilter = 'in-use')}
+			class="whitespace-nowrap"
+		>
+			<CheckCircle2 class="h-4 w-4 text-neon-green-500 shrink-0" />
+			<span class="text-sm font-bold">{inUseCount}</span>
+			<span class="text-xs text-muted-foreground">In Use</span>
+		</StatBadge>
+
+		<StatBadge
+			as="button"
+			variant={usageFilter === 'empty' ? 'primary' : 'default'}
+			aria-pressed={usageFilter === 'empty'}
+			onclick={() => (usageFilter = 'empty')}
+			class="whitespace-nowrap"
+		>
+			<XCircle class="h-4 w-4 text-red-500 shrink-0" />
+			<span class="text-sm font-bold">{emptyCount}</span>
+			<span class="text-xs text-muted-foreground">Empty</span>
 		</StatBadge>
 	</div>
 </PageHero>
@@ -180,13 +219,6 @@
 	</FilterButton>
 
 	<ViewToggle modes={['table', 'grid']} active={viewMode} onchange={setViewMode} />
-</div>
-
-<!-- Results count -->
-<div class="flex items-center justify-between mb-4">
-	<p class="text-sm text-muted-foreground">
-		Showing {filteredSuppliers.length} of {data.suppliers.length} suppliers
-	</p>
 </div>
 
 <!-- Content -->

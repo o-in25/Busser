@@ -13,8 +13,16 @@
 		side = 'right',
 		showClose = true,
 		children,
+		onOpenAutoFocus,
 		...restProps
 	}: SheetPrimitive.ContentProps & { side?: Side; showClose?: boolean } = $props();
+
+	// focus the panel, not the first child (avoids stray focus rings / combobox open-on-focus)
+	let contentRef = $state<HTMLElement | null>(null);
+	const focusPanel = (e: Event) => {
+		e.preventDefault();
+		contentRef?.focus();
+	};
 
 	const sideClasses: Record<Side, string> = {
 		top: 'inset-x-0 top-0 border-b data-[state=closed]:animate-slide-out-to-top data-[state=open]:animate-slide-in-from-top',
@@ -38,6 +46,9 @@
 <SheetPrimitive.Portal>
 	<SheetOverlay />
 	<SheetPrimitive.Content
+		bind:ref={contentRef}
+		tabindex={-1}
+		onOpenAutoFocus={onOpenAutoFocus ?? focusPanel}
 		class={cn('glass-sheet fixed z-50 gap-4 p-6', sideClasses[side], className)}
 		style={contentStyle}
 		{...restProps}

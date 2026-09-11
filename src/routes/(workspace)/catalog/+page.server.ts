@@ -21,7 +21,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const showFilter = url.searchParams.get('show') || ''; // 'favorites' | 'featured' | ''
 	const mood = url.searchParams.get('mood') || '';
 	const makeableLensAvailable = canModify;
-	const readyToMakeActive = makeableLensAvailable && url.searchParams.get('readyToMake') === '1';
+	// single mutually-exclusive make axis: 'ready' | 'almost' | '' (all)
+	const makeFilter = makeableLensAvailable ? url.searchParams.get('make') || '' : '';
 	const draftsView = canModify && showFilter === 'drafts';
 	const ingredientInclude = url.searchParams.get('ingredientInclude') || '';
 	const ingredientAny = url.searchParams.get('ingredientAny') || '';
@@ -56,7 +57,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	}
 
 	const advancedFilter: AdvancedFilter = {};
-	if (readyToMakeActive) advancedFilter.readyToMake = true;
+	if (makeFilter === 'ready') advancedFilter.readyToMake = true;
+	if (makeFilter === 'almost') advancedFilter.almostThere = true;
 	if (includeIds.length) advancedFilter.ingredientInclude = includeIds;
 	if (anyIds.length) advancedFilter.ingredientAny = anyIds;
 	if (excludeIds.length) advancedFilter.ingredientExclude = excludeIds;
@@ -84,7 +86,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		featuredRecipes,
 		prepMethodsResult,
 		availableResult,
-		almostThereRecipes,
+		almostThereIds,
+		stackTotalRaw,
 		...ingredientEntries
 	] = await Promise.all([
 		catalogRepo.findAll(
@@ -102,13 +105,40 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		catalogRepo.getFeatured(workspaceId),
 		catalogRepo.getPreparationMethods(),
 		catalogRepo.getAvailableRecipes(workspaceId),
-		catalogRepo.getAlmostThereRecipes(workspaceId),
+		catalogRepo.getAlmostThereIds(workspaceId),
+		// favorites/featured totals come from their loaded arrays; all/drafts need a count query
+		showFilter === 'favorites' || showFilter === 'featured'
+			? Promise.resolve(0)
+			: catalogRepo.countStack(workspaceId, draftsView),
 		...ingredientNameLookups,
 	]);
 
-	const availableCount =
-		availableResult.status === 'success' ? (availableResult.data?.length ?? 0) : 0;
-	const almostThereCount = almostThereRecipes.length;
+	const availableIds = new Set(
+		availableResult.status === 'success' ? (availableResult.data ?? []).map((r) => r.recipeId) : []
+	);
+	const almostIds = new Set(almostThereIds);
+
+	// make badges (all/ready/almost) are scoped to the active show stack
+	let stackTotal: number;
+	let readyCount: number;
+	let almostThereCount: number;
+	if (showFilter === 'favorites' || showFilter === 'featured') {
+		const stackIds = (showFilter === 'favorites' ? favoriteRecipes : featuredRecipes).map(
+			(r) => r.recipeId
+		);
+		stackTotal = stackIds.length;
+		readyCount = stackIds.filter((id) => availableIds.has(id)).length;
+		almostThereCount = stackIds.filter((id) => almostIds.has(id)).length;
+	} else if (draftsView) {
+		// drafts are unpublished, so never ready/almost (both id sets are published-only)
+		stackTotal = stackTotalRaw;
+		readyCount = 0;
+		almostThereCount = 0;
+	} else {
+		stackTotal = stackTotalRaw;
+		readyCount = availableIds.size;
+		almostThereCount = almostIds.size;
+	}
 
 	const ingredientNames = Object.fromEntries(ingredientEntries) as Record<number, string>;
 
@@ -120,15 +150,13 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 	const featuredRecipeIds = new Set(featuredRecipes.map((f) => f.recipeId));
 
 	const isReplacedView = showFilter === 'favorites' || showFilter === 'featured';
-	if (showFilter === 'favorites') {
-		data = favoriteRecipes;
-		pagination = { ...pagination, total: favoriteRecipes.length, lastPage: 1, currentPage: 1 };
-	} else if (showFilter === 'featured') {
-		data = featuredRecipes;
-		pagination = { ...pagination, total: featuredRecipes.length, lastPage: 1, currentPage: 1 };
-	}
-
 	if (isReplacedView) {
+		data = showFilter === 'favorites' ? favoriteRecipes : featuredRecipes;
+		// the replaced list bypasses findAll, so apply the make filter here to match the grid
+		if (makeFilter === 'ready') data = data.filter((r) => availableIds.has(r.recipeId));
+		else if (makeFilter === 'almost') data = data.filter((r) => almostIds.has(r.recipeId));
+		pagination = { ...pagination, total: data.length, lastPage: 1, currentPage: 1 };
+
 		const scoreOf = (r: (typeof data)[number]) =>
 			calculateOverallScore(
 				r.recipeVersatilityRating,
@@ -173,7 +201,8 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 		spirits,
 		preparationMethods,
 		canModify,
-		availableCount,
+		stackTotal,
+		readyCount,
 		almostThereCount,
 		makeableLensAvailable,
 		favoriteRecipeIds: [...favoriteRecipeIds],
@@ -186,7 +215,7 @@ export const load: PageServerLoad = async ({ url, parent, locals }) => {
 			mood,
 			page,
 			perPage,
-			readyToMake: readyToMakeActive ? '1' : '',
+			make: makeFilter,
 			ingredientInclude,
 			ingredientAny,
 			ingredientExclude,

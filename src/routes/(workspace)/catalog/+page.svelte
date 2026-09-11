@@ -74,7 +74,8 @@
 	);
 
 	const makeableLensAvailable = $derived(data.makeableLensAvailable);
-	const readyLensOn = $derived(data.filters.readyToMake === '1');
+	// active make filter, the primary "what can I pour" axis: 'ready' | 'almost' | '' (all)
+	const makeFilter = $derived(data.filters.make ?? '');
 
 	let filterOpen = $state(false);
 
@@ -85,7 +86,7 @@
 		if (selectedSort !== 'name-asc') count++;
 		if (perPage !== '24') count++;
 		if (selectedMood) count++;
-		if (makeableLensAvailable && readyLensOn) count++;
+		if (makeableLensAvailable && makeFilter) count++;
 		return count;
 	});
 
@@ -124,7 +125,7 @@
 				sort: 'name-asc',
 				perPage: '24',
 				mood: '',
-				readyToMake: null,
+				make: null,
 				page: 1,
 			}),
 			{
@@ -147,7 +148,7 @@
 			sort: 'name-asc',
 			perPage: '24',
 			mood: '',
-			readyToMake: null,
+			make: null,
 			page: 1,
 		};
 		for (const key of advancedParamKeys) overrides[key] = null;
@@ -188,9 +189,8 @@
 		if (mood) params.set('mood', String(mood));
 
 		if (makeableLensAvailable) {
-			const ready =
-				overrides.readyToMake !== undefined ? overrides.readyToMake : readyLensOn ? '1' : null;
-			if (ready === '1') params.set('readyToMake', '1');
+			const make = overrides.make !== undefined ? overrides.make : makeFilter || null;
+			if (make) params.set('make', String(make));
 		}
 
 		// preserve advanced filter params
@@ -228,8 +228,9 @@
 		goto(buildUrl({ show: value, page: 1 }), { keepFocus: true });
 	}
 
-	function setLens(on: boolean) {
-		goto(buildUrl({ readyToMake: on ? '1' : null, page: 1 }), { keepFocus: true });
+	// select one of the mutually-exclusive make states; null = all
+	function setMake(value: 'ready' | 'almost' | null) {
+		goto(buildUrl({ make: value, page: 1 }), { keepFocus: true });
 	}
 
 	function handlePerPageChange(value: string) {
@@ -361,27 +362,34 @@
 			subtitle="Browse cocktails and find what you can make with what's on hand."
 		>
 			<div class="flex gap-2 flex-wrap pb-1 -mb-1">
-				<StatBadge class="whitespace-nowrap">
-					<Wine class="h-4 w-4 text-primary shrink-0" />
-					<span class="text-sm font-bold">{data.pagination.total}</span>
-					<span class="text-xs text-muted-foreground">Recipes</span>
-				</StatBadge>
-
-				<!-- "Ready" jumps to the makeability lens; "Almost There" stays a stat (no almostThere filter yet) -->
+				<!-- make axis: all/ready/almost stat badges double as the mutually-exclusive filter control -->
 				{#if makeableLensAvailable}
-					<StatBadge as="button" onclick={() => setLens(true)} class="whitespace-nowrap">
-						<Sparkles class="h-4 w-4 text-primary shrink-0" />
-						<span class="text-sm font-bold">{data.availableCount}</span>
-						<span class="text-xs text-muted-foreground">Ready</span>
-					</StatBadge>
-
-					{#if data.almostThereCount > 0}
-						<StatBadge class="whitespace-nowrap">
-							<GlassWater class="h-4 w-4 text-primary shrink-0" />
-							<span class="text-sm font-bold">{data.almostThereCount}</span>
-							<span class="text-xs text-muted-foreground">Almost There</span>
-						</StatBadge>
+					{@render makeBadge(Wine, data.stackTotal, 'All', !makeFilter, () => setMake(null))}
+					{@render makeBadge(
+						Sparkles,
+						data.readyCount,
+						'Ready',
+						makeFilter === 'ready',
+						() => setMake('ready'),
+						'text-neon-green-500'
+					)}
+					{#if data.almostThereCount > 0 || makeFilter === 'almost'}
+						{@render makeBadge(
+							GlassWater,
+							data.almostThereCount,
+							'Almost There',
+							makeFilter === 'almost',
+							() => setMake('almost'),
+							'text-amber-500'
+						)}
 					{/if}
+				{:else}
+					<!-- global/public: no per-bar stock, so just the catalog size -->
+					<StatBadge class="whitespace-nowrap">
+						<Wine class="h-4 w-4 text-primary shrink-0" />
+						<span class="text-sm font-bold">{data.pagination.total}</span>
+						<span class="text-xs text-muted-foreground">Recipes</span>
+					</StatBadge>
 				{/if}
 
 				{#if selectedSpirit && selectedSpirit !== 'all'}
@@ -413,32 +421,27 @@
 		<h1 class="sr-only">Cocktail Catalog</h1>
 	{/if}
 
-	<!-- ready-to-make lens: shared by the inline (desktop/tablet) and mobile placements -->
-	{#snippet readyLens(extraClass = '')}
-		<div
-			class={cn('flex items-center gap-1 p-1 rounded-full bg-muted/50 w-fit shrink-0', extraClass)}
+	<!-- make-filter badge: matches the inventory stat badges (single-line pill that wraps naturally);
+	     the active/selected state reads as a pink-tinted primary badge. -->
+	{#snippet makeBadge(
+		Icon: typeof Wine,
+		count: number,
+		label: string,
+		active: boolean,
+		onSelect: () => void,
+		iconClass = 'text-primary'
+	)}
+		<StatBadge
+			as="button"
+			variant={active ? 'primary' : 'default'}
+			onclick={onSelect}
+			aria-pressed={active}
+			class="whitespace-nowrap"
 		>
-			<button
-				type="button"
-				onclick={() => setLens(true)}
-				class={cn(
-					'px-4 h-10 flex items-center rounded-full text-sm font-medium transition-colors',
-					readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
-				)}
-			>
-				Ready to make
-			</button>
-			<button
-				type="button"
-				onclick={() => setLens(false)}
-				class={cn(
-					'px-4 h-10 flex items-center rounded-full text-sm font-medium transition-colors',
-					!readyLensOn ? 'glass-primary' : 'text-muted-foreground hover:text-foreground'
-				)}
-			>
-				All recipes
-			</button>
-		</div>
+			<Icon class={cn('h-4 w-4 shrink-0', iconClass)} />
+			<span class="text-sm font-bold">{count}</span>
+			<span class="text-xs text-muted-foreground">{label}</span>
+		</StatBadge>
 	{/snippet}
 
 	<!-- Toolbar -->
@@ -509,11 +512,6 @@
 				/>
 			</FilterButton>
 
-			<!-- ready-to-make lens, promoted next to the view toggle (desktop/tablet) -->
-			{#if makeableLensAvailable && selectedShowFilter === 'all'}
-				{@render readyLens('hidden sm:flex')}
-			{/if}
-
 			<!-- View toggle -->
 			<ViewToggle modes={['grid', 'list']} active={viewMode} onchange={setViewMode} />
 		</div>
@@ -527,13 +525,6 @@
 			onSelect={(id) => handleShowFilterChange(String(id))}
 		/>
 	</div>
-
-	<!-- makeability lens (mobile): the primary "what can I make" axis; desktop/tablet shows it in the toolbar -->
-	{#if makeableLensAvailable && selectedShowFilter === 'all'}
-		<div class="sm:hidden mb-4">
-			{@render readyLens()}
-		</div>
-	{/if}
 
 	<!-- Active Advanced Filter Tags -->
 	{#if advancedFilterCount > 0}
@@ -630,7 +621,7 @@
 	<!-- Results -->
 	{#if $workspaceSwitching}
 		<CatalogResultsSkeleton {viewMode} count={data.recipes.length || 8} />
-	{:else if data.recipes.length === 0 && makeableLensAvailable && readyLensOn && !searchInput && advancedFilterCount === 0 && selectedShowFilter === 'all'}
+	{:else if data.recipes.length === 0 && makeableLensAvailable && makeFilter === 'ready' && !searchInput && advancedFilterCount === 0 && selectedShowFilter === 'all'}
 		<!-- makeable=0 first-run: teach the model instead of looking broken; widening is one tap -->
 		<Card.Root class="border-dashed">
 			<Card.Content class="flex flex-col items-center justify-center py-16 text-center">
@@ -644,7 +635,7 @@
 				</p>
 				<div class="flex flex-wrap gap-2 justify-center">
 					<a href="/inventory" class={buttonVariants()}>Add to your shelf</a>
-					<Button variant="outline" onclick={() => setLens(false)}>Show all recipes</Button>
+					<Button variant="outline" onclick={() => setMake(null)}>Show all recipes</Button>
 					<a href="/catalog/explore" class={buttonVariants({ variant: 'ghost' })}>Explore</a>
 				</div>
 			</Card.Content>

@@ -95,6 +95,20 @@ export class CatalogRepository extends BaseRepository {
 					);
 				}
 
+				// almost there: recipes missing exactly one ingredient (mirrors getAlmostThereRecipes)
+				if (advancedFilter.almostThere) {
+					query = query.whereIn(
+						'r.RecipeId',
+						this.db
+							.table('recipestepstock')
+							.select('RecipeId')
+							.where('WorkspaceId', workspaceId)
+							.groupBy('RecipeId')
+							.havingRaw('SUM(CASE WHEN EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
+							.havingRaw('COUNT(RecipeStepId) > 1')
+					);
+				}
+
 				// AND: recipe must contain ALL of these ingredients
 				if (advancedFilter.ingredientInclude?.length) {
 					for (const productId of advancedFilter.ingredientInclude) {
@@ -237,6 +251,46 @@ export class CatalogRepository extends BaseRepository {
 				error.sql || error.stackTrace
 			);
 			return 0;
+		}
+	}
+
+	// counts recipes in a show stack (published catalog, or drafts) using the same base scope as findAll
+	async countStack(workspaceId: string, draftsOnly: boolean = false): Promise<number> {
+		try {
+			const row = (await this.baseQuery(this.db.table('basicrecipe as r'), 'r', workspaceId)
+				.where('r.Published', !draftsOnly)
+				.count('* as count')
+				.first()) as { count: number } | undefined;
+			return Number(row?.count) || 0;
+		} catch (error: any) {
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return 0;
+		}
+	}
+
+	// published recipe ids missing exactly one ingredient — the uncapped id set behind the almost-there badge
+	async getAlmostThereIds(workspaceId: string): Promise<number[]> {
+		try {
+			const rows = await this.baseQuery(
+				this.db.table('basicrecipe as r').select('r.RecipeId'),
+				'r',
+				workspaceId
+			)
+				.where('r.Published', true)
+				.whereIn(
+					'r.RecipeId',
+					this.db
+						.table('recipestepstock')
+						.select('RecipeId')
+						.where('WorkspaceId', workspaceId)
+						.groupBy('RecipeId')
+						.havingRaw('SUM(CASE WHEN EffectiveInStock = 0 THEN 1 ELSE 0 END) = 1')
+						.havingRaw('COUNT(RecipeStepId) > 1')
+				);
+			return (rows as Array<{ recipeId: number }>).map((r) => r.recipeId);
+		} catch (error: any) {
+			Logger.error(error.sqlMessage || error.message, error.sql || error.stackTrace);
+			return [];
 		}
 	}
 
@@ -509,15 +563,30 @@ export class CatalogRepository extends BaseRepository {
 				rows.map((r) => [r.productId, r.productImageUrl])
 			);
 
+			// per-category art backs product-agnostic steps that have no product image
+			const catRows = (await this.db
+				.table('category')
+				.whereIn('CategoryId', [...new Set([...categoryIds, ...parentIds])])
+				.select('CategoryId', 'CategoryImageUrl')) as {
+				categoryId: number;
+				categoryImageUrl: string | null;
+			}[];
+			const imageByCategory = new Map<number, string | null>(
+				catRows.map((r) => [r.categoryId, r.categoryImageUrl])
+			);
+
 			return steps.map((step) => {
 				const matchMode = step.matchMode ?? 'EXACT_PRODUCT';
 
-				// prefer the step's own product image
+				// prefer the step's own product image, then any product in the category,
+				// then the category's image (generic "any gin"), then the letter tile
 				const own = imageByProduct.get(step.productId);
 				const productImageUrl =
 					(own && own.trim()) ||
 					rows.find((r) => r.categoryId === step.categoryId && r.productImageUrl?.trim())
 						?.productImageUrl ||
+					(step.categoryId && imageByCategory.get(step.categoryId)?.trim()) ||
+					(step.parentCategoryId && imageByCategory.get(step.parentCategoryId)?.trim()) ||
 					null;
 
 				let matchLabel: string | null = null;

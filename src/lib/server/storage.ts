@@ -46,7 +46,7 @@ export type UploadResult = {
 	message?: string;
 };
 
-export type UploadKind = 'recipes' | 'ingredients' | 'ai-generated';
+export type UploadKind = 'recipes' | 'ingredients' | 'ai-generated' | 'categories';
 
 export async function deleteSignedUrl(signedUrl: string): Promise<UploadResult> {
 	try {

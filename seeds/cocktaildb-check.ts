@@ -112,20 +112,43 @@ async function runInventory() {
 	if (missed.length) console.log(`\nno cocktaildb image for:\n  ${missed.join('\n  ')}`);
 }
 
+function getBucket(): ReturnType<Storage['bucket']> {
+	const { BUCKET } = process.env;
+	if (!BUCKET) throw new Error('BUCKET is not set');
+	const creds = JSON.parse(
+		Buffer.from(process.env.GOOGLE_SERVICE_KEY || '', 'base64').toString() || '{}'
+	);
+	const storage = new Storage({
+		credentials: { client_email: creds.client_email, private_key: creds.private_key },
+	});
+	return storage.bucket(BUCKET);
+}
+
+// download one cocktaildb ingredient image, flatten onto white, return the png buffer
+async function fetchFlattened(ingredient: string): Promise<Buffer | null> {
+	const img = await fetch(imageUrl(ingredient));
+	if (!img.ok) return null;
+	return sharp(Buffer.from(await img.arrayBuffer()))
+		.flatten({ background: '#ffffff' })
+		.png()
+		.toBuffer();
+}
+
 // compress to webp + upload to the bucket, mirroring storage.ts getSignedUrl
 async function uploadPhoto(
 	bucket: ReturnType<Storage['bucket']>,
 	user: knex.Knex,
 	png: Buffer,
-	productName: string
+	label: string,
+	kind: 'ingredients' | 'categories' = 'ingredients'
 ): Promise<string> {
 	const webp = await sharp(png)
 		.resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
 		.webp({ quality: 82 })
 		.toBuffer();
 
-	const safe = productName.replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/\.[^.]+$/, '');
-	const name = `ingredients/${WORKSPACE}/${safe}-${moment().format('MMDDYYYYSS')}.webp`;
+	const safe = label.replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/\.[^.]+$/, '');
+	const name = `${kind}/${WORKSPACE}/${safe}-${moment().format('MMDDYYYYSS')}.webp`;
 	const object = bucket.file(name);
 	await object.save(webp, {
 		contentType: 'image/webp',
@@ -147,15 +170,7 @@ async function uploadPhoto(
 }
 
 async function runSeed(opts: { commit: boolean; overwrite: boolean }) {
-	const { BUCKET } = process.env;
-	if (!BUCKET) throw new Error('BUCKET is not set');
-	const creds = JSON.parse(
-		Buffer.from(process.env.GOOGLE_SERVICE_KEY || '', 'base64').toString() || '{}'
-	);
-	const storage = new Storage({
-		credentials: { client_email: creds.client_email, private_key: creds.private_key },
-	});
-	const bucket = storage.bucket(BUCKET);
+	const bucket = getBucket();
 
 	const core = knex(config.core);
 	const user = knex(config.user);
@@ -235,16 +250,93 @@ async function runSeed(opts: { commit: boolean; overwrite: boolean }) {
 	}
 }
 
+// seeds category art used as the recipe-ingredient fallback (generic "any gin")
+async function runSeedCategories(opts: { commit: boolean; overwrite: boolean }) {
+	const bucket = getBucket();
+	const core = knex(config.core);
+	const user = knex(config.user);
+	try {
+		const ingredients = await ingredientNames();
+
+		// every category (+ parent) a global recipe step can display, keyed by id to dodge name dupes
+		const refs = await core('recipestep as rs')
+			.join('recipe as r', 'rs.RecipeId', 'r.RecipeId')
+			.join('product as p', 'rs.ProductId', 'p.ProductId')
+			.join('category as c', 'p.CategoryId', 'c.CategoryId')
+			.where('r.WorkspaceId', WORKSPACE)
+			.distinct('c.CategoryId as CategoryId', 'c.ParentCategoryId as ParentCategoryId');
+
+		const ids = new Set<number>();
+		for (const r of refs) {
+			if (r.CategoryId) ids.add(r.CategoryId);
+			if (r.ParentCategoryId) ids.add(r.ParentCategoryId);
+		}
+
+		const categories = await core('category')
+			.whereIn('CategoryId', [...ids])
+			.select('CategoryId', 'CategoryName', 'CategoryImageUrl')
+			.orderBy('CategoryName');
+
+		console.log(
+			`${opts.commit ? 'COMMIT' : 'DRY RUN'}: ${categories.length} categories in global recipes\n`
+		);
+
+		let seeded = 0;
+		let skippedExisting = 0;
+		let noMatch = 0;
+		for (const c of categories) {
+			if (c.CategoryImageUrl && !opts.overwrite) {
+				skippedExisting++;
+				continue;
+			}
+			const ingredient = matchIngredient(c.CategoryName, ingredients);
+			if (!ingredient) {
+				noMatch++;
+				console.log(`  - ${c.CategoryName} (no cocktaildb match)`);
+				continue;
+			}
+
+			if (!opts.commit) {
+				console.log(`  + ${c.CategoryName}  →  ${ingredient}`);
+				seeded++;
+				continue;
+			}
+
+			const png = await fetchFlattened(ingredient);
+			if (!png) {
+				noMatch++;
+				console.log(`  - ${c.CategoryName} (no image for ${ingredient})`);
+				continue;
+			}
+			const publicUrl = await uploadPhoto(bucket, user, png, c.CategoryName, 'categories');
+			await core('category')
+				.where('CategoryId', c.CategoryId)
+				.update({ CategoryImageUrl: publicUrl });
+			seeded++;
+			console.log(`  + ${c.CategoryName}  →  ${ingredient}\n    ${publicUrl}`);
+		}
+
+		console.log(
+			`\n${opts.commit ? 'seeded' : 'would seed'} ${seeded}, ${skippedExisting} already had an image, ${noMatch} no match`
+		);
+		if (!opts.commit) console.log('\nre-run with --commit to upload + write CategoryImageUrl');
+	} finally {
+		await core.destroy();
+		await user.destroy();
+	}
+}
+
 async function main() {
 	const args = process.argv.slice(2);
-	if (args.includes('--seed'))
-		return runSeed({ commit: args.includes('--commit'), overwrite: args.includes('--overwrite') });
+	const opts = { commit: args.includes('--commit'), overwrite: args.includes('--overwrite') };
+	if (args.includes('--seed-categories')) return runSeedCategories(opts);
+	if (args.includes('--seed')) return runSeed(opts);
 	if (args.includes('--inventory')) return runInventory();
 
 	const query = args.join(' ').trim();
 	if (!query) {
 		console.error(
-			'usage: pnpm cocktaildb:check "<search string>" | --inventory | --seed [--commit] [--overwrite]'
+			'usage: pnpm cocktaildb:check "<search string>" | --inventory | --seed | --seed-categories [--commit] [--overwrite]'
 		);
 		process.exit(1);
 	}

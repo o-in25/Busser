@@ -9,14 +9,25 @@
 		sideOffset = 4,
 		collisionPadding = 16,
 		children,
+		onOpenAutoFocus,
 		...restProps
 	}: PopoverPrimitive.ContentProps & { class?: string } = $props();
+
+	// focus the panel, not the first child (avoids stray focus rings / combobox open-on-focus)
+	let contentRef = $state<HTMLElement | null>(null);
+	const focusPanel = (e: Event) => {
+		e.preventDefault();
+		contentRef?.focus();
+	};
 </script>
 
 <!-- portal to body so the content escapes any clipping/overflow ancestor (e.g. a card),
      which also lets floating-ui measure available space against the viewport -->
 <PopoverPrimitive.Portal>
 	<PopoverPrimitive.Content
+		bind:ref={contentRef}
+		tabindex={-1}
+		onOpenAutoFocus={onOpenAutoFocus ?? focusPanel}
 		{align}
 		{sideOffset}
 		{collisionPadding}

@@ -372,7 +372,11 @@
 	{/snippet}
 </InventoryNav>
 
-<InventoryDashboard stats={data.stats} {showStock} />
+<InventoryDashboard
+	stats={data.stats}
+	{showStock}
+	activeFilter={data.filters?.stockFilter || 'all'}
+/>
 
 <!-- Toolbar -->
 <div class="flex flex-col gap-3 mb-6">
@@ -449,13 +453,6 @@
 	onClearStockFilter={clearStockFilter}
 	onClearAll={clearAllFilters}
 />
-
-<!-- Results Count -->
-<div class="flex items-center justify-between mb-4">
-	<p class="text-sm text-muted-foreground">
-		Showing {data.data.length} of {data.pagination.total} products
-	</p>
-</div>
 
 <!-- Content Area -->
 {#if $workspaceSwitching}
@@ -578,23 +575,6 @@
 	{#if data.data.length > 0}
 		<Pagination pagination={data.pagination} itemLabel="products" onNavigate={navigatePage} />
 	{/if}
-{/if}
-
-<!-- Recently Added Section -->
-{#if data.recentlyAdded.length > 0 && !hasActiveFilters && !$workspaceSwitching}
-	<div class="mt-12">
-		<h2 class="text-2xl font-bold mb-4">Recently Added</h2>
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-			{#each data.recentlyAdded as product (product.productId)}
-				<InventoryCard
-					{product}
-					viewMode="grid"
-					recipeCount={product.productId ? data.recipeUsage[product.productId] || 0 : 0}
-					onClick={handleCardClick}
-				/>
-			{/each}
-		</div>
-	</div>
 {/if}
 
 <!-- Bulk Delete Confirmation Dialog -->

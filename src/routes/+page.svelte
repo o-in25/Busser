@@ -208,7 +208,7 @@
 	// build browse URL preserving active filters
 	const browseUrl = $derived.by(() => {
 		const params = new URLSearchParams();
-		if (isOwner) params.set('readyToMake', '1');
+		if (isOwner) params.set('make', 'ready');
 		if (sortBy !== 'all') params.set('spirit', String(sortBy));
 		if (activeMood) params.set('mood', activeMood);
 		const qs = params.toString();

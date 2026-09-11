@@ -733,7 +733,8 @@ export class InventoryRepository extends BaseRepository {
 					'CategoryName',
 					'CategoryDescription',
 					'ParentCategoryId',
-					'CategoryGroupId'
+					'CategoryGroupId',
+					'CategoryImageUrl'
 				)
 				.first();
 
@@ -752,7 +753,8 @@ export class InventoryRepository extends BaseRepository {
 		categoryName: string,
 		categoryDescription: string | null,
 		parentCategoryId: number | null = null,
-		categoryGroupId: number | null = null
+		categoryGroupId: number | null = null,
+		categoryImageUrl: string | null = null
 	): Promise<QueryResult<number>> {
 		try {
 			// auto inherits group from parent when not explicitly set
@@ -771,6 +773,7 @@ export class InventoryRepository extends BaseRepository {
 				CategoryDescription: categoryDescription,
 				ParentCategoryId: parentCategoryId,
 				CategoryGroupId: categoryGroupId,
+				CategoryImageUrl: categoryImageUrl,
 			});
 			return { status: 'success', data: categoryId };
 		} catch (error: any) {
@@ -793,6 +796,7 @@ export class InventoryRepository extends BaseRepository {
 			let key = category.categoryId;
 			const { categoryName, categoryDescription, parentCategoryId } = category;
 			let { categoryGroupId } = category;
+			const categoryImageUrl = category.categoryImageUrl?.trim() || null;
 
 			// auto inherits group from parent when not explicitly set
 			if (parentCategoryId && !categoryGroupId) {
@@ -811,6 +815,7 @@ export class InventoryRepository extends BaseRepository {
 					CategoryDescription: categoryDescription,
 					ParentCategoryId: parentCategoryId,
 					CategoryGroupId: categoryGroupId || null,
+					CategoryImageUrl: categoryImageUrl,
 				});
 				if (!dbResult) throw new Error('Could not create new category.');
 				key = dbResult;
@@ -819,6 +824,12 @@ export class InventoryRepository extends BaseRepository {
 				const existing = await this.findCategoryById(workspaceId, key);
 				if (existing.status === 'error') throw new Error('Category not found in this workspace.');
 
+				// drop the old image when it's replaced or cleared
+				const oldImage = existing.data?.categoryImageUrl;
+				if (oldImage && oldImage !== categoryImageUrl) {
+					await deleteSignedUrl(oldImage);
+				}
+
 				dbResult = await this.db
 					.table('category')
 					.update({
@@ -826,6 +837,7 @@ export class InventoryRepository extends BaseRepository {
 						CategoryDescription: categoryDescription,
 						ParentCategoryId: parentCategoryId,
 						CategoryGroupId: categoryGroupId || null,
+						CategoryImageUrl: categoryImageUrl,
 					})
 					.where('categoryId', key)
 					.where('workspaceId', workspaceId);

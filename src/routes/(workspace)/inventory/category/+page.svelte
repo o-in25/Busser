@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Layers, Package, Plus, Search, Tags, X } from 'lucide-svelte';
+	import { CheckCircle2, Layers, Plus, Search, Tags, X, XCircle } from 'lucide-svelte';
 	import { getContext, onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
@@ -76,6 +76,12 @@
 	// Group filter state
 	let activeGroup = $state<string | null>(null);
 
+	// usage axis: 'all' | 'in-use' (has >=1 product) | 'empty'
+	let usageFilter = $state<'all' | 'in-use' | 'empty'>('all');
+
+	const inUseCount = $derived(data.categories.filter((c) => c.productCount > 0).length);
+	const emptyCount = $derived(data.categories.filter((c) => c.productCount === 0).length);
+
 	// Derived: unique category groups with counts
 	const categoryGroups = $derived.by(() => {
 		const groups = new Map<string, number>();
@@ -88,21 +94,27 @@
 		return [...groups.entries()].map(([name, count]) => ({ name, count }));
 	});
 
-	// Derived: filtered categories based on active group
+	// Derived: filtered categories based on active group + usage axis
 	const filteredCategories = $derived.by(() => {
-		if (!activeGroup) return data.categories;
-		return data.categories.filter((c) => c.categoryGroupName === activeGroup);
+		let list = data.categories;
+		if (activeGroup) list = list.filter((c) => c.categoryGroupName === activeGroup);
+		if (usageFilter === 'in-use') list = list.filter((c) => c.productCount > 0);
+		else if (usageFilter === 'empty') list = list.filter((c) => c.productCount === 0);
+		return list;
 	});
 
-	// Update search input and reset group filter when data changes (SSR navigation)
+	// Update search input and reset filters when data changes (SSR navigation)
 	$effect(() => {
 		searchInput = data.filters?.search || '';
 		activeGroup = null;
+		usageFilter = 'all';
 	});
 
 	// active filter count for badge
 	const activeFilterCount = $derived(
-		(data.pagination.perPage !== 24 ? 1 : 0) + (activeGroup !== null ? 1 : 0)
+		(data.pagination.perPage !== 24 ? 1 : 0) +
+			(activeGroup !== null ? 1 : 0) +
+			(usageFilter !== 'all' ? 1 : 0)
 	);
 
 	async function handleRefresh() {
@@ -175,22 +187,40 @@
 	subtitle="Group your ingredients so recipes and inventory stay organized."
 >
 	<div class="flex gap-2 flex-wrap pb-1 -mb-1">
-		<StatBadge class="whitespace-nowrap">
+		<StatBadge
+			as="button"
+			variant={usageFilter === 'all' ? 'primary' : 'default'}
+			aria-pressed={usageFilter === 'all'}
+			onclick={() => (usageFilter = 'all')}
+			class="whitespace-nowrap"
+		>
 			<Tags class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{data.pagination.total}</span>
-			<span class="text-xs text-muted-foreground">Categories</span>
+			<span class="text-sm font-bold">{data.categories.length}</span>
+			<span class="text-xs text-muted-foreground">All</span>
 		</StatBadge>
 
-		<StatBadge class="whitespace-nowrap">
-			<Package class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{data.totalProducts}</span>
-			<span class="text-xs text-muted-foreground">Products</span>
+		<StatBadge
+			as="button"
+			variant={usageFilter === 'in-use' ? 'primary' : 'default'}
+			aria-pressed={usageFilter === 'in-use'}
+			onclick={() => (usageFilter = 'in-use')}
+			class="whitespace-nowrap"
+		>
+			<CheckCircle2 class="h-4 w-4 text-neon-green-500 shrink-0" />
+			<span class="text-sm font-bold">{inUseCount}</span>
+			<span class="text-xs text-muted-foreground">In Use</span>
 		</StatBadge>
 
-		<StatBadge class="whitespace-nowrap">
-			<Layers class="h-4 w-4 text-primary shrink-0" />
-			<span class="text-sm font-bold">{categoryGroups.length}</span>
-			<span class="text-xs text-muted-foreground">Groups</span>
+		<StatBadge
+			as="button"
+			variant={usageFilter === 'empty' ? 'primary' : 'default'}
+			aria-pressed={usageFilter === 'empty'}
+			onclick={() => (usageFilter = 'empty')}
+			class="whitespace-nowrap"
+		>
+			<XCircle class="h-4 w-4 text-red-500 shrink-0" />
+			<span class="text-sm font-bold">{emptyCount}</span>
+			<span class="text-xs text-muted-foreground">Empty</span>
 		</StatBadge>
 	</div>
 </PageHero>
@@ -250,13 +280,6 @@
 	</p>
 {/if}
 
-<!-- Results Count -->
-<div class="flex items-center justify-between mb-4">
-	<p class="text-sm text-muted-foreground">
-		Showing {filteredCategories.length} of {data.pagination.total} categories
-	</p>
-</div>
-
 <!-- Categories Table -->
 {#if $workspaceSwitching}
 	<InventoryResultsSkeleton
@@ -304,11 +327,15 @@
 			<div class="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
 				<Layers class="h-10 w-10 text-muted-foreground/50" />
 			</div>
-			<h3 class="text-xl font-semibold mb-2">No Categories in This Group</h3>
-			<p class="text-muted-foreground mb-6 max-w-md">
-				No categories match the selected group filter.
-			</p>
-			<Button variant="outline" onclick={() => (activeGroup = null)}>Show All Categories</Button>
+			<h3 class="text-xl font-semibold mb-2">No Categories Match</h3>
+			<p class="text-muted-foreground mb-6 max-w-md">No categories match the current filter.</p>
+			<Button
+				variant="outline"
+				onclick={() => {
+					activeGroup = null;
+					usageFilter = 'all';
+				}}>Show All Categories</Button
+			>
 		</Card.Content>
 	</Card.Root>
 {:else if viewMode === 'table'}

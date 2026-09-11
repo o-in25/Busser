@@ -7,12 +7,27 @@
 	import DialogOverlay from './dialog-overlay.svelte';
 	import DialogPortal from './dialog-portal.svelte';
 
-	let { class: className, children, ...restProps }: DialogPrimitive.ContentProps = $props();
+	let {
+		class: className,
+		children,
+		onOpenAutoFocus,
+		...restProps
+	}: DialogPrimitive.ContentProps = $props();
+
+	// focus the panel, not the first child (avoids stray focus rings / combobox open-on-focus)
+	let contentRef = $state<HTMLElement | null>(null);
+	const focusPanel = (e: Event) => {
+		e.preventDefault();
+		contentRef?.focus();
+	};
 </script>
 
 <DialogPortal>
 	<DialogOverlay />
 	<DialogPrimitive.Content
+		bind:ref={contentRef}
+		tabindex={-1}
+		onOpenAutoFocus={onOpenAutoFocus ?? focusPanel}
 		class={cn(
 			'glass-sheet rounded-2xl fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg max-h-[85vh] overflow-y-auto translate-x-[-50%] translate-y-[-50%] gap-4 p-6',
 			'data-[state=open]:animate-glass-dialog-open data-[state=closed]:animate-glass-dialog-close',

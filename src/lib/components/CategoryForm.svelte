@@ -13,6 +13,7 @@
 	import type { ComponentAction, SelectOption, Table } from '$lib/types';
 
 	import { notificationStore } from '../../stores';
+	import ImagePrompt from './ImagePrompt.svelte';
 	import Prompt from './Prompt.svelte';
 
 	let {
@@ -38,6 +39,9 @@
 	let categoryGroupId = $state<string>(
 		category.categoryGroupId ? String(category.categoryGroupId) : ''
 	);
+	let categoryImageUrl = $state<string | null>(category.categoryImageUrl ?? null);
+	let pendingImageFile = $state<File | null>(null);
+	let imageCleared = $state(false);
 	let isSubmitting = $state(false);
 
 	// Validation state
@@ -87,8 +91,25 @@
 	<form
 		class="relative space-y-6"
 		method="POST"
-		use:enhance={() => {
+		enctype="multipart/form-data"
+		use:enhance={async ({ formData }) => {
 			isSubmitting = true;
+
+			// image is held in memory until submit — upload it, then send the url
+			if (pendingImageFile) {
+				const uploadData = new FormData();
+				uploadData.append('file', pendingImageFile);
+				uploadData.append('kind', 'categories');
+				const res = await fetch('/api/upload/image', { method: 'POST', body: uploadData });
+				const data = await res.json();
+				if (data.url) formData.set('categoryImageUrl', data.url);
+			} else if (imageCleared) {
+				formData.set('categoryImageCleared', 'true');
+			} else {
+				// keep the existing image on edit when it's untouched
+				formData.set('categoryImageUrl', categoryImageUrl ?? '');
+			}
+
 			return async ({ result }) => {
 				isSubmitting = false;
 				if (result.type === 'redirect') {
@@ -194,6 +215,19 @@
 						id="categoryDescription"
 						name="categoryDescription"
 						url="/api/generator/category"
+					/>
+				</div>
+
+				<div>
+					<ImagePrompt
+						name="categoryImageUrl"
+						label="Category Image"
+						bind:signedUrl={categoryImageUrl}
+						bind:pendingFile={pendingImageFile}
+						bind:imageCleared
+						trigger={categoryName}
+						type="product"
+						description={categoryDescription}
 					/>
 				</div>
 			</Card.Content>

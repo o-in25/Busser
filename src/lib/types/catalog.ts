@@ -5,6 +5,7 @@
 
 export type AdvancedFilter = {
 	readyToMake?: boolean;
+	almostThere?: boolean;
 	ingredientInclude?: number[];
 	ingredientAny?: number[];
 	ingredientExclude?: number[];
@@ -229,6 +230,7 @@ export namespace Table {
 		categoryDescription: string | null;
 		parentCategoryId?: number | null;
 		categoryGroupId?: number | null;
+		categoryImageUrl?: string | null;
 	};
 }
 

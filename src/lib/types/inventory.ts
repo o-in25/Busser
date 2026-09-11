@@ -16,6 +16,7 @@ export type Category = {
 	categoryDescription: string | null;
 	parentCategoryId: number | null;
 	categoryGroupId: number | null;
+	categoryImageUrl?: string | null;
 };
 
 // suppliertype lookup table (homemade, liquor_store, other)

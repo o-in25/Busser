@@ -8,7 +8,12 @@ export const config = {
 	body: { maxSize: '1mb' },
 };
 
-const ALLOWED_KINDS: readonly UploadKind[] = ['recipes', 'ingredients', 'ai-generated'];
+const ALLOWED_KINDS: readonly UploadKind[] = [
+	'recipes',
+	'ingredients',
+	'ai-generated',
+	'categories',
+];
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.activeWorkspaceId) {

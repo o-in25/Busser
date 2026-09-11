@@ -706,6 +706,8 @@
 									variant="product"
 									class="h-full w-full"
 								/>
+								<!-- dark scrim so bright photos don't glare on the near-black theme (dark mode only) -->
+								<div class="absolute inset-0 dark:bg-black/25 pointer-events-none"></div>
 								<Badge class="absolute top-3 left-3 px-2.5 py-0.5 text-xs font-semibold">
 									{item.categoryName}
 								</Badge>
@@ -770,12 +772,18 @@
 						<!-- List View -->
 						<Card.Root class={cn('transition-all duration-200', isRestocking && 'opacity-50')}>
 							<div class="flex items-center gap-4 p-3">
-								<SkeletonImage
-									src={item.productImageUrl}
-									alt={item.productName}
-									variant="product"
-									class="w-16 h-16 shrink-0 rounded-lg"
-								/>
+								<div class="relative w-16 h-16 shrink-0">
+									<SkeletonImage
+										src={item.productImageUrl}
+										alt={item.productName}
+										variant="product"
+										class="w-16 h-16 rounded-lg"
+									/>
+									<!-- dark scrim so bright photos don't glare on the near-black theme (dark mode only) -->
+									<div
+										class="absolute inset-0 rounded-lg dark:bg-black/25 pointer-events-none"
+									></div>
+								</div>
 								<div class="flex-1 min-w-0">
 									<h3 class={cn('font-bold text-base truncate', isRestocking && 'line-through')}>
 										{item.productName}

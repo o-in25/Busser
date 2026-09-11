@@ -11,7 +11,7 @@
 
 	import { page } from '$app/stores';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -96,10 +96,10 @@
 				</Card.Root>
 			</DropdownMenu.Trigger>
 		{:else}
-			<!-- render the trigger as a real glass-cta button so it matches sibling buttons exactly -->
+			<!-- render the trigger with buttonVariants so it matches sibling buttons (same h-9 sm size) -->
 			<DropdownMenu.Trigger
 				disabled={$workspaceSwitching}
-				class="glass-cta glass-cta-sm gap-1.5 whitespace-nowrap focus:outline-none focus-visible:outline-none"
+				class={buttonVariants({ size: 'sm', className: 'gap-1.5' })}
 			>
 				<GalleryHorizontalEnd class="h-4 w-4 text-primary shrink-0" />
 				<span class="font-semibold">{label}</span>

@@ -219,6 +219,7 @@
 		<Dialog.Portal>
 			<Sheet.Overlay />
 			<Dialog.Content
+				onOpenAutoFocus={(e) => e.preventDefault()}
 				onInteractOutside={(e) => {
 					e.preventDefault();
 					dismiss();

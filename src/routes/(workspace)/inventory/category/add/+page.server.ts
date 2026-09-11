@@ -54,6 +54,7 @@ export const actions: Actions = {
 		const parentCategoryId = parentCategoryIdRaw ? Number(parentCategoryIdRaw) : null;
 		const categoryGroupIdRaw = formData.get('categoryGroupId') as string;
 		const categoryGroupId = categoryGroupIdRaw ? Number(categoryGroupIdRaw) : null;
+		const categoryImageUrl = (formData.get('categoryImageUrl') as string) || null;
 
 		if (!categoryName) {
 			return fail(StatusCodes.BAD_REQUEST, { error: 'Category name is required.' });
@@ -64,7 +65,8 @@ export const actions: Actions = {
 			categoryName,
 			categoryDescription,
 			parentCategoryId,
-			categoryGroupId
+			categoryGroupId,
+			categoryImageUrl
 		);
 
 		if (result.status === 'error') {
