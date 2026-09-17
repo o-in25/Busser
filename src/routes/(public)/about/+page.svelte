@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { ArrowRight, Bot, Github, Sparkles, Target, Users } from 'lucide-svelte';
+	import { ArrowRight, Bot, Sparkles, Target, Ticket, Users } from 'lucide-svelte';
 
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 
 	import * as Card from '$lib/components/ui/card';
@@ -123,8 +122,9 @@
 				target="_blank"
 				rel="noopener noreferrer"
 				class="focus-ring text-primary hover:underline font-medium">open source project</a
-			>. Cheers!
+			>.
 		</p>
+		<p>Cheers!</p>
 		<p class="italic">— Eoin</p>
 	</div>
 </div>
@@ -151,30 +151,28 @@
 	</div>
 </div>
 
-<!-- Status & trust -->
-<div class="mb-12 max-w-2xl">
-	<h2 class="text-2xl font-bold mb-4">Where things stand</h2>
-	<div class="flex flex-wrap gap-2 mb-4">
-		<Badge variant="secondary">Free</Badge>
-		<Badge variant="secondary">Open source</Badge>
-		<Badge variant="secondary">Invitation-only · early access</Badge>
+<!-- Invitation-only notice (shown only while the app is in invite-only mode) -->
+{#if data.inviteOnly}
+	<div class="mb-12 max-w-2xl">
+		<Card.Root class="border-primary/30 bg-primary/5">
+			<Card.Content class="py-4 flex items-start gap-3">
+				<div class="p-2 rounded-lg bg-primary/10 shrink-0">
+					<Ticket class="h-5 w-5 text-primary" />
+				</div>
+				<div>
+					<p class="font-semibold mb-1">Busser is invitation-only right now</p>
+					<p class="text-sm text-muted-foreground">
+						We're in early development.
+						<a href="/" class="focus-ring text-primary hover:underline font-medium"
+							>Request an invite</a
+						>
+						from the home page and we'll get you set up.
+					</p>
+				</div>
+			</Card.Content>
+		</Card.Root>
 	</div>
-	<p class="text-muted-foreground">
-		Busser is in active, early development and currently invitation-only. It's open source, so you
-		can read the code, file issues, or contribute on
-		<a
-			href="https://github.com/o-in25/Busser"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="focus-ring text-primary hover:underline font-medium inline-flex items-center gap-1"
-		>
-			<Github class="h-4 w-4" />
-			GitHub
-		</a>. Want in? You can
-		<a href="/" class="focus-ring text-primary hover:underline font-medium">request an invite</a>
-		from the home page.
-	</p>
-</div>
+{/if}
 
 <!-- FAQ -->
 <div class="mb-12">
