@@ -27,7 +27,7 @@
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content side="bottom" showClose={false} class="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+	<Sheet.Content side="bottom" showClose={false} bind:open>
 		<Sheet.Header class="sr-only">
 			<Sheet.Title>Recipe details</Sheet.Title>
 		</Sheet.Header>

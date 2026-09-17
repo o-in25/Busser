@@ -36,15 +36,16 @@
 
 <Sheet.Root bind:open>
 	<Sheet.Content
+		bind:open
 		side={isMobile ? 'bottom' : 'right'}
 		showClose={false}
-		class="flex flex-col p-0 {isMobile ? 'max-h-[85vh] rounded-t-2xl' : 'w-full sm:max-w-md'}"
+		class={isMobile ? '' : 'flex flex-col p-0 w-full sm:max-w-md'}
 	>
 		<Sheet.Header class="sr-only">
 			<Sheet.Title>Product Details</Sheet.Title>
 		</Sheet.Header>
 
-		<div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+		<div class={isMobile ? 'space-y-4' : 'flex-1 min-h-0 overflow-y-auto p-4 space-y-4'}>
 			{#if product}
 				<InventoryItem {product} {recipeCount} {showStock} {onStockChange} {onDelete} />
 			{:else}

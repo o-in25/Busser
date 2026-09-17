@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Dialog } from 'bits-ui';
 	import { ChevronDown, RefreshCw, SlidersHorizontal, X } from 'lucide-svelte';
 	import { onMount, type Snippet } from 'svelte';
 
@@ -70,125 +69,9 @@
 		isMobile = mq.matches;
 		const handler = (e: MediaQueryListEvent) => (isMobile = e.matches);
 		mq.addEventListener('change', handler);
-
-		vh = window.innerHeight;
-		const onResize = () => (vh = window.innerHeight);
-		window.addEventListener('resize', onResize);
-
-		return () => {
-			mq.removeEventListener('change', handler);
-			window.removeEventListener('resize', onResize);
-		};
+		return () => mq.removeEventListener('change', handler);
 	});
 
-	// draggable sheet: full height in the dom, translated down (y px). resting height fits the
-	// content so everything shows, capped at LARGE; drag down past halfway (or fling) to dismiss.
-	const LARGE = 0.92; // max height, fraction of viewport
-	const FLICK = 0.55; // px/ms release = fling
-
-	let vh = $state(0);
-	let y = $state(0);
-	let dragging = $state(false);
-	let animating = $state(true);
-	let handleEl = $state<HTMLElement>();
-	let contentEl = $state<HTMLElement>();
-	let contentH = $state(0);
-
-	const largeH = $derived(vh * LARGE);
-	const dismissY = $derived(largeH);
-	const restingY = $derived(Math.max(0, largeH - contentH));
-
-	const sheetStyle = $derived(
-		`height:${largeH}px;transform:translateY(${y}px);` +
-			`transition:${animating ? 'transform .34s cubic-bezier(.32,.72,0,1)' : 'none'};`
-	);
-
-	// pointer tracking for the drag gesture
-	let startPointerY = 0;
-	let startY = 0;
-	let lastPointerY = 0;
-	let lastT = 0;
-	let velocity = 0;
-
-	function measure() {
-		if (handleEl && contentEl) contentH = handleEl.offsetHeight + contentEl.offsetHeight;
-	}
-
-	function snapTo(target: number) {
-		animating = true;
-		y = target;
-	}
-
-	function dismiss() {
-		animating = true;
-		y = dismissY;
-		// let the slide-down play before we actually unmount
-		window.setTimeout(() => (open = false), 300);
-	}
-
-	// start off-screen; the measure effect slides it up once content is laid out
-	function onOpenChange(next: boolean) {
-		if (!next) return;
-		animating = false;
-		y = dismissY;
-	}
-
-	// re-measure and settle to the resting height on open, advanced toggle, or resize
-	$effect(() => {
-		if (!open || !isMobile || !handleEl || !contentEl) return;
-		advancedExpanded;
-		vh;
-		requestAnimationFrame(() => {
-			measure();
-			if (!dragging) requestAnimationFrame(() => snapTo(restingY));
-		});
-	});
-
-	function onGrabStart(e: PointerEvent) {
-		dragging = true;
-		animating = false;
-		startPointerY = e.clientY;
-		startY = y;
-		lastPointerY = e.clientY;
-		lastT = e.timeStamp;
-		velocity = 0;
-		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-	}
-
-	function onGrabMove(e: PointerEvent) {
-		if (!dragging) return;
-		let next = startY + (e.clientY - startPointerY);
-		if (next < restingY) next = restingY; // can't expand past the content
-		if (next > dismissY) next = dismissY;
-		y = next;
-		const dt = e.timeStamp - lastT;
-		if (dt > 0) {
-			velocity = (e.clientY - lastPointerY) / dt;
-			lastPointerY = e.clientY;
-			lastT = e.timeStamp;
-		}
-	}
-
-	function onGrabEnd(e: PointerEvent) {
-		if (!dragging) return;
-		dragging = false;
-		try {
-			(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-		} catch {
-			// capture may already be released
-		}
-		settle();
-	}
-
-	function settle() {
-		const range = dismissY - restingY;
-		if (velocity > FLICK) dismiss();
-		else if (velocity < -FLICK) snapTo(restingY);
-		else if (range > 0 && y - restingY > range * 0.4) dismiss();
-		else snapTo(restingY);
-	}
-
-	// the measure effect re-sizes the sheet to fit once advanced expands
 	function toggleAdvanced() {
 		advancedExpanded = !advancedExpanded;
 	}
@@ -207,7 +90,7 @@
 {/snippet}
 
 {#if isMobile}
-	<Sheet.Root bind:open {onOpenChange}>
+	<Sheet.Root bind:open>
 		<Sheet.Trigger
 			class={cn(
 				buttonVariants({ variant: 'outline' }),
@@ -216,124 +99,87 @@
 		>
 			{@render trigger()}
 		</Sheet.Trigger>
-		<Dialog.Portal>
-			<Sheet.Overlay />
-			<Dialog.Content
-				onOpenAutoFocus={(e) => e.preventDefault()}
-				onInteractOutside={(e) => {
-					e.preventDefault();
-					dismiss();
-				}}
-				onEscapeKeydown={(e) => {
-					e.preventDefault();
-					dismiss();
-				}}
-				class="glass-sheet fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl border-t focus:outline-none"
-				style={sheetStyle}
-			>
-				<!-- drag handle: grabber + title. everything else scrolls -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div
-					bind:this={handleEl}
-					onpointerdown={onGrabStart}
-					onpointermove={onGrabMove}
-					onpointerup={onGrabEnd}
-					onpointercancel={onGrabEnd}
-					class="shrink-0 cursor-grab touch-none select-none px-6 pt-2.5 active:cursor-grabbing"
-				>
-					<div class="mx-auto mb-3 h-1.5 w-10 rounded-full bg-muted-foreground/30"></div>
-					<Sheet.Title>{title}</Sheet.Title>
-				</div>
+		<Sheet.Content side="bottom" bind:open showClose={false}>
+			<Sheet.Title>{title}</Sheet.Title>
 
-				<div class="flex-1 overflow-y-auto overscroll-contain">
-					<div
-						bind:this={contentEl}
-						class="px-6"
-						style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));"
-					>
-						{#if (viewModes && activeView && onViewChange) || onRefresh}
-							<div class="flex items-end gap-2 mt-4">
-								{#if viewModes && activeView && onViewChange}
-									<div class="flex flex-col gap-1.5">
-										<span class="text-sm font-medium text-muted-foreground">View</span>
-										<ViewToggle
-											modes={viewModes}
-											active={activeView}
-											onchange={onViewChange}
-											class="flex w-fit"
-										/>
-									</div>
-								{/if}
-								{#if onRefresh}
-									<button
-										onclick={handleRefresh}
-										disabled={isRefreshing}
-										class={cn(
-											'h-10 w-10 flex items-center justify-center rounded-lg border border-input/50 hover:bg-accent/50 transition-colors disabled:opacity-50 ml-auto shrink-0'
-										)}
-										aria-label="Refresh results"
-									>
-										<RefreshCw
-											class={cn('h-4 w-4 text-muted-foreground', isRefreshing && 'animate-spin')}
-										/>
-									</button>
-								{/if}
-							</div>
-						{/if}
-						<div class="mt-4">
-							{@render children()}
+			{#if (viewModes && activeView && onViewChange) || onRefresh}
+				<div class="flex items-end gap-2 mt-4">
+					{#if viewModes && activeView && onViewChange}
+						<div class="flex flex-col gap-1.5">
+							<span class="text-sm font-medium text-muted-foreground">View</span>
+							<ViewToggle
+								modes={viewModes}
+								active={activeView}
+								onchange={onViewChange}
+								class="flex w-fit"
+							/>
 						</div>
-						{#if advanced}
-							<div class="mt-4 border-t border-border/50 pt-3">
-								<button
-									type="button"
-									onclick={toggleAdvanced}
-									aria-expanded={advancedExpanded}
-									class="flex items-center justify-between w-full rounded-lg border border-input/50 px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors"
-								>
-									<span class="flex items-center gap-2">
-										<SlidersHorizontal class="h-4 w-4 text-muted-foreground" />
-										{advancedLabel}
-										{#if advancedCount > 0}
-											<span
-												class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground"
-											>
-												{advancedCount}
-											</span>
-										{/if}
-									</span>
-									<ChevronDown
-										class={cn(
-											'h-4 w-4 text-muted-foreground transition-transform',
-											advancedExpanded && 'rotate-180'
-										)}
-									/>
-								</button>
-								{#if advancedExpanded}
-									<div class="mt-3">
-										{@render advanced(advancedExpanded)}
-									</div>
-								{/if}
-							</div>
-						{/if}
-						<div class="mt-6 flex flex-col gap-2">
-							{#if onClear}
-								<Button variant="outline" class="w-full" onclick={() => onClear?.()}>Clear</Button>
-							{/if}
-							<Button
-								class="w-full"
-								onclick={() => {
-									onDone?.();
-									dismiss();
-								}}
-							>
-								Done
-							</Button>
-						</div>
-					</div>
+					{/if}
+					{#if onRefresh}
+						<button
+							onclick={handleRefresh}
+							disabled={isRefreshing}
+							class={cn(
+								'h-10 w-10 flex items-center justify-center rounded-lg border border-input/50 hover:bg-accent/50 transition-colors disabled:opacity-50 ml-auto shrink-0'
+							)}
+							aria-label="Refresh results"
+						>
+							<RefreshCw class={cn('h-4 w-4 text-muted-foreground', isRefreshing && 'animate-spin')} />
+						</button>
+					{/if}
 				</div>
-			</Dialog.Content>
-		</Dialog.Portal>
+			{/if}
+			<div class="mt-4">
+				{@render children()}
+			</div>
+			{#if advanced}
+				<div class="mt-4 border-t border-border/50 pt-3">
+					<button
+						type="button"
+						onclick={toggleAdvanced}
+						aria-expanded={advancedExpanded}
+						class="flex items-center justify-between w-full rounded-lg border border-input/50 px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors"
+					>
+						<span class="flex items-center gap-2">
+							<SlidersHorizontal class="h-4 w-4 text-muted-foreground" />
+							{advancedLabel}
+							{#if advancedCount > 0}
+								<span
+									class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground"
+								>
+									{advancedCount}
+								</span>
+							{/if}
+						</span>
+						<ChevronDown
+							class={cn(
+								'h-4 w-4 text-muted-foreground transition-transform',
+								advancedExpanded && 'rotate-180'
+							)}
+						/>
+					</button>
+					{#if advancedExpanded}
+						<div class="mt-3">
+							{@render advanced(advancedExpanded)}
+						</div>
+					{/if}
+				</div>
+			{/if}
+			<div class="mt-6 flex flex-col gap-2">
+				{#if onClear}
+					<Button variant="outline" class="w-full" onclick={() => onClear?.()}>Clear</Button>
+				{/if}
+				<Button
+					class="w-full"
+					onclick={() => {
+						onDone?.();
+						open = false;
+					}}
+				>
+					Done
+				</Button>
+			</div>
+		</Sheet.Content>
 	</Sheet.Root>
 {:else}
 	<Popover.Root bind:open>

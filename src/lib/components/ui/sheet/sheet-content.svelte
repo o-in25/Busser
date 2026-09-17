@@ -4,18 +4,20 @@
 
 	import { cn } from '$lib/utils';
 
+	import DraggableSheetContent from './draggable-sheet-content.svelte';
 	import SheetOverlay from './sheet-overlay.svelte';
 
 	type Side = 'top' | 'bottom' | 'left' | 'right';
 
 	let {
+		open = $bindable(false),
 		class: className,
 		side = 'right',
 		showClose = true,
 		children,
 		onOpenAutoFocus,
 		...restProps
-	}: SheetPrimitive.ContentProps & { side?: Side; showClose?: boolean } = $props();
+	}: SheetPrimitive.ContentProps & { open?: boolean; side?: Side; showClose?: boolean } = $props();
 
 	// focus the panel, not the first child (avoids stray focus rings / combobox open-on-focus)
 	let contentRef = $state<HTMLElement | null>(null);
@@ -43,10 +45,17 @@
 		side === 'bottom' ? 'top: 1.25rem;' : 'top: calc(1.25rem + env(safe-area-inset-top, 0px));';
 </script>
 
-<SheetPrimitive.Portal>
-	<SheetOverlay />
-	<SheetPrimitive.Content
-		bind:ref={contentRef}
+{#if side === 'bottom'}
+	<DraggableSheetContent bind:open class={className}>
+		{#if children}
+			{@render children()}
+		{/if}
+	</DraggableSheetContent>
+{:else}
+	<SheetPrimitive.Portal>
+		<SheetOverlay />
+		<SheetPrimitive.Content
+			bind:ref={contentRef}
 		tabindex={-1}
 		onOpenAutoFocus={onOpenAutoFocus ?? focusPanel}
 		class={cn('glass-sheet fixed z-50 gap-4 p-6', sideClasses[side], className)}
@@ -65,5 +74,6 @@
 				<span class="sr-only">Close</span>
 			</SheetPrimitive.Close>
 		{/if}
-	</SheetPrimitive.Content>
-</SheetPrimitive.Portal>
+		</SheetPrimitive.Content>
+	</SheetPrimitive.Portal>
+{/if}

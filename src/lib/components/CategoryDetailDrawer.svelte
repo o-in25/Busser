@@ -65,8 +65,9 @@
 
 <Sheet.Root bind:open>
 	<Sheet.Content
+		bind:open
 		side={isMobile ? 'bottom' : 'right'}
-		class="overflow-y-auto {isMobile ? 'max-h-[85vh] rounded-t-2xl' : 'w-full sm:max-w-lg'}"
+		class={isMobile ? '' : 'overflow-y-auto w-full sm:max-w-lg'}
 	>
 		<Sheet.Header class="pb-4 border-b">
 			<Sheet.Title class="text-lg font-semibold">Category Details</Sheet.Title>
