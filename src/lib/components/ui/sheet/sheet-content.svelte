@@ -56,24 +56,24 @@
 		<SheetOverlay />
 		<SheetPrimitive.Content
 			bind:ref={contentRef}
-		tabindex={-1}
-		onOpenAutoFocus={onOpenAutoFocus ?? focusPanel}
-		class={cn('glass-sheet fixed z-50 gap-4 p-6', sideClasses[side], className)}
-		style={contentStyle}
-		{...restProps}
-	>
-		{#if children}
-			{@render children()}
-		{/if}
-		{#if showClose}
-			<SheetPrimitive.Close
-				class="absolute right-4 z-10 p-2.5 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-				style={closeStyle}
-			>
-				<X class="h-5 w-5" />
-				<span class="sr-only">Close</span>
-			</SheetPrimitive.Close>
-		{/if}
+			tabindex={-1}
+			onOpenAutoFocus={onOpenAutoFocus ?? focusPanel}
+			class={cn('glass-sheet fixed z-50 gap-4 p-6', sideClasses[side], className)}
+			style={contentStyle}
+			{...restProps}
+		>
+			{#if children}
+				{@render children()}
+			{/if}
+			{#if showClose}
+				<SheetPrimitive.Close
+					class="absolute right-4 z-10 p-2.5 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+					style={closeStyle}
+				>
+					<X class="h-5 w-5" />
+					<span class="sr-only">Close</span>
+				</SheetPrimitive.Close>
+			{/if}
 		</SheetPrimitive.Content>
 	</SheetPrimitive.Portal>
 {/if}

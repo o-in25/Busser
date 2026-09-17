@@ -124,7 +124,9 @@
 							)}
 							aria-label="Refresh results"
 						>
-							<RefreshCw class={cn('h-4 w-4 text-muted-foreground', isRefreshing && 'animate-spin')} />
+							<RefreshCw
+								class={cn('h-4 w-4 text-muted-foreground', isRefreshing && 'animate-spin')}
+							/>
 						</button>
 					{/if}
 				</div>
